@@ -1,9 +1,11 @@
-import mongoose from "mongoose";
-const btradeStockSchema = new mongoose.Schema({
-    value: Number,
+import mongoose, { Schema } from "mongoose";
+// Схема для btradeStock
+const btradeStockSchema = new Schema({
+    value: { type: Number, required: true },
     date: { type: Date, default: Date.now },
 }, { _id: false });
-const ArtSchema = new mongoose.Schema({
+// Схема для Art
+const ArtSchema = new Schema({
     artikul: {
         type: String,
         required: true,
@@ -19,4 +21,5 @@ const ArtSchema = new mongoose.Schema({
     marker: String,
     btradeStock: btradeStockSchema,
 }, { timestamps: true });
+// Экспорт модели
 export default mongoose.model("Art", ArtSchema);

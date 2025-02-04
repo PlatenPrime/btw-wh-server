@@ -4,7 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 
 
-import artRoute from "./modules/arts/router";
+import artRoute from "./modules/arts/router.js";
 
 dotenv.config();
 

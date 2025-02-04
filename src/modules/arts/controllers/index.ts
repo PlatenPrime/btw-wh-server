@@ -1,2 +1,2 @@
-export { getArtById } from './getArtById';
-export { getAllArts } from './getAllArts';
+export { getArtById } from './getArtById.js';
+export { getAllArts } from './getAllArts.js';

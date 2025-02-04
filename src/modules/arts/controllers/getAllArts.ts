@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Art, { IArt } from "../models/Art";
+import Art, { IArt } from "../models/Art.js";
 
 export const getAllArts = async (req: Request, res: Response): Promise<void> => {
   try {
