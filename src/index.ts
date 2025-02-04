@@ -3,6 +3,9 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 
+
+import artRoute from "./modules/arts/router";
+
 dotenv.config();
 
 const app = express();
@@ -14,8 +17,12 @@ app.use(express.json());
 
 
 
+app.use("/api/arts", artRoute);
+
+
+
 // Constants
-const PORT = process.env.PORT || 3232;
+const PORT = process.env.PORT || 3000;
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_NAME = process.env.DB_NAME;

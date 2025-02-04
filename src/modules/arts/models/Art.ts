@@ -1,33 +1,54 @@
-import mongoose from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
-const btradeStockSchema = new mongoose.Schema(
+// Интерфейс для btradeStock
+interface IBtradeStock {
+  value: number;
+  date: Date;
+}
+
+// Интерфейс для Art
+export interface IArt extends Document {
+  artikul: string;
+  nameukr?: string;
+  namerus?: string;
+  zone: string;
+  limit?: number;
+  marker?: string;
+  btradeStock?: IBtradeStock;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Схема для btradeStock
+const btradeStockSchema = new Schema<IBtradeStock>(
   {
-    value: Number,
-    date: { type: Date, default: Date.now }, 
+    value: { type: Number, required: true },
+    date: { type: Date, default: Date.now },
   },
-  { _id: false } 
+  { _id: false }
 );
 
-
-const ArtSchema = new mongoose.Schema(
-    {
-      artikul: {
-        type: String,
-        required: true,
-        unique: true,
-      },
-      nameukr: String,
-      namerus: String,
-      zone: {
-        type: String,
-        required: true,
-      },
-      limit: Number,
-      marker: String,
-      btradeStock: btradeStockSchema,
+// Схема для Art
+const ArtSchema = new Schema<IArt>(
+  {
+    artikul: {
+      type: String,
+      required: true,
+      unique: true,
     },
-    { timestamps: true } 
-  );
-  
+    nameukr: String,
+    namerus: String,
+    zone: {
+      type: String,
+      required: true,
+    },
+    limit: Number,
+    marker: String,
+    btradeStock: btradeStockSchema,
+  },
+  { timestamps: true }
+);
 
-  export default mongoose.model("Art", ArtSchema);
+// Экспорт модели
+export default mongoose.model<IArt>("Art", ArtSchema);
+
