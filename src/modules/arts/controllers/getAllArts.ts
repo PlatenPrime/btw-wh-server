@@ -1,11 +1,41 @@
 import { Request, Response } from "express";
 import Art, { IArt } from "../models/Art.js";
 
-export const getAllArts = async (req: Request, res: Response): Promise<void> => {
+
+interface GetArtsQuery {
+  page?: string;
+  limit?: string;
+  search?: string;
+}
+
+export const getAllArts = async (req: Request<{}, {}, {}, GetArtsQuery>, res: Response) => {
   try {
-    const arts: IArt[] = await Art.find(); // Типизируем результат как массив IArt
-    res.status(200).json(arts);
+    const { page = "1", limit = "10", search = "" } = req.query;
+    const pageNumber = parseInt(page, 10);
+    const limitNumber = parseInt(limit, 10);
+
+    const searchQuery = search ? {
+      $or: [
+        { artikul: { $regex: search, $options: "i" } },
+        { nameukr: { $regex: search, $options: "i" } },
+        { namerus: { $regex: search, $options: "i" } }
+      ]
+    } : {};
+
+    const arts: IArt[] = await Art.find(searchQuery)
+      .skip((pageNumber - 1) * limitNumber)
+      .limit(limitNumber);
+
+    const total = await Art.countDocuments(searchQuery);
+
+    res.status(200).json({
+      data: arts,
+      total,
+      page: pageNumber,
+      totalPages: Math.ceil(total / limitNumber),
+    });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error });
+    console.error("Error fetching arts:", error);
+    res.status(500).json({ message: "Server error" });
   }
 };
