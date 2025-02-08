@@ -3,12 +3,14 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import artRoute from "./modules/arts/router.js";
+import authRoute from "./modules/auth/router.js";
 dotenv.config();
 const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
 app.use("/api/arts", artRoute);
+app.use("/api/auth", authRoute);
 // Constants
 const PORT = process.env.PORT || 3232;
 const DB_USER = process.env.DB_USER;

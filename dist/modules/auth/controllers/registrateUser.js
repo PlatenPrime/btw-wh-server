@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import Role from "../models/Role.js";
 import User from "../models/User.js";
-export const registration = async (req, res) => {
+export const registrateUser = async (req, res) => {
     try {
         if (!req.body) {
             return res.status(400).json({ message: "Невалідне тіло запиту" });

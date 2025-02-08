@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import Role from "../models/Role.js";
 import User from "../models/User.js";
 
-export const registration = async (req: Request, res: Response) => {
+export const registrateUser = async (req: Request, res: Response) => {
   try {
     if (!req.body) {
       return res.status(400).json({ message: "Невалідне тіло запиту" });
