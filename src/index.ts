@@ -22,7 +22,7 @@ app.use("/api/arts", artRoute);
 
 
 // Constants
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3232;
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_NAME = process.env.DB_NAME;
