@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 
-
 import artRoute from "./modules/arts/router.js";
 import authRoute from "./modules/auth/router.js";
+
+import fuserRoute from "./modules/founds/fuser.route.js";
 
 dotenv.config();
 
@@ -16,21 +17,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-
-
 app.use("/api/arts", artRoute);
 app.use("/api/auth", authRoute);
-
-
-
+app.use("/api/fuser", fuserRoute);
 
 // Constants
 const PORT = process.env.PORT || 3232;
 const DB_USER = process.env.DB_USER;
 const DB_PASSWORD = process.env.DB_PASSWORD;
 const DB_NAME = process.env.DB_NAME;
-
-
 
 async function start() {
   try {
