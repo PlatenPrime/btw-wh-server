@@ -6,9 +6,9 @@ import mongoose from "mongoose";
 import artRoute from "./modules/arts/router.js";
 import authRoute from "./modules/auth/router.js";
 
-import fuserRoute from "./modules/founds/fuser.route.js";
-import foundRoute from "./modules/founds/found.route.js";
-import fcommentRoute from "./modules/founds/fcomment.route.js";
+import fuserRoute from "./modules/founds/modules/fusers/router.js";
+import fcommentRoute from "./modules/founds/modules/fcomments/router.js";
+import foundRoute from "./modules/founds/modules/founds/router.js";
 
 dotenv.config();
 
@@ -24,8 +24,6 @@ app.use("/api/auth", authRoute);
 app.use("/api/fusers", fuserRoute);
 app.use("/api/founds", foundRoute);
 app.use("/api/fcomments", fcommentRoute);
-
-
 
 // Constants
 const PORT = process.env.PORT || 3232;
