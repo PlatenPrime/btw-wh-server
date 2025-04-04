@@ -6,9 +6,9 @@ import mongoose from "mongoose";
 import artRoute from "./modules/arts/router.js";
 import authRoute from "./modules/auth/router.js";
 
-import fuserRoute from "./modules/founds/modules/fusers/router.js";
-import fcommentRoute from "./modules/founds/modules/fcomments/router.js";
-import foundRoute from "./modules/founds/modules/founds/router.js";
+import fuserRoute from "./modules/founds/fusers/router.js";
+import fcommentRoute from "./modules/founds/fcomments/router.js";
+import foundRoute from "./modules/founds/founds/router.js";
 
 dotenv.config();
 
