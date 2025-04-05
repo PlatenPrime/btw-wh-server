@@ -1,14 +1,15 @@
 import cors from "cors";
 import dotenv from "dotenv";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 
 import artRoute from "./modules/arts/router.js";
 import authRoute from "./modules/auth/router.js";
 
-import fuserRoute from "./modules/founds/fusers/router.js";
 import fcommentRoute from "./modules/founds/fcomments/router.js";
 import foundRoute from "./modules/founds/founds/router.js";
+import fuserRoute from "./modules/founds/fusers/router.js";
+import fwebHookRoute from "./modules/founds/fwebhooks/router.js";
 
 dotenv.config();
 
@@ -24,6 +25,15 @@ app.use("/api/auth", authRoute);
 app.use("/api/fusers", fuserRoute);
 app.use("/api/founds", foundRoute);
 app.use("/api/fcomments", fcommentRoute);
+app.use("/api/webhooks", fwebHookRoute);
+
+app.use((error: Error, _req: Request, res:Response, _next: NextFunction) => {
+
+  res.json({
+    message: error.message || "Something went wrong",
+    stack: error.stack || null,
+  });
+});
 
 // Constants
 const PORT = process.env.PORT || 3232;
