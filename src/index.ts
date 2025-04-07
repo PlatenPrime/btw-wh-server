@@ -18,6 +18,8 @@ const app = express();
 // Middleware
 
 app.use(cors());
+app.use("/api/webhooks", fwebHookRoute);
+
 app.use(express.json());
 
 app.use("/api/arts", artRoute);
@@ -25,7 +27,6 @@ app.use("/api/auth", authRoute);
 app.use("/api/fusers", fuserRoute);
 app.use("/api/founds", foundRoute);
 app.use("/api/fcomments", fcommentRoute);
-app.use("/api/webhooks", fwebHookRoute);
 
 app.use((error: Error, _req: Request, res:Response, _next: NextFunction) => {
 
