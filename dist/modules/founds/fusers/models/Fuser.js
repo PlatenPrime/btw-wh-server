@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 const FuserSchema = new Schema({
+    clerkUserId: { type: String, required: true, unique: true },
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     fuserImg: { type: String },
