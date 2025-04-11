@@ -4,13 +4,16 @@ import express from "express";
 import mongoose from "mongoose";
 import artRoute from "./modules/arts/router.js";
 import authRoute from "./modules/auth/router.js";
+import { clerkMiddleware } from "@clerk/express";
 import fcommentRoute from "./modules/founds/fcomments/router.js";
 import foundRoute from "./modules/founds/founds/router.js";
 import fuserRoute from "./modules/founds/fusers/router.js";
 import fwebHookRoute from "./modules/founds/fwebhooks/router.js";
+import "./types/express";
 dotenv.config();
 const app = express();
 // Middleware
+app.use(clerkMiddleware());
 app.use(cors());
 app.use("/api/webhooks", fwebHookRoute);
 app.use(express.json());
