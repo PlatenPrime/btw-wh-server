@@ -5,23 +5,15 @@ import mongoose from "mongoose";
 import artRoute from "./modules/arts/router.js";
 import authRoute from "./modules/auth/router.js";
 import { clerkMiddleware } from "@clerk/express";
-import fcommentRoute from "./modules/founds/fcomments/router.js";
-import foundRoute from "./modules/founds/founds/router.js";
-import fuserRoute from "./modules/founds/fusers/router.js";
-import fwebHookRoute from "./modules/founds/fwebhooks/router.js";
-import "./types/express";
+import "./types/express/index.d.js";
 dotenv.config();
 const app = express();
 // Middleware
 app.use(clerkMiddleware());
 app.use(cors());
-app.use("/api/webhooks", fwebHookRoute);
 app.use(express.json());
 app.use("/api/arts", artRoute);
 app.use("/api/auth", authRoute);
-app.use("/api/fusers", fuserRoute);
-app.use("/api/founds", foundRoute);
-app.use("/api/fcomments", fcommentRoute);
 app.use((error, _req, res, _next) => {
     res.json({
         message: error.message || "Something went wrong",
