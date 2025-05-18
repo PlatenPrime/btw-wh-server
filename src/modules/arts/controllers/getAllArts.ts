@@ -23,6 +23,7 @@ export const getAllArts = async (req: Request<{}, {}, {}, GetArtsQuery>, res: Re
     } : {};
 
     const arts: IArt[] = await Art.find(searchQuery)
+      .sort({ artikul: 1 }) 
       .skip((pageNumber - 1) * limitNumber)
       .limit(limitNumber);
 
