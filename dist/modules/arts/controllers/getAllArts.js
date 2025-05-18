@@ -12,6 +12,7 @@ export const getAllArts = async (req, res) => {
             ]
         } : {};
         const arts = await Art.find(searchQuery)
+            .sort({ artikul: 1 })
             .skip((pageNumber - 1) * limitNumber)
             .limit(limitNumber);
         const total = await Art.countDocuments(searchQuery);
