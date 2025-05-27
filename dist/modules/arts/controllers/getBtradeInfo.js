@@ -15,37 +15,38 @@ export const getBtradeArtInfo = async (req, res) => {
             res.status(404).json({ message: "No products found for this artikul" });
             return;
         }
-        const products = [];
-        productElements.each((_, el) => {
-            const title = $(el).find(".one-item-tit").text().trim();
-            const priceRaw = $(el).find(".one-item-price").text().trim();
-            const quantityRaw = $(el).find(".one-item-quantity").text().trim();
-            if (!title || !priceRaw || !quantityRaw) {
-                console.warn("Incomplete product data:", {
-                    title,
-                    priceRaw,
-                    quantityRaw,
-                });
-                return;
-            }
-            const priceStr = priceRaw.replace(/[^\d.,]/g, "").replace(",", ".");
-            const price = parseFloat(priceStr);
-            const quantityMatch = quantityRaw.match(/\d+/);
-            const quantity = quantityMatch ? parseInt(quantityMatch[0], 10) : 0;
-            if (isNaN(price) || isNaN(quantity)) {
-                console.warn("Invalid number parsed:", { priceStr, quantityRaw });
-                return;
-            }
-            products.push({ title, price, quantity });
-        });
-        if (products.length === 0) {
-            res.status(404).json({ message: "No valid products extracted" });
+        const firstElement = productElements.eq(0); // eq возвращает Cheerio<cheerio.Element>
+        const data = parseArtikulElement(firstElement);
+        if (!data) {
+            res.status(404).json({ message: "Product data not found or incomplete" });
             return;
         }
-        res.json({ products });
+        res.json({ data });
     }
     catch (error) {
         console.error("Parsing error:", error);
         res.status(500).json({ message: "Parsing Btrade artikul failed", error });
     }
 };
+function parseArtikulElement(artElement) {
+    const nameukr = artElement.find(".one-item-tit").text().trim();
+    const priceRaw = artElement.find(".one-item-price").text().trim();
+    const quantityRaw = artElement.find(".one-item-quantity").text().trim();
+    if (!nameukr || !priceRaw || !quantityRaw) {
+        console.warn("Incomplete product data:", {
+            nameukr,
+            priceRaw,
+            quantityRaw,
+        });
+        return;
+    }
+    const priceStr = priceRaw.replace(/[^\d.,]/g, "").replace(",", ".");
+    const price = parseFloat(priceStr);
+    const quantityMatch = quantityRaw.match(/\d+/);
+    const quantity = quantityMatch ? parseInt(quantityMatch[0], 10) : 0;
+    if (isNaN(price) || isNaN(quantity)) {
+        console.warn("Invalid number parsed:", { priceStr, quantityRaw });
+        return;
+    }
+    return { nameukr, price, quantity };
+}
