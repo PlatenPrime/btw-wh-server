@@ -21,7 +21,7 @@ export const getBtradeArtInfo = async (req, res) => {
             res.status(404).json({ message: "Product data not found or incomplete" });
             return;
         }
-        res.json({ data });
+        res.json(data);
     }
     catch (error) {
         console.error("Parsing error:", error);

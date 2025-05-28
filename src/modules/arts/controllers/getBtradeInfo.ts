@@ -42,7 +42,7 @@ const data: BtradeArtInfo | undefined = parseArtikulElement( firstElement);
       return;
     }
 
-    res.json({ data });
+    res.json( data );
   } catch (error) {
     console.error("Parsing error:", error);
     res.status(500).json({ message: "Parsing Btrade artikul failed", error });
