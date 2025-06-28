@@ -11,4 +11,6 @@ const palletSchema = new Schema(
   { timestamps: true }
 );
 
-export const Pallet = model("Pallet", palletSchema);
+ export const Pallet = model("Pallet", palletSchema);
+
+
