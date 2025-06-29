@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-
 import { Row } from "../models/Row.js";
 
 export const getRowByTitle = async (
@@ -9,7 +8,7 @@ export const getRowByTitle = async (
   const { title } = req.params;
 
   try {
-    const row = await Row.findOne({title: title});
+    const row = await Row.findOne({ title: title });
 
     if (!row) {
       res.status(404).json({ message: "Row not found" });
