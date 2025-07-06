@@ -1,4 +1,4 @@
-import Art from "../models/Art.js";
+import { Art } from "../models/Art.js";
 export const getAllArts = async (req, res) => {
     try {
         const { page = "1", limit = "10", search = "" } = req.query;

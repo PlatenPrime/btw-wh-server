@@ -1,4 +1,4 @@
-import Art from "../models/Art.js";
+import { Art } from "../models/Art.js";
 export const upsertArts = async (req, res, next) => {
     const arts = req.body;
     if (!Array.isArray(arts) || arts.length === 0) {

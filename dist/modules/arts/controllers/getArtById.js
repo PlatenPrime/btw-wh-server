@@ -1,4 +1,4 @@
-import Art from "../models/Art.js";
+import { Art } from "../models/Art.js";
 export const getArtById = async (req, res) => {
     const { id } = req.params;
     try {

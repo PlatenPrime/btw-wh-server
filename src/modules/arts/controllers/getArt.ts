@@ -1,4 +1,4 @@
-import Art, { IArt } from "../models/Art.js";
+import  { Art, IArt } from "../models/Art.js";
 import { Request, Response } from 'express';
 
 export const getArt = async (req: Request, res: Response): Promise<void> => {

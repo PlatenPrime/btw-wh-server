@@ -1,7 +1,7 @@
-import mongoose, { Document, Schema } from "mongoose";
+import mongoose, { Document, Model, Schema } from "mongoose";
 
 // Интерфейс для btradeStock
-interface IBtradeStock {
+export interface IBtradeStock {
   value: number;
   date: Date;
 }
@@ -29,26 +29,28 @@ const btradeStockSchema = new Schema<IBtradeStock>(
 );
 
 // Схема для Art
-const ArtSchema = new Schema<IArt>(
+const artSchema = new Schema<IArt>(
   {
     artikul: {
       type: String,
       required: true,
       unique: true,
     },
-    nameukr: String,
-    namerus: String,
+    nameukr: { type: String },
+    namerus: { type: String },
     zone: {
       type: String,
       required: true,
     },
-    limit: Number,
-    marker: String,
-    btradeStock: btradeStockSchema,
+    limit: { type: Number },
+    marker: { type: String },
+    btradeStock: { type: btradeStockSchema },
   },
   { timestamps: true }
 );
 
-// Экспорт модели
-export default mongoose.model<IArt>("Art", ArtSchema);
-
+/**
+ * Art Mongoose model
+ * @see IArt
+ */
+export const Art: Model<IArt> = mongoose.model<IArt>("Art", artSchema);

@@ -1,6 +1,6 @@
 // controllers/upsertArts.ts
 import { NextFunction, Request,  Response } from "express";
-import Art from "../models/Art.js";
+import {Art} from "../models/Art.js";
 
 export const upsertArts  = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   const arts = req.body;

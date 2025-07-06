@@ -5,21 +5,24 @@ const btradeStockSchema = new Schema({
     date: { type: Date, default: Date.now },
 }, { _id: false });
 // Схема для Art
-const ArtSchema = new Schema({
+const artSchema = new Schema({
     artikul: {
         type: String,
         required: true,
         unique: true,
     },
-    nameukr: String,
-    namerus: String,
+    nameukr: { type: String },
+    namerus: { type: String },
     zone: {
         type: String,
         required: true,
     },
-    limit: Number,
-    marker: String,
-    btradeStock: btradeStockSchema,
+    limit: { type: Number },
+    marker: { type: String },
+    btradeStock: { type: btradeStockSchema },
 }, { timestamps: true });
-// Экспорт модели
-export default mongoose.model("Art", ArtSchema);
+/**
+ * Art Mongoose model
+ * @see IArt
+ */
+export const Art = mongoose.model("Art", artSchema);

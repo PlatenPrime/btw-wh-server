@@ -1,4 +1,4 @@
-import Art from "../models/Art.js";
+import { Art } from "../models/Art.js";
 export const getArt = async (req, res) => {
     const { artikul } = req.params;
     try {
