@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import artRoute from "./modules/arts/router.js";
 import rowRouter from "./modules/rows/router.js";
 import authRoute from "./modules/auth/router.js";
+import palletRoute from "./modules/pallets/router.js";
 
 import { clerkMiddleware } from "@clerk/express";
 
@@ -24,6 +25,7 @@ app.use(express.json({ limit: "20mb" }));
 app.use("/api/arts", artRoute);
 app.use("/api/rows", rowRouter);
 app.use("/api/auth", authRoute);
+app.use("/api/pallets", palletRoute);
 
 app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
   res.json({
