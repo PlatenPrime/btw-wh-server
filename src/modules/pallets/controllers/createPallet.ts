@@ -29,7 +29,7 @@ export const createPallet = async (req: Request, res: Response) => {
       return;
     }
     const pallet = await Pallet.create({ title, rowId, poses, sector });
-    rowDoc.pallets.push(pallet._id);
+    rowDoc.pallets.push(pallet._id as mongoose.Types.ObjectId);
     await rowDoc.save();
     res.status(201).json(pallet);
   } catch (error) {

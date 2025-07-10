@@ -1,11 +1,23 @@
 // models/Pallet.ts
-import { model, Schema, Types } from "mongoose";
+import { Document, model, Schema, Types } from "mongoose";
 
-const palletSchema = new Schema(
+/**
+ * Pallet document interface
+ */
+export interface IPallet extends Document {
+  title: string;
+  rowId: Types.ObjectId;
+  poses: Types.ObjectId[];
+  sector?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+const palletSchema = new Schema<IPallet>(
   {
     title: { type: String, required: true },
-    rowId: { type: Types.ObjectId, ref: "Row", required: true },
-    poses: [{ type: Types.ObjectId, ref: "Pos" }],
+    rowId: { type: Schema.Types.ObjectId, ref: "Row", required: true },
+    poses: [{ type: Schema.Types.ObjectId, ref: "Pos" }],
     sector: String,
   },
   { timestamps: true }
@@ -13,4 +25,8 @@ const palletSchema = new Schema(
 
 export { palletSchema };
 
-export const Pallet = model("Pallet", palletSchema);
+/**
+ * Pallet Mongoose model
+ * @see IPallet
+ */
+export const Pallet = model<IPallet>("Pallet", palletSchema);

@@ -55,7 +55,7 @@ export const updatePallet = async (req: Request, res: Response) => {
         );
         await oldRow.save();
       }
-      newRow.pallets.push(pallet._id);
+      newRow.pallets.push(pallet._id as mongoose.Types.ObjectId);
       await newRow.save();
       pallet.set("rowId", new Types.ObjectId(parseResult.data.rowId));
     }

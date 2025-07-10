@@ -4,6 +4,7 @@ import {
   deletePallet,
   getAllPallets,
   getPalletById,
+  movePalletPoses,
   updatePallet,
 } from "./controllers/index.js";
 
@@ -14,5 +15,6 @@ router.get("/", getAllPallets);
 router.get("/:id", getPalletById);
 router.put("/:id", updatePallet);
 router.delete("/:id", deletePallet);
+router.post("/move-poses", movePalletPoses);
 
 export default router;

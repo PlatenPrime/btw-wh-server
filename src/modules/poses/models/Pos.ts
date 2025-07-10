@@ -1,17 +1,40 @@
 // models/Pos.ts
-import { model, Schema, Types } from "mongoose";
+import { Document, model, Schema, Types } from "mongoose";
 
-const posSchema = new Schema({
-  pallet: { type: Types.ObjectId, ref: "Pallet", required: true },
-  row: { type: Types.ObjectId, ref: "Row", required: true },
-  palletTitle: String,
-  rowTitle: String,
-  artikul: String,
-  quant: Number,
-  boxes: Number,
-  date: String,
-  sklad: String,
-},
-  { timestamps: true });
+/**
+ * Pos document interface
+ */
+export interface IPos extends Document {
+  palletId: Types.ObjectId;
+  rowId: Types.ObjectId;
+  palletTitle?: string;
+  rowTitle?: string;
+  artikul?: string;
+  quant?: number;
+  boxes?: number;
+  date?: string;
+  sklad?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
 
-export const Pos = model("Pos", posSchema);
+const posSchema = new Schema<IPos>(
+  {
+    palletId: { type: Schema.Types.ObjectId, ref: "Pallet", required: true },
+    rowId: { type: Schema.Types.ObjectId, ref: "Row", required: true },
+    palletTitle: String,
+    rowTitle: String,
+    artikul: String,
+    quant: Number,
+    boxes: Number,
+    date: String,
+    sklad: String,
+  },
+  { timestamps: true }
+);
+
+/**
+ * Pos Mongoose model
+ * @see IPos
+ */
+export const Pos = model<IPos>("Pos", posSchema);
