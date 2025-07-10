@@ -6,12 +6,9 @@ import artRoute from "./modules/arts/router.js";
 import rowRouter from "./modules/rows/router.js";
 import authRoute from "./modules/auth/router.js";
 import palletRoute from "./modules/pallets/router.js";
-import { clerkMiddleware } from "@clerk/express";
-// import "./types/express/index.d.js";
 dotenv.config();
 const app = express();
 // Middleware
-app.use(clerkMiddleware());
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 app.use("/api/arts", artRoute);
