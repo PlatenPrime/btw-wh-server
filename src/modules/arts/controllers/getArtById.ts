@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import  {Art, IArt } from "../models/Art.js";
+import { Art, IArt } from "../models/Art.js";
 
 export const getArtById = async (
   req: Request,

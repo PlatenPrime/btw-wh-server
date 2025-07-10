@@ -7,7 +7,9 @@ export const getPalletById = async (req, res) => {
         return;
     }
     try {
-        const pallet = await Pallet.findById(id).populate("row").populate("poses");
+        const pallet = await Pallet.findById(id)
+            .populate("row")
+            .populate("poses");
         if (!pallet) {
             res.status(404).json({ error: "Pallet not found" });
             return;

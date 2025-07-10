@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
-import { Row } from "../../rows/models/Row.js";
-import { Pallet } from "../models/Pallet.js";
+import { IRow, Row } from "../../rows/models/Row.js";
+import { IPallet, Pallet } from "../models/Pallet.js";
 
 const createPalletSchema = z.object({
   title: z.string().min(1),
@@ -23,12 +23,17 @@ export const createPallet = async (req: Request, res: Response) => {
   }
   const { title, rowId, poses, sector } = parseResult.data;
   try {
-    const rowDoc = await Row.findById(rowId);
+    const rowDoc: IRow | null = await Row.findById(rowId);
     if (!rowDoc) {
       res.status(404).json({ error: "Row not found" });
       return;
     }
-    const pallet = await Pallet.create({ title, rowId, poses, sector });
+    const pallet: IPallet = await Pallet.create({
+      title,
+      rowId,
+      poses,
+      sector,
+    });
     rowDoc.pallets.push(pallet._id as mongoose.Types.ObjectId);
     await rowDoc.save();
     res.status(201).json(pallet);

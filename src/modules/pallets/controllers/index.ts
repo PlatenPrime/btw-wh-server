@@ -1,6 +1,7 @@
 export { createPallet } from "./createPallet.js";
-export * from "./deletePallet.js";
-export * from "./getAllPallets.js";
-export * from "./getPalletById.js";
-export * from "./movePalletPoses.js";
-export * from "./updatePallet.js";
+export { deletePallet } from "./deletePallet.js";
+export { getAllPallets } from "./getAllPallets.js";
+export {  getAllPalletsByRowId } from './getAllPalletsByRowId.js';
+export { getPalletById } from "./getPalletById.js";
+export { movePalletPoses } from "./movePalletPoses.js";
+export { updatePallet } from "./updatePallet.js";

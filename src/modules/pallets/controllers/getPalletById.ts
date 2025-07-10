@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { Pallet } from "../models/Pallet.js";
+import { IPallet, Pallet } from "../models/Pallet.js";
 
 export const getPalletById = async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -9,7 +9,9 @@ export const getPalletById = async (req: Request, res: Response) => {
     return;
   }
   try {
-    const pallet = await Pallet.findById(id).populate("row").populate("poses");
+    const pallet: IPallet | null = await Pallet.findById(id)
+      .populate("row")
+      .populate("poses");
     if (!pallet) {
       res.status(404).json({ error: "Pallet not found" });
       return;

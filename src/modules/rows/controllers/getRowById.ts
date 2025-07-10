@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
-
-import { Row } from "../models/Row.js";
+import { IRow, Row } from "../models/Row.js";
 
 export const getRowById = async (
   req: Request,
@@ -9,9 +8,8 @@ export const getRowById = async (
   const { id } = req.params;
 
   try {
-    const row = await Row.findById(id);
+    const row: IRow | null = await Row.findById(id);
 
-   
     if (!row) {
       res.status(404).json({ message: "Row not found" });
       return;

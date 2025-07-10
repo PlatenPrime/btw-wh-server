@@ -25,7 +25,12 @@ export const createPallet = async (req, res) => {
             res.status(404).json({ error: "Row not found" });
             return;
         }
-        const pallet = await Pallet.create({ title, rowId, poses, sector });
+        const pallet = await Pallet.create({
+            title,
+            rowId,
+            poses,
+            sector,
+        });
         rowDoc.pallets.push(pallet._id);
         await rowDoc.save();
         res.status(201).json(pallet);

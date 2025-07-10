@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
-import { Row } from "../models/Row.js";
+import { IRow, Row } from "../models/Row.js";
 
 export const createRow = async (req: Request, res: Response) => {
   try {
     const { title } = req.body;
-    const row = new Row({ title });
+    const row: IRow = new Row({ title });
     await row.save();
     res.status(201).json(row);
   } catch (error) {
