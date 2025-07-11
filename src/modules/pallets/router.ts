@@ -14,12 +14,8 @@ const router = Router();
 router.post("/", createPallet);
 router.get("/", getAllPallets);
 router.get("/by-row/:rowId", async (req, res) => {
-  try {
-    await getAllPalletsByRowId(req, res);
-  } catch (error) {
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-} );
+  await getAllPalletsByRowId(req, res);
+});
 router.get("/:id", getPalletById);
 router.put("/:id", updatePallet);
 router.delete("/:id", deletePallet);

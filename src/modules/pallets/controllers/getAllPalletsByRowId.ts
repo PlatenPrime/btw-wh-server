@@ -15,7 +15,7 @@ import { IPallet, Pallet } from "../models/Pallet.js";
     return res.status(400).json({ error: "Missing rowId parameter" });
   }
   try {
-    const pallets: IPallet[] = await Pallet.find({ rowId });
+    const pallets: IPallet[]  = await Pallet.find({ rowId: rowId });
     return res.json(pallets);
   } catch (error) {
     return res
