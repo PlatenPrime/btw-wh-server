@@ -1,0 +1,100 @@
+import mongoose from "mongoose";
+import { z } from "zod";
+import { Pallet } from "../../pallets/models/Pallet.js";
+import { Row } from "../../rows/models/Row.js";
+import { Pos } from "../models/Pos.js";
+const posItemSchema = z.object({
+    palletId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+        message: "Invalid pallet ID",
+    }),
+    rowId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+        message: "Invalid row ID",
+    }),
+    palletTitle: z.string().optional(),
+    rowTitle: z.string().optional(),
+    artikul: z.string().optional(),
+    quant: z.number().optional(),
+    boxes: z.number().optional(),
+    date: z.string().optional(),
+    sklad: z.string().optional(),
+});
+const bulkCreatePosesSchema = z.object({
+    poses: z.array(posItemSchema).min(1, "At least one position is required"),
+});
+export const bulkCreatePoses = async (req, res) => {
+    const parseResult = bulkCreatePosesSchema.safeParse(req.body);
+    if (!parseResult.success) {
+        res.status(400).json({ error: parseResult.error.errors });
+        return;
+    }
+    const { poses } = parseResult.data;
+    const session = await mongoose.startSession();
+    try {
+        await session.withTransaction(async () => {
+            const createdPoses = [];
+            const palletUpdates = new Map();
+            // Проверяем существование всех паллетов и рядов
+            const palletIds = [...new Set(poses.map((p) => p.palletId))];
+            const rowIds = [...new Set(poses.map((p) => p.rowId))];
+            const pallets = await Pallet.find({ _id: { $in: palletIds } }).session(session);
+            const rows = await Row.find({ _id: { $in: rowIds } }).session(session);
+            if (pallets.length !== palletIds.length) {
+                res.status(404).json({ error: "Some pallets not found" });
+                throw new Error("Some pallets not found");
+            }
+            if (rows.length !== rowIds.length) {
+                res.status(404).json({ error: "Some rows not found" });
+                throw new Error("Some rows not found");
+            }
+            // Создаем позиции
+            for (const posData of poses) {
+                const pallet = pallets.find((p) => p._id.toString() === posData.palletId);
+                const row = rows.find((r) => r._id.toString() === posData.rowId);
+                const [createdPos] = await Pos.create([
+                    {
+                        ...posData,
+                        palletTitle: posData.palletTitle || pallet?.title,
+                        rowTitle: posData.rowTitle || row?.title,
+                    },
+                ], { session });
+                createdPoses.push(createdPos);
+                // Собираем обновления для паллетов
+                if (!palletUpdates.has(posData.palletId)) {
+                    palletUpdates.set(posData.palletId, []);
+                }
+                palletUpdates
+                    .get(posData.palletId)
+                    .push(createdPos._id);
+            }
+            // Обновляем паллеты
+            for (const [palletId, posIds] of palletUpdates) {
+                const pallet = pallets.find((p) => p._id.toString() === palletId);
+                if (pallet) {
+                    pallet.poses.push(...posIds);
+                    await pallet.save({ session });
+                }
+            }
+            // Заполняем связанные данные для созданных позиций
+            const populatedPoses = await Pos.find({
+                _id: { $in: createdPoses.map((p) => p._id) },
+            })
+                .populate("palletId", "title sector")
+                .populate("rowId", "title")
+                .session(session);
+            res.status(201).json({
+                message: `${createdPoses.length} positions created successfully`,
+                data: populatedPoses,
+            });
+        });
+    }
+    catch (error) {
+        if (!res.headersSent) {
+            res
+                .status(500)
+                .json({ error: "Failed to create positions", details: error });
+        }
+    }
+    finally {
+        await session.endSession();
+    }
+};

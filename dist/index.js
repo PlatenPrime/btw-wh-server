@@ -6,6 +6,7 @@ import artRoute from "./modules/arts/router.js";
 import rowRouter from "./modules/rows/router.js";
 import authRoute from "./modules/auth/router.js";
 import palletRoute from "./modules/pallets/router.js";
+import posesRoute from "./modules/poses/router.js";
 dotenv.config();
 const app = express();
 // Middleware
@@ -15,6 +16,7 @@ app.use("/api/arts", artRoute);
 app.use("/api/rows", rowRouter);
 app.use("/api/auth", authRoute);
 app.use("/api/pallets", palletRoute);
+app.use("/api/poses", posesRoute);
 app.use((error, _req, res, _next) => {
     res.json({
         message: error.message || "Something went wrong",
