@@ -6,6 +6,7 @@ import {
   getAllPalletsByRowId,
   getPalletById,
   movePalletPoses,
+  deletePalletPoses,
   updatePallet,
 } from "./controllers/index.js";
 
@@ -19,6 +20,7 @@ router.get("/by-row/:rowId", async (req, res) => {
 router.get("/:id", getPalletById);
 router.put("/:id", updatePallet);
 router.delete("/:id", deletePallet);
+router.delete("/:id/poses", deletePalletPoses);
 router.post("/move-poses", movePalletPoses);
 
 export default router;
