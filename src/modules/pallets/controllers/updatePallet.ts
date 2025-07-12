@@ -93,16 +93,24 @@ export const updatePallet = async (req: Request, res: Response) => {
     // Handle specific error types
     if (error instanceof Error) {
       if (error.message === "Pallet not found") {
-        res.status(404).json({ error: "Pallet not found" });
+        if (!res.headersSent) {
+          res.status(404).json({ error: "Pallet not found" });
+        }
         return;
       }
       if (error.message === "New rowId not found") {
-        res.status(404).json({ error: "New rowId not found" });
+        if (!res.headersSent) {
+          res.status(404).json({ error: "New rowId not found" });
+        }
         return;
       }
     }
 
-    res.status(500).json({ error: "Failed to update pallet", details: error });
+    if (!res.headersSent) {
+      res
+        .status(500)
+        .json({ error: "Failed to update pallet", details: error });
+    }
   } finally {
     // Always end the session
     await session.endSession();

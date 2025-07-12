@@ -24,6 +24,8 @@ export const movePalletPoses = async (req: Request, res: Response) => {
     return;
   }
   const { sourcePalletId, targetPalletId } = parseResult.data;
+
+  // Validate before starting transaction
   if (sourcePalletId === targetPalletId) {
     res
       .status(400)
@@ -32,61 +34,67 @@ export const movePalletPoses = async (req: Request, res: Response) => {
   }
 
   const session = await mongoose.startSession();
-  session.startTransaction();
+
   try {
-    const [sourcePallet, targetPallet] = await Promise.all([
-      Pallet.findById(sourcePalletId).session(
-        session
-      ) as Promise<IPallet | null>,
-      Pallet.findById(targetPalletId).session(
-        session
-      ) as Promise<IPallet | null>,
-    ]);
-    if (!sourcePallet || !targetPallet) {
-      await session.abortTransaction();
-      res.status(404).json({ error: "Source or target pallet not found" });
-      return;
-    }
-    if (!Array.isArray(targetPallet.poses) || targetPallet.poses.length > 0) {
-      await session.abortTransaction();
-      res.status(400).json({ error: "Target pallet must be empty" });
-      return;
-    }
-    if (!Array.isArray(sourcePallet.poses) || sourcePallet.poses.length === 0) {
-      await session.abortTransaction();
-      res.status(400).json({ error: "Source pallet has no poses to move" });
-      return;
-    }
+    await session.withTransaction(async () => {
+      const [sourcePallet, targetPallet] = await Promise.all([
+        Pallet.findById(sourcePalletId).session(
+          session
+        ) as Promise<IPallet | null>,
+        Pallet.findById(targetPalletId).session(
+          session
+        ) as Promise<IPallet | null>,
+      ]);
 
-    // Move poses
-    const posesToMove = (await Pos.find({
-      _id: { $in: sourcePallet.poses },
-    }).session(session)) as IPos[];
-    for (const pos of posesToMove) {
-      pos.palletId = targetPallet._id as mongoose.Types.ObjectId;
-      pos.rowId = targetPallet.rowId as mongoose.Types.ObjectId;
-      pos.palletTitle = targetPallet.title;
-      // Optionally update rowTitle if needed (not always present)
-      if (targetPallet.rowId && pos.rowTitle !== undefined) {
-        pos.rowTitle = undefined; // Or fetch and set the new row title if required
+      if (!sourcePallet || !targetPallet) {
+        res.status(404).json({ error: "Source or target pallet not found" });
+        throw new Error("Source or target pallet not found");
       }
-      await pos.save({ session });
-    }
 
-    // Update pallets
-    targetPallet.poses = sourcePallet.poses;
-    sourcePallet.poses = [];
-    await Promise.all([
-      targetPallet.save({ session }),
-      sourcePallet.save({ session }),
-    ]);
+      if (!Array.isArray(targetPallet.poses) || targetPallet.poses.length > 0) {
+        res.status(400).json({ error: "Target pallet must be empty" });
+        throw new Error("Target pallet must be empty");
+      }
 
-    await session.commitTransaction();
-    res.json({ message: "Poses moved successfully", targetPallet });
+      if (
+        !Array.isArray(sourcePallet.poses) ||
+        sourcePallet.poses.length === 0
+      ) {
+        res.status(400).json({ error: "Source pallet has no poses to move" });
+        throw new Error("Source pallet has no poses to move");
+      }
+
+      // Move poses
+      const posesToMove = (await Pos.find({
+        _id: { $in: sourcePallet.poses },
+      }).session(session)) as IPos[];
+
+      for (const pos of posesToMove) {
+        pos.palletId = targetPallet._id as mongoose.Types.ObjectId;
+        pos.rowId = targetPallet.rowId as mongoose.Types.ObjectId;
+        pos.palletTitle = targetPallet.title;
+        // Optionally update rowTitle if needed (not always present)
+        if (targetPallet.rowId && pos.rowTitle !== undefined) {
+          pos.rowTitle = undefined; // Or fetch and set the new row title if required
+        }
+        await pos.save({ session });
+      }
+
+      // Update pallets
+      targetPallet.poses = sourcePallet.poses;
+      sourcePallet.poses = [];
+      await Promise.all([
+        targetPallet.save({ session }),
+        sourcePallet.save({ session }),
+      ]);
+
+      res.json({ message: "Poses moved successfully", targetPallet });
+    });
   } catch (error) {
-    await session.abortTransaction();
-    res.status(500).json({ error: "Failed to move poses", details: error });
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Failed to move poses", details: error });
+    }
   } finally {
-    session.endSession();
+    await session.endSession();
   }
 };

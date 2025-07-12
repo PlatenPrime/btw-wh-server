@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
 import { IRow, Row } from "../../rows/models/Row.js";
-import { IPallet, Pallet } from "../models/Pallet.js";
+import { Pallet } from "../models/Pallet.js";
 
 const createPalletSchema = z.object({
   title: z.string().min(1),
@@ -22,22 +22,36 @@ export const createPallet = async (req: Request, res: Response) => {
     return;
   }
   const { title, rowId, poses, sector } = parseResult.data;
+  const session = await mongoose.startSession();
   try {
-    const rowDoc: IRow | null = await Row.findById(rowId);
-    if (!rowDoc) {
-      res.status(404).json({ error: "Row not found" });
-      return;
-    }
-    const pallet: IPallet = await Pallet.create({
-      title,
-      rowId,
-      poses,
-      sector,
+    await session.withTransaction(async () => {
+      const rowDoc: IRow | null = await Row.findById(rowId).session(session);
+      if (!rowDoc) {
+        res.status(404).json({ error: "Row not found" });
+        throw new Error("Row not found");
+      }
+      const [createdPallet] = await Pallet.create(
+        [
+          {
+            title,
+            rowId,
+            poses,
+            sector,
+          },
+        ],
+        { session }
+      );
+      rowDoc.pallets.push(createdPallet._id as mongoose.Types.ObjectId);
+      await rowDoc.save({ session });
+      res.status(201).json(createdPallet);
     });
-    rowDoc.pallets.push(pallet._id as mongoose.Types.ObjectId);
-    await rowDoc.save();
-    res.status(201).json(pallet);
   } catch (error) {
-    res.status(500).json({ error: "Failed to create pallet", details: error });
+    if (!res.headersSent) {
+      res
+        .status(500)
+        .json({ error: "Failed to create pallet", details: error });
+    }
+  } finally {
+    await session.endSession();
   }
 };

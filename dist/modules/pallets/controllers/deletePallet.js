@@ -8,26 +8,36 @@ export const deletePallet = async (req, res) => {
         res.status(400).json({ error: "Invalid pallet ID" });
         return;
     }
+    const session = await mongoose.startSession();
     try {
-        const pallet = await Pallet.findById(id);
-        if (!pallet) {
-            res.status(404).json({ error: "Pallet not found" });
-            return;
-        }
-        // Remove all positions associated with this pallet
-        if (pallet.poses && pallet.poses.length > 0) {
-            await Pos.deleteMany({ _id: { $in: pallet.poses } });
-        }
-        // Remove pallet reference from the row
-        const row = await Row.findById(pallet.rowId);
-        if (row) {
-            row.pallets = row.pallets.filter((pid) => pid.toString() !== id);
-            await row.save();
-        }
-        await Pallet.findByIdAndDelete(id);
-        res.json({ message: "Pallet deleted" });
+        await session.withTransaction(async () => {
+            const pallet = await Pallet.findById(id).session(session);
+            if (!pallet) {
+                res.status(404).json({ error: "Pallet not found" });
+                throw new Error("Pallet not found");
+            }
+            // Remove all positions associated with this pallet
+            if (pallet.poses && pallet.poses.length > 0) {
+                await Pos.deleteMany({ _id: { $in: pallet.poses } }).session(session);
+            }
+            // Remove pallet reference from the row
+            const row = await Row.findById(pallet.rowId).session(session);
+            if (row) {
+                row.pallets = row.pallets.filter((pid) => pid.toString() !== id);
+                await row.save({ session });
+            }
+            await Pallet.findByIdAndDelete(id).session(session);
+            res.json({ message: "Pallet deleted" });
+        });
     }
     catch (error) {
-        res.status(500).json({ error: "Failed to delete pallet", details: error });
+        if (!res.headersSent) {
+            res
+                .status(500)
+                .json({ error: "Failed to delete pallet", details: error });
+        }
+    }
+    finally {
+        await session.endSession();
     }
 };

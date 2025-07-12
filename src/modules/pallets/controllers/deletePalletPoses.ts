@@ -37,10 +37,12 @@ export const deletePalletPoses = async (req: Request, res: Response) => {
       });
     });
   } catch (error) {
-    res.status(500).json({
-      error: "Failed to remove pallet content",
-      details: error instanceof Error ? error.message : error,
-    });
+    if (!res.headersSent) {
+      res.status(500).json({
+        error: "Failed to remove pallet content",
+        details: error instanceof Error ? error.message : error,
+      });
+    }
   } finally {
     await session.endSession();
   }
