@@ -1,8 +1,17 @@
 // models/Pos.ts
 import { model, Schema } from "mongoose";
+const palletSubdocumentSchema = new Schema({
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: { type: String, required: true },
+    sector: String,
+}, { _id: false });
+const rowSubdocumentSchema = new Schema({
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: { type: String, required: true },
+}, { _id: false });
 const posSchema = new Schema({
-    palletId: { type: Schema.Types.ObjectId, ref: "Pallet", required: true },
-    rowId: { type: Schema.Types.ObjectId, ref: "Row", required: true },
+    pallet: { type: palletSubdocumentSchema, required: true },
+    row: { type: rowSubdocumentSchema, required: true },
     palletTitle: String,
     rowTitle: String,
     artikul: String,

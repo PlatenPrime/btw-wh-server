@@ -46,10 +46,10 @@ export const updatePallet = async (req: Request, res: Response) => {
       // If row is being changed, update both old and new row's pallets arrays
       if (
         parseResult.data.rowId &&
-        pallet.rowId &&
-        parseResult.data.rowId !== pallet.rowId.toString()
+        pallet.row._id &&
+        parseResult.data.rowId !== pallet.row._id.toString()
       ) {
-        const oldRow = await Row.findById(pallet.rowId).session(session);
+        const oldRow = await Row.findById(pallet.row._id).session(session);
         const newRow = await Row.findById(parseResult.data.rowId).session(
           session
         );
@@ -67,7 +67,10 @@ export const updatePallet = async (req: Request, res: Response) => {
 
         newRow.pallets.push(pallet._id as mongoose.Types.ObjectId);
         await newRow.save({ session });
-        pallet.set("rowId", new Types.ObjectId(parseResult.data.rowId));
+        pallet.set("row", {
+          _id: new Types.ObjectId(parseResult.data.rowId),
+          title: newRow.title,
+        });
       }
 
       // Update pallet fields
@@ -90,29 +93,16 @@ export const updatePallet = async (req: Request, res: Response) => {
       res.json(pallet);
     });
   } catch (error) {
-    // Handle specific error types
-    if (error instanceof Error) {
-      if (error.message === "Pallet not found") {
-        if (!res.headersSent) {
-          res.status(404).json({ error: "Pallet not found" });
-        }
-        return;
-      }
-      if (error.message === "New rowId not found") {
-        if (!res.headersSent) {
-          res.status(404).json({ error: "New rowId not found" });
-        }
-        return;
-      }
-    }
-
     if (!res.headersSent) {
-      res
-        .status(500)
-        .json({ error: "Failed to update pallet", details: error });
+      if (error instanceof Error && error.message === "New rowId not found") {
+        res.status(404).json({ error: "New rowId not found" });
+      } else {
+        res
+          .status(500)
+          .json({ error: "Failed to update pallet", details: error });
+      }
     }
   } finally {
-    // Always end the session
     await session.endSession();
   }
 };

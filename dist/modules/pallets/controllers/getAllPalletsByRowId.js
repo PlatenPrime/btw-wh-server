@@ -10,7 +10,7 @@ export const getAllPalletsByRowId = async (req, res) => {
         return res.status(400).json({ error: "Missing rowId parameter" });
     }
     try {
-        const pallets = await Pallet.find({ rowId: rowId });
+        const pallets = await Pallet.find({ "row._id": rowId });
         return res.json(pallets);
     }
     catch (error) {

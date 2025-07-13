@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
 import { IPos, Pos } from "../../poses/models/Pos.js";
+import { Row } from "../../rows/models/Row.js";
 import { IPallet, Pallet } from "../models/Pallet.js";
 
 const movePalletPosesSchema = z.object({
@@ -64,19 +65,32 @@ export const movePalletPoses = async (req: Request, res: Response) => {
         throw new Error("Source pallet has no poses to move");
       }
 
+      // Получаем информацию о ряде для target pallet
+      const targetRow = await Row.findById(targetPallet.row._id).session(
+        session
+      );
+      if (!targetRow) {
+        res.status(404).json({ error: "Target row not found" });
+        throw new Error("Target row not found");
+      }
+
       // Move poses
       const posesToMove = (await Pos.find({
         _id: { $in: sourcePallet.poses },
       }).session(session)) as IPos[];
 
       for (const pos of posesToMove) {
-        pos.palletId = targetPallet._id as mongoose.Types.ObjectId;
-        pos.rowId = targetPallet.rowId as mongoose.Types.ObjectId;
+        pos.pallet = {
+          _id: targetPallet._id as mongoose.Types.ObjectId,
+          title: targetPallet.title,
+          sector: targetPallet.sector,
+        };
+        pos.row = {
+          _id: targetRow._id as mongoose.Types.ObjectId,
+          title: targetRow.title,
+        };
         pos.palletTitle = targetPallet.title;
-        // Optionally update rowTitle if needed (not always present)
-        if (targetPallet.rowId && pos.rowTitle !== undefined) {
-          pos.rowTitle = undefined; // Or fetch and set the new row title if required
-        }
+        pos.rowTitle = targetRow.title;
         await pos.save({ session });
       }
 

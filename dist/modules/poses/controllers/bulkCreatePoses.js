@@ -52,9 +52,22 @@ export const bulkCreatePoses = async (req, res) => {
                 const row = rows.find((r) => r._id.toString() === posData.rowId);
                 const [createdPos] = await Pos.create([
                     {
-                        ...posData,
+                        pallet: {
+                            _id: pallet._id,
+                            title: pallet.title,
+                            sector: pallet.sector,
+                        },
+                        row: {
+                            _id: row._id,
+                            title: row.title,
+                        },
                         palletTitle: posData.palletTitle || pallet?.title,
                         rowTitle: posData.rowTitle || row?.title,
+                        artikul: posData.artikul,
+                        quant: posData.quant,
+                        boxes: posData.boxes,
+                        date: posData.date,
+                        sklad: posData.sklad,
                     },
                 ], { session });
                 createdPoses.push(createdPos);
@@ -74,16 +87,9 @@ export const bulkCreatePoses = async (req, res) => {
                     await pallet.save({ session });
                 }
             }
-            // Заполняем связанные данные для созданных позиций
-            const populatedPoses = await Pos.find({
-                _id: { $in: createdPoses.map((p) => p._id) },
-            })
-                .populate("palletId", "title sector")
-                .populate("rowId", "title")
-                .session(session);
             res.status(201).json({
                 message: `${createdPoses.length} positions created successfully`,
-                data: populatedPoses,
+                data: createdPoses,
             });
         });
     }

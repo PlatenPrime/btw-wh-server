@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
+import { Pallet } from "../../pallets/models/Pallet.js";
+import { Row } from "../../rows/models/Row.js";
 import { IPos, Pos } from "../models/Pos.js";
 
 const updatePosSchema = z.object({
@@ -46,13 +48,42 @@ export const updatePos = async (req: Request, res: Response) => {
       return;
     }
 
+    // Подготавливаем данные для обновления
+    const updateData: any = { ...parseResult.data };
+
+    // Если обновляются palletId или rowId, нужно получить новые данные
+    if (parseResult.data.palletId) {
+      const pallet = await Pallet.findById(parseResult.data.palletId);
+      if (!pallet) {
+        res.status(404).json({ error: "Pallet not found" });
+        return;
+      }
+      updateData.pallet = {
+        _id: pallet._id,
+        title: pallet.title,
+        sector: pallet.sector,
+      };
+      delete updateData.palletId;
+    }
+
+    if (parseResult.data.rowId) {
+      const row = await Row.findById(parseResult.data.rowId);
+      if (!row) {
+        res.status(404).json({ error: "Row not found" });
+        return;
+      }
+      updateData.row = {
+        _id: row._id,
+        title: row.title,
+      };
+      delete updateData.rowId;
+    }
+
     // Обновляем позицию
-    const updatedPos = await Pos.findByIdAndUpdate(id, parseResult.data, {
+    const updatedPos = await Pos.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
-    })
-      .populate("palletId", "title sector")
-      .populate("rowId", "title");
+    });
 
     res.json(updatedPos);
   } catch (error) {

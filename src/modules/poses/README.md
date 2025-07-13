@@ -11,10 +11,17 @@ The Positions module provides a RESTful API for managing warehouse positions. Ea
 ```typescript
 interface Position {
   _id: string; // MongoDB ObjectId
-  palletId: string; // Required: Reference to Pallet
-  rowId: string; // Required: Reference to Row
-  palletTitle?: string; // Optional: Cached pallet title
-  rowTitle?: string; // Optional: Cached row title
+  pallet: {
+    _id: string; // Pallet ObjectId
+    title: string; // Pallet title (cached)
+    sector?: string; // Pallet sector (cached)
+  }; // Required: Embedded pallet reference
+  row: {
+    _id: string; // Row ObjectId
+    title: string; // Row title (cached)
+  }; // Required: Embedded row reference
+  palletTitle?: string; // Optional: Cached pallet title (legacy)
+  rowTitle?: string; // Optional: Cached row title (legacy)
   artikul?: string; // Optional: Article number
   quant?: number; // Optional: Quantity
   boxes?: number; // Optional: Number of boxes
@@ -58,12 +65,12 @@ interface Position {
   "data": [
     {
       "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
-      "palletId": {
+      "pallet": {
         "_id": "64f8a1b2c3d4e5f6a7b8c9d1",
         "title": "Pallet A",
         "sector": "Sector 1"
       },
-      "rowId": {
+      "row": {
         "_id": "64f8a1b2c3d4e5f6a7b8c9d2",
         "title": "Row A"
       },
@@ -133,10 +140,10 @@ interface Position {
 
 ```json
 {
-  "palletId": "64f8a1b2c3d4e5f6a7b8c9d1",
-  "rowId": "64f8a1b2c3d4e5f6a7b8c9d2",
-  "palletTitle": "Pallet A", // optional
-  "rowTitle": "Row A", // optional
+  "palletId": "64f8a1b2c3d4e5f6a7b8c9d1", // Required: Pallet ObjectId
+  "rowId": "64f8a1b2c3d4e5f6a7b8c9d2", // Required: Row ObjectId
+  "palletTitle": "Pallet A", // optional: Override cached pallet title
+  "rowTitle": "Row A", // optional: Override cached row title
   "artikul": "ART001", // optional
   "quant": 100, // optional
   "boxes": 10, // optional
@@ -230,13 +237,13 @@ interface Position {
 
 ## Important Notes
 
-1. **Cascading Updates:** When a position is created or deleted, the associated pallet's `poses` array is automatically updated.
+1. **Request vs Response Format:** While requests use `palletId` and `rowId` references, responses include embedded pallet and row subdocuments for better performance.
 
 2. **Transaction Safety:** All operations that modify multiple documents use MongoDB transactions to ensure data consistency.
 
 3. **Validation:** All input data is validated using Zod schemas with proper error messages.
 
-4. **Population:** Position responses include populated `palletId` and `rowId` references for easier frontend consumption.
+4. **Cached Data:** Position responses include embedded pallet and row data for easier frontend consumption without additional queries.
 
 5. **Search and Filtering:** The getAllPoses endpoint supports flexible filtering and search capabilities.
 

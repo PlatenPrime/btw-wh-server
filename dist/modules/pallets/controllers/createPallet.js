@@ -30,7 +30,10 @@ export const createPallet = async (req, res) => {
             const [createdPallet] = await Pallet.create([
                 {
                     title,
-                    rowId,
+                    row: {
+                        _id: rowDoc._id,
+                        title: rowDoc.title,
+                    },
                     poses,
                     sector,
                 },

@@ -7,10 +7,9 @@ export const getPosesByRowId = async (req, res) => {
         return;
     }
     try {
-        const poses = await Pos.find({ rowId })
-            .populate("palletId", "title sector")
-            .populate("rowId", "title")
-            .sort({ createdAt: -1 });
+        const poses = await Pos.find({ "row._id": rowId }).sort({
+            artikul: -1,
+        });
         res.json(poses);
     }
     catch (error) {

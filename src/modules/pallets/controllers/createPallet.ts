@@ -34,7 +34,10 @@ export const createPallet = async (req: Request, res: Response) => {
         [
           {
             title,
-            rowId,
+            row: {
+              _id: rowDoc._id,
+              title: rowDoc.title,
+            },
             poses,
             sector,
           },

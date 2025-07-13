@@ -2,11 +2,28 @@
 import { Document, model, Schema, Types } from "mongoose";
 
 /**
+ * Pallet subdocument interface for Pos
+ */
+interface IPalletSubdocument {
+  _id: Types.ObjectId;
+  title: string;
+  sector?: string;
+}
+
+/**
+ * Row subdocument interface for Pos
+ */
+interface IRowSubdocument {
+  _id: Types.ObjectId;
+  title: string;
+}
+
+/**
  * Pos document interface
  */
 export interface IPos extends Document {
-  palletId: Types.ObjectId;
-  rowId: Types.ObjectId;
+  pallet: IPalletSubdocument;
+  row: IRowSubdocument;
   palletTitle?: string;
   rowTitle?: string;
   artikul?: string;
@@ -18,10 +35,27 @@ export interface IPos extends Document {
   updatedAt?: Date;
 }
 
+const palletSubdocumentSchema = new Schema<IPalletSubdocument>(
+  {
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: { type: String, required: true },
+    sector: String,
+  },
+  { _id: false }
+);
+
+const rowSubdocumentSchema = new Schema<IRowSubdocument>(
+  {
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const posSchema = new Schema<IPos>(
   {
-    palletId: { type: Schema.Types.ObjectId, ref: "Pallet", required: true },
-    rowId: { type: Schema.Types.ObjectId, ref: "Row", required: true },
+    pallet: { type: palletSubdocumentSchema, required: true },
+    row: { type: rowSubdocumentSchema, required: true },
     palletTitle: String,
     rowTitle: String,
     artikul: String,

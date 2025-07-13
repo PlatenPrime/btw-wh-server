@@ -57,12 +57,19 @@ export const createPos = async (req: Request, res: Response) => {
         throw new Error("Row not found");
       }
 
-      // Создаем позицию
+      // Создаем позицию с новой структурой
       const [createdPos] = await Pos.create(
         [
           {
-            palletId,
-            rowId,
+            pallet: {
+              _id: pallet._id,
+              title: pallet.title,
+              sector: pallet.sector,
+            },
+            row: {
+              _id: row._id,
+              title: row.title,
+            },
             palletTitle: palletTitle || pallet.title,
             rowTitle: rowTitle || row.title,
             artikul,
@@ -79,13 +86,7 @@ export const createPos = async (req: Request, res: Response) => {
       pallet.poses.push(createdPos._id as mongoose.Types.ObjectId);
       await pallet.save({ session });
 
-      // Заполняем связанные данные
-      const populatedPos = await Pos.findById(createdPos._id)
-        .populate("palletId", "title sector")
-        .populate("rowId", "title")
-        .session(session);
-
-      res.status(201).json(populatedPos);
+      res.status(201).json(createdPos);
     });
   } catch (error) {
     if (!res.headersSent) {

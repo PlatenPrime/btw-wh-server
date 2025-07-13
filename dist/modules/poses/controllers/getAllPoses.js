@@ -8,16 +8,14 @@ export const getAllPoses = async (req, res) => {
         // Строим фильтр
         const filter = {};
         if (palletId)
-            filter.palletId = palletId;
+            filter["pallet._id"] = palletId;
         if (rowId)
-            filter.rowId = rowId;
+            filter["row._id"] = rowId;
         if (artikul)
             filter.artikul = { $regex: artikul, $options: "i" };
         if (sklad)
             filter.sklad = { $regex: sklad, $options: "i" };
         const poses = await Pos.find(filter)
-            .populate("palletId", "title sector")
-            .populate("rowId", "title")
             .skip(skip)
             .limit(limitNum)
             .sort({ createdAt: -1 });

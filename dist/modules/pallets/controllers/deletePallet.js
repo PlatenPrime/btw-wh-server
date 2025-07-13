@@ -21,7 +21,7 @@ export const deletePallet = async (req, res) => {
                 await Pos.deleteMany({ _id: { $in: pallet.poses } }).session(session);
             }
             // Remove pallet reference from the row
-            const row = await Row.findById(pallet.rowId).session(session);
+            const row = await Row.findById(pallet.row._id).session(session);
             if (row) {
                 row.pallets = row.pallets.filter((pid) => pid.toString() !== id);
                 await row.save({ session });

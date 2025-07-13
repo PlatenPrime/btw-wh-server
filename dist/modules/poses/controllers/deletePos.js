@@ -16,7 +16,7 @@ export const deletePos = async (req, res) => {
                 throw new Error("Position not found");
             }
             // Удаляем позицию из паллета
-            const pallet = await Pallet.findById(pos.palletId).session(session);
+            const pallet = await Pallet.findById(pos.pallet._id).session(session);
             if (pallet) {
                 pallet.poses = pallet.poses.filter((posId) => posId.toString() !== id);
                 await pallet.save({ session });

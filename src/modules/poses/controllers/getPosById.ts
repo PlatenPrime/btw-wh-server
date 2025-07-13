@@ -11,9 +11,7 @@ export const getPosById = async (req: Request, res: Response) => {
   }
 
   try {
-    const pos: IPos | null = await Pos.findById(id)
-      .populate("palletId", "title sector")
-      .populate("rowId", "title");
+    const pos: IPos | null = await Pos.findById(id);
 
     if (!pos) {
       res.status(404).json({ error: "Position not found" });

@@ -11,10 +11,9 @@ export const getPosesByRowId = async (req: Request, res: Response) => {
   }
 
   try {
-    const poses: IPos[] = await Pos.find({ rowId })
-      .populate("palletId", "title sector")
-      .populate("rowId", "title")
-      .sort({ createdAt: -1 });
+    const poses: IPos[] = await Pos.find({ "row._id": rowId }).sort({
+      artikul: -1,
+    });
 
     res.json(poses);
   } catch (error) {
