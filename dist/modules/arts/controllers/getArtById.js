@@ -1,6 +1,10 @@
 import { Art } from "../models/Art.js";
 export const getArtById = async (req, res) => {
     const { id } = req.params;
+    if (!id) {
+        res.status(400).json({ message: "ID is required" });
+        return;
+    }
     try {
         const art = await Art.findById(id);
         if (!art) {

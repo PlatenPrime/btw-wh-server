@@ -21,7 +21,7 @@ export const getBtradeArtInfo = async (req, res) => {
             res.status(404).json({ message: "Product data not found or incomplete" });
             return;
         }
-        res.json(data);
+        res.status(200).json(data);
     }
     catch (error) {
         console.error("Parsing error:", error);
@@ -40,11 +40,15 @@ function parseArtikulElement(artElement) {
         });
         return;
     }
-    const priceStr = priceRaw.replace(/[^\d.,]/g, "").replace(",", ".");
+    const priceStr = priceRaw.replace(/[^\d.,]/g, "").replace(/,/g, "");
     const price = parseFloat(priceStr);
     const quantityMatch = quantityRaw.match(/\d+/);
-    const quantity = quantityMatch ? parseInt(quantityMatch[0], 10) : 0;
-    if (isNaN(price) || isNaN(quantity)) {
+    if (!quantityMatch) {
+        console.warn("Invalid quantity format:", { quantityRaw });
+        return;
+    }
+    const quantity = parseInt(quantityMatch[0], 10);
+    if (isNaN(price)) {
         console.warn("Invalid number parsed:", { priceStr, quantityRaw });
         return;
     }

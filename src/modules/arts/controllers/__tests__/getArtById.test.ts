@@ -1,29 +1,30 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestArt } from "../../../../test/setup.js";
 import { getArtById } from "../getArtById.js";
 
 describe("getArtById Controller", () => {
   let mockRequest: Partial<Request>;
-  let mockResponse: Partial<Response>;
   let responseJson: any;
   let responseStatus: any;
+  let res: Response;
 
   beforeEach(() => {
     responseJson = {};
     responseStatus = {};
 
-    mockResponse = {
-      status: (code: number) => {
+    res = {
+      status: function (code: number) {
         responseStatus.code = code;
-        return mockResponse;
+        return this;
       },
-      json: (data: any) => {
+      json: function (data: any) {
         responseJson = data;
-        return mockResponse;
+        return this;
       },
-    };
+    } as unknown as Response;
+    vi.clearAllMocks();
   });
 
   it("should return art by valid ObjectId", async () => {
@@ -41,7 +42,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -61,7 +62,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(404);
@@ -75,7 +76,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(500);
@@ -99,7 +100,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -123,7 +124,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -138,7 +139,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -152,7 +153,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -172,7 +173,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -195,7 +196,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -213,7 +214,7 @@ describe("getArtById Controller", () => {
     };
 
     // Act
-    await getArtById(mockRequest as Request, mockResponse as Response);
+    await getArtById(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(404);

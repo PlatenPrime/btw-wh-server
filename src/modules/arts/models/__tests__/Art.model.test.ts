@@ -288,8 +288,8 @@ describe("Art Model", () => {
       // Assert
       expect(savedArt.createdAt).toBeInstanceOf(Date);
       expect(savedArt.updatedAt).toBeInstanceOf(Date);
-      expect(savedArt.createdAt.getTime()).toBeGreaterThan(Date.now() - 1000);
-      expect(savedArt.updatedAt.getTime()).toBeGreaterThan(Date.now() - 1000);
+      expect(savedArt.createdAt!.getTime()).toBeGreaterThan(Date.now() - 1000);
+      expect(savedArt.updatedAt!.getTime()).toBeGreaterThan(Date.now() - 1000);
     });
 
     it("should update updatedAt when document is modified", async () => {
@@ -309,10 +309,12 @@ describe("Art Model", () => {
       const updatedArt = await art.save();
 
       // Assert
-      expect(updatedArt.updatedAt.getTime()).toBeGreaterThan(
-        originalUpdatedAt.getTime()
+      expect(updatedArt.updatedAt!.getTime()).toBeGreaterThan(
+        originalUpdatedAt!.getTime()
       );
-      expect(updatedArt.createdAt.getTime()).toBe(originalUpdatedAt.getTime());
+      expect(updatedArt.createdAt!.getTime()).toBe(
+        originalUpdatedAt!.getTime()
+      );
     });
   });
 

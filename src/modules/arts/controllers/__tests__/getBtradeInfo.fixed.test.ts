@@ -15,24 +15,24 @@ const mockedAxios = vi.mocked(axios);
 
 describe("getBtradeArtInfo Controller (Fixed)", () => {
   let mockRequest: Partial<Request>;
-  let mockResponse: Partial<Response>;
   let responseJson: any;
   let responseStatus: any;
+  let res: Response;
 
   beforeEach(() => {
     responseJson = {};
     responseStatus = {};
 
-    mockResponse = {
-      status: (code: number) => {
+    res = {
+      status: function (code: number) {
         responseStatus.code = code;
-        return mockResponse;
+        return this;
       },
-      json: (data: any) => {
+      json: function (data: any) {
         responseJson = data;
-        return mockResponse;
+        return this;
       },
-    };
+    } as unknown as Response;
 
     // Reset mocks
     vi.clearAllMocks();
@@ -54,14 +54,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "TEST123" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -80,7 +82,7 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -94,7 +96,7 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -113,14 +115,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "NONEXISTENT" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(404);
@@ -142,14 +146,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "INCOMPLETE" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(404);
@@ -172,14 +178,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "PRICE_TEST" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -202,14 +210,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "QUANTITY_TEST" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -232,14 +242,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "ZERO_QUANTITY" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -262,14 +274,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "INVALID_PRICE" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(404);
@@ -292,14 +306,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "INVALID_QUANTITY" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(404);
@@ -308,14 +324,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
 
   it("should handle axios error", async () => {
     // Arrange
-    mockedAxios.get.mockRejectedValue(new Error("Network error"));
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockRejectedValue(
+      new Error("Network error")
+    );
 
     mockRequest = {
       params: { artikul: "ERROR_TEST" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(500);
@@ -339,14 +357,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "SPECIAL-123_ABC" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -371,14 +391,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "UKRAINIAN" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -406,14 +428,16 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
       </html>
     `;
 
-    mockedAxios.get.mockResolvedValue({ data: mockHtml });
+    (vi.mocked(axios).get as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: mockHtml,
+    });
 
     mockRequest = {
       params: { artikul: "MULTIPLE" },
     };
 
     // Act
-    await getBtradeArtInfo(mockRequest as Request, mockResponse as Response);
+    await getBtradeArtInfo(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);

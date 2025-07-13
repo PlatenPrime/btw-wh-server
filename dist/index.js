@@ -3,10 +3,10 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import artRoute from "./modules/arts/router.js";
-import rowRouter from "./modules/rows/router.js";
 import authRoute from "./modules/auth/router.js";
 import palletRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
+import rowRouter from "./modules/rows/router.js";
 dotenv.config();
 const app = express();
 // Middleware
@@ -17,10 +17,15 @@ app.use("/api/rows", rowRouter);
 app.use("/api/auth", authRoute);
 app.use("/api/pallets", palletRoute);
 app.use("/api/poses", posesRoute);
-app.use((error, _req, res, _next) => {
-    res.json({
-        message: error.message || "Something went wrong",
-        stack: error.stack || null,
+// Error handler must be after all routes
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use(function (err, req, res, next) {
+    if (err instanceof SyntaxError && "body" in err) {
+        return res.status(400).json({ message: "Invalid or empty data" });
+    }
+    res.status(400).json({
+        message: err.message || "Something went wrong",
+        stack: err.stack || null,
     });
 });
 // Constants

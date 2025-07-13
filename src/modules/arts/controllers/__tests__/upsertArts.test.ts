@@ -1,32 +1,32 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestArt } from "../../../../test/setup.js";
 import { upsertArts } from "../upsertArts.js";
 
 describe("upsertArts Controller", () => {
   let mockRequest: Partial<Request>;
-  let mockResponse: Partial<Response>;
-  let mockNext: NextFunction;
   let responseJson: any;
   let responseStatus: any;
+  let res: Response;
+  let mockNext: any;
 
   beforeEach(() => {
     responseJson = {};
     responseStatus = {};
 
-    mockResponse = {
-      status: (code: number) => {
+    res = {
+      status: function (code: number) {
         responseStatus.code = code;
-        return mockResponse;
+        return this;
       },
-      json: (data: any) => {
+      json: function (data: any) {
         responseJson = data;
-        return mockResponse;
+        return this;
       },
-    };
-
-    mockNext = () => {};
+    } as unknown as Response;
+    mockNext = vi.fn();
+    vi.clearAllMocks();
   });
 
   it("should create new arts when they don't exist", async () => {
@@ -51,11 +51,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -88,11 +84,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -128,11 +120,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -149,11 +137,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -167,11 +151,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -185,11 +165,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -213,11 +189,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -240,11 +212,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -272,11 +240,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -301,11 +265,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -329,11 +289,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -366,11 +322,7 @@ describe("upsertArts Controller", () => {
     };
 
     // Act
-    await upsertArts(
-      mockRequest as Request,
-      mockResponse as Response,
-      mockNext
-    );
+    await upsertArts(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);

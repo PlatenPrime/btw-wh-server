@@ -2,8 +2,8 @@ import { Art } from "../models/Art.js";
 export const getAllArts = async (req, res) => {
     try {
         const { page = "1", limit = "10", search = "" } = req.query;
-        const pageNumber = parseInt(page, 10);
-        const limitNumber = parseInt(limit, 10);
+        const pageNumber = parseInt(page, 10) || 1;
+        const limitNumber = parseInt(limit, 10) || 10;
         const searchQuery = search ? {
             $or: [
                 { artikul: { $regex: search, $options: "i" } },

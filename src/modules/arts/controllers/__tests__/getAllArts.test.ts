@@ -1,28 +1,29 @@
 import { Request, Response } from "express";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestArt } from "../../../../test/setup.js";
 import { getAllArts } from "../getAllArts.js";
 
 describe("getAllArts Controller", () => {
   let mockRequest: Partial<Request>;
-  let mockResponse: Partial<Response>;
   let responseJson: any;
   let responseStatus: any;
+  let res: Response;
 
   beforeEach(() => {
     responseJson = {};
     responseStatus = {};
 
-    mockResponse = {
-      status: (code: number) => {
+    res = {
+      status: function (code: number) {
         responseStatus.code = code;
-        return mockResponse;
+        return this;
       },
-      json: (data: any) => {
+      json: function (data: any) {
         responseJson = data;
-        return mockResponse;
+        return this;
       },
-    };
+    } as unknown as Response;
+    vi.clearAllMocks();
   });
 
   it("should return all arts with default pagination", async () => {
@@ -46,7 +47,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -76,7 +77,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -101,7 +102,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -127,7 +128,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -153,7 +154,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -170,7 +171,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -185,7 +186,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -204,7 +205,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -221,7 +222,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -240,7 +241,7 @@ describe("getAllArts Controller", () => {
     };
 
     // Act
-    await getAllArts(mockRequest as Request, mockResponse as Response);
+    await getAllArts(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
