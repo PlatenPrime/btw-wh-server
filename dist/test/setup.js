@@ -1,30 +1,44 @@
 import dotenv from "dotenv";
+import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
+// Import models to register schemas
+import "../modules/arts/models/Art.js";
+import "../modules/auth/models/User.js";
 // Load environment variables
 dotenv.config({ path: ".env.test" });
-// Test database connection
-const TEST_MONGODB_URI = process.env.TEST_MONGODB_URI || "mongodb://localhost:27017/btw-wh-test";
+let mongoServer;
 beforeAll(async () => {
     try {
-        // Skip database connection for now to avoid timeout issues
-        console.log("Skipping database connection for tests");
+        // Start MongoDB Memory Server
+        mongoServer = await MongoMemoryServer.create();
+        const mongoUri = mongoServer.getUri();
+        // Connect to the in-memory database
+        await mongoose.connect(mongoUri);
+        console.log("Connected to MongoDB Memory Server for tests");
     }
     catch (error) {
-        console.error("Test setup error:", error);
+        console.error("Failed to start MongoDB Memory Server:", error);
+        throw error;
     }
 }, 30000);
 afterAll(async () => {
     try {
-        console.log("Test cleanup completed");
+        await mongoose.connection.close();
+        await mongoServer.stop();
+        console.log("Disconnected from MongoDB Memory Server");
     }
     catch (error) {
-        console.error("Test cleanup error:", error);
+        console.error("Error closing MongoDB Memory Server:", error);
     }
 });
 beforeEach(async () => {
-    // Skip database operations for now
-    console.log("Test setup completed");
+    // Clear all collections before each test
+    const collections = mongoose.connection.collections;
+    for (const key in collections) {
+        const collection = collections[key];
+        await collection.deleteMany({});
+    }
 });
 afterEach(async () => {
     // Clean up after each test if needed
