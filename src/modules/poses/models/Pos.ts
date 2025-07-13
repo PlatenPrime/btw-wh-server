@@ -20,19 +20,21 @@ interface IRowSubdocument {
 
 /**
  * Pos document interface
+ * All position data fields (palletTitle, rowTitle, artikul, quant, boxes) are required
+ * to ensure data integrity and prevent incomplete position records.
  */
 export interface IPos extends Document {
   pallet: IPalletSubdocument;
   row: IRowSubdocument;
-  palletTitle?: string;
-  rowTitle?: string;
-  artikul?: string;
-  quant?: number;
-  boxes?: number;
-  date?: string;
-  sklad?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  palletTitle: string; // Required: Cached pallet title for performance
+  rowTitle: string; // Required: Cached row title for performance
+  artikul: string; // Required: Article number/identifier
+  quant: number; // Required: Quantity of items
+  boxes: number; // Required: Number of boxes
+  date?: string; // Optional: Date information
+  sklad?: string; // Optional: Warehouse identifier
+  createdAt?: Date; // Auto-generated timestamp
+  updatedAt?: Date; // Auto-generated timestamp
 }
 
 const palletSubdocumentSchema = new Schema<IPalletSubdocument>(
@@ -56,13 +58,13 @@ const posSchema = new Schema<IPos>(
   {
     pallet: { type: palletSubdocumentSchema, required: true },
     row: { type: rowSubdocumentSchema, required: true },
-    palletTitle: String,
-    rowTitle: String,
-    artikul: String,
-    quant: Number,
-    boxes: Number,
-    date: String,
-    sklad: String,
+    palletTitle: { type: String, required: true }, // Required for data integrity
+    rowTitle: { type: String, required: true }, // Required for data integrity
+    artikul: { type: String, required: true }, // Required for data integrity
+    quant: { type: Number, required: true }, // Required for data integrity
+    boxes: { type: Number, required: true }, // Required for data integrity
+    date: String, // Optional date information
+    sklad: String, // Optional warehouse identifier
   },
   { timestamps: true }
 );

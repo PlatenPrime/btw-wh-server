@@ -16,11 +16,11 @@ const updatePosSchema = z.object({
         message: "Invalid row ID",
     })
         .optional(),
-    palletTitle: z.string().optional(),
-    rowTitle: z.string().optional(),
-    artikul: z.string().optional(),
-    quant: z.number().optional(),
-    boxes: z.number().optional(),
+    palletTitle: z.string(),
+    rowTitle: z.string(),
+    artikul: z.string(),
+    quant: z.number(),
+    boxes: z.number(),
     date: z.string().optional(),
     sklad: z.string().optional(),
 });

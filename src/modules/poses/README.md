@@ -20,11 +20,11 @@ interface Position {
     _id: string; // Row ObjectId
     title: string; // Row title (cached)
   }; // Required: Embedded row reference
-  palletTitle?: string; // Optional: Cached pallet title (legacy)
-  rowTitle?: string; // Optional: Cached row title (legacy)
-  artikul?: string; // Optional: Article number
-  quant?: number; // Optional: Quantity
-  boxes?: number; // Optional: Number of boxes
+  palletTitle: string; // Required: Cached pallet title
+  rowTitle: string; // Required: Cached row title
+  artikul: string; // Required: Article number
+  quant: number; // Required: Quantity
+  boxes: number; // Required: Number of boxes
   date?: string; // Optional: Date string
   sklad?: string; // Optional: Warehouse identifier
   createdAt: Date; // Auto-generated timestamp
@@ -142,11 +142,11 @@ interface Position {
 {
   "palletId": "64f8a1b2c3d4e5f6a7b8c9d1", // Required: Pallet ObjectId
   "rowId": "64f8a1b2c3d4e5f6a7b8c9d2", // Required: Row ObjectId
-  "palletTitle": "Pallet A", // optional: Override cached pallet title
-  "rowTitle": "Row A", // optional: Override cached row title
-  "artikul": "ART001", // optional
-  "quant": 100, // optional
-  "boxes": 10, // optional
+  "palletTitle": "Pallet A", // Required: Cached pallet title
+  "rowTitle": "Row A", // Required: Cached row title
+  "artikul": "ART001", // Required: Article number
+  "quant": 100, // Required: Quantity
+  "boxes": 10, // Required: Number of boxes
   "date": "2024-01-01", // optional
   "sklad": "Main" // optional
 }
@@ -199,7 +199,7 @@ interface Position {
 
 - `id` (string): MongoDB ObjectId of the position
 
-**Body:** (all fields optional)
+**Body:** (palletTitle, rowTitle, artikul, quant, boxes are required; others optional)
 
 ```json
 {

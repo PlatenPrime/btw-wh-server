@@ -12,13 +12,13 @@ const rowSubdocumentSchema = new Schema({
 const posSchema = new Schema({
     pallet: { type: palletSubdocumentSchema, required: true },
     row: { type: rowSubdocumentSchema, required: true },
-    palletTitle: String,
-    rowTitle: String,
-    artikul: String,
-    quant: Number,
-    boxes: Number,
-    date: String,
-    sklad: String,
+    palletTitle: { type: String, required: true }, // Required for data integrity
+    rowTitle: { type: String, required: true }, // Required for data integrity
+    artikul: { type: String, required: true }, // Required for data integrity
+    quant: { type: Number, required: true }, // Required for data integrity
+    boxes: { type: Number, required: true }, // Required for data integrity
+    date: String, // Optional date information
+    sklad: String, // Optional warehouse identifier
 }, { timestamps: true });
 /**
  * Pos Mongoose model
