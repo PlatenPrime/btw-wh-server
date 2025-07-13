@@ -35,50 +35,75 @@ export const updatePos = async (req, res) => {
         res.status(400).json({ error: parseResult.error.errors });
         return;
     }
+    const session = await mongoose.startSession();
     try {
-        const pos = await Pos.findById(id);
-        if (!pos) {
-            res.status(404).json({ error: "Position not found" });
-            return;
-        }
-        // Подготавливаем данные для обновления
-        const updateData = { ...parseResult.data };
-        // Если обновляются palletId или rowId, нужно получить новые данные
-        if (parseResult.data.palletId) {
-            const pallet = await Pallet.findById(parseResult.data.palletId);
-            if (!pallet) {
-                res.status(404).json({ error: "Pallet not found" });
-                return;
+        await session.withTransaction(async () => {
+            const pos = await Pos.findById(id).session(session);
+            if (!pos) {
+                res.status(404).json({ error: "Position not found" });
+                throw new Error("Position not found");
             }
-            updateData.pallet = {
-                _id: pallet._id,
-                title: pallet.title,
-                sector: pallet.sector,
-            };
-            delete updateData.palletId;
-        }
-        if (parseResult.data.rowId) {
-            const row = await Row.findById(parseResult.data.rowId);
-            if (!row) {
-                res.status(404).json({ error: "Row not found" });
-                return;
+            // Подготавливаем данные для обновления
+            const updateData = { ...parseResult.data };
+            // Если обновляется palletId, нужно получить новые данные паллета
+            if (parseResult.data.palletId) {
+                const pallet = await Pallet.findById(parseResult.data.palletId).session(session);
+                if (!pallet) {
+                    res.status(404).json({ error: "Pallet not found" });
+                    throw new Error("Pallet not found");
+                }
+                updateData.pallet = {
+                    _id: pallet._id,
+                    title: pallet.title,
+                    sector: pallet.sector,
+                };
+                // Обновляем кэшированное название паллета
+                updateData.palletTitle = pallet.title;
+                delete updateData.palletId;
             }
-            updateData.row = {
-                _id: row._id,
-                title: row.title,
-            };
-            delete updateData.rowId;
-        }
-        // Обновляем позицию
-        const updatedPos = await Pos.findByIdAndUpdate(id, updateData, {
-            new: true,
-            runValidators: true,
+            else {
+                // Сохраняем существующий объект паллета
+                updateData.pallet = pos.pallet;
+            }
+            // Если обновляется rowId, нужно получить новые данные ряда
+            if (parseResult.data.rowId) {
+                const row = await Row.findById(parseResult.data.rowId).session(session);
+                if (!row) {
+                    res.status(404).json({ error: "Row not found" });
+                    throw new Error("Row not found");
+                }
+                updateData.row = {
+                    _id: row._id,
+                    title: row.title,
+                };
+                // Обновляем кэшированное название ряда
+                updateData.rowTitle = row.title;
+                delete updateData.rowId;
+            }
+            else {
+                // Сохраняем существующий объект ряда
+                updateData.row = pos.row;
+            }
+            // Обновляем позицию
+            const updatedPos = await Pos.findByIdAndUpdate(id, updateData, {
+                new: true,
+                runValidators: true,
+                session,
+            });
+            res.json(updatedPos);
         });
-        res.json(updatedPos);
     }
     catch (error) {
-        res
-            .status(500)
-            .json({ error: "Failed to update position", details: error });
+        if (!res.headersSent) {
+            const errorMessage = error instanceof Error ? error.message : "Failed to update position";
+            const statusCode = errorMessage.includes("not found") ? 404 : 500;
+            res.status(statusCode).json({
+                error: errorMessage,
+                ...(statusCode === 500 && { details: error }),
+            });
+        }
+    }
+    finally {
+        await session.endSession();
     }
 };
