@@ -6,6 +6,12 @@ export const getArtById = async (
   res: Response
 ): Promise<void> => {
   const { id } = req.params;
+
+  if (!id) {
+    res.status(400).json({ message: "ID is required" });
+    return;
+  }
+
   try {
     const art: IArt | null = await Art.findById(id);
     if (!art) {
