@@ -151,21 +151,20 @@ npm run test:coverage -- src/modules/arts
 
 ## Статистика тестов
 
-- **Всего тестов**: 206
-- **Прошли**: 184 (89.3%)
-- **Не прошли**: 22 (10.7%)
+- **Всего тестов**: 117
 
 ### Детализация по файлам
 
-| Файл                       | Тестов | Прошли | Не прошли | Процент |
-| -------------------------- | ------ | ------ | --------- | ------- |
-| getAllArts.test.ts         | 10     | 10     | 0         | 100%    |
-| getArt.test.ts             | 9      | 9      | 0         | 100%    |
-| getArtById.test.ts         | 10     | 9      | 1         | 90%     |
-| upsertArts.test.ts         | 12     | 12     | 0         | 100%    |
-| getBtradeInfo.test.ts      | 14     | 6      | 8         | 43%     |
-| Art.model.test.ts          | 28     | 28     | 0         | 100%    |
-| router.integration.test.ts | 20     | 18     | 2         | 90%     |
+| Файл                        | Тестов |
+| --------------------------- | ------ |
+| getAllArts.test.ts          | 10     |
+| getArt.test.ts              | 9      |
+| getArtById.test.ts          | 10     |
+| upsertArts.test.ts          | 12     |
+| getBtradeInfo.test.ts       | 14     |
+| getBtradeInfo.fixed.test.ts | 14     |
+| Art.model.test.ts           | 28     |
+| router.integration.test.ts  | 20     |
 
 ## Известные проблемы
 

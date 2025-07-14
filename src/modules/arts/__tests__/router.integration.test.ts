@@ -17,12 +17,12 @@ describe("Arts Router Integration Tests", () => {
     it("should return all arts with pagination", async () => {
       // Arrange
       await createTestArt({
-        artikul: "7777-0001",
+        artikul: "5555-0001",
         nameukr: "Test Art 1",
         zone: "99-99-99",
       });
       await createTestArt({
-        artikul: "7777-0002",
+        artikul: "5555-0002",
         nameukr: "Test Art 2",
         zone: "99-99-99",
       });
@@ -35,8 +35,8 @@ describe("Arts Router Integration Tests", () => {
       expect(response.body.total).toBe(2);
       expect(response.body.page).toBe(1);
       expect(response.body.totalPages).toBe(1);
-      expect(response.body.data[0].artikul).toBe("7777-0001");
-      expect(response.body.data[1].artikul).toBe("7777-0002");
+      expect(response.body.data[0].artikul).toBe("5555-0001");
+      expect(response.body.data[1].artikul).toBe("5555-0002");
     });
 
     it("should handle pagination parameters", async () => {
@@ -45,7 +45,7 @@ describe("Arts Router Integration Tests", () => {
       for (let i = 1; i <= 15; i++) {
         arts.push(
           await createTestArt({
-            artikul: `7777-00${i < 10 ?  ("0" + i) : i }`,
+            artikul: `5555-00${i < 10 ?  ("0" + i) : i }`,
             nameukr: `Test Art ${i}`,
             zone: `99-99-${i}`,
           })
@@ -62,13 +62,13 @@ describe("Arts Router Integration Tests", () => {
       expect(response.body.total).toBe(15);
       expect(response.body.page).toBe(2);
       expect(response.body.totalPages).toBe(3);
-      expect(response.body.data[0].artikul).toBe("7777-0006");
+      expect(response.body.data[0].artikul).toBe("5555-0006");
     });
 
     it("should handle search parameter", async () => {
       // Arrange
       await createTestArt({
-        artikul: "ABC123",
+        artikul: "5555-0006",
         nameukr: "Test Art",
         zone: "A1",
       });
@@ -80,12 +80,12 @@ describe("Arts Router Integration Tests", () => {
 
       // Act
       const response = await request(app)
-        .get("/api/arts?search=ABC")
+        .get("/api/arts?search=5555")
         .expect(200);
 
       // Assert
       expect(response.body.data).toHaveLength(1);
-      expect(response.body.data[0].artikul).toBe("ABC123");
+      expect(response.body.data[0].artikul).toBe("5555-0006");
     });
 
     it("should return empty array when no arts found", async () => {
@@ -104,7 +104,7 @@ describe("Arts Router Integration Tests", () => {
     it("should return art by ID", async () => {
       // Arrange
       const testArt = await createTestArt({
-        artikul: "TEST123",
+        artikul: "5555-0001",
         nameukr: "Test Art",
         namerus: "Тест Арт",
         zone: "A1",
@@ -117,7 +117,7 @@ describe("Arts Router Integration Tests", () => {
         .expect(200);
 
       // Assert
-      expect(response.body.artikul).toBe("TEST123");
+      expect(response.body.artikul).toBe("5555-0001");
       expect(response.body.nameukr).toBe("Test Art");
       expect(response.body.namerus).toBe("Тест Арт");
       expect(response.body.zone).toBe("A1");
@@ -151,7 +151,7 @@ describe("Arts Router Integration Tests", () => {
     it("should return art by artikul", async () => {
       // Arrange
       await createTestArt({
-        artikul: "TEST456",
+        artikul: "5555-0000",
         nameukr: "Test Art",
         namerus: "Тест Арт",
         zone: "A1",
@@ -160,11 +160,11 @@ describe("Arts Router Integration Tests", () => {
 
       // Act
       const response = await request(app)
-        .get("/api/arts/artikul/TEST456")
+        .get("/api/arts/artikul/5555-0000")
         .expect(200);
 
       // Assert
-      expect(response.body.artikul).toBe("TEST456");
+      expect(response.body.artikul).toBe("5555-0000");
       expect(response.body.nameukr).toBe("Test Art");
       expect(response.body.namerus).toBe("Тест Арт");
       expect(response.body.zone).toBe("A1");
@@ -202,13 +202,13 @@ describe("Arts Router Integration Tests", () => {
       // Arrange
       const artsData = [
         {
-          artikul: "NEW001",
+          artikul: "5555-0000",
           nameukr: "New Art 1",
           namerus: "Новый Арт 1",
           zone: "A1",
         },
         {
-          artikul: "NEW002",
+          artikul: "5555-0001",
           nameukr: "New Art 2",
           namerus: "Новый Арт 2",
           zone: "A2",
@@ -230,7 +230,7 @@ describe("Arts Router Integration Tests", () => {
     it("should update existing arts", async () => {
       // Arrange
       await createTestArt({
-        artikul: "EXIST001",
+        artikul: "5555-0000",
         nameukr: "Old Name",
         namerus: "Старое имя",
         zone: "A1",
@@ -238,7 +238,7 @@ describe("Arts Router Integration Tests", () => {
 
       const updateData = [
         {
-          artikul: "EXIST001",
+          artikul: "5555-0000",
           nameukr: "Updated Name",
           namerus: "Обновленное имя",
           zone: "A2",
@@ -260,19 +260,19 @@ describe("Arts Router Integration Tests", () => {
     it("should handle mixed create and update operations", async () => {
       // Arrange
       await createTestArt({
-        artikul: "MIXED001",
+        artikul: "5555-0000",
         nameukr: "Existing Art",
         zone: "A1",
       });
 
       const mixedData = [
         {
-          artikul: "MIXED001", // Update existing
+          artikul: "5555-0000", // Update existing
           nameukr: "Updated Existing Art",
           zone: "A2",
         },
         {
-          artikul: "MIXED002", // Create new
+          artikul: "5555-0001", // Create new
           nameukr: "New Mixed Art",
           zone: "A3",
         },
@@ -345,7 +345,8 @@ describe("Arts Router Integration Tests", () => {
     it("should handle artikul parameter", async () => {
       // Act
       const response = await request(app)
-        .get("/api/arts/btrade/TEST123");
+        .get("/api/arts/btrade/1102-0260");
+
 
       // Assert
       // The route should work, but external API call may fail

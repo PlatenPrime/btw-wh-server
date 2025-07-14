@@ -65,7 +65,7 @@ export const createTestUser = async (userData: any = {}) => {
 export const createTestArt = async (artData: any = {}) => {
   const Art = mongoose.model("Art");
   return await Art.create({
-    artikul: "TEST001",
+    artikul: "5555-5555",
     nameukr: "Test Art",
     namerus: "Тест Арт",
     zone: "A1",
