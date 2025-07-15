@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Pallet } from "../../models/Pallet.js";
 import { Row } from "../../../rows/models/Row.js";
+import { Pallet } from "../../models/Pallet.js";
 import { createPallet } from "../createPallet.js";
 
 const validRow = { _id: new Types.ObjectId(), title: "Test Row" };
@@ -31,13 +31,17 @@ describe("createPallet Controller", () => {
 
   it("should create a new pallet", async () => {
     // Arrange
-    mockRequest = { body: { title: "New Pallet", row: validRow } };
-    vi.spyOn(Row, "findById").mockResolvedValueOnce({
+    const rowDoc = await Row.create({
       _id: validRow._id,
       title: validRow.title,
       pallets: [],
-      save: vi.fn().mockResolvedValue(undefined),
     });
+    mockRequest = {
+      body: {
+        title: "New Pallet",
+        row: { _id: rowDoc._id, title: rowDoc.title },
+      },
+    };
     vi.spyOn(Pallet, "create").mockImplementationOnce(
       async (...args: any[]) => [
         {
@@ -51,6 +55,11 @@ describe("createPallet Controller", () => {
     );
     // Act
     await createPallet(mockRequest as Request, res);
+    // Debug: log error if not 201
+    if (responseStatus.code !== 201) {
+      // eslint-disable-next-line no-console
+      console.error("Test createPallet: ", responseStatus, responseJson);
+    }
     // Assert
     expect(responseStatus.code).toBe(201);
     expect(responseJson.title).toBe("New Pallet");

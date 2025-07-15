@@ -62,7 +62,8 @@ describe("deletePallet Controller", () => {
 
   it("should handle server error", async () => {
     // Arrange
-    mockRequest = { params: { id: new Types.ObjectId().toString() } };
+    const testPallet = await createTestPallet();
+    mockRequest = { params: { id: testPallet.id } };
     vi.spyOn(Pallet, "findByIdAndDelete").mockRejectedValueOnce(
       new Error("DB error")
     );

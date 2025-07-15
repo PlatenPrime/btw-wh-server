@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { MongoMemoryServer } from "mongodb-memory-server";
+import { MongoMemoryReplSet } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 
@@ -10,19 +10,24 @@ import "../modules/auth/models/User.js";
 // Load environment variables
 dotenv.config({ path: ".env.test" });
 
-let mongoServer: MongoMemoryServer;
+let mongoServer: MongoMemoryReplSet;
 
 beforeAll(async () => {
   try {
-    // Start MongoDB Memory Server
-    mongoServer = await MongoMemoryServer.create();
+    // Start MongoDB Memory Server as a replica set for transactions
+    mongoServer = await MongoMemoryReplSet.create({
+      replSet: { count: 1 },
+    });
     const mongoUri = mongoServer.getUri();
 
-    // Connect to the in-memory database
+    // Connect to the in-memory replica set
     await mongoose.connect(mongoUri);
-    console.log("Connected to MongoDB Memory Server for tests");
+    console.log("Connected to MongoDB Memory Server (replica set) for tests");
   } catch (error) {
-    console.error("Failed to start MongoDB Memory Server:", error);
+    console.error(
+      "Failed to start MongoDB Memory Server (replica set):",
+      error
+    );
     throw error;
   }
 }, 30000);
@@ -31,9 +36,9 @@ afterAll(async () => {
   try {
     await mongoose.connection.close();
     await mongoServer.stop();
-    console.log("Disconnected from MongoDB Memory Server");
+    console.log("Disconnected from MongoDB Memory Server (replica set)");
   } catch (error) {
-    console.error("Error closing MongoDB Memory Server:", error);
+    console.error("Error closing MongoDB Memory Server (replica set):", error);
   }
 });
 

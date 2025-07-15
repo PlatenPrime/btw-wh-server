@@ -55,13 +55,19 @@ describe("deletePalletPoses Controller", () => {
     });
     it("should handle server error", async () => {
         // Arrange
+        const poseId = new Types.ObjectId();
+        const pallet = await Pallet.create({
+            title: "DeletePoses Pallet",
+            row: { _id: new Types.ObjectId(), title: "Row" },
+            poses: [poseId],
+        });
         mockRequest = {
             body: {
-                palletId: new Types.ObjectId().toString(),
-                poses: [new Types.ObjectId().toString()],
+                palletId: pallet.id,
+                poses: [poseId.toString()],
             },
         };
-        vi.spyOn(Pallet, "findByIdAndUpdate").mockRejectedValueOnce(new Error("DB error"));
+        vi.spyOn(Pallet.prototype, "save").mockRejectedValueOnce(new Error("DB error"));
         // Act
         await deletePalletPoses(mockRequest, res);
         // Assert

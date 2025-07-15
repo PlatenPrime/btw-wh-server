@@ -39,6 +39,11 @@ describe("updatePallet Controller", () => {
         };
         // Act
         await updatePallet(mockRequest, res);
+        // Debug: log error if not 200
+        if (responseStatus.code !== 200) {
+            // eslint-disable-next-line no-console
+            console.error("Test updatePallet: ", responseStatus, responseJson);
+        }
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseJson.title).toBe("Updated Pallet");
@@ -69,7 +74,7 @@ describe("updatePallet Controller", () => {
         // Arrange
         const testPallet = await createTestPallet();
         mockRequest = { params: { id: testPallet.id }, body: { title: "Err" } };
-        vi.spyOn(Pallet, "findByIdAndUpdate").mockRejectedValueOnce(new Error("DB error"));
+        vi.spyOn(Pallet.prototype, "save").mockRejectedValueOnce(new Error("DB error"));
         // Act
         await updatePallet(mockRequest, res);
         // Assert

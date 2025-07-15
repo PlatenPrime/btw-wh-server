@@ -61,14 +61,16 @@ export const createPallet = async (req, res) => {
     const { title, row, poses, sector } = parseResult.data;
     const session = await Pallet.startSession();
     try {
-        let created = null;
+        let result = null;
+        let error = null;
         await session.withTransaction(async () => {
             try {
                 const rowDoc = await Row.findById(row._id).session(session);
                 if (!rowDoc) {
-                    return res.status(404).json({ message: "Row not found" });
+                    error = { status: 404, message: "Row not found" };
+                    return;
                 }
-                created = await Pallet.create([
+                const created = await Pallet.create([
                     {
                         title,
                         row: {
@@ -80,20 +82,30 @@ export const createPallet = async (req, res) => {
                     },
                 ], { session });
                 if (!created || !created[0]) {
-                    return res.status(500).json({ message: "Failed to create pallet" });
+                    error = { status: 500, message: "Failed to create pallet" };
+                    return;
                 }
                 rowDoc.pallets.push(created[0]._id);
                 await rowDoc.save({ session });
-                const palletObj = serializeIds(created[0].toObject());
-                return res.status(201).json(palletObj);
+                result = serializeIds(created[0].toObject());
             }
             catch (err) {
-                if (err.name === "ValidationError" || err.name === "CastError") {
-                    return res.status(400).json({ message: err.message, error: err });
-                }
-                return res.status(500).json({ message: "Server error", error: err });
+                error = err;
             }
         });
+        if (error) {
+            if (error.status) {
+                return res.status(error.status).json({ message: error.message });
+            }
+            if (error.name === "ValidationError" || error.name === "CastError") {
+                return res.status(400).json({ message: error.message, error });
+            }
+            return res.status(500).json({ message: "Server error", error });
+        }
+        if (!result) {
+            return res.status(500).json({ message: "Unknown error" });
+        }
+        return res.status(201).json(result);
     }
     catch (error) {
         // Debug log for diagnosis
