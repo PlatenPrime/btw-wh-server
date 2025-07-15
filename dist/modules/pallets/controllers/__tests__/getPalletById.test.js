@@ -1,0 +1,70 @@
+import { Types } from "mongoose";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Pallet } from "../../models/Pallet.js";
+import { getPalletById } from "../getPalletById.js";
+describe("getPalletById Controller", () => {
+    let mockRequest;
+    let responseJson;
+    let responseStatus;
+    let res;
+    beforeEach(() => {
+        responseJson = {};
+        responseStatus = {};
+        res = {
+            status: function (code) {
+                responseStatus.code = code;
+                return this;
+            },
+            json: function (data) {
+                responseJson = data;
+                return this;
+            },
+        };
+        vi.clearAllMocks();
+    });
+    it("should return pallet by valid ID", async () => {
+        // Arrange
+        const pallet = await Pallet.create({
+            title: "Test Pallet",
+            row: { _id: new Types.ObjectId(), title: "Test Row" },
+            poses: [],
+        });
+        mockRequest = { params: { id: pallet.id } };
+        // Act
+        await getPalletById(mockRequest, res);
+        // Assert
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.title).toBe("Test Pallet");
+        expect(responseJson._id).toBe(pallet.id);
+    });
+    it("should return 404 if pallet not found", async () => {
+        // Arrange
+        mockRequest = { params: { id: new Types.ObjectId().toString() } };
+        // Act
+        await getPalletById(mockRequest, res);
+        // Assert
+        expect(responseStatus.code).toBe(404);
+        expect(responseJson.message).toBe("Pallet not found");
+    });
+    it("should return 500 for invalid ID", async () => {
+        // Arrange
+        mockRequest = { params: { id: "invalid-id" } };
+        // Act
+        await getPalletById(mockRequest, res);
+        // Assert
+        expect(responseStatus.code).toBe(500);
+        expect(responseJson.message).toBe("Server error");
+    });
+    it("should handle server error", async () => {
+        // Arrange
+        const palletId = new Types.ObjectId().toString();
+        mockRequest = { params: { id: palletId } };
+        vi.spyOn(Pallet, "findById").mockRejectedValueOnce(new Error("DB error"));
+        // Act
+        await getPalletById(mockRequest, res);
+        // Assert
+        expect(responseStatus.code).toBe(500);
+        expect(responseJson.message).toBe("Server error");
+        expect(responseJson.error).toBeDefined();
+    });
+});

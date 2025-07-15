@@ -15,9 +15,9 @@ export const getPalletById = async (req, res) => {
         const responseObj = {
             ...palletObj,
             _id: palletObj._id.toString(),
-            row: palletObj.row
+            row: palletObj.row && palletObj.row._id
                 ? { ...palletObj.row, _id: palletObj.row._id.toString() }
-                : undefined,
+                : palletObj.row || undefined,
             poses: Array.isArray(palletObj.poses)
                 ? palletObj.poses.map((id) => id.toString())
                 : [],
@@ -25,6 +25,7 @@ export const getPalletById = async (req, res) => {
         return res.status(200).json(responseObj);
     }
     catch (error) {
+        console.error("getPalletById error:", error);
         return res.status(500).json({ message: "Server error", error });
     }
 };

@@ -15,6 +15,13 @@ const movePalletPosesSchema = z.object({
         message: "Invalid targetPalletId",
     }),
 });
+class HttpError extends Error {
+    status;
+    constructor(status, message) {
+        super(message);
+        this.status = status;
+    }
+}
 export const movePalletPoses = async (req, res) => {
     const parseResult = movePalletPosesSchema.safeParse(req.body);
     if (!parseResult.success) {
@@ -31,84 +38,75 @@ export const movePalletPoses = async (req, res) => {
     const session = await mongoose.startSession();
     try {
         await session.withTransaction(async () => {
-            try {
-                const [sourcePallet, targetPallet] = await Promise.all([
-                    Pallet.findById(sourcePalletId).session(session),
-                    Pallet.findById(targetPalletId).session(session),
-                ]);
-                if (!sourcePallet) {
-                    return res.status(404).json({ message: "Source pallet not found" });
-                }
-                if (!targetPallet) {
-                    return res.status(404).json({ message: "Target pallet not found" });
-                }
-                if (!Array.isArray(targetPallet.poses) ||
-                    targetPallet.poses.length > 0) {
-                    return res
-                        .status(400)
-                        .json({ message: "Target pallet must be empty" });
-                }
-                if (!Array.isArray(sourcePallet.poses) ||
-                    sourcePallet.poses.length === 0) {
-                    return res
-                        .status(400)
-                        .json({ message: "Source pallet has no poses to move" });
-                }
-                const targetRow = await Row.findById(targetPallet.row._id).session(session);
-                if (!targetRow) {
-                    return res.status(404).json({ message: "Target row not found" });
-                }
-                const posesToMove = await Pos.find({
-                    _id: { $in: sourcePallet.poses },
-                }).session(session);
-                for (const pos of posesToMove) {
-                    pos.pallet = {
-                        _id: targetPallet._id,
-                        title: targetPallet.title,
-                        sector: targetPallet.sector,
-                    };
-                    pos.row = {
-                        _id: targetRow._id,
-                        title: targetRow.title,
-                    };
-                    pos.palletTitle = targetPallet.title;
-                    pos.rowTitle = targetRow.title;
-                    await pos.save({ session });
-                }
-                targetPallet.poses = sourcePallet.poses;
-                sourcePallet.poses = [];
-                await Promise.all([
-                    targetPallet.save({ session }),
-                    sourcePallet.save({ session }),
-                ]);
-                const palletObj = targetPallet.toObject();
-                const responseObj = {
-                    ...palletObj,
-                    _id: targetPallet._id.toString(),
-                    row: palletObj.row && {
-                        ...palletObj.row,
-                        _id: palletObj.row._id.toString(),
-                    },
-                    poses: Array.isArray(palletObj.poses)
-                        ? palletObj.poses.map((id) => id.toString())
-                        : [],
+            const [sourcePallet, targetPallet] = await Promise.all([
+                Pallet.findById(sourcePalletId).session(session),
+                Pallet.findById(targetPalletId).session(session),
+            ]);
+            if (!sourcePallet) {
+                throw new HttpError(404, "Source pallet not found");
+            }
+            if (!targetPallet) {
+                throw new HttpError(404, "Target pallet not found");
+            }
+            if (!Array.isArray(targetPallet.poses) || targetPallet.poses.length > 0) {
+                throw new HttpError(400, "Target pallet must be empty");
+            }
+            if (!Array.isArray(sourcePallet.poses) ||
+                sourcePallet.poses.length === 0) {
+                throw new HttpError(400, "Source pallet has no poses to move");
+            }
+            const targetRow = await Row.findById(targetPallet.row._id).session(session);
+            if (!targetRow) {
+                throw new HttpError(404, "Target row not found");
+            }
+            const posesToMove = await Pos.find({
+                _id: { $in: sourcePallet.poses },
+            }).session(session);
+            for (const pos of posesToMove) {
+                pos.pallet = {
+                    _id: targetPallet._id,
+                    title: targetPallet.title,
+                    sector: targetPallet.sector,
                 };
-                return res
-                    .status(200)
-                    .json({
-                    message: "Poses moved successfully",
-                    targetPallet: responseObj,
-                });
+                pos.row = {
+                    _id: targetRow._id,
+                    title: targetRow.title,
+                };
+                pos.palletTitle = targetPallet.title;
+                pos.rowTitle = targetRow.title;
+                await pos.save({ session });
             }
-            catch (err) {
-                if (err.name === "ValidationError" || err.name === "CastError") {
-                    return res.status(400).json({ message: err.message, error: err });
-                }
-                return res.status(500).json({ message: "Server error", error: err });
-            }
+            targetPallet.poses = sourcePallet.poses;
+            sourcePallet.poses = [];
+            await Promise.all([
+                targetPallet.save({ session }),
+                sourcePallet.save({ session }),
+            ]);
+            const palletObj = targetPallet.toObject();
+            const responseObj = {
+                ...palletObj,
+                _id: targetPallet._id.toString(),
+                row: palletObj.row && {
+                    ...palletObj.row,
+                    _id: palletObj.row._id.toString(),
+                },
+                poses: Array.isArray(palletObj.poses)
+                    ? palletObj.poses.map((id) => id.toString())
+                    : [],
+            };
+            res.status(200).json({
+                message: "Poses moved successfully",
+                targetPallet: responseObj,
+            });
         });
     }
     catch (error) {
+        if (error instanceof HttpError) {
+            return res.status(error.status).json({ message: error.message });
+        }
+        if (error.name === "ValidationError" || error.name === "CastError") {
+            return res.status(400).json({ message: error.message, error });
+        }
         return res.status(500).json({ message: "Server error", error });
     }
     finally {
