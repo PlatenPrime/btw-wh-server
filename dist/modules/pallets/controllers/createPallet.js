@@ -1,54 +1,104 @@
-import mongoose from "mongoose";
+import { Types } from "mongoose";
 import { z } from "zod";
 import { Row } from "../../rows/models/Row.js";
 import { Pallet } from "../models/Pallet.js";
+function serializeIds(obj) {
+    if (Array.isArray(obj))
+        return obj.map(serializeIds);
+    if (obj && typeof obj === "object") {
+        const result = {};
+        for (const key in obj) {
+            if (obj[key] instanceof Types.ObjectId) {
+                result[key] = obj[key].toString();
+            }
+            else {
+                result[key] = serializeIds(obj[key]);
+            }
+        }
+        return result;
+    }
+    return obj;
+}
 const createPalletSchema = z.object({
     title: z.string().min(1),
-    rowId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-        message: "Invalid row ID",
+    row: z.object({
+        _id: z.union([
+            z.string().refine((val) => Types.ObjectId.isValid(val), {
+                message: "Invalid row ID",
+            }),
+            z.instanceof(Types.ObjectId),
+        ]),
+        title: z.string().min(1),
     }),
     poses: z
-        .array(z.string().refine((val) => mongoose.Types.ObjectId.isValid(val)))
+        .array(z.string().refine((val) => Types.ObjectId.isValid(val)))
         .optional(),
     sector: z.string().optional(),
 });
 export const createPallet = async (req, res) => {
-    const parseResult = createPalletSchema.safeParse(req.body);
-    if (!parseResult.success) {
-        res.status(400).json({ error: parseResult.error.errors });
-        return;
+    // Convert ObjectId to string for validation
+    const body = { ...req.body };
+    if (!body.title ||
+        !body.row ||
+        !body.row._id ||
+        !body.row.title ||
+        (typeof body.row._id !== "string" &&
+            !(body.row._id instanceof Types.ObjectId))) {
+        return res
+            .status(400)
+            .json({ message: "Title and row with valid _id and title are required" });
     }
-    const { title, rowId, poses, sector } = parseResult.data;
-    const session = await mongoose.startSession();
+    if (typeof body.row._id !== "string" &&
+        body.row._id instanceof Types.ObjectId) {
+        body.row = { ...body.row, _id: body.row._id.toString() };
+    }
+    const parseResult = createPalletSchema.safeParse(body);
+    if (!parseResult.success) {
+        return res
+            .status(400)
+            .json({ message: "Invalid input", error: parseResult.error.errors });
+    }
+    const { title, row, poses, sector } = parseResult.data;
+    const session = await Pallet.startSession();
     try {
+        let created = null;
         await session.withTransaction(async () => {
-            const rowDoc = await Row.findById(rowId).session(session);
-            if (!rowDoc) {
-                res.status(404).json({ error: "Row not found" });
-                throw new Error("Row not found");
-            }
-            const [createdPallet] = await Pallet.create([
-                {
-                    title,
-                    row: {
-                        _id: rowDoc._id,
-                        title: rowDoc.title,
+            try {
+                const rowDoc = await Row.findById(row._id).session(session);
+                if (!rowDoc) {
+                    return res.status(404).json({ message: "Row not found" });
+                }
+                created = await Pallet.create([
+                    {
+                        title,
+                        row: {
+                            _id: rowDoc._id,
+                            title: rowDoc.title,
+                        },
+                        poses,
+                        sector,
                     },
-                    poses,
-                    sector,
-                },
-            ], { session });
-            rowDoc.pallets.push(createdPallet._id);
-            await rowDoc.save({ session });
-            res.status(201).json(createdPallet);
+                ], { session });
+                if (!created || !created[0]) {
+                    return res.status(500).json({ message: "Failed to create pallet" });
+                }
+                rowDoc.pallets.push(created[0]._id);
+                await rowDoc.save({ session });
+                const palletObj = serializeIds(created[0].toObject());
+                return res.status(201).json(palletObj);
+            }
+            catch (err) {
+                if (err.name === "ValidationError" || err.name === "CastError") {
+                    return res.status(400).json({ message: err.message, error: err });
+                }
+                return res.status(500).json({ message: "Server error", error: err });
+            }
         });
     }
     catch (error) {
-        if (!res.headersSent) {
-            res
-                .status(500)
-                .json({ error: "Failed to create pallet", details: error });
-        }
+        // Debug log for diagnosis
+        console.error("createPallet error:", error);
+        return res.status(500).json({ message: "Server error", error });
     }
     finally {
         await session.endSession();

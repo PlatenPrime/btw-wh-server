@@ -530,3 +530,70 @@ export const useDeletePallet = () => {
 - **Positions Module:** Pallets contain positions
 
 For more information about related modules, refer to their respective documentation.
+
+# Тестирование модуля Pallets
+
+## Обзор
+
+Модуль Pallets должен содержать комплексную систему тестирования, покрывающую все аспекты функциональности:
+
+- **Контроллеры** — тестирование бизнес-логики (unit)
+- **Модели** — тестирование схемы данных и валидации
+- **Интеграционные тесты** — тестирование HTTP endpoints
+- **Моки** — изоляция внешних зависимостей
+
+## Структура тестов
+
+```
+src/modules/pallets/
+├── controllers/
+│   └── __tests__/
+│       ├── createPallet.test.ts
+│       ├── deletePallet.test.ts
+│       ├── getAllPallets.test.ts
+│       ├── getAllPalletsByRowId.test.ts
+│       ├── getPalletById.test.ts
+│       ├── movePalletPoses.test.ts
+│       ├── deletePalletPoses.test.ts
+│       └── updatePallet.test.ts
+├── models/
+│   └── __tests__/
+│       └── Pallet.model.test.ts
+├── __tests__/
+│   ├── router.integration.test.ts
+│   └── index.test.ts
+```
+
+## Запуск тестов
+
+### Запуск всех тестов модуля
+
+```bash
+npm test -- src/modules/pallets
+```
+
+### Запуск конкретных тестов
+
+```bash
+# Только контроллеры
+npm test -- src/modules/pallets/controllers
+
+# Только модель
+npm test -- src/modules/pallets/models
+
+# Интеграционные тесты
+npm test -- src/modules/pallets/__tests__/router.integration.test.ts
+```
+
+### Запуск с покрытием
+
+```bash
+npm run test:coverage -- src/modules/pallets
+```
+
+## Рекомендации по тестированию
+
+- Использовать Vitest, Supertest, MongoDB Memory Server
+- Покрывать edge cases, ошибки, валидацию
+- Мокировать внешние зависимости
+- Следовать best practices из arts/rows

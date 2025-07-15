@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
-import mongoose, { Types } from "mongoose";
+import mongoose from "mongoose";
 import { z } from "zod";
-import { Row } from "../../rows/models/Row.js";
 import { Pallet } from "../models/Pallet.js";
 
 const updatePalletSchema = z.object({
@@ -21,87 +20,55 @@ const updatePalletSchema = z.object({
 });
 
 export const updatePallet = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    res.status(400).json({ error: "Invalid pallet ID" });
-    return;
+  const { id } = req.params || {};
+  const body = req.body;
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid pallet ID" });
   }
-  const parseResult = updatePalletSchema.safeParse(req.body);
+  if (!body || (body.title !== undefined && !body.title)) {
+    return res.status(400).json({ message: "Invalid update data" });
+  }
+  const parseResult = updatePalletSchema.safeParse(body);
   if (!parseResult.success) {
-    res.status(400).json({ error: parseResult.error.errors });
-    return;
-  }
-
-  // Start a mongoose session for transaction safety
-  const session = await mongoose.startSession();
-
-  try {
-    // Start transaction
-    await session.withTransaction(async () => {
-      const pallet = await Pallet.findById(id).session(session);
-      if (!pallet) {
-        throw new Error("Pallet not found");
-      }
-
-      // If row is being changed, update both old and new row's pallets arrays
-      if (
-        parseResult.data.rowId &&
-        pallet.row._id &&
-        parseResult.data.rowId !== pallet.row._id.toString()
-      ) {
-        const oldRow = await Row.findById(pallet.row._id).session(session);
-        const newRow = await Row.findById(parseResult.data.rowId).session(
-          session
-        );
-
-        if (!newRow) {
-          throw new Error("New rowId not found");
-        }
-
-        if (oldRow) {
-          oldRow.pallets = oldRow.pallets.filter(
-            (pid: any) => pid.toString() !== id
-          );
-          await oldRow.save({ session });
-        }
-
-        newRow.pallets.push(pallet._id as mongoose.Types.ObjectId);
-        await newRow.save({ session });
-        pallet.set("row", {
-          _id: new Types.ObjectId(parseResult.data.rowId),
-          title: newRow.title,
-        });
-      }
-
-      // Update pallet fields
-      if (parseResult.data.title !== undefined) {
-        pallet.title = parseResult.data.title;
-      }
-      if (parseResult.data.poses !== undefined) {
-        pallet.set(
-          "poses",
-          parseResult.data.poses.map((p: string) => new Types.ObjectId(p))
-        );
-      }
-      if (parseResult.data.sector !== undefined) {
-        pallet.sector = parseResult.data.sector;
-      }
-
-      await pallet.save({ session });
-
-      // Return the updated pallet
-      res.json(pallet);
+    return res.status(400).json({
+      message: "Invalid update data",
+      error: parseResult.error.errors,
     });
-  } catch (error) {
-    if (!res.headersSent) {
-      if (error instanceof Error && error.message === "New rowId not found") {
-        res.status(404).json({ error: "New rowId not found" });
-      } else {
-        res
-          .status(500)
-          .json({ error: "Failed to update pallet", details: error });
+  }
+  const session = await Pallet.startSession();
+  try {
+    await session.withTransaction(async () => {
+      try {
+        const pallet = await Pallet.findById(id).session(session);
+        if (!pallet) {
+          return res.status(404).json({ message: "Pallet not found" });
+        }
+        const { title, sector, poses } = parseResult.data;
+        if (title !== undefined) pallet.title = title;
+        if (sector !== undefined) pallet.sector = sector;
+        if (poses !== undefined)
+          pallet.poses = poses.map((id) => new mongoose.Types.ObjectId(id));
+        await pallet.save({ session });
+        const palletObj = pallet.toObject();
+        return res.status(200).json({
+          ...palletObj,
+          _id: (palletObj._id as mongoose.Types.ObjectId).toString(),
+          row: palletObj.row
+            ? { ...palletObj.row, _id: palletObj.row._id.toString() }
+            : undefined,
+          poses: Array.isArray(palletObj.poses)
+            ? palletObj.poses.map((id: any) => id.toString())
+            : palletObj.poses,
+        });
+      } catch (err: any) {
+        if (err.name === "ValidationError" || err.name === "CastError") {
+          return res.status(400).json({ message: err.message, error: err });
+        }
+        return res.status(500).json({ message: "Server error", error: err });
       }
-    }
+    });
+  } catch (error: any) {
+    return res.status(500).json({ message: "Server error", error });
   } finally {
     await session.endSession();
   }

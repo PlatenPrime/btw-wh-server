@@ -5,17 +5,23 @@ import { Pallet } from "../models/Pallet.js";
  * @param res Express response
  */
 export const getAllPalletsByRowId = async (req, res) => {
-    const { rowId } = req.params;
+    const { rowId } = req.params || {};
     if (!rowId) {
-        return res.status(400).json({ error: "Missing rowId parameter" });
+        return res.status(400).json({ message: "Missing rowId parameter" });
     }
     try {
         const pallets = await Pallet.find({ "row._id": rowId });
-        return res.json(pallets);
+        if (!pallets || pallets.length === 0) {
+            return res.status(404).json({ message: "Pallets not found" });
+        }
+        return res.status(200).json(pallets);
     }
     catch (error) {
         return res
             .status(500)
-            .json({ error: "Failed to fetch pallets by rowId", details: error });
+            .json({
+            message: "Server error",
+            error: error instanceof Error ? error.message : error,
+        });
     }
 };

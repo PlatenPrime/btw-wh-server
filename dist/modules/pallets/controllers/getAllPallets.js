@@ -2,9 +2,17 @@ import { Pallet } from "../models/Pallet.js";
 export const getAllPallets = async (req, res) => {
     try {
         const pallets = await Pallet.find();
-        res.json(pallets);
+        if (!pallets || pallets.length === 0) {
+            return res.status(404).json({ message: "Pallets not found" });
+        }
+        return res.status(200).json(pallets);
     }
     catch (error) {
-        res.status(500).json({ error: "Failed to fetch pallets", details: error });
+        return res
+            .status(500)
+            .json({
+            message: "Server error",
+            error: error instanceof Error ? error.message : error,
+        });
     }
 };

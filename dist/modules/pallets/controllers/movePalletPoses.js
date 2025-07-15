@@ -18,75 +18,98 @@ const movePalletPosesSchema = z.object({
 export const movePalletPoses = async (req, res) => {
     const parseResult = movePalletPosesSchema.safeParse(req.body);
     if (!parseResult.success) {
-        res.status(400).json({ error: parseResult.error.errors });
-        return;
+        return res
+            .status(400)
+            .json({ message: "Invalid input", error: parseResult.error.errors });
     }
     const { sourcePalletId, targetPalletId } = parseResult.data;
-    // Validate before starting transaction
     if (sourcePalletId === targetPalletId) {
-        res
+        return res
             .status(400)
-            .json({ error: "Source and target pallet IDs must be different" });
-        return;
+            .json({ message: "Source and target pallet IDs must be different" });
     }
     const session = await mongoose.startSession();
     try {
         await session.withTransaction(async () => {
-            const [sourcePallet, targetPallet] = await Promise.all([
-                Pallet.findById(sourcePalletId).session(session),
-                Pallet.findById(targetPalletId).session(session),
-            ]);
-            if (!sourcePallet || !targetPallet) {
-                res.status(404).json({ error: "Source or target pallet not found" });
-                throw new Error("Source or target pallet not found");
-            }
-            if (!Array.isArray(targetPallet.poses) || targetPallet.poses.length > 0) {
-                res.status(400).json({ error: "Target pallet must be empty" });
-                throw new Error("Target pallet must be empty");
-            }
-            if (!Array.isArray(sourcePallet.poses) ||
-                sourcePallet.poses.length === 0) {
-                res.status(400).json({ error: "Source pallet has no poses to move" });
-                throw new Error("Source pallet has no poses to move");
-            }
-            // Получаем информацию о ряде для target pallet
-            const targetRow = await Row.findById(targetPallet.row._id).session(session);
-            if (!targetRow) {
-                res.status(404).json({ error: "Target row not found" });
-                throw new Error("Target row not found");
-            }
-            // Move poses
-            const posesToMove = (await Pos.find({
-                _id: { $in: sourcePallet.poses },
-            }).session(session));
-            for (const pos of posesToMove) {
-                pos.pallet = {
-                    _id: targetPallet._id,
-                    title: targetPallet.title,
-                    sector: targetPallet.sector,
+            try {
+                const [sourcePallet, targetPallet] = await Promise.all([
+                    Pallet.findById(sourcePalletId).session(session),
+                    Pallet.findById(targetPalletId).session(session),
+                ]);
+                if (!sourcePallet) {
+                    return res.status(404).json({ message: "Source pallet not found" });
+                }
+                if (!targetPallet) {
+                    return res.status(404).json({ message: "Target pallet not found" });
+                }
+                if (!Array.isArray(targetPallet.poses) ||
+                    targetPallet.poses.length > 0) {
+                    return res
+                        .status(400)
+                        .json({ message: "Target pallet must be empty" });
+                }
+                if (!Array.isArray(sourcePallet.poses) ||
+                    sourcePallet.poses.length === 0) {
+                    return res
+                        .status(400)
+                        .json({ message: "Source pallet has no poses to move" });
+                }
+                const targetRow = await Row.findById(targetPallet.row._id).session(session);
+                if (!targetRow) {
+                    return res.status(404).json({ message: "Target row not found" });
+                }
+                const posesToMove = await Pos.find({
+                    _id: { $in: sourcePallet.poses },
+                }).session(session);
+                for (const pos of posesToMove) {
+                    pos.pallet = {
+                        _id: targetPallet._id,
+                        title: targetPallet.title,
+                        sector: targetPallet.sector,
+                    };
+                    pos.row = {
+                        _id: targetRow._id,
+                        title: targetRow.title,
+                    };
+                    pos.palletTitle = targetPallet.title;
+                    pos.rowTitle = targetRow.title;
+                    await pos.save({ session });
+                }
+                targetPallet.poses = sourcePallet.poses;
+                sourcePallet.poses = [];
+                await Promise.all([
+                    targetPallet.save({ session }),
+                    sourcePallet.save({ session }),
+                ]);
+                const palletObj = targetPallet.toObject();
+                const responseObj = {
+                    ...palletObj,
+                    _id: targetPallet._id.toString(),
+                    row: palletObj.row && {
+                        ...palletObj.row,
+                        _id: palletObj.row._id.toString(),
+                    },
+                    poses: Array.isArray(palletObj.poses)
+                        ? palletObj.poses.map((id) => id.toString())
+                        : [],
                 };
-                pos.row = {
-                    _id: targetRow._id,
-                    title: targetRow.title,
-                };
-                pos.palletTitle = targetPallet.title;
-                pos.rowTitle = targetRow.title;
-                await pos.save({ session });
+                return res
+                    .status(200)
+                    .json({
+                    message: "Poses moved successfully",
+                    targetPallet: responseObj,
+                });
             }
-            // Update pallets
-            targetPallet.poses = sourcePallet.poses;
-            sourcePallet.poses = [];
-            await Promise.all([
-                targetPallet.save({ session }),
-                sourcePallet.save({ session }),
-            ]);
-            res.json({ message: "Poses moved successfully", targetPallet });
+            catch (err) {
+                if (err.name === "ValidationError" || err.name === "CastError") {
+                    return res.status(400).json({ message: err.message, error: err });
+                }
+                return res.status(500).json({ message: "Server error", error: err });
+            }
         });
     }
     catch (error) {
-        if (!res.headersSent) {
-            res.status(500).json({ error: "Failed to move poses", details: error });
-        }
+        return res.status(500).json({ message: "Server error", error });
     }
     finally {
         await session.endSession();

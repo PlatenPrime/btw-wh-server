@@ -1,14 +1,15 @@
 import { Router } from "express";
-import { createPallet, deletePallet, getAllPallets, getAllPalletsByRowId, getPalletById, movePalletPoses, deletePalletPoses, updatePallet, } from "./controllers/index.js";
+import { createPallet, deletePallet, deletePalletPoses, getAllPallets, getAllPalletsByRowId, getPalletById, movePalletPoses, updatePallet, } from "./controllers/index.js";
 const router = Router();
-router.post("/", createPallet);
-router.get("/", getAllPallets);
+const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+router.post("/", asyncHandler(createPallet));
+router.get("/", asyncHandler(getAllPallets));
 router.get("/by-row/:rowId", async (req, res) => {
     await getAllPalletsByRowId(req, res);
 });
-router.get("/:id", getPalletById);
-router.put("/:id", updatePallet);
-router.delete("/:id", deletePallet);
-router.delete("/:id/poses", deletePalletPoses);
-router.post("/move-poses", movePalletPoses);
+router.get("/:id", asyncHandler(getPalletById));
+router.put("/:id", asyncHandler(updatePallet));
+router.delete("/:id", asyncHandler(deletePallet));
+router.delete("/:id/poses", asyncHandler(deletePalletPoses));
+router.post("/move-poses", asyncHandler(movePalletPoses));
 export default router;
