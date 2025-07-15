@@ -24,20 +24,20 @@ describe("getArt Controller", () => {
     it("should return art by artikul", async () => {
         // Arrange
         const testArt = await createTestArt({
-            artikul: "TEST123",
+            artikul: "5555-0001",
             nameukr: "Test Art",
             namerus: "Тест Арт",
             zone: "A1",
             limit: 100,
         });
         mockRequest = {
-            params: { artikul: "TEST123" },
+            params: { artikul: "5555-0001" },
         };
         // Act
         await getArt(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
-        expect(responseJson.artikul).toBe("TEST123");
+        expect(responseJson.artikul).toBe("5555-0001");
         expect(responseJson.nameukr).toBe("Test Art");
         expect(responseJson.namerus).toBe("Тест Арт");
         expect(responseJson.zone).toBe("A1");
@@ -74,7 +74,7 @@ describe("getArt Controller", () => {
     it("should return art with btradeStock data", async () => {
         // Arrange
         const testArt = await createTestArt({
-            artikul: "TEST456",
+            artikul: "5555-0001",
             nameukr: "Test Art",
             zone: "A1",
             btradeStock: {
@@ -83,13 +83,13 @@ describe("getArt Controller", () => {
             },
         });
         mockRequest = {
-            params: { artikul: "TEST456" },
+            params: { artikul: "5555-0001" },
         };
         // Act
         await getArt(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
-        expect(responseJson.artikul).toBe("TEST456");
+        expect(responseJson.artikul).toBe("5555-0001");
         expect(responseJson.btradeStock).toBeDefined();
         expect(responseJson.btradeStock.value).toBe(50);
         expect(responseJson.btradeStock.date).toBeDefined();
@@ -97,19 +97,19 @@ describe("getArt Controller", () => {
     it("should return art with marker", async () => {
         // Arrange
         const testArt = await createTestArt({
-            artikul: "TEST789",
+            artikul: "5555-0001",
             nameukr: "Test Art",
             zone: "A1",
             marker: "IMPORTANT",
         });
         mockRequest = {
-            params: { artikul: "TEST789" },
+            params: { artikul: "5555-0001" },
         };
         // Act
         await getArt(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
-        expect(responseJson.artikul).toBe("TEST789");
+        expect(responseJson.artikul).toBe("5555-0001");
         expect(responseJson.marker).toBe("IMPORTANT");
     });
     it("should handle empty artikul parameter", async () => {

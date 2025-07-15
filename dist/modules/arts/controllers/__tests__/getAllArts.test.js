@@ -24,13 +24,13 @@ describe("getAllArts Controller", () => {
     it("should return all arts with default pagination", async () => {
         // Arrange
         const art1 = await createTestArt({
-            artikul: "ART001",
+            artikul: "5555-0000",
             nameukr: "Test Art 1",
             namerus: "Тест Арт 1",
             zone: "A1",
         });
         const art2 = await createTestArt({
-            artikul: "ART002",
+            artikul: "5555-0001",
             nameukr: "Test Art 2",
             namerus: "Тест Арт 2",
             zone: "A2",
@@ -46,17 +46,17 @@ describe("getAllArts Controller", () => {
         expect(responseJson.total).toBe(2);
         expect(responseJson.page).toBe(1);
         expect(responseJson.totalPages).toBe(1);
-        expect(responseJson.data[0].artikul).toBe("ART001");
-        expect(responseJson.data[1].artikul).toBe("ART002");
+        expect(responseJson.data[0].artikul).toBe("5555-0000");
+        expect(responseJson.data[1].artikul).toBe("5555-0001");
     });
     it("should handle pagination correctly", async () => {
         // Arrange
         const arts = [];
         for (let i = 1; i <= 15; i++) {
             arts.push(await createTestArt({
-                artikul: `ART${i.toString().padStart(3, "0")}`,
+                artikul: `5555-00${i < 10 ? ("0" + i) : i}`,
                 nameukr: `Test Art ${i}`,
-                zone: `A${i}`,
+                zone: `99-99-${i}`,
             }));
         }
         mockRequest = {
@@ -70,35 +70,35 @@ describe("getAllArts Controller", () => {
         expect(responseJson.total).toBe(15);
         expect(responseJson.page).toBe(2);
         expect(responseJson.totalPages).toBe(3);
-        expect(responseJson.data[0].artikul).toBe("ART006");
+        expect(responseJson.data[0].artikul).toBe("5555-0006");
     });
     it("should handle search by artikul", async () => {
         // Arrange
-        await createTestArt({ artikul: "ABC123", nameukr: "Test Art", zone: "A1" });
+        await createTestArt({ artikul: "5555-0006", nameukr: "Test Art", zone: "A1" });
         await createTestArt({
             artikul: "XYZ789",
             nameukr: "Another Art",
             zone: "A2",
         });
         mockRequest = {
-            query: { search: "ABC" },
+            query: { search: "5555" },
         };
         // Act
         await getAllArts(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data).toHaveLength(1);
-        expect(responseJson.data[0].artikul).toBe("ABC123");
+        expect(responseJson.data[0].artikul).toBe("5555-0006");
     });
     it("should handle search by nameukr", async () => {
         // Arrange
         await createTestArt({
-            artikul: "ART001",
+            artikul: "5555-0001",
             nameukr: "Українська назва",
             zone: "A1",
         });
         await createTestArt({
-            artikul: "ART002",
+            artikul: "5555-0002",
             nameukr: "English name",
             zone: "A2",
         });
@@ -115,12 +115,12 @@ describe("getAllArts Controller", () => {
     it("should handle search by namerus", async () => {
         // Arrange
         await createTestArt({
-            artikul: "ART001",
+            artikul: "5555-0001",
             namerus: "Русское название",
             zone: "A1",
         });
         await createTestArt({
-            artikul: "ART002",
+            artikul: "5555-0002",
             namerus: "Another name",
             zone: "A2",
         });
@@ -136,7 +136,7 @@ describe("getAllArts Controller", () => {
     });
     it("should handle case-insensitive search", async () => {
         // Arrange
-        await createTestArt({ artikul: "ART001", nameukr: "Test Art", zone: "A1" });
+        await createTestArt({ artikul: "5555-0001", nameukr: "Test Art", zone: "A1" });
         mockRequest = {
             query: { search: "test art" },
         };
@@ -163,7 +163,7 @@ describe("getAllArts Controller", () => {
     });
     it("should handle invalid page parameter", async () => {
         // Arrange
-        await createTestArt({ artikul: "ART001", nameukr: "Test Art", zone: "A1" });
+        await createTestArt({ artikul: "5555-0001", nameukr: "Test Art", zone: "A1" });
         mockRequest = {
             query: { page: "invalid" },
         };
@@ -176,7 +176,7 @@ describe("getAllArts Controller", () => {
     });
     it("should handle invalid limit parameter", async () => {
         // Arrange
-        await createTestArt({ artikul: "ART001", nameukr: "Test Art", zone: "A1" });
+        await createTestArt({ artikul: "5555-0001", nameukr: "Test Art", zone: "A1" });
         mockRequest = {
             query: { limit: "invalid" },
         };
@@ -189,9 +189,9 @@ describe("getAllArts Controller", () => {
     });
     it("should sort arts by artikul in ascending order", async () => {
         // Arrange
-        await createTestArt({ artikul: "ZART003", nameukr: "Z Art", zone: "A3" });
-        await createTestArt({ artikul: "AART001", nameukr: "A Art", zone: "A1" });
-        await createTestArt({ artikul: "BART002", nameukr: "B Art", zone: "A2" });
+        await createTestArt({ artikul: "Z5555-0003", nameukr: "Z Art", zone: "A3" });
+        await createTestArt({ artikul: "A5555-0001", nameukr: "A Art", zone: "A1" });
+        await createTestArt({ artikul: "B5555-0002", nameukr: "B Art", zone: "A2" });
         mockRequest = {
             query: {},
         };
@@ -200,8 +200,8 @@ describe("getAllArts Controller", () => {
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data).toHaveLength(3);
-        expect(responseJson.data[0].artikul).toBe("AART001");
-        expect(responseJson.data[1].artikul).toBe("BART002");
-        expect(responseJson.data[2].artikul).toBe("ZART003");
+        expect(responseJson.data[0].artikul).toBe("A5555-0001");
+        expect(responseJson.data[1].artikul).toBe("B5555-0002");
+        expect(responseJson.data[2].artikul).toBe("Z5555-0003");
     });
 });

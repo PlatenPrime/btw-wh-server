@@ -13,7 +13,7 @@ import { getBtradeArtInfo } from "../getBtradeInfo.js";
 
 const mockedAxios = vi.mocked(axios);
 
-describe("getBtradeArtInfo Controller", () => {
+describe("getBtradeArtInfo Controller (Fixed)", () => {
   let mockRequest: Partial<Request>;
   let responseJson: any;
   let responseStatus: any;
@@ -33,6 +33,8 @@ describe("getBtradeArtInfo Controller", () => {
         return this;
       },
     } as unknown as Response;
+
+    // Reset mocks
     vi.clearAllMocks();
   });
 

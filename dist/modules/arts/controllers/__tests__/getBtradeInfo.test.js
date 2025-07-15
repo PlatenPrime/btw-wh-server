@@ -8,7 +8,7 @@ vi.mock("axios", () => ({
 import axios from "axios";
 import { getBtradeArtInfo } from "../getBtradeInfo.js";
 const mockedAxios = vi.mocked(axios);
-describe("getBtradeArtInfo Controller", () => {
+describe("getBtradeArtInfo Controller (Fixed)", () => {
     let mockRequest;
     let responseJson;
     let responseStatus;
@@ -26,6 +26,7 @@ describe("getBtradeArtInfo Controller", () => {
                 return this;
             },
         };
+        // Reset mocks
         vi.clearAllMocks();
     });
     it("should return product info for valid artikul", async () => {
