@@ -104,6 +104,7 @@ export const movePalletPoses = async (req, res) => {
         if (error instanceof HttpError) {
             return res.status(error.status).json({ message: error.message });
         }
+        console.error(error);
         if (error.name === "ValidationError" || error.name === "CastError") {
             return res.status(400).json({ message: error.message, error });
         }
