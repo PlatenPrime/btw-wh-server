@@ -47,7 +47,7 @@ export const updatePos = async (req: Request, res: Response) => {
       const pos: IPos | null = await Pos.findById(id).session(session);
       if (!pos) {
         res.status(404).json({ error: "Position not found" });
-        throw new Error("Position not found");
+        return;
       }
 
       // Подготавливаем данные для обновления
@@ -60,7 +60,7 @@ export const updatePos = async (req: Request, res: Response) => {
         );
         if (!pallet) {
           res.status(404).json({ error: "Pallet not found" });
-          throw new Error("Pallet not found");
+          return;
         }
         updateData.pallet = {
           _id: pallet._id,
@@ -80,7 +80,7 @@ export const updatePos = async (req: Request, res: Response) => {
         const row = await Row.findById(parseResult.data.rowId).session(session);
         if (!row) {
           res.status(404).json({ error: "Row not found" });
-          throw new Error("Row not found");
+          return;
         }
         updateData.row = {
           _id: row._id,
@@ -108,9 +108,8 @@ export const updatePos = async (req: Request, res: Response) => {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update position";
       const statusCode = errorMessage.includes("not found") ? 404 : 500;
-
       res.status(statusCode).json({
-        error: errorMessage,
+        error: statusCode === 500 ? "Failed to update position" : errorMessage,
         ...(statusCode === 500 && { details: error }),
       });
     }

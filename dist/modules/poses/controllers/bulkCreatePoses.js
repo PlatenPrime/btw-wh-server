@@ -40,11 +40,11 @@ export const bulkCreatePoses = async (req, res) => {
             const rows = await Row.find({ _id: { $in: rowIds } }).session(session);
             if (pallets.length !== palletIds.length) {
                 res.status(404).json({ error: "Some pallets not found" });
-                throw new Error("Some pallets not found");
+                return;
             }
             if (rows.length !== rowIds.length) {
                 res.status(404).json({ error: "Some rows not found" });
-                throw new Error("Some rows not found");
+                return;
             }
             // Создаем позиции
             for (const posData of poses) {

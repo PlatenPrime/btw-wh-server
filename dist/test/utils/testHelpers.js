@@ -74,3 +74,54 @@ export const cleanupTestData = async () => {
         await collection.deleteMany({});
     }
 };
+/**
+ * Create a test Row
+ */
+export const createTestRow = async (rowData = {}) => {
+    const Row = mongoose.model("Row");
+    return await Row.create({
+        title: rowData.title || `Test Row ${Date.now()}`,
+        pallets: rowData.pallets || [],
+        ...rowData,
+    });
+};
+/**
+ * Create a test Pallet
+ */
+export const createTestPallet = async (palletData = {}) => {
+    const Pallet = mongoose.model("Pallet");
+    return await Pallet.create({
+        title: palletData.title || `Test Pallet ${Date.now()}`,
+        row: palletData.row || {
+            _id: new mongoose.Types.ObjectId(),
+            title: "Test Row",
+        },
+        poses: palletData.poses || [],
+        sector: palletData.sector,
+        ...palletData,
+    });
+};
+/**
+ * Create a test Pos
+ */
+export const createTestPos = async (posData = {}) => {
+    const Pos = mongoose.model("Pos");
+    return await Pos.create({
+        pallet: posData.pallet || {
+            _id: new mongoose.Types.ObjectId(),
+            title: "Test Pallet",
+        },
+        row: posData.row || {
+            _id: new mongoose.Types.ObjectId(),
+            title: "Test Row",
+        },
+        palletTitle: posData.palletTitle || "Test Pallet",
+        rowTitle: posData.rowTitle || "Test Row",
+        artikul: posData.artikul || `ART-${Date.now()}`,
+        quant: posData.quant || 10,
+        boxes: posData.boxes || 1,
+        date: posData.date,
+        sklad: posData.sklad,
+        ...posData,
+    });
+};

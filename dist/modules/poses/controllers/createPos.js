@@ -32,13 +32,13 @@ export const createPos = async (req, res) => {
             const pallet = await Pallet.findById(palletId).session(session);
             if (!pallet) {
                 res.status(404).json({ error: "Pallet not found" });
-                throw new Error("Pallet not found");
+                return;
             }
             // Проверяем существование ряда
             const row = await Row.findById(rowId).session(session);
             if (!row) {
                 res.status(404).json({ error: "Row not found" });
-                throw new Error("Row not found");
+                return;
             }
             // Создаем позицию с новой структурой
             const [createdPos] = await Pos.create([

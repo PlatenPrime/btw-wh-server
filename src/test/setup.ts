@@ -6,7 +6,9 @@ import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 // Import models to register schemas
 import "../modules/arts/models/Art.js";
 import "../modules/auth/models/User.js";
+import "../modules/pallets/models/Pallet.js";
 import "../modules/poses/models/Pos.js";
+import "../modules/rows/models/Row.js";
 
 // Load environment variables
 dotenv.config({ path: ".env.test" });

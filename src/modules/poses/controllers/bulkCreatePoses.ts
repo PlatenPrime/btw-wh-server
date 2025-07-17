@@ -51,12 +51,12 @@ export const bulkCreatePoses = async (req: Request, res: Response) => {
 
       if (pallets.length !== palletIds.length) {
         res.status(404).json({ error: "Some pallets not found" });
-        throw new Error("Some pallets not found");
+        return;
       }
 
       if (rows.length !== rowIds.length) {
         res.status(404).json({ error: "Some rows not found" });
-        throw new Error("Some rows not found");
+        return;
       }
 
       // Создаем позиции
