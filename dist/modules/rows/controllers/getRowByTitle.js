@@ -1,3 +1,4 @@
+import { Pallet } from "../../pallets/models/Pallet.js";
 import { Row } from "../models/Row.js";
 export const getRowByTitle = async (req, res) => {
     const { title } = req.params;
@@ -7,7 +8,18 @@ export const getRowByTitle = async (req, res) => {
             res.status(404).json({ message: "Row not found" });
             return;
         }
-        res.status(200).json(row);
+        const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title");
+        const palletsFormatted = pallets.map((p) => ({
+            _id: p._id,
+            title: p.title,
+        }));
+        res.status(200).json({
+            _id: row._id,
+            title: row.title,
+            pallets: palletsFormatted,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+        });
     }
     catch (error) {
         console.log("Error fetching row:", error);

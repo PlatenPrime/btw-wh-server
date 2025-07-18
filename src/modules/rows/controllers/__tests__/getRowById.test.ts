@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
+import { Types } from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Pallet } from "../../../pallets/models/Pallet.js";
 import { Row } from "../../models/Row.js";
 import { getRowById } from "../getRowById.js";
-import { Types } from "mongoose";
 
 describe("getRowById Controller", () => {
   let mockRequest: Partial<Request>;
@@ -29,6 +30,13 @@ describe("getRowById Controller", () => {
   it("should return row by id", async () => {
     // Arrange
     const row = await Row.create({ title: "Row by ID" });
+    // Создаем паллету, связанную с этим рядом
+    const pallet = await Pallet.create({
+      title: "Pallet for Row by ID",
+      row: { _id: row._id, title: row.title },
+      rowData: { _id: row._id, title: row.title },
+      poses: [],
+    });
     mockRequest = { params: { id: (row._id as Types.ObjectId).toString() } };
 
     // Act
@@ -38,6 +46,13 @@ describe("getRowById Controller", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.title).toBe("Row by ID");
     expect(responseJson._id).toBeDefined();
+    // Проверяем pallets
+    expect(Array.isArray(responseJson.pallets)).toBe(true);
+    expect(responseJson.pallets.length).toBe(1);
+    expect(responseJson.pallets[0]._id.toString()).toBe(
+      (pallet._id as Types.ObjectId).toString()
+    );
+    expect(responseJson.pallets[0].title).toBe(pallet.title);
   });
 
   it("should return 404 if row not found", async () => {

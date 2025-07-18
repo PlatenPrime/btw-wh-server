@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Pallet } from "../../pallets/models/Pallet.js";
 import { IRow, Row } from "../models/Row.js";
 
 export const getRowById = async (
@@ -15,7 +16,21 @@ export const getRowById = async (
       return;
     }
 
-    res.status(200).json(row);
+    const pallets = await Pallet.find({ "rowData._id": row._id }).select(
+      "_id title"
+    );
+    const palletsFormatted = pallets.map((p) => ({
+      _id: p._id,
+      title: p.title,
+    }));
+
+    res.status(200).json({
+      _id: row._id,
+      title: row.title,
+      pallets: palletsFormatted,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    });
   } catch (error) {
     console.log("Error fetching row:", error);
     res.status(500).json({ message: "Server error", error });
