@@ -6,7 +6,8 @@ const rowSubdocumentSchema = new Schema({
 }, { _id: false });
 const palletSchema = new Schema({
     title: { type: String, required: true },
-    row: { type: rowSubdocumentSchema, required: true },
+    rowData: { type: rowSubdocumentSchema, required: true },
+    row: { type: Schema.Types.ObjectId, required: true },
     poses: [{ type: Schema.Types.ObjectId, ref: "Pos" }],
     sector: String,
 }, { timestamps: true });

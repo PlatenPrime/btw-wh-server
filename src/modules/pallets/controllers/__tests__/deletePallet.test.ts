@@ -6,10 +6,10 @@ import { deletePallet } from "../deletePallet.js";
 
 const createTestPallet = async (palletData: any = {}) => {
   return await Pallet.create({
-    title: palletData.title || `Test Pallet ${Date.now()}`,
-    row: palletData.row || { _id: new Types.ObjectId(), title: "Test Row" },
-    poses: palletData.poses || [],
-    sector: palletData.sector,
+    title: "Test Pallet",
+    row: { _id: new Types.ObjectId(), title: "Test Row" },
+    rowData: { _id: new Types.ObjectId(), title: "Test Row" },
+    poses: [],
   });
 };
 

@@ -66,23 +66,27 @@ describe("createRow Controller", () => {
         const pallet = await Pallet.create({
             title: "PalletForRow",
             row: { _id: rowId, title: rowTitle },
+            rowData: { _id: rowId, title: rowTitle },
             poses: [],
         });
         // Создаем позицию, связанную с паллетой и рядом
         const pos = await Pos.create({
             pallet: { _id: pallet._id, title: pallet.title },
             row: { _id: rowId, title: rowTitle },
+            palletData: { _id: pallet._id, title: pallet.title },
+            rowData: { _id: rowId, title: rowTitle },
             palletTitle: pallet.title,
             rowTitle: rowTitle,
             artikul: "A-2",
             quant: 5,
             boxes: 2,
+            limit: 100,
         });
         // Assert
-        expect(pallet.row._id.toString()).toBe(String(rowId));
-        expect(pallet.row.title).toBe(rowTitle);
-        expect(String(pos.pallet._id)).toBe(String(pallet._id));
-        expect(pos.row._id.toString()).toBe(String(rowId));
+        expect(pallet.rowData._id.toString()).toBe(String(rowId));
+        expect(pallet.rowData.title).toBe(rowTitle);
+        expect(String(pos.palletData._id)).toBe(String(pallet._id));
+        expect(pos.rowData._id.toString()).toBe(String(rowId));
         expect(pos.palletTitle).toBe(pallet.title);
         expect(pos.rowTitle).toBe(rowTitle);
     });

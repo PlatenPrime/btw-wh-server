@@ -24,8 +24,10 @@ interface IRowSubdocument {
  * to ensure data integrity and prevent incomplete position records.
  */
 export interface IPos extends Document {
-  pallet: IPalletSubdocument;
-  row: IRowSubdocument;
+  pallet: Types.ObjectId; // Только ObjectId для обратной совместимости
+  row: Types.ObjectId; // Только ObjectId для обратной совместимости
+  palletData: IPalletSubdocument;
+  rowData: IRowSubdocument;
   palletTitle: string; // Required: Cached pallet title for performance
   rowTitle: string; // Required: Cached row title for performance
   artikul: string; // Required: Article number/identifier
@@ -35,6 +37,7 @@ export interface IPos extends Document {
   sklad?: string; // Optional: Warehouse identifier
   createdAt?: Date; // Auto-generated timestamp
   updatedAt?: Date; // Auto-generated timestamp
+  limit: number;
 }
 
 const palletSubdocumentSchema = new Schema<IPalletSubdocument>(
@@ -56,8 +59,10 @@ const rowSubdocumentSchema = new Schema<IRowSubdocument>(
 
 const posSchema = new Schema<IPos>(
   {
-    pallet: { type: palletSubdocumentSchema, required: true },
-    row: { type: rowSubdocumentSchema, required: true },
+    pallet: { type: Schema.Types.ObjectId, required: true },
+    row: { type: Schema.Types.ObjectId, required: true },
+    palletData: { type: palletSubdocumentSchema, required: true },
+    rowData: { type: rowSubdocumentSchema, required: true },
     palletTitle: { type: String, required: true }, // Required for data integrity
     rowTitle: { type: String, required: true }, // Required for data integrity
     artikul: { type: String, required: true }, // Required for data integrity
@@ -65,6 +70,7 @@ const posSchema = new Schema<IPos>(
     boxes: { type: Number, required: true }, // Required for data integrity
     date: String, // Optional date information
     sklad: String, // Optional warehouse identifier
+    limit: Number,
   },
   { timestamps: true }
 );

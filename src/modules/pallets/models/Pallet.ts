@@ -14,7 +14,8 @@ interface IRowSubdocument {
  */
 export interface IPallet extends Document {
   title: string;
-  row: IRowSubdocument;
+  row: Types.ObjectId;
+  rowData: IRowSubdocument;
   poses: Types.ObjectId[];
   sector?: string;
   createdAt?: Date;
@@ -32,7 +33,8 @@ const rowSubdocumentSchema = new Schema<IRowSubdocument>(
 const palletSchema = new Schema<IPallet>(
   {
     title: { type: String, required: true },
-    row: { type: rowSubdocumentSchema, required: true },
+    rowData: { type: rowSubdocumentSchema, required: true },
+    row: { type: Schema.Types.ObjectId, required: true },
     poses: [{ type: Schema.Types.ObjectId, ref: "Pos" }],
     sector: String,
   },

@@ -40,6 +40,7 @@ describe("createPallet Controller", () => {
       body: {
         title: "New Pallet",
         row: { _id: rowDoc._id, title: rowDoc.title },
+        rowData: { _id: rowDoc._id, title: rowDoc.title },
       },
     };
     vi.spyOn(Pallet, "create").mockImplementationOnce(
@@ -63,7 +64,7 @@ describe("createPallet Controller", () => {
     // Assert
     expect(responseStatus.code).toBe(201);
     expect(responseJson.title).toBe("New Pallet");
-    expect(responseJson.row.title).toBe("Test Row");
+    expect(responseJson.rowData.title).toBe("Test Row");
   });
 
   it("should return 400 if title or row is missing", async () => {

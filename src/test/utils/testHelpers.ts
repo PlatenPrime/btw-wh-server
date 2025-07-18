@@ -103,10 +103,15 @@ export const createTestPallet = async (palletData: any = {}) => {
   const Pallet = mongoose.model("Pallet");
   return await Pallet.create({
     title: palletData.title || `Test Pallet ${Date.now()}`,
-    row: palletData.row || {
-      _id: new mongoose.Types.ObjectId(),
-      title: "Test Row",
-    },
+    row:
+      palletData.row?._id ||
+      (palletData.row && palletData.row._id) ||
+      new mongoose.Types.ObjectId(),
+    rowData: palletData.rowData ||
+      palletData.row || {
+        _id: new mongoose.Types.ObjectId(),
+        title: "Test Row",
+      },
     poses: palletData.poses || [],
     sector: palletData.sector,
     ...palletData,
@@ -118,22 +123,27 @@ export const createTestPallet = async (palletData: any = {}) => {
  */
 export const createTestPos = async (posData: any = {}) => {
   const Pos = mongoose.model("Pos");
+  const pallet = posData.pallet || {
+    _id: new mongoose.Types.ObjectId(),
+    title: "Test Pallet",
+  };
+  const row = posData.row || {
+    _id: new mongoose.Types.ObjectId(),
+    title: "Test Row",
+  };
   return await Pos.create({
-    pallet: posData.pallet || {
-      _id: new mongoose.Types.ObjectId(),
-      title: "Test Pallet",
-    },
-    row: posData.row || {
-      _id: new mongoose.Types.ObjectId(),
-      title: "Test Row",
-    },
-    palletTitle: posData.palletTitle || "Test Pallet",
-    rowTitle: posData.rowTitle || "Test Row",
+    pallet: pallet._id,
+    row: row._id,
+    palletData: posData.palletData || pallet,
+    rowData: posData.rowData || row,
+    palletTitle: posData.palletTitle || pallet.title,
+    rowTitle: posData.rowTitle || row.title,
     artikul: posData.artikul || `ART-${Date.now()}`,
     quant: posData.quant || 10,
     boxes: posData.boxes || 1,
     date: posData.date,
     sklad: posData.sklad,
+    limit: typeof posData.limit === "number" ? posData.limit : 100,
     ...posData,
   });
 };

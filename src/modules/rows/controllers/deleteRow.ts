@@ -9,16 +9,16 @@ export const deleteRow = async (req: Request, res: Response) => {
     if (!row) return res.status(404).json({ message: "Row not found" });
 
     // Находим все паллеты, принадлежащие этому ряду
-    const pallets = await Pallet.find({ "row._id": row._id });
+    const pallets = await Pallet.find({ "rowData._id": row._id });
 
     // Получаем все их ID
     const palletIds = pallets.map((p) => p._id);
 
     // Удаляем все позиции, связанные с этими паллетами
-    await Pos.deleteMany({ "pallet._id": { $in: palletIds } });
+    await Pos.deleteMany({ "palletData._id": { $in: palletIds } });
 
     // Удаляем паллеты
-    await Pallet.deleteMany({ "row._id": row._id });
+    await Pallet.deleteMany({ "rowData._id": row._id });
 
     // Удаляем сам ряд
     await row.deleteOne();

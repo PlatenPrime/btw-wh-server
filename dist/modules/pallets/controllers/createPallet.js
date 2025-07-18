@@ -73,10 +73,8 @@ export const createPallet = async (req, res) => {
                 const created = await Pallet.create([
                     {
                         title,
-                        row: {
-                            _id: rowDoc._id,
-                            title: rowDoc.title,
-                        },
+                        row: rowDoc._id,
+                        rowData: { _id: rowDoc._id, title: rowDoc.title },
                         poses,
                         sector,
                     },

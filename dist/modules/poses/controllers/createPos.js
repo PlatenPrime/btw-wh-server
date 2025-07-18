@@ -43,12 +43,14 @@ export const createPos = async (req, res) => {
             // Создаем позицию с новой структурой
             const [createdPos] = await Pos.create([
                 {
-                    pallet: {
+                    pallet: pallet._id,
+                    row: row._id,
+                    palletData: {
                         _id: pallet._id,
                         title: pallet.title,
                         sector: pallet.sector,
                     },
-                    row: {
+                    rowData: {
                         _id: row._id,
                         title: row.title,
                     },
@@ -59,6 +61,7 @@ export const createPos = async (req, res) => {
                     boxes,
                     date,
                     sklad,
+                    limit: 100,
                 },
             ], { session });
             // Добавляем позицию в паллет

@@ -33,27 +33,46 @@ describe("Pallet Model - Schema Validation Only", () => {
       await expect(pallet2.save()).rejects.toThrow();
     });
     it("should handle unicode and special characters in title", async () => {
+      const row = createTestRow();
       const pallet = await Pallet.create({
         title: "Юникод-测试-!@#",
-        row: createTestRow(),
+        row,
+        rowData: { _id: row._id, title: row.title },
       });
       expect(pallet.title).toBe("Юникод-测试-!@#");
     });
     it("should allow empty poses array", async () => {
+      const row = createTestRow();
       const pallet = await Pallet.create({
         title: "EmptyPoses",
-        row: createTestRow(),
+        row,
+        rowData: { _id: row._id, title: row.title },
         poses: [],
       });
       expect(Array.isArray(pallet.poses)).toBe(true);
       expect(pallet.poses).toHaveLength(0);
     });
     it("should allow missing sector", async () => {
+      const row = createTestRow();
       const pallet = await Pallet.create({
         title: "NoSector",
-        row: createTestRow(),
+        row,
+        rowData: { _id: row._id, title: row.title },
       });
       expect(pallet.sector).toBeUndefined();
+    });
+    it("should allow rowData to be different from row", async () => {
+      const rowId = new Types.ObjectId();
+      const pallet = await Pallet.create({
+        title: "Test Pallet",
+        row: rowId,
+        rowData: { _id: rowId, title: "Test Row" },
+        poses: [],
+      });
+      expect((pallet.rowData as any)._doc).toEqual({
+        _id: rowId,
+        title: "Test Row",
+      });
     });
   });
 });

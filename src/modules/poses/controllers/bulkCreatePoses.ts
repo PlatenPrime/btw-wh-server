@@ -72,12 +72,14 @@ export const bulkCreatePoses = async (req: Request, res: Response) => {
         const [createdPos] = await Pos.create(
           [
             {
-              pallet: {
+              pallet: pallet!._id,
+              row: row!._id,
+              palletData: {
                 _id: pallet!._id,
                 title: pallet!.title,
                 sector: pallet!.sector,
               },
-              row: {
+              rowData: {
                 _id: row!._id,
                 title: row!.title,
               },
@@ -88,6 +90,7 @@ export const bulkCreatePoses = async (req: Request, res: Response) => {
               boxes: posData.boxes,
               date: posData.date,
               sklad: posData.sklad,
+              limit: 100,
             },
           ],
           { session }

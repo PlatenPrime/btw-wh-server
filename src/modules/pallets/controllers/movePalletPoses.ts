@@ -71,17 +71,21 @@ export const movePalletPoses = async (req: Request, res: Response) => {
         _id: { $in: sourcePallet.poses },
       }).session(session);
       for (const pos of posesToMove) {
-        pos.pallet = {
+        // Основные данные — palletData и rowData
+        pos.palletData = {
           _id: targetPallet._id as mongoose.Types.ObjectId,
           title: targetPallet.title,
           sector: targetPallet.sector,
         };
-        pos.row = {
+        pos.rowData = {
           _id: targetRow._id as mongoose.Types.ObjectId,
           title: targetRow.title,
         };
         pos.palletTitle = targetPallet.title;
         pos.rowTitle = targetRow.title;
+        // Для обратной совместимости
+        pos.pallet = targetPallet._id as mongoose.Types.ObjectId;
+        pos.row = targetRow._id as mongoose.Types.ObjectId;
         await pos.save({ session });
       }
       targetPallet.poses = sourcePallet.poses;
@@ -92,15 +96,19 @@ export const movePalletPoses = async (req: Request, res: Response) => {
       ]);
       const palletObj = targetPallet.toObject();
       const responseObj = {
-        ...palletObj,
-        _id: (targetPallet._id as mongoose.Types.ObjectId).toString(),
-        row: palletObj.row && {
-          ...palletObj.row,
-          _id: (palletObj.row._id as mongoose.Types.ObjectId).toString(),
+        _id: (palletObj._id as mongoose.Types.ObjectId).toString(),
+        title: palletObj.title,
+        row: (palletObj.row as mongoose.Types.ObjectId).toString(),
+        rowData: {
+          _id: (palletObj.rowData._id as mongoose.Types.ObjectId).toString(),
+          title: palletObj.rowData.title,
         },
         poses: Array.isArray(palletObj.poses)
           ? palletObj.poses.map((id: any) => id.toString())
           : [],
+        sector: palletObj.sector,
+        createdAt: palletObj.createdAt,
+        updatedAt: palletObj.updatedAt,
       };
       res.status(200).json({
         message: "Poses moved successfully",

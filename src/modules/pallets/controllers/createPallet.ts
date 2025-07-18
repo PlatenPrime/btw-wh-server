@@ -80,10 +80,8 @@ export const createPallet = async (req: Request, res: Response) => {
           [
             {
               title,
-              row: {
-                _id: rowDoc._id,
-                title: rowDoc.title,
-              },
+              row: rowDoc._id,
+              rowData: { _id: rowDoc._id, title: rowDoc.title },
               poses,
               sector,
             },

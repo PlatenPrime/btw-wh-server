@@ -52,7 +52,8 @@ export const updatePos = async (req, res) => {
                     res.status(404).json({ error: "Pallet not found" });
                     return;
                 }
-                updateData.pallet = {
+                updateData.pallet = pallet._id;
+                updateData.palletData = {
                     _id: pallet._id,
                     title: pallet.title,
                     sector: pallet.sector,
@@ -64,6 +65,7 @@ export const updatePos = async (req, res) => {
             else {
                 // Сохраняем существующий объект паллета
                 updateData.pallet = pos.pallet;
+                updateData.palletData = pos.palletData;
             }
             // Если обновляется rowId, нужно получить новые данные ряда
             if (parseResult.data.rowId) {
@@ -72,7 +74,8 @@ export const updatePos = async (req, res) => {
                     res.status(404).json({ error: "Row not found" });
                     return;
                 }
-                updateData.row = {
+                updateData.row = row._id;
+                updateData.rowData = {
                     _id: row._id,
                     title: row.title,
                 };
@@ -83,6 +86,7 @@ export const updatePos = async (req, res) => {
             else {
                 // Сохраняем существующий объект ряда
                 updateData.row = pos.row;
+                updateData.rowData = pos.rowData;
             }
             // Обновляем позицию
             const updatedPos = await Pos.findByIdAndUpdate(id, updateData, {

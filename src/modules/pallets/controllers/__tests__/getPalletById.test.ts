@@ -31,6 +31,7 @@ describe("getPalletById Controller", () => {
     const pallet = await Pallet.create({
       title: "Test Pallet",
       row: { _id: new Types.ObjectId(), title: "Test Row" },
+      rowData: { _id: new Types.ObjectId(), title: "Test Row" },
       poses: [],
     });
     mockRequest = { params: { id: pallet.id } };

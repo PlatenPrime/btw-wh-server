@@ -18,8 +18,8 @@ export const getAllPoses = async (req: Request, res: Response) => {
 
     // Строим фильтр
     const filter: any = {};
-    if (palletId) filter["pallet._id"] = palletId;
-    if (rowId) filter["row._id"] = rowId;
+    if (palletId) filter["palletData._id"] = palletId;
+    if (rowId) filter["rowData._id"] = rowId;
     if (artikul) filter.artikul = { $regex: artikul, $options: "i" };
     if (sklad) filter.sklad = { $regex: sklad, $options: "i" };
 

@@ -10,8 +10,10 @@ const rowSubdocumentSchema = new Schema({
     title: { type: String, required: true },
 }, { _id: false });
 const posSchema = new Schema({
-    pallet: { type: palletSubdocumentSchema, required: true },
-    row: { type: rowSubdocumentSchema, required: true },
+    pallet: { type: Schema.Types.ObjectId, required: true },
+    row: { type: Schema.Types.ObjectId, required: true },
+    palletData: { type: palletSubdocumentSchema, required: true },
+    rowData: { type: rowSubdocumentSchema, required: true },
     palletTitle: { type: String, required: true }, // Required for data integrity
     rowTitle: { type: String, required: true }, // Required for data integrity
     artikul: { type: String, required: true }, // Required for data integrity
@@ -19,6 +21,7 @@ const posSchema = new Schema({
     boxes: { type: Number, required: true }, // Required for data integrity
     date: String, // Optional date information
     sklad: String, // Optional warehouse identifier
+    limit: Number,
 }, { timestamps: true });
 /**
  * Pos Mongoose model

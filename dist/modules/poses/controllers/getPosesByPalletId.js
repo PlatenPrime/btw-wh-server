@@ -7,7 +7,7 @@ export const getPosesByPalletId = async (req, res) => {
         return;
     }
     try {
-        const poses = await Pos.find({ "pallet._id": palletId }).sort({
+        const poses = await Pos.find({ "palletData._id": palletId }).sort({
             artikul: -1,
         });
         res.json(poses);

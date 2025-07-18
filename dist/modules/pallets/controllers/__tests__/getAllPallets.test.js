@@ -1,15 +1,13 @@
+import { Types } from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Pallet } from "../../models/Pallet.js";
 import { getAllPallets } from "../getAllPallets.js";
 const createTestPallet = async (palletData = {}) => {
     return await Pallet.create({
-        title: palletData.title || `Test Pallet ${Date.now()}`,
-        row: palletData.row || {
-            _id: "507f1f77bcf86cd799439011",
-            title: "Test Row",
-        },
-        poses: palletData.poses || [],
-        sector: palletData.sector,
+        title: "Test Pallet",
+        row: { _id: new Types.ObjectId(), title: "Test Row" },
+        rowData: { _id: new Types.ObjectId(), title: "Test Row" },
+        poses: [],
     });
 };
 describe("getAllPallets Controller", () => {

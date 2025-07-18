@@ -81,16 +81,20 @@ describe("updateRow Controller", () => {
     const pallet = await Pallet.create({
       title: "PalletForUpdate",
       row: { _id: row._id, title: row.title },
+      rowData: { _id: row._id, title: row.title },
       poses: [],
     });
     const pos = await Pos.create({
       pallet: { _id: pallet._id, title: pallet.title },
       row: { _id: row._id, title: row.title },
+      palletData: { _id: pallet._id, title: pallet.title },
+      rowData: { _id: row._id, title: row.title },
       palletTitle: pallet.title,
       rowTitle: row.title,
       artikul: "A-3",
       quant: 7,
       boxes: 3,
+      limit: 100,
     });
     mockRequest = {
       params: { id: String((row as any)._id) },
@@ -102,19 +106,19 @@ describe("updateRow Controller", () => {
 
     // Обновим Pallet и Pos вручную (в реальном проекте это делается через хуки или сервис)
     await Pallet.updateMany(
-      { "row._id": row._id },
-      { $set: { "row.title": "NewRowTitle" } }
+      { "rowData._id": row._id },
+      { $set: { "rowData.title": "NewRowTitle" } }
     );
     await Pos.updateMany(
-      { "row._id": row._id },
-      { $set: { rowTitle: "NewRowTitle", "row.title": "NewRowTitle" } }
+      { "rowData._id": row._id },
+      { $set: { rowTitle: "NewRowTitle", "rowData.title": "NewRowTitle" } }
     );
 
     // Assert
     const updatedPallet = await Pallet.findById(pallet._id);
     const updatedPos = await Pos.findById(pos._id);
-    expect(updatedPallet?.row.title).toBe("NewRowTitle");
+    expect(updatedPallet?.rowData.title).toBe("NewRowTitle");
     expect(updatedPos?.rowTitle).toBe("NewRowTitle");
-    expect(updatedPos?.row.title).toBe("NewRowTitle");
+    expect(updatedPos?.rowData.title).toBe("NewRowTitle");
   });
 });

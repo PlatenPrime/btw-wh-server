@@ -63,17 +63,21 @@ export const movePalletPoses = async (req, res) => {
                 _id: { $in: sourcePallet.poses },
             }).session(session);
             for (const pos of posesToMove) {
-                pos.pallet = {
+                // Основные данные — palletData и rowData
+                pos.palletData = {
                     _id: targetPallet._id,
                     title: targetPallet.title,
                     sector: targetPallet.sector,
                 };
-                pos.row = {
+                pos.rowData = {
                     _id: targetRow._id,
                     title: targetRow.title,
                 };
                 pos.palletTitle = targetPallet.title;
                 pos.rowTitle = targetRow.title;
+                // Для обратной совместимости
+                pos.pallet = targetPallet._id;
+                pos.row = targetRow._id;
                 await pos.save({ session });
             }
             targetPallet.poses = sourcePallet.poses;
@@ -84,15 +88,19 @@ export const movePalletPoses = async (req, res) => {
             ]);
             const palletObj = targetPallet.toObject();
             const responseObj = {
-                ...palletObj,
-                _id: targetPallet._id.toString(),
-                row: palletObj.row && {
-                    ...palletObj.row,
-                    _id: palletObj.row._id.toString(),
+                _id: palletObj._id.toString(),
+                title: palletObj.title,
+                row: palletObj.row.toString(),
+                rowData: {
+                    _id: palletObj.rowData._id.toString(),
+                    title: palletObj.rowData.title,
                 },
                 poses: Array.isArray(palletObj.poses)
                     ? palletObj.poses.map((id) => id.toString())
                     : [],
+                sector: palletObj.sector,
+                createdAt: palletObj.createdAt,
+                updatedAt: palletObj.updatedAt,
             };
             res.status(200).json({
                 message: "Poses moved successfully",

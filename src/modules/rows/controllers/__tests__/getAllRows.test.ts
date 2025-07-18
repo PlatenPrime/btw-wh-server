@@ -82,8 +82,9 @@ describe("getAllRows Controller", () => {
     // Arrange
     const row = await createTestRow({ title: "RowWithPallets" });
     const pallet = await Pallet.create({
-      title: "PalletForGetAll",
+      title: "PalletForRow",
       row: { _id: row._id, title: row.title },
+      rowData: { _id: row._id, title: row.title },
       poses: [],
     });
     // Добавим pallet в массив pallets у row
@@ -104,8 +105,9 @@ describe("getAllRows Controller", () => {
       (pallet._id as Types.ObjectId).toString()
     );
     // Проверим, что pallet ссылается на row
-    expect((pallet.row._id as Types.ObjectId).toString()).toBe(
+    expect((pallet.rowData._id as Types.ObjectId).toString()).toBe(
       (row._id as Types.ObjectId).toString()
     );
+    expect(pallet.rowData.title).toBe(row.title);
   });
 });

@@ -8,9 +8,9 @@ export const getAllPoses = async (req, res) => {
         // Строим фильтр
         const filter = {};
         if (palletId)
-            filter["pallet._id"] = palletId;
+            filter["palletData._id"] = palletId;
         if (rowId)
-            filter["row._id"] = rowId;
+            filter["rowData._id"] = rowId;
         if (artikul)
             filter.artikul = { $regex: artikul, $options: "i" };
         if (sklad)

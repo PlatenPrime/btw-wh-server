@@ -30,9 +30,10 @@ describe("deletePalletPoses Controller", () => {
     // Arrange
     const poseId = new Types.ObjectId();
     const pallet = await Pallet.create({
-      title: "DeletePoses Pallet",
-      row: { _id: new Types.ObjectId(), title: "Row" },
-      poses: [poseId],
+      title: "Test Pallet",
+      row: { _id: new Types.ObjectId(), title: "Test Row" },
+      rowData: { _id: new Types.ObjectId(), title: "Test Row" },
+      poses: [],
     });
     mockRequest = {
       body: {
@@ -66,9 +67,10 @@ describe("deletePalletPoses Controller", () => {
     // Arrange
     const poseId = new Types.ObjectId();
     const pallet = await Pallet.create({
-      title: "DeletePoses Pallet",
-      row: { _id: new Types.ObjectId(), title: "Row" },
-      poses: [poseId],
+      title: "Test Pallet",
+      row: { _id: new Types.ObjectId(), title: "Test Row" },
+      rowData: { _id: new Types.ObjectId(), title: "Test Row" },
+      poses: [],
     });
     mockRequest = {
       body: {

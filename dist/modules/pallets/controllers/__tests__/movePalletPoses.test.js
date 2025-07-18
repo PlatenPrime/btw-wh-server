@@ -42,27 +42,32 @@ describe("movePalletPoses Controller", () => {
     });
     it("should move poses for a pallet", async () => {
         // Arrange
-        const rowSource = await Row.create({ title: "Row Source" });
-        const rowTarget = await Row.create({ title: "Row Target" });
+        const rowSource = { _id: new Types.ObjectId(), title: "Source Row" };
+        const rowTarget = { _id: new Types.ObjectId(), title: "Target Row" };
         const sourcePallet = await Pallet.create({
             title: "Source Pallet",
-            row: { _id: rowSource._id, title: rowSource.title },
+            row: rowSource._id,
+            rowData: { _id: rowSource._id, title: rowSource.title },
             poses: [],
         });
         const targetPallet = await Pallet.create({
             title: "Target Pallet",
-            row: { _id: rowTarget._id, title: rowTarget.title },
+            row: rowTarget._id,
+            rowData: { _id: rowTarget._id, title: rowTarget.title },
             poses: [],
         });
-        const pos = (await Pos.create({
-            pallet: { _id: sourcePallet._id, title: sourcePallet.title },
-            row: { _id: rowSource._id, title: rowSource.title },
+        const pos = await Pos.create({
+            pallet: sourcePallet._id,
+            row: rowSource._id,
+            palletData: { _id: sourcePallet._id, title: sourcePallet.title },
+            rowData: { _id: rowSource._id, title: rowSource.title },
             palletTitle: sourcePallet.title,
             rowTitle: rowSource.title,
-            artikul: "A-001",
+            artikul: "A-1",
             quant: 10,
-            boxes: 2,
-        }));
+            boxes: 1,
+            limit: 100,
+        });
         pos.save = vi.fn().mockResolvedValue(pos);
         sourcePallet.save = vi.fn().mockResolvedValue(sourcePallet);
         targetPallet.save = vi.fn().mockResolvedValue(targetPallet);
@@ -93,7 +98,8 @@ describe("movePalletPoses Controller", () => {
         vi.spyOn(Pos, "find").mockImplementation(((query) => makeMongooseQueryMock(query &&
             query._id &&
             Array.isArray(query._id.$in) &&
-            query._id.$in[0]?.toString() === pos._id.toString()
+            query._id.$in[0]?.toString() ===
+                pos._id.toString()
             ? [pos]
             : [])));
         mockRequest = {

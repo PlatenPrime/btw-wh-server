@@ -43,11 +43,22 @@ export const updatePallet = async (req: Request, res: Response) => {
         if (!pallet) {
           return res.status(404).json({ message: "Pallet not found" });
         }
-        const { title, sector, poses } = parseResult.data;
+        const { title, sector, poses, rowId } = parseResult.data;
         if (title !== undefined) pallet.title = title;
         if (sector !== undefined) pallet.sector = sector;
         if (poses !== undefined)
           pallet.poses = poses.map((id) => new mongoose.Types.ObjectId(id));
+        if (rowId !== undefined) {
+          const rowDoc = await mongoose
+            .model("Row")
+            .findById(rowId)
+            .session(session);
+          if (!rowDoc) {
+            return res.status(404).json({ message: "Row not found" });
+          }
+          pallet.row = rowDoc._id;
+          pallet.rowData = { _id: rowDoc._id, title: rowDoc.title };
+        }
         await pallet.save({ session });
         const palletObj = pallet.toObject();
         return res.status(200).json({

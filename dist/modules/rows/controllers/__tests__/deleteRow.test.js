@@ -60,16 +60,20 @@ describe("deleteRow Controller", () => {
         const pallet = await Pallet.create({
             title: "CascadePallet",
             row: { _id: row._id, title: row.title },
+            rowData: { _id: row._id, title: row.title },
             poses: [],
         });
         const pos = await Pos.create({
             pallet: { _id: pallet._id, title: pallet.title },
             row: { _id: row._id, title: row.title },
+            palletData: { _id: pallet._id, title: pallet.title },
+            rowData: { _id: row._id, title: row.title },
             palletTitle: pallet.title,
             rowTitle: row.title,
             artikul: "A-1",
             quant: 10,
             boxes: 1,
+            limit: 100,
         });
         mockRequest = { params: { id: String(row._id) } };
         // Act
