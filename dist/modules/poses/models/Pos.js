@@ -21,7 +21,7 @@ const posSchema = new Schema({
     boxes: { type: Number, required: true }, // Required for data integrity
     date: String, // Optional date information
     sklad: String, // Optional warehouse identifier
-    limit: Number,
+    comment: String,
 }, { timestamps: true });
 /**
  * Pos Mongoose model

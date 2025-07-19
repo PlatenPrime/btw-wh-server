@@ -38,6 +38,7 @@ export interface IPos extends Document {
   createdAt?: Date; // Auto-generated timestamp
   updatedAt?: Date; // Auto-generated timestamp
   limit: number;
+  comment: string;
 }
 
 const palletSubdocumentSchema = new Schema<IPalletSubdocument>(
@@ -70,7 +71,7 @@ const posSchema = new Schema<IPos>(
     boxes: { type: Number, required: true }, // Required for data integrity
     date: String, // Optional date information
     sklad: String, // Optional warehouse identifier
-    limit: Number,
+    comment: String,
   },
   { timestamps: true }
 );
