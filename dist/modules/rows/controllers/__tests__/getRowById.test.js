@@ -28,9 +28,9 @@ describe("getRowById Controller", () => {
         // Создаем паллету, связанную с этим рядом
         const pallet = await Pallet.create({
             title: "Pallet for Row by ID",
-            row: { _id: row._id, title: row.title },
+            row: row._id, // Add this line to set the required row field
             rowData: { _id: row._id, title: row.title },
-            poses: [],
+            sector: "test-sector",
         });
         mockRequest = { params: { id: row._id.toString() } };
         // Act
@@ -44,6 +44,7 @@ describe("getRowById Controller", () => {
         expect(responseJson.pallets.length).toBe(1);
         expect(responseJson.pallets[0]._id.toString()).toBe(pallet._id.toString());
         expect(responseJson.pallets[0].title).toBe(pallet.title);
+        expect(responseJson.pallets[0].sector).toBe(pallet.sector);
     });
     it("should return 404 if row not found", async () => {
         // Arrange

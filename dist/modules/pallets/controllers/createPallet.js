@@ -69,17 +69,19 @@ export const createPallet = async (req, res) => {
                 result = serializeIds(created[0].toObject());
             }
             catch (err) {
-                error = err;
+                // Only treat Zod validation errors as 400
+                if (err instanceof z.ZodError) {
+                    error = { status: 400, message: err.message, error: err };
+                }
+                else {
+                    error = { status: 500, message: "Server error", error: err };
+                }
             }
         });
         if (error) {
-            if (error.status) {
-                return res.status(error.status).json({ message: error.message });
-            }
-            if (error.name === "ValidationError" || error.name === "CastError") {
-                return res.status(400).json({ message: error.message, error });
-            }
-            return res.status(500).json({ message: "Server error", error });
+            return res
+                .status(error.status || 500)
+                .json({ message: error.message, error: error.error });
         }
         if (!result) {
             return res.status(500).json({ message: "Unknown error" });

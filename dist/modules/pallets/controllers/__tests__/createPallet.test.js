@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Row } from "../../../rows/models/Row.js";
 import { Pallet } from "../../models/Pallet.js";
 import { createPallet } from "../createPallet.js";
-const validRow = { _id: new Types.ObjectId(), title: "Test Row" };
+const validRowData = { _id: new Types.ObjectId(), title: "Test Row" };
 describe("createPallet Controller", () => {
     let mockRequest;
     let responseJson;
@@ -27,14 +27,14 @@ describe("createPallet Controller", () => {
     it("should create a new pallet", async () => {
         // Arrange
         const rowDoc = await Row.create({
-            _id: validRow._id,
-            title: validRow.title,
+            _id: validRowData._id,
+            title: validRowData.title,
             pallets: [],
         });
         mockRequest = {
             body: {
                 title: "New Pallet",
-                row: { _id: rowDoc._id, title: rowDoc.title },
+                row: rowDoc._id,
                 rowData: { _id: rowDoc._id, title: rowDoc.title },
             },
         };
@@ -59,9 +59,9 @@ describe("createPallet Controller", () => {
         expect(responseJson.title).toBe("New Pallet");
         expect(responseJson.rowData.title).toBe("Test Row");
     });
-    it("should return 400 if title or row is missing", async () => {
+    it("should return 400 if title or rowData is missing", async () => {
         // Arrange
-        mockRequest = { body: { row: validRow } };
+        mockRequest = { body: { rowData: validRowData } };
         await createPallet(mockRequest, res);
         expect(responseStatus.code).toBe(400);
         expect(responseJson.message).toBeDefined();
@@ -72,10 +72,10 @@ describe("createPallet Controller", () => {
     });
     it("should handle server error", async () => {
         // Arrange
-        mockRequest = { body: { title: "Err Pallet", row: validRow } };
+        mockRequest = { body: { title: "Err Pallet", rowData: validRowData } };
         vi.spyOn(Row, "findById").mockResolvedValueOnce({
-            _id: validRow._id,
-            title: validRow.title,
+            _id: validRowData._id,
+            title: validRowData.title,
             pallets: [],
             save: vi.fn().mockResolvedValue(undefined),
         });
