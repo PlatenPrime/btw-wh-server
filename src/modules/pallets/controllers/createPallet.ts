@@ -3,26 +3,11 @@ import { Types } from "mongoose";
 import { z } from "zod";
 import { Row } from "../../rows/models/Row.js";
 import { Pallet } from "../models/Pallet.js";
-
-function serializeIds(obj: any): any {
-  if (Array.isArray(obj)) return obj.map(serializeIds);
-  if (obj && typeof obj === "object") {
-    const result: any = {};
-    for (const key in obj) {
-      if (obj[key] instanceof Types.ObjectId) {
-        result[key] = obj[key].toString();
-      } else {
-        result[key] = serializeIds(obj[key]);
-      }
-    }
-    return result;
-  }
-  return obj;
-}
+import { serializeIds } from "../utils/serialize-ids.js";
 
 const createPalletSchema = z.object({
   title: z.string().min(1),
-  row: z.object({
+  rowData: z.object({
     _id: z.union([
       z.string().refine((val) => Types.ObjectId.isValid(val), {
         message: "Invalid row ID",
@@ -31,9 +16,6 @@ const createPalletSchema = z.object({
     ]),
     title: z.string().min(1),
   }),
-  poses: z
-    .array(z.string().refine((val) => Types.ObjectId.isValid(val)))
-    .optional(),
   sector: z.string().optional(),
 });
 
@@ -42,21 +24,21 @@ export const createPallet = async (req: Request, res: Response) => {
   const body = { ...req.body };
   if (
     !body.title ||
-    !body.row ||
-    !body.row._id ||
-    !body.row.title ||
-    (typeof body.row._id !== "string" &&
-      !(body.row._id instanceof Types.ObjectId))
+    !body.rowData ||
+    !body.rowData._id ||
+    !body.rowData.title ||
+    (typeof body.rowData._id !== "string" &&
+      !(body.rowData._id instanceof Types.ObjectId))
   ) {
     return res
       .status(400)
       .json({ message: "Title and row with valid _id and title are required" });
   }
   if (
-    typeof body.row._id !== "string" &&
-    body.row._id instanceof Types.ObjectId
+    typeof body.rowData._id !== "string" &&
+    body.rowData._id instanceof Types.ObjectId
   ) {
-    body.row = { ...body.row, _id: body.row._id.toString() };
+    body.rowData = { ...body.rowData, _id: body.rowData._id.toString() };
   }
   const parseResult = createPalletSchema.safeParse(body);
   if (!parseResult.success) {
@@ -64,14 +46,14 @@ export const createPallet = async (req: Request, res: Response) => {
       .status(400)
       .json({ message: "Invalid input", error: parseResult.error.errors });
   }
-  const { title, row, poses, sector } = parseResult.data;
+  const { title, rowData, sector } = parseResult.data;
   const session = await Pallet.startSession();
   try {
     let result: any = null;
     let error: any = null;
     await session.withTransaction(async () => {
       try {
-        const rowDoc = await Row.findById(row._id).session(session);
+        const rowDoc = await Row.findById(rowData._id).session(session);
         if (!rowDoc) {
           error = { status: 404, message: "Row not found" };
           return;
@@ -82,7 +64,7 @@ export const createPallet = async (req: Request, res: Response) => {
               title,
               row: rowDoc._id,
               rowData: { _id: rowDoc._id, title: rowDoc.title },
-              poses,
+              poses: [],
               sector,
             },
           ],

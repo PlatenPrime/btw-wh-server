@@ -8,10 +8,11 @@ export const getRowByTitle = async (req, res) => {
             res.status(404).json({ message: "Row not found" });
             return;
         }
-        const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title");
+        const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector");
         const palletsFormatted = pallets.map((p) => ({
             _id: p._id,
             title: p.title,
+            sector: p.sector,
         }));
         res.status(200).json({
             _id: row._id,

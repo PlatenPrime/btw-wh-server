@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Pallet } from "../../pallets/models/Pallet.js";
-import { Row } from "../models/Row.js";
+import { IRow, Row } from "../models/Row.js";
 
 export const getRowByTitle = async (
   req: Request,
@@ -9,7 +9,7 @@ export const getRowByTitle = async (
   const { title } = req.params;
 
   try {
-    const row = await Row.findOne({ title: title });
+    const row: IRow | null = await Row.findOne({ title: title });
 
     if (!row) {
       res.status(404).json({ message: "Row not found" });
@@ -17,11 +17,12 @@ export const getRowByTitle = async (
     }
 
     const pallets = await Pallet.find({ "rowData._id": row._id }).select(
-      "_id title"
+      "_id title sector"
     );
     const palletsFormatted = pallets.map((p) => ({
       _id: p._id,
       title: p.title,
+      sector: p.sector,
     }));
 
     res.status(200).json({

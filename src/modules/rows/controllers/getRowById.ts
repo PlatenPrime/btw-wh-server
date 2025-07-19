@@ -17,11 +17,12 @@ export const getRowById = async (
     }
 
     const pallets = await Pallet.find({ "rowData._id": row._id }).select(
-      "_id title"
+      "_id title sector"
     );
     const palletsFormatted = pallets.map((p) => ({
       _id: p._id,
       title: p.title,
+      sector: p.sector,
     }));
 
     res.status(200).json({
