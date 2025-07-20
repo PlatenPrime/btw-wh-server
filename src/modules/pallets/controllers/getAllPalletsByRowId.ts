@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IPallet, Pallet } from "../models/Pallet.js";
 
+
 /**
  * Get all pallets by rowId
  * @param req Express request with rowId param
@@ -13,7 +14,7 @@ export const getAllPalletsByRowId = async (req: Request, res: Response) => {
   }
   try {
     const pallets: IPallet[] = await Pallet.find({
-      "rowData._id": new (require("mongoose").Types.ObjectId)(rowId),
+      "rowData._id": rowId,
     });
     if (!pallets || pallets.length === 0) {
       return res.status(404).json({ message: "Pallets not found" });

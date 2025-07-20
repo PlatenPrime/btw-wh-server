@@ -11,7 +11,7 @@ export const getAllPalletsByRowId = async (req, res) => {
     }
     try {
         const pallets = await Pallet.find({
-            "rowData._id": new (require("mongoose").Types.ObjectId)(rowId),
+            "rowData._id": rowId,
         });
         if (!pallets || pallets.length === 0) {
             return res.status(404).json({ message: "Pallets not found" });
