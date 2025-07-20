@@ -4,22 +4,9 @@ import { z } from "zod";
 import { Pallet } from "../../pallets/models/Pallet.js";
 import { Row } from "../../rows/models/Row.js";
 import { Pos } from "../models/Pos.js";
+import { createPosSchema } from "../createPosSchema.js";
 
-const createPosSchema = z.object({
-  palletId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-    message: "Invalid pallet ID",
-  }),
-  rowId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-    message: "Invalid row ID",
-  }),
-  artikul: z.string(),
-  nameukr: z.string(),
-  quant: z.number(),
-  boxes: z.number(),
-  date: z.string().optional(),
-  sklad: z.string().optional(),
-  comment: z.string().optional(),
-});
+
 
 export const createPos = async (req: Request, res: Response) => {
   const parseResult = createPosSchema.safeParse(req.body);

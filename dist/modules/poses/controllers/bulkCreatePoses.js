@@ -2,26 +2,13 @@ import mongoose from "mongoose";
 import { z } from "zod";
 import { Pallet } from "../../pallets/models/Pallet.js";
 import { Row } from "../../rows/models/Row.js";
+import { createPosSchema } from "../createPosSchema.js";
 import { Pos } from "../models/Pos.js";
-const posItemSchema = z.object({
-    palletId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-        message: "Invalid pallet ID",
-    }),
-    rowId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-        message: "Invalid row ID",
-    }),
-    palletTitle: z.string(),
-    rowTitle: z.string(),
-    artikul: z.string(),
-    quant: z.number(),
-    boxes: z.number(),
-    date: z.string().optional(),
-    sklad: z.string().optional(),
-});
 const bulkCreatePosesSchema = z.object({
-    poses: z.array(posItemSchema).min(1, "At least one position is required"),
+    poses: z.array(createPosSchema).min(1, "At least one position is required"),
 });
 export const bulkCreatePoses = async (req, res) => {
+    // Zod validation OUTSIDE try/catch
     const parseResult = bulkCreatePosesSchema.safeParse(req.body);
     if (!parseResult.success) {
         res.status(400).json({ error: parseResult.error.errors });
@@ -63,14 +50,15 @@ export const bulkCreatePoses = async (req, res) => {
                             _id: row._id,
                             title: row.title,
                         },
-                        palletTitle: posData.palletTitle,
-                        rowTitle: posData.rowTitle,
+                        palletTitle: pallet.title,
+                        rowTitle: row.title,
                         artikul: posData.artikul,
+                        nameukr: posData.nameukr,
                         quant: posData.quant,
                         boxes: posData.boxes,
                         date: posData.date,
                         sklad: posData.sklad,
-                        limit: 100,
+                        comment: posData.comment,
                     },
                 ], { session });
                 createdPoses.push(createdPos);
