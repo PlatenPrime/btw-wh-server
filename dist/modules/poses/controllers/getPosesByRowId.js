@@ -8,7 +8,7 @@ export const getPosesByRowId = async (req, res) => {
     }
     try {
         const poses = await Pos.find({ "rowData._id": rowId }).sort({
-            artikul: -1,
+            artikul: 1,
         });
         res.json(poses);
     }

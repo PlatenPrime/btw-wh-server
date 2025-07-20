@@ -10,13 +10,13 @@ const createPosSchema = z.object({
     rowId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
         message: "Invalid row ID",
     }),
-    palletTitle: z.string(),
-    rowTitle: z.string(),
     artikul: z.string(),
+    nameukr: z.string(),
     quant: z.number(),
     boxes: z.number(),
     date: z.string().optional(),
     sklad: z.string().optional(),
+    comment: z.string().optional(),
 });
 export const createPos = async (req, res) => {
     const parseResult = createPosSchema.safeParse(req.body);
@@ -24,7 +24,7 @@ export const createPos = async (req, res) => {
         res.status(400).json({ error: parseResult.error.errors });
         return;
     }
-    const { palletId, rowId, palletTitle, rowTitle, artikul, quant, boxes, date, sklad, } = parseResult.data;
+    const { palletId, rowId, artikul, nameukr, quant, boxes, date, sklad, comment } = parseResult.data;
     const session = await mongoose.startSession();
     try {
         await session.withTransaction(async () => {
@@ -45,6 +45,8 @@ export const createPos = async (req, res) => {
                 {
                     pallet: pallet._id,
                     row: row._id,
+                    palletTitle: pallet.title,
+                    rowTitle: row.title,
                     palletData: {
                         _id: pallet._id,
                         title: pallet.title,
@@ -54,14 +56,13 @@ export const createPos = async (req, res) => {
                         _id: row._id,
                         title: row.title,
                     },
-                    palletTitle,
-                    rowTitle,
                     artikul,
+                    nameukr,
                     quant,
                     boxes,
                     date,
                     sklad,
-                    limit: 100,
+                    comment
                 },
             ], { session });
             // Добавляем позицию в паллет

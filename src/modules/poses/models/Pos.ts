@@ -31,6 +31,7 @@ export interface IPos extends Document {
   palletTitle: string; // Required: Cached pallet title for performance
   rowTitle: string; // Required: Cached row title for performance
   artikul: string; // Required: Article number/identifier
+  nameukr?: string;
   quant: number; // Required: Quantity of items
   boxes: number; // Required: Number of boxes
   date?: string; // Optional: Date information
@@ -67,6 +68,7 @@ const posSchema = new Schema<IPos>(
     palletTitle: { type: String, required: true }, // Required for data integrity
     rowTitle: { type: String, required: true }, // Required for data integrity
     artikul: { type: String, required: true }, // Required for data integrity
+    nameukr: String,
     quant: { type: Number, required: true }, // Required for data integrity
     boxes: { type: Number, required: true }, // Required for data integrity
     date: String, // Optional date information

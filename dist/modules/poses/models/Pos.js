@@ -17,6 +17,7 @@ const posSchema = new Schema({
     palletTitle: { type: String, required: true }, // Required for data integrity
     rowTitle: { type: String, required: true }, // Required for data integrity
     artikul: { type: String, required: true }, // Required for data integrity
+    nameukr: String,
     quant: { type: Number, required: true }, // Required for data integrity
     boxes: { type: Number, required: true }, // Required for data integrity
     date: String, // Optional date information

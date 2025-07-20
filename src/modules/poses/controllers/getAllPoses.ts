@@ -11,6 +11,7 @@ export const getAllPoses = async (req: Request, res: Response) => {
       rowTitle,
       palletTitle,
       artikul,
+      nameukr,
       sklad,
     } = req.query;
 
@@ -25,6 +26,7 @@ export const getAllPoses = async (req: Request, res: Response) => {
     if (rowTitle) filter["rowData.title"] = rowTitle;
     if (palletTitle) filter["palletData.title"] = palletTitle;
     if (artikul) filter.artikul = { $regex: artikul, $options: "i" };
+    if (nameukr) filter.nameukr = { $regex: nameukr, $options: "i"}
     if (sklad) filter.sklad = { $regex: sklad, $options: "i" };
 
     const poses = await Pos.find(filter)

@@ -1,30 +1,16 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
-import { Pallet } from "../../pallets/models/Pallet.js";
-import { Row } from "../../rows/models/Row.js";
 import { IPos, Pos } from "../models/Pos.js";
 
 const updatePosSchema = z.object({
-  palletId: z
-    .string()
-    .refine((val) => mongoose.Types.ObjectId.isValid(val), {
-      message: "Invalid pallet ID",
-    })
-    .optional(),
-  rowId: z
-    .string()
-    .refine((val) => mongoose.Types.ObjectId.isValid(val), {
-      message: "Invalid row ID",
-    })
-    .optional(),
-  palletTitle: z.string(),
-  rowTitle: z.string(),
-  artikul: z.string(),
-  quant: z.number(),
-  boxes: z.number(),
+  artikul: z.string().optional(),
+  nameukr: z.string().optional(),
+  quant: z.number().optional(),
+  boxes: z.number().optional(),
   date: z.string().optional(),
   sklad: z.string().optional(),
+  comment: z.string().optional(),
 });
 
 export const updatePos = async (req: Request, res: Response) => {
@@ -53,50 +39,6 @@ export const updatePos = async (req: Request, res: Response) => {
       // Подготавливаем данные для обновления
       const updateData: any = { ...parseResult.data };
 
-      // Если обновляется palletId, нужно получить новые данные паллета
-      if (parseResult.data.palletId) {
-        const pallet = await Pallet.findById(parseResult.data.palletId).session(
-          session
-        );
-        if (!pallet) {
-          res.status(404).json({ error: "Pallet not found" });
-          return;
-        }
-        updateData.pallet = pallet._id;
-        updateData.palletData = {
-          _id: pallet._id,
-          title: pallet.title,
-          sector: pallet.sector,
-        };
-        // Обновляем кэшированное название паллета
-        updateData.palletTitle = pallet.title;
-        delete updateData.palletId;
-      } else {
-        // Сохраняем существующий объект паллета
-        updateData.pallet = pos.pallet;
-        updateData.palletData = pos.palletData;
-      }
-
-      // Если обновляется rowId, нужно получить новые данные ряда
-      if (parseResult.data.rowId) {
-        const row = await Row.findById(parseResult.data.rowId).session(session);
-        if (!row) {
-          res.status(404).json({ error: "Row not found" });
-          return;
-        }
-        updateData.row = row._id;
-        updateData.rowData = {
-          _id: row._id,
-          title: row.title,
-        };
-        // Обновляем кэшированное название ряда
-        updateData.rowTitle = row.title;
-        delete updateData.rowId;
-      } else {
-        // Сохраняем существующий объект ряда
-        updateData.row = pos.row;
-        updateData.rowData = pos.rowData;
-      }
 
       // Обновляем позицию
       const updatedPos = await Pos.findByIdAndUpdate(id, updateData, {
@@ -105,7 +47,7 @@ export const updatePos = async (req: Request, res: Response) => {
         session,
       });
 
-      res.json(updatedPos);
+      console.log("Updated Pos: ", updatedPos);
     });
   } catch (error) {
     if (!res.headersSent) {

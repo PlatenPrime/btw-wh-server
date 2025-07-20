@@ -13,10 +13,12 @@ const createPosSchema = z.object({
     message: "Invalid row ID",
   }),
   artikul: z.string(),
+  nameukr: z.string(),
   quant: z.number(),
   boxes: z.number(),
   date: z.string().optional(),
   sklad: z.string().optional(),
+  comment: z.string().optional(),
 });
 
 export const createPos = async (req: Request, res: Response) => {
@@ -30,10 +32,12 @@ export const createPos = async (req: Request, res: Response) => {
     palletId,
     rowId,
     artikul,
+    nameukr,
     quant,
     boxes,
     date,
     sklad,
+    comment
   } = parseResult.data;
 
   const session = await mongoose.startSession();
@@ -71,10 +75,12 @@ export const createPos = async (req: Request, res: Response) => {
               title: row.title,
             },
             artikul,
+            nameukr,
             quant,
             boxes,
             date,
             sklad,
+            comment
           },
         ],
         { session }

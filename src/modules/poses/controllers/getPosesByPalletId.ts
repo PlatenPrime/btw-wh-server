@@ -12,7 +12,7 @@ export const getPosesByPalletId = async (req: Request, res: Response) => {
 
   try {
     const poses: IPos[] = await Pos.find({ "palletData._id": palletId }).sort({
-      artikul: -1,
+      artikul: 1,
     });
 
     res.json(poses);

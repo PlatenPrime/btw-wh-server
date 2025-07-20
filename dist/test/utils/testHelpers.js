@@ -126,11 +126,12 @@ export const createTestPos = async (posData = {}) => {
         palletTitle: posData.palletTitle || pallet.title,
         rowTitle: posData.rowTitle || row.title,
         artikul: posData.artikul || `ART-${Date.now()}`,
+        nameukr: posData.nameukr || "",
         quant: posData.quant || 10,
         boxes: posData.boxes || 1,
         date: posData.date,
         sklad: posData.sklad,
-        limit: typeof posData.limit === "number" ? posData.limit : 100,
+        comment: posData.comment || "",
         ...posData,
     });
 };
