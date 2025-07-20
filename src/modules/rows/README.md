@@ -1,419 +1,243 @@
-# Rows Module API Documentation
+# Rows Module – API & Integration Guide
 
-## Overview
+## Purpose
 
-The Rows module provides a RESTful API for managing warehouse rows. Each row can contain multiple pallets and is identified by a unique title. The module supports full CRUD operations with proper error handling and cascading deletes.
+The Rows module manages warehouse rows, each containing multiple pallets. It provides a RESTful API for CRUD operations, with cascading deletes and robust error handling. This guide details all endpoints, controllers, routes, request/response schemas, and data models for seamless frontend integration.
+
+---
 
 ## Data Model
 
-### Row Schema
+### Row
 
 ```typescript
 interface Row {
   _id: string; // MongoDB ObjectId
-  title: string; // Required: Unique row identifier
-  pallets: string[]; // Array of Pallet ObjectIds (references)
-  createdAt: Date; // Auto-generated timestamp
-  updatedAt: Date; // Auto-generated timestamp
+  title: string; // Unique row name
+  pallets: string[]; // Array of Pallet ObjectIds
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
 }
 ```
 
-## API Endpoints
+### Example Row JSON
 
-### Base URL
-
+```json
+{
+  "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
+  "title": "Row A",
+  "pallets": ["64f8a1b2c3d4e5f6a7b8c9d1"],
+  "createdAt": "2023-09-06T10:30:00.000Z",
+  "updatedAt": "2023-09-06T10:30:00.000Z"
+}
 ```
-/api/rows
-```
 
-### 1. Get All Rows
+---
 
-**Endpoint:** `GET /api/rows`
+## API Endpoints & Controllers
 
-**Description:** Retrieves all rows sorted alphabetically by title.
+| Method | Route                  | Controller    | Description                        |
+| ------ | ---------------------- | ------------- | ---------------------------------- |
+| GET    | /api/rows              | getAllRows    | List all rows                      |
+| GET    | /api/rows/id/:id       | getRowById    | Get row by ObjectId                |
+| GET    | /api/rows/title/:title | getRowByTitle | Get row by title                   |
+| POST   | /api/rows              | createRow     | Create a new row                   |
+| PUT    | /api/rows/:id          | updateRow     | Update row by ObjectId             |
+| DELETE | /api/rows/:id          | deleteRow     | Delete row (cascade pallets/poses) |
 
-**Response:**
+---
 
-- **Success (200):** Array of row objects
-- **Not Found (404):** `{ message: "Rows not found" }`
-- **Server Error (500):** `{ message: "Server error", error }`
+## Endpoints in Detail
 
-**Example Response:**
+### 1. List All Rows
+
+- **GET /api/rows**
+- **Controller:** getAllRows
+- **Response 200:** `Row[]` (sorted by title)
+- **Response 404:** `{ message: "Rows not found" }`
+- **Response 500:** `{ message: "Server error", error }`
+
+#### Example
 
 ```json
 [
   {
-    "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
+    "_id": "...",
     "title": "Row A",
-    "pallets": ["64f8a1b2c3d4e5f6a7b8c9d1", "64f8a1b2c3d4e5f6a7b8c9d2"],
-    "createdAt": "2023-09-06T10:30:00.000Z",
-    "updatedAt": "2023-09-06T10:30:00.000Z"
-  },
-  {
-    "_id": "64f8a1b2c3d4e5f6a7b8c9d3",
-    "title": "Row B",
-    "pallets": [],
-    "createdAt": "2023-09-06T11:00:00.000Z",
-    "updatedAt": "2023-09-06T11:00:00.000Z"
+    "pallets": ["..."],
+    "createdAt": "...",
+    "updatedAt": "..."
   }
 ]
 ```
 
+---
+
 ### 2. Get Row by ID
 
-**Endpoint:** `GET /api/rows/id/:id`
+- **GET /api/rows/id/:id**
+- **Controller:** getRowById
+- **Params:** `id` (string, required)
+- **Response 200:** `Row`
+- **Response 404:** `{ message: "Row not found" }`
+- **Response 500:** `{ message: "Server error", error }`
 
-**Description:** Retrieves a specific row by its MongoDB ObjectId.
-
-**Parameters:**
-
-- `id` (string): MongoDB ObjectId of the row
-
-**Response:**
-
-- **Success (200):** Row object
-- **Not Found (404):** `{ message: "Row not found" }`
-- **Server Error (500):** `{ message: "Server error", error }`
-
-**Example Request:**
-
-```
-GET /api/rows/id/64f8a1b2c3d4e5f6a7b8c9d0
-```
-
-**Example Response:**
-
-```json
-{
-  "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
-  "title": "Row A",
-  "pallets": ["64f8a1b2c3d4e5f6a7b8c9d1", "64f8a1b2c3d4e5f6a7b8c9d2"],
-  "createdAt": "2023-09-06T10:30:00.000Z",
-  "updatedAt": "2023-09-06T10:30:00.000Z"
-}
-```
+---
 
 ### 3. Get Row by Title
 
-**Endpoint:** `GET /api/rows/title/:title`
+- **GET /api/rows/title/:title**
+- **Controller:** getRowByTitle
+- **Params:** `title` (string, required)
+- **Response 200:** `Row`
+- **Response 404:** `{ message: "Row not found" }`
+- **Response 500:** `{ message: "Server error", error }`
 
-**Description:** Retrieves a specific row by its title.
-
-**Parameters:**
-
-- `title` (string): Title of the row
-
-**Response:**
-
-- **Success (200):** Row object
-- **Not Found (404):** `{ message: "Row not found" }`
-- **Server Error (500):** `{ message: "Server error", error }`
-
-**Example Request:**
-
-```
-GET /api/rows/title/Row%20A
-```
-
-**Example Response:**
-
-```json
-{
-  "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
-  "title": "Row A",
-  "pallets": ["64f8a1b2c3d4e5f6a7b8c9d1", "64f8a1b2c3d4e5f6a7b8c9d2"],
-  "createdAt": "2023-09-06T10:30:00.000Z",
-  "updatedAt": "2023-09-06T10:30:00.000Z"
-}
-```
+---
 
 ### 4. Create Row
 
-**Endpoint:** `POST /api/rows`
+- **POST /api/rows**
+- **Controller:** createRow
+- **Body:**
+  ```json
+  { "title": "New Row" }
+  ```
+- **Response 201:** `Row`
+- **Response 400:** `{ message: "Title is required" }`
+- **Response 409:** `{ message: "Row title must be unique" }`
+- **Response 500:** `{ message: "Server error", error }`
 
-**Description:** Creates a new row with the specified title.
-
-**Request Body:**
-
-```typescript
-{
-  title: string; // Required: Unique row title
-}
-```
-
-**Response:**
-
-- **Success (201):** Created row object
-- **Server Error (500):** `{ message: "Server error", error }`
-
-**Example Request:**
-
-```json
-{
-  "title": "New Row"
-}
-```
-
-**Example Response:**
-
-```json
-{
-  "_id": "64f8a1b2c3d4e5f6a7b8c9d4",
-  "title": "New Row",
-  "pallets": [],
-  "createdAt": "2023-09-06T12:00:00.000Z",
-  "updatedAt": "2023-09-06T12:00:00.000Z"
-}
-```
+---
 
 ### 5. Update Row
 
-**Endpoint:** `PUT /api/rows/:id`
+- **PUT /api/rows/:id**
+- **Controller:** updateRow
+- **Params:** `id` (string, required)
+- **Body:**
+  ```json
+  { "title": "Updated Title", "pallets": ["..."] }
+  ```
+- **Response 200:** `Row`
+- **Response 404:** `{ message: "Row not found" }`
+- **Response 409:** `{ message: "Row title must be unique" }`
+- **Response 500:** `{ message: "Server error", error }`
 
-**Description:** Updates an existing row by ID.
+---
 
-**Parameters:**
+### 6. Delete Row (Cascading)
 
-- `id` (string): MongoDB ObjectId of the row to update
+- **DELETE /api/rows/:id**
+- **Controller:** deleteRow
+- **Params:** `id` (string, required)
+- **Response 200:** `{ message: "Row and related pallets and positions deleted" }`
+- **Response 404:** `{ message: "Row not found" }`
+- **Response 500:** `{ message: "Server error", error }`
 
-**Request Body:**
+---
+
+## Controllers Overview
+
+- **getAllRows:** Returns all rows, sorted by title.
+- **getRowById:** Returns a row by its ObjectId.
+- **getRowByTitle:** Returns a row by its unique title.
+- **createRow:** Creates a new row (title must be unique).
+- **updateRow:** Updates row title and/or pallets.
+- **deleteRow:** Deletes a row and all related pallets and positions (cascading).
+
+---
+
+## Route Map
+
+- `/api/rows` → getAllRows, createRow
+- `/api/rows/id/:id` → getRowById
+- `/api/rows/title/:title` → getRowByTitle
+- `/api/rows/:id` → updateRow, deleteRow
+
+---
+
+## Request/Response Patterns
+
+### Fetch All Rows
 
 ```typescript
-{
-  title?: string;     // Optional: New title
-  pallets?: string[]; // Optional: Array of Pallet ObjectIds
-}
+const rows = await fetch("/api/rows").then((r) => r.json());
 ```
 
-**Response:**
+### Fetch Row by ID
 
-- **Success (200):** Updated row object
-- **Not Found (404):** `{ message: "Row not found" }`
-- **Server Error (500):** `{ message: "Server error", error }`
-
-**Example Request:**
-
-```json
-PUT /api/rows/64f8a1b2c3d4e5f6a7b8c9d0
-{
-  "title": "Updated Row Title"
-}
+```typescript
+const row = await fetch(`/api/rows/id/${id}`).then((r) => r.json());
 ```
 
-**Example Response:**
+### Fetch Row by Title
 
-```json
-{
-  "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
-  "title": "Updated Row Title",
-  "pallets": ["64f8a1b2c3d4e5f6a7b8c9d1", "64f8a1b2c3d4e5f6a7b8c9d2"],
-  "createdAt": "2023-09-06T10:30:00.000Z",
-  "updatedAt": "2023-09-06T12:30:00.000Z"
-}
+```typescript
+const row = await fetch(`/api/rows/title/${encodeURIComponent(title)}`).then(
+  (r) => r.json()
+);
 ```
 
-### 6. Delete Row
+### Create Row
 
-**Endpoint:** `DELETE /api/rows/:id`
-
-**Description:** Deletes a row and all associated pallets and positions (cascading delete).
-
-**Parameters:**
-
-- `id` (string): MongoDB ObjectId of the row to delete
-
-**Response:**
-
-- **Success (200):** `{ message: "Row and related pallets and positions deleted" }`
-- **Not Found (404):** `{ message: "Row not found" }`
-- **Server Error (500):** `{ message: "Server error", error }`
-
-**Example Request:**
-
-```
-DELETE /api/rows/64f8a1b2c3d4e5f6a7b8c9d0
+```typescript
+const newRow = await fetch("/api/rows", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ title }),
+}).then((r) => r.json());
 ```
 
-**Example Response:**
+### Update Row
 
-```json
-{
-  "message": "Row and related pallets and positions deleted"
-}
+```typescript
+const updatedRow = await fetch(`/api/rows/${id}`, {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ title, pallets }),
+}).then((r) => r.json());
 ```
+
+### Delete Row
+
+```typescript
+const result = await fetch(`/api/rows/${id}`, { method: "DELETE" }).then((r) =>
+  r.json()
+);
+```
+
+---
 
 ## Error Handling
 
-All endpoints follow a consistent error handling pattern:
+- All errors return JSON with a `message` field and, optionally, an `error` field for debugging.
+- 404: Resource not found
+- 409: Uniqueness violation
+- 400: Bad request (e.g., missing title)
+- 500: Internal server error
 
-- **404 Not Found:** When the requested resource doesn't exist
-- **500 Server Error:** When an internal server error occurs
+---
 
-Error responses include a `message` field with a human-readable description and may include an `error` field with technical details.
+## Special Notes
 
-## Frontend Integration Examples
+- **Cascading Deletes:** Deleting a row removes all its pallets and their positions.
+- **Title Uniqueness:** Row titles are unique. Creating/updating with a duplicate title returns 409.
+- **Timestamps:** `createdAt` and `updatedAt` are ISO strings, auto-managed.
+- **Relationships:** `pallets` is an array of Pallet ObjectIds. To fetch pallet details, query the pallets API.
 
-### Using Fetch API
-
-```typescript
-// Get all rows
-const getAllRows = async () => {
-  try {
-    const response = await fetch("/api/rows");
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const rows = await response.json();
-    return rows;
-  } catch (error) {
-    console.error("Error fetching rows:", error);
-    throw error;
-  }
-};
-
-// Create a new row
-const createRow = async (title: string) => {
-  try {
-    const response = await fetch("/api/rows", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title }),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const newRow = await response.json();
-    return newRow;
-  } catch (error) {
-    console.error("Error creating row:", error);
-    throw error;
-  }
-};
-
-// Update a row
-const updateRow = async (id: string, updates: Partial<Row>) => {
-  try {
-    const response = await fetch(`/api/rows/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updates),
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const updatedRow = await response.json();
-    return updatedRow;
-  } catch (error) {
-    console.error("Error updating row:", error);
-    throw error;
-  }
-};
-
-// Delete a row
-const deleteRow = async (id: string) => {
-  try {
-    const response = await fetch(`/api/rows/${id}`, {
-      method: "DELETE",
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const result = await response.json();
-    return result;
-  } catch (error) {
-    console.error("Error deleting row:", error);
-    throw error;
-  }
-};
-```
-
-### Using React Query (TanStack Query)
-
-```typescript
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
-// Query keys
-const ROW_KEYS = {
-  all: ["rows"] as const,
-  lists: () => [...ROW_KEYS.all, "list"] as const,
-  list: (filters: string) => [...ROW_KEYS.lists(), { filters }] as const,
-  details: () => [...ROW_KEYS.all, "detail"] as const,
-  detail: (id: string) => [...ROW_KEYS.details(), id] as const,
-};
-
-// Hooks
-export const useRows = () => {
-  return useQuery({
-    queryKey: ROW_KEYS.lists(),
-    queryFn: getAllRows,
-  });
-};
-
-export const useRow = (id: string) => {
-  return useQuery({
-    queryKey: ROW_KEYS.detail(id),
-    queryFn: () => getRowById(id),
-    enabled: !!id,
-  });
-};
-
-export const useCreateRow = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: createRow,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ROW_KEYS.lists() });
-    },
-  });
-};
-
-export const useUpdateRow = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, updates }: { id: string; updates: Partial<Row> }) =>
-      updateRow(id, updates),
-    onSuccess: (updatedRow) => {
-      queryClient.invalidateQueries({ queryKey: ROW_KEYS.lists() });
-      queryClient.invalidateQueries({
-        queryKey: ROW_KEYS.detail(updatedRow._id),
-      });
-    },
-  });
-};
-
-export const useDeleteRow = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: deleteRow,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ROW_KEYS.lists() });
-    },
-  });
-};
-```
-
-## Important Notes
-
-1. **Cascading Deletes:** When a row is deleted, all associated pallets and their positions are automatically deleted.
-
-2. **Title Uniqueness:** Row titles should be unique within the system.
-
-3. **Pallets Relationship:** Rows contain references to pallets via ObjectIds. When working with pallet data, you may need to populate these references.
-
-4. **Timestamps:** All rows include `createdAt` and `updatedAt` timestamps that are automatically managed by MongoDB.
-
-5. **Error Handling:** Always implement proper error handling in your frontend code to handle network errors and API error responses.
+---
 
 ## Related Modules
 
-- **Pallets Module:** Rows contain references to pallets
-- **Positions Module:** Pallets contain positions, which are deleted when rows are deleted
+- **Pallets:** Rows reference pallets by ObjectId.
+- **Positions:** Pallets reference positions. Deleting a row cascades to pallets and their positions.
 
-For more information about related modules, refer to their respective documentation.
+---
+
+## Frontend Integration Tips
+
+- Use TanStack React Query for data fetching and cache invalidation.
+- Always handle error responses and display user-friendly messages.
+- Use optimistic updates for create/update/delete for best UX.
+- Validate user input before sending requests (e.g., non-empty, unique title).

@@ -1,258 +1,257 @@
-# Positions Module API Documentation
+# Positions Module – API & Integration Guide
 
-## Overview
+## Purpose
 
-The Positions module provides a RESTful API for managing warehouse positions. Each position represents a specific item location within a pallet and row structure. The module supports full CRUD operations with proper error handling and relationship management.
+Модуль Positions (Pos) управляет позициями склада, каждая из которых принадлежит паллете и строке. API поддерживает CRUD, bulk-операции, фильтрацию и строгую типизацию. Документация полностью соответствует реальной модели.
 
-## Data Model
+---
 
-### Position Schema
+## Data Model (точно как в коде)
+
+### Position (IPos)
 
 ```typescript
-interface Position {
-  _id: string; // MongoDB ObjectId
-  pallet: {
-    _id: string; // Pallet ObjectId
-    title: string; // Pallet title (cached)
-    sector?: string; // Pallet sector (cached)
-  }; // Required: Embedded pallet reference
-  row: {
-    _id: string; // Row ObjectId
-    title: string; // Row title (cached)
-  }; // Required: Embedded row reference
-  palletTitle: string; // Required: Cached pallet title
-  rowTitle: string; // Required: Cached row title
-  artikul: string; // Required: Article number
-  quant: number; // Required: Quantity
-  boxes: number; // Required: Number of boxes
-  date?: string; // Optional: Date string
-  sklad?: string; // Optional: Warehouse identifier
-  createdAt: Date; // Auto-generated timestamp
-  updatedAt: Date; // Auto-generated timestamp
+import { Types } from "mongoose";
+
+interface IPos {
+  _id: Types.ObjectId;
+  pallet: Types.ObjectId; // Обязательное, ссылка на Pallet
+  row: Types.ObjectId; // Обязательное, ссылка на Row
+  palletData: { _id: Types.ObjectId; title: string; sector?: string }; // Обязательное, кэшированные данные паллеты
+  rowData: { _id: Types.ObjectId; title: string }; // Обязательное, кэшированные данные строки
+  palletTitle: string; // Обязательное
+  rowTitle: string; // Обязательное
+  artikul: string; // Обязательное
+  nameukr?: string;
+  quant: number; // Обязательное
+  boxes: number; // Обязательное
+  date?: string;
+  sklad?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  comment: string; // Обязательное
 }
 ```
 
-## API Endpoints
-
-### Base URL
-
-```
-/api/poses
-```
-
-### 1. Get All Positions
-
-**Endpoint:** `GET /api/poses`
-
-**Query Parameters:**
-
-- `page` (string, optional, default: "1") — Page number
-- `limit` (string, optional, default: "10") — Items per page
-- `palletId` (string, optional) — Filter by pallet ID
-- `rowId` (string, optional) — Filter by row ID
-- `artikul` (string, optional) — Search by article number (case-insensitive)
-- `sklad` (string, optional) — Search by warehouse (case-insensitive)
-
-**Response:**
-
-- **Success (200):** Paginated response with positions
-- **Server Error (500):** `{ error: "Failed to fetch poses", details }`
-
-**Example Response:**
+### Пример ответа Position
 
 ```json
 {
-  "data": [
-    {
-      "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
-      "pallet": {
-        "_id": "64f8a1b2c3d4e5f6a7b8c9d1",
-        "title": "Pallet A",
-        "sector": "Sector 1"
-      },
-      "row": {
-        "_id": "64f8a1b2c3d4e5f6a7b8c9d2",
-        "title": "Row A"
-      },
-      "artikul": "ART001",
-      "quant": 100,
-      "boxes": 10,
-      "date": "2024-01-01",
-      "sklad": "Main",
-      "createdAt": "2024-01-01T00:00:00.000Z",
-      "updatedAt": "2024-01-01T00:00:00.000Z"
-    }
-  ],
-  "total": 50,
-  "page": 1,
-  "totalPages": 5
-}
-```
-
-### 2. Get Position by ID
-
-**Endpoint:** `GET /api/poses/:id`
-
-**Parameters:**
-
-- `id` (string): MongoDB ObjectId of the position
-
-**Response:**
-
-- **Success (200):** Position object with populated references
-- **Bad Request (400):** `{ error: "Invalid position ID" }`
-- **Not Found (404):** `{ error: "Position not found" }`
-- **Server Error (500):** `{ error: "Failed to fetch position", details }`
-
-### 3. Get Positions by Pallet ID
-
-**Endpoint:** `GET /api/poses/by-pallet/:palletId`
-
-**Parameters:**
-
-- `palletId` (string): MongoDB ObjectId of the pallet
-
-**Response:**
-
-- **Success (200):** Array of positions for the specified pallet
-- **Bad Request (400):** `{ error: "Invalid pallet ID" }`
-- **Server Error (500):** `{ error: "Failed to fetch poses by pallet", details }`
-
-### 4. Get Positions by Row ID
-
-**Endpoint:** `GET /api/poses/by-row/:rowId`
-
-**Parameters:**
-
-- `rowId` (string): MongoDB ObjectId of the row
-
-**Response:**
-
-- **Success (200):** Array of positions for the specified row
-- **Bad Request (400):** `{ error: "Invalid row ID" }`
-- **Server Error (500):** `{ error: "Failed to fetch poses by row", details }`
-
-### 5. Create Position
-
-**Endpoint:** `POST /api/poses`
-
-**Body:**
-
-```json
-{
-  "palletId": "64f8a1b2c3d4e5f6a7b8c9d1", // Required: Pallet ObjectId
-  "rowId": "64f8a1b2c3d4e5f6a7b8c9d2", // Required: Row ObjectId
-  "palletTitle": "Pallet A", // Required: Cached pallet title
-  "rowTitle": "Row A", // Required: Cached row title
-  "artikul": "ART001", // Required: Article number
-  "quant": 100, // Required: Quantity
-  "boxes": 10, // Required: Number of boxes
-  "date": "2024-01-01", // optional
-  "sklad": "Main" // optional
-}
-```
-
-**Response:**
-
-- **Created (201):** Created position object with populated references
-- **Bad Request (400):** `{ error: validation_errors }`
-- **Not Found (404):** `{ error: "Pallet not found" }` or `{ error: "Row not found" }`
-- **Server Error (500):** `{ error: "Failed to create position", details }`
-
-### 6. Bulk Create Positions
-
-**Endpoint:** `POST /api/poses/bulk`
-
-**Body:**
-
-```json
-{
-  "poses": [
-    {
-      "palletId": "64f8a1b2c3d4e5f6a7b8c9d1",
-      "rowId": "64f8a1b2c3d4e5f6a7b8c9d2",
-      "artikul": "ART001",
-      "quant": 100
-    },
-    {
-      "palletId": "64f8a1b2c3d4e5f6a7b8c9d1",
-      "rowId": "64f8a1b2c3d4e5f6a7b8c9d2",
-      "artikul": "ART002",
-      "quant": 50
-    }
-  ]
-}
-```
-
-**Response:**
-
-- **Created (201):** `{ message: "X positions created successfully", data: [...] }`
-- **Bad Request (400):** `{ error: validation_errors }`
-- **Not Found (404):** `{ error: "Some pallets not found" }` or `{ error: "Some rows not found" }`
-- **Server Error (500):** `{ error: "Failed to create positions", details }`
-
-### 7. Update Position
-
-**Endpoint:** `PUT /api/poses/:id`
-
-**Parameters:**
-
-- `id` (string): MongoDB ObjectId of the position
-
-**Body:** (palletTitle, rowTitle, artikul, quant, boxes are required; others optional)
-
-```json
-{
-  "palletId": "64f8a1b2c3d4e5f6a7b8c9d1",
-  "rowId": "64f8a1b2c3d4e5f6a7b8c9d2",
+  "_id": "64f8a1b2c3d4e5f6a7b8c9d0",
+  "pallet": "64f8a1b2c3d4e5f6a7b8c9d1",
+  "row": "64f8a1b2c3d4e5f6a7b8c9d2",
+  "palletData": {
+    "_id": "64f8a1b2c3d4e5f6a7b8c9d1",
+    "title": "Pallet A",
+    "sector": "Sector 1"
+  },
+  "rowData": { "_id": "64f8a1b2c3d4e5f6a7b8c9d2", "title": "Row A" },
+  "palletTitle": "Pallet A",
+  "rowTitle": "Row A",
   "artikul": "ART001",
-  "quant": 150,
-  "boxes": 15,
-  "date": "2024-01-02",
-  "sklad": "Secondary"
+  "nameukr": "Название",
+  "quant": 100,
+  "boxes": 10,
+  "date": "2024-01-01",
+  "sklad": "Main",
+  "limit": 5,
+  "comment": "Комментарий",
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
 }
 ```
 
-**Response:**
+---
 
-- **Success (200):** Updated position object with populated references
-- **Bad Request (400):** `{ error: "Invalid position ID" }` or `{ error: validation_errors }`
-- **Not Found (404):** `{ error: "Position not found" }`
-- **Server Error (500):** `{ error: "Failed to update position", details }`
+## API Endpoints & Controllers
 
-### 8. Delete Position
+| Method | Route                          | Controller         | Описание                                  |
+| ------ | ------------------------------ | ------------------ | ----------------------------------------- |
+| GET    | /api/poses                     | getAllPoses        | Получить все позиции (фильтры, пагинация) |
+| GET    | /api/poses/:id                 | getPosById         | Получить позицию по ObjectId              |
+| GET    | /api/poses/by-pallet/:palletId | getPosesByPalletId | Получить все позиции паллеты              |
+| GET    | /api/poses/by-row/:rowId       | getPosesByRowId    | Получить все позиции строки               |
+| POST   | /api/poses                     | createPos          | Создать новую позицию                     |
+| POST   | /api/poses/bulk                | bulkCreatePoses    | Массовое создание позиций                 |
+| PUT    | /api/poses/:id                 | updatePos          | Обновить позицию по ObjectId              |
+| DELETE | /api/poses/:id                 | deletePos          | Удалить позицию по ObjectId               |
 
-**Endpoint:** `DELETE /api/poses/:id`
+---
 
-**Parameters:**
+## Endpoint Details
 
-- `id` (string): MongoDB ObjectId of the position
+### 1. Получить все позиции (фильтры, пагинация)
 
-**Response:**
+- **GET /api/poses**
+- **Query:** page, limit, palletId, rowId, artikul, sklad
+- **Ответ 200:**
+  ```json
+  {
+    "data": [Position, ...],
+    "total": 50,
+    "page": 1,
+    "totalPages": 5
+  }
+  ```
+- **Ответ 500:** `{ error: "Failed to fetch poses", details }`
 
-- **Success (200):** `{ message: "Position deleted successfully" }`
-- **Bad Request (400):** `{ error: "Invalid position ID" }`
-- **Not Found (404):** `{ error: "Position not found" }`
-- **Server Error (500):** `{ error: "Failed to delete position", details }`
+### 2. Получить позицию по ID
 
-## Important Notes
+- **GET /api/poses/:id**
+- **Параметры:** id (ObjectId)
+- **Ответ 200:** Position
+- **Ответ 400:** `{ error: "Invalid position ID" }`
+- **Ответ 404:** `{ error: "Position not found" }`
+- **Ответ 500:** `{ error: "Failed to fetch position", details }`
 
-1. **Request vs Response Format:** While requests use `palletId` and `rowId` references, responses include embedded pallet and row subdocuments for better performance.
+### 3. Получить позиции по palletId
 
-2. **Transaction Safety:** All operations that modify multiple documents use MongoDB transactions to ensure data consistency.
+- **GET /api/poses/by-pallet/:palletId**
+- **Параметры:** palletId (ObjectId)
+- **Ответ 200:** Массив Position
+- **Ответ 400:** `{ error: "Invalid pallet ID" }`
+- **Ответ 500:** `{ error: "Failed to fetch poses by pallet", details }`
 
-3. **Validation:** All input data is validated using Zod schemas with proper error messages.
+### 4. Получить позиции по rowId
 
-4. **Cached Data:** Position responses include embedded pallet and row data for easier frontend consumption without additional queries.
+- **GET /api/poses/by-row/:rowId**
+- **Параметры:** rowId (ObjectId)
+- **Ответ 200:** Массив Position
+- **Ответ 400:** `{ error: "Invalid row ID" }`
+- **Ответ 500:** `{ error: "Failed to fetch poses by row", details }`
 
-5. **Search and Filtering:** The getAllPoses endpoint supports flexible filtering and search capabilities.
+### 5. Создать позицию
 
-6. **Pagination:** List endpoints support pagination with customizable page size.
+- **POST /api/poses**
+- **Body:**
+  ```json
+  {
+    "pallet": "ObjectId",
+    "row": "ObjectId",
+    "artikul": "ART001",
+    "quant": 100,
+    "boxes": 10,
+    "date": "2024-01-01",
+    "sklad": "Main",
+    "limit": 5,
+    "comment": "Комментарий"
+  }
+  ```
+- **Ответ 201:** Position
+- **Ответ 400:** `{ error: validation_errors }`
+- **Ответ 404:** `{ error: "Pallet not found" }` или `{ error: "Row not found" }`
+- **Ответ 500:** `{ error: "Failed to create position", details }`
 
-## Related Modules
+### 6. Массовое создание позиций
 
-- **Pallets Module:** Positions are associated with pallets
-- **Rows Module:** Positions are associated with rows
-- **Arts Module:** Positions can reference articles by `artikul`
+- **POST /api/poses/bulk**
+- **Body:**
+  ```json
+  {
+    "poses": [
+      {
+        "pallet": "ObjectId",
+        "row": "ObjectId",
+        "artikul": "ART001",
+        "quant": 100,
+        "boxes": 10,
+        "limit": 5,
+        "comment": "..."
+      },
+      {
+        "pallet": "ObjectId",
+        "row": "ObjectId",
+        "artikul": "ART002",
+        "quant": 50,
+        "boxes": 5,
+        "limit": 2,
+        "comment": "..."
+      }
+    ]
+  }
+  ```
+- **Ответ 201:** `{ message: "X positions created successfully", data: [Position, ...] }`
+- **Ответ 400:** `{ error: validation_errors }`
+- **Ответ 404:** `{ error: "Some pallets not found" }` или `{ error: "Some rows not found" }`
+- **Ответ 500:** `{ error: "Failed to create positions", details }`
 
-For more information about related modules, refer to their respective documentation.
+### 7. Обновить позицию
+
+- **PUT /api/poses/:id**
+- **Body:**
+  ```json
+  {
+    "pallet": "ObjectId",
+    "row": "ObjectId",
+    "artikul": "ART001",
+    "quant": 150,
+    "boxes": 15,
+    "date": "2024-01-02",
+    "sklad": "Secondary",
+    "limit": 10,
+    "comment": "Обновлено"
+  }
+  ```
+- **Ответ 200:** Position
+- **Ответ 400:** `{ error: "Invalid position ID" }` или `{ error: validation_errors }`
+- **Ответ 404:** `{ error: "Position not found" }`
+- **Ответ 500:** `{ error: "Failed to update position", details }`
+
+### 8. Удалить позицию
+
+- **DELETE /api/poses/:id**
+- **Параметры:** id (ObjectId)
+- **Ответ 200:** `{ message: "Position deleted successfully" }`
+- **Ответ 400:** `{ error: "Invalid position ID" }`
+- **Ответ 404:** `{ error: "Position not found" }`
+- **Ответ 500:** `{ error: "Failed to delete position", details }`
+
+---
+
+## Controllers Overview
+
+- **getAllPoses:** Все позиции, фильтры и пагинация.
+- **getPosById:** Поиск по ObjectId.
+- **getPosesByPalletId:** Все позиции паллеты.
+- **getPosesByRowId:** Все позиции строки.
+- **createPos:** Создание позиции.
+- **bulkCreatePoses:** Массовое создание.
+- **updatePos:** Обновление позиции.
+- **deletePos:** Удаление позиции.
+
+---
+
+## Route Map
+
+- `/api/poses` → getAllPoses, createPos
+- `/api/poses/:id` → getPosById, updatePos, deletePos
+- `/api/poses/by-pallet/:palletId` → getPosesByPalletId
+- `/api/poses/by-row/:rowId` → getPosesByRowId
+- `/api/poses/bulk` → bulkCreatePoses
+
+---
+
+## Error Handling
+
+- Все ошибки: `{ error, details? }`
+- 404: Не найдено
+- 400: Некорректный запрос (например, невалидный ID, ошибка валидации)
+- 500: Внутренняя ошибка
+
+---
+
+## Special Notes
+
+- **pallet/row** — всегда ObjectId, **palletData/rowData** — кэшированные объекты.
+- **limit/comment** — обязательные поля.
+- **createdAt/updatedAt** — ISO строки.
+- **Bulk-операции** — через /bulk.
+
+---
+
+## Frontend Integration Tips
+
+- Используйте TanStack React Query для кэширования.
+- Всегда обрабатывайте ошибки.
+- Проверяйте обязательные поля (artikul, quant, boxes, limit, comment, pallet, row).
+- Для отображения строк и паллет используйте rowData/palletData.
