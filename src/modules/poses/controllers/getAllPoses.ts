@@ -5,9 +5,11 @@ export const getAllPoses = async (req: Request, res: Response) => {
   try {
     const {
       page = "1",
-      limit = "10",
-      palletId,
+      limit = "20",
       rowId,
+      palletId,
+      rowTitle,
+      palletTitle,
       artikul,
       sklad,
     } = req.query;
@@ -20,13 +22,15 @@ export const getAllPoses = async (req: Request, res: Response) => {
     const filter: any = {};
     if (palletId) filter["palletData._id"] = palletId;
     if (rowId) filter["rowData._id"] = rowId;
+    if (rowTitle) filter["rowData.title"] = rowTitle;
+    if (palletTitle) filter["palletData.title"] = palletTitle;
     if (artikul) filter.artikul = { $regex: artikul, $options: "i" };
     if (sklad) filter.sklad = { $regex: sklad, $options: "i" };
 
     const poses = await Pos.find(filter)
       .skip(skip)
       .limit(limitNum)
-      .sort({ createdAt: -1 });
+      .sort({ artikul: 1 });
 
     const total = await Pos.countDocuments(filter);
 

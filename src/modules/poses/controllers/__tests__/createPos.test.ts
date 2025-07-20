@@ -25,19 +25,21 @@ describe("createPos Controller", () => {
       body: {
         palletId: pallet._id.toString(),
         rowId: row._id.toString(),
-        palletTitle: pallet.title,
-        rowTitle: row.title,
         artikul: "ART-1",
         quant: 5,
         boxes: 2,
+        sklad: "merezhi",
+        date: "04.21",
       },
     });
     const res = createMockResponse();
     await createPos(req as any, res as any);
     expect(res.statusCode).toBe(201);
     expect(res.body.artikul).toBe("ART-1");
-    expect(res.body.pallet._id.toString()).toBe(pallet._id.toString());
-    expect(res.body.row._id.toString()).toBe(row._id.toString());
+    expect(res.body.sklad).toBe("merezhi");
+    expect(res.body.date).toBe("04.21");
+    expect(res.body.palletData._id.toString()).toBe(pallet._id.toString());
+    expect(res.body.rowData._id.toString()).toBe(row._id.toString());
   });
 
   it("should return 404 if pallet not found", async () => {
@@ -45,8 +47,6 @@ describe("createPos Controller", () => {
       body: {
         palletId: new mongoose.Types.ObjectId().toString(),
         rowId: row._id.toString(),
-        palletTitle: "No Pallet",
-        rowTitle: row.title,
         artikul: "ART-2",
         quant: 5,
         boxes: 2,
@@ -63,8 +63,6 @@ describe("createPos Controller", () => {
       body: {
         palletId: pallet._id.toString(),
         rowId: new mongoose.Types.ObjectId().toString(),
-        palletTitle: pallet.title,
-        rowTitle: "No Row",
         artikul: "ART-3",
         quant: 5,
         boxes: 2,
@@ -81,8 +79,6 @@ describe("createPos Controller", () => {
       body: {
         palletId: "invalid",
         rowId: row._id.toString(),
-        palletTitle: pallet.title,
-        rowTitle: row.title,
         artikul: "ART-4",
         quant: 5,
         boxes: 2,
@@ -99,8 +95,6 @@ describe("createPos Controller", () => {
       body: {
         palletId: pallet._id.toString(),
         rowId: row._id.toString(),
-        palletTitle: pallet.title,
-        rowTitle: row.title,
         artikul: "ART-5",
         quant: 5,
         boxes: 2,

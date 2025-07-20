@@ -12,8 +12,6 @@ const createPosSchema = z.object({
   rowId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
     message: "Invalid row ID",
   }),
-  palletTitle: z.string(),
-  rowTitle: z.string(),
   artikul: z.string(),
   quant: z.number(),
   boxes: z.number(),
@@ -31,8 +29,6 @@ export const createPos = async (req: Request, res: Response) => {
   const {
     palletId,
     rowId,
-    palletTitle,
-    rowTitle,
     artikul,
     quant,
     boxes,
@@ -63,6 +59,8 @@ export const createPos = async (req: Request, res: Response) => {
           {
             pallet: pallet._id,
             row: row._id,
+            palletTitle: pallet.title,
+            rowTitle: row.title,
             palletData: {
               _id: pallet._id,
               title: pallet.title,
@@ -72,14 +70,11 @@ export const createPos = async (req: Request, res: Response) => {
               _id: row._id,
               title: row.title,
             },
-            palletTitle,
-            rowTitle,
             artikul,
             quant,
             boxes,
             date,
             sklad,
-            limit: 100,
           },
         ],
         { session }
