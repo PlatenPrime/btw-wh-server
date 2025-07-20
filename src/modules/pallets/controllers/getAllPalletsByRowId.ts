@@ -16,6 +16,9 @@ export const getAllPalletsByRowId = async (req: Request, res: Response) => {
     const pallets: IPallet[] = await Pallet.find({
       "rowData._id": rowId,
     });
+
+    console.log("pallets", pallets);
+    
     if (!pallets) {
       return res.status(404).json({ message: "Pallets not found" });
     }
