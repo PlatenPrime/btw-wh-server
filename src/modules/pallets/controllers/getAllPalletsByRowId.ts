@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { IPallet, Pallet } from "../models/Pallet.js";
+import { sortPalletsByTitle } from "../utils/sortPalletsByTitle.js";
 
 
 /**
@@ -17,12 +18,16 @@ export const getAllPalletsByRowId = async (req: Request, res: Response) => {
       "rowData._id": rowId,
     });
 
-    console.log("pallets", pallets);
+
     
     if (!pallets) {
       return res.status(404).json({ message: "Pallets not found" });
     }
-    return res.status(200).json(pallets);
+
+    const sortedPallets = sortPalletsByTitle(pallets);
+
+
+    return res.status(200).json(sortedPallets);
   } catch (error) {
     return res.status(500).json({
       message: "Server error",

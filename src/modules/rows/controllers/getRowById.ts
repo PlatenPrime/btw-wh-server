@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Pallet } from "../../pallets/models/Pallet.js";
+import { sortPalletsByTitle } from "../../pallets/utils/sortPalletsByTitle.js";
 import { IRow, Row } from "../models/Row.js";
 
 export const getRowById = async (
@@ -25,10 +26,12 @@ export const getRowById = async (
       sector: p.sector,
     }));
 
+    const sortedPallets = sortPalletsByTitle(palletsFormatted);
+
     res.status(200).json({
       _id: row._id,
       title: row.title,
-      pallets: palletsFormatted,
+      pallets: sortedPallets,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
     });

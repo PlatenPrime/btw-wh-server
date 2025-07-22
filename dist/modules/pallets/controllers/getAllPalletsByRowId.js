@@ -1,4 +1,5 @@
 import { Pallet } from "../models/Pallet.js";
+import { sortPalletsByTitle } from "../utils/sortPalletsByTitle.js";
 /**
  * Get all pallets by rowId
  * @param req Express request with rowId param
@@ -13,11 +14,11 @@ export const getAllPalletsByRowId = async (req, res) => {
         const pallets = await Pallet.find({
             "rowData._id": rowId,
         });
-        console.log("pallets", pallets);
         if (!pallets) {
             return res.status(404).json({ message: "Pallets not found" });
         }
-        return res.status(200).json(pallets);
+        const sortedPallets = sortPalletsByTitle(pallets);
+        return res.status(200).json(sortedPallets);
     }
     catch (error) {
         return res.status(500).json({

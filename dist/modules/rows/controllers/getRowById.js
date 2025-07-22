@@ -1,4 +1,5 @@
 import { Pallet } from "../../pallets/models/Pallet.js";
+import { sortPalletsByTitle } from "../../pallets/utils/sortPalletsByTitle.js";
 import { Row } from "../models/Row.js";
 export const getRowById = async (req, res) => {
     const { id } = req.params;
@@ -14,10 +15,11 @@ export const getRowById = async (req, res) => {
             title: p.title,
             sector: p.sector,
         }));
+        const sortedPallets = sortPalletsByTitle(palletsFormatted);
         res.status(200).json({
             _id: row._id,
             title: row.title,
-            pallets: palletsFormatted,
+            pallets: sortedPallets,
             createdAt: row.createdAt,
             updatedAt: row.updatedAt,
         });
