@@ -18,12 +18,13 @@ export const getRowById = async (
     }
 
     const pallets = await Pallet.find({ "rowData._id": row._id }).select(
-      "_id title sector"
+      "_id title sector poses"
     );
     const palletsFormatted = pallets.map((p) => ({
       _id: p._id,
       title: p.title,
       sector: p.sector,
+      isEmpty: p.poses.length === 0,
     }));
 
     const sortedPallets = sortPalletsByTitle(palletsFormatted);

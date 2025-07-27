@@ -9,11 +9,12 @@ export const getRowById = async (req, res) => {
             res.status(404).json({ message: "Row not found" });
             return;
         }
-        const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector");
+        const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector poses");
         const palletsFormatted = pallets.map((p) => ({
             _id: p._id,
             title: p.title,
             sector: p.sector,
+            isEmpty: p.poses.length === 0,
         }));
         const sortedPallets = sortPalletsByTitle(palletsFormatted);
         res.status(200).json({
