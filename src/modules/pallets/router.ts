@@ -6,6 +6,7 @@ import {
   getAllPallets,
   getAllPalletsByRowId,
   getPalletById,
+  getPalletByTitle,
   movePalletPoses,
   updatePallet,
 } from "./controllers/index.js";
@@ -20,6 +21,7 @@ router.get("/", asyncHandler(getAllPallets));
 router.get("/by-row/:rowId", async (req, res) => {
   await getAllPalletsByRowId(req, res);
 });
+router.get("/by-title/:title", asyncHandler(getPalletByTitle));
 router.get("/:id", asyncHandler(getPalletById));
 router.put("/:id", asyncHandler(updatePallet));
 router.delete("/:id", asyncHandler(deletePallet));

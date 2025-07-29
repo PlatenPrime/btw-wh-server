@@ -16,7 +16,7 @@ export interface IRow extends Document {
  */
 const rowSchema = new Schema<IRow>(
   {
-    title: { type: String, required: true },
+    title: { type: String, required: true, unique: true },
     pallets: [{ type: Types.ObjectId, ref: "Pallet" }],
   },
   { timestamps: true }

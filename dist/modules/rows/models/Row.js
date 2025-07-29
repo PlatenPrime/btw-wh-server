@@ -4,7 +4,7 @@ import { model, Schema, Types } from "mongoose";
  * Row schema
  */
 const rowSchema = new Schema({
-    title: { type: String, required: true },
+    title: { type: String, required: true, unique: true },
     pallets: [{ type: Types.ObjectId, ref: "Pallet" }],
 }, { timestamps: true });
 /**

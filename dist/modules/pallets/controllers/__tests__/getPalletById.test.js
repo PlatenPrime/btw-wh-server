@@ -36,7 +36,7 @@ describe("getPalletById Controller", () => {
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseJson.title).toBe("Test Pallet");
-        expect(responseJson._id).toBe(pallet.id);
+        expect(responseJson._id.toString()).toBe(pallet.id);
     });
     it("should return 404 if pallet not found", async () => {
         // Arrange

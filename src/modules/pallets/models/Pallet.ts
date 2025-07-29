@@ -32,7 +32,7 @@ const rowSubdocumentSchema = new Schema<IRowSubdocument>(
 
 const palletSchema = new Schema<IPallet>(
   {
-    title: { type: String, required: true },
+    title: { type: String, required: true, unique: true },
     rowData: { type: rowSubdocumentSchema, required: true },
     row: { type: Schema.Types.ObjectId, required: true },
     poses: [{ type: Schema.Types.ObjectId, ref: "Pos" }],

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createPallet, deletePallet, deletePalletPoses, getAllPallets, getAllPalletsByRowId, getPalletById, movePalletPoses, updatePallet, } from "./controllers/index.js";
+import { createPallet, deletePallet, deletePalletPoses, getAllPallets, getAllPalletsByRowId, getPalletById, getPalletByTitle, movePalletPoses, updatePallet, } from "./controllers/index.js";
 const router = Router();
 const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 router.post("/", asyncHandler(createPallet));
@@ -7,6 +7,7 @@ router.get("/", asyncHandler(getAllPallets));
 router.get("/by-row/:rowId", async (req, res) => {
     await getAllPalletsByRowId(req, res);
 });
+router.get("/by-title/:title", asyncHandler(getPalletByTitle));
 router.get("/:id", asyncHandler(getPalletById));
 router.put("/:id", asyncHandler(updatePallet));
 router.delete("/:id", asyncHandler(deletePallet));
