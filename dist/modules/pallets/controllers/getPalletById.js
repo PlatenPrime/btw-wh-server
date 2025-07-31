@@ -6,7 +6,10 @@ export const getPalletById = async (req, res) => {
         return res.status(500).json({ message: "Server error" });
     }
     try {
-        const pallet = await Pallet.findById(id).populate("poses");
+        const pallet = await Pallet.findById(id).populate({
+            path: "poses",
+            options: { sort: { artikul: 1 } }, // Сортировка по artikul в алфавитном порядке
+        });
         if (!pallet) {
             return res.status(404).json({ message: "Pallet not found" });
         }

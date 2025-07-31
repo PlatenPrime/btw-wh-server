@@ -11,7 +11,10 @@ export const getPalletByTitle = async (req: Request, res: Response) => {
   try {
     const pallet: IPallet | null = await Pallet.findOne({
       title: title.trim(),
-    }).populate("poses");
+    }).populate({
+      path: "poses",
+      options: { sort: { artikul: 1 } }, // Сортировка по artikul в алфавитном порядке
+    });
 
     if (!pallet) {
       return res.status(404).json({ message: "Pallet not found" });

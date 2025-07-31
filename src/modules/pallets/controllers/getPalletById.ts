@@ -9,7 +9,10 @@ export const getPalletById = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
   try {
-    const pallet: IPallet | null = await Pallet.findById(id).populate("poses");
+    const pallet: IPallet | null = await Pallet.findById(id).populate({
+      path: "poses",
+      options: { sort: { artikul: 1 } }, // Сортировка по artikul в алфавитном порядке
+    });
     if (!pallet) {
       return res.status(404).json({ message: "Pallet not found" });
     }
