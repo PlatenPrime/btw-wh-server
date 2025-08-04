@@ -38,6 +38,7 @@ export const updatePos = async (req, res) => {
                 session,
             });
             console.log("Updated Pos: ", updatedPos);
+            res.json(updatedPos);
         });
     }
     catch (error) {

@@ -48,6 +48,8 @@ export const updatePos = async (req: Request, res: Response) => {
       });
 
       console.log("Updated Pos: ", updatedPos);
+
+      res.json(updatedPos);
     });
   } catch (error) {
     if (!res.headersSent) {
