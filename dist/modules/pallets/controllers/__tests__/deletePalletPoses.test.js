@@ -24,7 +24,6 @@ describe("deletePalletPoses Controller", () => {
     });
     it("should delete poses from a pallet", async () => {
         // Arrange
-        const poseId = new Types.ObjectId();
         const pallet = await Pallet.create({
             title: "Test Pallet",
             row: { _id: new Types.ObjectId(), title: "Test Row" },
@@ -32,9 +31,8 @@ describe("deletePalletPoses Controller", () => {
             poses: [],
         });
         mockRequest = {
-            body: {
-                palletId: pallet.id,
-                poses: [poseId.toString()],
+            params: {
+                id: pallet.id,
             },
         };
         // Act
@@ -43,13 +41,9 @@ describe("deletePalletPoses Controller", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.message).toBeDefined();
     });
-    it("should return 400 if palletId or poses missing", async () => {
+    it("should return 400 if pallet id missing", async () => {
         // Arrange
-        mockRequest = { body: { poses: [new Types.ObjectId().toString()] } };
-        await deletePalletPoses(mockRequest, res);
-        expect(responseStatus.code).toBe(400);
-        expect(responseJson.message).toBeDefined();
-        mockRequest = { body: { palletId: new Types.ObjectId().toString() } };
+        mockRequest = { params: {} };
         await deletePalletPoses(mockRequest, res);
         expect(responseStatus.code).toBe(400);
         expect(responseJson.message).toBeDefined();
@@ -64,9 +58,8 @@ describe("deletePalletPoses Controller", () => {
             poses: [],
         });
         mockRequest = {
-            body: {
-                palletId: pallet.id,
-                poses: [poseId.toString()],
+            params: {
+                id: pallet.id,
             },
         };
         vi.spyOn(Pallet.prototype, "save").mockRejectedValueOnce(new Error("DB error"));

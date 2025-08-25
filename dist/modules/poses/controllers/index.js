@@ -6,4 +6,3 @@ export { getPosById } from "./getPosById.js";
 export { getPosesByPalletId } from "./getPosesByPalletId.js";
 export { getPosesByRowId } from "./getPosesByRowId.js";
 export { updatePos } from "./updatePos.js";
-export { updateAllPosesNameukr } from "./updateAllPosesNameukr.js";

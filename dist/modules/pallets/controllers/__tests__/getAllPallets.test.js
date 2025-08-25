@@ -8,6 +8,7 @@ const createTestPallet = async (palletData = {}) => {
         row: { _id: new Types.ObjectId(), title: "Test Row" },
         rowData: { _id: new Types.ObjectId(), title: "Test Row" },
         poses: [],
+        ...palletData,
     });
 };
 describe("getAllPallets Controller", () => {

@@ -8,7 +8,7 @@ import {
   getPosesByPalletId,
   getPosesByRowId,
   updatePos,
-  updateAllPosesNameukr,
+
 } from "./controllers/index.js";
 import { populateMissingPosData } from "./controllers/populateMissingPosData.js";
 
@@ -27,7 +27,7 @@ router.get("/by-row/:rowId", getPosesByRowId);
 router.post("/", createPos);
 router.post("/bulk", bulkCreatePoses);
 router.post("/populate-missing-data", asyncHandler(populateMissingPosData));
-router.post("/update-nameukr", asyncHandler(updateAllPosesNameukr));
+
 
 // PUT routes
 router.put("/:id", updatePos);

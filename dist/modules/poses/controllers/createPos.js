@@ -1,15 +1,28 @@
 import mongoose from "mongoose";
+// import { z } from "zod";
 import { Pallet } from "../../pallets/models/Pallet.js";
 import { Row } from "../../rows/models/Row.js";
 import { Pos } from "../models/Pos.js";
-import { createPosSchema } from "../createPosSchema.js";
+// import { createPosSchema } from "../createPosSchema.js";
 export const createPos = async (req, res) => {
-    const parseResult = createPosSchema.safeParse(req.body);
-    if (!parseResult.success) {
-        res.status(400).json({ error: parseResult.error.errors });
-        return;
-    }
-    const { palletId, rowId, artikul, nameukr, quant, boxes, date, sklad, comment } = parseResult.data;
+    // const parseResult = createPosSchema.safeParse(req.body);
+    // console.log("PARSE RESULT: ",parseResult);
+    // if (!parseResult.success) {
+    //   res.status(400).json({ error: parseResult.error.errors });
+    //   return;
+    // }
+    // const {
+    //   palletId,
+    //   rowId,
+    //   artikul,
+    //   nameukr,
+    //   quant,
+    //   boxes,
+    //   date,
+    //   sklad,
+    //   comment
+    // } = parseResult.data;
+    const { palletId, rowId, artikul, nameukr, quant, boxes, date, sklad, comment } = req.body;
     const session = await mongoose.startSession();
     try {
         await session.withTransaction(async () => {

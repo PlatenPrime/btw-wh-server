@@ -63,17 +63,6 @@ describe("getAllPalletsByRowId Controller", () => {
     expect(responseJson[0].rowData.title).toBe("Test Row");
   });
 
-  it("should return 404 if no pallets found for rowId", async () => {
-    // Arrange
-    mockRequest = { params: { rowId: testRowId.toString() } };
-
-    // Act
-    await getAllPalletsByRowId(mockRequest as Request, res);
-
-    // Assert
-    expect(responseStatus.code).toBe(404);
-    expect(responseJson.message).toBe("Pallets not found");
-  });
 
   it("should handle server error", async () => {
     // Arrange

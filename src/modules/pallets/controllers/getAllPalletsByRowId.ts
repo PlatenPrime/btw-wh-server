@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { IPallet, Pallet } from "../models/Pallet.js";
 import { sortPalletsByTitle } from "../utils/sortPalletsByTitle.js";
+import { Row } from "../../rows/models/Row.js";
 
 
 /**
@@ -14,6 +15,10 @@ export const getAllPalletsByRowId = async (req: Request, res: Response) => {
     return res.status(400).json({ message: "Missing rowId parameter" });
   }
   try {
+
+
+
+
     const pallets: IPallet[] = await Pallet.find({
       "rowData._id": rowId,
     });
