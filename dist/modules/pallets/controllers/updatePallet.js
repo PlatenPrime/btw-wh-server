@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { z } from "zod";
+import { Pos } from "../../poses/models/Pos.js";
 import { Pallet } from "../models/Pallet.js";
 const updatePalletSchema = z.object({
     title: z.string().min(1).optional(),
@@ -39,10 +40,14 @@ export const updatePallet = async (req, res) => {
                     return res.status(404).json({ message: "Pallet not found" });
                 }
                 const { title, sector, poses, rowId } = parseResult.data;
-                if (title !== undefined)
+                if (title !== undefined) {
                     pallet.title = title;
-                if (sector !== undefined)
+                    await Pos.updateMany({ pallet: id }, { $set: { "palletData.title": title, palletTitle: title } });
+                }
+                if (sector !== undefined) {
                     pallet.sector = sector;
+                    await Pos.updateMany({ pallet: id }, { $set: { "palletData.sector": sector } });
+                }
                 if (poses !== undefined)
                     pallet.poses = poses.map((id) => new mongoose.Types.ObjectId(id));
                 if (rowId !== undefined) {

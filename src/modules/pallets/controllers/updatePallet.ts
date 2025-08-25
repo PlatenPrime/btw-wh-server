@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
+import { Pos } from "../../poses/models/Pos.js";
 import { Pallet } from "../models/Pallet.js";
 
 const updatePalletSchema = z.object({
@@ -44,8 +45,20 @@ export const updatePallet = async (req: Request, res: Response) => {
           return res.status(404).json({ message: "Pallet not found" });
         }
         const { title, sector, poses, rowId } = parseResult.data;
-        if (title !== undefined) pallet.title = title;
-        if (sector !== undefined) pallet.sector = sector;
+        if (title !== undefined) {
+          pallet.title = title;
+          await Pos.updateMany(
+            { pallet: id },
+            { $set: { "palletData.title": title, palletTitle: title } }
+          );
+        }
+        if (sector !== undefined) {
+          pallet.sector = sector;
+          await Pos.updateMany(
+            { pallet: id },
+            { $set: { "palletData.sector": sector } }
+          );
+        }
         if (poses !== undefined)
           pallet.poses = poses.map((id) => new mongoose.Types.ObjectId(id));
         if (rowId !== undefined) {
