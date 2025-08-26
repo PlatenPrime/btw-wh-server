@@ -2,11 +2,14 @@ import { Request, Response } from "express";
 import { IPallet, Pallet } from "../models/Pallet.js";
 import { sortPalletsByTitle } from "../utils/sortPalletsByTitle.js";
 
-export const getAllPallets = async (req: Request, res: Response) => {
+export const getEmptyPallets = async (req: Request, res: Response) => {
   try {
-    const pallets: IPallet[] = await Pallet.find();
+    const pallets: IPallet[] = await Pallet.find({
+      $or: [{ poses: { $exists: false } }, { poses: { $size: 0 } }],
+    });
+
     if (!pallets || pallets.length === 0) {
-      return res.status(404).json({ message: "Pallets not found" });
+      return res.status(404).json({ message: "Empty pallets not found" });
     }
 
     const sortedPallets = sortPalletsByTitle(pallets);

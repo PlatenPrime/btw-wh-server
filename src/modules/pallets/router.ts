@@ -5,6 +5,7 @@ import {
   deletePalletPoses,
   getAllPallets,
   getAllPalletsByRowId,
+  getEmptyPallets,
   getPalletById,
   getPalletByTitle,
   movePalletPoses,
@@ -18,6 +19,7 @@ const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
 
 router.post("/", asyncHandler(createPallet));
 router.get("/", asyncHandler(getAllPallets));
+router.get("/empty", asyncHandler(getEmptyPallets));
 router.get("/by-row/:rowId", async (req, res) => {
   await getAllPalletsByRowId(req, res);
 });

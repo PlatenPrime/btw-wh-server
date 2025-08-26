@@ -3,6 +3,7 @@ export { deletePallet } from "./deletePallet.js";
 export { deletePalletPoses } from "./deletePalletPoses.js";
 export { getAllPallets } from "./getAllPallets.js";
 export { getAllPalletsByRowId } from "./getAllPalletsByRowId.js";
+export { getEmptyPallets } from "./getEmptyPallets.js";
 export { getPalletById } from "./getPalletById.js";
 export { getPalletByTitle } from "./getPalletByTitle.js";
 export { movePalletPoses } from "./movePalletPoses.js";
