@@ -2,7 +2,8 @@ import mongoose, { Document, Model, Schema, Types } from "mongoose";
 import { IUser } from "../../auth/models/User.js";
 
 type AskUserData = Pick<IUser, "id" | "fullname" | "telegram" | "photo">;
-type AskStatus = "new" | "in_progress" | "completed" | "cancelled";
+export type AskStatus = "new" | "in_progress" | "completed" | "cancelled";
+export const validAskStatuses: AskStatus[] = ["new", "in_progress", "completed", "cancelled"];
 
 export interface IAsk extends Document {
   artikul: string;

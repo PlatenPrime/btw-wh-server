@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+export const validAskStatuses = ["new", "in_progress", "completed", "cancelled"];
 const askUserDataSchema = new Schema({
     id: { type: String, required: true },
     fullname: { type: String, required: true },
