@@ -1,26 +1,41 @@
 import { Request, Response } from "express";
 import { Ask, IAsk } from "../models/Ask.js";
+import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
+import User from "../../auth/models/User.js";
+
 
 export const createAsk = async (req: Request, res: Response) => {
   try {
-    const { artikul, nameukr, quant, com, askerData } = req.body;
-    const now = new Date();
-    const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
-    const formattedDateTime = `${pad(now.getDate())}.${pad(
-      now.getMonth() + 1
-    )}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const { artikul, nameukr, quant, com, askerId } = req.body;
+
+    const askerData = await User.findById(askerId);
+
+    if (!askerData) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const time = getCurrentFormattedDateTime();
+
     const actions = [
-      `${formattedDateTime} ${
+      `${time} ${
         askerData?.fullname ?? ""
-      } необхідно ${nameukr} в кількості ${quant}, коментарій: ${com}`,
+      }: необхідно ${nameukr} в кількості ${quant} ${
+        com && ", коментарій: "
+      }${com}`,
     ];
+
     const ask: IAsk = new Ask({
       artikul,
       nameukr,
       quant,
       com,
-      asker: askerData.id,
-      askerData,
+      asker: askerId,
+      askerData: {
+        id: askerData?._id.toString(),
+        fullname: askerData?.fullname,
+        telegram: askerData?.telegram,
+        photo: askerData?.photo,
+      },
       actions,
       status: "new",
     });
