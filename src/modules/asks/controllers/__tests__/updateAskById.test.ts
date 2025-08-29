@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestAsk, createTestUser } from "../../../../test/setup.js";
+import { Ask } from "../../models/Ask.js";
 import { updateAskById } from "../updateAskById.js";
 
 // Mock the getCurrentFormattedDateTime utility to return a predictable format
@@ -369,5 +370,30 @@ describe("updateAskById Controller", () => {
     expect(responseJson.updatedAt.getTime()).toBeGreaterThan(
       testAsk.updatedAt.getTime()
     );
+  });
+
+  it("should return 500 when findByIdAndUpdate returns null", async () => {
+    // Arrange - mock Ask.findByIdAndUpdate to return null
+    const mockFindByIdAndUpdate = vi
+      .spyOn(Ask, "findByIdAndUpdate")
+      .mockResolvedValueOnce(null);
+
+    mockRequest = {
+      params: { id: testAsk._id.toString() },
+      body: {
+        solverId: solverUser._id.toString(),
+        action: "почав обробку запиту",
+      },
+    };
+
+    // Act
+    await updateAskById(mockRequest as Request, res);
+
+    // Assert
+    expect(responseStatus.code).toBe(500);
+    expect(responseJson.message).toBe("Failed to update ask");
+
+    // Cleanup
+    mockFindByIdAndUpdate.mockRestore();
   });
 });
