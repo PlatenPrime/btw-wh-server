@@ -6,6 +6,7 @@ import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 // Import models to register schemas
 import "../modules/arts/models/Art.js";
 import "../modules/auth/models/User.js";
+import "../modules/asks/models/Ask.js";
 import "../modules/pallets/models/Pallet.js";
 import "../modules/poses/models/Pos.js";
 import "../modules/rows/models/Row.js";
@@ -79,5 +80,39 @@ export const createTestArt = async (artData: any = {}) => {
     zone: "A1",
     limit: 100,
     ...artData,
+  });
+};
+
+export const createTestAsk = async (askData: any = {}) => {
+  const Ask = mongoose.model("Ask");
+  const User = mongoose.model("User");
+  
+  // Create a test user if not provided
+  let asker = askData.asker;
+  if (!asker) {
+    asker = await User.create({
+      username: `testuser-${Date.now()}`,
+      fullname: "Test User",
+      password: "password123",
+      role: "user",
+    });
+  }
+
+  return await Ask.create({
+    artikul: `ART-${Date.now()}`,
+    nameukr: "Test Ask",
+    quant: 10,
+    com: "Test comment",
+    asker: asker._id,
+    askerData: {
+      id: asker._id.toString(),
+      fullname: asker.fullname,
+      telegram: asker.telegram,
+      photo: asker.photo,
+    },
+    solver: asker._id, // Same user for simplicity in tests
+    status: "new",
+    actions: [],
+    ...askData,
   });
 };
