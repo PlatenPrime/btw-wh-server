@@ -1,0 +1,180 @@
+# Правила проекта btw-wh-server
+
+## Технологический стек
+
+- **Backend**: Node.js + Express.js 5.0
+- **Language**: TypeScript (strict mode)
+- **Database**: MongoDB + Mongoose ODM
+- **Testing**: Vitest + MongoDB Memory Server
+- **Authentication**: JWT + bcryptjs
+- **Validation**: Zod + express-validator
+- **Build**: TypeScript compiler (tsc)
+- **Dev Server**: tsx (TypeScript execution)
+
+## Архитектура проекта
+
+### Структура модулей
+
+Каждый модуль (`arts`, `asks`, `auth`, `pallets`, `poses`, `rows`) имеет стандартную структуру:
+
+```
+modules/[module]/
+├── controllers/     # Бизнес-логика и обработка запросов
+├── models/         # Mongoose схемы и интерфейсы
+├── router.ts       # Express роуты
+└── utils/          # Утилиты модуля (опционально)
+```
+
+### Основные принципы
+
+- **Модульная архитектура**: каждый модуль самодостаточен
+- **REST API**: стандартные HTTP методы (GET, POST, PUT, DELETE)
+- **MVC паттерн**: разделение на модели, контроллеры и роуты
+- **Middleware подход**: использование express middleware
+
+## Стиль кода
+
+### TypeScript
+
+- Строгая типизация (`strict: true`)
+- ES модули (`"type": "module"`)
+- Интерфейсы для всех моделей данных
+- Типизация Express Request/Response
+
+### Контроллеры
+
+- Асинхронные функции с try-catch
+- Ранний возврат при ошибках
+- Стандартные HTTP статус коды
+- JSON ответы с message/data полями
+
+### Модели
+
+- Mongoose схемы с TypeScript интерфейсами
+- Timestamps автоматически
+- Валидация через Zod при создании
+- Ссылки между коллекциями через ObjectId
+
+## Тестирование
+
+### Настройка тестов
+
+- **Vitest** как основной тест-раннер
+- **MongoDB Memory Server** для изолированных тестов
+- **Setup файл** для глобальной конфигурации
+- **Coverage** через v8 провайдер
+
+### Структура тестов
+
+- Unit тесты для утилит
+- Integration тесты для API endpoints
+- Тестовые хелперы для создания данных
+- Автоматическая очистка коллекций между тестами
+
+### Паттерны тестирования
+
+- `beforeAll/afterAll` для setup/teardown
+- `beforeEach` для очистки данных
+- Тестовые фабрики для создания объектов
+- Проверка HTTP статусов и структуры ответов
+
+## Утилиты и middleware
+
+### Глобальные утилиты
+
+- `asyncHandler`: обертка для асинхронных контроллеров
+- `getCurrentFormattedDateTime`: форматирование дат
+- CORS middleware для cross-origin запросов
+- Body parser с лимитом 20MB
+
+### Валидация
+
+- **Zod** для схем валидации
+- **express-validator** для middleware валидации
+- Валидация ObjectId через mongoose.Types.ObjectId.isValid
+
+## Конфигурация
+
+### TypeScript
+
+- Target: ESNext
+- Module: NodeNext
+- OutDir: ./dist
+- RootDir: ./src
+- Алиас @ для src директории
+
+### Environment
+
+- Переменные окружения через dotenv
+- MongoDB Atlas для продакшена
+- MongoDB Memory Server для тестов
+- Порт по умолчанию: 3232
+
+## API Endpoints
+
+### Стандартные роуты
+
+- `/api/auth` - аутентификация и пользователи
+- `/api/arts` - артикулы товаров
+- `/api/asks` - заявки
+- `/api/rows` - ряды склада
+- `/api/pallets` - паллеты
+- `/api/poses` - позиции товаров
+
+### HTTP методы
+
+- GET для получения данных (с пагинацией и поиском)
+- POST для создания новых записей
+- PUT для обновления существующих записей
+- DELETE для удаления записей
+
+## Безопасность
+
+### Аутентификация
+
+- JWT токены для сессий
+- bcryptjs для хеширования паролей
+- Роли пользователей (user, admin)
+- Защищенные роуты через middleware
+
+### Валидация данных
+
+- Проверка входящих данных
+- Санитизация пользовательского ввода
+- Валидация ObjectId перед запросами к БД
+
+## Производительность
+
+### Оптимизации
+
+- Пагинация для больших списков
+- Индексы в MongoDB для быстрого поиска
+- Лимиты на размер запросов
+- Эффективные MongoDB запросы
+
+### Мониторинг
+
+- Логирование ошибок
+- Обработка исключений
+- Graceful shutdown для сервера
+
+## Разработка
+
+### Скрипты
+
+- `npm run dev` - разработка с hot reload
+- `npm run build` - компиляция TypeScript
+- `npm run test` - запуск тестов
+- `npm run test:coverage` - покрытие кода тестами
+
+### Структура файлов
+
+- Исходный код в `src/`
+- Скомпилированный код в `dist/`
+- Тесты рядом с исходным кодом
+- README файлы для документации модулей
+  description:
+  globs:
+  alwaysApply: true
+
+---
