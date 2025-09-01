@@ -2,9 +2,10 @@ import { Request, Response } from "express";
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
 import User from "../../auth/models/User.js";
 import { Ask, type AskStatus, IAsk, validAskStatuses } from "../models/Ask.js";
+import { Types } from "mongoose";
 
 interface UpdateAskRequest {
-  solverId: string;
+  solverId: Types.ObjectId;
   action: string;
   status?: AskStatus;
 }
@@ -38,7 +39,7 @@ export const updateAskById = async (req: Request, res: Response) => {
 
     // Подготавливаем данные solver
     const solverData = {
-      id: solver._id.toString(),
+      _id: solver._id,
       fullname: solver.fullname,
       telegram: solver.telegram,
       photo: solver.photo,
@@ -65,7 +66,7 @@ export const updateAskById = async (req: Request, res: Response) => {
     const updateFields: Partial<IAsk> = {
       actions: updatedActions,
       solverData,
-      solver: updateData.solverId as any,
+      solver: updateData.solverId,
     };
 
     // Добавляем status только если он передан

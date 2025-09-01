@@ -25,7 +25,7 @@ export const updateAskById = async (req, res) => {
         }
         // Подготавливаем данные solver
         const solverData = {
-            id: solver._id.toString(),
+            _id: solver._id,
             fullname: solver.fullname,
             telegram: solver.telegram,
             photo: solver.photo,

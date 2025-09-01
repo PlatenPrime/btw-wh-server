@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 export const validAskStatuses = ["new", "in_progress", "completed", "cancelled"];
 const askUserDataSchema = new Schema({
-    id: { type: String, required: true },
+    _id: { type: Schema.Types.ObjectId, required: true },
     fullname: { type: String, required: true },
     telegram: { type: String },
     photo: { type: String },

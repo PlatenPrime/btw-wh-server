@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
 import { IUser } from "../../auth/models/User.js";
 
-type AskUserData = Pick<IUser, "id" | "fullname" | "telegram" | "photo">;
+type AskUserData = Pick<IUser, "_id" | "fullname" | "telegram" | "photo">;
 export type AskStatus = "new" | "in_progress" | "completed" | "cancelled";
 export const validAskStatuses: AskStatus[] = ["new", "in_progress", "completed", "cancelled"];
 
@@ -22,7 +22,7 @@ export interface IAsk extends Document {
 
 const askUserDataSchema = new Schema<AskUserData>(
   {
-    id: { type: String, required: true },
+    _id: { type: Schema.Types.ObjectId, required: true },
     fullname: { type: String, required: true },
     telegram: { type: String },
     photo: { type: String },

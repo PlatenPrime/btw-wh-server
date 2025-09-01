@@ -4,13 +4,13 @@ import User from "../../auth/models/User.js";
 export const createAsk = async (req, res) => {
     try {
         const { artikul, nameukr, quant, com, askerId } = req.body;
-        const askerData = await User.findById(askerId);
-        if (!askerData) {
+        const asker = await User.findById(askerId);
+        if (!asker) {
             return res.status(404).json({ message: "User not found" });
         }
         const time = getCurrentFormattedDateTime();
         const actions = [
-            `${time} ${askerData?.fullname ?? ""}: необхідно ${nameukr} в кількості ${quant} ${com && ", коментарій: "}${com}`,
+            `${time} ${asker?.fullname ?? ""}: необхідно ${nameukr} в кількості ${quant} ${com && ", коментарій: "}${com}`,
         ];
         const ask = new Ask({
             artikul,
@@ -19,10 +19,10 @@ export const createAsk = async (req, res) => {
             com,
             asker: askerId,
             askerData: {
-                id: askerData?._id.toString(),
-                fullname: askerData?.fullname,
-                telegram: askerData?.telegram,
-                photo: askerData?.photo,
+                _id: asker?._id,
+                fullname: asker?.fullname,
+                telegram: asker?.telegram,
+                photo: asker?.photo,
             },
             actions,
             status: "new",

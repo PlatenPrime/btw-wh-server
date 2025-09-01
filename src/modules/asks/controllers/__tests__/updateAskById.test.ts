@@ -57,7 +57,7 @@ describe("updateAskById Controller", () => {
       com: "Test comment",
       asker: testUser._id,
       askerData: {
-        id: testUser._id.toString(),
+        _id: testUser._id,
         fullname: testUser.fullname,
         telegram: testUser.telegram,
         photo: testUser.photo,
@@ -72,14 +72,14 @@ describe("updateAskById Controller", () => {
   it("should update ask with valid data and add action", async () => {
     // Arrange
     mockRequest = {
-      params: { id: testAsk._id.toString() },
+      params: { id: testAsk._id },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "почав обробку запиту",
       },
     };
 
-    // Act
+    // Act  
     await updateAskById(mockRequest as Request, res);
 
     // Assert
@@ -89,9 +89,9 @@ describe("updateAskById Controller", () => {
     expect(responseJson.quant).toBe(10);
     expect(responseJson.com).toBe("Test comment");
     expect(responseJson.status).toBe("new"); // Status should remain unchanged
-    expect(responseJson.solver.toString()).toBe(solverUser._id.toString());
+    expect(responseJson.solver).toStrictEqual(solverUser._id);
     expect(responseJson.solverData).toBeDefined();
-    expect(responseJson.solverData.id).toBe(solverUser._id.toString());
+    expect(responseJson.solverData._id).toStrictEqual(solverUser._id);
     expect(responseJson.solverData.fullname).toBe("Solver User");
     expect(responseJson.solverData.telegram).toBe("@solveruser");
     expect(responseJson.solverData.photo).toBe("solver-photo.jpg");
@@ -107,9 +107,9 @@ describe("updateAskById Controller", () => {
   it("should update ask with status change", async () => {
     // Arrange
     mockRequest = {
-      params: { id: testAsk._id.toString() },
+      params: { id: testAsk._id },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "завершив обробку запиту",
         status: "completed",
       },
@@ -121,7 +121,7 @@ describe("updateAskById Controller", () => {
     // Assert
     expect(responseStatus.code).toBe(200);
     expect(responseJson.status).toBe("completed");
-    expect(responseJson.solver.toString()).toBe(solverUser._id.toString());
+    expect(responseJson.solver).toStrictEqual(solverUser._id);
     expect(responseJson.actions).toHaveLength(2);
     expect(responseJson.actions[1]).toBe(
       "15.01.2024 10:30 Solver User: завершив обробку запиту"
@@ -134,9 +134,9 @@ describe("updateAskById Controller", () => {
     for (const status of validStatuses) {
       // Arrange
       mockRequest = {
-        params: { id: testAsk._id.toString() },
+        params: { id: testAsk._id },
         body: {
-          solverId: solverUser._id.toString(),
+          solverId: solverUser._id,
           action: `змінив статус на ${status}`,
           status: status as any,
         },
@@ -154,7 +154,7 @@ describe("updateAskById Controller", () => {
   it("should return 400 when solverId is missing", async () => {
     // Arrange
     mockRequest = {
-      params: { id: testAsk._id.toString() },
+      params: { id: testAsk._id },
       body: {
         action: "почав обробку запиту",
       },
@@ -171,9 +171,9 @@ describe("updateAskById Controller", () => {
   it("should return 400 when action is missing", async () => {
     // Arrange
     mockRequest = {
-      params: { id: testAsk._id.toString() },
+      params: { id: testAsk._id },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
       },
     };
 
@@ -191,7 +191,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: nonExistentId.toString() },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "почав обробку запиту",
       },
     };
@@ -210,7 +210,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: testAsk._id.toString() },
       body: {
-        solverId: nonExistentUserId.toString(),
+        solverId: nonExistentUserId,
         action: "почав обробку запиту",
       },
     };
@@ -228,7 +228,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: testAsk._id.toString() },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "спробував встановити невалідний статус",
         status: "invalid_status",
       },
@@ -249,7 +249,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: testAsk._id.toString() },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "додав нову дію",
       },
     };
@@ -274,7 +274,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: testAsk._id.toString() },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "оновлю без зміни статусу",
       },
     };
@@ -285,7 +285,7 @@ describe("updateAskById Controller", () => {
     // Assert
     expect(responseStatus.code).toBe(200);
     expect(responseJson.status).toBe(originalStatus);
-    expect(responseJson.solver.toString()).toBe(solverUser._id.toString());
+    expect(responseJson.solver).toStrictEqual(solverUser._id);
   });
 
   it("should return 500 for invalid ObjectId format", async () => {
@@ -293,7 +293,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: "invalid-id-format" },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "почав обробку запиту",
       },
     };
@@ -314,7 +314,7 @@ describe("updateAskById Controller", () => {
       nameukr: "Empty Actions Ask",
       asker: testUser._id,
       askerData: {
-        id: testUser._id.toString(),
+        _id: testUser._id,
         fullname: testUser.fullname,
         telegram: testUser.telegram,
         photo: testUser.photo,
@@ -325,7 +325,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: emptyActionsAsk._id.toString() },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "перша дія для пустого масиву",
       },
     };
@@ -346,7 +346,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: testAsk._id.toString() },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "оновлюю запит",
       },
     };
@@ -361,7 +361,7 @@ describe("updateAskById Controller", () => {
     expect(responseJson.com).toBe(testAsk.com);
     expect(responseJson.asker.toString()).toBe(testAsk.asker.toString());
     // Compare askerData fields individually to avoid Mongoose object comparison issues
-    expect(responseJson.askerData.id).toBe(testAsk.askerData.id);
+    expect(responseJson.askerData._id).toStrictEqual(testAsk.askerData._id);
     expect(responseJson.askerData.fullname).toBe(testAsk.askerData.fullname);
     expect(responseJson.askerData.telegram).toBe(testAsk.askerData.telegram);
     expect(responseJson.askerData.photo).toBe(testAsk.askerData.photo);
@@ -381,7 +381,7 @@ describe("updateAskById Controller", () => {
     mockRequest = {
       params: { id: testAsk._id.toString() },
       body: {
-        solverId: solverUser._id.toString(),
+        solverId: solverUser._id,
         action: "почав обробку запиту",
       },
     };

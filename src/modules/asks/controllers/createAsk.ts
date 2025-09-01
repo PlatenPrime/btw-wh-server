@@ -2,15 +2,26 @@ import { Request, Response } from "express";
 import { Ask, IAsk } from "../models/Ask.js";
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
 import User from "../../auth/models/User.js";
+import { Types } from "mongoose";
+
+
+interface CreateAskRequest {
+  artikul: string;
+  nameukr: string;
+  quant: number;
+  com: string;
+  askerId: Types.ObjectId;
+}
+
 
 
 export const createAsk = async (req: Request, res: Response) => {
   try {
-    const { artikul, nameukr, quant, com, askerId } = req.body;
+    const { artikul, nameukr, quant, com, askerId }: CreateAskRequest = req.body;
 
-    const askerData = await User.findById(askerId);
+    const asker = await User.findById(askerId);
 
-    if (!askerData) {
+    if (!asker) {
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -18,7 +29,7 @@ export const createAsk = async (req: Request, res: Response) => {
 
     const actions = [
       `${time} ${
-        askerData?.fullname ?? ""
+        asker?.fullname ?? ""
       }: необхідно ${nameukr} в кількості ${quant} ${
         com && ", коментарій: "
       }${com}`,
@@ -31,10 +42,10 @@ export const createAsk = async (req: Request, res: Response) => {
       com,
       asker: askerId,
       askerData: {
-        id: askerData?._id.toString(),
-        fullname: askerData?.fullname,
-        telegram: askerData?.telegram,
-        photo: askerData?.photo,
+        _id: asker?._id,
+        fullname: asker?.fullname,
+        telegram: asker?.telegram,
+        photo: asker?.photo,
       },
       actions,
       status: "new",
