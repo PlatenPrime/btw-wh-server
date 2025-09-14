@@ -16,7 +16,7 @@ export const getPosesByArtikul = async (req, res) => {
         }
         // Find all poses with the specified artikul
         const poses = await Pos.find({ artikul }).exec();
-        if (!poses || poses.length === 0) {
+        if (!poses) {
             return res.status(404).json({
                 success: false,
                 message: "No poses found with the specified artikul",

@@ -39,10 +39,36 @@ describe("getPosesByArtikul", () => {
             message: "Artikul parameter is required",
         });
     });
-    it("should return 404 if no poses found", async () => {
+    it("should return 200 with empty data when no poses found (empty array)", async () => {
         mockReq.params = { artikul: "TEST123" };
         Pos.find.mockReturnValue({
             exec: vi.fn().mockResolvedValue([]),
+        });
+        await getPosesByArtikul(mockReq, mockRes);
+        expect(mockStatus).toHaveBeenCalledWith(200);
+        expect(mockJson).toHaveBeenCalledWith({
+            success: true,
+            data: {
+                total: 0,
+                pogrebi: {
+                    poses: [],
+                    quant: 0,
+                    boxes: 0,
+                },
+                merezhi: {
+                    poses: [],
+                    quant: 0,
+                    boxes: 0,
+                },
+                totalQuant: 0,
+                totalBoxes: 0,
+            },
+        });
+    });
+    it("should return 404 if database returns null", async () => {
+        mockReq.params = { artikul: "TEST123" };
+        Pos.find.mockReturnValue({
+            exec: vi.fn().mockResolvedValue(null),
         });
         await getPosesByArtikul(mockReq, mockRes);
         expect(mockStatus).toHaveBeenCalledWith(404);
