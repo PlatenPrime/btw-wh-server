@@ -1,6 +1,8 @@
 export function getCurrentFormattedDateTime() {
     const now = new Date();
     const pad = (n) => (n < 10 ? `0${n}` : `${n}`);
-    const formattedDateTime = `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    // Convert to Kyiv timezone (Europe/Kyiv)
+    const kyivTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Kyiv" }));
+    const formattedDateTime = `${pad(kyivTime.getDate())}.${pad(kyivTime.getMonth() + 1)}.${kyivTime.getFullYear()} ${pad(kyivTime.getHours())}:${pad(kyivTime.getMinutes())}`;
     return formattedDateTime;
 }

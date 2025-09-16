@@ -2,8 +2,8 @@ import mongoose, { Document, Model, Schema, Types } from "mongoose";
 import { IUser } from "../../auth/models/User.js";
 
 type AskUserData = Pick<IUser, "_id" | "fullname" | "telegram" | "photo">;
-export type AskStatus = "new" | "in_progress" | "completed" | "cancelled";
-export const validAskStatuses: AskStatus[] = ["new", "in_progress", "completed", "cancelled"];
+export type AskStatus = "new"  | "completed" | "rejected";
+export const validAskStatuses: AskStatus[] = ["new",  "completed", "rejected"];
 
 export interface IAsk extends Document {
   artikul: string;
@@ -42,7 +42,7 @@ const askSchema = new Schema<IAsk>(
     solverData: { type: askUserDataSchema },
     status: {
       type: String,
-      enum: ["new", "in_progress", "completed", "cancelled"],
+      enum: ["new", "completed", "rejected"],
       default: "new",
     },
     actions: { type: [String], default: [] },

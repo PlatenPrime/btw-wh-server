@@ -7,6 +7,7 @@ import {
   getAsksByDate,
   updateAskById,
 } from "./controllers/index.js";
+import { completeAskById } from "./controllers/completeAskById.js";
 
 const router = Router();
 
@@ -17,6 +18,8 @@ router.get("/by-date", asyncHandler(getAsksByDate));
 router.get("/:id", asyncHandler(getAskById));
 
 router.put("/:id", asyncHandler(updateAskById));
+
+router.patch("/:id/complete", asyncHandler(completeAskById));
 
 router.delete("/:id", asyncHandler(deleteAskById));
 

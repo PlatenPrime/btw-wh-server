@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-export const validAskStatuses = ["new", "in_progress", "completed", "cancelled"];
+export const validAskStatuses = ["new", "completed", "rejected"];
 const askUserDataSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
     fullname: { type: String, required: true },
@@ -17,7 +17,7 @@ const askSchema = new Schema({
     solverData: { type: askUserDataSchema },
     status: {
         type: String,
-        enum: ["new", "in_progress", "completed", "cancelled"],
+        enum: ["new", "completed", "rejected"],
         default: "new",
     },
     actions: { type: [String], default: [] },
