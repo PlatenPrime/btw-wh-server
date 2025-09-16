@@ -8,6 +8,7 @@ import {
   getAskById,
   getAsksByDate,
   rejectAskById,
+  updateAskActionsById,
   updateAskById,
 } from "./controllers/index.js";
 
@@ -24,6 +25,8 @@ router.put("/:id", asyncHandler(updateAskById));
 router.patch("/:id/complete", asyncHandler(completeAskById));
 
 router.patch("/:id/reject", asyncHandler(rejectAskById));
+
+router.patch("/:id/actions", asyncHandler(updateAskActionsById));
 
 router.delete("/:id", asyncHandler(deleteAskById));
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { completeAskById, createAsk, deleteAskById, getAskById, getAsksByDate, rejectAskById, updateAskById, } from "./controllers/index.js";
+import { completeAskById, createAsk, deleteAskById, getAskById, getAsksByDate, rejectAskById, updateAskActionsById, updateAskById, } from "./controllers/index.js";
 const router = Router();
 router.post("/", asyncHandler(createAsk));
 router.get("/by-date", asyncHandler(getAsksByDate));
@@ -8,5 +8,6 @@ router.get("/:id", asyncHandler(getAskById));
 router.put("/:id", asyncHandler(updateAskById));
 router.patch("/:id/complete", asyncHandler(completeAskById));
 router.patch("/:id/reject", asyncHandler(rejectAskById));
+router.patch("/:id/actions", asyncHandler(updateAskActionsById));
 router.delete("/:id", asyncHandler(deleteAskById));
 export default router;
