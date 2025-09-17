@@ -30,9 +30,9 @@ export const createAsk = async (req: Request, res: Response) => {
     const actions = [
       `${time} ${
         asker?.fullname ?? ""
-      }: необхідно ${nameukr} в кількості ${quant} ${
-        com && ", коментарій: "
-      }${com}`,
+      }: необхідно ${nameukr}
+      ${quant > 0 && ", кількість: "}${quant}
+      ${com && ", коментарій: "}${com}`,
     ];
 
     const ask: IAsk = new Ask({

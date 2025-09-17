@@ -10,7 +10,9 @@ export const createAsk = async (req, res) => {
         }
         const time = getCurrentFormattedDateTime();
         const actions = [
-            `${time} ${asker?.fullname ?? ""}: необхідно ${nameukr} в кількості ${quant} ${com && ", коментарій: "}${com}`,
+            `${time} ${asker?.fullname ?? ""}: необхідно ${nameukr}
+      ${quant > 0 && ", кількість: "}${quant}
+      ${com && ", коментарій: "}${com}`,
         ];
         const ask = new Ask({
             artikul,
