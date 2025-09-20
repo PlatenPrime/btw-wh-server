@@ -31,7 +31,7 @@ export const createAsk = async (req: Request, res: Response) => {
       `${time} ${
         asker?.fullname ?? ""
       }: необхідно ${nameukr}
-      ${quant > 0 && ", кількість: "}${quant}
+      ${quant  && ", кількість: "}${quant}
       ${com && ", коментарій: "}${com}`,
     ];
 
