@@ -4,6 +4,7 @@ import {
   getArt,
   getArtById,
   getBtradeArtInfo,
+  updateArtLimit,
   upsertArts,
 } from "./controllers/index.js";
     
@@ -16,6 +17,8 @@ router.get("/id/:id", getArtById);
 router.get("/artikul/:artikul", getArt);
 
 router.get("/btrade/:artikul", getBtradeArtInfo);
+
+router.patch("/limit/:id", updateArtLimit);
 
 router.post("/upsert", (req, res, next) => upsertArts(req, res, next));
 

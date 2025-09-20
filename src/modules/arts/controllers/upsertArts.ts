@@ -1,13 +1,17 @@
 // controllers/upsertArts.ts
-import { NextFunction, Request,  Response } from "express";
-import {Art} from "../models/Art.js";
+import { NextFunction, Request, Response } from "express";
+import { Art } from "../models/Art.js";
 
-export const upsertArts  = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const upsertArts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   const arts = req.body;
 
   if (!Array.isArray(arts) || arts.length === 0) {
-     res.status(400).json({ message: "Invalid or empty data" });  
-     return
+    res.status(400).json({ message: "Invalid or empty data" });
+    return;
   }
 
   const operations = arts.map((art) => ({
@@ -18,6 +22,10 @@ export const upsertArts  = async (req: Request, res: Response, next: NextFunctio
           zone: art.zone,
           namerus: art.namerus,
           nameukr: art.nameukr,
+          ...(art.limit !== undefined &&
+            art.limit !== null && { limit: art.limit }),
+          ...(art.marker !== undefined &&
+            art.marker !== null && { marker: art.marker }),
         },
       },
       upsert: true,

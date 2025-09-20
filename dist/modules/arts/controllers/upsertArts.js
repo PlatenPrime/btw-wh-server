@@ -13,6 +13,10 @@ export const upsertArts = async (req, res, next) => {
                     zone: art.zone,
                     namerus: art.namerus,
                     nameukr: art.nameukr,
+                    ...(art.limit !== undefined &&
+                        art.limit !== null && { limit: art.limit }),
+                    ...(art.marker !== undefined &&
+                        art.marker !== null && { marker: art.marker }),
                 },
             },
             upsert: true,
