@@ -1,297 +1,141 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-// Mock axios and cheerio before importing the module
-vi.mock("axios", () => ({
-    default: {
-        get: vi.fn(),
-    },
-}));
-vi.mock("cheerio", () => ({
-    load: vi.fn(),
-}));
 import axios from "axios";
-import * as cheerio from "cheerio";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getSharikData } from "../getSharikData.js";
-const mockedAxios = vi.mocked(axios);
-const mockedCheerio = vi.mocked(cheerio);
+// Мокируем только axios
+vi.mock("axios");
+const mockedAxios = axios;
 describe("getSharikData", () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
-    it("should return product data for valid artikul", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product Name</div>
-              <div class="one-item-price">1,250.50 грн</div>
-              <div class="one-item-quantity">В наявності: 15 шт</div>
-            </div>
+    describe("Валидация входных данных", () => {
+        it("должен выбрасывать ошибку при пустом артикуле", async () => {
+            await expect(getSharikData("")).rejects.toThrow("Artikul is required and must be a string");
+        });
+        it("должен выбрасывать ошибку при null артикуле", async () => {
+            await expect(getSharikData(null)).rejects.toThrow("Artikul is required and must be a string");
+        });
+        it("должен выбрасывать ошибку при undefined артикуле", async () => {
+            await expect(getSharikData(undefined)).rejects.toThrow("Artikul is required and must be a string");
+        });
+        it("должен выбрасывать ошибку при не-строковом артикуле", async () => {
+            await expect(getSharikData(123)).rejects.toThrow("Artikul is required and must be a string");
+        });
+    });
+    describe("Успешные сценарии", () => {
+        it("должен возвращать данные товара при успешном парсинге", async () => {
+            const mockHtml = `
+        <div class="car-col">
+          <div class="one-item">
+            <div class="one-item-tit">Тестовый товар</div>
+            <div class="one-item-price">1 250,50 грн</div>
+            <div class="one-item-quantity">В наличии: 15 шт</div>
           </div>
-        </body>
-      </html>
-    `;
-        const mockCheerioInstance = {
-            find: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            text: vi.fn().mockReturnValue(""),
-        };
-        mockedAxios.get.mockResolvedValue({ data: mockHtml });
-        mockedCheerio.load.mockReturnValue(mockCheerioInstance);
-        // Mock the cheerio chain
-        mockCheerioInstance.find.mockImplementation((selector) => {
-            if (selector === ".car-col .one-item") {
-                return {
-                    length: 1,
-                    eq: () => ({
-                        find: (sel) => {
-                            if (sel === ".one-item-tit")
-                                return { text: () => "Test Product Name" };
-                            if (sel === ".one-item-price")
-                                return { text: () => "1,250.50 грн" };
-                            if (sel === ".one-item-quantity")
-                                return { text: () => "В наявності: 15 шт" };
-                            return { text: () => "" };
-                        },
-                    }),
-                };
-            }
-            return { text: () => "" };
+        </div>
+      `;
+            mockedAxios.get.mockResolvedValue({ data: mockHtml });
+            const result = await getSharikData("test-artikul");
+            expect(result).toEqual({
+                nameukr: "Тестовый товар",
+                price: 125050,
+                quantity: 15,
+            });
+            expect(mockedAxios.get).toHaveBeenCalledWith("https://sharik.ua/ua/search/?q=test-artikul");
         });
-        // Act
-        const result = await getSharikData("TEST123");
-        // Assert
-        expect(result).toEqual({
-            nameukr: "Test Product Name",
-            price: 1250.5,
-            quantity: 15,
-        });
-        expect(mockedAxios.get).toHaveBeenCalledWith("https://sharik.ua/ua/search/?q=TEST123");
-    });
-    it("should return null when no products found", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <!-- No products -->
+        it("должен правильно обрабатывать цену с запятыми и пробелами", async () => {
+            const mockHtml = `
+        <div class="car-col">
+          <div class="one-item">
+            <div class="one-item-tit">Товар</div>
+            <div class="one-item-price">2,500.75 грн</div>
+            <div class="one-item-quantity">10 шт</div>
           </div>
-        </body>
-      </html>
-    `;
-        const mockCheerioInstance = {
-            find: vi.fn().mockReturnValue({ length: 0 }),
-        };
-        mockedAxios.get.mockResolvedValue({ data: mockHtml });
-        mockedCheerio.load.mockReturnValue(mockCheerioInstance);
-        // Act
-        const result = await getSharikData("NONEXISTENT");
-        // Assert
-        expect(result).toBeNull();
-    });
-    it("should return null when product data is incomplete", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <!-- Missing price and quantity -->
-            </div>
+        </div>
+      `;
+            mockedAxios.get.mockResolvedValue({ data: mockHtml });
+            const result = await getSharikData("test");
+            expect(result?.price).toBe(2500.75);
+        });
+        it("должен правильно извлекать количество из текста", async () => {
+            const mockHtml = `
+        <div class="car-col">
+          <div class="one-item">
+            <div class="one-item-tit">Товар</div>
+            <div class="one-item-price">100 грн</div>
+            <div class="one-item-quantity">Осталось: 42 единицы</div>
           </div>
-        </body>
-      </html>
-    `;
-        const mockCheerioInstance = {
-            find: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            text: vi.fn().mockReturnValue(""),
-        };
-        mockedAxios.get.mockResolvedValue({ data: mockHtml });
-        mockedCheerio.load.mockReturnValue(mockCheerioInstance);
-        // Mock the cheerio chain
-        mockCheerioInstance.find.mockImplementation((selector) => {
-            if (selector === ".car-col .one-item") {
-                return {
-                    length: 1,
-                    eq: () => ({
-                        find: (sel) => {
-                            if (sel === ".one-item-tit")
-                                return { text: () => "Test Product" };
-                            if (sel === ".one-item-price")
-                                return { text: () => "" };
-                            if (sel === ".one-item-quantity")
-                                return { text: () => "" };
-                            return { text: () => "" };
-                        },
-                    }),
-                };
-            }
-            return { text: () => "" };
+        </div>
+      `;
+            mockedAxios.get.mockResolvedValue({ data: mockHtml });
+            const result = await getSharikData("test");
+            expect(result?.quantity).toBe(42);
         });
-        // Act
-        const result = await getSharikData("INCOMPLETE");
-        // Assert
-        expect(result).toBeNull();
     });
-    it("should handle different price formats", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <div class="one-item-price">2,500 грн</div>
-              <div class="one-item-quantity">В наявності: 10 шт</div>
-            </div>
+    describe("Сценарии когда товар не найден", () => {
+        it("должен возвращать null когда нет товаров", async () => {
+            const mockHtml = `<div class="car-col"></div>`;
+            mockedAxios.get.mockResolvedValue({ data: mockHtml });
+            const result = await getSharikData("nonexistent");
+            expect(result).toBeNull();
+        });
+        it("должен возвращать null когда данные товара неполные", async () => {
+            const mockHtml = `
+        <div class="car-col">
+          <div class="one-item">
+            <div class="one-item-tit"></div>
+            <div class="one-item-price">100 грн</div>
+            <div class="one-item-quantity">10 шт</div>
           </div>
-        </body>
-      </html>
-    `;
-        const mockCheerioInstance = {
-            find: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            text: vi.fn().mockReturnValue(""),
-        };
-        mockedAxios.get.mockResolvedValue({ data: mockHtml });
-        mockedCheerio.load.mockReturnValue(mockCheerioInstance);
-        // Mock the cheerio chain
-        mockCheerioInstance.find.mockImplementation((selector) => {
-            if (selector === ".car-col .one-item") {
-                return {
-                    length: 1,
-                    eq: () => ({
-                        find: (sel) => {
-                            if (sel === ".one-item-tit")
-                                return { text: () => "Test Product" };
-                            if (sel === ".one-item-price")
-                                return { text: () => "2,500 грн" };
-                            if (sel === ".one-item-quantity")
-                                return { text: () => "В наявності: 10 шт" };
-                            return { text: () => "" };
-                        },
-                    }),
-                };
-            }
-            return { text: () => "" };
+        </div>
+      `;
+            mockedAxios.get.mockResolvedValue({ data: mockHtml });
+            const result = await getSharikData("test");
+            expect(result).toBeNull();
         });
-        // Act
-        const result = await getSharikData("PRICE_TEST");
-        // Assert
-        expect(result?.price).toBe(2500);
-    });
-    it("should handle different quantity formats", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <div class="one-item-price">100 грн</div>
-              <div class="one-item-quantity">Кількість: 25 pieces</div>
-            </div>
+        it("должен возвращать null когда цена невалидна", async () => {
+            const mockHtml = `
+        <div class="car-col">
+          <div class="one-item">
+            <div class="one-item-tit">Товар</div>
+            <div class="one-item-price">неверная цена</div>
+            <div class="one-item-quantity">10 шт</div>
           </div>
-        </body>
-      </html>
-    `;
-        const mockCheerioInstance = {
-            find: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            text: vi.fn().mockReturnValue(""),
-        };
-        mockedAxios.get.mockResolvedValue({ data: mockHtml });
-        mockedCheerio.load.mockReturnValue(mockCheerioInstance);
-        // Mock the cheerio chain
-        mockCheerioInstance.find.mockImplementation((selector) => {
-            if (selector === ".car-col .one-item") {
-                return {
-                    length: 1,
-                    eq: () => ({
-                        find: (sel) => {
-                            if (sel === ".one-item-tit")
-                                return { text: () => "Test Product" };
-                            if (sel === ".one-item-price")
-                                return { text: () => "100 грн" };
-                            if (sel === ".one-item-quantity")
-                                return { text: () => "Кількість: 25 pieces" };
-                            return { text: () => "" };
-                        },
-                    }),
-                };
-            }
-            return { text: () => "" };
+        </div>
+      `;
+            mockedAxios.get.mockResolvedValue({ data: mockHtml });
+            const result = await getSharikData("test");
+            expect(result).toBeNull();
         });
-        // Act
-        const result = await getSharikData("QUANTITY_TEST");
-        // Assert
-        expect(result?.quantity).toBe(25);
-    });
-    it("should throw error for invalid artikul", async () => {
-        // Act & Assert
-        await expect(getSharikData("")).rejects.toThrow("Artikul is required and must be a string");
-        await expect(getSharikData(null)).rejects.toThrow("Artikul is required and must be a string");
-        await expect(getSharikData(undefined)).rejects.toThrow("Artikul is required and must be a string");
-    });
-    it("should throw error when axios fails", async () => {
-        // Arrange
-        mockedAxios.get.mockRejectedValue(new Error("Network error"));
-        // Act & Assert
-        await expect(getSharikData("ERROR_TEST")).rejects.toThrow("Failed to fetch data from sharik.ua: Network error");
-    });
-    it("should handle special characters in artikul", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Special Product</div>
-              <div class="one-item-price">100 грн</div>
-              <div class="one-item-quantity">В наявності: 5 шт</div>
-            </div>
+        it("должен возвращать null когда количество невалидно", async () => {
+            const mockHtml = `
+        <div class="car-col">
+          <div class="one-item">
+            <div class="one-item-tit">Товар</div>
+            <div class="one-item-price">100 грн</div>
+            <div class="one-item-quantity">нет количества</div>
           </div>
-        </body>
-      </html>
-    `;
-        const mockCheerioInstance = {
-            find: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            text: vi.fn().mockReturnValue(""),
-        };
-        mockedAxios.get.mockResolvedValue({ data: mockHtml });
-        mockedCheerio.load.mockReturnValue(mockCheerioInstance);
-        // Mock the cheerio chain
-        mockCheerioInstance.find.mockImplementation((selector) => {
-            if (selector === ".car-col .one-item") {
-                return {
-                    length: 1,
-                    eq: () => ({
-                        find: (sel) => {
-                            if (sel === ".one-item-tit")
-                                return { text: () => "Special Product" };
-                            if (sel === ".one-item-price")
-                                return { text: () => "100 грн" };
-                            if (sel === ".one-item-quantity")
-                                return { text: () => "В наявності: 5 шт" };
-                            return { text: () => "" };
-                        },
-                    }),
-                };
-            }
-            return { text: () => "" };
+        </div>
+      `;
+            mockedAxios.get.mockResolvedValue({ data: mockHtml });
+            const result = await getSharikData("test");
+            expect(result).toBeNull();
         });
-        // Act
-        const result = await getSharikData("SPECIAL-123_ABC");
-        // Assert
-        expect(result).toEqual({
-            nameukr: "Special Product",
-            price: 100,
-            quantity: 5,
+    });
+    describe("Обработка ошибок", () => {
+        it("должен выбрасывать ошибку при ошибке axios", async () => {
+            const error = new Error("Network error");
+            mockedAxios.get.mockRejectedValue(error);
+            await expect(getSharikData("test")).rejects.toThrow("Failed to fetch data from sharik.ua: Network error");
         });
-        expect(mockedAxios.get).toHaveBeenCalledWith("https://sharik.ua/ua/search/?q=SPECIAL-123_ABC");
+        it("должен выбрасывать ошибку при неизвестной ошибке", async () => {
+            mockedAxios.get.mockRejectedValue("Unknown error");
+            await expect(getSharikData("test")).rejects.toThrow("Failed to fetch data from sharik.ua: Unknown error");
+        });
+        it("должен правильно кодировать артикул в URL", async () => {
+            const mockHtml = `<div class="car-col"></div>`;
+            mockedAxios.get.mockResolvedValue({ data: mockHtml });
+            await getSharikData("тест с пробелами & символами");
+            expect(mockedAxios.get).toHaveBeenCalledWith("https://sharik.ua/ua/search/?q=%D1%82%D0%B5%D1%81%D1%82%20%D1%81%20%D0%BF%D1%80%D0%BE%D0%B1%D0%B5%D0%BB%D0%B0%D0%BC%D0%B8%20%26%20%D1%81%D0%B8%D0%BC%D0%B2%D0%BE%D0%BB%D0%B0%D0%BC%D0%B8");
+        });
     });
 });
