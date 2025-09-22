@@ -3,12 +3,14 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 
-import artRoute from "./modules/arts/router.js";
-import askRoute from "./modules/asks/router.js";
+import artsRoute from "./modules/arts/router.js";
+import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
-import palletRoute from "./modules/pallets/router.js";
+import palletsRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
-import rowRouter from "./modules/rows/router.js";
+import rowsRoute from "./modules/rows/router.js";
+import defsRoute from "./modules/defs/router.js";
+import { mergePoses } from "./utils/mergePoses.js";
 
 dotenv.config();
 
@@ -21,11 +23,12 @@ app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 
 app.use("/api/auth", authRoute);
-app.use("/api/arts", artRoute);
-app.use("/api/asks", askRoute);
-app.use("/api/rows", rowRouter);
-app.use("/api/pallets", palletRoute);
+app.use("/api/arts", artsRoute);
+app.use("/api/asks", asksRoute);
+app.use("/api/rows", rowsRoute);
+app.use("/api/pallets", palletsRoute);
 app.use("/api/poses", posesRoute);
+app.use("/api/defs", defsRoute);
 
 // Error handler must be after all routes
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
