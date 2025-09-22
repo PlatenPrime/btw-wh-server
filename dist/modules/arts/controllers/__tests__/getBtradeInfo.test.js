@@ -1,13 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-// Mock axios before importing the module
-vi.mock("axios", () => ({
-    default: {
-        get: vi.fn(),
-    },
+// Mock the getSharikData utility
+const mockGetSharikData = vi.fn();
+vi.mock("../../../utils/index.js", () => ({
+    getSharikData: mockGetSharikData,
 }));
-import axios from "axios";
 import { getBtradeArtInfo } from "../getBtradeInfo.js";
-const mockedAxios = vi.mocked(axios);
 describe("getBtradeArtInfo Controller (Fixed)", () => {
     let mockRequest;
     let responseJson;
@@ -31,22 +28,12 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
     });
     it("should return product info for valid artikul", async () => {
         // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product Name</div>
-              <div class="one-item-price">1,250.50 грн</div>
-              <div class="one-item-quantity">В наявності: 15 шт</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
+        const mockProductData = {
+            nameukr: "Test Product Name",
+            price: 1250.5,
+            quantity: 15,
+        };
+        mockGetSharikData.mockResolvedValue(mockProductData);
         mockRequest = {
             params: { artikul: "TEST123" },
         };
@@ -54,10 +41,8 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
         await getBtradeArtInfo(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
-        expect(responseJson.nameukr).toBe("Test Product Name");
-        expect(responseJson.price).toBe(1250.5);
-        expect(responseJson.quantity).toBe(15);
-        expect(mockedAxios.get).toHaveBeenCalledWith("https://sharik.ua/ua/search/?q=TEST123");
+        expect(responseJson).toEqual(mockProductData);
+        expect(mockGetSharikData).toHaveBeenCalledWith("TEST123");
     });
     it("should return 400 when artikul is missing", async () => {
         // Arrange
@@ -83,18 +68,7 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
     });
     it("should return 404 when no products found", async () => {
         // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <!-- No products -->
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
+        mockGetSharikData.mockResolvedValue(null);
         mockRequest = {
             params: { artikul: "NONEXISTENT" },
         };
@@ -103,171 +77,11 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
         // Assert
         expect(responseStatus.code).toBe(404);
         expect(responseJson.message).toBe("No products found for this artikul");
+        expect(mockGetSharikData).toHaveBeenCalledWith("NONEXISTENT");
     });
-    it("should return 404 when product data is incomplete", async () => {
+    it("should handle getSharikData error", async () => {
         // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <!-- Missing price and quantity -->
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
-        mockRequest = {
-            params: { artikul: "INCOMPLETE" },
-        };
-        // Act
-        await getBtradeArtInfo(mockRequest, res);
-        // Assert
-        expect(responseStatus.code).toBe(404);
-        expect(responseJson.message).toBe("Product data not found or incomplete");
-    });
-    it("should handle price with different formats", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <div class="one-item-price">2,500 грн</div>
-              <div class="one-item-quantity">В наявності: 10 шт</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
-        mockRequest = {
-            params: { artikul: "PRICE_TEST" },
-        };
-        // Act
-        await getBtradeArtInfo(mockRequest, res);
-        // Assert
-        expect(responseStatus.code).toBe(200);
-        expect(responseJson.price).toBe(2500);
-    });
-    it("should handle quantity with different formats", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <div class="one-item-price">100 грн</div>
-              <div class="one-item-quantity">Кількість: 25 pieces</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
-        mockRequest = {
-            params: { artikul: "QUANTITY_TEST" },
-        };
-        // Act
-        await getBtradeArtInfo(mockRequest, res);
-        // Assert
-        expect(responseStatus.code).toBe(200);
-        expect(responseJson.quantity).toBe(25);
-    });
-    it("should handle zero quantity", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <div class="one-item-price">50 грн</div>
-              <div class="one-item-quantity">В наявності: 0 шт</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
-        mockRequest = {
-            params: { artikul: "ZERO_QUANTITY" },
-        };
-        // Act
-        await getBtradeArtInfo(mockRequest, res);
-        // Assert
-        expect(responseStatus.code).toBe(200);
-        expect(responseJson.quantity).toBe(0);
-    });
-    it("should handle invalid price format", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <div class="one-item-price">Invalid Price</div>
-              <div class="one-item-quantity">В наявності: 5 шт</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
-        mockRequest = {
-            params: { artikul: "INVALID_PRICE" },
-        };
-        // Act
-        await getBtradeArtInfo(mockRequest, res);
-        // Assert
-        expect(responseStatus.code).toBe(404);
-        expect(responseJson.message).toBe("Product data not found or incomplete");
-    });
-    it("should handle invalid quantity format", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Test Product</div>
-              <div class="one-item-price">100 грн</div>
-              <div class="one-item-quantity">В наявності: Invalid</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
-        mockRequest = {
-            params: { artikul: "INVALID_QUANTITY" },
-        };
-        // Act
-        await getBtradeArtInfo(mockRequest, res);
-        // Assert
-        expect(responseStatus.code).toBe(404);
-        expect(responseJson.message).toBe("Product data not found or incomplete");
-    });
-    it("should handle axios error", async () => {
-        // Arrange
-        vi.mocked(axios).get.mockRejectedValue(new Error("Network error"));
+        mockGetSharikData.mockRejectedValue(new Error("Network error"));
         mockRequest = {
             params: { artikul: "ERROR_TEST" },
         };
@@ -275,27 +89,18 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
         await getBtradeArtInfo(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(500);
-        expect(responseJson.message).toBe("Parsing Btrade artikul failed");
-        expect(responseJson.error).toBeDefined();
+        expect(responseJson.message).toBe("Failed to fetch data from sharik.ua");
+        expect(responseJson.error).toBe("Network error");
+        expect(mockGetSharikData).toHaveBeenCalledWith("ERROR_TEST");
     });
     it("should handle special characters in artikul", async () => {
         // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Special Product</div>
-              <div class="one-item-price">100 грн</div>
-              <div class="one-item-quantity">В наявності: 5 шт</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
+        const mockProductData = {
+            nameukr: "Special Product",
+            price: 100,
+            quantity: 5,
+        };
+        mockGetSharikData.mockResolvedValue(mockProductData);
         mockRequest = {
             params: { artikul: "SPECIAL-123_ABC" },
         };
@@ -303,26 +108,17 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
         await getBtradeArtInfo(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
-        expect(mockedAxios.get).toHaveBeenCalledWith("https://sharik.ua/ua/search/?q=SPECIAL-123_ABC");
+        expect(responseJson).toEqual(mockProductData);
+        expect(mockGetSharikData).toHaveBeenCalledWith("SPECIAL-123_ABC");
     });
     it("should handle Ukrainian characters in product name", async () => {
         // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">Українська назва з їїї</div>
-              <div class="one-item-price">200 грн</div>
-              <div class="one-item-quantity">В наявності: 10 шт</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
+        const mockProductData = {
+            nameukr: "Українська назва з їїї",
+            price: 200,
+            quantity: 10,
+        };
+        mockGetSharikData.mockResolvedValue(mockProductData);
         mockRequest = {
             params: { artikul: "UKRAINIAN" },
         };
@@ -330,40 +126,7 @@ describe("getBtradeArtInfo Controller (Fixed)", () => {
         await getBtradeArtInfo(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
-        expect(responseJson.nameukr).toBe("Українська назва з їїї");
-    });
-    it("should handle multiple products and return first one", async () => {
-        // Arrange
-        const mockHtml = `
-      <html>
-        <body>
-          <div class="car-col">
-            <div class="one-item">
-              <div class="one-item-tit">First Product</div>
-              <div class="one-item-price">100 грн</div>
-              <div class="one-item-quantity">В наявності: 5 шт</div>
-            </div>
-            <div class="one-item">
-              <div class="one-item-tit">Second Product</div>
-              <div class="one-item-price">200 грн</div>
-              <div class="one-item-quantity">В наявності: 10 шт</div>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
-        vi.mocked(axios).get.mockResolvedValue({
-            data: mockHtml,
-        });
-        mockRequest = {
-            params: { artikul: "MULTIPLE" },
-        };
-        // Act
-        await getBtradeArtInfo(mockRequest, res);
-        // Assert
-        expect(responseStatus.code).toBe(200);
-        expect(responseJson.nameukr).toBe("First Product");
-        expect(responseJson.price).toBe(100);
-        expect(responseJson.quantity).toBe(5);
+        expect(responseJson).toEqual(mockProductData);
+        expect(mockGetSharikData).toHaveBeenCalledWith("UKRAINIAN");
     });
 });
