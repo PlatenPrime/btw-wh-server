@@ -13,8 +13,8 @@ export async function getSkladStocks(sklad = "pogrebi") {
             quant: { $ne: 0 },
         }).exec();
         // Объединяем позиции с помощью функции mergePoses
-        const mergedPoses = mergePoses(poses);
-        return mergedPoses;
+        const stocks = mergePoses(poses);
+        return stocks;
     }
     catch (error) {
         console.error(`Ошибка при получении позиций склада ${sklad}:`, error);

@@ -15,9 +15,9 @@ export async function getSkladStocks(sklad: string = "pogrebi") {
     }).exec();
 
     // Объединяем позиции с помощью функции mergePoses
-    const mergedPoses = mergePoses(poses);
+    const stocks = mergePoses(poses);
 
-    return mergedPoses;
+    return stocks;
   } catch (error) {
     console.error(`Ошибка при получении позиций склада ${sklad}:`, error);
     throw error;
