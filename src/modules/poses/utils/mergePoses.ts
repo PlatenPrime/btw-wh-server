@@ -1,4 +1,4 @@
-import { IPos, Pos } from "../modules/poses/models/Pos.js";
+import { IPos } from "../models/Pos.js";
 
 /**
  * Интерфейс для объединенной позиции
@@ -18,21 +18,13 @@ interface IMergedPosesResult {
 
 /**
  * Объединяет позиции по артикулу, суммируя количество и коробки
- * @param sklad - Склад для фильтрации (по умолчанию "pogrebi")
- * @returns Promise с объектом, где ключи - артикулы, значения - объединенные данные позиций
+ * @param poses - Массив позиций для объединения
+ * @returns Объект, где ключи - артикулы, значения - объединенные данные позиций
  */
-export async function mergePoses(
-  sklad: string = "pogrebi"
-): Promise<IMergedPosesResult> {
+export function mergePoses(poses: IPos[]): IMergedPosesResult {
   const startTime = performance.now();
 
   try {
-    // Находим все позиции с указанным складом и ненулевым количеством
-    const poses = await Pos.find({
-      sklad: sklad,
-      quant: { $ne: 0, $exists: true },
-    }).exec();
-
     // Группируем позиции по артикулу и суммируем значения
     const mergedPoses: IMergedPosesResult = {};
 
@@ -68,7 +60,6 @@ export async function mergePoses(
         Object.keys(mergedPoses).length
       } уникальных артикулов.`
     );
-
 
     return mergedPoses;
   } catch (error) {
