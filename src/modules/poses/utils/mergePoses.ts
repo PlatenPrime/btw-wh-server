@@ -12,7 +12,7 @@ interface IMergedPos {
 /**
  * Интерфейс для результата объединения позиций
  */
-interface IMergedPosesResult {
+export interface IMergedPosesResult {
   [artikul: string]: IMergedPos;
 }
 
