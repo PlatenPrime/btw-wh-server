@@ -14,6 +14,7 @@ const movePalletPosesSchema = z.object({
         .refine((val) => mongoose.Types.ObjectId.isValid(val), {
         message: "Invalid targetPalletId",
     }),
+    isDef: z.boolean().optional(),
 });
 class HttpError extends Error {
     status;
@@ -68,6 +69,7 @@ export const movePalletPoses = async (req, res) => {
                     _id: targetPallet._id,
                     title: targetPallet.title,
                     sector: targetPallet.sector,
+                    isDef: targetPallet.isDef,
                 };
                 pos.rowData = {
                     _id: targetRow._id,
@@ -99,6 +101,7 @@ export const movePalletPoses = async (req, res) => {
                     ? palletObj.poses.map((id) => id.toString())
                     : [],
                 sector: palletObj.sector,
+                isDef: palletObj.isDef,
                 createdAt: palletObj.createdAt,
                 updatedAt: palletObj.updatedAt,
             };

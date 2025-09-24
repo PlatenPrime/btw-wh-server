@@ -49,6 +49,7 @@ export const createPos = async (req, res) => {
                         _id: pallet._id,
                         title: pallet.title,
                         sector: pallet.sector,
+                        isDef: pallet.isDef,
                     },
                     rowData: {
                         _id: row._id,
@@ -60,7 +61,7 @@ export const createPos = async (req, res) => {
                     boxes,
                     date,
                     sklad,
-                    comment
+                    comment,
                 },
             ], { session });
             // Добавляем позицию в паллет

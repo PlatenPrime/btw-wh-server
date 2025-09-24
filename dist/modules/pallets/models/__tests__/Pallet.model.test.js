@@ -58,6 +58,25 @@ describe("Pallet Model - Schema Validation Only", () => {
             });
             expect(pallet.sector).toBeUndefined();
         });
+        it("should default isDef to false", async () => {
+            const row = createTestRow();
+            const pallet = await Pallet.create({
+                title: "DefaultIsDef",
+                row,
+                rowData: { _id: row._id, title: row.title },
+            });
+            expect(pallet.isDef).toBe(false);
+        });
+        it("should allow custom isDef value", async () => {
+            const row = createTestRow();
+            const pallet = await Pallet.create({
+                title: "CustomIsDef",
+                row,
+                rowData: { _id: row._id, title: row.title },
+                isDef: true,
+            });
+            expect(pallet.isDef).toBe(true);
+        });
         it("should allow rowData to be different from row", async () => {
             const rowId = new Types.ObjectId();
             const pallet = await Pallet.create({

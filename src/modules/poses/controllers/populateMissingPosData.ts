@@ -25,11 +25,9 @@ export const populateMissingPosData = async (_req: Request, res: Response) => {
     const errors: Array<{ posId: string; reason: string }> = [];
 
     for (const pos of missingPoses) {
-
       try {
-
-        console.log("pos: " , pos.artikul)
-        console.log("palletTitle: " , pos.palletTitle)
+        console.log("pos: ", pos.artikul);
+        console.log("palletTitle: ", pos.palletTitle);
         // --- PALLET ---
         const pallet = await Pallet.findById(pos.pallet);
         if (!pallet) {
@@ -44,6 +42,7 @@ export const populateMissingPosData = async (_req: Request, res: Response) => {
           _id: pallet._id as Types.ObjectId,
           title: pallet.title,
           sector: pallet.sector,
+          isDef: pallet.isDef,
         };
 
         // --- ROW ---
@@ -89,7 +88,7 @@ export const populateMissingPosData = async (_req: Request, res: Response) => {
         errorCount++;
       }
     }
-    return res.json({
+    return res.status(200).json({
       updated: updatedCount,
       errors: errorCount,
       errorDetails: errors,

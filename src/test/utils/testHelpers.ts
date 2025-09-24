@@ -114,6 +114,7 @@ export const createTestPallet = async (palletData: any = {}) => {
       },
     poses: palletData.poses || [],
     sector: palletData.sector,
+    isDef: palletData.isDef || false,
     ...palletData,
   });
 };
@@ -126,6 +127,8 @@ export const createTestPos = async (posData: any = {}) => {
   const pallet = posData.pallet || {
     _id: new mongoose.Types.ObjectId(),
     title: "Test Pallet",
+    sector: undefined,
+    isDef: false,
   };
   const row = posData.row || {
     _id: new mongoose.Types.ObjectId(),

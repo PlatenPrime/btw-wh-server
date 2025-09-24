@@ -17,6 +17,7 @@ const createPalletSchema = z.object({
     title: z.string().min(1),
   }),
   sector: z.string().optional(),
+  isDef: z.boolean().optional(),
 });
 
 export const createPallet = async (req: Request, res: Response) => {
@@ -46,7 +47,7 @@ export const createPallet = async (req: Request, res: Response) => {
       .status(400)
       .json({ message: "Invalid input", error: parseResult.error.errors });
   }
-  const { title, rowData, sector } = parseResult.data;
+  const { title, rowData, sector, isDef } = parseResult.data;
   const session = await Pallet.startSession();
   try {
     let result: any = null;
@@ -66,6 +67,7 @@ export const createPallet = async (req: Request, res: Response) => {
               rowData: { _id: rowDoc._id, title: rowDoc.title },
               poses: [],
               sector,
+              isDef,
             },
           ],
           { session }

@@ -65,7 +65,11 @@ describe("movePalletPoses Controller", () => {
     const pos = await Pos.create({
       pallet: sourcePallet._id,
       row: rowSource._id,
-      palletData: { _id: sourcePallet._id, title: sourcePallet.title },
+      palletData: {
+        _id: sourcePallet._id,
+        title: sourcePallet.title,
+        isDef: sourcePallet.isDef,
+      },
       rowData: { _id: rowSource._id, title: rowSource.title },
       palletTitle: sourcePallet.title,
       rowTitle: rowSource.title,

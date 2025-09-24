@@ -18,6 +18,7 @@ const updatePalletSchema = z.object({
     )
     .optional(),
   sector: z.string().optional(),
+  isDef: z.boolean().optional(),
 });
 
 export const updatePallet = async (req: Request, res: Response) => {
@@ -44,7 +45,7 @@ export const updatePallet = async (req: Request, res: Response) => {
         if (!pallet) {
           return res.status(404).json({ message: "Pallet not found" });
         }
-        const { title, sector, poses, rowId } = parseResult.data;
+        const { title, sector, poses, rowId, isDef } = parseResult.data;
         if (title !== undefined) {
           pallet.title = title;
           await Pos.updateMany(
@@ -72,6 +73,13 @@ export const updatePallet = async (req: Request, res: Response) => {
           pallet.row = rowDoc._id;
           pallet.rowData = { _id: rowDoc._id, title: rowDoc.title };
         }
+        if (isDef !== undefined) {
+          pallet.isDef = isDef;
+          await Pos.updateMany(
+            { pallet: id },
+            { $set: { "palletData.isDef": isDef } }
+          );
+        }
         await pallet.save({ session });
         const palletObj = pallet.toObject();
         return res.status(200).json({
@@ -83,6 +91,8 @@ export const updatePallet = async (req: Request, res: Response) => {
           poses: Array.isArray(palletObj.poses)
             ? palletObj.poses.map((id: any) => id.toString())
             : palletObj.poses,
+          isDef: palletObj.isDef,
+          sector: palletObj.sector,
         });
       } catch (err: any) {
         if (err.name === "ValidationError" || err.name === "CastError") {

@@ -14,6 +14,7 @@ const updatePalletSchema = z.object({
         .array(z.string().refine((val) => mongoose.Types.ObjectId.isValid(val)))
         .optional(),
     sector: z.string().optional(),
+    isDef: z.boolean().optional(),
 });
 export const updatePallet = async (req, res) => {
     const { id } = req.params || {};
@@ -39,7 +40,7 @@ export const updatePallet = async (req, res) => {
                 if (!pallet) {
                     return res.status(404).json({ message: "Pallet not found" });
                 }
-                const { title, sector, poses, rowId } = parseResult.data;
+                const { title, sector, poses, rowId, isDef } = parseResult.data;
                 if (title !== undefined) {
                     pallet.title = title;
                     await Pos.updateMany({ pallet: id }, { $set: { "palletData.title": title, palletTitle: title } });
@@ -61,6 +62,10 @@ export const updatePallet = async (req, res) => {
                     pallet.row = rowDoc._id;
                     pallet.rowData = { _id: rowDoc._id, title: rowDoc.title };
                 }
+                if (isDef !== undefined) {
+                    pallet.isDef = isDef;
+                    await Pos.updateMany({ pallet: id }, { $set: { "palletData.isDef": isDef } });
+                }
                 await pallet.save({ session });
                 const palletObj = pallet.toObject();
                 return res.status(200).json({
@@ -72,6 +77,8 @@ export const updatePallet = async (req, res) => {
                     poses: Array.isArray(palletObj.poses)
                         ? palletObj.poses.map((id) => id.toString())
                         : palletObj.poses,
+                    isDef: palletObj.isDef,
+                    sector: palletObj.sector,
                 });
             }
             catch (err) {

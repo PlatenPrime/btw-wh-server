@@ -12,6 +12,7 @@ const createTestPallet = async (palletData: any = {}) => {
       palletData.row || { _id: new Types.ObjectId(), title: "Test Row" },
     poses: palletData.poses || [],
     sector: palletData.sector,
+    isDef: palletData.isDef || false,
   });
 };
 
@@ -101,5 +102,21 @@ describe("updatePallet Controller", () => {
     expect(responseStatus.code).toBe(500);
     expect(responseJson.message).toBe("Server error");
     expect(responseJson.error).toBeDefined();
+  });
+
+  it("should update pallet isDef field", async () => {
+    // Arrange
+    const testPallet = await createTestPallet({ isDef: false });
+    mockRequest = {
+      params: { id: testPallet.id },
+      body: { isDef: true },
+    };
+
+    // Act
+    await updatePallet(mockRequest as Request, res);
+
+    // Assert
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.isDef).toBe(true);
   });
 });

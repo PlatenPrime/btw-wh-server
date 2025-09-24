@@ -32,6 +32,7 @@ describe("createPos Controller", () => {
         expect(res.body.date).toBe("04.21");
         expect(res.body.palletData._id.toString()).toBe(pallet._id.toString());
         expect(res.body.rowData._id.toString()).toBe(row._id.toString());
+        expect(res.body.palletData.isDef).toBe(pallet.isDef);
     });
     it("should return 404 if pallet not found", async () => {
         const req = createMockRequest({
@@ -95,5 +96,24 @@ describe("createPos Controller", () => {
         await createPos(req, res);
         expect(res.statusCode).toBe(500);
         expect(res.body.error).toBe("Failed to create position");
+    });
+    it("should create a pos with isDef field in palletData", async () => {
+        const palletWithIsDef = await createTestPallet({
+            row: { _id: row._id, title: row.title },
+            isDef: true,
+        });
+        const req = createMockRequest({
+            body: {
+                palletId: palletWithIsDef._id.toString(),
+                rowId: row._id.toString(),
+                artikul: "ART-DEF",
+                quant: 3,
+                boxes: 1,
+            },
+        });
+        const res = createMockResponse();
+        await createPos(req, res);
+        expect(res.statusCode).toBe(201);
+        expect(res.body.palletData.isDef).toBe(true);
     });
 });

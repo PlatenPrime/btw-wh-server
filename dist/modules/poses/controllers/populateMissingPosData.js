@@ -38,6 +38,7 @@ export const populateMissingPosData = async (_req, res) => {
                     _id: pallet._id,
                     title: pallet.title,
                     sector: pallet.sector,
+                    isDef: pallet.isDef,
                 };
                 // --- ROW ---
                 let rowId = pos.row;
@@ -83,7 +84,7 @@ export const populateMissingPosData = async (_req, res) => {
                 errorCount++;
             }
         }
-        return res.json({
+        return res.status(200).json({
             updated: updatedCount,
             errors: errorCount,
             errorDetails: errors,

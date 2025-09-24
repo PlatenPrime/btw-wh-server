@@ -4,6 +4,7 @@ const palletSubdocumentSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
     sector: String,
+    isDef: { type: Boolean, default: false },
 }, { _id: false });
 const rowSubdocumentSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },

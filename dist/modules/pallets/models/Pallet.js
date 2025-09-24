@@ -9,6 +9,7 @@ const palletSchema = new Schema({
     rowData: { type: rowSubdocumentSchema, required: true },
     row: { type: Schema.Types.ObjectId, required: true },
     poses: [{ type: Schema.Types.ObjectId, ref: "Pos" }],
+    isDef: { type: Boolean, default: false },
     sector: String,
 }, { timestamps: true });
 export { palletSchema };

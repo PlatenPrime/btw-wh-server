@@ -17,6 +17,7 @@ export interface IPallet extends Document {
   row: Types.ObjectId;
   rowData: IRowSubdocument;
   poses: Types.ObjectId[];
+  isDef: boolean;
   sector?: string;
   createdAt?: Date;
   updatedAt?: Date;
@@ -36,6 +37,7 @@ const palletSchema = new Schema<IPallet>(
     rowData: { type: rowSubdocumentSchema, required: true },
     row: { type: Schema.Types.ObjectId, required: true },
     poses: [{ type: Schema.Types.ObjectId, ref: "Pos" }],
+    isDef: { type: Boolean, default: false },
     sector: String,
   },
   { timestamps: true }

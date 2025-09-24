@@ -72,6 +72,7 @@ export const createPos = async (req: Request, res: Response) => {
               _id: pallet._id,
               title: pallet.title,
               sector: pallet.sector,
+              isDef: pallet.isDef,
             },
             rowData: {
               _id: row._id,
@@ -83,7 +84,8 @@ export const createPos = async (req: Request, res: Response) => {
             boxes,
             date,
             sklad,
-            comment
+            comment,
+  
           },
         ],
         { session }
