@@ -54,6 +54,27 @@ describe("getRowById Controller", () => {
     );
     expect(responseJson.pallets[0].title).toBe(pallet.title);
     expect(responseJson.pallets[0].sector).toBe(pallet.sector);
+    expect(responseJson.pallets[0].isDef).toBe(false); // default value
+  });
+
+  it("should return pallet with isDef true", async () => {
+    // Arrange
+    const row = await Row.create({ title: "RowWithDefPalletById" });
+    const pallet = await Pallet.create({
+      title: "Defective Pallet by ID",
+      row: row._id,
+      rowData: { _id: row._id, title: row.title },
+      sector: "def-sector",
+      isDef: true,
+    });
+    mockRequest = { params: { id: (row._id as Types.ObjectId).toString() } };
+
+    // Act
+    await getRowById(mockRequest as Request, res);
+
+    // Assert
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.pallets[0].isDef).toBe(true);
   });
 
   it("should return 404 if row not found", async () => {

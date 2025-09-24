@@ -1,6 +1,6 @@
 import { Pallet } from "../../pallets/models/Pallet.js";
-import { Row } from "../models/Row.js";
 import { sortPalletsByTitle } from "../../pallets/utils/sortPalletsByTitle.js";
+import { Row } from "../models/Row.js";
 export const getRowByTitle = async (req, res) => {
     const { title } = req.params;
     try {
@@ -9,12 +9,13 @@ export const getRowByTitle = async (req, res) => {
             res.status(404).json({ message: "Row not found" });
             return;
         }
-        const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector poses");
+        const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector poses isDef");
         const palletsFormatted = pallets.map((p) => ({
             _id: p._id,
             title: p.title,
             sector: p.sector,
             isEmpty: p.poses.length === 0,
+            isDef: p.isDef,
         }));
         const sortedPallets = sortPalletsByTitle(palletsFormatted);
         res.status(200).json({

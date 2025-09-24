@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Pallet } from "../../pallets/models/Pallet.js";
-import { IRow, Row } from "../models/Row.js";
 import { sortPalletsByTitle } from "../../pallets/utils/sortPalletsByTitle.js";
+import { IRow, Row } from "../models/Row.js";
 
 export const getRowByTitle = async (
   req: Request,
@@ -18,13 +18,14 @@ export const getRowByTitle = async (
     }
 
     const pallets = await Pallet.find({ "rowData._id": row._id }).select(
-      "_id title sector poses"
+      "_id title sector poses isDef"
     );
     const palletsFormatted = pallets.map((p) => ({
       _id: p._id,
       title: p.title,
       sector: p.sector,
       isEmpty: p.poses.length === 0,
+      isDef: p.isDef,
     }));
 
     const sortedPallets = sortPalletsByTitle(palletsFormatted);
