@@ -79,7 +79,7 @@ describe("updateAskById Controller", () => {
       },
     };
 
-    // Act  
+    // Act
     await updateAskById(mockRequest as Request, res);
 
     // Assert
@@ -129,7 +129,7 @@ describe("updateAskById Controller", () => {
   });
 
   it("should update ask with all valid statuses", async () => {
-    const validStatuses = ["new", "in_progress", "completed", "cancelled"];
+    const validStatuses = ["new", "completed", "rejected"];
 
     for (const status of validStatuses) {
       // Arrange

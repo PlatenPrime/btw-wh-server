@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
-import { Ask, IAsk } from "../models/Ask.js";
+import { Types } from "mongoose";
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
 import User from "../../auth/models/User.js";
-import { Types } from "mongoose";
-
+import { Ask, IAsk } from "../models/Ask.js";
 
 interface CreateAskRequest {
   artikul: string;
@@ -13,11 +12,10 @@ interface CreateAskRequest {
   askerId: Types.ObjectId;
 }
 
-
-
 export const createAsk = async (req: Request, res: Response) => {
   try {
-    const { artikul, nameukr, quant, com, askerId }: CreateAskRequest = req.body;
+    const { artikul, nameukr, quant, com, askerId }: CreateAskRequest =
+      req.body;
 
     const asker = await User.findById(askerId);
 
@@ -28,10 +26,8 @@ export const createAsk = async (req: Request, res: Response) => {
     const time = getCurrentFormattedDateTime();
 
     const actions = [
-      `${time} ${
-        asker?.fullname ?? ""
-      }: необхідно ${nameukr}
-      ${quant  && ", кількість: "}${quant}
+      `${time} ${asker?.fullname ?? ""}: необхідно ${nameukr}
+      ${quant !== undefined && ", кількість: "}${quant}
       ${com && ", коментарій: "}${com}`,
     ];
 
@@ -42,10 +38,10 @@ export const createAsk = async (req: Request, res: Response) => {
       com,
       asker: askerId,
       askerData: {
-        _id: asker?._id,
-        fullname: asker?.fullname,
-        telegram: asker?.telegram,
-        photo: asker?.photo,
+        _id: asker._id,
+        fullname: asker.fullname,
+        telegram: asker.telegram,
+        photo: asker.photo,
       },
       actions,
       status: "new",

@@ -4,8 +4,8 @@ import mongoose from "mongoose";
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 // Import models to register schemas
 import "../modules/arts/models/Art.js";
-import "../modules/auth/models/User.js";
 import "../modules/asks/models/Ask.js";
+import "../modules/auth/models/User.js";
 import "../modules/pallets/models/Pallet.js";
 import "../modules/poses/models/Pos.js";
 import "../modules/rows/models/Row.js";
@@ -91,7 +91,7 @@ export const createTestAsk = async (askData = {}) => {
         com: "Test comment",
         asker: asker._id,
         askerData: {
-            id: asker._id.toString(),
+            _id: asker._id,
             fullname: asker.fullname,
             telegram: asker.telegram,
             photo: asker.photo,

@@ -77,7 +77,7 @@ describe("getAskById Controller", () => {
             nameukr: "Full Test Ask",
             quant: 25,
             com: "Detailed comment",
-            status: "in_progress",
+            status: "new",
             actions: ["action1", "action2"],
         });
         mockRequest = {
@@ -91,7 +91,7 @@ describe("getAskById Controller", () => {
         expect(responseJson.data.nameukr).toBe("Full Test Ask");
         expect(responseJson.data.quant).toBe(25);
         expect(responseJson.data.com).toBe("Detailed comment");
-        expect(responseJson.data.status).toBe("in_progress");
+        expect(responseJson.data.status).toBe("new");
         expect(responseJson.data.actions).toEqual(["action1", "action2"]);
         expect(responseJson.data.askerData).toBeDefined();
         expect(responseJson.data.askerData.fullname).toBe("Test User");
@@ -173,7 +173,7 @@ describe("getAskById Controller", () => {
         const testAsk = await createTestAsk({
             artikul: "SOLVER123",
             solverData: {
-                id: "solver123",
+                _id: new mongoose.Types.ObjectId(),
                 fullname: "Solver User",
                 telegram: "@solver",
                 photo: "photo.jpg",
@@ -203,11 +203,11 @@ describe("getAskById Controller", () => {
         expect(responseStatus.code).toBe(404);
         expect(responseJson.message).toBe("Ask not found");
     });
-    it("should handle ask with cancelled status", async () => {
+    it("should handle ask with rejected status", async () => {
         // Arrange
         const testAsk = await createTestAsk({
-            artikul: "CANCELLED123",
-            status: "cancelled",
+            artikul: "REJECTED123",
+            status: "rejected",
         });
         mockRequest = {
             params: { id: testAsk._id.toString() },
@@ -216,7 +216,7 @@ describe("getAskById Controller", () => {
         await getAskById(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
-        expect(responseJson.data.status).toBe("cancelled");
+        expect(responseJson.data.status).toBe("rejected");
     });
     it("should handle ask with empty actions array", async () => {
         // Arrange

@@ -1,6 +1,6 @@
-import { Ask } from "../models/Ask.js";
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
 import User from "../../auth/models/User.js";
+import { Ask } from "../models/Ask.js";
 export const createAsk = async (req, res) => {
     try {
         const { artikul, nameukr, quant, com, askerId } = req.body;
@@ -11,7 +11,7 @@ export const createAsk = async (req, res) => {
         const time = getCurrentFormattedDateTime();
         const actions = [
             `${time} ${asker?.fullname ?? ""}: необхідно ${nameukr}
-      ${quant && ", кількість: "}${quant}
+      ${quant !== undefined && ", кількість: "}${quant}
       ${com && ", коментарій: "}${com}`,
         ];
         const ask = new Ask({
@@ -21,10 +21,10 @@ export const createAsk = async (req, res) => {
             com,
             asker: askerId,
             askerData: {
-                _id: asker?._id,
-                fullname: asker?.fullname,
-                telegram: asker?.telegram,
-                photo: asker?.photo,
+                _id: asker._id,
+                fullname: asker.fullname,
+                telegram: asker.telegram,
+                photo: asker.photo,
             },
             actions,
             status: "new",

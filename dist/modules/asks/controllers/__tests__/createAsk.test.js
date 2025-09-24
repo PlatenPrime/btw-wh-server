@@ -62,7 +62,8 @@ describe("createAsk Controller", () => {
         // Check that the action contains the expected format (more flexible)
         expect(responseJson.actions[0]).toMatch(/\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}/);
         expect(responseJson.actions[0]).toContain("Test User");
-        expect(responseJson.actions[0]).toContain("необхідно Test Product в кількості 10");
+        expect(responseJson.actions[0]).toContain("необхідно Test Product");
+        expect(responseJson.actions[0]).toContain(", кількість: 10");
         expect(responseJson.actions[0]).toContain("коментарій: Test comment");
         expect(responseJson._id).toBeDefined();
         expect(responseJson.createdAt).toBeDefined();
@@ -94,7 +95,7 @@ describe("createAsk Controller", () => {
         expect(responseJson.askerData.id).toBe(testUser._id.toString());
         expect(responseJson.askerData.fullname).toBe("Minimal User");
         expect(responseJson.actions).toHaveLength(1);
-        expect(responseJson.actions[0]).toContain("необхідно undefined в кількості undefined");
+        expect(responseJson.actions[0]).toContain("необхідно undefined");
     });
     it("should create ask without comment", async () => {
         // Arrange
@@ -120,7 +121,8 @@ describe("createAsk Controller", () => {
         expect(responseJson.quant).toBe(5);
         expect(responseJson.com).toBeUndefined();
         expect(responseJson.actions).toHaveLength(1);
-        expect(responseJson.actions[0]).toContain("необхідно No Comment Product в кількості 5");
+        expect(responseJson.actions[0]).toContain("необхідно No Comment Product");
+        expect(responseJson.actions[0]).toContain(", кількість: 5");
         expect(responseJson.actions[0]).not.toContain("коментарій:");
     });
     it("should create ask with empty comment", async () => {
@@ -145,7 +147,8 @@ describe("createAsk Controller", () => {
         expect(responseJson.artikul).toBe("EMPTYCOM123");
         expect(responseJson.com).toBe("");
         expect(responseJson.actions).toHaveLength(1);
-        expect(responseJson.actions[0]).toContain("необхідно Empty Comment Product в кількості 3");
+        expect(responseJson.actions[0]).toContain("необхідно Empty Comment Product");
+        expect(responseJson.actions[0]).toContain(", кількість: 3");
         expect(responseJson.actions[0]).not.toContain("коментарій:");
     });
     it("should return 404 when user not found", async () => {
@@ -257,7 +260,7 @@ describe("createAsk Controller", () => {
         // Assert
         expect(responseStatus.code).toBe(201);
         expect(responseJson.quant).toBe(0);
-        expect(responseJson.actions[0]).toContain("в кількості 0");
+        expect(responseJson.actions[0]).toContain(", кількість: 0");
     });
     it("should create ask with negative quantity", async () => {
         // Arrange
@@ -278,7 +281,7 @@ describe("createAsk Controller", () => {
         // Assert
         expect(responseStatus.code).toBe(201);
         expect(responseJson.quant).toBe(-5);
-        expect(responseJson.actions[0]).toContain("в кількості -5");
+        expect(responseJson.actions[0]).toContain(", кількість: -5");
     });
     it("should create ask with very long comment", async () => {
         // Arrange

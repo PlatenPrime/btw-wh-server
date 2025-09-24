@@ -68,7 +68,7 @@ describe("updateAskById Controller", () => {
                 action: "почав обробку запиту",
             },
         };
-        // Act  
+        // Act
         await updateAskById(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
@@ -107,7 +107,7 @@ describe("updateAskById Controller", () => {
         expect(responseJson.actions[1]).toBe("15.01.2024 10:30 Solver User: завершив обробку запиту");
     });
     it("should update ask with all valid statuses", async () => {
-        const validStatuses = ["new", "in_progress", "completed", "cancelled"];
+        const validStatuses = ["new", "completed", "rejected"];
         for (const status of validStatuses) {
             // Arrange
             mockRequest = {
