@@ -3,7 +3,7 @@ import { IPos } from "../models/Pos.js";
 /**
  * Интерфейс для объединенной позиции
  */
-interface IMergedPos {
+export interface IMergedPos {
   nameukr?: string;
   quant: number;
   boxes: number;

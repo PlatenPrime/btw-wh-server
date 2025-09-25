@@ -5,10 +5,10 @@ import mongoose from "mongoose";
 import artsRoute from "./modules/arts/router.js";
 import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
+import defsRoute from "./modules/defs/router.js";
 import palletsRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
 import rowsRoute from "./modules/rows/router.js";
-import defsRoute from "./modules/defs/router.js";
 dotenv.config();
 const app = express();
 // Middleware

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getSharikData } from "../../../comps/utils/getSharikData.js";
-import { getSharikStocks } from "../getSharikStocks.js";
+import { getSharikStocks } from "../../../poses/utils/getSharikStocks.js";
 // Мокаем getSharikData
 vi.mock("../../../comps/utils/getSharikData.js");
 const mockedGetSharikData = vi.mocked(getSharikData);

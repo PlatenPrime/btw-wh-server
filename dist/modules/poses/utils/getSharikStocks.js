@@ -2,9 +2,10 @@ import { getSharikData } from "../../comps/utils/getSharikData.js";
 /**
  * Расширяет объекты массива stocks данными с сайта sharik.ua
  * @param stocks - Объект с объединенными позициями по артикулам
- * @returns Promise с расширенными данными, включающими sharikQuant и difQuant
+ * @param limits - Объект с лимитами по артикулам из модели Art
+ * @returns Promise с расширенными данными, включающими sharikQuant, difQuant и limit
  */
-export async function getSharikStocks(stocks) {
+export async function getSharikStocks(stocks, limits = {}) {
     const startTime = performance.now();
     try {
         const extendedStocks = {};
@@ -24,6 +25,7 @@ export async function getSharikStocks(stocks) {
                         ...stockData,
                         sharikQuant,
                         difQuant,
+                        limit: limits[artikul],
                     };
                 }
                 else {
@@ -32,6 +34,7 @@ export async function getSharikStocks(stocks) {
                         ...stockData,
                         sharikQuant: 0,
                         difQuant: -stockData.quant, // Разница будет отрицательной
+                        limit: limits[artikul],
                     };
                 }
             }
@@ -42,6 +45,7 @@ export async function getSharikStocks(stocks) {
                     ...stocks[artikul],
                     sharikQuant: 0,
                     difQuant: -stocks[artikul].quant,
+                    limit: limits[artikul],
                 };
             }
             // Добавляем задержку между запросами (кроме последнего)

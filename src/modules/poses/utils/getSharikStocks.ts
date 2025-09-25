@@ -1,5 +1,5 @@
 import { getSharikData } from "../../comps/utils/getSharikData.js";
-import { IMergedPosesResult } from "../../poses/utils/mergePoses.js";
+import { IMergedPosesResult } from "./mergePoses.js";
 
 /**
  * Интерфейс для расширенной позиции с данными Sharik
@@ -10,6 +10,7 @@ interface IExtendedMergedPos {
   boxes: number;
   sharikQuant: number;
   difQuant: number;
+  limit?: number;
 }
 
 /**
@@ -22,10 +23,12 @@ export interface ISharikStocksResult {
 /**
  * Расширяет объекты массива stocks данными с сайта sharik.ua
  * @param stocks - Объект с объединенными позициями по артикулам
- * @returns Promise с расширенными данными, включающими sharikQuant и difQuant
+ * @param limits - Объект с лимитами по артикулам из модели Art
+ * @returns Promise с расширенными данными, включающими sharikQuant, difQuant и limit
  */
 export async function getSharikStocks(
-  stocks: IMergedPosesResult
+  stocks: IMergedPosesResult,
+  limits: { [artikul: string]: number } = {}
 ): Promise<ISharikStocksResult> {
   const startTime = performance.now();
 
@@ -54,6 +57,7 @@ export async function getSharikStocks(
             ...stockData,
             sharikQuant,
             difQuant,
+            limit: limits[artikul],
           };
         } else {
           // Если данные не получены, устанавливаем нулевые значения
@@ -61,6 +65,7 @@ export async function getSharikStocks(
             ...stockData,
             sharikQuant: 0,
             difQuant: -stockData.quant, // Разница будет отрицательной
+            limit: limits[artikul],
           };
         }
       } catch (error) {
@@ -74,6 +79,7 @@ export async function getSharikStocks(
           ...stocks[artikul],
           sharikQuant: 0,
           difQuant: -stocks[artikul].quant,
+          limit: limits[artikul],
         };
       }
 
