@@ -1,26 +1,19 @@
 import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
-// Telegram Bot Token (split for security)
-const one = "6777916786:";
-const two = "AAG1HB5d9spnsql";
-const three = "YM3zIV8C5SFa4JA7GV-E";
-const TOKEN = one + two + three;
-// Chat and User IDs
-const CHAT_ID = "-1002121224059";
-const PLATEN_ID = "555196992";
+import { BTW_TOKEN, BTW_CHAT_ID, BTW_PLATEN_ID } from "../constants/telegram.js";
 /**
- * Sends a message to the default Telegram chat
+ * Sends a message to the BTW Chat
  * @param message - The message text to send
  * @throws Error if message sending fails
  */
-export const sendMessageToTelegram = async (message) => {
+export const sendMessageToBTWChat = async (message) => {
     if (!message?.trim()) {
         throw new Error("Message cannot be empty");
     }
     try {
-        const response = await axios.post(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-            chat_id: CHAT_ID,
+        const response = await axios.post(`https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`, {
+            chat_id: BTW_CHAT_ID,
             text: message,
         });
         if (!response.data.ok) {
@@ -48,7 +41,7 @@ export const sendMessageToChat = async (message, chatId) => {
         throw new Error("Chat ID cannot be empty");
     }
     try {
-        const response = await axios.post(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+        const response = await axios.post(`https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`, {
             chat_id: chatId,
             text: message,
         });
@@ -77,7 +70,7 @@ export const sendMessageToUser = async (message, userId) => {
         throw new Error("User ID cannot be empty");
     }
     try {
-        const response = await axios.post(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+        const response = await axios.post(`https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`, {
             chat_id: userId,
             text: message,
             parse_mode: "HTML",
@@ -99,7 +92,7 @@ export const sendMessageToUser = async (message, userId) => {
  * @throws Error if message sending fails
  */
 export const sendMessageToPlaten = async (message) => {
-    return sendMessageToUser(message, PLATEN_ID);
+    return sendMessageToUser(message, BTW_PLATEN_ID);
 };
 /**
  * Sends a file to a specific user
@@ -122,7 +115,7 @@ export const sendFileToUser = async (filePath, userId) => {
         const formData = new FormData();
         formData.append("chat_id", userId);
         formData.append("document", fs.createReadStream(filePath));
-        const response = await axios.post(`https://api.telegram.org/bot${TOKEN}/sendDocument`, formData, {
+        const response = await axios.post(`https://api.telegram.org/bot${BTW_TOKEN}/sendDocument`, formData, {
             headers: {
                 ...formData.getHeaders(),
             },
@@ -144,5 +137,5 @@ export const sendFileToUser = async (filePath, userId) => {
  * @throws Error if file sending fails
  */
 export const sendFileToPlaten = async (filePath) => {
-    return sendFileToUser(filePath, PLATEN_ID);
+    return sendFileToUser(filePath, BTW_PLATEN_ID);
 };

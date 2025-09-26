@@ -7,7 +7,7 @@ import { calculateAndSavePogrebiDefs } from "../utils/calculatePogrebiDefs.js";
  */
 export function startDeficitCalculationCron(): CronJob {
   const job = new CronJob(
-    "0 0 9-17 * * 1-5", // будни 09:00-17:00
+    "0 0 8-17 * * 1-5", // будни 09:00-17:00
     async () => {
       try {
         console.log(`[CRON] Calculating deficits...`);

@@ -1,18 +1,15 @@
 import axios from "axios";
 import fs from "fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { sendFileToPlaten, sendFileToUser, sendMessageToChat, sendMessageToPlaten, sendMessageToTelegram, sendMessageToUser, } from "../sendTelegramMessages.js";
+import { BTW_CHAT_ID, BTW_PLATEN_ID, BTW_TOKEN, } from "../../constants/telegram.js";
+import { sendFileToPlaten, sendFileToUser, sendMessageToBTWChat, sendMessageToChat, sendMessageToPlaten, sendMessageToUser, } from "../sendTelegramMessages.js";
 // Mock axios
 vi.mock("axios");
 const mockedAxios = axios;
 // Mock fs
 vi.mock("fs");
 const mockedFs = vi.mocked(fs);
-// Telegram Bot Token (split for security)
-const one = "6777916786:";
-const two = "AAG1HB5d9spnsql";
-const three = "YM3zIV8C5SFa4JA7GV-E";
-const TOKEN = one + two + three;
+// Use constants from telegram.ts
 // Mock data
 const mockTelegramResponse = {
     ok: true,
@@ -25,7 +22,7 @@ const mockTelegramResponse = {
             username: "test_bot",
         },
         chat: {
-            id: -1002121224059,
+            id: parseInt(BTW_CHAT_ID),
             title: "Test Chat",
             type: "supergroup",
         },
@@ -44,7 +41,7 @@ const mockDocumentResponse = {
             username: "test_bot",
         },
         chat: {
-            id: 555196992,
+            id: parseInt(BTW_PLATEN_ID),
             type: "private",
         },
         date: 1640995200,
@@ -65,18 +62,18 @@ describe("sendTelegramMessages", () => {
     afterEach(() => {
         vi.restoreAllMocks();
     });
-    describe("sendMessageToTelegram", () => {
+    describe("sendMessageToBTWChat", () => {
         it("should send message successfully", async () => {
             const message = "Test message";
-            await sendMessageToTelegram(message);
-            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-                chat_id: "-1002121224059",
+            await sendMessageToBTWChat(message);
+            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`, {
+                chat_id: BTW_CHAT_ID,
                 text: message,
             });
         });
         it("should throw error for empty message", async () => {
-            await expect(sendMessageToTelegram("")).rejects.toThrow("Message cannot be empty");
-            await expect(sendMessageToTelegram("   ")).rejects.toThrow("Message cannot be empty");
+            await expect(sendMessageToBTWChat("")).rejects.toThrow("Message cannot be empty");
+            await expect(sendMessageToBTWChat("   ")).rejects.toThrow("Message cannot be empty");
         });
         it("should throw error when API returns error", async () => {
             const errorResponse = {
@@ -85,11 +82,11 @@ describe("sendTelegramMessages", () => {
                 description: "Bad Request: chat not found",
             };
             mockedAxios.post.mockResolvedValue({ data: errorResponse });
-            await expect(sendMessageToTelegram("Test")).rejects.toThrow("Failed to send message");
+            await expect(sendMessageToBTWChat("Test")).rejects.toThrow("Failed to send message");
         });
         it("should handle network errors", async () => {
             mockedAxios.post.mockRejectedValue(new Error("Network error"));
-            await expect(sendMessageToTelegram("Test")).rejects.toThrow("Failed to send message: Network error");
+            await expect(sendMessageToBTWChat("Test")).rejects.toThrow("Failed to send message: Network error");
         });
     });
     describe("sendMessageToChat", () => {
@@ -97,7 +94,7 @@ describe("sendTelegramMessages", () => {
             const message = "Test message";
             const chatId = "-1001234567890";
             await sendMessageToChat(message, chatId);
-            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`, {
                 chat_id: chatId,
                 text: message,
             });
@@ -118,7 +115,7 @@ describe("sendTelegramMessages", () => {
             const message = "<b>Bold text</b>";
             const userId = "123456789";
             await sendMessageToUser(message, userId);
-            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`, {
                 chat_id: userId,
                 text: message,
                 parse_mode: "HTML",
@@ -139,8 +136,8 @@ describe("sendTelegramMessages", () => {
         it("should send message to Platen user", async () => {
             const message = "Test message to Platen";
             await sendMessageToPlaten(message);
-            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-                chat_id: "555196992",
+            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`, {
+                chat_id: BTW_PLATEN_ID,
                 text: message,
                 parse_mode: "HTML",
             });
@@ -162,7 +159,7 @@ describe("sendTelegramMessages", () => {
             await sendFileToUser(filePath, userId);
             expect(mockedFs.existsSync).toHaveBeenCalledWith(filePath);
             expect(mockedFs.createReadStream).toHaveBeenCalledWith(filePath);
-            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${TOKEN}/sendDocument`, expect.any(Object), // FormData object
+            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${BTW_TOKEN}/sendDocument`, expect.any(Object), // FormData object
             {
                 headers: expect.any(Object),
             });
@@ -202,7 +199,7 @@ describe("sendTelegramMessages", () => {
             await sendFileToPlaten(filePath);
             expect(mockedFs.existsSync).toHaveBeenCalledWith(filePath);
             expect(mockedFs.createReadStream).toHaveBeenCalledWith(filePath);
-            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${TOKEN}/sendDocument`, expect.any(Object), // FormData object
+            expect(mockedAxios.post).toHaveBeenCalledWith(`https://api.telegram.org/bot${BTW_TOKEN}/sendDocument`, expect.any(Object), // FormData object
             {
                 headers: expect.any(Object),
             });
@@ -216,12 +213,12 @@ describe("sendTelegramMessages", () => {
         it("should handle complex error scenarios", async () => {
             // Test with null/undefined values
             mockedAxios.post.mockRejectedValue(null);
-            await expect(sendMessageToTelegram("Test")).rejects.toThrow("Failed to send message: Unknown error occurred");
+            await expect(sendMessageToBTWChat("Test")).rejects.toThrow("Failed to send message: Unknown error occurred");
         });
         it("should validate all required parameters", async () => {
             const testCases = [
                 {
-                    fn: () => sendMessageToTelegram(""),
+                    fn: () => sendMessageToBTWChat(""),
                     expected: "Message cannot be empty",
                 },
                 {
@@ -256,8 +253,8 @@ describe("sendTelegramMessages", () => {
     });
     describe("Token security", () => {
         it("should use correct token format", async () => {
-            await sendMessageToTelegram("Test");
-            expect(mockedAxios.post).toHaveBeenCalledWith(expect.stringContaining(`bot${TOKEN}`), expect.any(Object));
+            await sendMessageToBTWChat("Test");
+            expect(mockedAxios.post).toHaveBeenCalledWith(expect.stringContaining(`bot${BTW_TOKEN}`), expect.any(Object));
         });
     });
 });

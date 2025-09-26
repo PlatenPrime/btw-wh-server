@@ -1,8 +1,9 @@
 import { getPogrebiDefStocks } from "../../poses/utils/getPogrebiDefStocks.js";
-import { getSharikStocks } from "../../poses/utils/getSharikStocks.js";
+import { getSharikStocks, } from "../../poses/utils/getSharikStocks.js";
 import { Defcalc } from "../models/Defcalc.js";
 import { filterDeficits } from "./filterDeficits.js";
 import { getArtLimits } from "./getArtLimits.js";
+import { sendDefCalculationCompleteNotification, sendDefCalculationErrorNotification, sendDefCalculationStartNotification, } from "./sendDefNotifications.js";
 export async function calculatePogrebiDefs() {
     const pogrebiDefStocks = await getPogrebiDefStocks();
     const artikuls = Object.keys(pogrebiDefStocks);
@@ -18,6 +19,8 @@ export async function calculatePogrebiDefs() {
  */
 export async function calculateAndSavePogrebiDefs() {
     try {
+        // Отправляем уведомление о начале расчета
+        await sendDefCalculationStartNotification();
         // Выполняем расчет дефицитов
         const result = await calculatePogrebiDefs();
         // Создаем и сохраняем документ в базу данных
@@ -25,10 +28,14 @@ export async function calculateAndSavePogrebiDefs() {
             result,
         });
         const savedDefcalc = await defcalc.save();
+        // Отправляем уведомление о завершении с результатами
+        await sendDefCalculationCompleteNotification(result);
         return savedDefcalc;
     }
     catch (error) {
         console.error("Error in calculateAndSavePogrebiDefs:", error);
+        // Отправляем уведомление об ошибке
+        await sendDefCalculationErrorNotification(error);
         throw new Error(`Failed to calculate and save pogrebi deficits: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
 }
