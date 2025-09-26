@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import artsRoute from "./modules/arts/router.js";
 import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
+import { startDeficitCalculationCron } from "./modules/defs/cron/cronCalculateDefs.js";
 import defsRoute from "./modules/defs/router.js";
 import palletsRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
@@ -52,7 +53,12 @@ async function start() {
     await mongoose.connect(
       `mongodb+srv://${DB_USER}:${DB_PASSWORD}@cluster0.b6qtdz4.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`
     );
-    app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+
+    startDeficitCalculationCron();
+
+    app.listen(PORT, () => {
+      console.log(`Server started on port ${PORT}`);
+    });
   } catch (error) {
     console.log(error);
   }

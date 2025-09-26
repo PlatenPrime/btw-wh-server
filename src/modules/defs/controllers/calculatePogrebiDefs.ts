@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../../utils/asyncHandler.js";
-import { Defcalc } from "../models/Defcalc.js";
-import { calculatePogrebiDefs } from "../utils/calculatePogrebiDefs.js";
+import { calculateAndSavePogrebiDefs } from "../utils/calculatePogrebiDefs.js";
 
 /**
  * @desc    Выполнить расчет дефицитов и сохранить результат в БД
@@ -11,15 +10,8 @@ import { calculatePogrebiDefs } from "../utils/calculatePogrebiDefs.js";
 export const calculatePogrebiDefsController = asyncHandler(
   async (req: Request, res: Response) => {
     try {
-      // Выполняем расчет дефицитов
-      const result = await calculatePogrebiDefs();
-
-      // Сохраняем результат в базу данных
-      const defcalc = new Defcalc({
-        result,
-      });
-
-      const savedDefcalc = await defcalc.save();
+      // Выполняем расчет дефицитов и сохраняем в БД
+      const savedDefcalc = await calculateAndSavePogrebiDefs();
 
       res.status(201).json({
         success: true,
