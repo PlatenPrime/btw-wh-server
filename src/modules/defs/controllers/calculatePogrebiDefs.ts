@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../../../utils/asyncHandler.js";
 import { calculateAndSavePogrebiDefs } from "../utils/calculatePogrebiDefs.js";
 import {
-  finishCalculationTracking,
-  resetCalculationStatus,
+    finishCalculationTracking,
+    resetCalculationStatus,
 } from "../utils/calculationStatus.js";
 
 /**
@@ -27,8 +27,9 @@ export const calculatePogrebiDefsController = asyncHandler(
         success: true,
         message: "Deficit calculation completed and saved successfully",
         data: {
-          totalItems: savedDefcalc.totalItems,
-          totalDeficits: savedDefcalc.totalDeficits,
+          total: savedDefcalc.total,
+          totalCriticalDefs: savedDefcalc.totalCriticalDefs,
+          totalLimitDefs: savedDefcalc.totalLimitDefs,
           createdAt: savedDefcalc.createdAt,
         },
       });

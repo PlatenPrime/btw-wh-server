@@ -10,7 +10,7 @@ export function startDeficitCalculationCron() {
         try {
             console.log(`[CRON] Calculating deficits...`);
             const result = await calculateAndSavePogrebiDefs();
-            console.log(`[CRON] Completed: ${result.totalDeficits} deficits found`);
+            console.log(`[CRON] Completed: ${result.total} deficits found`);
         }
         catch (error) {
             console.error(`[CRON] Error:`, error instanceof Error ? error.message : "Unknown error");

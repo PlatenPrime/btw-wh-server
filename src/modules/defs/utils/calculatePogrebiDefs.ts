@@ -4,6 +4,7 @@ import {
   ISharikStocksResult,
 } from "../../poses/utils/getSharikStocks.js";
 import { Defcalc, IDefcalc } from "../models/Defcalc.js";
+import { calculateDeficitTotals } from "./calculateTotals.js";
 import {
   finishCalculationTracking,
   startCalculationTracking,
@@ -76,9 +77,16 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDefcalc> {
       artikuls.length + 2,
       "Сохранение в базу данных..."
     );
+
+    // Рассчитываем итоговые значения
+    const totals = calculateDeficitTotals(filteredDefs);
+
     // Создаем и сохраняем документ в базу данных
     const defcalc = new Defcalc({
       result: filteredDefs,
+      total: totals.total,
+      totalCriticalDefs: totals.totalCriticalDefs,
+      totalLimitDefs: totals.totalLimitDefs,
     });
 
     const savedDefcalc = await defcalc.save();

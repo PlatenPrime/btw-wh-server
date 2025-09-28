@@ -4,12 +4,11 @@ import mongoose, { Document, Model, Schema } from "mongoose";
  * Интерфейс для данных о дефиците по артикулу
  */
 export interface IDeficitItem {
-  nameukr?: string;
-  quant: number;
-  boxes: number;
-  sharikQuant: number;
-  difQuant: number;
-  limit?: number;
+  nameukr: string;
+  quant: number; // общее количество посчитанного товара на складе
+  sharikQuant: number; // количество товара на сайте
+  difQuant: number; // разница между sharikQuant и quant
+  defLimit: number; // сумма quant + artLimit
 }
 
 /**
@@ -24,8 +23,9 @@ export interface IDeficitCalculationResult {
  */
 export interface IDefcalc extends Document {
   result: IDeficitCalculationResult;
-  totalDeficits: number;
-  totalItems: number;
+  total: number;
+  totalCriticalDefs: number;
+  totalLimitDefs: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -33,12 +33,11 @@ export interface IDefcalc extends Document {
 // Схема для элемента дефицита
 const deficitItemSchema = new Schema<IDeficitItem>(
   {
-    nameukr: { type: String },
-    quant: { type: Number, required: true },
-    boxes: { type: Number, required: true },
-    sharikQuant: { type: Number, required: true },
-    difQuant: { type: Number, required: true },
-    limit: { type: Number },
+    nameukr: { type: String, required: true },
+    quant: { type: Number, required: true }, // общее количество посчитанного товара на складе
+    sharikQuant: { type: Number, required: true }, // количество товара на сайте
+    difQuant: { type: Number, required: true }, // разница между sharikQuant и quant
+    defLimit: { type: Number, required: true }, // сумма quant + artLimit
   },
   { _id: false }
 );
@@ -59,12 +58,17 @@ const defcalcSchema = new Schema<IDefcalc>(
       type: deficitCalculationResultSchema,
       required: true,
     },
-    totalDeficits: {
+    total: {
       type: Number,
       required: true,
       default: 0,
     },
-    totalItems: {
+    totalCriticalDefs: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    totalLimitDefs: {
       type: Number,
       required: true,
       default: 0,
@@ -72,37 +76,6 @@ const defcalcSchema = new Schema<IDefcalc>(
   },
   { timestamps: true }
 );
-
-// Middleware для автоматического подсчета статистики перед сохранением
-defcalcSchema.pre<IDefcalc>("save", function (next) {
-  const result = this.result;
-
-  if (result && typeof result === "object") {
-    // Получаем только пользовательские ключи, исключая внутренние Mongoose поля
-    const userKeys = Object.keys(result).filter(
-      (key) =>
-        !key.startsWith("$") &&
-        !key.startsWith("_") &&
-        key !== "isNew" &&
-        key !== "isModified"
-    );
-
-    const items = userKeys
-      .map((key) => result[key])
-      .filter((item) => item && typeof item === "object" && "difQuant" in item);
-
-    this.totalItems = items.length;
-    this.totalDeficits = items.filter(
-      (item) => item && item.difQuant <= 0
-    ).length;
-  } else {
-    console.warn("Defcalc pre-save: result is empty or invalid");
-    this.totalItems = 0;
-    this.totalDeficits = 0;
-  }
-
-  next();
-});
 
 /**
  * Defcalc Mongoose model

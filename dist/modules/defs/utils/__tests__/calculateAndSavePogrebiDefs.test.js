@@ -74,7 +74,13 @@ describe("calculateAndSavePogrebiDefs", () => {
             },
         };
         const mockFilteredData = {
-            ART001: mockSharikData["ART001"],
+            ART001: {
+                nameukr: "Товар 1",
+                quant: 10,
+                sharikQuant: 5,
+                difQuant: -5,
+                defLimit: 30, // quant + artLimit = 10 + 20
+            },
         };
         // Настраиваем моки
         getPogrebiDefStocks.mockResolvedValue(mockPogrebiStocks);
@@ -99,8 +105,9 @@ describe("calculateAndSavePogrebiDefs", () => {
         // Проверяем результат - проверяем только ключевые поля, так как MongoDB генерирует _id и timestamps
         expect(result).toMatchObject({
             result: mockFilteredData,
-            totalItems: 1,
-            totalDeficits: 1,
+            total: 1,
+            totalCriticalDefs: 1,
+            totalLimitDefs: 0,
             __v: 0,
         });
         expect(result._id).toBeDefined();

@@ -1,6 +1,7 @@
 import { getPogrebiDefStocks } from "../../poses/utils/getPogrebiDefStocks.js";
 import { getSharikStocks, } from "../../poses/utils/getSharikStocks.js";
 import { Defcalc } from "../models/Defcalc.js";
+import { calculateDeficitTotals } from "./calculateTotals.js";
 import { finishCalculationTracking, startCalculationTracking, updateCalculationProgress, } from "./calculationStatus.js";
 import { filterDeficits } from "./filterDeficits.js";
 import { getArtLimits } from "./getArtLimits.js";
@@ -37,9 +38,14 @@ export async function calculateAndSavePogrebiDefs() {
         updateCalculationProgress(artikuls.length + 1, artikuls.length + 2, "Фильтрация дефицитов...");
         const filteredDefs = filterDeficits(result);
         updateCalculationProgress(artikuls.length + 2, artikuls.length + 2, "Сохранение в базу данных...");
+        // Рассчитываем итоговые значения
+        const totals = calculateDeficitTotals(filteredDefs);
         // Создаем и сохраняем документ в базу данных
         const defcalc = new Defcalc({
             result: filteredDefs,
+            total: totals.total,
+            totalCriticalDefs: totals.totalCriticalDefs,
+            totalLimitDefs: totals.totalLimitDefs,
         });
         const savedDefcalc = await defcalc.save();
         // Отправляем уведомление о завершении с результатами
