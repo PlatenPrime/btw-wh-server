@@ -54,7 +54,7 @@ async function start() {
       `mongodb+srv://${DB_USER}:${DB_PASSWORD}@cluster0.b6qtdz4.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`
     );
 
-    startDeficitCalculationCron();
+    // startDeficitCalculationCron();
 
     app.listen(PORT, () => {
       console.log(`Server started on port ${PORT}`);
