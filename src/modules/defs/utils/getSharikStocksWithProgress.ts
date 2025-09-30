@@ -20,7 +20,7 @@ export async function getSharikStocksWithProgress(
     const artikuls = Object.keys(stocks);
     const totalItems = artikuls.length;
 
-    console.log(`Начинаем обработку ${totalItems} артикулов`);
+    console.log(`Початок обробки ${totalItems} артикулів`);
 
     // Обрабатываем каждый артикул последовательно с задержкой
     for (let i = 0; i < artikuls.length; i++) {
@@ -52,11 +52,11 @@ export async function getSharikStocksWithProgress(
         }
       } catch (error) {
         console.warn(
-          `Ошибка при получении данных Sharik для артикула ${artikul}:`,
+          `Помилка при отриманні даних Sharik для артикула ${artikul}:`,
           error
         );
 
-        // В случае ошибки устанавливаем нулевые значения
+        // В разі помилки встановлюємо нульові значення
         extendedStocks[artikul] = {
           ...stocks[artikul],
           sharikQuant: 0,
@@ -65,32 +65,32 @@ export async function getSharikStocksWithProgress(
         };
       }
 
-      // Добавляем задержку между запросами (кроме последнего)
+      // Додаємо затримку між запитами (крім останнього)
       if (i < artikuls.length - 1) {
         await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms задержка
       }
 
-      // Обновляем прогресс каждые 5 артикулов или на последнем элементе
+      // Оновлюємо прогресс кожні 5 артикулів або на останньому елементі
       if ((i + 1) % 5 === 0 || i === artikuls.length - 1) {
         updateCalculationProgress(
           i + 1,
           totalItems,
-          `Обработка данных Sharik: ${i + 1} из ${totalItems} артикулов`
+          `Обробка даних Sharik: ${i + 1} з ${totalItems} артикулів`
         );
 
-        console.log(`Обработано ${i + 1} из ${totalItems} артикулов`);
+        console.log(`Оброблено ${i + 1} з ${totalItems} артикулів`);
       }
     }
 
     const endTime = performance.now();
     const duration = Math.round((endTime - startTime) / 1000);
     console.log(
-      `Обработка ${totalItems} артикулов завершена за ${duration} секунд`
+      `Обробка ${totalItems} артикулів завершена за ${duration} секунд`
     );
 
     return extendedStocks;
   } catch (error) {
-    console.error("Ошибка в getSharikStocksWithProgress:", error);
+    console.error("Помилка в getSharikStocksWithProgress:", error);
     throw error;
   }
 }

@@ -53,11 +53,11 @@ export const startCalculationTracking = (totalItems) => {
         startedAt: new Date().toISOString(),
         totalItems,
         processedItems: 0,
-        currentStep: "Инициализация расчета...",
+        currentStep: "Ініціалізація розрахунку...",
     });
 };
 /**
- * Обновить прогресс расчета
+ * Оновити прогрес розрахунку
  */
 export const updateCalculationProgress = (processedItems, totalItems, currentStep) => {
     const progress = Math.round((processedItems / totalItems) * 100);
@@ -78,7 +78,7 @@ export const finishCalculationTracking = () => {
         isRunning: false,
         progress: 100,
         estimatedTimeRemaining: 0,
-        currentStep: "Расчет завершен",
+        currentStep: "Розрахунок завершено",
     });
 };
 /**

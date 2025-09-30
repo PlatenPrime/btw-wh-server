@@ -10,14 +10,13 @@ import {
   startCalculationTracking,
   updateCalculationProgress,
 } from "./calculationStatus.js";
+import { sendDefCalculationCompleteNotification } from "./defs-tg-notifications/sendDefCalculationCompleteNotification.js";
+import { sendDefCalculationErrorNotification } from "./defs-tg-notifications/sendDefCalculationErrorNotification.js";
+import { sendDefCalculationStartNotification } from "./defs-tg-notifications/sendDefCalculationStartNotification.js";
 import { filterDeficits } from "./filterDeficits.js";
 import { getArtLimits } from "./getArtLimits.js";
 import { getSharikStocksWithProgress } from "./getSharikStocksWithProgress.js";
-import {
-  sendDefCalculationCompleteNotification,
-  sendDefCalculationErrorNotification,
-  sendDefCalculationStartNotification,
-} from "./sendDefNotifications.js";
+
 
 export async function calculatePogrebiDefs() {
   const pogrebiDefStocks = await getPogrebiDefStocks();
@@ -40,7 +39,7 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDefcalc> {
     await sendDefCalculationStartNotification();
 
     // Получаем данные для расчета
-    updateCalculationProgress(0, 100, "Получение данных склада...");
+    updateCalculationProgress(0, 100, "Отримання даних складу...");
     const pogrebiDefStocks = await getPogrebiDefStocks();
     const artikuls = Object.keys(pogrebiDefStocks);
 
@@ -50,14 +49,14 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDefcalc> {
     updateCalculationProgress(
       1,
       artikuls.length + 2,
-      "Получение лимитов артикулов..."
+      "Отримання лімітів артикулів..."
     );
     const limits = await getArtLimits(artikuls);
 
     updateCalculationProgress(
       2,
       artikuls.length + 2,
-      "Обработка данных Sharik..."
+      "Обробка даних Sharik..."
     );
     // Используем функцию с отслеживанием прогресса
     const result: ISharikStocksResult = await getSharikStocksWithProgress(
@@ -68,20 +67,20 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDefcalc> {
     updateCalculationProgress(
       artikuls.length + 1,
       artikuls.length + 2,
-      "Фильтрация дефицитов..."
+      "Фільтрація дефіцитів..."
     );
     const filteredDefs = filterDeficits(result);
 
     updateCalculationProgress(
       artikuls.length + 2,
       artikuls.length + 2,
-      "Сохранение в базу данных..."
+      "Збереження в базу даних..."
     );
 
-    // Рассчитываем итоговые значения
+    // Розраховуємо ітогові значення
     const totals = calculateDeficitTotals(filteredDefs);
 
-    // Создаем и сохраняем документ в базу данных
+    // Створюємо і зберігаємо документ в базу даних
     const defcalc = new Defcalc({
       result: filteredDefs,
       total: totals.total,
@@ -91,25 +90,25 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDefcalc> {
 
     const savedDefcalc = await defcalc.save();
 
-    // Отправляем уведомление о завершении с результатами
+    // Відправляємо повідомлення про завершення з результатами
     await sendDefCalculationCompleteNotification(filteredDefs);
 
-    // Завершаем отслеживание
+    // Завершаємо відстеження
     finishCalculationTracking();
 
     return savedDefcalc;
   } catch (error) {
-    console.error("Error in calculateAndSavePogrebiDefs:", error);
+    console.error("Помилка в calculateAndSavePogrebiDefs:", error);
 
     // Завершаем отслеживание при ошибке
     finishCalculationTracking();
 
-    // Отправляем уведомление об ошибке
+    // Відправляємо повідомлення про помилку
     await sendDefCalculationErrorNotification(error);
 
     throw new Error(
-      `Failed to calculate and save pogrebi deficits: ${
-        error instanceof Error ? error.message : "Unknown error"
+      `Не вдалося розрахувати і зберегти дефіцити: ${
+        error instanceof Error ? error.message : "Невідома помилка"
       }`
     );
   }

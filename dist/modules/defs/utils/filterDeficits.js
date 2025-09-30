@@ -1,9 +1,9 @@
 /**
- * Фильтрует дефициты по правильной логике:
+ * Фільтрує дефіцити по правильній логіці:
  * - Критический дефицит: sharikQuant <= quant (difQuant <= 0)
- * - Лимитированный дефицит: sharikQuant <= defLimit (где defLimit = quant + artLimit)
- * @param defs - Результат с данными Sharik
- * @returns Отфильтрованные дефициты с правильно рассчитанным полем defLimit
+ * - Лимитированный дефицит: sharikQuant <= defLimit (де defLimit = quant + artLimit)
+ * @param defs - Результат з даними Sharik
+ * @returns Відфільтровані дефіцити з правильно розрахованим полем defLimit
  */
 export function filterDeficits(defs) {
     const filteredDefs = {};

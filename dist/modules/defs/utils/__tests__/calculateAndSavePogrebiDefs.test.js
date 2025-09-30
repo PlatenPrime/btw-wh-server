@@ -41,7 +41,9 @@ import { finishCalculationTracking, startCalculationTracking, updateCalculationP
 import { filterDeficits } from "../filterDeficits.js";
 import { getArtLimits } from "../getArtLimits.js";
 import { getSharikStocksWithProgress } from "../getSharikStocksWithProgress.js";
-import { sendDefCalculationCompleteNotification, sendDefCalculationErrorNotification, sendDefCalculationStartNotification, } from "../sendDefNotifications.js";
+import { sendDefCalculationStartNotification } from "../defs-tg-notifications/sendDefCalculationStartNotification.js";
+import { sendDefCalculationCompleteNotification } from "../defs-tg-notifications/sendDefCalculationCompleteNotification.js";
+import { sendDefCalculationErrorNotification } from "../defs-tg-notifications/sendDefCalculationErrorNotification.js";
 describe("calculateAndSavePogrebiDefs", () => {
     beforeEach(() => {
         vi.clearAllMocks();

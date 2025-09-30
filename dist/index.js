@@ -9,6 +9,7 @@ import defsRoute from "./modules/defs/router.js";
 import palletsRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
 import rowsRoute from "./modules/rows/router.js";
+import { sendMessageToDefsChat } from "./utils/telegram/sendMessageToDefsChat.js";
 dotenv.config();
 const app = express();
 // Middleware
@@ -50,3 +51,4 @@ async function start() {
     }
 }
 start();
+sendMessageToDefsChat("test");

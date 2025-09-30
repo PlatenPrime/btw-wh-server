@@ -25,7 +25,7 @@ export async function getArtLimits(
 
     return limits;
   } catch (error) {
-    console.error("Ошибка при получении лимитов из модели Art:", error);
+    console.error("Помилка при отриманні лімітів з моделі Art:", error);
     return {};
   }
 }
