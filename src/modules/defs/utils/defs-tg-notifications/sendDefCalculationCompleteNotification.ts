@@ -8,14 +8,14 @@ export const sendDefCalculationCompleteNotification = async (
     const totalDeficits = Object.keys(result).length;
 
     let message =
-      `✅ <b>Розрахунок дефіцитів завершено</b>\n\n` +
-      `📊 <b>Результати:</b>\n` +
-      `• Знайдено дефіцитів: <b>${totalDeficits}</b>\n` +
-      `• Документ збережено в БД\n`;
+      `✅ Розрахунок дефіцитів завершено \n` +
+      `📊 Результати: \n` +
+      `• Знайдено дефіцитів: ${totalDeficits}\n`;
+   
 
     if (totalDeficits === 0) {
-      message += `\n🎉 <b>Відмінно! 
-        Дефіцитів не знайдено</b>\n
+      message += `🎉 Відмінно! 
+        Дефіцитів не знайдено
         Всі артикули в нормі`;
     } else {
       // Формуємо список дефіцитних артикулів з difQuant
@@ -25,13 +25,16 @@ export const sendDefCalculationCompleteNotification = async (
           const quant = data.quant || 0;
           const defLimit = data.defLimit || 0;
           const status = difQuant <= 0 ? "🔴" : "🟡";
-          return `${status} <b>${artikul}</b>: ${difQuant} \n  
-            └ Поточний залишок: ${quant}, \n  
-            └ Ліміт дефіциту: ${defLimit}`;
+          return `${status} ${artikul} 
+            └ Запаси: ${quant}  
+            └ Ліміт дефіциту: ${defLimit}
+            └ Вітрина: ${difQuant}
+            `;
         })
         .join("\n");
 
-      message += `\n📋 <b>Список дефіцитів:</b>\n${deficitList}`;
+      message += `📋Список дефіцитів:
+      ${deficitList}`;
     }
 
     await sendMessageToDefsChat(message);

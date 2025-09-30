@@ -2,6 +2,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
+import { startCronOperations } from "./cron/startCronOperations.js";
 import artsRoute from "./modules/arts/router.js";
 import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
@@ -9,7 +10,6 @@ import defsRoute from "./modules/defs/router.js";
 import palletsRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
 import rowsRoute from "./modules/rows/router.js";
-import { sendMessageToDefsChat } from "./utils/telegram/sendMessageToDefsChat.js";
 dotenv.config();
 const app = express();
 // Middleware
@@ -41,7 +41,7 @@ const DB_NAME = process.env.DB_NAME;
 async function start() {
     try {
         await mongoose.connect(`mongodb+srv://${DB_USER}:${DB_PASSWORD}@cluster0.b6qtdz4.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`);
-        // startDeficitCalculationCron();
+        startCronOperations();
         app.listen(PORT, () => {
             console.log(`Server started on port ${PORT}`);
         });
@@ -51,4 +51,3 @@ async function start() {
     }
 }
 start();
-sendMessageToDefsChat("test");
