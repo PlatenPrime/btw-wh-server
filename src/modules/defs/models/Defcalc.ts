@@ -19,6 +19,11 @@ export interface IDeficitItemWithAsk extends IDeficitItem {
 }
 
 /**
+ * Типы статусов дефицита
+ */
+export type DeficitStatus = "limited" | "critical";
+
+/**
  * Интерфейс для данных о дефиците по артикулу
  */
 export interface IDeficitItem {
@@ -27,6 +32,7 @@ export interface IDeficitItem {
   sharikQuant: number; // количество товара на сайте
   difQuant: number; // разница между sharikQuant и quant
   defLimit: number; // сумма quant + artLimit
+  status: DeficitStatus; // статус дефицита: 'limited' или 'critical'
 }
 
 /**
@@ -63,6 +69,11 @@ const deficitItemSchema = new Schema<IDeficitItem>(
     sharikQuant: { type: Number, required: true }, // количество товара на сайте
     difQuant: { type: Number, required: true }, // разница между sharikQuant и quant
     defLimit: { type: Number, required: true }, // сумма quant + artLimit
+    status: {
+      type: String,
+      required: true,
+      enum: ["limited", "critical"],
+    }, // статус дефицита: 'limited' или 'critical'
   },
   { _id: false }
 );

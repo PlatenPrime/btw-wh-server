@@ -6,6 +6,11 @@ const deficitItemSchema = new Schema({
     sharikQuant: { type: Number, required: true }, // количество товара на сайте
     difQuant: { type: Number, required: true }, // разница между sharikQuant и quant
     defLimit: { type: Number, required: true }, // сумма quant + artLimit
+    status: {
+        type: String,
+        required: true,
+        enum: ["limited", "critical"],
+    }, // статус дефицита: 'limited' или 'critical'
 }, { _id: false });
 // Схема для результата расчета дефицитов
 const deficitCalculationResultSchema = new Schema({}, {

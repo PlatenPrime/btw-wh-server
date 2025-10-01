@@ -1,7 +1,7 @@
 /**
- * Рассчитывает итоговые значения для дефицитов по правильной логике:
- * - Критический дефицит: sharikQuant <= quant (difQuant <= 0)
- * - Лимитированный дефицит: sharikQuant <= defLimit и sharikQuant > quant
+ * Рассчитывает итоговые значения для дефицитов используя поле status:
+ * - Критический дефицит: status === 'critical'
+ * - Лимитированный дефицит: status === 'limited'
  * @param result - Результат расчета дефицитов
  * @returns Объект с итоговыми значениями
  */
@@ -11,12 +11,11 @@ export function calculateDeficitTotals(result) {
     let totalLimitDefs = 0;
     Object.values(result).forEach((item) => {
         total++;
-        // Критический дефицит: sharikQuant <= quant (difQuant <= 0)
-        if (item.sharikQuant <= item.quant) {
+        // Используем поле status для определения типа дефицита
+        if (item.status === "critical") {
             totalCriticalDefs++;
         }
-        // Лимитированный дефицит: sharikQuant <= defLimit и sharikQuant > quant
-        else if (item.sharikQuant <= item.defLimit) {
+        else if (item.status === "limited") {
             totalLimitDefs++;
         }
     });

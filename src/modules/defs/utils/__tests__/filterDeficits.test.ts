@@ -32,6 +32,10 @@ describe("filterDeficits", () => {
     // Проверяем, что поле defLimit рассчитано правильно (quant + artLimit)
     expect(result["ART001"].defLimit).toBe(30); // 10 + 20
     expect(result["ART002"].defLimit).toBe(30); // 10 + 20
+
+    // Проверяем, что статус установлен правильно для критических дефицитов
+    expect(result["ART001"].status).toBe("critical");
+    expect(result["ART002"].status).toBe("critical");
   });
 
   it("должна включать лимитированные дефициты (sharikQuant <= defLimit и sharikQuant > quant)", () => {
@@ -63,6 +67,10 @@ describe("filterDeficits", () => {
     // Проверяем, что поле defLimit рассчитано правильно
     expect(result["ART001"].defLimit).toBe(30); // 10 + 20
     expect(result["ART002"].defLimit).toBe(20); // 5 + 15
+
+    // Проверяем, что статус установлен правильно для лимитированных дефицитов
+    expect(result["ART001"].status).toBe("limited");
+    expect(result["ART002"].status).toBe("limited");
   });
 
   it("должна исключать артикулы без дефицитов (sharikQuant > defLimit)", () => {
@@ -130,6 +138,10 @@ describe("filterDeficits", () => {
     // Проверяем, что поле defLimit рассчитано правильно
     expect(result["ART001"].defLimit).toBe(30); // 10 + 20
     expect(result["ART002"].defLimit).toBe(30); // 10 + 20
+
+    // Проверяем, что статус установлен правильно для смешанных случаев
+    expect(result["ART001"].status).toBe("critical");
+    expect(result["ART002"].status).toBe("limited");
   });
 
   it("должна обрабатывать пустой объект", () => {
@@ -167,5 +179,8 @@ describe("filterDeficits", () => {
 
     // Проверяем, что поле defLimit рассчитано правильно
     expect(result["ART001"].defLimit).toBe(30); // 10 + 20
+
+    // Проверяем, что статус установлен правильно для граничного случая
+    expect(result["ART001"].status).toBe("limited");
   });
 });

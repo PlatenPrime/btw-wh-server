@@ -17,12 +17,15 @@ export function filterDeficits(defs) {
         const isCriticalDeficit = sharikQuant <= quant; // difQuant <= 0
         const isLimitDeficit = sharikQuant <= defLimit && sharikQuant > quant;
         if (isCriticalDeficit || isLimitDeficit) {
+            // Определяем статус дефицита
+            const status = isCriticalDeficit ? "critical" : "limited";
             filteredDefs[artikul] = {
                 nameukr: data.nameukr || "",
                 quant,
                 sharikQuant,
                 difQuant,
                 defLimit,
+                status,
             };
         }
     });

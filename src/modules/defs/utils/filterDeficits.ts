@@ -1,5 +1,5 @@
 import { ISharikStocksResult } from "../../poses/utils/getSharikStocks.js";
-import { IDeficitCalculationResult } from "../models/Defcalc.js";
+import { DeficitStatus, IDeficitCalculationResult } from "../models/Defcalc.js";
 
 /**
  * Фільтрує дефіцити по правильній логіці:
@@ -26,12 +26,16 @@ export function filterDeficits(
     const isLimitDeficit = sharikQuant <= defLimit && sharikQuant > quant;
 
     if (isCriticalDeficit || isLimitDeficit) {
+      // Определяем статус дефицита
+      const status: DeficitStatus = isCriticalDeficit ? "critical" : "limited";
+
       filteredDefs[artikul] = {
         nameukr: data.nameukr || "",
         quant,
         sharikQuant,
         difQuant,
         defLimit,
+        status,
       };
     }
   });

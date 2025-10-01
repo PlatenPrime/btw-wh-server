@@ -16,12 +16,12 @@ const createDeficitMessage = (deficits, startIndex, totalDeficits) => {
         const difQuant = data.difQuant || 0;
         const quant = data.quant || 0;
         const defLimit = data.defLimit || 0;
-        const status = difQuant <= 0 ? "🔴" : "🟡";
-        return `${status} ${artikul} 
-      └ Запаси: ${quant}  
-      └ Вітрина: ${difQuant}
-      └ Ліміт: ${defLimit - quant}
-        `;
+        const statusIcon = data.status === "critical" ? "🔴" : "🟡";
+        return `${statusIcon} ${artikul} 
+          └ Запаси: ${quant}  
+          └ Вітрина: ${difQuant}
+          └ Ліміт: ${defLimit - quant}
+            `;
     })
         .join("\n");
     return `📋 Список дефіцитів (${rangeText}):
