@@ -18,14 +18,15 @@ const createDeficitMessage = (deficits, startIndex, totalDeficits) => {
         const defLimit = data.defLimit || 0;
         const status = difQuant <= 0 ? "🔴" : "🟡";
         return `${status} ${artikul} 
-        └ Запаси: ${quant}  
-        └ Ліміт дефіциту: ${defLimit}
-        └ Вітрина: ${difQuant}
+      └ Запаси: ${quant}  
+      └ Вітрина: ${difQuant}
+      └ Ліміт: ${defLimit - quant}
         `;
     })
         .join("\n");
     return `📋 Список дефіцитів (${rangeText}):
-${deficitList}`;
+  ------------------
+    ${deficitList}`;
 };
 export const sendDefCalculationCompleteNotification = async (result) => {
     try {
@@ -43,11 +44,11 @@ export const sendDefCalculationCompleteNotification = async (result) => {
         else {
             // Разбиваем дефициты на кластеры по 10
             const deficitEntries = Object.entries(result);
-            const chunks = chunkArray(deficitEntries, 10);
+            const chunks = chunkArray(deficitEntries, 20);
             // Отправляем каждый кластер отдельным сообщением
             for (let i = 0; i < chunks.length; i++) {
                 const chunk = chunks[i];
-                const startIndex = i * 10;
+                const startIndex = i * 20;
                 const message = createDeficitMessage(chunk, startIndex, totalDeficits);
                 await sendMessageToDefsChat(message);
                 // Небольшая задержка между сообщениями (500мс)

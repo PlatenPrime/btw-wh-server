@@ -1,6 +1,24 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
 /**
+ * Интерфейс для информации о существующей заявке
+ */
+export interface IExistingAsk {
+  _id: string;
+  status: string;
+  createdAt: Date;
+  askerName: string;
+  askerId: string;
+}
+
+/**
+ * Интерфейс для данных о дефиците по артикулу с информацией о заявке
+ */
+export interface IDeficitItemWithAsk extends IDeficitItem {
+  existingAsk: IExistingAsk | null;
+}
+
+/**
  * Интерфейс для данных о дефиците по артикулу
  */
 export interface IDeficitItem {
@@ -16,6 +34,13 @@ export interface IDeficitItem {
  */
 export interface IDeficitCalculationResult {
   [artikul: string]: IDeficitItem;
+}
+
+/**
+ * Интерфейс для результата расчета дефицитов с информацией о заявках
+ */
+export interface IDeficitCalculationResultWithAsks {
+  [artikul: string]: IDeficitItemWithAsk;
 }
 
 /**

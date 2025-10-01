@@ -1,7 +1,8 @@
 import { asyncHandler } from "../../../utils/asyncHandler.js";
-import { Defcalc } from "../models/Defcalc.js";
+import { Ask } from "../../asks/models/Ask.js";
+import { Defcalc, } from "../models/Defcalc.js";
 /**
- * @desc    Получить последнюю актуальную запись о дефицитах
+ * @desc    Получить последнюю актуальную запись о дефицитах с информацией о существующих заявках
  * @route   GET /api/defs/latest
  * @access  Private
  */
@@ -16,9 +17,43 @@ export const getLatestDefcalcs = asyncHandler(async (req, res) => {
                 message: "No deficit calculations found",
             });
         }
+        // Получаем все активные заявки для артикулов из дефицитов
+        const artikuls = Object.keys(latestDefcalc.result);
+        const existingAsks = await Ask.find({
+            artikul: { $in: artikuls },
+            status: { $in: ["new"] }, // только необработанные заявки
+        })
+            .select("artikul status createdAt askerData.fullname askerData._id")
+            .lean();
+        // Группируем заявки по артикулу (берем только первую активную заявку)
+        const asksByArtikul = existingAsks.reduce((acc, ask) => {
+            if (!acc[ask.artikul]) {
+                acc[ask.artikul] = {
+                    _id: ask._id.toString(),
+                    status: ask.status,
+                    createdAt: ask.createdAt,
+                    askerName: ask.askerData.fullname,
+                    askerId: ask.askerData._id.toString(),
+                };
+            }
+            return acc;
+        }, {});
+        // Добавляем информацию о заявках к каждому дефициту
+        const resultWithAsks = Object.keys(latestDefcalc.result).reduce((acc, artikul) => {
+            acc[artikul] = {
+                ...latestDefcalc.result[artikul],
+                existingAsk: asksByArtikul[artikul] || null,
+            };
+            return acc;
+        }, {});
+        // Формируем итоговый ответ
+        const responseData = {
+            ...latestDefcalc,
+            result: resultWithAsks,
+        };
         res.json({
             success: true,
-            data: latestDefcalc,
+            data: responseData,
         });
     }
     catch (error) {
