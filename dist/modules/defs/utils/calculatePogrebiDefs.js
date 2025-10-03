@@ -1,6 +1,6 @@
 import { getPogrebiDefStocks } from "../../poses/utils/getPogrebiDefStocks.js";
 import { getSharikStocks, } from "../../poses/utils/getSharikStocks.js";
-import { Defcalc } from "../models/Defcalc.js";
+import { Def } from "../models/Def.js";
 import { calculateDeficitTotals } from "./calculateTotals.js";
 import { finishCalculationTracking, startCalculationTracking, updateCalculationProgress, } from "./calculationStatus.js";
 import { sendDefCalculationCompleteNotification } from "./defs-tg-notifications/sendDefCalculationCompleteNotification.js";
@@ -19,7 +19,7 @@ export async function calculatePogrebiDefs() {
 }
 /**
  * Выполняет расчет дефицитов и сохраняет результат в базу данных
- * @returns Promise<IDefcalc> - сохраненный документ с результатами расчета
+ * @returns Promise<IDef> - сохраненный документ с результатами расчета
  * @throws Error - если произошла ошибка при расчете или сохранении
  */
 export async function calculateAndSavePogrebiDefs() {
@@ -43,18 +43,18 @@ export async function calculateAndSavePogrebiDefs() {
         // Розраховуємо ітогові значення
         const totals = calculateDeficitTotals(filteredDefs);
         // Створюємо і зберігаємо документ в базу даних
-        const defcalc = new Defcalc({
+        const def = new Def({
             result: filteredDefs,
             total: totals.total,
             totalCriticalDefs: totals.totalCriticalDefs,
             totalLimitDefs: totals.totalLimitDefs,
         });
-        const savedDefcalc = await defcalc.save();
+        const savedDef = await def.save();
         // Відправляємо повідомлення про завершення з результатами
         await sendDefCalculationCompleteNotification(filteredDefs);
         // Завершаємо відстеження
         finishCalculationTracking();
-        return savedDefcalc;
+        return savedDef;
     }
     catch (error) {
         console.error("Помилка в calculateAndSavePogrebiDefs:", error);

@@ -1,5 +1,5 @@
 import { ISharikStocksResult } from "../../poses/utils/getSharikStocks.js";
-import { DeficitStatus, IDeficitCalculationResult } from "../models/Defcalc.js";
+import { DeficitStatus, IDeficitCalculationResult } from "../models/Def.js";
 
 /**
  * Фільтрує дефіцити по правильній логіці:

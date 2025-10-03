@@ -30,14 +30,15 @@ vi.mock("../calculationStatus.js", () => ({
   finishCalculationTracking: vi.fn(),
 }));
 
-vi.mock("../models/Defcalc", () => ({
-  Defcalc: vi.fn().mockImplementation((data) => ({
+vi.mock("../models/Def", () => ({
+  Def: vi.fn().mockImplementation((data) => ({
     save: vi.fn().mockResolvedValue({
       ...data,
       _id: "test-id",
       createdAt: new Date("2024-01-15T10:00:00.000Z"),
-      totalItems: 1,
-      totalDeficits: 1,
+      total: 1,
+      totalCriticalDefs: 1,
+      totalLimitDefs: 0,
       __v: 0,
       updatedAt: new Date("2024-01-15T10:00:00.000Z"),
     }),
@@ -50,13 +51,12 @@ import {
   startCalculationTracking,
   updateCalculationProgress,
 } from "../calculationStatus.js";
+import { sendDefCalculationCompleteNotification } from "../defs-tg-notifications/sendDefCalculationCompleteNotification.js";
+import { sendDefCalculationErrorNotification } from "../defs-tg-notifications/sendDefCalculationErrorNotification.js";
+import { sendDefCalculationStartNotification } from "../defs-tg-notifications/sendDefCalculationStartNotification.js";
 import { filterDeficits } from "../filterDeficits.js";
 import { getArtLimits } from "../getArtLimits.js";
 import { getSharikStocksWithProgress } from "../getSharikStocksWithProgress.js";
-import { sendDefCalculationStartNotification } from "../defs-tg-notifications/sendDefCalculationStartNotification.js";
-import { sendDefCalculationCompleteNotification } from "../defs-tg-notifications/sendDefCalculationCompleteNotification.js";
-import { sendDefCalculationErrorNotification } from "../defs-tg-notifications/sendDefCalculationErrorNotification.js";
-
 
 describe("calculateAndSavePogrebiDefs", () => {
   beforeEach(() => {

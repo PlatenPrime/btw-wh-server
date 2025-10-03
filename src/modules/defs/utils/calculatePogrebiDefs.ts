@@ -3,7 +3,7 @@ import {
   getSharikStocks,
   ISharikStocksResult,
 } from "../../poses/utils/getSharikStocks.js";
-import { Defcalc, IDefcalc } from "../models/Defcalc.js";
+import { Def, IDef } from "../models/Def.js";
 import { calculateDeficitTotals } from "./calculateTotals.js";
 import {
   finishCalculationTracking,
@@ -17,7 +17,6 @@ import { filterDeficits } from "./filterDeficits.js";
 import { getArtLimits } from "./getArtLimits.js";
 import { getSharikStocksWithProgress } from "./getSharikStocksWithProgress.js";
 
-
 export async function calculatePogrebiDefs() {
   const pogrebiDefStocks = await getPogrebiDefStocks();
   const artikuls = Object.keys(pogrebiDefStocks);
@@ -30,10 +29,10 @@ export async function calculatePogrebiDefs() {
 
 /**
  * Выполняет расчет дефицитов и сохраняет результат в базу данных
- * @returns Promise<IDefcalc> - сохраненный документ с результатами расчета
+ * @returns Promise<IDef> - сохраненный документ с результатами расчета
  * @throws Error - если произошла ошибка при расчете или сохранении
  */
-export async function calculateAndSavePogrebiDefs(): Promise<IDefcalc> {
+export async function calculateAndSavePogrebiDefs(): Promise<IDef> {
   try {
     // Отправляем уведомление о начале расчета
     await sendDefCalculationStartNotification();
@@ -81,14 +80,14 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDefcalc> {
     const totals = calculateDeficitTotals(filteredDefs);
 
     // Створюємо і зберігаємо документ в базу даних
-    const defcalc = new Defcalc({
+    const def = new Def({
       result: filteredDefs,
       total: totals.total,
       totalCriticalDefs: totals.totalCriticalDefs,
       totalLimitDefs: totals.totalLimitDefs,
     });
 
-    const savedDefcalc = await defcalc.save();
+    const savedDef = await def.save();
 
     // Відправляємо повідомлення про завершення з результатами
     await sendDefCalculationCompleteNotification(filteredDefs);
@@ -96,7 +95,7 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDefcalc> {
     // Завершаємо відстеження
     finishCalculationTracking();
 
-    return savedDefcalc;
+    return savedDef;
   } catch (error) {
     console.error("Помилка в calculateAndSavePogrebiDefs:", error);
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { IDeficitCalculationResult } from "../../models/Defcalc.js";
+import { IDeficitCalculationResult } from "../../models/Def.js";
 import { calculateDeficitTotals } from "../calculateTotals.js";
 
 describe("calculateDeficitTotals", () => {

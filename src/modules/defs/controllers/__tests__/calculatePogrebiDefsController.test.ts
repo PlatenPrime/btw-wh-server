@@ -48,7 +48,7 @@ describe("calculatePogrebiDefsController", () => {
   });
 
   it("должен успешно выполнять расчет и возвращать результат", async () => {
-    const mockSavedDefcalc = {
+    const mockSavedDef = {
       _id: "test-id",
       result: {
         ART001: {
@@ -61,13 +61,12 @@ describe("calculatePogrebiDefsController", () => {
         },
       },
       createdAt: new Date("2024-01-15T10:00:00.000Z"),
-      totalItems: 1,
-      totalDeficits: 1,
+      total: 1,
+      totalCriticalDefs: 1,
+      totalLimitDefs: 0,
     };
 
-    mockedCalculateAndSavePogrebiDefs.mockResolvedValue(
-      mockSavedDefcalc as any
-    );
+    mockedCalculateAndSavePogrebiDefs.mockResolvedValue(mockSavedDef as any);
 
     await calculatePogrebiDefsController(
       mockReq as Request,
@@ -86,8 +85,9 @@ describe("calculatePogrebiDefsController", () => {
       success: true,
       message: "Deficit calculation completed and saved successfully",
       data: {
-        totalItems: 1,
-        totalDeficits: 1,
+        total: 1,
+        totalCriticalDefs: 1,
+        totalLimitDefs: 0,
         createdAt: new Date("2024-01-15T10:00:00.000Z"),
       },
     });
@@ -162,7 +162,7 @@ describe("calculatePogrebiDefsController", () => {
   });
 
   it("должен возвращать правильную структуру данных при успехе", async () => {
-    const mockSavedDefcalc = {
+    const mockSavedDef = {
       _id: "test-id",
       result: {
         ART001: {
@@ -183,13 +183,12 @@ describe("calculatePogrebiDefsController", () => {
         },
       },
       createdAt: new Date("2024-01-15T10:00:00.000Z"),
-      totalItems: 2,
-      totalDeficits: 1,
+      total: 2,
+      totalCriticalDefs: 1,
+      totalLimitDefs: 1,
     };
 
-    mockedCalculateAndSavePogrebiDefs.mockResolvedValue(
-      mockSavedDefcalc as any
-    );
+    mockedCalculateAndSavePogrebiDefs.mockResolvedValue(mockSavedDef as any);
 
     await calculatePogrebiDefsController(
       mockReq as Request,
@@ -201,25 +200,25 @@ describe("calculatePogrebiDefsController", () => {
       success: true,
       message: "Deficit calculation completed and saved successfully",
       data: {
-        totalItems: 2,
-        totalDeficits: 1,
+        total: 2,
+        totalCriticalDefs: 1,
+        totalLimitDefs: 1,
         createdAt: new Date("2024-01-15T10:00:00.000Z"),
       },
     });
   });
 
   it("должен корректно обрабатывать пустой результат", async () => {
-    const mockSavedDefcalc = {
+    const mockSavedDef = {
       _id: "test-id",
       result: {},
       createdAt: new Date("2024-01-15T10:00:00.000Z"),
-      totalItems: 0,
-      totalDeficits: 0,
+      total: 0,
+      totalCriticalDefs: 0,
+      totalLimitDefs: 0,
     };
 
-    mockedCalculateAndSavePogrebiDefs.mockResolvedValue(
-      mockSavedDefcalc as any
-    );
+    mockedCalculateAndSavePogrebiDefs.mockResolvedValue(mockSavedDef as any);
 
     await calculatePogrebiDefsController(
       mockReq as Request,
@@ -231,8 +230,9 @@ describe("calculatePogrebiDefsController", () => {
       success: true,
       message: "Deficit calculation completed and saved successfully",
       data: {
-        totalItems: 0,
-        totalDeficits: 0,
+        total: 0,
+        totalCriticalDefs: 0,
+        totalLimitDefs: 0,
         createdAt: new Date("2024-01-15T10:00:00.000Z"),
       },
     });

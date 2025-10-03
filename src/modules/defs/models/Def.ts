@@ -52,7 +52,7 @@ export interface IDeficitCalculationResultWithAsks {
 /**
  * Интерфейс для документа расчета дефицитов
  */
-export interface IDefcalc extends Document {
+export interface IDef extends Document {
   result: IDeficitCalculationResult;
   total: number;
   totalCriticalDefs: number;
@@ -60,23 +60,6 @@ export interface IDefcalc extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-
-// Схема для элемента дефицита
-const deficitItemSchema = new Schema<IDeficitItem>(
-  {
-    nameukr: { type: String, required: true },
-    quant: { type: Number, required: true }, // общее количество посчитанного товара на складе
-    sharikQuant: { type: Number, required: true }, // количество товара на сайте
-    difQuant: { type: Number, required: true }, // разница между sharikQuant и quant
-    defLimit: { type: Number, required: true }, // сумма quant + artLimit
-    status: {
-      type: String,
-      required: true,
-      enum: ["limited", "critical"],
-    }, // статус дефицита: 'limited' или 'critical'
-  },
-  { _id: false }
-);
 
 // Схема для результата расчета дефицитов
 const deficitCalculationResultSchema = new Schema<IDeficitCalculationResult>(
@@ -88,7 +71,7 @@ const deficitCalculationResultSchema = new Schema<IDeficitCalculationResult>(
 );
 
 // Основная схема для расчета дефицитов
-const defcalcSchema = new Schema<IDefcalc>(
+const defSchema = new Schema<IDef>(
   {
     result: {
       type: deficitCalculationResultSchema,
@@ -114,10 +97,11 @@ const defcalcSchema = new Schema<IDefcalc>(
 );
 
 /**
- * Defcalc Mongoose model
- * @see IDefcalc
+ * Def Mongoose model
+ * @see IDef
  */
-export const Defcalc: Model<IDefcalc> = mongoose.model<IDefcalc>(
-  "Defcalc",
-  defcalcSchema
+export const Def: Model<IDef> = mongoose.model<IDef>(
+  "Def",
+  defSchema,
+  "defs" // Указываем имя коллекции как "defs"
 );

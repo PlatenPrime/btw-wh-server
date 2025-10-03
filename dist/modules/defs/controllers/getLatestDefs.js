@@ -6,7 +6,7 @@ import { Def, } from "../models/Def.js";
  * @route   GET /api/defs/latest
  * @access  Private
  */
-export const getLatestDefcalcs = asyncHandler(async (req, res) => {
+export const getLatestDefs = asyncHandler(async (req, res) => {
     try {
         const latestDef = await Def.findOne().sort({ createdAt: -1 }).lean();
         if (!latestDef) {

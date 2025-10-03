@@ -11,17 +11,17 @@ export const calculatePogrebiDefsController = asyncHandler(async (req, res) => {
         // Сбрасываем предыдущий статус
         resetCalculationStatus();
         // Выполняем расчет дефицитов и сохраняем в БД
-        const savedDefcalc = await calculateAndSavePogrebiDefs();
+        const savedDef = await calculateAndSavePogrebiDefs();
         // Завершаем отслеживание
         finishCalculationTracking();
         res.status(201).json({
             success: true,
             message: "Deficit calculation completed and saved successfully",
             data: {
-                total: savedDefcalc.total,
-                totalCriticalDefs: savedDefcalc.totalCriticalDefs,
-                totalLimitDefs: savedDefcalc.totalLimitDefs,
-                createdAt: savedDefcalc.createdAt,
+                total: savedDef.total,
+                totalCriticalDefs: savedDef.totalCriticalDefs,
+                totalLimitDefs: savedDef.totalLimitDefs,
+                createdAt: savedDef.createdAt,
             },
         });
     }

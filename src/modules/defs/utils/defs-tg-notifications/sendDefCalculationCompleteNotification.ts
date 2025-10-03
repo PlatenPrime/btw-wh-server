@@ -1,5 +1,5 @@
 import { sendMessageToDefsChat } from "../../../../utils/telegram/sendMessageToDefsChat.js";
-import { IDeficitCalculationResult } from "../../models/Defcalc.js";
+import { IDeficitCalculationResult } from "../../models/Def.js";
 
 // Функция для разбивки массива на чанки
 const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {

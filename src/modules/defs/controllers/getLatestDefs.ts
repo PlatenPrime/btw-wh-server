@@ -2,24 +2,22 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../../../utils/asyncHandler.js";
 import { Ask } from "../../asks/models/Ask.js";
 import {
-  Defcalc,
+  Def,
   IDeficitCalculationResultWithAsks,
   IExistingAsk,
-} from "../models/Defcalc.js";
+} from "../models/Def.js";
 
 /**
  * @desc    Получить последнюю актуальную запись о дефицитах с информацией о существующих заявках
  * @route   GET /api/defs/latest
  * @access  Private
  */
-export const getLatestDefcalcs = asyncHandler(
+export const getLatestDefs = asyncHandler(
   async (req: Request, res: Response) => {
     try {
-      const latestDefcalc = await Defcalc.findOne()
-        .sort({ createdAt: -1 })
-        .lean();
+      const latestDef = await Def.findOne().sort({ createdAt: -1 }).lean();
 
-      if (!latestDefcalc) {
+      if (!latestDef) {
         return res.status(404).json({
           success: false,
           message: "No deficit calculations found",
@@ -27,7 +25,7 @@ export const getLatestDefcalcs = asyncHandler(
       }
 
       // Получаем все активные заявки для артикулов из дефицитов
-      const artikuls = Object.keys(latestDefcalc.result);
+      const artikuls = Object.keys(latestDef.result);
       const existingAsks = await Ask.find({
         artikul: { $in: artikuls },
         status: { $in: ["new"] }, // только необработанные заявки
@@ -51,10 +49,10 @@ export const getLatestDefcalcs = asyncHandler(
 
       // Добавляем информацию о заявках к каждому дефициту
       const resultWithAsks: IDeficitCalculationResultWithAsks = Object.keys(
-        latestDefcalc.result
+        latestDef.result
       ).reduce((acc, artikul) => {
         acc[artikul] = {
-          ...latestDefcalc.result[artikul],
+          ...latestDef.result[artikul],
           existingAsk: asksByArtikul[artikul] || null,
         };
         return acc;
@@ -62,7 +60,7 @@ export const getLatestDefcalcs = asyncHandler(
 
       // Формируем итоговый ответ
       const responseData = {
-        ...latestDefcalc,
+        ...latestDef,
         result: resultWithAsks,
       };
 
