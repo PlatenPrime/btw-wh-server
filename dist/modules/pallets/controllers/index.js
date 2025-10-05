@@ -1,5 +1,6 @@
 export { createPallet } from "./createPallet.js";
 export { deletePallet } from "./deletePallet.js";
+export { deletePalletEmptyPoses } from "./deletePalletEmptyPoses.js";
 export { deletePalletPoses } from "./deletePalletPoses.js";
 export { getAllPallets } from "./getAllPallets.js";
 export { getAllPalletsByRowId } from "./getAllPalletsByRowId.js";
