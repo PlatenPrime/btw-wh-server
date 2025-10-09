@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
+import { sendMessageToDefsChat } from "../../../utils/telegram/sendMessageToDefsChat.js";
 import User from "../../auth/models/User.js";
 import { Ask, IAsk } from "../models/Ask.js";
 
@@ -47,7 +48,25 @@ export const createAsk = async (req: Request, res: Response) => {
       status: "new",
     });
     await ask.save();
+
+    // Сначала отправляем ответ клиенту
     res.status(201).json(ask);
+
+    // Отправка уведомления в Telegram чат дефицитов (асинхронно, не блокируя ответ)
+    try {
+      const telegramMessage = `🆕 Новий запит
+
+👤 ${asker.fullname}
+📦 ${artikul}
+📝 ${nameukr || "—"}
+🔢 ${quant ?? "—"}
+💬 ${com || "—"}`;
+
+      await sendMessageToDefsChat(telegramMessage);
+    } catch (telegramError) {
+      // Логируем ошибку, но это уже не повлияет на ответ клиенту
+      console.error("Failed to send Telegram notification:", telegramError);
+    }
   } catch (error) {
     console.error("Error creating ask:", error);
     res.status(500).json({ message: "Server error", error });

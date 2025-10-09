@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
+import { sendMessageToTGUser } from "../../../utils/telegram/sendMessageToTGUser.js";
 import User from "../../auth/models/User.js";
 import { Ask, IAsk } from "../models/Ask.js";
 
@@ -52,7 +53,32 @@ export const completeAskById = async (req: Request, res: Response) => {
     if (!updatedAsk) {
       return res.status(500).json({ message: "Failed to update ask" });
     }
+
+    // Сначала отправляем ответ клиенту
     res.status(200).json(updatedAsk);
+
+    // Отправка уведомления создателю запроса о завершении
+    if (existingAsk.askerData?.telegram) {
+      try {
+        const telegramMessage = `✅ Ваш запит виконано!
+
+📦 ${existingAsk.artikul}
+📝 ${existingAsk.nameukr || "—"}
+🔢 ${existingAsk.quant ?? "—"}
+👤 Виконавець: ${solverName}`;
+
+        await sendMessageToTGUser(
+          telegramMessage,
+          existingAsk.askerData.telegram
+        );
+      } catch (telegramError) {
+        // Логируем ошибку, но это уже не повлияет на ответ клиенту
+        console.error(
+          "Failed to send Telegram notification to asker:",
+          telegramError
+        );
+      }
+    }
   } catch (error) {
     console.error("Error completing ask:", error);
     res.status(500).json({ message: "Server error", error });
