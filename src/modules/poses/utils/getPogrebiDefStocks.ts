@@ -14,7 +14,12 @@ export async function getPogrebiDefStocks() {
       quant: { $ne: 0 },
     }).exec();
 
-    const stocks: IMergedPosesResult = mergePoses(poses);
+    // Сортируем позиции по артикулу для предсказуемого порядка обработки
+    const sortedPoses = poses.sort((a, b) =>
+      a.artikul.localeCompare(b.artikul)
+    );
+
+    const stocks: IMergedPosesResult = mergePoses(sortedPoses);
 
     return stocks;
   } catch (error) {

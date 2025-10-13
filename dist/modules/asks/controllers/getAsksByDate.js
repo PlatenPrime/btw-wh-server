@@ -26,11 +26,18 @@ export const getAsksByDate = async (req, res) => {
                 $lte: endOfDay,
             },
         }).sort({ createdAt: -1 }); // Sort by creation date, newest first
+        // Calculate statistics by status
+        const newCount = asks.filter((ask) => ask.status === "new").length;
+        const completedCount = asks.filter((ask) => ask.status === "completed").length;
+        const rejectedCount = asks.filter((ask) => ask.status === "rejected").length;
         res.status(200).json({
             message: `Found ${asks.length} asks for ${date}`,
             data: asks,
             date: date,
             count: asks.length,
+            newCount,
+            completedCount,
+            rejectedCount,
         });
     }
     catch (error) {

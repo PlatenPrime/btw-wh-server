@@ -34,7 +34,7 @@ export async function calculateAndSavePogrebiDefs() {
         startCalculationTracking(artikuls.length + 2); // +2 для получения лимитов и сохранения
         updateCalculationProgress(1, artikuls.length + 2, "Отримання лімітів артикулів...");
         const limits = await getArtLimits(artikuls);
-        updateCalculationProgress(2, artikuls.length + 2, "Обробка даних Sharik...");
+        updateCalculationProgress(2, artikuls.length + 2, "Отримання даних з sharik.ua...");
         // Используем функцию с отслеживанием прогресса
         const result = await getSharikStocksWithProgress(pogrebiDefStocks, limits);
         updateCalculationProgress(artikuls.length + 1, artikuls.length + 2, "Фільтрація дефіцитів...");

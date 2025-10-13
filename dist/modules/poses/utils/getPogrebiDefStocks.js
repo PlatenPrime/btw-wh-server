@@ -12,7 +12,9 @@ export async function getPogrebiDefStocks() {
             "palletData.isDef": true,
             quant: { $ne: 0 },
         }).exec();
-        const stocks = mergePoses(poses);
+        // Сортируем позиции по артикулу для предсказуемого порядка обработки
+        const sortedPoses = poses.sort((a, b) => a.artikul.localeCompare(b.artikul));
+        const stocks = mergePoses(sortedPoses);
         return stocks;
     }
     catch (error) {

@@ -55,7 +55,7 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDef> {
     updateCalculationProgress(
       2,
       artikuls.length + 2,
-      "Обробка даних Sharik..."
+      "Отримання даних з sharik.ua..."
     );
     // Используем функцию с отслеживанием прогресса
     const result: ISharikStocksResult = await getSharikStocksWithProgress(
