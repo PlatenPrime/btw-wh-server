@@ -16,7 +16,7 @@ router.post("/move-poses", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler
 // PUT роуты - доступно для ADMIN и PRIME
 router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updatePallet));
 // DELETE роуты - доступно для ADMIN и PRIME
-router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deletePallet));
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deletePallet));
 router.delete("/:id/poses", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deletePalletPoses));
 router.delete("/:id/empty-poses", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deletePalletEmptyPoses));
 export default router;

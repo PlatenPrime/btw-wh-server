@@ -76,7 +76,7 @@ router.put(
 router.delete(
   "/:id",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.PRIME]),
   asyncHandler(deletePallet)
 );
 router.delete(

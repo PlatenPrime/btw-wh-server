@@ -14,7 +14,7 @@ router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), async (req, res) => 
     await updateRow(req, res);
 });
 // DELETE роуты - доступно для ADMIN и PRIME
-router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), async (req, res) => {
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), async (req, res) => {
     await deleteRow(req, res);
 });
 export default router;

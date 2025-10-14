@@ -39,7 +39,7 @@ router.put(
 router.delete(
   "/:id",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.PRIME]),
   async (req: Request, res: Response) => {
     await deleteRow(req, res);
   }
