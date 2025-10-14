@@ -1,13 +1,32 @@
 import jwt from "jsonwebtoken";
 
-export const generateAccessToken = (id: string, role: string): string => {
+/**
+ * Генерирует JWT токен доступа для пользователя
+ *
+ * @param id - ID пользователя
+ * @param role - роль пользователя (USER, ADMIN, PRIME)
+ * @param expiresIn - время жизни токена (по умолчанию 24 часа)
+ * @returns JWT токен
+ *
+ * @throws Error если JWT_SECRET не установлен в переменных окружения
+ *
+ * @example
+ * ```typescript
+ * const token = generateAccessToken(userId, "ADMIN", "7d"); // токен на 7 дней
+ * const token = generateAccessToken(userId, "USER"); // токен на 24 часа
+ * ```
+ */
+export const generateAccessToken = (
+  id: string,
+  role: string,
+  expiresIn: string | number = "24h"
+): string => {
   const payload = { id, role };
-  const secret = process.env.JWT_SECRET as string;
+  const secret = process.env.JWT_SECRET;
 
   if (!secret) {
     throw new Error("JWT_SECRET is not defined in environment variables");
   }
 
-  return jwt.sign(payload, secret);
+  return jwt.sign(payload, secret, { expiresIn } as jwt.SignOptions);
 };
-

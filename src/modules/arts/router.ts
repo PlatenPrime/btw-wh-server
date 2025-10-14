@@ -1,4 +1,6 @@
 import { Router } from "express";
+import { RoleType } from "../../constants/roles.js";
+import { checkAuth, checkRoles } from "../../middleware/index.js";
 import {
   getAllArts,
   getArt,
@@ -10,16 +12,37 @@ import {
 
 const router = Router();
 
-router.get("/", getAllArts);
+// Получить все артикулы - доступно для всех авторизованных пользователей
+router.get("/", checkAuth, checkRoles([RoleType.USER]), getAllArts);
 
-router.get("/id/:id", getArtById);
+// Получить артикул по ID - доступно для всех авторизованных пользователей
+router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), getArtById);
 
-router.get("/artikul/:artikul", getArt);
+// Получить артикул по номеру - доступно для всех авторизованных пользователей
+router.get("/artikul/:artikul", checkAuth, checkRoles([RoleType.USER]), getArt);
 
-router.get("/btrade/:artikul", getBtradeArtInfo);
+// Получить информацию из Btrade - доступно для всех авторизованных пользователей
+router.get(
+  "/btrade/:artikul",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  getBtradeArtInfo
+);
 
-router.patch("/:id/limit", updateArtLimit);
+// Обновить лимит артикула - доступно для ADMIN и PRIME
+router.patch(
+  "/:id/limit",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  updateArtLimit
+);
 
-router.post("/upsert", (req, res, next) => upsertArts(req, res, next));
+// Создать/обновить артикулы - доступно для ADMIN и PRIME
+router.post(
+  "/upsert",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  (req, res, next) => upsertArts(req, res, next)
+);
 
 export default router;

@@ -1,4 +1,6 @@
 import { Request, Response, Router } from "express";
+import { RoleType } from "../../constants/roles.js";
+import { checkAuth, checkRoles } from "../../middleware/index.js";
 import {
   createRow,
   deleteRow,
@@ -10,18 +12,37 @@ import {
 
 const router = Router();
 
-router.get("/", getAllRows);
-router.get("/id/:id", getRowById);
-router.get("/title/:title", getRowByTitle);
+// GET роуты - доступно для всех авторизованных пользователей
+router.get("/", checkAuth, checkRoles([RoleType.USER]), getAllRows);
+router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), getRowById);
+router.get(
+  "/title/:title",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  getRowByTitle
+);
 
-router.post("/", createRow);
+// POST роуты - доступно для ADMIN и PRIME
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), createRow);
 
-router.put("/:id", async (req: Request, res: Response) => {
-  await updateRow(req, res);
-});
+// PUT роуты - доступно для ADMIN и PRIME
+router.put(
+  "/:id",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  async (req: Request, res: Response) => {
+    await updateRow(req, res);
+  }
+);
 
-router.delete("/:id", async (req: Request, res: Response) => {
-  await deleteRow(req, res);
-});
+// DELETE роуты - доступно для ADMIN и PRIME
+router.delete(
+  "/:id",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  async (req: Request, res: Response) => {
+    await deleteRow(req, res);
+  }
+);
 
 export default router;

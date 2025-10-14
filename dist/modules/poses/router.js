@@ -1,20 +1,22 @@
 import { Router } from "express";
+import { RoleType } from "../../constants/roles.js";
+import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { bulkCreatePoses, createPos, deletePos, getAllPoses, getPosById, getPosesByArtikul, getPosesByPalletId, getPosesByRowId, updatePos, } from "./controllers/index.js";
 import { populateMissingPosData } from "./controllers/populateMissingPosData.js";
 const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const router = Router();
-// GET routes
-router.get("/", getAllPoses);
-router.get("/:id", getPosById);
-router.get("/by-artikul/:artikul", asyncHandler(getPosesByArtikul));
-router.get("/by-pallet/:palletId", getPosesByPalletId);
-router.get("/by-row/:rowId", getPosesByRowId);
-// POST routes
-router.post("/", createPos);
-router.post("/bulk", bulkCreatePoses);
-router.post("/populate-missing-data", asyncHandler(populateMissingPosData));
-// PUT routes
-router.put("/:id", updatePos);
-// DELETE routes
-router.delete("/:id", deletePos);
+// GET routes - доступно для всех авторизованных пользователей
+router.get("/", checkAuth, checkRoles([RoleType.USER]), getAllPoses);
+router.get("/:id", checkAuth, checkRoles([RoleType.USER]), getPosById);
+router.get("/by-artikul/:artikul", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getPosesByArtikul));
+router.get("/by-pallet/:palletId", checkAuth, checkRoles([RoleType.USER]), getPosesByPalletId);
+router.get("/by-row/:rowId", checkAuth, checkRoles([RoleType.USER]), getPosesByRowId);
+// POST routes - доступно для ADMIN и PRIME
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), createPos);
+router.post("/bulk", checkAuth, checkRoles([RoleType.ADMIN]), bulkCreatePoses);
+router.post("/populate-missing-data", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(populateMissingPosData));
+// PUT routes - доступно для ADMIN и PRIME
+router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), updatePos);
+// DELETE routes - доступно для ADMIN и PRIME
+router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), deletePos);
 export default router;

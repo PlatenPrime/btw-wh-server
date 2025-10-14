@@ -1,6 +1,11 @@
 import { Router } from "express";
+import { RoleType } from "../../constants/roles.js";
+import {
+  checkAuth,
+  checkOwnership,
+  checkRoles,
+} from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-
 import {
   completeAskById,
   createAsk,
@@ -11,23 +16,78 @@ import {
   updateAskActionsById,
   updateAskById,
 } from "./controllers/index.js";
+import { Ask } from "./models/Ask.js";
 
 const router = Router();
 
-router.post("/", asyncHandler(createAsk));
+// Создать ask - доступно для всех авторизованных пользователей
+router.post(
+  "/",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(createAsk)
+);
 
-router.get("/by-date", asyncHandler(getAsksByDate));
+// Получить asks по дате - доступно для всех авторизованных пользователей
+router.get(
+  "/by-date",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAsksByDate)
+);
 
-router.get("/:id", asyncHandler(getAskById));
+// Получить ask по ID - доступно для всех авторизованных пользователей
+router.get(
+  "/:id",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAskById)
+);
 
-router.put("/:id", asyncHandler(updateAskById));
+// Обновить ask - доступно для ADMIN, PRIME и владельца ask
+router.put(
+  "/:id",
+  checkAuth,
+  checkOwnership(async (req) => {
+    const ask = await Ask.findById(req.params.id);
+    return ask?.asker.toString();
+  }),
+  asyncHandler(updateAskById)
+);
 
-router.patch("/:id/complete", asyncHandler(completeAskById));
+// Завершить ask - доступно для ADMIN и PRIME
+router.patch(
+  "/:id/complete",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(completeAskById)
+);
 
-router.patch("/:id/reject", asyncHandler(rejectAskById));
+// Отклонить ask - доступно для ADMIN и PRIME
+router.patch(
+  "/:id/reject",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(rejectAskById)
+);
 
-router.patch("/:id/actions", asyncHandler(updateAskActionsById));
+// Обновить действия ask - доступно для ADMIN и PRIME
+router.patch(
+  "/:id/actions",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(updateAskActionsById)
+);
 
-router.delete("/:id", asyncHandler(deleteAskById));
+// Удалить ask - доступно для ADMIN, PRIME и владельца ask
+router.delete(
+  "/:id",
+  checkAuth,
+  checkOwnership(async (req) => {
+    const ask = await Ask.findById(req.params.id);
+    return ask?.asker.toString();
+  }),
+  asyncHandler(deleteAskById)
+);
 
 export default router;

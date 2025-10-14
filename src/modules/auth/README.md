@@ -199,9 +199,72 @@ This document describes the authentication and user management API endpoints for
 
 - All endpoints return JSON.
 - Passwords are never returned in responses.
-- Use the returned JWT token for authenticated requests (if required by backend).
+- **JWT token required:** Most endpoints now require authentication via JWT token in `Authorization` header.
 - Error messages may be in English or Ukrainian.
 - For any error, check the `message` field in the response.
+
+---
+
+## 🔐 Authorization & Roles (New!)
+
+### Authentication Required
+
+Most endpoints now require a valid JWT token in the `Authorization` header:
+
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+### User Roles & Permissions
+
+The system has three role levels with hierarchical access:
+
+| Role      | Level | Description                                              |
+| --------- | ----- | -------------------------------------------------------- |
+| **PRIME** | 3     | Full access to all functionality                         |
+| **ADMIN** | 2     | Can create, update, and delete entities                  |
+| **USER**  | 1     | Read access + limited create/delete (own resources only) |
+
+### Endpoint Access Matrix
+
+| Endpoint         | Method | USER | ADMIN | PRIME | Public |
+| ---------------- | ------ | ---- | ----- | ----- | ------ |
+| `/login`         | POST   | -    | -     | -     | ✅     |
+| `/register`      | POST   | -    | -     | -     | ✅     |
+| `/users`         | GET    | ❌   | ✅    | ✅    | ❌     |
+| `/users/:id`     | GET    | ✅   | ✅    | ✅    | ❌     |
+| `/me/:id`        | GET    | ✅   | ✅    | ✅    | ❌     |
+| `/users/:userId` | PUT    | ❌   | ✅    | ✅    | ❌     |
+| `/roles`         | GET    | ❌   | ✅    | ✅    | ❌     |
+
+### Error Codes
+
+#### Authentication Errors (401)
+
+- `NO_TOKEN` - Authorization header missing
+- `INVALID_TOKEN_FORMAT` - Token format is not "Bearer <token>"
+- `TOKEN_EXPIRED` - JWT token has expired
+- `INVALID_TOKEN` - Token signature invalid
+- `INVALID_TOKEN_PAYLOAD` - Token missing required fields (id, role)
+
+#### Authorization Errors (403)
+
+- `INSUFFICIENT_PERMISSIONS` - User role lacks required permissions
+- `INVALID_USER_ROLE` - User has an unrecognized role
+
+### JWT Token Structure
+
+```json
+{
+  "id": "user_id_string",
+  "role": "USER|ADMIN|PRIME",
+  "iat": 1705315800,
+  "exp": 1705402200
+}
+```
+
+- **Default expiration:** 24 hours
+- Token must be included in all protected endpoints
 
 ---
 
@@ -218,11 +281,74 @@ fetch("/api/auth/login", {
   .then((res) => res.json())
   .then((data) => {
     if (data.token) {
-      // Save token, use for authenticated requests
+      // Save token for future requests
+      localStorage.setItem("authToken", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
     }
   });
 ```
 
+**Making Authenticated Requests:**
+
+```js
+const token = localStorage.getItem("authToken");
+
+fetch("/api/auth/users", {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+})
+  .then((res) => res.json())
+  .then((data) => console.log(data))
+  .catch((error) => {
+    if (error.status === 401) {
+      // Token expired or invalid - redirect to login
+      window.location.href = "/login";
+    }
+  });
+```
+
+**Using Axios with Interceptors:**
+
+```js
+import axios from "axios";
+
+const api = axios.create({
+  baseURL: "/api",
+});
+
+// Add token to all requests
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("authToken");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("user");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Use the API
+api.get("/auth/users").then((response) => console.log(response.data));
+```
+
 ---
 
-For further details, refer to the controller source code or contact backend developers.
+For further details, refer to:
+
+- **Frontend Guide:** `FRONTEND_AUTH_GUIDE.md` (comprehensive frontend integration guide)
+- **Middleware Documentation:** `src/middleware/README.md` (backend middleware usage)
+- Controller source code or contact backend developers.
