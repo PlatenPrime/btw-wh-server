@@ -15,7 +15,7 @@ import jwt from "jsonwebtoken";
  * const token = generateAccessToken(userId, "USER"); // токен на 24 часа
  * ```
  */
-export const generateAccessToken = (id, role, expiresIn = "24h") => {
+export const generateAccessToken = (id, role, expiresIn = "30d") => {
     const payload = { id, role };
     const secret = process.env.JWT_SECRET;
     if (!secret) {

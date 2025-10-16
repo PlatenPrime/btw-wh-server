@@ -19,7 +19,7 @@ import jwt from "jsonwebtoken";
 export const generateAccessToken = (
   id: string,
   role: string,
-  expiresIn: string | number = "24h"
+  expiresIn: string | number = "30d"
 ): string => {
   const payload = { id, role };
   const secret = process.env.JWT_SECRET;
