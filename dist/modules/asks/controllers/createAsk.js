@@ -1,5 +1,5 @@
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
-import { sendMessageToDefsChat } from "../../../utils/telegram/sendMessageToDefsChat.js";
+import { sendMessageToBTWChat } from "../../../utils/telegram/sendMessageToBTWChat.js";
 import User from "../../auth/models/User.js";
 import { Ask } from "../models/Ask.js";
 export const createAsk = async (req, res) => {
@@ -39,10 +39,8 @@ export const createAsk = async (req, res) => {
 
 👤 ${asker.fullname}
 📦 ${artikul}
-📝 ${nameukr || "—"}
-🔢 ${quant ?? "—"}
-💬 ${com || "—"}`;
-            await sendMessageToDefsChat(telegramMessage);
+📝 ${nameukr || "—"}${quant !== undefined && quant !== null ? `\n\n🔢 ${quant}` : ""}${com ? `\n💬 ${com}` : ""}`;
+            await sendMessageToBTWChat(telegramMessage);
         }
         catch (telegramError) {
             // Логируем ошибку, но это уже не повлияет на ответ клиенту

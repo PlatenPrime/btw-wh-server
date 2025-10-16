@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
-import { sendMessageToDefsChat } from "../../../utils/telegram/sendMessageToDefsChat.js";
+import { sendMessageToBTWChat } from "../../../utils/telegram/sendMessageToBTWChat.js";
 import User from "../../auth/models/User.js";
 import { Ask, IAsk } from "../models/Ask.js";
 
@@ -58,11 +58,11 @@ export const createAsk = async (req: Request, res: Response) => {
 
 👤 ${asker.fullname}
 📦 ${artikul}
-📝 ${nameukr || "—"}
-🔢 ${quant ?? "—"}
-💬 ${com || "—"}`;
+📝 ${nameukr || "—"}${
+        quant !== undefined && quant !== null ? `\n\n🔢 ${quant}` : ""
+      }${com ? `\n💬 ${com}` : ""}`;
 
-      await sendMessageToDefsChat(telegramMessage);
+      await sendMessageToBTWChat(telegramMessage);
     } catch (telegramError) {
       // Логируем ошибку, но это уже не повлияет на ответ клиенту
       console.error("Failed to send Telegram notification:", telegramError);
