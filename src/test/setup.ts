@@ -10,6 +10,7 @@ import "../modules/auth/models/User.js";
 import "../modules/pallets/models/Pallet.js";
 import "../modules/poses/models/Pos.js";
 import "../modules/rows/models/Row.js";
+import "../modules/zones/models/Zone.js";
 
 // Load environment variables
 dotenv.config({ path: ".env.test" });
@@ -114,5 +115,15 @@ export const createTestAsk = async (askData: any = {}) => {
     status: "new",
     actions: [],
     ...askData,
+  });
+};
+
+export const createTestZone = async (zoneData: any = {}) => {
+  const Zone = mongoose.model("Zone");
+  return await Zone.create({
+    title: `42-5-${Date.now() % 100}`,
+    bar: Date.now() % 1000000,
+    sector: Math.floor(Math.random() * 1000000), // Генерируем уникальный sector
+    ...zoneData,
   });
 };
