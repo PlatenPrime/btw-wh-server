@@ -91,7 +91,26 @@ This document describes the available API endpoints for the `arts` module. Use t
 
 ---
 
-### 4. Get Btrade Info by Artikul
+### 4. Get Arts by Zone
+
+- **URL:** `GET /arts/zone/:zone`
+- **Path Parameters:**
+  - `zone` (string, required) — Zone identifier (e.g., "42-5-2")
+- **Response:**
+
+```json
+{
+  "data": [Art, ...],
+  "total": 25
+}
+```
+
+- **Errors:**
+  - `500` — Server error
+
+---
+
+### 5. Get Btrade Info by Artikul
 
 - **URL:** `GET /arts/btrade/:artikul`
 - **Response:**
@@ -111,7 +130,7 @@ This document describes the available API endpoints for the `arts` module. Use t
 
 ---
 
-### 5. Upsert Arts (Bulk Insert/Update)
+### 6. Upsert Arts (Bulk Insert/Update)
 
 - **URL:** `POST /arts/upsert`
 - **Body:** Array of Art objects (see model above)

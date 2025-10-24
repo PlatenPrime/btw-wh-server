@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
-import { getAllArts, getArt, getArtById, getBtradeArtInfo, updateArtLimit, upsertArts, } from "./controllers/index.js";
+import { getAllArts, getArt, getArtById, getArtsByZone, getBtradeArtInfo, updateArtLimit, upsertArts, } from "./controllers/index.js";
 const router = Router();
 // Получить все артикулы - доступно для всех авторизованных пользователей
 router.get("/", checkAuth, checkRoles([RoleType.USER]), getAllArts);
+// Получить артикулы по зоне - доступно для всех авторизованных пользователей
+router.get("/zone/:zone", checkAuth, checkRoles([RoleType.USER]), getArtsByZone);
 // Получить артикул по ID - доступно для всех авторизованных пользователей
 router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), getArtById);
 // Получить артикул по номеру - доступно для всех авторизованных пользователей
