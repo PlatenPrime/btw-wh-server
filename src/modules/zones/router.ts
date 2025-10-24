@@ -3,7 +3,6 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
-  bulkCreateZones,
   createZone,
   deleteZoneById,
   exportZonesToExcel,
@@ -11,6 +10,7 @@ import {
   getZoneById,
   getZoneByTitle,
   updateZoneById,
+  upsertZones,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -71,12 +71,12 @@ router.delete(
   asyncHandler(deleteZoneById)
 );
 
-// Массовое создание зон (Excel импорт) - доступно только для ADMIN
+// Массовое создание/обновление зон (upsert) - доступно только для ADMIN
 router.post(
-  "/bulk",
+  "/upsert",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(bulkCreateZones)
+  asyncHandler(upsertZones)
 );
 
 export default router;

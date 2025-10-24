@@ -49,9 +49,13 @@ export const bulkCreateZonesSchema = z.object({
             .number()
             .int("Bar must be an integer")
             .positive("Bar must be a positive number"),
+        sector: z
+            .number()
+            .int("Sector must be an integer")
+            .min(0, "Sector must be non-negative")
+            .optional(),
     }))
-        .min(1, "At least one zone is required")
-        .max(1000, "Maximum 1000 zones allowed per batch"),
+        .min(1, "At least one zone is required"),
 });
 // Схема для параметров запроса getAllZones
 export const getAllZonesQuerySchema = z.object({

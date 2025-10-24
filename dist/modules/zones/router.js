@@ -2,7 +2,7 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { bulkCreateZones, createZone, deleteZoneById, exportZonesToExcel, getAllZones, getZoneById, getZoneByTitle, updateZoneById, } from "./controllers/index.js";
+import { createZone, deleteZoneById, exportZonesToExcel, getAllZones, getZoneById, getZoneByTitle, updateZoneById, upsertZones, } from "./controllers/index.js";
 const router = Router();
 // Создать зону - доступно только для ADMIN
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createZone));
@@ -18,6 +18,6 @@ router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getZone
 router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateZoneById));
 // Удалить зону - доступно только для ADMIN
 router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deleteZoneById));
-// Массовое создание зон (Excel импорт) - доступно только для ADMIN
-router.post("/bulk", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(bulkCreateZones));
+// Массовое создание/обновление зон (upsert) - доступно только для ADMIN
+router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(upsertZones));
 export default router;

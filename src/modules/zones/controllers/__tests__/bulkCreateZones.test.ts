@@ -1,13 +1,14 @@
-import { Request, Response } from "express";
-import { beforeEach, describe, expect, it } from "vitest";
+import { NextFunction, Request, Response } from "express";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestZone } from "../../../../test/setup.js";
-import { bulkCreateZones } from "../bulkCreateZones.js";
+import { upsertZones } from "../bulkCreateZones.js";
 
-describe("bulkCreateZones Controller", () => {
+describe("upsertZones Controller", () => {
   let mockRequest: Partial<Request>;
   let responseJson: any;
   let responseStatus: any;
   let res: Response;
+  let mockNext: NextFunction;
 
   beforeEach(() => {
     responseJson = {};
@@ -23,6 +24,8 @@ describe("bulkCreateZones Controller", () => {
         return this;
       },
     } as unknown as Response;
+    mockNext = vi.fn();
+    vi.clearAllMocks();
   });
 
   it("should create multiple zones successfully", async () => {
@@ -38,62 +41,60 @@ describe("bulkCreateZones Controller", () => {
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.message).toBe("Bulk create completed");
-    expect(responseJson.results.created).toBe(3);
-    expect(responseJson.results.skipped).toBe(0);
-    expect(responseJson.results.errors).toHaveLength(0);
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result).toBeDefined();
+    expect(responseJson.result.upsertedCount).toBe(3);
+    expect(responseJson.result.modifiedCount).toBe(0);
   });
 
-  it("should skip zones with duplicate titles", async () => {
+  it("should update existing zones with same bar", async () => {
     // Arrange
     await createTestZone({ title: "42-1", bar: 4201, sector: 0 });
 
     mockRequest = {
       body: {
         zones: [
-          { title: "42-1", bar: 9999 }, // duplicate title
-          { title: "42-2", bar: 4202 }, // new zone
+          { title: "42-2", bar: 4201 }, // same bar, different title
+          { title: "42-3", bar: 4203 }, // new zone
         ],
       },
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.results.created).toBe(1);
-    expect(responseJson.results.skipped).toBe(1);
-    expect(responseJson.results.errors).toHaveLength(1);
-    expect(responseJson.results.errors[0].error).toContain("already exists");
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result.upsertedCount).toBe(1);
+    expect(responseJson.result.modifiedCount).toBe(1);
   });
 
-  it("should skip zones with duplicate bars", async () => {
+  it("should handle mixed create and update operations", async () => {
     // Arrange
     await createTestZone({ title: "42-1", bar: 4201, sector: 0 });
 
     mockRequest = {
       body: {
         zones: [
-          { title: "99-9", bar: 4201 }, // duplicate bar
-          { title: "42-2", bar: 4202 }, // new zone
+          { title: "42-2", bar: 4201 }, // update existing
+          { title: "42-3", bar: 4203 }, // create new
         ],
       },
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.results.created).toBe(1);
-    expect(responseJson.results.skipped).toBe(1);
-    expect(responseJson.results.errors).toHaveLength(1);
-    expect(responseJson.results.errors[0].error).toContain("already exists");
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result.upsertedCount).toBe(1);
+    expect(responseJson.result.modifiedCount).toBe(1);
   });
 
   it("should return 400 for empty zones array", async () => {
@@ -105,7 +106,7 @@ describe("bulkCreateZones Controller", () => {
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -120,7 +121,7 @@ describe("bulkCreateZones Controller", () => {
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -128,9 +129,9 @@ describe("bulkCreateZones Controller", () => {
     expect(responseJson.errors).toBeDefined();
   });
 
-  it("should return 400 for too many zones", async () => {
+  it("should handle large batch of zones", async () => {
     // Arrange
-    const zones = Array.from({ length: 1001 }, (_, i) => ({
+    const zones = Array.from({ length: 100 }, (_, i) => ({
       title: `42-${i}`,
       bar: 4200 + i,
     }));
@@ -140,12 +141,12 @@ describe("bulkCreateZones Controller", () => {
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
-    expect(responseStatus.code).toBe(400);
-    expect(responseJson.message).toBe("Validation error");
-    expect(responseJson.errors).toBeDefined();
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result.upsertedCount).toBe(100);
   });
 
   it("should return 400 for invalid zone data", async () => {
@@ -160,7 +161,7 @@ describe("bulkCreateZones Controller", () => {
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -168,31 +169,27 @@ describe("bulkCreateZones Controller", () => {
     expect(responseJson.errors).toBeDefined();
   });
 
-  it("should handle mixed success and failure", async () => {
+  it("should handle zones with optional sector field", async () => {
     // Arrange
-    await createTestZone({ title: "42-1", bar: 4201, sector: 0 });
-
     mockRequest = {
       body: {
         zones: [
-          { title: "42-1", bar: 9999 }, // duplicate title - should skip
-          { title: "42-2", bar: 4202 }, // valid - should create
-          { title: "42-3", bar: 4203 }, // valid - should create
+          { title: "42-1", bar: 4201, sector: 5 }, // with sector
+          { title: "42-2", bar: 4202 }, // without sector (defaults to 0)
         ],
       },
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.results.created).toBe(2);
-    expect(responseJson.results.skipped).toBe(1);
-    expect(responseJson.results.errors).toHaveLength(1);
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result.upsertedCount).toBe(2);
   });
 
-  it("should set sector to 0 for all created zones", async () => {
+  it("should set sector to 0 when not provided", async () => {
     // Arrange
     mockRequest = {
       body: {
@@ -204,11 +201,11 @@ describe("bulkCreateZones Controller", () => {
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.results.created).toBe(2);
+    expect(responseJson.result.upsertedCount).toBe(2);
 
     // Verify zones were created with sector = 0
     const Zone = require("mongoose").model("Zone");
@@ -233,43 +230,15 @@ describe("bulkCreateZones Controller", () => {
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.results.created).toBe(4);
-    expect(responseJson.results.skipped).toBe(0);
-    expect(responseJson.results.errors).toHaveLength(0);
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result.upsertedCount).toBe(4);
   });
 
-  it("should provide detailed error information", async () => {
-    // Arrange
-    await createTestZone({ title: "42-1", bar: 4201, sector: 0 });
-
-    mockRequest = {
-      body: {
-        zones: [
-          { title: "42-1", bar: 9999 }, // duplicate title
-          { title: "42-2", bar: 4202 }, // valid
-        ],
-      },
-    };
-
-    // Act
-    await bulkCreateZones(mockRequest as Request, res);
-
-    // Assert
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.results.errors).toHaveLength(1);
-    expect(responseJson.results.errors[0].index).toBe(0);
-    expect(responseJson.results.errors[0].error).toContain("already exists");
-    expect(responseJson.results.errors[0].data).toEqual({
-      title: "42-1",
-      bar: 9999,
-    });
-  });
-
-  it("should handle single zone creation", async () => {
+  it("should handle single zone upsert", async () => {
     // Arrange
     mockRequest = {
       body: {
@@ -278,33 +247,61 @@ describe("bulkCreateZones Controller", () => {
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.results.created).toBe(1);
-    expect(responseJson.results.skipped).toBe(0);
-    expect(responseJson.results.errors).toHaveLength(0);
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result.upsertedCount).toBe(1);
   });
 
-  it("should handle maximum allowed zones", async () => {
+  it("should handle duplicate bars in same batch", async () => {
     // Arrange
-    const zones = Array.from({ length: 100 }, (_, i) => ({
-      title: `42-${i}`,
-      bar: 4200 + i,
-    }));
-
     mockRequest = {
-      body: { zones },
+      body: {
+        zones: [
+          { title: "42-1", bar: 4201 },
+          { title: "42-2", bar: 4201 }, // same bar
+        ],
+      },
     };
 
     // Act
-    await bulkCreateZones(mockRequest as Request, res);
+    await upsertZones(mockRequest as Request, res, mockNext);
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.results.created).toBe(100);
-    expect(responseJson.results.skipped).toBe(0);
-    expect(responseJson.results.errors).toHaveLength(0);
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result.upsertedCount).toBe(1);
+    expect(responseJson.result.modifiedCount).toBe(1);
+  });
+
+  it("should handle zones with custom sector values", async () => {
+    // Arrange
+    mockRequest = {
+      body: {
+        zones: [
+          { title: "42-1", bar: 4201, sector: 10 },
+          { title: "42-2", bar: 4202, sector: 20 },
+        ],
+      },
+    };
+
+    // Act
+    await upsertZones(mockRequest as Request, res, mockNext);
+
+    // Assert
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.message).toBe("Upsert completed");
+    expect(responseJson.result.upsertedCount).toBe(2);
+
+    // Verify zones were created with custom sectors
+    const Zone = require("mongoose").model("Zone");
+    const createdZones = await Zone.find({ title: { $in: ["42-1", "42-2"] } });
+    expect(createdZones).toHaveLength(2);
+    const zone1 = createdZones.find((z: any) => z.title === "42-1");
+    const zone2 = createdZones.find((z: any) => z.title === "42-2");
+    expect(zone1.sector).toBe(10);
+    expect(zone2.sector).toBe(20);
   });
 });
