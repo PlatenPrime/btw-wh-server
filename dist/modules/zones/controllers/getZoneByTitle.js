@@ -11,11 +11,14 @@ export const getZoneByTitle = async (req, res) => {
         // Поиск зоны по title
         const zone = await Zone.findOne({ title: title.trim() });
         if (!zone) {
-            return res.status(404).json({
+            return res.status(200).json({
+                exists: false,
                 message: "Zone not found",
+                data: null,
             });
         }
         res.status(200).json({
+            exists: true,
             message: "Zone retrieved successfully",
             data: zone,
         });

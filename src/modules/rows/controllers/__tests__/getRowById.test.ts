@@ -44,17 +44,19 @@ describe("getRowById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.title).toBe("Row by ID");
-    expect(responseJson._id).toBeDefined();
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Row retrieved successfully");
+    expect(responseJson.data.title).toBe("Row by ID");
+    expect(responseJson.data._id).toBeDefined();
     // Проверяем pallets
-    expect(Array.isArray(responseJson.pallets)).toBe(true);
-    expect(responseJson.pallets.length).toBe(1);
-    expect(responseJson.pallets[0]._id.toString()).toBe(
+    expect(Array.isArray(responseJson.data.pallets)).toBe(true);
+    expect(responseJson.data.pallets.length).toBe(1);
+    expect(responseJson.data.pallets[0]._id.toString()).toBe(
       (pallet._id as Types.ObjectId).toString()
     );
-    expect(responseJson.pallets[0].title).toBe(pallet.title);
-    expect(responseJson.pallets[0].sector).toBe(pallet.sector);
-    expect(responseJson.pallets[0].isDef).toBe(false); // default value
+    expect(responseJson.data.pallets[0].title).toBe(pallet.title);
+    expect(responseJson.data.pallets[0].sector).toBe(pallet.sector);
+    expect(responseJson.data.pallets[0].isDef).toBe(false); // default value
   });
 
   it("should return pallet with isDef true", async () => {
@@ -74,7 +76,7 @@ describe("getRowById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.pallets[0].isDef).toBe(true);
+    expect(responseJson.data.pallets[0].isDef).toBe(true);
   });
 
   it("should return 404 if row not found", async () => {
@@ -85,8 +87,10 @@ describe("getRowById Controller", () => {
     await getRowById(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Row not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should handle server error", async () => {

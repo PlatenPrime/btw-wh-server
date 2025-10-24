@@ -6,7 +6,11 @@ export const getRowByTitle = async (req, res) => {
     try {
         const row = await Row.findOne({ title: title });
         if (!row) {
-            res.status(404).json({ message: "Row not found" });
+            res.status(200).json({
+                exists: false,
+                message: "Row not found",
+                data: null,
+            });
             return;
         }
         const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector poses isDef");
@@ -19,11 +23,15 @@ export const getRowByTitle = async (req, res) => {
         }));
         const sortedPallets = sortPalletsByTitle(palletsFormatted);
         res.status(200).json({
-            _id: row._id,
-            title: row.title,
-            pallets: sortedPallets,
-            createdAt: row.createdAt,
-            updatedAt: row.updatedAt,
+            exists: true,
+            message: "Row retrieved successfully",
+            data: {
+                _id: row._id,
+                title: row.title,
+                pallets: sortedPallets,
+                createdAt: row.createdAt,
+                updatedAt: row.updatedAt,
+            },
         });
     }
     catch (error) {

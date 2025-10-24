@@ -35,8 +35,10 @@ describe("getPalletById Controller", () => {
         await getPalletById(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
-        expect(responseJson.title).toBe("Test Pallet");
-        expect(responseJson._id.toString()).toBe(pallet.id);
+        expect(responseJson.exists).toBe(true);
+        expect(responseJson.message).toBe("Pallet retrieved successfully");
+        expect(responseJson.data.title).toBe("Test Pallet");
+        expect(responseJson.data._id.toString()).toBe(pallet.id);
     });
     it("should return 404 if pallet not found", async () => {
         // Arrange
@@ -44,8 +46,10 @@ describe("getPalletById Controller", () => {
         // Act
         await getPalletById(mockRequest, res);
         // Assert
-        expect(responseStatus.code).toBe(404);
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.exists).toBe(false);
         expect(responseJson.message).toBe("Pallet not found");
+        expect(responseJson.data).toBe(null);
     });
     it("should return 500 for invalid ID", async () => {
         // Arrange

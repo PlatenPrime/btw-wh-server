@@ -8,10 +8,15 @@ export const getAskById = async (req, res) => {
     try {
         const ask = await Ask.findById(id);
         if (!ask) {
-            res.status(404).json({ message: "Ask not found" });
+            res.status(200).json({
+                exists: false,
+                message: "Ask not found",
+                data: null,
+            });
             return;
         }
         res.status(200).json({
+            exists: true,
             message: "Ask retrieved successfully",
             data: ask,
         });

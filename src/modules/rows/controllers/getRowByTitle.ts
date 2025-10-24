@@ -13,7 +13,11 @@ export const getRowByTitle = async (
     const row: IRow | null = await Row.findOne({ title: title });
 
     if (!row) {
-      res.status(404).json({ message: "Row not found" });
+      res.status(200).json({
+        exists: false,
+        message: "Row not found",
+        data: null,
+      });
       return;
     }
 
@@ -31,11 +35,15 @@ export const getRowByTitle = async (
     const sortedPallets = sortPalletsByTitle(palletsFormatted);
 
     res.status(200).json({
-      _id: row._id,
-      title: row.title,
-      pallets: sortedPallets,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
+      exists: true,
+      message: "Row retrieved successfully",
+      data: {
+        _id: row._id,
+        title: row.title,
+        pallets: sortedPallets,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      },
     });
   } catch (error) {
     console.log("Error fetching row:", error);

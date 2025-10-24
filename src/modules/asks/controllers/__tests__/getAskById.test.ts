@@ -46,6 +46,7 @@ describe("getAskById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
     expect(responseJson.message).toBe("Ask retrieved successfully");
     expect(responseJson.data.artikul).toBe("TEST123");
     expect(responseJson.data.nameukr).toBe("Test Ask");
@@ -55,7 +56,7 @@ describe("getAskById Controller", () => {
     expect(responseJson.data._id).toBeDefined();
   });
 
-  it("should return 404 when ask not found", async () => {
+  it("should return 200 with exists false when ask not found", async () => {
     // Arrange
     const nonExistentId = new mongoose.Types.ObjectId();
     mockRequest = {
@@ -66,8 +67,10 @@ describe("getAskById Controller", () => {
     await getAskById(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Ask not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should return 500 for invalid ObjectId format", async () => {
@@ -105,6 +108,8 @@ describe("getAskById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Ask retrieved successfully");
     expect(responseJson.data.artikul).toBe("FULL123");
     expect(responseJson.data.nameukr).toBe("Full Test Ask");
     expect(responseJson.data.quant).toBe(25);
@@ -131,6 +136,8 @@ describe("getAskById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Ask retrieved successfully");
     expect(responseJson.data.status).toBe("completed");
   });
 
@@ -177,6 +184,8 @@ describe("getAskById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Ask retrieved successfully");
     expect(responseJson.data.createdAt).toBeDefined();
     expect(responseJson.data.updatedAt).toBeDefined();
     expect(new Date(responseJson.data.createdAt)).toBeInstanceOf(Date);
@@ -199,6 +208,8 @@ describe("getAskById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Ask retrieved successfully");
     expect(responseJson.data.artikul).toBe("MINIMAL");
     expect(responseJson.data._id).toBeDefined();
     expect(responseJson.data.askerData).toBeDefined();
@@ -226,6 +237,8 @@ describe("getAskById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Ask retrieved successfully");
     expect(responseJson.data.solverData).toBeDefined();
     expect(responseJson.data.solverData.fullname).toBe("Solver User");
     expect(responseJson.data.solverData.telegram).toBe("@solver");
@@ -243,8 +256,10 @@ describe("getAskById Controller", () => {
     await getAskById(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Ask not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should handle ask with rejected status", async () => {
@@ -263,6 +278,8 @@ describe("getAskById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Ask retrieved successfully");
     expect(responseJson.data.status).toBe("rejected");
   });
 
@@ -282,6 +299,8 @@ describe("getAskById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Ask retrieved successfully");
     expect(responseJson.data.actions).toEqual([]);
   });
 });

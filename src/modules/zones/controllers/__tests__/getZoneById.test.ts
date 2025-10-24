@@ -43,6 +43,7 @@ describe("getZoneById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
     expect(responseJson.message).toBe("Zone retrieved successfully");
     expect(responseJson.data.title).toBe("42-5-2");
     expect(responseJson.data.bar).toBe(420502);
@@ -61,8 +62,10 @@ describe("getZoneById Controller", () => {
     await getZoneById(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Zone not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should return 400 for invalid ObjectId format", async () => {
@@ -124,6 +127,8 @@ describe("getZoneById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Zone retrieved successfully");
     expect(responseJson.data.title).toBe("42-5-2");
     expect(responseJson.data.bar).toBe(420502);
     expect(responseJson.data.sector).toBe(1);
@@ -148,6 +153,8 @@ describe("getZoneById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Zone retrieved successfully");
     expect(responseJson.data.sector).toBe(999);
   });
 
@@ -162,8 +169,10 @@ describe("getZoneById Controller", () => {
     await getZoneById(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Zone not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should handle ObjectId with special characters", async () => {
@@ -197,6 +206,8 @@ describe("getZoneById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Zone retrieved successfully");
     expect(responseJson.data.createdAt).toBeDefined();
     expect(responseJson.data.updatedAt).toBeDefined();
     expect(new Date(responseJson.data.createdAt)).toBeInstanceOf(Date);
@@ -220,6 +231,8 @@ describe("getZoneById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Zone retrieved successfully");
     expect(responseJson.data.title).toBe("42-1");
     expect(responseJson.data.bar).toBe(4201);
     expect(responseJson.data.sector).toBe(0);

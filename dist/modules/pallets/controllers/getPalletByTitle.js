@@ -12,10 +12,18 @@ export const getPalletByTitle = async (req, res) => {
             options: { sort: { artikul: 1 } }, // Сортировка по artikul в алфавитном порядке
         });
         if (!pallet) {
-            return res.status(404).json({ message: "Pallet not found" });
+            return res.status(200).json({
+                exists: false,
+                message: "Pallet not found",
+                data: null,
+            });
         }
         const palletObj = pallet.toObject();
-        return res.status(200).json(palletObj);
+        return res.status(200).json({
+            exists: true,
+            message: "Pallet retrieved successfully",
+            data: palletObj,
+        });
     }
     catch (error) {
         console.error("getPalletByTitle error:", error);

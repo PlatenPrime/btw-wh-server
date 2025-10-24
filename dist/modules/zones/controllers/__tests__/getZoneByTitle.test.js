@@ -34,6 +34,7 @@ describe("getZoneByTitle Controller", () => {
         await getZoneByTitle(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
+        expect(responseJson.exists).toBe(true);
         expect(responseJson.message).toBe("Zone retrieved successfully");
         expect(responseJson.data.title).toBe("42-5-2");
         expect(responseJson.data.bar).toBe(420502);
@@ -48,8 +49,10 @@ describe("getZoneByTitle Controller", () => {
         // Act
         await getZoneByTitle(mockRequest, res);
         // Assert
-        expect(responseStatus.code).toBe(404);
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.exists).toBe(false);
         expect(responseJson.message).toBe("Zone not found");
+        expect(responseJson.data).toBe(null);
     });
     it("should return 400 for empty title parameter", async () => {
         // Arrange
@@ -106,6 +109,8 @@ describe("getZoneByTitle Controller", () => {
             await getZoneByTitle(mockRequest, res);
             // Assert
             expect(responseStatus.code).toBe(200);
+            expect(responseJson.exists).toBe(true);
+            expect(responseJson.message).toBe("Zone retrieved successfully");
             expect(responseJson.data.title).toBe(testCase.title);
             expect(responseJson.data.bar).toBe(testCase.bar);
         }
@@ -140,6 +145,8 @@ describe("getZoneByTitle Controller", () => {
         await getZoneByTitle(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
+        expect(responseJson.exists).toBe(true);
+        expect(responseJson.message).toBe("Zone retrieved successfully");
         expect(responseJson.data.title).toBe("42-5-2");
         expect(responseJson.data.bar).toBe(420502);
         expect(responseJson.data.sector).toBe(1);
@@ -160,6 +167,8 @@ describe("getZoneByTitle Controller", () => {
         await getZoneByTitle(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
+        expect(responseJson.exists).toBe(true);
+        expect(responseJson.message).toBe("Zone retrieved successfully");
         expect(responseJson.data.createdAt).toBeDefined();
         expect(responseJson.data.updatedAt).toBeDefined();
         expect(new Date(responseJson.data.createdAt)).toBeInstanceOf(Date);
@@ -179,6 +188,8 @@ describe("getZoneByTitle Controller", () => {
         await getZoneByTitle(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
+        expect(responseJson.exists).toBe(true);
+        expect(responseJson.message).toBe("Zone retrieved successfully");
         expect(responseJson.data.title).toBe("42-5-3");
         // Test with different title (should not match)
         mockRequest = {
@@ -201,7 +212,9 @@ describe("getZoneByTitle Controller", () => {
         // Act
         await getZoneByTitle(mockRequest, res);
         // Assert
-        expect(responseStatus.code).toBe(404);
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.exists).toBe(false);
         expect(responseJson.message).toBe("Zone not found");
+        expect(responseJson.data).toBe(null);
     });
 });

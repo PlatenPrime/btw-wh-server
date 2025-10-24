@@ -30,7 +30,9 @@ describe("getPosById Controller", () => {
     const req = createMockRequest({ params: { id: pos._id.toString() } });
     const res = createMockResponse();
     await getPosById(req as any, res as any);
-    expect(res.body._id.toString()).toBe(pos._id.toString());
+    expect(res.body.exists).toBe(true);
+    expect(res.body.message).toBe("Position retrieved successfully");
+    expect(res.body.data._id.toString()).toBe(pos._id.toString());
   });
 
   it("should return 404 if pos not found", async () => {
@@ -39,8 +41,10 @@ describe("getPosById Controller", () => {
     });
     const res = createMockResponse();
     await getPosById(req as any, res as any);
-    expect(res.statusCode).toBe(404);
-    expect(res.body.error).toBe("Position not found");
+    expect(res.statusCode).toBe(200);
+    expect(res.body.exists).toBe(false);
+    expect(res.body.message).toBe("Position not found");
+    expect(res.body.data).toBe(null);
   });
 
   it("should return 400 for invalid ID", async () => {

@@ -45,15 +45,17 @@ describe("getArt Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("5555-0001");
-    expect(responseJson.nameukr).toBe("Test Art");
-    expect(responseJson.namerus).toBe("Тест Арт");
-    expect(responseJson.zone).toBe("A1");
-    expect(responseJson.limit).toBe(100);
-    expect(responseJson._id).toBeDefined();
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("5555-0001");
+    expect(responseJson.data.nameukr).toBe("Test Art");
+    expect(responseJson.data.namerus).toBe("Тест Арт");
+    expect(responseJson.data.zone).toBe("A1");
+    expect(responseJson.data.limit).toBe(100);
+    expect(responseJson.data._id).toBeDefined();
   });
 
-  it("should return 404 when art not found", async () => {
+  it("should return 200 with exists false when art not found", async () => {
     // Arrange
     mockRequest = {
       params: { artikul: "NONEXISTENT" },
@@ -63,8 +65,10 @@ describe("getArt Controller", () => {
     await getArt(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Art not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should handle case-sensitive search", async () => {
@@ -83,8 +87,10 @@ describe("getArt Controller", () => {
     await getArt(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Art not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should return art with btradeStock data", async () => {
@@ -108,10 +114,12 @@ describe("getArt Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("5555-0001");
-    expect(responseJson.btradeStock).toBeDefined();
-    expect(responseJson.btradeStock.value).toBe(50);
-    expect(responseJson.btradeStock.date).toBeDefined();
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("5555-0001");
+    expect(responseJson.data.btradeStock).toBeDefined();
+    expect(responseJson.data.btradeStock.value).toBe(50);
+    expect(responseJson.data.btradeStock.date).toBeDefined();
   });
 
   it("should return art with marker", async () => {
@@ -132,8 +140,10 @@ describe("getArt Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("5555-0001");
-    expect(responseJson.marker).toBe("IMPORTANT");
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("5555-0001");
+    expect(responseJson.data.marker).toBe("IMPORTANT");
   });
 
   it("should handle empty artikul parameter", async () => {
@@ -146,8 +156,10 @@ describe("getArt Controller", () => {
     await getArt(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Art not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should handle special characters in artikul", async () => {
@@ -167,7 +179,9 @@ describe("getArt Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("TEST-123_ABC");
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("TEST-123_ABC");
   });
 
   it("should handle numeric artikul", async () => {
@@ -187,7 +201,9 @@ describe("getArt Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("123456");
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("123456");
   });
 
   it("should return timestamps", async () => {
@@ -207,9 +223,11 @@ describe("getArt Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.createdAt).toBeDefined();
-    expect(responseJson.updatedAt).toBeDefined();
-    expect(new Date(responseJson.createdAt)).toBeInstanceOf(Date);
-    expect(new Date(responseJson.updatedAt)).toBeInstanceOf(Date);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.createdAt).toBeDefined();
+    expect(responseJson.data.updatedAt).toBeDefined();
+    expect(new Date(responseJson.data.createdAt)).toBeInstanceOf(Date);
+    expect(new Date(responseJson.data.updatedAt)).toBeInstanceOf(Date);
   });
 });

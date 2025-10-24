@@ -9,10 +9,18 @@ export const getPosById = async (req, res) => {
     try {
         const pos = await Pos.findById(id);
         if (!pos) {
-            res.status(404).json({ error: "Position not found" });
+            res.status(200).json({
+                exists: false,
+                message: "Position not found",
+                data: null,
+            });
             return;
         }
-        res.json(pos);
+        res.status(200).json({
+            exists: true,
+            message: "Position retrieved successfully",
+            data: pos,
+        });
     }
     catch (error) {
         res.status(500).json({ error: "Failed to fetch position", details: error });

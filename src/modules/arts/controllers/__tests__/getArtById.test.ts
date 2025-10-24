@@ -46,15 +46,17 @@ describe("getArtById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("TEST123");
-    expect(responseJson.nameukr).toBe("Test Art");
-    expect(responseJson.namerus).toBe("Тест Арт");
-    expect(responseJson.zone).toBe("A1");
-    expect(responseJson.limit).toBe(100);
-    expect(responseJson._id).toBeDefined();
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("TEST123");
+    expect(responseJson.data.nameukr).toBe("Test Art");
+    expect(responseJson.data.namerus).toBe("Тест Арт");
+    expect(responseJson.data.zone).toBe("A1");
+    expect(responseJson.data.limit).toBe(100);
+    expect(responseJson.data._id).toBeDefined();
   });
 
-  it("should return 404 when art not found", async () => {
+  it("should return 200 with exists false when art not found", async () => {
     // Arrange
     const nonExistentId = new mongoose.Types.ObjectId();
     mockRequest = {
@@ -65,8 +67,10 @@ describe("getArtById Controller", () => {
     await getArtById(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Art not found");
+    expect(responseJson.data).toBe(null);
   });
 
   it("should return 500 for invalid ObjectId format", async () => {
@@ -104,10 +108,12 @@ describe("getArtById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("TEST456");
-    expect(responseJson.btradeStock).toBeDefined();
-    expect(responseJson.btradeStock.value).toBe(75);
-    expect(responseJson.btradeStock.date).toBeDefined();
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("TEST456");
+    expect(responseJson.data.btradeStock).toBeDefined();
+    expect(responseJson.data.btradeStock.value).toBe(75);
+    expect(responseJson.data.btradeStock.date).toBeDefined();
   });
 
   it("should return art with marker", async () => {
@@ -128,8 +134,10 @@ describe("getArtById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("TEST789");
-    expect(responseJson.marker).toBe("URGENT");
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("TEST789");
+    expect(responseJson.data.marker).toBe("URGENT");
   });
 
   it("should handle empty id parameter", async () => {
@@ -177,10 +185,12 @@ describe("getArtById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.createdAt).toBeDefined();
-    expect(responseJson.updatedAt).toBeDefined();
-    expect(new Date(responseJson.createdAt)).toBeInstanceOf(Date);
-    expect(new Date(responseJson.updatedAt)).toBeInstanceOf(Date);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.createdAt).toBeDefined();
+    expect(responseJson.data.updatedAt).toBeDefined();
+    expect(new Date(responseJson.data.createdAt)).toBeInstanceOf(Date);
+    expect(new Date(responseJson.data.updatedAt)).toBeInstanceOf(Date);
   });
 
   it("should handle art with minimal required fields", async () => {
@@ -200,10 +210,12 @@ describe("getArtById Controller", () => {
 
     // Assert
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.artikul).toBe("MINIMAL");
-    expect(responseJson.zone).toBe("A1");
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.message).toBe("Art retrieved successfully");
+    expect(responseJson.data.artikul).toBe("MINIMAL");
+    expect(responseJson.data.zone).toBe("A1");
     // Optional fields may be undefined or have default values from createTestArt
-    expect(responseJson._id).toBeDefined();
+    expect(responseJson.data._id).toBeDefined();
   });
 
   it("should handle very long ObjectId", async () => {
@@ -217,7 +229,9 @@ describe("getArtById Controller", () => {
     await getArtById(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(404);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(false);
     expect(responseJson.message).toBe("Art not found");
+    expect(responseJson.data).toBe(null);
   });
 });
