@@ -118,6 +118,55 @@ export const createTestAsk = async (askData: any = {}) => {
   });
 };
 
+export const createTestPos = async (posData: any = {}) => {
+  const Pos = mongoose.model("Pos");
+  const Pallet = mongoose.model("Pallet");
+  const Row = mongoose.model("Row");
+
+  // Create test pallet and row if not provided
+  let pallet = posData.pallet;
+  let row = posData.row;
+
+  if (!pallet) {
+    pallet = await Pallet.create({
+      title: `Test Pallet ${Date.now()}`,
+      sector: 1,
+      isDef: false,
+      poses: [],
+    });
+  }
+
+  if (!row) {
+    row = await Row.create({
+      title: `Test Row ${Date.now()}`,
+    });
+  }
+
+  return await Pos.create({
+    artikul: `ART-${Date.now()}`,
+    nameukr: "Test Position",
+    quant: 10,
+    boxes: 1,
+    pallet: pallet._id,
+    row: row._id,
+    palletTitle: pallet.title,
+    rowTitle: row.title,
+    palletData: {
+      _id: pallet._id,
+      title: pallet.title,
+      sector: pallet.sector,
+      isDef: pallet.isDef,
+    },
+    rowData: {
+      _id: row._id,
+      title: row.title,
+    },
+    limit: 0,
+    comment: "",
+    ...posData,
+  });
+};
+
 export const createTestZone = async (zoneData: any = {}) => {
   const Zone = mongoose.model("Zone");
   return await Zone.create({
