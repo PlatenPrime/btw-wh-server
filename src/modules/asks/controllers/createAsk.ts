@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
+import { RoleType } from "../../../constants/roles.js";
 import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
 import { sendMessageToBTWChat } from "../../../utils/telegram/sendMessageToBTWChat.js";
 import User from "../../auth/models/User.js";
@@ -53,19 +54,22 @@ export const createAsk = async (req: Request, res: Response) => {
     res.status(201).json(ask);
 
     // Отправка уведомления в Telegram чат дефицитов (асинхронно, не блокируя ответ)
-    try {
-      const telegramMessage = `🆕 Новий запит
+    // Не отправляем сообщения для пользователей с ролью PRIME или в тестовом окружении
+    if (asker.role !== RoleType.PRIME && process.env.NODE_ENV !== "test") {
+      try {
+        const telegramMessage = `🆕 Новий запит
 
 👤 ${asker.fullname}
 📦 ${artikul}
 📝 ${nameukr || "—"}${
-        quant !== undefined && quant !== null ? `\n\n🔢 ${quant}` : ""
-      }${com ? `\n💬 ${com}` : ""}`;
+          quant !== undefined && quant !== null ? `\n\n🔢 ${quant}` : ""
+        }${com ? `\n💬 ${com}` : ""}`;
 
-      await sendMessageToBTWChat(telegramMessage);
-    } catch (telegramError) {
-      // Логируем ошибку, но это уже не повлияет на ответ клиенту
-      console.error("Failed to send Telegram notification:", telegramError);
+        await sendMessageToBTWChat(telegramMessage);
+      } catch (telegramError) {
+        // Логируем ошибку, но это уже не повлияет на ответ клиенту
+        console.error("Failed to send Telegram notification:", telegramError);
+      }
     }
   } catch (error) {
     console.error("Error creating ask:", error);
