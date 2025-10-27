@@ -61,6 +61,8 @@ export interface IPullsResponse {
  * Request interface for processing a pull position
  */
 export interface IProcessPullPositionRequest {
+  /** ID of the ask that requests this position */
+  askId: Types.ObjectId;
   /** Actual quantity to be pulled from the position */
   actualQuant: number;
   /** ID of the solver processing this position */

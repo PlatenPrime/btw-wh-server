@@ -189,6 +189,7 @@ interface IPullsResponse {
 
 ```json
 {
+  "askId": "64a1b2c3d4e5f6789abcdef2",
   "actualQuant": 5,
   "solverId": "64a1b2c3d4e5f6789abcdef4"
 }
@@ -196,6 +197,7 @@ interface IPullsResponse {
 
 **Request Body Schema**:
 
+- `askId` (string, required): Valid MongoDB ObjectId of the ask that requests this position
 - `actualQuant` (number, required): Non-negative number representing actual quantity to be pulled
 - `solverId` (string, required): Valid MongoDB ObjectId of the solver processing this position
 
@@ -274,12 +276,21 @@ interface IPullsResponse {
 }
 ```
 
-- `404`: No active asks found
+- `404`: Ask not found or no longer active
 
 ```json
 {
   "success": false,
-  "message": "No active asks found for this position"
+  "message": "Ask not found"
+}
+```
+
+- `400`: Ask artikul validation error
+
+```json
+{
+  "success": false,
+  "message": "Ask artikul does not match position artikul"
 }
 ```
 
@@ -402,6 +413,7 @@ const processResponse = await fetch(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
+      askId: askId,
       actualQuant: 5,
       solverId: solverId,
     }),

@@ -4,10 +4,12 @@ import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedD
 import { sendMessageToTGUser } from "../../../utils/telegram/sendMessageToTGUser.js";
 import { Ask } from "../../asks/models/Ask.js";
 import User from "../../auth/models/User.js";
-import { Pallet } from "../../pallets/models/Pallet.js";
 import { Pos } from "../../poses/models/Pos.js";
 // Validation schema for process pull position request
 const processPullPositionSchema = z.object({
+    askId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+        message: "Invalid ask ID format",
+    }),
     actualQuant: z.number().min(0, "Actual quantity must be non-negative"),
     solverId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
         message: "Invalid solver ID format",
@@ -19,11 +21,10 @@ const processPullPositionSchema = z.object({
  *
  * Handles the actual pulling of goods from a position:
  * 1. Validates input data
- * 2. Updates position quantity (decreases quant, removes if 0)
- * 3. Updates pallet (removes position if necessary)
- * 4. Adds action to corresponding ask
- * 5. Checks if ask is fully completed → transitions to "completed" + sends notification
- * 6. Returns updated state
+ * 2. Updates position quantity (decreases quant, keeps position even at 0 for history tracking)
+ * 3. Adds action to corresponding ask
+ * 4. Checks if ask is fully completed → transitions to "completed" + sends notification
+ * 5. Returns updated state
  */
 export const processPullPosition = async (req, res) => {
     const session = await mongoose.startSession();
@@ -46,7 +47,8 @@ export const processPullPosition = async (req, res) => {
                 errors: parseResult.error.errors,
             });
         }
-        const { actualQuant, solverId } = parseResult.data;
+        const { askId, actualQuant, solverId } = parseResult.data;
+        const askObjectId = new mongoose.Types.ObjectId(askId);
         const solverObjectId = new mongoose.Types.ObjectId(solverId);
         const palletObjectId = new mongoose.Types.ObjectId(palletId);
         const posObjectId = new mongoose.Types.ObjectId(posId);
@@ -57,12 +59,12 @@ export const processPullPosition = async (req, res) => {
                 throw new Error("Position not found");
             }
             // Verify position belongs to the specified pallet
-            if (position.pallet.toString() !== palletId) {
+            if (position.palletData._id.toString() !== palletObjectId.toString()) {
                 throw new Error("Position does not belong to the specified pallet");
             }
             // 2. Validate actual quantity
             if (actualQuant > position.quant) {
-                throw new Error("Actual quantity cannot exceed available quantity");
+                throw new Error("Неможливо зняти більше товару, ніж є на позиції");
             }
             // 3. Find solver user
             const solver = await User.findById(solverObjectId).session(session);
@@ -70,29 +72,28 @@ export const processPullPosition = async (req, res) => {
                 throw new Error("Solver user not found");
             }
             // 4. Find the ask associated with this position
-            // We need to find which ask is requesting this position
-            const asks = await Ask.find({
-                status: "new",
-                artikul: position.artikul,
-            }).session(session);
-            if (asks.length === 0) {
-                throw new Error("No active asks found for this position");
+            // Use the askId provided in the request to directly find the correct ask
+            const ask = await Ask.findById(askObjectId).session(session);
+            if (!ask) {
+                throw new Error("Ask not found");
             }
-            // For simplicity, we'll process the first ask that matches
-            // In a more complex scenario, you might need to track which ask corresponds to which position
-            const ask = asks[0];
+            // Validate that the ask is still active
+            if (ask.status !== "new") {
+                throw new Error("Ask is no longer active");
+            }
+            // Validate that the ask matches the position's artikul
+            if (ask.artikul !== position.artikul) {
+                throw new Error("Ask artikul does not match position artikul");
+            }
             // 5. Update position quantity
             const newQuant = position.quant - actualQuant;
-            if (newQuant <= 0) {
-                // Remove position if quantity becomes 0 or negative
-                await Pos.findByIdAndDelete(posObjectId).session(session);
-                // Remove position from pallet
-                await Pallet.findByIdAndUpdate(palletObjectId, { $pull: { poses: posObjectId } }, { session });
+            // Validate that newQuant is not negative (additional safety check)
+            if (newQuant < 0) {
+                throw new Error("Неможливо зняти більше товару, ніж є на позиції");
             }
-            else {
-                // Update position quantity
-                await Pos.findByIdAndUpdate(posObjectId, { quant: newQuant }, { session });
-            }
+            // Always update position quantity, even if it becomes 0
+            // Keep position with 0 quantity for warehouse history tracking
+            await Pos.findByIdAndUpdate(posObjectId, { quant: newQuant }, { session });
             // 6. Add action to ask
             const time = getCurrentFormattedDateTime();
             const solverName = solver.fullname;
@@ -156,7 +157,9 @@ export const processPullPosition = async (req, res) => {
         if (!res.headersSent) {
             const statusCode = error instanceof Error && error.message.includes("not found")
                 ? 404
-                : 500;
+                : error instanceof Error && error.message.includes("Неможливо зняти")
+                    ? 422
+                    : 500;
             res.status(statusCode).json({
                 success: false,
                 message: error instanceof Error ? error.message : "Failed to process position",

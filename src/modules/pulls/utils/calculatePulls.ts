@@ -39,21 +39,31 @@ export const calculatePulls = async (): Promise<IPullsResponse> => {
     const pullPositions: IPullPosition[] = [];
 
     for (const [artikul, asks] of asksByArtikul) {
-      // Find all positions for this artikul
-      const positions = await Pos.find({ artikul }).lean();
+      // Find available positions (not empty, only from pogrebi)
+      const positions = await Pos.find({
+        artikul,
+        quant: { $gt: 0 },
+        sklad: "pogrebi",
+      }).lean();
 
       if (positions.length === 0) {
-        continue; // Skip if no positions found
+        continue; // Skip if no suitable positions found
       }
 
       // Sort positions by sector (ASC)
       const sortedPositions = sortPositionsBySector(positions);
 
-      // 4. Distribute asks across positions using greedy algorithm
+      // 4. Split asks into two groups: with specific quantity and with null quantity
+      const asksWithQuant = asks.filter((ask) => ask.quant && ask.quant > 0);
+      const asksWithNullQuant = asks.filter(
+        (ask) => !ask.quant || ask.quant <= 0
+      );
+
+      // 5. Process asks with specific quantity using greedy algorithm
       let positionIndex = 0;
 
-      for (const ask of asks) {
-        const requestedQuant = ask.quant || 0;
+      for (const ask of asksWithQuant) {
+        const requestedQuant = ask.quant!;
         let remainingQuant = requestedQuant;
 
         // Try to fulfill the ask from available positions
@@ -85,9 +95,29 @@ export const calculatePulls = async (): Promise<IPullsResponse> => {
         // Reset position index for next ask
         positionIndex = 0;
       }
+
+      // 6. Process asks with null quantity - use first position (minimum sector)
+      if (asksWithNullQuant.length > 0 && sortedPositions.length > 0) {
+        const firstPosition = sortedPositions[0];
+
+        // Create pull position for each null-quant ask
+        for (const ask of asksWithNullQuant) {
+          const pullPosition: IPullPosition = {
+            posId: firstPosition._id as Types.ObjectId,
+            artikul: firstPosition.artikul,
+            nameukr: firstPosition.nameukr,
+            currentQuant: firstPosition.quant,
+            requestedQuant: 0, // Solver decides the quantity
+            askId: ask._id as Types.ObjectId,
+            askerData: ask.askerData,
+          };
+
+          pullPositions.push(pullPosition);
+        }
+      }
     }
 
-    // 5. Group pull positions by palletId
+    // 7. Group pull positions by palletId
     const pullsByPallet = new Map<string, IPullPosition[]>();
 
     for (const pullPosition of pullPositions) {
@@ -103,7 +133,7 @@ export const calculatePulls = async (): Promise<IPullsResponse> => {
       pullsByPallet.get(palletId)!.push(pullPosition);
     }
 
-    // 6. Create IPull objects
+    // 8. Create IPull objects
     const pulls: IPull[] = [];
 
     for (const [palletIdStr, positions] of pullsByPallet) {
@@ -132,7 +162,7 @@ export const calculatePulls = async (): Promise<IPullsResponse> => {
       pulls.push(pull);
     }
 
-    // 7. Sort pulls by sector (ASC)
+    // 9. Sort pulls by sector (ASC)
     pulls.sort((a, b) => a.sector - b.sector);
 
     return {
