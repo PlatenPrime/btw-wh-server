@@ -1,34 +1,13 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import { z } from "zod";
-import { getCurrentFormattedDateTime } from "../../../utils/getCurrentFormattedDateTime.js";
-import { sendMessageToTGUser } from "../../../utils/telegram/sendMessageToTGUser.js";
-import { Ask } from "../../asks/models/Ask.js";
-import User from "../../auth/models/User.js";
-import { Pos } from "../../poses/models/Pos.js";
+import { getCurrentFormattedDateTime } from "../../../../utils/getCurrentFormattedDateTime.js";
+import { sendCompleteAskMesToUser } from "../../../../utils/telegram/asks/sendCompleteAskMesToUser.js";
+import { Ask } from "../../../asks/models/Ask.js";
+import User from "../../../auth/models/User.js";
+import { Pos } from "../../../poses/models/Pos.js";
+import { processPullPositionSchema } from "./processPullPositionSchema.js";
 
-// Validation schema for process pull position request
-const processPullPositionSchema = z.object({
-  askId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-    message: "Invalid ask ID format",
-  }),
-  actualQuant: z.number().min(0, "Actual quantity must be non-negative"),
-  solverId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
-    message: "Invalid solver ID format",
-  }),
-});
 
-/**
- * Controller to process a pull position (remove goods from a specific position)
- * PATCH /api/pulls/:palletId/positions/:posId
- *
- * Handles the actual pulling of goods from a position:
- * 1. Validates input data
- * 2. Updates position quantity (decreases quant, keeps position even at 0 for history tracking)
- * 3. Adds action to corresponding ask
- * 4. Checks if ask is fully completed → transitions to "completed" + sends notification
- * 5. Returns updated state
- */
 export const processPullPosition = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
 
@@ -160,24 +139,8 @@ export const processPullPosition = async (req: Request, res: Response) => {
         );
 
         // Send completion notification to asker
-        if (ask.askerData?.telegram) {
-          try {
-            const telegramMessage = `✅ Ваш запит виконано!
 
-📦 ${ask.artikul}
-📝 ${ask.nameukr || "—"}
-🔢 ${ask.quant ?? "—"}
-👤 Виконавець: ${solverName}`;
-
-            await sendMessageToTGUser(telegramMessage, ask.askerData.telegram);
-          } catch (telegramError) {
-            console.error(
-              "Failed to send Telegram notification:",
-              telegramError
-            );
-            // Don't throw error - notification failure shouldn't break the transaction
-          }
-        }
+        await sendCompleteAskMesToUser(ask, solverName);
       }
 
       // 8. Return success response

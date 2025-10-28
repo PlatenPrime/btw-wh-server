@@ -11,7 +11,7 @@ import { Ask } from "../../../asks/models/Ask.js";
 import User from "../../../auth/models/User.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 import { Pos } from "../../../poses/models/Pos.js";
-import { processPullPosition } from "../processPullPosition.js";
+import { processPullPosition } from "../process-pull-position/processPullPosition.js";
 
 // Mock external dependencies
 vi.mock("../../../../utils/getCurrentFormattedDateTime.js", () => ({
