@@ -1,4 +1,4 @@
-export { completeAskById } from "./completeAskById.js";
+export { completeAskById } from "./complete-ask-by-id/completeAskById.js";
 export { createAsk } from "./createAsk.js";
 export { deleteAskById } from "./deleteAskById.js";
 export { getAskById } from "./getAskById.js";

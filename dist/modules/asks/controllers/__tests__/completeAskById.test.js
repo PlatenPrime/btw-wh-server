@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestAsk, createTestUser } from "../../../../test/setup.js";
 import { Ask } from "../../models/Ask.js";
-import { completeAskById } from "../completeAskById.js";
+import { completeAskById } from "../complete-ask-by-id/completeAskById.js";
 // Mock the getCurrentFormattedDateTime utility to return a predictable format
 vi.mock("../../../../utils/getCurrentFormattedDateTime.js", () => ({
     getCurrentFormattedDateTime: vi.fn(() => "15.01.2024 10:30"),

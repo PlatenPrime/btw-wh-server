@@ -6,6 +6,8 @@ import { Ask } from "../../../asks/models/Ask.js";
 import User from "../../../auth/models/User.js";
 import { Pos } from "../../../poses/models/Pos.js";
 import { processPullPositionSchema } from "./processPullPositionSchema.js";
+import { completeAsk } from "../../../asks/controllers/complete-ask-by-id/utils/completeAsk.js";
+import { IAsk } from "../../../asks/models/Ask.js";
 
 
 export const processPullPosition = async (req: Request, res: Response) => {
@@ -115,32 +117,12 @@ export const processPullPosition = async (req: Request, res: Response) => {
       const remainingQuant = (ask.quant || 0) - actualQuant;
 
       if (remainingQuant <= 0) {
-        // Mark ask as completed
-        const solverData = {
-          _id: solver._id,
-          fullname: solver.fullname,
-          telegram: solver.telegram,
-          photo: solver.photo,
-        };
-
-        const completionAction = `${time} ${solverName}: ВИКОНАВ запит`;
-
-        await Ask.findByIdAndUpdate(
-          ask._id,
-          {
-            $push: { actions: completionAction },
-            $set: {
-              status: "completed",
-              solver: solverObjectId,
-              solverData,
-            },
-          },
-          { session }
-        );
+        const updatedAsk = await completeAsk({ solver, ask: ask as IAsk });
 
         // Send completion notification to asker
-
-        await sendCompleteAskMesToUser(ask, solverName);
+        if (updatedAsk) {
+          await sendCompleteAskMesToUser(updatedAsk, solver.fullname);
+        }
       }
 
       // 8. Return success response
