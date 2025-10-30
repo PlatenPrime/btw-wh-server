@@ -2,7 +2,7 @@ import { RoleType } from "../../../../../constants/roles.js";
 import { sendMessageToBTWChat } from "../../../../../utils/telegram/sendMessageToBTWChat.js";
 import { IUser } from "../../../../auth/models/User.js";
 
-export const sendCreateAskCreateMesUtil = async ({
+export const sendCreateAskMesUtil = async ({
   message,
   askerData,
 }: {

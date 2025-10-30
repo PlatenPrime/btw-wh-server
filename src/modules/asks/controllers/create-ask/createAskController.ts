@@ -4,7 +4,7 @@ import User from "../../../auth/models/User.js";
 import { createAskUtil } from "./utils/createAskUtil.js";
 import { getCreateAskActionsUtil } from "./utils/getCreateAskActionsUtil.js";
 import { getCreateAskMessageUtil } from "./utils/getCreateAskMesUtil.js";
-import { sendCreateAskCreateMesUtil } from "./utils/sendCreateAskCreateMesUtil.js";
+import { sendCreateAskMesUtil } from "./utils/sendCreateAskMesUtil.js";
 
 interface CreateAskRequest {
   artikul: string;
@@ -49,7 +49,7 @@ export const createAskController = async (req: Request, res: Response) => {
       quant,
       com,
     });
-    await sendCreateAskCreateMesUtil({ message, askerData });
+    await sendCreateAskMesUtil({ message, askerData });
   } catch (error) {
     console.error("Error creating ask:", error);
     res.status(500).json({ message: "Server error", error });

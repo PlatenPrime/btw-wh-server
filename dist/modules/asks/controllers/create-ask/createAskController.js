@@ -2,7 +2,7 @@ import User from "../../../auth/models/User.js";
 import { createAskUtil } from "./utils/createAskUtil.js";
 import { getCreateAskActionsUtil } from "./utils/getCreateAskActionsUtil.js";
 import { getCreateAskMessageUtil } from "./utils/getCreateAskMesUtil.js";
-import { sendCreateAskCreateMesUtil } from "./utils/sendCreateAskCreateMesUtil.js";
+import { sendCreateAskMesUtil } from "./utils/sendCreateAskMesUtil.js";
 export const createAskController = async (req, res) => {
     try {
         const { artikul, nameukr, quant, com, askerId } = req.body;
@@ -30,7 +30,7 @@ export const createAskController = async (req, res) => {
             quant,
             com,
         });
-        await sendCreateAskCreateMesUtil({ message, askerData });
+        await sendCreateAskMesUtil({ message, askerData });
     }
     catch (error) {
         console.error("Error creating ask:", error);

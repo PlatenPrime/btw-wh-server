@@ -1,14 +1,10 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { getCurrentFormattedDateTime } from "../../../../utils/getCurrentFormattedDateTime.js";
-import { sendCompleteAskMesToUser } from "../../../../utils/telegram/asks/sendCompleteAskMesToUser.js";
 import { Ask } from "../../../asks/models/Ask.js";
 import User from "../../../auth/models/User.js";
 import { Pos } from "../../../poses/models/Pos.js";
 import { processPullPositionSchema } from "./processPullPositionSchema.js";
-import { completeAsk } from "../../../asks/controllers/complete-ask-by-id/utils/completeAsk.js";
-import { IAsk } from "../../../asks/models/Ask.js";
-
 
 export const processPullPosition = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -116,14 +112,14 @@ export const processPullPosition = async (req: Request, res: Response) => {
       // across all positions for this ask
       const remainingQuant = (ask.quant || 0) - actualQuant;
 
-      if (remainingQuant <= 0) {
-        const updatedAsk = await completeAsk({ solver, ask: ask as IAsk });
+      // if (remainingQuant <= 0) {
+      //   const updatedAsk = await completeAskUtil({ solver, solverId, ask: ask as IAsk });
 
-        // Send completion notification to asker
-        if (updatedAsk) {
-          await sendCompleteAskMesToUser(updatedAsk, solver.fullname);
-        }
-      }
+      //   // Send completion notification to asker
+      //   if (updatedAsk) {
+      //     await sendCompleteAskMesToUser(updatedAsk, solver.fullname);
+      //   }
+      // }
 
       // 8. Return success response
       res.status(200).json({
