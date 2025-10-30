@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
 import { IUser } from "../../auth/models/User.js";
 
-type AskUserData = Pick<IUser, "_id" | "fullname" | "telegram" | "photo">;
+export type AskUserData = Pick<IUser, "_id" | "fullname" | "telegram" | "photo">;
 export type AskStatus = "new"  | "completed" | "rejected";
 export const validAskStatuses: AskStatus[] = ["new",  "completed", "rejected"];
 

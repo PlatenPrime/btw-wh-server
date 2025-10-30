@@ -3,9 +3,9 @@ import { Ask } from "../../asks/models/Ask.js";
 import { Pos } from "../../poses/models/Pos.js";
 import { IPull, IPullPosition, IPullsResponse } from "../models/Pull.js";
 import {
-  getPositionSector,
   sortPositionsBySector,
 } from "./sortPositionsBySector.js";
+import { getPositionSector } from "./getPositionSector.js";
 
 /**
  * Calculates pulls dynamically based on all "new" asks

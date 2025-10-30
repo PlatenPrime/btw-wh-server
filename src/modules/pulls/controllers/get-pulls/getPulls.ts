@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { calculatePulls } from "../utils/calculatePulls.js";
+import { calculatePulls } from "../../utils/calculatePulls.js";
 
 /**
  * Controller to get all calculated pulls

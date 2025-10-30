@@ -27,7 +27,9 @@ export const completeAskById = async (req: Request, res: Response) => {
     if (!solver) {
       return res.status(404).json({ message: "Solver user not found" });
     }
+    
     const updatedAsk = await completeAsk({ solver, ask: existingAsk });
+
     if (updatedAsk) {
       res.status(200).json(updatedAsk);
       await sendCompleteAskMesToUser(updatedAsk, solver.fullname);

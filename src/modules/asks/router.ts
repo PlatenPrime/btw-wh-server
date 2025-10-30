@@ -8,7 +8,7 @@ import {
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   completeAskById,
-  createAsk,
+  createAskController,
   deleteAskById,
   getAskById,
   getAsksByDate,
@@ -25,7 +25,7 @@ router.post(
   "/",
   checkAuth,
   checkRoles([RoleType.USER]),
-  asyncHandler(createAsk)
+  asyncHandler(createAskController)
 );
 
 // Получить asks по дате - доступно для всех авторизованных пользователей

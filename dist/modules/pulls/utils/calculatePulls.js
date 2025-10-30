@@ -1,7 +1,8 @@
 import { Types } from "mongoose";
 import { Ask } from "../../asks/models/Ask.js";
 import { Pos } from "../../poses/models/Pos.js";
-import { getPositionSector, sortPositionsBySector, } from "./sortPositionsBySector.js";
+import { sortPositionsBySector, } from "./sortPositionsBySector.js";
+import { getPositionSector } from "./getPositionSector.js";
 /**
  * Calculates pulls dynamically based on all "new" asks
  * Groups positions by pallet and sorts by sector for optimal processing
