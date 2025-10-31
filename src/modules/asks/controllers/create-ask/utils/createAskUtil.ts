@@ -1,3 +1,4 @@
+import mongoose, { ClientSession } from "mongoose";
 import { Ask, IAsk } from "../../../models/Ask.js";
 import { IUser } from "../../../../auth/models/User.js";
 
@@ -8,6 +9,7 @@ type CreateAskInput = {
   com?: string;
   askerData: IUser;
   actions: string[];
+  session: ClientSession;
 };
 
 export const createAskUtil = async ({
@@ -17,6 +19,7 @@ export const createAskUtil = async ({
   com,
   askerData,
   actions,
+  session,
 }: CreateAskInput): Promise<IAsk> => {
   const ask: IAsk = new Ask({
     artikul,
@@ -29,6 +32,6 @@ export const createAskUtil = async ({
     status: "new",
   });
 
-  await ask.save();
+  await ask.save({ session });
   return ask as IAsk;
 };

@@ -1,5 +1,5 @@
 import { Ask } from "../../../models/Ask.js";
-export const createAskUtil = async ({ artikul, nameukr, quant, com, askerData, actions, }) => {
+export const createAskUtil = async ({ artikul, nameukr, quant, com, askerData, actions, session, }) => {
     const ask = new Ask({
         artikul,
         nameukr,
@@ -10,6 +10,6 @@ export const createAskUtil = async ({ artikul, nameukr, quant, com, askerData, a
         actions,
         status: "new",
     });
-    await ask.save();
+    await ask.save({ session });
     return ask;
 };

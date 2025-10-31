@@ -1,36 +1,45 @@
+import mongoose from "mongoose";
 import User from "../../../auth/models/User.js";
 import { Ask } from "../../models/Ask.js";
+import { completeAskByIdSchema } from "./schemas/completeAskByIdSchema.js";
 import { completeAskUtil } from "./utils/completeAskUtil.js";
 import { getCompleteAskMesUtil } from "./utils/getCompleteAskMesUtil.js";
 import { sendCompleteAskMesUtil } from "./utils/sendCompleteAskMesUtil.js";
 export const completeAskById = async (req, res) => {
+    const session = await mongoose.startSession();
     try {
         const { id } = req.params;
         const { solverId } = req.body;
-        if (!id) {
-            return res.status(400).json({ message: "id is required" });
+        // Валидация входных данных
+        const parseResult = completeAskByIdSchema.safeParse({ id, solverId });
+        if (!parseResult.success) {
+            return res.status(400).json({
+                message: "Validation error",
+                errors: parseResult.error.errors,
+            });
         }
-        const existingAsk = await Ask.findById(id);
-        if (!existingAsk) {
-            return res.status(404).json({ message: "Ask not found" });
-        }
-        if (!solverId) {
-            return res.status(400).json({ message: "solverId is required" });
-        }
-        const solver = await User.findById(solverId);
-        if (!solver) {
-            return res.status(404).json({ message: "Solver user not found" });
-        }
-        const updatedAsk = await completeAskUtil({
-            solver,
-            solverId,
-            ask: existingAsk,
+        let existingAsk = null;
+        let solver = null;
+        let updatedAsk = null;
+        await session.withTransaction(async () => {
+            existingAsk = await Ask.findById(id).session(session);
+            if (!existingAsk) {
+                throw new Error("Ask not found");
+            }
+            solver = await User.findById(solverId).session(session);
+            if (!solver) {
+                throw new Error("Solver user not found");
+            }
+            updatedAsk = await completeAskUtil({
+                solver,
+                solverId,
+                ask: existingAsk,
+                session,
+            });
         });
-        if (!updatedAsk) {
-            return res.status(500).json({ message: "Failed to complete ask" });
-        }
         res.status(200).json(updatedAsk);
-        if (existingAsk.askerData?.telegram) {
+        // Отправка уведомления создателю запроса о выполнении
+        if (existingAsk?.askerData?.telegram) {
             const message = getCompleteAskMesUtil({
                 ask: updatedAsk,
                 solverName: solver.fullname,
@@ -43,7 +52,20 @@ export const completeAskById = async (req, res) => {
     }
     catch (error) {
         console.error("Error completing ask:", error);
-        res.status(500).json({ message: "Server error", error });
-        return;
+        if (!res.headersSent) {
+            if (error instanceof Error && error.message === "Ask not found") {
+                res.status(404).json({ message: "Ask not found" });
+            }
+            else if (error instanceof Error &&
+                error.message === "Solver user not found") {
+                res.status(404).json({ message: "Solver user not found" });
+            }
+            else {
+                res.status(500).json({ message: "Server error", error });
+            }
+        }
+    }
+    finally {
+        await session.endSession();
     }
 };

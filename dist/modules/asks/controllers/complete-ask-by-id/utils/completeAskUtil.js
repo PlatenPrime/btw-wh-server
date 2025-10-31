@@ -1,6 +1,6 @@
 import { Ask } from "../../../models/Ask.js";
 import { getCompleteAskActionUtil } from "./getCompleteAskActionUtil.js";
-export async function completeAskUtil({ solver, solverId, ask, }) {
+export async function completeAskUtil({ solver, solverId, ask, session, }) {
     const solverData = {
         _id: String(solver._id),
         fullname: solver.fullname,
@@ -18,6 +18,10 @@ export async function completeAskUtil({ solver, solverId, ask, }) {
     const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
         new: true,
         runValidators: true,
+        session,
     });
+    if (!updatedAsk) {
+        throw new Error("Failed to complete ask");
+    }
     return updatedAsk;
 }
