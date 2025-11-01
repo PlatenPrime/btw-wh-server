@@ -13,6 +13,7 @@ interface IRowSubdocument {
  * Pallet document interface
  */
 export interface IPallet extends Document {
+  _id: Types.ObjectId;
   title: string;
   row: Types.ObjectId;
   rowData: IRowSubdocument;
