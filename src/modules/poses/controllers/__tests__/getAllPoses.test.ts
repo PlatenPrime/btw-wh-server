@@ -7,7 +7,7 @@ import {
   createTestRow,
 } from "../../../../test/utils/testHelpers.js";
 import { Pos } from "../../models/Pos.js";
-import { getAllPoses } from "../getAllPoses.js";
+import { getAllPoses } from "../index.js";
 
 // Мокаем консоль для ошибок
 vi.spyOn(console, "error").mockImplementation(() => {});
@@ -37,7 +37,7 @@ describe("getAllPoses Controller", () => {
     const req = createMockRequest({ query: {} });
     const res = createMockResponse();
     await getAllPoses(req as any, res as any);
-    expect(res.statusCode).toBeUndefined();
+    expect(res.statusCode).toBe(200);
     expect(res.body.data).toHaveLength(2);
     expect(res.body.total).toBe(2);
     expect(res.body.page).toBe(1);

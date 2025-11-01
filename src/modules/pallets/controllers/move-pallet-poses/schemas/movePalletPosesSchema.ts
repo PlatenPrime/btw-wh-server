@@ -18,3 +18,5 @@ export const movePalletPosesSchema = z.object({
 export type MovePalletPosesInput = z.infer<typeof movePalletPosesSchema>;
 
 
+
+

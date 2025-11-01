@@ -8,7 +8,7 @@ import {
   createTestRow,
 } from "../../../../test/utils/testHelpers.js";
 import { Pos } from "../../models/Pos.js";
-import { deletePos } from "../deletePos.js";
+import { deletePos } from "../index.js";
 
 describe("deletePos Controller", () => {
   let row: any;

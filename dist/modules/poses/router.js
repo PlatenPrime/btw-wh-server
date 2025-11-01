@@ -1,8 +1,7 @@
 import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
-import { bulkCreatePoses, createPos, deletePos, getAllPoses, getPosById, getPosesByArtikul, getPosesByPalletId, getPosesByRowId, updatePos, } from "./controllers/index.js";
-import { populateMissingPosData } from "./controllers/populateMissingPosData.js";
+import { bulkCreatePoses, createPos, deletePos, getAllPoses, getPosById, getPosesByArtikul, getPosesByPalletId, getPosesByRowId, updatePos, populateMissingPosData, } from "./controllers/index.js";
 const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const router = Router();
 // GET routes - доступно для всех авторизованных пользователей

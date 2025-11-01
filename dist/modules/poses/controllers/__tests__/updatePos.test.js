@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockRequest, createMockResponse, createTestPos, } from "../../../../test/utils/testHelpers.js";
 import { Pos } from "../../models/Pos.js";
-import { updatePos } from "../updatePos.js";
+import { updatePos } from "../index.js";
 describe("updatePos Controller", () => {
     let pos;
     beforeEach(async () => {

@@ -7,7 +7,7 @@ import {
   createTestRow,
 } from "../../../../test/utils/testHelpers.js";
 import { Pos } from "../../models/Pos.js";
-import { getPosesByRowId } from "../getPosesByRowId.js";
+import { getPosesByRowId } from "../index.js";
 
 describe("getPosesByRowId Controller", () => {
   let row: any;

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockRequest, createMockResponse, createTestPallet, createTestPos, createTestRow, } from "../../../../test/utils/testHelpers.js";
 import { Pos } from "../../models/Pos.js";
-import { deletePos } from "../deletePos.js";
+import { deletePos } from "../index.js";
 describe("deletePos Controller", () => {
     let row;
     let pallet;

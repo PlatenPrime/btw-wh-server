@@ -12,3 +12,5 @@ export const deletePalletPosesSchema = z.object({
 export type DeletePalletPosesInput = z.infer<typeof deletePalletPosesSchema>;
 
 
+
+

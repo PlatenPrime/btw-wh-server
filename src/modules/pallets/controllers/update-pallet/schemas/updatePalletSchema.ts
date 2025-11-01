@@ -28,3 +28,5 @@ export const updatePalletSchema = z.object({
 export type UpdatePalletInput = z.infer<typeof updatePalletSchema>;
 
 
+
+

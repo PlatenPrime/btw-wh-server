@@ -7,7 +7,7 @@ import {
   createTestRow,
 } from "../../../../test/utils/testHelpers.js";
 import { Pos } from "../../models/Pos.js";
-import { bulkCreatePoses } from "../bulkCreatePoses.js";
+import { bulkCreatePoses } from "../index.js";
 
 describe("bulkCreatePoses Controller", () => {
   let row: any;

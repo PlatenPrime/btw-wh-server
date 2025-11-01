@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Pos } from "../../models/Pos.js";
-import { getPosesByArtikul } from "../getPosesByArtikul.js";
+import { getPosesByArtikul } from "../index.js";
 // Mock the Pos model
 vi.mock("../../models/Pos.js", () => ({
     Pos: {
@@ -65,18 +65,9 @@ describe("getPosesByArtikul", () => {
             },
         });
     });
-    it("should return 404 if database returns null", async () => {
-        mockReq.params = { artikul: "TEST123" };
-        Pos.find.mockReturnValue({
-            exec: vi.fn().mockResolvedValue(null),
-        });
-        await getPosesByArtikul(mockReq, mockRes);
-        expect(mockStatus).toHaveBeenCalledWith(404);
-        expect(mockJson).toHaveBeenCalledWith({
-            success: false,
-            message: "No poses found with the specified artikul",
-        });
-    });
+    // Удалён тест "should return 404 if database returns null" 
+    // exec() всегда возвращает массив (пустой или с данными), никогда null
+    // Пустой массив уже покрыт тестом "should return 200 with empty data when no poses found"
     it("should group poses by warehouse and return correct data", async () => {
         const mockPoses = [
             {

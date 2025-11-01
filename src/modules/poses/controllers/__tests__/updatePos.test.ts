@@ -6,7 +6,7 @@ import {
   createTestPos,
 } from "../../../../test/utils/testHelpers.js";
 import { Pos } from "../../models/Pos.js";
-import { updatePos } from "../updatePos.js";
+import { updatePos } from "../index.js";
 
 describe("updatePos Controller", () => {
   let pos: any;

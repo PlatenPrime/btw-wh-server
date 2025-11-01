@@ -25,6 +25,7 @@ interface IRowSubdocument {
  * to ensure data integrity and prevent incomplete position records.
  */
 export interface IPos extends Document {
+  _id: Types.ObjectId;
   pallet: Types.ObjectId; // Только ObjectId для обратной совместимости
   row: Types.ObjectId; // Только ObjectId для обратной совместимости
   palletData: IPalletSubdocument;
@@ -39,7 +40,6 @@ export interface IPos extends Document {
   sklad?: string; // Optional: Warehouse identifier
   createdAt?: Date; // Auto-generated timestamp
   updatedAt?: Date; // Auto-generated timestamp
-  limit: number;
   comment: string;
 }
 

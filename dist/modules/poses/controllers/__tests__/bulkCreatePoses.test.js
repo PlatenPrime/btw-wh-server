@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createMockRequest, createMockResponse, createTestPallet, createTestRow, } from "../../../../test/utils/testHelpers.js";
 import { Pos } from "../../models/Pos.js";
-import { bulkCreatePoses } from "../bulkCreatePoses.js";
+import { bulkCreatePoses } from "../index.js";
 describe("bulkCreatePoses Controller", () => {
     let row;
     let pallet;

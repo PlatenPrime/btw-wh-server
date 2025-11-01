@@ -4,7 +4,7 @@ import "../../../../test/setup";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 import { Row } from "../../../rows/models/Row.js";
 import { Pos } from "../../models/Pos.js";
-import { populateMissingPosData } from "../populateMissingPosData.js";
+import { populateMissingPosData } from "../index.js";
 describe("populateMissingPosData Controller", () => {
     let mockRequest;
     let responseJson;

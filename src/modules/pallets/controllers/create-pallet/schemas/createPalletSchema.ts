@@ -19,3 +19,5 @@ export const createPalletSchema = z.object({
 export type CreatePalletInput = z.infer<typeof createPalletSchema>;
 
 
+
+
