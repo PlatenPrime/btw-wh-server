@@ -51,7 +51,7 @@ router.post(
   "/upsert",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  (req, res, next) => upsertArts(req, res, next)
+  upsertArts
 );
 
 export default router;

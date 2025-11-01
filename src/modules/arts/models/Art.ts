@@ -8,6 +8,7 @@ export interface IBtradeStock {
 
 // Интерфейс для Art
 export interface IArt extends Document {
+  _id: mongoose.Types.ObjectId;
   artikul: string;
   nameukr?: string;
   namerus?: string;

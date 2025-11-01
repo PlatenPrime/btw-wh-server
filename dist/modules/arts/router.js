@@ -16,5 +16,5 @@ router.get("/btrade/:artikul", checkAuth, checkRoles([RoleType.USER]), getBtrade
 // Обновить лимит артикула - доступно для ADMIN и PRIME
 router.patch("/:id/limit", checkAuth, checkRoles([RoleType.ADMIN]), updateArtLimit);
 // Создать/обновить артикулы - доступно для ADMIN и PRIME
-router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), (req, res, next) => upsertArts(req, res, next));
+router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), upsertArts);
 export default router;
