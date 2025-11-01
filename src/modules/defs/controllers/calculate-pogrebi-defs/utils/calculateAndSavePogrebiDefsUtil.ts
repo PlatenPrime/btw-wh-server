@@ -1,38 +1,25 @@
-import { getPogrebiDefStocks } from "../../poses/utils/getPogrebiDefStocks.js";
-import {
-  getSharikStocks,
-  ISharikStocksResult,
-} from "../../poses/utils/getSharikStocks.js";
-import { Def, IDef } from "../models/Def.js";
-import { calculateDeficitTotals } from "./calculateTotals.js";
+import { getPogrebiDefStocks } from "../../../../poses/utils/getPogrebiDefStocks.js";
+import { ISharikStocksResult } from "../../../../poses/utils/getSharikStocks.js";
+import { Def, IDef, IDeficitCalculationResult } from "../../../models/Def.js";
 import {
   finishCalculationTracking,
   startCalculationTracking,
   updateCalculationProgress,
-} from "./calculationStatus.js";
+} from "../../../utils/calculationStatus.js";
+import { calculateDeficitTotals } from "../../../utils/calculateTotals.js";
+import { filterDeficits } from "../../../utils/filterDeficits.js";
+import { getArtLimits } from "../../../utils/getArtLimits.js";
+import { getSharikStocksWithProgress } from "../../../utils/getSharikStocksWithProgress.js";
 import { sendDefCalculationCompleteNotification } from "./defs-tg-notifications/sendDefCalculationCompleteNotification.js";
 import { sendDefCalculationErrorNotification } from "./defs-tg-notifications/sendDefCalculationErrorNotification.js";
 import { sendDefCalculationStartNotification } from "./defs-tg-notifications/sendDefCalculationStartNotification.js";
-import { filterDeficits } from "./filterDeficits.js";
-import { getArtLimits } from "./getArtLimits.js";
-import { getSharikStocksWithProgress } from "./getSharikStocksWithProgress.js";
-
-export async function calculatePogrebiDefs() {
-  const pogrebiDefStocks = await getPogrebiDefStocks();
-  const artikuls = Object.keys(pogrebiDefStocks);
-  const limits = await getArtLimits(artikuls);
-  const defs = await getSharikStocks(pogrebiDefStocks, limits);
-  const filteredDefs = filterDeficits(defs);
-
-  return filteredDefs;
-}
 
 /**
  * Выполняет расчет дефицитов и сохраняет результат в базу данных
  * @returns Promise<IDef> - сохраненный документ с результатами расчета
  * @throws Error - если произошла ошибка при расчете или сохранении
  */
-export async function calculateAndSavePogrebiDefs(): Promise<IDef> {
+export async function calculateAndSavePogrebiDefsUtil(): Promise<IDef> {
   try {
     // Отправляем уведомление о начале расчета
     await sendDefCalculationStartNotification();
@@ -112,3 +99,4 @@ export async function calculateAndSavePogrebiDefs(): Promise<IDef> {
     );
   }
 }
+

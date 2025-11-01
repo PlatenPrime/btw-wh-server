@@ -155,7 +155,7 @@ describe("getSharikStocksWithProgress", () => {
     });
 
     expect(consoleSpy).toHaveBeenCalledWith(
-      "Ошибка при получении данных Sharik для артикула ART001:",
+      "Помилка при отриманні даних Sharik для артикула ART001:",
       expect.any(Error)
     );
 
@@ -210,28 +210,28 @@ describe("getSharikStocksWithProgress", () => {
       1,
       5,
       12,
-      "Обработка данных Sharik: 5 из 12 артикулов"
+      "Обробка даних Sharik: 5 з 12 артикулів"
     );
 
     expect(mockedUpdateCalculationProgress).toHaveBeenNthCalledWith(
       2,
       10,
       12,
-      "Обработка данных Sharik: 10 из 12 артикулов"
+      "Обробка даних Sharik: 10 з 12 артикулів"
     );
 
     expect(mockedUpdateCalculationProgress).toHaveBeenNthCalledWith(
       3,
       12,
       12,
-      "Обработка данных Sharik: 12 из 12 артикулов"
+      "Обробка даних Sharik: 12 з 12 артикулів"
     );
 
     // Проверяем логи
-    expect(consoleSpy).toHaveBeenCalledWith("Начинаем обработку 12 артикулов");
-    expect(consoleSpy).toHaveBeenCalledWith("Обработано 5 из 12 артикулов");
-    expect(consoleSpy).toHaveBeenCalledWith("Обработано 10 из 12 артикулов");
-    expect(consoleSpy).toHaveBeenCalledWith("Обработано 12 из 12 артикулов");
+    expect(consoleSpy).toHaveBeenCalledWith("Початок обробки 12 артикулів");
+    expect(consoleSpy).toHaveBeenCalledWith("Оброблено 5 з 12 артикулів");
+    expect(consoleSpy).toHaveBeenCalledWith("Оброблено 10 з 12 артикулів");
+    expect(consoleSpy).toHaveBeenCalledWith("Оброблено 12 з 12 артикулів");
 
     consoleSpy.mockRestore();
   });
@@ -325,9 +325,9 @@ describe("getSharikStocksWithProgress", () => {
 
     await resultPromise;
 
-    expect(consoleSpy).toHaveBeenCalledWith("Начинаем обработку 1 артикулов");
+    expect(consoleSpy).toHaveBeenCalledWith("Початок обробки 1 артикулів");
     expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/Обработка 1 артикулов завершена за \d+ секунд/)
+      expect.stringMatching(/Обробка 1 артикулів завершена за \d+ секунд/)
     );
 
     consoleSpy.mockRestore();

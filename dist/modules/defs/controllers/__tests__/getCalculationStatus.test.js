@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getCalculationStatus, resetCalculationStatus, } from "../../utils/calculationStatus.js";
-import { getCalculationStatusController } from "../getCalculationStatus.js";
-// Мокаем asyncHandler
-vi.mock("../../../../utils/asyncHandler.js", () => ({
-    asyncHandler: (fn) => fn,
-}));
+import { getCalculationStatusController } from "../get-calculation-status/getCalculationStatusController.js";
 // Мокаем calculationStatus
 vi.mock("../../utils/calculationStatus.js", () => ({
     getCalculationStatus: vi.fn(),
@@ -14,13 +10,11 @@ vi.mock("../../utils/calculationStatus.js", () => ({
 describe("getCalculationStatusController", () => {
     let mockReq;
     let mockRes;
-    let mockNext;
     let mockJson;
     let mockStatus;
     beforeEach(() => {
         mockJson = vi.fn();
         mockStatus = vi.fn().mockReturnThis();
-        mockNext = vi.fn();
         mockReq = {};
         mockRes = {
             json: mockJson,
@@ -42,7 +36,7 @@ describe("getCalculationStatusController", () => {
         });
     });
     it("должен возвращать статус когда расчет не запущен", async () => {
-        await getCalculationStatusController(mockReq, mockRes, mockNext);
+        await getCalculationStatusController(mockReq, mockRes);
         expect(mockStatus).toHaveBeenCalledWith(200);
         expect(mockJson).toHaveBeenCalledWith({
             success: true,
@@ -70,7 +64,7 @@ describe("getCalculationStatusController", () => {
             totalItems: 100,
             processedItems: 45,
         });
-        await getCalculationStatusController(mockReq, mockRes, mockNext);
+        await getCalculationStatusController(mockReq, mockRes);
         expect(mockStatus).toHaveBeenCalledWith(200);
         expect(mockJson).toHaveBeenCalledWith({
             success: true,
@@ -98,7 +92,7 @@ describe("getCalculationStatusController", () => {
             totalItems: 100,
             processedItems: 100,
         });
-        await getCalculationStatusController(mockReq, mockRes, mockNext);
+        await getCalculationStatusController(mockReq, mockRes);
         expect(mockStatus).toHaveBeenCalledWith(200);
         expect(mockJson).toHaveBeenCalledWith({
             success: true,
@@ -121,7 +115,7 @@ describe("getCalculationStatusController", () => {
         vi.mocked(getCalculationStatus).mockImplementation(() => {
             throw new Error("Test error");
         });
-        await getCalculationStatusController(mockReq, mockRes, mockNext);
+        await getCalculationStatusController(mockReq, mockRes);
         expect(consoleSpy).toHaveBeenCalledWith("Error in getCalculationStatusController:", expect.any(Error));
         expect(mockStatus).toHaveBeenCalledWith(500);
         expect(mockJson).toHaveBeenCalledWith({
@@ -137,7 +131,7 @@ describe("getCalculationStatusController", () => {
         vi.mocked(getCalculationStatus).mockImplementation(() => {
             throw "String error";
         });
-        await getCalculationStatusController(mockReq, mockRes, mockNext);
+        await getCalculationStatusController(mockReq, mockRes);
         expect(mockStatus).toHaveBeenCalledWith(500);
         expect(mockJson).toHaveBeenCalledWith({
             success: false,
@@ -148,7 +142,7 @@ describe("getCalculationStatusController", () => {
     });
     it("должен возвращать актуальный статус при каждом вызове", async () => {
         // Первый вызов - статус не запущен
-        await getCalculationStatusController(mockReq, mockRes, mockNext);
+        await getCalculationStatusController(mockReq, mockRes);
         expect(mockJson).toHaveBeenCalledWith({
             success: true,
             data: expect.objectContaining({
@@ -168,7 +162,7 @@ describe("getCalculationStatusController", () => {
             processedItems: 50,
         });
         // Второй вызов - статус обновлен
-        await getCalculationStatusController(mockReq, mockRes, mockNext);
+        await getCalculationStatusController(mockReq, mockRes);
         expect(mockJson).toHaveBeenCalledWith({
             success: true,
             data: expect.objectContaining({

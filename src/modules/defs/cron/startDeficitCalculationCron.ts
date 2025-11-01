@@ -1,5 +1,5 @@
 import { CronJob } from "cron";
-import { calculateAndSavePogrebiDefs } from "../utils/calculatePogrebiDefs.js";
+import { calculateAndSavePogrebiDefsUtil } from "../controllers/calculate-pogrebi-defs/utils/calculateAndSavePogrebiDefsUtil.js";
 
 /**
  * Запускает cron job для автоматического расчета дефицитов
@@ -11,7 +11,7 @@ export function startDeficitCalculationCron(): CronJob {
     async () => {
       try {
         console.log(`[CRON] Calculating deficits...`);
-        const result = await calculateAndSavePogrebiDefs();
+        const result = await calculateAndSavePogrebiDefsUtil();
         console.log(`[CRON] Completed: ${result.total} deficits found`);
       } catch (error) {
         console.error(

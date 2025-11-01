@@ -1,4 +1,4 @@
-import { sendMessageToDefsChat } from "../../../../utils/telegram/sendMessageToDefsChat.js";
+import { sendMessageToDefsChat } from "../../../../../../utils/telegram/sendMessageToDefsChat.js";
 
 export const sendDefCalculationStartNotification = async (): Promise<void> => {
   try {
@@ -10,3 +10,4 @@ export const sendDefCalculationStartNotification = async (): Promise<void> => {
     // Не викидаємо помилку, щоб не переривати основний процес
   }
 };
+

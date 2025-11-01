@@ -115,7 +115,7 @@ describe("calculationStatus", () => {
       expect(status.totalItems).toBe(totalItems);
       expect(status.processedItems).toBe(0);
       expect(status.startedAt).toBeTruthy();
-      expect(status.currentStep).toBe("Инициализация расчета...");
+      expect(status.currentStep).toBe("Ініціалізація розрахунку...");
       expect(new Date(status.startedAt!)).toBeInstanceOf(Date);
     });
   });
@@ -186,7 +186,7 @@ describe("calculationStatus", () => {
       expect(status.isRunning).toBe(false);
       expect(status.progress).toBe(100);
       expect(status.estimatedTimeRemaining).toBe(0);
-      expect(status.currentStep).toBe("Расчет завершен");
+      expect(status.currentStep).toBe("Розрахунок завершено");
     });
   });
 
@@ -214,7 +214,7 @@ describe("calculationStatus", () => {
 
       expect(status.isRunning).toBe(false);
       expect(status.progress).toBe(100);
-      expect(status.currentStep).toBe("Расчет завершен");
+      expect(status.currentStep).toBe("Розрахунок завершено");
     });
 
     it("должен корректно обрабатывать сброс во время выполнения", () => {

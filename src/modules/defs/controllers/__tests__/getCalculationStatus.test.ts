@@ -4,12 +4,7 @@ import {
   getCalculationStatus,
   resetCalculationStatus,
 } from "../../utils/calculationStatus.js";
-import { getCalculationStatusController } from "../getCalculationStatus.js";
-
-// Мокаем asyncHandler
-vi.mock("../../../../utils/asyncHandler.js", () => ({
-  asyncHandler: (fn: any) => fn,
-}));
+import { getCalculationStatusController } from "../get-calculation-status/getCalculationStatusController.js";
 
 // Мокаем calculationStatus
 vi.mock("../../utils/calculationStatus.js", () => ({
@@ -21,14 +16,12 @@ vi.mock("../../utils/calculationStatus.js", () => ({
 describe("getCalculationStatusController", () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
-  let mockNext: any;
   let mockJson: any;
   let mockStatus: any;
 
   beforeEach(() => {
     mockJson = vi.fn();
     mockStatus = vi.fn().mockReturnThis();
-    mockNext = vi.fn();
 
     mockReq = {};
     mockRes = {
@@ -56,8 +49,7 @@ describe("getCalculationStatusController", () => {
   it("должен возвращать статус когда расчет не запущен", async () => {
     await getCalculationStatusController(
       mockReq as Request,
-      mockRes as Response,
-      mockNext
+      mockRes as Response
     );
 
     expect(mockStatus).toHaveBeenCalledWith(200);
@@ -91,8 +83,7 @@ describe("getCalculationStatusController", () => {
 
     await getCalculationStatusController(
       mockReq as Request,
-      mockRes as Response,
-      mockNext
+      mockRes as Response
     );
 
     expect(mockStatus).toHaveBeenCalledWith(200);
@@ -126,8 +117,7 @@ describe("getCalculationStatusController", () => {
 
     await getCalculationStatusController(
       mockReq as Request,
-      mockRes as Response,
-      mockNext
+      mockRes as Response
     );
 
     expect(mockStatus).toHaveBeenCalledWith(200);
@@ -157,8 +147,7 @@ describe("getCalculationStatusController", () => {
 
     await getCalculationStatusController(
       mockReq as Request,
-      mockRes as Response,
-      mockNext
+      mockRes as Response
     );
 
     expect(consoleSpy).toHaveBeenCalledWith(
@@ -185,8 +174,7 @@ describe("getCalculationStatusController", () => {
 
     await getCalculationStatusController(
       mockReq as Request,
-      mockRes as Response,
-      mockNext
+      mockRes as Response
     );
 
     expect(mockStatus).toHaveBeenCalledWith(500);
@@ -203,8 +191,7 @@ describe("getCalculationStatusController", () => {
     // Первый вызов - статус не запущен
     await getCalculationStatusController(
       mockReq as Request,
-      mockRes as Response,
-      mockNext
+      mockRes as Response
     );
 
     expect(mockJson).toHaveBeenCalledWith({
@@ -230,8 +217,7 @@ describe("getCalculationStatusController", () => {
     // Второй вызов - статус обновлен
     await getCalculationStatusController(
       mockReq as Request,
-      mockRes as Response,
-      mockNext
+      mockRes as Response
     );
 
     expect(mockJson).toHaveBeenCalledWith({

@@ -1,4 +1,4 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Document, Model, Schema, Types } from "mongoose";
 
 /**
  * Интерфейс для информации о существующей заявке
@@ -53,6 +53,7 @@ export interface IDeficitCalculationResultWithAsks {
  * Интерфейс для документа расчета дефицитов
  */
 export interface IDef extends Document {
+  _id: Types.ObjectId;
   result: IDeficitCalculationResult;
   total: number;
   totalCriticalDefs: number;

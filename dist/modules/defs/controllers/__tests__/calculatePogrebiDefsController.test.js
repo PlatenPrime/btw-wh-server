@@ -1,21 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { calculatePogrebiDefsController } from "../calculatePogrebiDefs.js";
-// Мокаем зависимости
-vi.mock("../../../../utils/asyncHandler.js", () => ({
-    asyncHandler: (fn) => fn,
-}));
-vi.mock("../../utils/calculatePogrebiDefs.js", () => ({
-    calculateAndSavePogrebiDefs: vi.fn(),
-}));
+import { calculatePogrebiDefsController } from "../calculate-pogrebi-defs/calculatePogrebiDefsController.js";
 vi.mock("../../utils/calculationStatus.js", () => ({
     resetCalculationStatus: vi.fn(),
-    finishCalculationTracking: vi.fn(),
 }));
-import { calculateAndSavePogrebiDefs } from "../../utils/calculatePogrebiDefs.js";
-import { finishCalculationTracking, resetCalculationStatus, } from "../../utils/calculationStatus.js";
-const mockedCalculateAndSavePogrebiDefs = vi.mocked(calculateAndSavePogrebiDefs);
+vi.mock("../calculate-pogrebi-defs/utils/calculateAndSavePogrebiDefsUtil.js", () => ({
+    calculateAndSavePogrebiDefsUtil: vi.fn(),
+}));
+import { calculateAndSavePogrebiDefsUtil } from "../calculate-pogrebi-defs/utils/calculateAndSavePogrebiDefsUtil.js";
+import { resetCalculationStatus } from "../../utils/calculationStatus.js";
+const mockedCalculateAndSavePogrebiDefsUtil = vi.mocked(calculateAndSavePogrebiDefsUtil);
 const mockedResetCalculationStatus = vi.mocked(resetCalculationStatus);
-const mockedFinishCalculationTracking = vi.mocked(finishCalculationTracking);
 describe("calculatePogrebiDefsController", () => {
     let mockReq;
     let mockRes;
@@ -38,10 +32,10 @@ describe("calculatePogrebiDefsController", () => {
                 ART001: {
                     nameukr: "Товар 1",
                     quant: 10,
-                    boxes: 2,
                     sharikQuant: 5,
                     difQuant: -5,
-                    limit: 20,
+                    defLimit: 30,
+                    status: "critical",
                 },
             },
             createdAt: new Date("2024-01-15T10:00:00.000Z"),
@@ -49,12 +43,11 @@ describe("calculatePogrebiDefsController", () => {
             totalCriticalDefs: 1,
             totalLimitDefs: 0,
         };
-        mockedCalculateAndSavePogrebiDefs.mockResolvedValue(mockSavedDef);
-        await calculatePogrebiDefsController(mockReq, mockRes, vi.fn());
+        mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef);
+        await calculatePogrebiDefsController(mockReq, mockRes);
         // Проверяем последовательность вызовов
         expect(mockedResetCalculationStatus).toHaveBeenCalledTimes(1);
-        expect(mockedCalculateAndSavePogrebiDefs).toHaveBeenCalledTimes(1);
-        expect(mockedFinishCalculationTracking).toHaveBeenCalledTimes(1);
+        expect(mockedCalculateAndSavePogrebiDefsUtil).toHaveBeenCalledTimes(1);
         // Проверяем ответ
         expect(mockStatus).toHaveBeenCalledWith(201);
         expect(mockJson).toHaveBeenCalledWith({
@@ -68,14 +61,13 @@ describe("calculatePogrebiDefsController", () => {
             },
         });
     });
-    it("должен обрабатывать ошибки и завершать отслеживание", async () => {
+    it("должен обрабатывать ошибки", async () => {
         const error = new Error("Calculation failed");
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
-        mockedCalculateAndSavePogrebiDefs.mockRejectedValue(error);
-        await calculatePogrebiDefsController(mockReq, mockRes, vi.fn());
-        // Проверяем, что отслеживание было сброшено и завершено
+        mockedCalculateAndSavePogrebiDefsUtil.mockRejectedValue(error);
+        await calculatePogrebiDefsController(mockReq, mockRes);
+        // Проверяем, что отслеживание было сброшено
         expect(mockedResetCalculationStatus).toHaveBeenCalledTimes(1);
-        expect(mockedFinishCalculationTracking).toHaveBeenCalledTimes(1);
         // Проверяем обработку ошибки
         expect(consoleSpy).toHaveBeenCalledWith("Error in calculatePogrebiDefsController:", error);
         expect(mockStatus).toHaveBeenCalledWith(500);
@@ -88,8 +80,8 @@ describe("calculatePogrebiDefsController", () => {
     });
     it("должен обрабатывать ошибки без message", async () => {
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
-        mockedCalculateAndSavePogrebiDefs.mockRejectedValue("String error");
-        await calculatePogrebiDefsController(mockReq, mockRes, vi.fn());
+        mockedCalculateAndSavePogrebiDefsUtil.mockRejectedValue("String error");
+        await calculatePogrebiDefsController(mockReq, mockRes);
         expect(mockStatus).toHaveBeenCalledWith(500);
         expect(mockJson).toHaveBeenCalledWith({
             success: false,
@@ -98,14 +90,6 @@ describe("calculatePogrebiDefsController", () => {
         });
         consoleSpy.mockRestore();
     });
-    it("должен завершать отслеживание даже при ошибке", async () => {
-        const error = new Error("Network error");
-        mockedCalculateAndSavePogrebiDefs.mockRejectedValue(error);
-        await calculatePogrebiDefsController(mockReq, mockRes, vi.fn());
-        // Проверяем, что finishCalculationTracking вызывается даже при ошибке
-        expect(mockedFinishCalculationTracking).toHaveBeenCalledTimes(1);
-        expect(mockedResetCalculationStatus).toHaveBeenCalledTimes(1);
-    });
     it("должен возвращать правильную структуру данных при успехе", async () => {
         const mockSavedDef = {
             _id: "test-id",
@@ -113,18 +97,18 @@ describe("calculatePogrebiDefsController", () => {
                 ART001: {
                     nameukr: "Товар 1",
                     quant: 10,
-                    boxes: 2,
                     sharikQuant: 5,
                     difQuant: -5,
-                    limit: 20,
+                    defLimit: 30,
+                    status: "critical",
                 },
                 ART002: {
                     nameukr: "Товар 2",
                     quant: 5,
-                    boxes: 1,
-                    sharikQuant: 10,
-                    difQuant: 5,
-                    limit: 5,
+                    sharikQuant: 25,
+                    difQuant: 20,
+                    defLimit: 25,
+                    status: "limited",
                 },
             },
             createdAt: new Date("2024-01-15T10:00:00.000Z"),
@@ -132,8 +116,8 @@ describe("calculatePogrebiDefsController", () => {
             totalCriticalDefs: 1,
             totalLimitDefs: 1,
         };
-        mockedCalculateAndSavePogrebiDefs.mockResolvedValue(mockSavedDef);
-        await calculatePogrebiDefsController(mockReq, mockRes, vi.fn());
+        mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef);
+        await calculatePogrebiDefsController(mockReq, mockRes);
         expect(mockJson).toHaveBeenCalledWith({
             success: true,
             message: "Deficit calculation completed and saved successfully",
@@ -154,8 +138,8 @@ describe("calculatePogrebiDefsController", () => {
             totalCriticalDefs: 0,
             totalLimitDefs: 0,
         };
-        mockedCalculateAndSavePogrebiDefs.mockResolvedValue(mockSavedDef);
-        await calculatePogrebiDefsController(mockReq, mockRes, vi.fn());
+        mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef);
+        await calculatePogrebiDefsController(mockReq, mockRes);
         expect(mockJson).toHaveBeenCalledWith({
             success: true,
             message: "Deficit calculation completed and saved successfully",

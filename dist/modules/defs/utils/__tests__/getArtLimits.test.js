@@ -54,7 +54,7 @@ describe("getArtLimits", () => {
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
         const result = await getArtLimits(["ART001"]);
         expect(result).toEqual({});
-        expect(consoleSpy).toHaveBeenCalledWith("Ошибка при получении лимитов из модели Art:", expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith("Помилка при отриманні лімітів з моделі Art:", expect.any(Error));
         consoleSpy.mockRestore();
     });
     it("должна фильтровать артикулы с undefined лимитами", async () => {

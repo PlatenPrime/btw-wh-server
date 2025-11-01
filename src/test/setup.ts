@@ -7,6 +7,7 @@ import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import "../modules/arts/models/Art.js";
 import "../modules/asks/models/Ask.js";
 import "../modules/auth/models/User.js";
+import "../modules/defs/models/Def.js";
 import "../modules/pallets/models/Pallet.js";
 import "../modules/poses/models/Pos.js";
 import "../modules/rows/models/Row.js";

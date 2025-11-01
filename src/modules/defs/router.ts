@@ -4,7 +4,7 @@ import { checkAuth, checkRoles } from "../../middleware/index.js";
 import {
   calculatePogrebiDefsController,
   getCalculationStatusController,
-  getLatestDefs,
+  getLatestDefsController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -20,7 +20,7 @@ router.post(
 );
 
 // Получить последние дефициты - доступно для всех авторизованных пользователей
-router.get("/latest", checkAuth, checkRoles([RoleType.USER]), getLatestDefs);
+router.get("/latest", checkAuth, checkRoles([RoleType.USER]), getLatestDefsController);
 
 // Получить статус расчета - доступно для всех авторизованных пользователей
 router.get(

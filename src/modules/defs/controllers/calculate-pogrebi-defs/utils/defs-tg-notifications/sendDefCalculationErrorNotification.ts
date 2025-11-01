@@ -1,4 +1,4 @@
-import { sendMessageToDefsChat } from "../../../../utils/telegram/sendMessageToDefsChat.js";
+import { sendMessageToDefsChat } from "../../../../../../utils/telegram/sendMessageToDefsChat.js";
 
 export const sendDefCalculationErrorNotification = async (
   error: unknown
@@ -19,3 +19,4 @@ export const sendDefCalculationErrorNotification = async (
     // Не викидаємо помилку, щоб не переривати основний процес
   }
 };
+

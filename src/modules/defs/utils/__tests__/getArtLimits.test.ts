@@ -69,7 +69,7 @@ describe("getArtLimits", () => {
 
     expect(result).toEqual({});
     expect(consoleSpy).toHaveBeenCalledWith(
-      "Ошибка при получении лимитов из модели Art:",
+      "Помилка при отриманні лімітів з моделі Art:",
       expect.any(Error)
     );
 
