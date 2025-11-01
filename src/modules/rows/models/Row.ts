@@ -5,6 +5,7 @@ import { Document, Model, model, Schema, Types } from "mongoose";
  * Row document interface
  */
 export interface IRow extends Document {
+  _id: Types.ObjectId;
   title: string;
   pallets: Types.ObjectId[];
   createdAt?: Date;

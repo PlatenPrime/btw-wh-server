@@ -1,6 +1,6 @@
-export { getAllRows } from "./getAllRows.js";
-export { getRowById} from "./getRowById.js";
-export { getRowByTitle } from "./getRowByTitle.js";
-export { createRow } from "./createRow.js";
-export { updateRow } from "./updateRow.js";
-export { deleteRow } from "./deleteRow.js";
+export { createRow } from "./create-row/createRow.js";
+export { deleteRow } from "./delete-row/deleteRow.js";
+export { getAllRows } from "./get-all-rows/getAllRows.js";
+export { getRowById } from "./get-row-by-id/getRowById.js";
+export { getRowByTitle } from "./get-row-by-title/getRowByTitle.js";
+export { updateRow } from "./update-row/updateRow.js";
