@@ -2,7 +2,7 @@ import { Ask } from "../../../models/Ask.js";
 import { getRejectAskActionUtil } from "./getRejectAskActionUtil.js";
 export async function rejectAskUtil({ solver, solverId, ask, session, }) {
     const solverData = {
-        _id: String(solver._id),
+        _id: solver._id,
         fullname: solver.fullname,
         telegram: solver.telegram,
         photo: solver.photo,

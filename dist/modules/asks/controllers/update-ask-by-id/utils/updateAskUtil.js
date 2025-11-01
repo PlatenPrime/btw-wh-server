@@ -2,7 +2,7 @@ import { Ask } from "../../../models/Ask.js";
 import { getUpdateAskActionUtil } from "./getUpdateAskActionUtil.js";
 export async function updateAskUtil({ solver, solverId, ask, action, status, session, }) {
     const solverData = {
-        _id: String(solver._id),
+        _id: solver._id,
         fullname: solver.fullname,
         telegram: solver.telegram,
         photo: solver.photo,

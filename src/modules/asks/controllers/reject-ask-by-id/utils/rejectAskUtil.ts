@@ -18,7 +18,7 @@ export async function rejectAskUtil({
   session,
 }: RejectAskUtilInput): Promise<IAsk> {
   const solverData = {
-    _id: String(solver._id),
+    _id: solver._id,
     fullname: solver.fullname,
     telegram: solver.telegram,
     photo: solver.photo,

@@ -1,6 +1,7 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import mongoose, { Document, Model, Schema, Types } from "mongoose";
 
 export interface IRole extends Document {
+  _id: Types.ObjectId;
   value: string;
   name?: string;
 }

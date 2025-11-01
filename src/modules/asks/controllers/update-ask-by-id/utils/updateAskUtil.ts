@@ -23,7 +23,7 @@ export async function updateAskUtil({
   session,
 }: UpdateAskUtilInput): Promise<IAsk> {
   const solverData = {
-    _id: String(solver._id),
+    _id: solver._id,
     fullname: solver.fullname,
     telegram: solver.telegram,
     photo: solver.photo,
