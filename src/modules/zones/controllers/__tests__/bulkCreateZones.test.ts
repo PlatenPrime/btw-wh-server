@@ -1,14 +1,13 @@
-import { NextFunction, Request, Response } from "express";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Request, Response } from "express";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createTestZone } from "../../../../test/setup.js";
-import { upsertZones } from "../bulkCreateZones.js";
+import { upsertZones } from "../bulk-create-zones/bulkCreateZones.js";
 
 describe("upsertZones Controller", () => {
   let mockRequest: Partial<Request>;
   let responseJson: any;
   let responseStatus: any;
   let res: Response;
-  let mockNext: NextFunction;
 
   beforeEach(() => {
     responseJson = {};
@@ -24,8 +23,6 @@ describe("upsertZones Controller", () => {
         return this;
       },
     } as unknown as Response;
-    mockNext = vi.fn();
-    vi.clearAllMocks();
   });
 
   it("should create multiple zones successfully", async () => {
@@ -41,7 +38,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -65,7 +62,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -88,7 +85,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -106,7 +103,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -121,7 +118,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -141,7 +138,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -161,7 +158,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(400);
@@ -181,7 +178,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -201,7 +198,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -230,7 +227,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -247,7 +244,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -267,7 +264,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -288,7 +285,7 @@ describe("upsertZones Controller", () => {
     };
 
     // Act
-    await upsertZones(mockRequest as Request, res, mockNext);
+    await upsertZones(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);

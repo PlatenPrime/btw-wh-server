@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestZone } from "../../../../test/setup.js";
-import { updateZoneById } from "../updateZoneById.js";
+import { updateZoneById } from "../update-zone-by-id/updateZoneById.js";
 
 describe("updateZoneById Controller", () => {
   let mockRequest: Partial<Request>;

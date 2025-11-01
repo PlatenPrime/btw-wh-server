@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestZone } from "../../../../test/setup.js";
-import { getZoneByTitle } from "../getZoneByTitle.js";
+import { getZoneByTitle } from "../get-zone-by-title/getZoneByTitle.js";
 describe("getZoneByTitle Controller", () => {
     let mockRequest;
     let responseJson;

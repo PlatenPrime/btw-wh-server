@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestZone } from "../../../../test/setup.js";
-import { exportZonesToExcel } from "../exportZonesToExcel.js";
+import { exportZonesToExcel } from "../export-zones-to-excel/exportZonesToExcel.js";
 describe("exportZonesToExcel Controller", () => {
     let mockRequest;
     let responseData;

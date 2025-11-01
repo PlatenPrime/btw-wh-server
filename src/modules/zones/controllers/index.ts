@@ -1,9 +1,9 @@
 // Barrel export для всех контроллеров зон
-export { upsertZones } from "./bulkCreateZones.js";
-export { createZone } from "./createZone.js";
-export { deleteZoneById } from "./deleteZoneById.js";
-export { exportZonesToExcel } from "./exportZonesToExcel.js";
-export { getAllZones } from "./getAllZones.js";
-export { getZoneById } from "./getZoneById.js";
-export { getZoneByTitle } from "./getZoneByTitle.js";
-export { updateZoneById } from "./updateZoneById.js";
+export { upsertZones } from "./bulk-create-zones/bulkCreateZones.js";
+export { createZone } from "./create-zone/createZone.js";
+export { deleteZoneById } from "./delete-zone-by-id/deleteZoneById.js";
+export { exportZonesToExcel } from "./export-zones-to-excel/exportZonesToExcel.js";
+export { getAllZones } from "./get-all-zones/getAllZones.js";
+export { getZoneById } from "./get-zone-by-id/getZoneById.js";
+export { getZoneByTitle } from "./get-zone-by-title/getZoneByTitle.js";
+export { updateZoneById } from "./update-zone-by-id/updateZoneById.js";

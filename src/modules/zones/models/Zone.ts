@@ -2,6 +2,7 @@ import mongoose, { Document, Model, Schema } from "mongoose";
 
 // Интерфейс для Zone
 export interface IZone extends Document {
+  _id: mongoose.Types.ObjectId;
   title: string; // "42-5-2" (row-rack-shelf)
   bar: number; // 420502 (for Code-128 barcode)
   sector: number; // 0 (default, calculated later by separate service)
