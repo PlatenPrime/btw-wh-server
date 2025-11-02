@@ -52,3 +52,4 @@ export const deletePalletController = async (
 
 
 
+

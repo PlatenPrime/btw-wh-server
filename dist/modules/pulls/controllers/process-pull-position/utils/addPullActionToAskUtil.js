@@ -1,0 +1,16 @@
+import { Ask } from "../../../../asks/models/Ask.js";
+import { getCurrentFormattedDateTime } from "../../../../../utils/getCurrentFormattedDateTime.js";
+/**
+ * Adds a pull action to ask's actions array
+ *
+ * @param askId - ID of the ask
+ * @param solverName - Name of the solver
+ * @param actualQuant - Quantity that was pulled
+ * @param palletTitle - Title of the pallet
+ * @param session - MongoDB session for transaction
+ */
+export const addPullActionToAskUtil = async (askId, solverName, actualQuant, palletTitle, session) => {
+    const time = getCurrentFormattedDateTime();
+    const actionMessage = `${time} ${solverName}: знято ${actualQuant} шт. з паллети ${palletTitle}`;
+    await Ask.findByIdAndUpdate(askId, { $push: { actions: actionMessage } }, { session });
+};

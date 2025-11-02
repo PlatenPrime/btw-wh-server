@@ -1,3 +1,3 @@
-export { getPullByPalletId } from "./getPullByPalletId.js";
-export { getPulls } from "../controllers/get-pulls/getPulls.js";
-export { processPullPosition } from "./process-pull-position/processPullPosition.js";
+export { getPullByPalletIdController as getPullByPalletId } from "./get-pull-by-pallet-id/getPullByPalletIdController.js";
+export { getPullsController as getPulls } from "./get-pulls/getPullsController.js";
+export { processPullPositionController as processPullPosition } from "./process-pull-position/processPullPositionController.js";
