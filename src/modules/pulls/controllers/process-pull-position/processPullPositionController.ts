@@ -149,7 +149,7 @@ export const processPullPositionController = async (
       }
 
       // 8. Check if ask is fully completed using updated actions
-      askFullyProcessed = checkAskCompletionUtil(updatedAsk, actualQuant);
+      askFullyProcessed = checkAskCompletionUtil(updatedAsk, actualQuant, actualBoxes);
 
       // 9. Calculate progress for response using updated actions
       askProgress = getProcessedQuantFromActionsUtil(updatedAsk.actions);

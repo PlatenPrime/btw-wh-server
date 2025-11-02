@@ -24,7 +24,7 @@ describe("checkAskCompletionUtil", () => {
     } as unknown as IAsk;
 
     // 5 + 3 + 2 = 10, что равно quant (все действия уже в actions)
-    const result = checkAskCompletionUtil(ask, 2);
+    const result = checkAskCompletionUtil(ask, 2, 0);
     expect(result).toBe(true);
   });
 
@@ -47,11 +47,11 @@ describe("checkAskCompletionUtil", () => {
     } as unknown as IAsk;
 
     // 5 + 2 = 7 < 10 (все действия уже в actions)
-    const result = checkAskCompletionUtil(ask, 2);
+    const result = checkAskCompletionUtil(ask, 2, 0);
     expect(result).toBe(false);
   });
 
-  it("возвращает false если ask не имеет quant", () => {
+  it("возвращает true если ask не имеет quant и был снят товар", () => {
     const ask = {
       _id: new Types.ObjectId(),
       artikul: "ART-001",
@@ -65,11 +65,47 @@ describe("checkAskCompletionUtil", () => {
       updatedAt: new Date(),
     } as unknown as IAsk;
 
-    const result = checkAskCompletionUtil(ask, 5);
+    const result = checkAskCompletionUtil(ask, 5, 0);
+    expect(result).toBe(true);
+  });
+
+  it("возвращает false если ask не имеет quant и товар не был снят", () => {
+    const ask = {
+      _id: new Types.ObjectId(),
+      artikul: "ART-001",
+      quant: undefined,
+      status: "new" as const,
+      actions: [],
+      asker: new Types.ObjectId(),
+      askerData: {} as any,
+      solver: new Types.ObjectId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as unknown as IAsk;
+
+    const result = checkAskCompletionUtil(ask, 0, 0);
     expect(result).toBe(false);
   });
 
-  it("возвращает false если quant <= 0", () => {
+  it("возвращает true если ask не имеет quant и были сняты коробки", () => {
+    const ask = {
+      _id: new Types.ObjectId(),
+      artikul: "ART-001",
+      quant: undefined,
+      status: "new" as const,
+      actions: [],
+      asker: new Types.ObjectId(),
+      askerData: {} as any,
+      solver: new Types.ObjectId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as unknown as IAsk;
+
+    const result = checkAskCompletionUtil(ask, 0, 2);
+    expect(result).toBe(true);
+  });
+
+  it("возвращает true если quant <= 0 и был снят товар", () => {
     const ask = {
       _id: new Types.ObjectId(),
       artikul: "ART-001",
@@ -83,7 +119,25 @@ describe("checkAskCompletionUtil", () => {
       updatedAt: new Date(),
     } as unknown as IAsk;
 
-    const result = checkAskCompletionUtil(ask, 5);
+    const result = checkAskCompletionUtil(ask, 5, 0);
+    expect(result).toBe(true);
+  });
+
+  it("возвращает false если quant <= 0 и товар не был снят", () => {
+    const ask = {
+      _id: new Types.ObjectId(),
+      artikul: "ART-001",
+      quant: 0,
+      status: "new" as const,
+      actions: [],
+      asker: new Types.ObjectId(),
+      askerData: {} as any,
+      solver: new Types.ObjectId(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as unknown as IAsk;
+
+    const result = checkAskCompletionUtil(ask, 0, 0);
     expect(result).toBe(false);
   });
 });

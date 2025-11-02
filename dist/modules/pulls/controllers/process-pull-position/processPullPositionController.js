@@ -114,7 +114,7 @@ export const processPullPositionController = async (req, res) => {
                 throw new Error("Ask not found after update");
             }
             // 8. Check if ask is fully completed using updated actions
-            askFullyProcessed = checkAskCompletionUtil(updatedAsk, actualQuant);
+            askFullyProcessed = checkAskCompletionUtil(updatedAsk, actualQuant, actualBoxes);
             // 9. Calculate progress for response using updated actions
             askProgress = getProcessedQuantFromActionsUtil(updatedAsk.actions);
             // 10. Validate that we haven't over-fulfilled the ask (edge case protection)
