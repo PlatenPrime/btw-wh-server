@@ -12,6 +12,7 @@ export const createPullPositionUtil = (position, ask, requestedQuant) => {
         artikul: position.artikul,
         nameukr: position.nameukr,
         currentQuant: position.quant,
+        currentBoxes: position.boxes,
         requestedQuant,
         askId: ask._id,
         askerData: ask.askerData,

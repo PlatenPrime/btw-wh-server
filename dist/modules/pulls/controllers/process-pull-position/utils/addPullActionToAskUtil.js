@@ -6,11 +6,12 @@ import { getCurrentFormattedDateTime } from "../../../../../utils/getCurrentForm
  * @param askId - ID of the ask
  * @param solverName - Name of the solver
  * @param actualQuant - Quantity that was pulled
+ * @param actualBoxes - Number of boxes that were pulled
  * @param palletTitle - Title of the pallet
  * @param session - MongoDB session for transaction
  */
-export const addPullActionToAskUtil = async (askId, solverName, actualQuant, palletTitle, session) => {
+export const addPullActionToAskUtil = async (askId, solverName, actualQuant, actualBoxes, palletTitle, session) => {
     const time = getCurrentFormattedDateTime();
-    const actionMessage = `${time} ${solverName}: знято ${actualQuant} шт. з паллети ${palletTitle}`;
+    const actionMessage = `${time} ${solverName}: знято ${actualQuant} шт. (${actualBoxes} кор.) з паллети ${palletTitle}`;
     await Ask.findByIdAndUpdate(askId, { $push: { actions: actionMessage } }, { session });
 };

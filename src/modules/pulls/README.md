@@ -30,22 +30,23 @@
 
 ```typescript
 interface IPull {
-  palletId: Types.ObjectId;      // ID паллеты
-  palletTitle: string;            // Название паллеты
-  sector: number;                 // Номер сектора (0 если не указан)
-  rowTitle: string;               // Название ряда
-  positions: IPullPosition[];     // Позиции для обработки
-  totalAsks: number;              // Количество уникальных asks
+  palletId: Types.ObjectId; // ID паллеты
+  palletTitle: string; // Название паллеты
+  sector: number; // Номер сектора (0 если не указан)
+  rowTitle: string; // Название ряда
+  positions: IPullPosition[]; // Позиции для обработки
+  totalAsks: number; // Количество уникальных asks
 }
 
 interface IPullPosition {
-  posId: Types.ObjectId;          // ID позиции
-  artikul: string;                 // Артикул товара
-  nameukr?: string;               // Украинское название
-  currentQuant: number;           // Текущее количество на позиции
-  requestedQuant: number;         // Запрошенное количество (0 для asks без quant)
-  askId: Types.ObjectId;          // ID заявки
-  askerData: AskUserData;         // Данные заказчика
+  posId: Types.ObjectId; // ID позиции
+  artikul: string; // Артикул товара
+  nameukr?: string; // Украинское название
+  currentQuant: number; // Текущее количество на позиции
+  currentBoxes: number; // Текущее количество коробок на позиции
+  requestedQuant: number; // Запрошенное количество (0 для asks без quant)
+  askId: Types.ObjectId; // ID заявки
+  askerData: AskUserData; // Данные заказчика
 }
 ```
 
@@ -54,7 +55,7 @@ interface IPullPosition {
 ### Модуль Asks (Заявки)
 
 - **Зависимость**: Pulls вычисляются на основе asks со статусом `"new"`
-- **Взаимодействие**: 
+- **Взаимодействие**:
   - При обработке позиции pull обновляются actions в ask
   - При полном выполнении ask автоматически переводится в статус `"completed"`
   - Отправляются уведомления заказчику при завершении ask
@@ -99,7 +100,7 @@ pulls/
 │   │       ├── __tests__/
 │   │       │   ├── getProcessedQuantFromActionsUtil.test.ts
 │   │       │   └── checkAskCompletionUtil.test.ts
-│   │       ├── updatePosQuantUtil.ts
+│   │       ├── updatePosQuantUtil.ts          # Обновляет quant и boxes позиции
 │   │       ├── addPullActionToAskUtil.ts
 │   │       ├── getProcessedQuantFromActionsUtil.ts
 │   │       ├── checkAskCompletionUtil.ts
@@ -134,6 +135,7 @@ pulls/
 **Доступ**: ADMIN, PRIME
 
 **Ответ**:
+
 ```json
 {
   "success": true,
@@ -162,9 +164,11 @@ pulls/
 **Доступ**: ADMIN, PRIME
 
 **Параметры**:
+
 - `palletId` (path) - ID паллеты
 
 **Ответ при наличии**:
+
 ```json
 {
   "success": true,
@@ -182,6 +186,7 @@ pulls/
 ```
 
 **Ответ при отсутствии**:
+
 ```json
 {
   "success": true,
@@ -198,19 +203,23 @@ pulls/
 **Доступ**: ADMIN, PRIME
 
 **Параметры**:
+
 - `palletId` (path) - ID паллеты
 - `posId` (path) - ID позиции
 
 **Тело запроса**:
+
 ```json
 {
   "askId": "...",
   "actualQuant": 5,
+  "actualBoxes": 2,
   "solverId": "..."
 }
 ```
 
 **Ответ**:
+
 ```json
 {
   "success": true,
@@ -230,10 +239,11 @@ pulls/
 ```
 
 **Коды ответов**:
+
 - `200` - Успешно обработано
 - `400` - Ошибка валидации
 - `404` - Позиция, ask или пользователь не найдены
-- `422` - Невозможно взять больше товара чем есть на позиции
+- `422` - Невозможно взять больше товара/коробок чем есть на позиции
 - `500` - Внутренняя ошибка сервера
 
 ## Бизнес-логика
@@ -258,19 +268,29 @@ pulls/
 При обработке позиции происходит:
 
 1. **Валидация**: Проверка корректности данных и существования сущностей
-2. **Обновление позиции**: Уменьшение `quant` на `actualQuant`
-3. **Добавление action**: Добавление записи в массив `actions` ask с информацией об изъятии
-4. **Проверка завершённости**: Проверка, выполнена ли ask полностью (суммируются все `actualQuant` из actions)
-5. **Автоматическое завершение**: Если ask выполнен, он автоматически переводится в статус `"completed"`
-6. **Уведомление**: Отправка уведомления заказчику через Telegram (если указан telegram)
+2. **Валидация количества**: Проверка что `actualQuant <= position.quant` и `actualBoxes <= position.boxes`
+3. **Обновление позиции**: Уменьшение `quant` на `actualQuant` и `boxes` на `actualBoxes`
+4. **Добавление action**: Добавление записи в массив `actions` ask с информацией об изъятии (формат: `"знято X шт. (Y кор.) з паллети ..."`)
+5. **Проверка завершённости**: Проверка, выполнена ли ask полностью (суммируются все `actualQuant` из actions)
+6. **Автоматическое завершение**: Если ask выполнен, он автоматически переводится в статус `"completed"`
+7. **Уведомление**: Отправка уведомления заказчику через Telegram (если указан telegram)
 
 ### Отслеживание прогресса
 
 Модуль отслеживает прогресс обработки каждой ask:
 
-- **Извлечение из actions**: Количество обработанного товара извлекается из строк actions по паттерну `"знято X шт. з паллети ..."`
+- **Извлечение из actions**: Количество обработанного товара извлекается из строк actions по паттерну `"знято X шт. (Y кор.) з паллети ..."`
 - **Расчёт прогресса**: Суммируются все количества из всех actions для конкретного ask
 - **Автоматическое завершение**: Ask считается выполненным если `processedQuant >= requestedQuant`
+
+### Обработка коробок
+
+Каждая позиция содержит информацию о количестве товара (`quant`) и количестве коробок (`boxes`). При обработке позиции:
+
+- **Фронтенд передаёт**: `actualQuant` (количество снятого товара) и `actualBoxes` (количество снятых коробок)
+- **Бэкенд валидирует**: что оба значения не превышают текущие значения на позиции
+- **Бэкенд обновляет**: оба поля атомарно в рамках транзакции MongoDB
+- **Бэкенд записывает**: в action информацию о товаре и коробках: `"знято X шт. (Y кор.) з паллети ..."`
 
 ## Использование с TanStack Query
 
@@ -279,15 +299,15 @@ pulls/
 #### Получение всех pulls
 
 ```typescript
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from "@tanstack/react-query";
 
 const usePulls = () => {
   return useQuery({
-    queryKey: ['pulls'],
+    queryKey: ["pulls"],
     queryFn: async () => {
-      const response = await fetch('/api/pulls', {
+      const response = await fetch("/api/pulls", {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       const data = await response.json();
@@ -303,11 +323,11 @@ const usePulls = () => {
 ```typescript
 const usePullByPalletId = (palletId: string) => {
   return useQuery({
-    queryKey: ['pulls', palletId],
+    queryKey: ["pulls", palletId],
     queryFn: async () => {
       const response = await fetch(`/api/pulls/${palletId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       const data = await response.json();
@@ -321,7 +341,7 @@ const usePullByPalletId = (palletId: string) => {
 #### Обработка позиции
 
 ```typescript
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const useProcessPullPosition = () => {
   const queryClient = useQueryClient();
@@ -332,25 +352,28 @@ const useProcessPullPosition = () => {
       posId,
       askId,
       actualQuant,
+      actualBoxes,
       solverId,
     }: {
       palletId: string;
       posId: string;
       askId: string;
       actualQuant: number;
+      actualBoxes: number;
       solverId: string;
     }) => {
       const response = await fetch(
         `/api/pulls/${palletId}/positions/${posId}`,
         {
-          method: 'PATCH',
+          method: "PATCH",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             askId,
             actualQuant,
+            actualBoxes,
             solverId,
           }),
         }
@@ -360,15 +383,15 @@ const useProcessPullPosition = () => {
     },
     onSuccess: (data, variables) => {
       // Инвалидируем кэш для обновления данных
-      queryClient.invalidateQueries({ queryKey: ['pulls'] });
+      queryClient.invalidateQueries({ queryKey: ["pulls"] });
       queryClient.invalidateQueries({
-        queryKey: ['pulls', variables.palletId],
+        queryKey: ["pulls", variables.palletId],
       });
-      queryClient.invalidateQueries({ queryKey: ['asks'] });
+      queryClient.invalidateQueries({ queryKey: ["asks"] });
 
       // Если ask завершён, обновляем список asks
       if (data.askFullyProcessed) {
-        queryClient.invalidateQueries({ queryKey: ['asks'] });
+        queryClient.invalidateQueries({ queryKey: ["asks"] });
       }
     },
   });
@@ -387,18 +410,21 @@ const useProcessPullPosition = () => {
 ### Workflow обработки pulls
 
 1. **Получение списка pulls**:
+
    ```typescript
    const { data: pullsData } = usePulls();
    // pullsData.pulls - массив pulls, отсортированных по сектору
    ```
 
 2. **Выбор паллеты для обработки**:
+
    ```typescript
    const { data: pull } = usePullByPalletId(palletId);
    // pull.positions - позиции для обработки на этой паллете
    ```
 
 3. **Обработка позиций последовательно**:
+
    ```typescript
    const processPosition = useProcessPullPosition();
 
@@ -408,6 +434,7 @@ const useProcessPullPosition = () => {
        posId: position.posId,
        askId: position.askId,
        actualQuant: position.requestedQuant || actualCount,
+       actualBoxes: calculatedBoxes,
        solverId: currentUser.id,
      });
 
@@ -425,7 +452,7 @@ const useProcessPullPosition = () => {
 const PullProgress = ({ pull }) => {
   const totalPositions = pull.positions.length;
   const processedPositions = pull.positions.filter(
-    (p) => p.ask.status === 'completed'
+    (p) => p.ask.status === "completed"
   ).length;
 
   return (
@@ -434,10 +461,7 @@ const PullProgress = ({ pull }) => {
         Обработано: {processedPositions} / {totalPositions}
       </p>
       <p>Asks: {pull.totalAsks}</p>
-      <ProgressBar
-        value={processedPositions}
-        max={totalPositions}
-      />
+      <ProgressBar value={processedPositions} max={totalPositions} />
     </div>
   );
 };
@@ -448,6 +472,7 @@ const PullProgress = ({ pull }) => {
 ### Валидация
 
 Все endpoints используют Zod схемы для валидации:
+
 - `getPullsSchema` - для GET /api/pulls (текущая версия пустая, может быть расширена)
 - `getPullByPalletIdSchema` - для GET /api/pulls/:palletId
 - `processPullPositionSchema` - для PATCH /api/pulls/:palletId/positions/:posId
@@ -455,6 +480,7 @@ const PullProgress = ({ pull }) => {
 ### Транзакции
 
 Обработка позиции выполняется в транзакции MongoDB для обеспечения атомарности:
+
 - Обновление позиции
 - Добавление action в ask
 - Завершение ask (если требуется)
@@ -474,17 +500,20 @@ const PullProgress = ({ pull }) => {
 Модуль покрыт тестами:
 
 ### Unit-тесты утилит
+
 - `getPositionSector.test.ts` - тестирование извлечения сектора
 - `sortPositionsBySector.test.ts` - тестирование сортировки
 - `getProcessedQuantFromActionsUtil.test.ts` - тестирование парсинга actions
 - `checkAskCompletionUtil.test.ts` - тестирование проверки завершённости
 
 ### Интеграционные тесты контроллеров
+
 - `getPullsController.test.ts` - тестирование получения всех pulls
 - `getPullByPalletIdController.test.ts` - тестирование получения pull по ID
 - `processPullPositionController.test.ts` - тестирование обработки позиции
 
 Запуск тестов:
+
 ```bash
 npm test -- src/modules/pulls
 ```

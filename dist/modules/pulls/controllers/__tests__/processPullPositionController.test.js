@@ -34,6 +34,7 @@ describe("processPullPositionController", () => {
             body: {
                 askId: new mongoose.Types.ObjectId().toString(),
                 actualQuant: 5,
+                actualBoxes: 1,
                 solverId: new mongoose.Types.ObjectId().toString(),
             },
         };
@@ -50,6 +51,7 @@ describe("processPullPositionController", () => {
             body: {
                 // Отсутствует askId
                 actualQuant: 5,
+                actualBoxes: 1,
                 solverId: new mongoose.Types.ObjectId().toString(),
             },
         };
@@ -127,6 +129,7 @@ describe("processPullPositionController", () => {
             body: {
                 askId: String(ask._id),
                 actualQuant: 3,
+                actualBoxes: 1,
                 solverId: solver._id.toString(),
             },
         };
@@ -140,9 +143,11 @@ describe("processPullPositionController", () => {
         // Проверяем что количество обновилось
         const updatedPosition = await Pos.findById(position._id);
         expect(updatedPosition?.quant).toBe(7); // 10 - 3
+        expect(updatedPosition?.boxes).toBe(0); // 1 - 1
         // Проверяем что action добавился
         const updatedAsk = await Ask.findById(ask._id);
         expect(updatedAsk?.actions.length).toBeGreaterThan(0);
+        expect(updatedAsk?.actions[0]).toContain("кор.");
     });
     it("422: ошибка если пытаются взять больше чем есть", async () => {
         const asker = await createTestUser({
@@ -212,6 +217,7 @@ describe("processPullPositionController", () => {
             body: {
                 askId: String(ask._id),
                 actualQuant: 10, // Пытаемся взять больше чем есть
+                actualBoxes: 2, // Пытаемся взять больше коробок чем есть
                 solverId: solver._id.toString(),
             },
         };
@@ -219,5 +225,82 @@ describe("processPullPositionController", () => {
         expect(responseStatus.code).toBe(422);
         expect(responseJson.success).toBe(false);
         expect(responseJson.message).toContain("Неможливо зняти");
+    });
+    it("422: ошибка если пытаются взять больше коробок чем есть", async () => {
+        const asker = await createTestUser({
+            fullname: "Asker",
+            username: `asker-${Date.now()}-${Math.random()}`,
+        });
+        const solver = await createTestUser({
+            fullname: "Solver",
+            username: `solver-${Date.now()}-${Math.random()}`,
+        });
+        const row = await Row.create({
+            title: "Test Row",
+            pallets: [],
+        });
+        const pallet = await Pallet.create({
+            title: "Test Pallet",
+            row: row._id,
+            rowData: {
+                _id: row._id,
+                title: row.title,
+            },
+            sector: "1",
+            isDef: false,
+        });
+        const position = await Pos.create({
+            pallet: pallet._id,
+            row: row._id,
+            palletData: {
+                _id: pallet._id,
+                title: pallet.title,
+                sector: pallet.sector,
+                isDef: pallet.isDef,
+            },
+            rowData: {
+                _id: row._id,
+                title: row.title,
+            },
+            palletTitle: pallet.title,
+            rowTitle: row.title,
+            artikul: "ART-001",
+            nameukr: "Test Article",
+            quant: 10,
+            boxes: 1, // Только 1 коробка
+            sklad: "pogrebi",
+            comment: "",
+        });
+        const ask = await Ask.create({
+            artikul: "ART-001",
+            nameukr: "Test Article",
+            quant: 5,
+            asker: asker._id,
+            askerData: {
+                _id: asker._id,
+                fullname: asker.fullname,
+                telegram: asker.telegram,
+                photo: asker.photo,
+            },
+            solver: solver._id,
+            status: "new",
+            actions: [],
+        });
+        const req = {
+            params: {
+                palletId: pallet._id.toString(),
+                posId: position._id.toString(),
+            },
+            body: {
+                askId: String(ask._id),
+                actualQuant: 3,
+                actualBoxes: 2, // Пытаемся взять 2 коробки, но есть только 1
+                solverId: solver._id.toString(),
+            },
+        };
+        await processPullPositionController(req, res);
+        expect(responseStatus.code).toBe(422);
+        expect(responseJson.success).toBe(false);
+        expect(responseJson.message).toContain("коробок");
     });
 });

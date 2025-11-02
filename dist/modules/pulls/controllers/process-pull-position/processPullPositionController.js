@@ -4,7 +4,7 @@ import { Ask } from "../../../asks/models/Ask.js";
 import User from "../../../auth/models/User.js";
 import { Pos } from "../../../poses/models/Pos.js";
 import { processPullPositionSchema } from "./processPullPositionSchema.js";
-import { updatePosQuantUtil } from "./utils/updatePosQuantUtil.js";
+import { updatePosQuantAndBoxesUtil } from "./utils/updatePosQuantUtil.js";
 import { addPullActionToAskUtil } from "./utils/addPullActionToAskUtil.js";
 import { checkAskCompletionUtil } from "./utils/checkAskCompletionUtil.js";
 import { completeAskFromPullUtil } from "./utils/completeAskFromPullUtil.js";
@@ -40,7 +40,7 @@ export const processPullPositionController = async (req, res) => {
             });
             return;
         }
-        const { askId, actualQuant, solverId } = parseResult.data;
+        const { askId, actualQuant, actualBoxes, solverId } = parseResult.data;
         const askObjectId = new Types.ObjectId(askId);
         const solverObjectId = new Types.ObjectId(solverId);
         const palletObjectId = new Types.ObjectId(palletId);
@@ -70,6 +70,9 @@ export const processPullPositionController = async (req, res) => {
             if (actualQuant > currentPosition.quant) {
                 throw new Error("Неможливо зняти більше товару, ніж є на позиції");
             }
+            if (actualBoxes > currentPosition.boxes) {
+                throw new Error("Неможливо зняти більше коробок, ніж є на позиції");
+            }
             // Use the most recent position data
             position = currentPosition;
             // 3. Find solver user
@@ -90,16 +93,21 @@ export const processPullPositionController = async (req, res) => {
             if (ask.artikul !== position.artikul) {
                 throw new Error("Ask artikul does not match position artikul");
             }
-            // 5. Update position quantity
+            // 5. Update position quantity and boxes
             const newQuant = position.quant - actualQuant;
+            const newBoxes = position.boxes - actualBoxes;
             // Validate that newQuant is not negative (additional safety check)
             if (newQuant < 0) {
                 throw new Error("Неможливо зняти більше товару, ніж є на позиції");
             }
-            // Always update position quantity, even if it becomes 0
-            await updatePosQuantUtil(posObjectId, newQuant, session);
+            // Validate that newBoxes is not negative
+            if (newBoxes < 0) {
+                throw new Error("Неможливо зняти більше коробок, ніж є на позиції");
+            }
+            // Always update position quantity and boxes, even if they become 0
+            await updatePosQuantAndBoxesUtil(posObjectId, newQuant, newBoxes, session);
             // 6. Add action to ask
-            await addPullActionToAskUtil(ask._id, solver.fullname, actualQuant, position.palletTitle, session);
+            await addPullActionToAskUtil(ask._id, solver.fullname, actualQuant, actualBoxes, position.palletTitle, session);
             // 7. Re-read ask to get updated actions array after adding new action
             const updatedAsk = await Ask.findById(askObjectId).session(session);
             if (!updatedAsk) {

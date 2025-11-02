@@ -18,6 +18,8 @@ export interface IPullPosition {
   nameukr?: string;
   /** Current quantity available on the pallet */
   currentQuant: number;
+  /** Current number of boxes available on the pallet */
+  currentBoxes: number;
   /** Requested quantity to be pulled from this position */
   requestedQuant: number;
   /** ID of the ask that requests this position */
@@ -65,6 +67,8 @@ export interface IProcessPullPositionRequest {
   askId: Types.ObjectId;
   /** Actual quantity to be pulled from the position */
   actualQuant: number;
+  /** Actual number of boxes to be pulled from the position */
+  actualBoxes: number;
   /** ID of the solver processing this position */
   solverId: Types.ObjectId;
 }
