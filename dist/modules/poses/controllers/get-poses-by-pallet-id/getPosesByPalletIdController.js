@@ -1,14 +1,25 @@
+import { getPosesByPalletIdQuerySchema } from "./schemas/getPosesByPalletIdSchema.js";
 import { getPosesByPalletIdUtil } from "./utils/getPosesByPalletIdUtil.js";
 export const getPosesByPalletIdController = async (req, res) => {
     const { palletId } = req.params;
     try {
-        // 1. Получаем позиции через утилиту
-        const poses = await getPosesByPalletIdUtil(palletId);
-        // 2. HTTP ответ
+        // 1. Валидация query параметров
+        const parseResult = getPosesByPalletIdQuerySchema.safeParse(req.query);
+        if (!parseResult.success) {
+            res.status(400).json({
+                error: "Invalid query parameters",
+                details: parseResult.error.errors,
+            });
+            return;
+        }
+        const { sortBy, sortOrder } = parseResult.data;
+        // 2. Получаем позиции через утилиту
+        const poses = await getPosesByPalletIdUtil(palletId, sortBy, sortOrder);
+        // 3. HTTP ответ
         res.status(200).json(poses);
     }
     catch (error) {
-        // 3. Обработка ошибок
+        // 4. Обработка ошибок
         if (!res.headersSent) {
             if (error instanceof Error && error.message === "Invalid pallet ID") {
                 res.status(400).json({ error: "Invalid pallet ID" });
