@@ -24,3 +24,4 @@ export type CreatePalletInput = z.infer<typeof createPalletSchema>;
 
 
 
+

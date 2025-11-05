@@ -13,6 +13,9 @@ import posesRoute from "./modules/poses/router.js";
 import pullsRoute from "./modules/pulls/router.js";
 import rowsRoute from "./modules/rows/router.js";
 import zonesRoute from "./modules/zones/router.js";
+import { BTW_PLATEN_ID } from "./constants/telegram.js";
+import { sendMessageToTGChat } from "./utils/telegram/sendMessageToTGChat.js";
+import { sendMessageToDefsChat } from "./utils/telegram/sendMessageToDefsChat.js";
 
 dotenv.config();
 
