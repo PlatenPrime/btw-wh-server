@@ -1,19 +1,19 @@
 import mongoose from "mongoose";
 import { IPos, Pos } from "../../../models/Pos.js";
 
-type SortBy = "artikul" | "createdAt";
+type SortBy = "artikul" | "updatedAt";
 type SortOrder = "asc" | "desc";
 
 /**
  * Получает позиции по ID паллета с возможностью сортировки
  * @param palletId - ID паллета
- * @param sortBy - Поле для сортировки: 'artikul' или 'createdAt' (по умолчанию 'createdAt')
+ * @param sortBy - Поле для сортировки: 'artikul' или 'updatedAt' (по умолчанию 'updatedAt')
  * @param sortOrder - Направление сортировки: 'asc' или 'desc' (по умолчанию 'desc')
  * @returns Массив позиций
  */
 export const getPosesByPalletIdUtil = async (
   palletId: string,
-  sortBy: SortBy = "createdAt",
+  sortBy: SortBy = "updatedAt",
   sortOrder: SortOrder = "desc"
 ): Promise<IPos[]> => {
   if (!mongoose.Types.ObjectId.isValid(palletId)) {

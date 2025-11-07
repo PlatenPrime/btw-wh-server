@@ -4,8 +4,8 @@ import { z } from "zod";
  */
 export const getPosesByPalletIdQuerySchema = z.object({
     sortBy: z
-        .enum(["artikul", "createdAt"])
+        .enum(["artikul", "updatedAt"])
         .optional()
-        .default("createdAt"),
+        .default("updatedAt"),
     sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
 });
