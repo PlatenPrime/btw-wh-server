@@ -1,7 +1,11 @@
-import mongoose, { ClientSession } from "mongoose";
-import { Types } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import { IUser } from "../../../../auth/models/User.js";
 import { Ask, IAsk } from "../../../models/Ask.js";
+import {
+  applyAskEvent,
+  buildAskEvent,
+  mapUserToAskUserData,
+} from "../../../utils/askEventsUtil.js";
 import { getRejectAskActionUtil } from "./getRejectAskActionUtil.js";
 
 interface RejectAskUtilInput {
@@ -17,14 +21,19 @@ export async function rejectAskUtil({
   ask,
   session,
 }: RejectAskUtilInput): Promise<IAsk> {
-  const solverData = {
-    _id: solver._id,
-    fullname: solver.fullname,
-    telegram: solver.telegram,
-    photo: solver.photo,
-  };
-
+  const solverData = mapUserToAskUserData(solver);
   const newAction = getRejectAskActionUtil({ solver });
+  const newEvent = buildAskEvent({ eventName: "reject", user: solverData });
+  const {
+    events: updatedEvents,
+    pullQuant,
+    pullBox,
+  } = applyAskEvent(
+    ask.events,
+    newEvent,
+    ask.pullQuant,
+    ask.pullBox
+  );
 
   const updatedActions = [...ask.actions, newAction];
   const updateFields: Partial<IAsk> = {
@@ -32,6 +41,9 @@ export async function rejectAskUtil({
     solverData,
     solver: solverId,
     status: "rejected",
+    events: updatedEvents,
+    pullQuant,
+    pullBox,
   };
 
   const updatedAsk = await Ask.findByIdAndUpdate(

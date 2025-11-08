@@ -10,7 +10,7 @@ export const updateAskById = async (req: Request, res: Response) => {
 
   try {
     const { id } = req.params;
-    const { solverId, action, status } = req.body;
+    const { solverId, action, status, event } = req.body;
 
     // Валидация входных данных
     const parseResult = updateAskByIdSchema.safeParse({
@@ -18,6 +18,7 @@ export const updateAskById = async (req: Request, res: Response) => {
       solverId,
       action,
       status,
+      event,
     });
     if (!parseResult.success) {
       return res.status(400).json({
@@ -45,6 +46,7 @@ export const updateAskById = async (req: Request, res: Response) => {
         ask: existingAsk,
         action: parseResult.data.action,
         status: parseResult.data.status,
+        event: parseResult.data.event,
         session,
       });
     });
@@ -68,4 +70,3 @@ export const updateAskById = async (req: Request, res: Response) => {
     await session.endSession();
   }
 };
-

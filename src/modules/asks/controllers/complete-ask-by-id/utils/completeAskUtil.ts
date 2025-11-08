@@ -1,7 +1,11 @@
-import mongoose, { ClientSession } from "mongoose";
-import { Types } from "mongoose";
+import { ClientSession, Types } from "mongoose";
 import { IUser } from "../../../../auth/models/User.js";
 import { Ask, IAsk } from "../../../models/Ask.js";
+import {
+  applyAskEvent,
+  buildAskEvent,
+  mapUserToAskUserData,
+} from "../../../utils/askEventsUtil.js";
 import { getCompleteAskActionUtil } from "./getCompleteAskActionUtil.js";
 
 interface CompleteAskUtilInput {
@@ -17,14 +21,14 @@ export async function completeAskUtil({
   ask,
   session,
 }: CompleteAskUtilInput): Promise<IAsk> {
-  const solverData = {
-    _id: solver._id,
-    fullname: solver.fullname,
-    telegram: solver.telegram,
-    photo: solver.photo,
-  };
-
+  const solverData = mapUserToAskUserData(solver);
   const newAction = getCompleteAskActionUtil({ solver });
+  const newEvent = buildAskEvent({ eventName: "complete", user: solverData });
+  const {
+    events: updatedEvents,
+    pullQuant,
+    pullBox,
+  } = applyAskEvent(ask.events, newEvent, ask.pullQuant, ask.pullBox);
 
   const updatedActions = [...ask.actions, newAction];
   const updateFields: Partial<IAsk> = {
@@ -32,17 +36,16 @@ export async function completeAskUtil({
     solverData,
     solver: solverId,
     status: "completed",
+    events: updatedEvents,
+    pullQuant,
+    pullBox,
   };
 
-  const updatedAsk = await Ask.findByIdAndUpdate(
-    ask._id,
-    updateFields,
-    {
-      new: true,
-      runValidators: true,
-      session,
-    }
-  );
+  const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
+    new: true,
+    runValidators: true,
+    session,
+  });
 
   if (!updatedAsk) {
     throw new Error("Failed to complete ask");

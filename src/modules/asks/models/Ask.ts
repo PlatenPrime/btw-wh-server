@@ -8,11 +8,13 @@ export type AskUserData = Pick<
 export type AskStatus = "new" | "completed" | "rejected";
 export const validAskStatuses: AskStatus[] = ["new", "completed", "rejected"];
 
-export type AskEventName = "complete" | "reject" | "pull";
+export type AskEventName = "create" | "complete" | "reject" | "pull";
 
 export interface AskEventPalletData {
   _id: Types.ObjectId;
   title: string;
+  sector?: string;
+  isDef?: boolean;
 }
 
 export interface AskEventPullDetails {
@@ -23,9 +25,9 @@ export interface AskEventPullDetails {
 
 export interface AskEvent {
   eventName: AskEventName;
-  solverData?: AskUserData;
+  userData: AskUserData;
   date: Date;
-  details?: AskEventPullDetails;
+  pullDetails?: AskEventPullDetails;
 }
 
 export interface IAsk extends Document {
@@ -40,6 +42,7 @@ export interface IAsk extends Document {
   status: AskStatus;
   actions: string[];
   pullQuant: number;
+  pullBox: number;
   events: AskEvent[];
   createdAt: Date;
   updatedAt: Date;
@@ -59,6 +62,8 @@ const askEventPalletDataSchema = new Schema<AskEventPalletData>(
   {
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
+    sector: { type: String },
+    isDef: { type: Boolean },
   },
   { _id: false }
 );
@@ -76,27 +81,27 @@ const askEventSchema = new Schema<AskEvent>(
   {
     eventName: {
       type: String,
-      enum: ["complete", "reject", "pull"],
+      enum: ["create", "complete", "reject", "pull"],
       required: true,
     },
-    solverData: { type: askUserDataSchema },
+    userData: { type: askUserDataSchema, required: true },
     date: { type: Date, required: true },
-    details: { type: askEventPullDetailsSchema },
+    pullDetails: { type: askEventPullDetailsSchema },
   },
   { _id: false }
 );
 
-askEventSchema.path("details").validate({
+askEventSchema.path("pullDetails").validate({
   validator: function (
     this: AskEvent,
-    details: AskEventPullDetails | undefined
+    pullDetails: AskEventPullDetails | undefined
   ): boolean {
     if (this.eventName === "pull") {
-      return Boolean(details);
+      return Boolean(pullDetails);
     }
-    return details === undefined;
+    return pullDetails === undefined;
   },
-  message: "details must be provided only for pull events",
+  message: "pullDetails must be provided only for pull events",
 });
 
 const askSchema = new Schema<IAsk>(
@@ -116,6 +121,7 @@ const askSchema = new Schema<IAsk>(
     },
     actions: { type: [String], default: [] },
     pullQuant: { type: Number, default: 0 },
+    pullBox: { type: Number, default: 0 },
     events: { type: [askEventSchema], default: [] },
   },
   { timestamps: true }

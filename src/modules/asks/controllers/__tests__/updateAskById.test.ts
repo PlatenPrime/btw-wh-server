@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { updateAskById } from "../update-ask-by-id/updateAskById.js";
 import { createTestAsk, createTestUser } from "../../../../test/setup.js";
+import { updateAskById } from "../update-ask-by-id/updateAskById.js";
 
 describe("updateAskById", () => {
   let res: Response;
@@ -30,7 +30,11 @@ describe("updateAskById", () => {
     const solver = await createTestUser({ fullname: "Solver" });
     const req = {
       params: { id: String(ask._id) },
-      body: { solverId: String(solver._id), action: "коментар", status: "completed" },
+      body: {
+        solverId: String(solver._id),
+        action: "коментар",
+        status: "completed",
+      },
     } as unknown as Request;
 
     await updateAskById(req, res);
@@ -39,6 +43,41 @@ describe("updateAskById", () => {
     expect(responseJson.status).toBe("completed");
     expect(responseJson.solverData.fullname).toBe("Solver");
     expect(responseJson.actions.at(-1)).toContain("коментар");
+  });
+
+  it("200: создаёт pull событие при обновлении", async () => {
+    const ask = await createTestAsk({ actions: [], status: "new" });
+    const solver = await createTestUser({ fullname: "Solver" });
+    const palletId = new mongoose.Types.ObjectId();
+    const req = {
+      params: { id: String(ask._id) },
+      body: {
+        solverId: String(solver._id),
+        action: "знято з палети",
+        event: {
+          eventName: "pull",
+          pullDetails: {
+            palletData: {
+              _id: palletId.toString(),
+              title: "PAL-1",
+            },
+            quant: 5,
+            boxes: 2,
+          },
+        },
+      },
+    } as unknown as Request;
+
+    await updateAskById(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.events.at(-1).eventName).toBe("pull");
+    expect(responseJson.events.at(-1).pullDetails.quant).toBe(5);
+    expect(
+      responseJson.events.at(-1).pullDetails.palletData._id.toString()
+    ).toBe(palletId.toString());
+    expect(responseJson.pullQuant).toBe(5);
+    expect(responseJson.pullBox).toBe(2);
   });
 
   it("404: ask не найден", async () => {
@@ -64,11 +103,12 @@ describe("updateAskById", () => {
   });
 
   it("400: ошибка валидации", async () => {
-    const req = { params: { id: "invalid" }, body: { solverId: "invalid", action: 1 } } as unknown as Request;
+    const req = {
+      params: { id: "invalid" },
+      body: { solverId: "invalid", action: 1 },
+    } as unknown as Request;
     await updateAskById(req, res);
     expect(responseStatus.code).toBe(400);
     expect(responseJson.message).toBe("Validation error");
   });
 });
-
-
