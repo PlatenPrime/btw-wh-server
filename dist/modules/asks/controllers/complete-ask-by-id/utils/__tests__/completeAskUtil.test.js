@@ -24,6 +24,10 @@ describe("completeAskUtil", () => {
             expect(updated.solverData?.fullname).toBe("Solver");
             expect(updated.solver?.toString()).toBe(String(solver._id));
             expect(updated.actions.at(-1)).toContain("ВИКОНАВ запит");
+            expect(updated.events.at(-1)?.eventName).toBe("complete");
+            expect(updated.events.at(-1)?.userData.fullname).toBe("Solver");
+            expect(updated.pullBox).toBe(ask.pullBox);
+            expect(updated.pullQuant).toBe(ask.pullQuant);
         });
         await session.endSession();
     });

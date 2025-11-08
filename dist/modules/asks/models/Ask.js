@@ -18,21 +18,21 @@ const askEventPullDetailsSchema = new Schema({
 const askEventSchema = new Schema({
     eventName: {
         type: String,
-        enum: ["complete", "reject", "pull"],
+        enum: ["create", "complete", "reject", "pull"],
         required: true,
     },
-    solverData: { type: askUserDataSchema },
+    userData: { type: askUserDataSchema, required: true },
     date: { type: Date, required: true },
-    details: { type: askEventPullDetailsSchema },
+    pullDetails: { type: askEventPullDetailsSchema },
 }, { _id: false });
-askEventSchema.path("details").validate({
-    validator: function (details) {
+askEventSchema.path("pullDetails").validate({
+    validator: function (pullDetails) {
         if (this.eventName === "pull") {
-            return Boolean(details);
+            return Boolean(pullDetails);
         }
-        return details === undefined;
+        return pullDetails === undefined;
     },
-    message: "details must be provided only for pull events",
+    message: "pullDetails must be provided only for pull events",
 });
 const askSchema = new Schema({
     artikul: { type: String, required: true },
@@ -50,6 +50,7 @@ const askSchema = new Schema({
     },
     actions: { type: [String], default: [] },
     pullQuant: { type: Number, default: 0 },
+    pullBox: { type: Number, default: 0 },
     events: { type: [askEventSchema], default: [] },
 }, { timestamps: true });
 export const Ask = mongoose.model("Ask", askSchema);

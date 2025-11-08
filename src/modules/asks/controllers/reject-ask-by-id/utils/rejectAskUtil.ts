@@ -2,7 +2,6 @@ import { ClientSession, Types } from "mongoose";
 import { IUser } from "../../../../auth/models/User.js";
 import { Ask, IAsk } from "../../../models/Ask.js";
 import {
-  applyAskEvent,
   buildAskEvent,
   mapUserToAskUserData,
 } from "../../../utils/askEventsUtil.js";
@@ -24,26 +23,16 @@ export async function rejectAskUtil({
   const solverData = mapUserToAskUserData(solver);
   const newAction = getRejectAskActionUtil({ solver });
   const newEvent = buildAskEvent({ eventName: "reject", user: solverData });
-  const {
-    events: updatedEvents,
-    pullQuant,
-    pullBox,
-  } = applyAskEvent(
-    ask.events,
-    newEvent,
-    ask.pullQuant,
-    ask.pullBox
-  );
-
   const updatedActions = [...ask.actions, newAction];
+  const updatedEvents = [...(ask.events ?? []), newEvent];
   const updateFields: Partial<IAsk> = {
     actions: updatedActions,
     solverData,
     solver: solverId,
     status: "rejected",
     events: updatedEvents,
-    pullQuant,
-    pullBox,
+    pullQuant: ask.pullQuant ?? 0,
+    pullBox: ask.pullBox ?? 0,
   };
 
   const updatedAsk = await Ask.findByIdAndUpdate(

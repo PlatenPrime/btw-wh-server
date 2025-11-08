@@ -26,9 +26,17 @@ describe("createAskUtil", () => {
             expect(result.status).toBe("new");
             expect(Array.isArray(result.actions)).toBe(true);
             expect(result.actions.length).toBe(1);
+            expect(result.events).toHaveLength(1);
+            expect(result.events[0].eventName).toBe("create");
+            expect(result.events[0].userData.fullname).toBe("Creator One");
+            expect(result.pullQuant).toBe(0);
+            expect(result.pullBox).toBe(0);
             const found = await Ask.findById(result._id).session(session);
             expect(found).not.toBeNull();
             expect(found?.asker.toString()).toBe(String(asker._id));
+            expect(found?.events).toHaveLength(1);
+            expect(found?.events?.[0].eventName).toBe("create");
+            expect(found?.pullBox).toBe(0);
         });
         await session.endSession();
     });

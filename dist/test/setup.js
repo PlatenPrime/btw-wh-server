@@ -105,6 +105,8 @@ export const createTestAsk = async (askData = {}) => {
         solver: asker._id, // Same user for simplicity in tests
         status: "new",
         actions: [],
+        pullQuant: 0,
+        pullBox: 0,
         ...askData,
     });
 };

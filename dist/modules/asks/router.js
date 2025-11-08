@@ -2,7 +2,7 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkOwnership, checkRoles, } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { completeAskById, createAskController, deleteAskById, getAskById, getAsksByDate, rejectAskById, updateAskActionsById, updateAskById, } from "./controllers/index.js";
+import { completeAskById, createAskController, deleteAskById, getAskById, getAsksByDate, pullAskById, rejectAskById, updateAskActionsById, } from "./controllers/index.js";
 import { Ask } from "./models/Ask.js";
 const router = Router();
 // Создать ask - доступно для всех авторизованных пользователей
@@ -11,11 +11,8 @@ router.post("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(createAskC
 router.get("/by-date", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAsksByDate));
 // Получить ask по ID - доступно для всех авторизованных пользователей
 router.get("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAskById));
-// Обновить ask - доступно для ADMIN, PRIME и владельца ask
-router.put("/:id", checkAuth, checkOwnership(async (req) => {
-    const ask = await Ask.findById(req.params.id);
-    return ask?.asker.toString();
-}), asyncHandler(updateAskById));
+// Зафиксировать снятие товара (pull) - доступно для ADMIN и PRIME
+router.patch("/:id/pull", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(pullAskById));
 // Завершить ask - доступно для ADMIN и PRIME
 router.patch("/:id/complete", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(completeAskById));
 // Отклонить ask - доступно для ADMIN и PRIME

@@ -2,7 +2,6 @@ import { ClientSession, Types } from "mongoose";
 import { IUser } from "../../../../auth/models/User.js";
 import { Ask, IAsk } from "../../../models/Ask.js";
 import {
-  applyAskEvent,
   buildAskEvent,
   mapUserToAskUserData,
 } from "../../../utils/askEventsUtil.js";
@@ -24,21 +23,16 @@ export async function completeAskUtil({
   const solverData = mapUserToAskUserData(solver);
   const newAction = getCompleteAskActionUtil({ solver });
   const newEvent = buildAskEvent({ eventName: "complete", user: solverData });
-  const {
-    events: updatedEvents,
-    pullQuant,
-    pullBox,
-  } = applyAskEvent(ask.events, newEvent, ask.pullQuant, ask.pullBox);
-
   const updatedActions = [...ask.actions, newAction];
+  const updatedEvents = [...(ask.events ?? []), newEvent];
   const updateFields: Partial<IAsk> = {
     actions: updatedActions,
     solverData,
     solver: solverId,
     status: "completed",
     events: updatedEvents,
-    pullQuant,
-    pullBox,
+    pullQuant: ask.pullQuant ?? 0,
+    pullBox: ask.pullBox ?? 0,
   };
 
   const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {

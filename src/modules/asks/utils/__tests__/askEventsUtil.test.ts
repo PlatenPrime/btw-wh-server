@@ -1,12 +1,7 @@
 import { Types } from "mongoose";
 import { describe, expect, it } from "vitest";
 import { AskEventPullDetails } from "../../models/Ask.js";
-import {
-  appendAskEvent,
-  applyAskEvent,
-  buildAskEvent,
-  mapUserToAskUserData,
-} from "../askEventsUtil.js";
+import { buildAskEvent, mapUserToAskUserData } from "../askEventsUtil.js";
 
 const createTestUser = () => ({
   _id: new Types.ObjectId(),
@@ -93,50 +88,3 @@ describe("buildAskEvent", () => {
   });
 });
 
-describe("appendAskEvent", () => {
-  it("добавляет событие в список", () => {
-    const user = createTestUser();
-    const event = buildAskEvent({
-      eventName: "create",
-      user,
-    });
-
-    const events = appendAskEvent([], event);
-    expect(events).toHaveLength(1);
-    expect(events[0]).toEqual(event);
-  });
-});
-
-describe("applyAskEvent", () => {
-  it("возвращает события и агрегаты pull без изменений для non-pull", () => {
-    const user = createTestUser();
-    const event = buildAskEvent({ eventName: "complete", user });
-
-    const { events, pullQuant, pullBox } = applyAskEvent([], event, 10, 3);
-    expect(events).toHaveLength(1);
-    expect(pullQuant).toBe(10);
-    expect(pullBox).toBe(3);
-  });
-
-  it("инкрементирует pullQuant и pullBox для pull-события", () => {
-    const user = createTestUser();
-    const pullDetails: AskEventPullDetails = {
-      palletData: {
-        _id: new Types.ObjectId(),
-        title: "Pallet-1",
-      },
-      quant: 4,
-      boxes: 1,
-    };
-    const event = buildAskEvent({
-      eventName: "pull",
-      user,
-      pullDetails,
-    });
-
-    const { events, pullQuant, pullBox } = applyAskEvent([], event, 2, 5);
-    expect(events).toHaveLength(1);
-    expect(pullQuant).toBe(6);
-    expect(pullBox).toBe(6);
-  });
-});

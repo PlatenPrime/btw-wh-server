@@ -12,9 +12,9 @@ import {
   deleteAskById,
   getAskById,
   getAsksByDate,
+  pullAskById,
   rejectAskById,
   updateAskActionsById,
-  updateAskById,
 } from "./controllers/index.js";
 import { Ask } from "./models/Ask.js";
 
@@ -44,15 +44,12 @@ router.get(
   asyncHandler(getAskById)
 );
 
-// Обновить ask - доступно для ADMIN, PRIME и владельца ask
-router.put(
-  "/:id",
+// Зафиксировать снятие товара (pull) - доступно для ADMIN и PRIME
+router.patch(
+  "/:id/pull",
   checkAuth,
-  checkOwnership(async (req) => {
-    const ask = await Ask.findById(req.params.id);
-    return ask?.asker.toString();
-  }),
-  asyncHandler(updateAskById)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(pullAskById)
 );
 
 // Завершить ask - доступно для ADMIN и PRIME

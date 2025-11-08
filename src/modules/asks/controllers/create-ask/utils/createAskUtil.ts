@@ -2,7 +2,6 @@ import { ClientSession } from "mongoose";
 import { IUser } from "../../../../auth/models/User.js";
 import { Ask, IAsk } from "../../../models/Ask.js";
 import {
-  applyAskEvent,
   buildAskEvent,
   mapUserToAskUserData,
 } from "../../../utils/askEventsUtil.js";
@@ -31,8 +30,6 @@ export const createAskUtil = async ({
     eventName: "create",
     user: mappedAskerData,
   });
-  const { events, pullQuant, pullBox } = applyAskEvent([], createEvent, 0, 0);
-
   const ask: IAsk = new Ask({
     artikul,
     nameukr,
@@ -42,9 +39,9 @@ export const createAskUtil = async ({
     askerData: mappedAskerData,
     actions,
     status: "new",
-    events,
-    pullQuant,
-    pullBox,
+    events: [createEvent],
+    pullQuant: 0,
+    pullBox: 0,
   });
 
   await ask.save({ session });

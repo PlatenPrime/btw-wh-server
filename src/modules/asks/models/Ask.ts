@@ -13,8 +13,6 @@ export type AskEventName = "create" | "complete" | "reject" | "pull";
 export interface AskEventPalletData {
   _id: Types.ObjectId;
   title: string;
-  sector?: string;
-  isDef?: boolean;
 }
 
 export interface AskEventPullDetails {
@@ -37,7 +35,7 @@ export interface IAsk extends Document {
   com?: string;
   asker: Types.ObjectId;
   askerData: AskUserData;
-  solver: Types.ObjectId;
+  solver?: Types.ObjectId;
   solverData?: AskUserData;
   status: AskStatus;
   actions: string[];
@@ -62,8 +60,6 @@ const askEventPalletDataSchema = new Schema<AskEventPalletData>(
   {
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
-    sector: { type: String },
-    isDef: { type: Boolean },
   },
   { _id: false }
 );

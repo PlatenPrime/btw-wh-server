@@ -20,6 +20,10 @@ describe("rejectAskUtil", () => {
             expect(updated.status).toBe("rejected");
             expect(updated.solverData?.fullname).toBe("Solver");
             expect(updated.actions.at(-1)).toContain("ВІДХИЛИВ запит");
+            expect(updated.events.at(-1)?.eventName).toBe("reject");
+            expect(updated.events.at(-1)?.userData.fullname).toBe("Solver");
+            expect(updated.pullBox).toBe(ask.pullBox);
+            expect(updated.pullQuant).toBe(ask.pullQuant);
         });
         await session.endSession();
     });
