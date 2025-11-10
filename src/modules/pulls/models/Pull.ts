@@ -20,8 +20,14 @@ export interface IPullPosition {
   currentQuant: number;
   /** Current number of boxes available on the pallet */
   currentBoxes: number;
-  /** Requested quantity to be pulled from this position */
-  requestedQuant: number;
+  /** Planned quantity to pull from this position (null when ask has no explicit quantity) */
+  plannedQuant: number | null;
+  /** Total requested quantity in the ask (null when not provided) */
+  totalRequestedQuant: number | null;
+  /** Quant already pulled according to ask history */
+  alreadyPulledQuant: number;
+  /** Boxes already pulled according to ask history */
+  alreadyPulledBoxes: number;
   /** ID of the ask that requests this position */
   askId: Types.ObjectId;
   /** Data of the user who made the ask */
@@ -57,18 +63,4 @@ export interface IPullsResponse {
   totalPulls: number;
   /** Total number of asks being processed */
   totalAsks: number;
-}
-
-/**
- * Request interface for processing a pull position
- */
-export interface IProcessPullPositionRequest {
-  /** ID of the ask that requests this position */
-  askId: Types.ObjectId;
-  /** Actual quantity to be pulled from the position */
-  actualQuant: number;
-  /** Actual number of boxes to be pulled from the position */
-  actualBoxes: number;
-  /** ID of the solver processing this position */
-  solverId: Types.ObjectId;
 }

@@ -1,7 +1,6 @@
 import { Types } from "mongoose";
 import { IPos } from "../../poses/models/Pos.js";
 import { IPull, IPullPosition } from "../models/Pull.js";
-import { Pos } from "../../poses/models/Pos.js";
 import { getPositionSector } from "./getPositionSector.js";
 
 /**
@@ -11,17 +10,17 @@ import { getPositionSector } from "./getPositionSector.js";
  * @param positions - Array of pull positions for this pallet
  * @returns Promise<IPull | null> - Built pull object or null if position not found
  */
-export const buildPullObjectUtil = async (
+export const buildPullObjectUtil = (
   palletId: Types.ObjectId,
-  positions: IPullPosition[]
-): Promise<IPull | null> => {
+  positions: IPullPosition[],
+  positionsLookup: Map<string, IPos>
+): IPull | null => {
   if (positions.length === 0) {
     return null;
   }
 
-  // Get original position data for pallet information
   const firstPosition = positions[0];
-  const originalPosition = await Pos.findById(firstPosition.posId).lean();
+  const originalPosition = positionsLookup.get(firstPosition.posId.toString());
 
   if (!originalPosition) {
     console.warn(

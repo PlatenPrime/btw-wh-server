@@ -1,11 +1,14 @@
 import { Types } from "mongoose";
 import { IPull, IPullPosition, IPullsResponse } from "../models/Pull.js";
+import { buildPullObjectUtil } from "./buildPullObjectUtil.js";
+import { distributeAsksToPositionsUtil } from "./distributeAsksToPositionsUtil.js";
+import { getAvailablePositionsUtil } from "./getAvailablePositionsUtil.js";
 import { getNewAsksUtil } from "./getNewAsksUtil.js";
 import { groupAsksByArtikulUtil } from "./groupAsksByArtikulUtil.js";
-import { getAvailablePositionsUtil } from "./getAvailablePositionsUtil.js";
-import { distributeAsksToPositionsUtil } from "./distributeAsksToPositionsUtil.js";
-import { groupPullPositionsByPalletUtil } from "./groupPullPositionsByPalletUtil.js";
-import { buildPullObjectUtil } from "./buildPullObjectUtil.js";
+import {
+  GroupedPullPositions,
+  groupPullPositionsByPalletUtil,
+} from "./groupPullPositionsByPalletUtil.js";
 
 /**
  * Calculates pulls dynamically based on all "new" asks
@@ -16,9 +19,9 @@ import { buildPullObjectUtil } from "./buildPullObjectUtil.js";
 export const calculatePullsUtil = async (): Promise<IPullsResponse> => {
   try {
     // 1. Get all asks with "new" status
-    const newAsks = await getNewAsksUtil();
+    const pendingAsks = await getNewAsksUtil();
 
-    if (newAsks.length === 0) {
+    if (pendingAsks.length === 0) {
       return {
         pulls: [],
         totalPulls: 0,
@@ -27,7 +30,7 @@ export const calculatePullsUtil = async (): Promise<IPullsResponse> => {
     }
 
     // 2. Group asks by artikul
-    const asksByArtikul = groupAsksByArtikulUtil(newAsks);
+    const asksByArtikul = groupAsksByArtikulUtil(pendingAsks);
 
     // 3. Process each artikul group
     const pullPositions: IPullPosition[] = [];
@@ -37,23 +40,34 @@ export const calculatePullsUtil = async (): Promise<IPullsResponse> => {
       const positions = await getAvailablePositionsUtil(artikul);
 
       if (positions.length === 0) {
-        continue; // Skip if no suitable positions found
+        continue;
       }
 
-      // Distribute asks to positions
-      const artikulPullPositions = distributeAsksToPositionsUtil(asks, positions);
+      const artikulPullPositions = distributeAsksToPositionsUtil(
+        asks,
+        positions
+      );
       pullPositions.push(...artikulPullPositions);
     }
 
-    // 4. Group pull positions by palletId
-    const pullsByPallet = await groupPullPositionsByPalletUtil(pullPositions);
+    if (pullPositions.length === 0) {
+      return {
+        pulls: [],
+        totalPulls: 0,
+        totalAsks: pendingAsks.length,
+      };
+    }
+
+    // 4. Group pull positions by palletId and collect metadata
+    const { pullsByPallet, positionsLookup }: GroupedPullPositions =
+      await groupPullPositionsByPalletUtil(pullPositions);
 
     // 5. Create IPull objects
     const pulls: IPull[] = [];
 
     for (const [palletIdStr, positions] of pullsByPallet) {
       const palletId = new Types.ObjectId(palletIdStr);
-      const pull = await buildPullObjectUtil(palletId, positions);
+      const pull = buildPullObjectUtil(palletId, positions, positionsLookup);
 
       if (pull) {
         pulls.push(pull);
@@ -66,32 +80,10 @@ export const calculatePullsUtil = async (): Promise<IPullsResponse> => {
     return {
       pulls,
       totalPulls: pulls.length,
-      totalAsks: newAsks.length,
+      totalAsks: pendingAsks.length,
     };
   } catch (error) {
     console.error("Error calculating pulls:", error);
     throw new Error("Failed to calculate pulls");
-  }
-};
-
-/**
- * Calculates pulls for a specific pallet
- *
- * @param palletId - ID of the pallet to calculate pulls for
- * @returns Promise<IPull | null> - Pull for the specified pallet or null if not found
- */
-export const calculatePullByPalletIdUtil = async (
-  palletId: Types.ObjectId
-): Promise<IPull | null> => {
-  try {
-    const allPulls = await calculatePullsUtil();
-    return (
-      allPulls.pulls.find(
-        (pull) => pull.palletId.toString() === palletId.toString()
-      ) || null
-    );
-  } catch (error) {
-    console.error("Error calculating pull by pallet ID:", error);
-    throw new Error("Failed to calculate pull by pallet ID");
   }
 };

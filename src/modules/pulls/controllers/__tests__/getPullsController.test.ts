@@ -1,6 +1,28 @@
 import { Request, Response } from "express";
-import { beforeEach, describe, expect, it } from "vitest";
+import { Types } from "mongoose";
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+  type Mock,
+} from "vitest";
 import { getPullsController } from "../get-pulls/getPullsController.js";
+import { calculatePullsUtil } from "../../utils/calculatePullsUtil.js";
+import type { IPullsResponse } from "../../models/Pull.js";
+
+vi.mock("../../utils/calculatePullsUtil.js", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("../../utils/calculatePullsUtil.js")>();
+  return {
+    ...original,
+    calculatePullsUtil: vi.fn(),
+  };
+});
+
+const mockedCalculatePullsUtil = calculatePullsUtil as unknown as Mock;
 
 describe("getPullsController", () => {
   let res: Response;
@@ -11,11 +33,11 @@ describe("getPullsController", () => {
     responseJson = {};
     responseStatus = {};
     res = {
-      status: function (code: number) {
+      status(code: number) {
         responseStatus.code = code;
         return this;
       },
-      json: function (data: any) {
+      json(data: any) {
         responseJson = data;
         return this;
       },
@@ -23,18 +45,69 @@ describe("getPullsController", () => {
     } as unknown as Response;
   });
 
-  it("200: возвращает pulls с корректной структурой", async () => {
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("200: возвращает подготовленный ответ утилиты", async () => {
     const req = {} as Request;
+
+    const mockResponse: IPullsResponse = {
+      pulls: [
+        {
+          palletId: new Types.ObjectId("6568d4e0550102f4b6b2d001"),
+          palletTitle: "Pallet A",
+          rowTitle: "Row 1",
+          sector: 1,
+          positions: [
+            {
+              posId: new Types.ObjectId("6568d4e0550102f4b6b2d101"),
+              artikul: "ART-1",
+              nameukr: "Товар 1",
+              currentQuant: 50,
+              currentBoxes: 5,
+              plannedQuant: 7,
+              totalRequestedQuant: 10,
+              alreadyPulledQuant: 3,
+              alreadyPulledBoxes: 1,
+              askId: new Types.ObjectId("6568d4e0550102f4b6b2d201"),
+              askerData: {
+                _id: new Types.ObjectId("6568d4e0550102f4b6b2d301"),
+                fullname: "Test User",
+                telegram: "@test_user",
+                photo: "",
+              },
+            },
+          ],
+          totalAsks: 1,
+        },
+      ],
+      totalPulls: 1,
+      totalAsks: 1,
+    };
+
+    mockedCalculatePullsUtil.mockResolvedValueOnce(mockResponse);
 
     await getPullsController(req, res);
 
+    expect(mockedCalculatePullsUtil).toHaveBeenCalledTimes(1);
     expect(responseStatus.code).toBe(200);
     expect(responseJson.success).toBe(true);
     expect(responseJson.message).toBe("Pulls calculated successfully");
-    expect(responseJson.data).toBeDefined();
-    expect(responseJson.data).toHaveProperty("pulls");
-    expect(responseJson.data).toHaveProperty("totalPulls");
-    expect(responseJson.data).toHaveProperty("totalAsks");
-    expect(Array.isArray(responseJson.data.pulls)).toBe(true);
+    expect(responseJson.data).toEqual(mockResponse);
+  });
+
+  it("500: возвращает ошибку если расчёт падает", async () => {
+    const req = {} as Request;
+    const testError = new Error("DB offline");
+    mockedCalculatePullsUtil.mockRejectedValueOnce(testError);
+
+    await getPullsController(req, res);
+
+    expect(mockedCalculatePullsUtil).toHaveBeenCalledTimes(1);
+    expect(responseStatus.code).toBe(500);
+    expect(responseJson.success).toBe(false);
+    expect(responseJson.message).toBe("Failed to calculate pulls");
+    expect(responseJson.error).toBe(testError.message);
   });
 });

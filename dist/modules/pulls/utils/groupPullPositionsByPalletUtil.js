@@ -1,18 +1,27 @@
+import { Types } from "mongoose";
 import { Pos } from "../../poses/models/Pos.js";
+const buildPositionsLookup = async (pullPositions) => {
+    if (pullPositions.length === 0) {
+        return new Map();
+    }
+    const uniqueIds = Array.from(new Set(pullPositions.map((position) => position.posId.toString()))).map((id) => new Types.ObjectId(id));
+    const positions = await Pos.find({ _id: { $in: uniqueIds } }).lean();
+    const lookup = new Map();
+    for (const position of positions) {
+        lookup.set(position._id.toString(), position);
+    }
+    return lookup;
+};
 /**
  * Groups pull positions by palletId
- * Fetches position data to get pallet information
- *
- * @param pullPositions - Array of pull positions to group
- * @returns Promise<Map<string, IPullPosition[]>> - Map of palletId to positions array
+ * Fetches position data in batch to provide pallet metadata
  */
 export const groupPullPositionsByPalletUtil = async (pullPositions) => {
     const pullsByPallet = new Map();
+    const positionsLookup = await buildPositionsLookup(pullPositions);
     for (const pullPosition of pullPositions) {
-        // Find the original position to get pallet information
-        const originalPosition = await Pos.findById(pullPosition.posId).lean();
+        const originalPosition = positionsLookup.get(pullPosition.posId.toString());
         if (!originalPosition) {
-            // Log warning for missing positions (could be deleted between calculation and processing)
             console.warn(`Position ${pullPosition.posId} not found when grouping by pallet. Skipping.`);
             continue;
         }
@@ -22,5 +31,5 @@ export const groupPullPositionsByPalletUtil = async (pullPositions) => {
         }
         pullsByPallet.get(palletId).push(pullPosition);
     }
-    return pullsByPallet;
+    return { pullsByPallet, positionsLookup };
 };

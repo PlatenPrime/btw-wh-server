@@ -1,140 +1,91 @@
-# Модуль Pulls (Зняття товарів)
+# Модуль `pulls`
 
-## Содержание
-
+## Оглавление
 1. [Введение](#введение)
-2. [Что такое Pulls?](#что-такое-pulls)
-3. [Связи с другими модулями](#связи-с-другими-модулями)
-4. [Архитектура модуля](#архитектура-модуля)
-5. [API Endpoints](#api-endpoints)
-6. [Бизнес-логика](#бизнес-логика)
-7. [Использование с TanStack Query](#использование-с-tanstack-query)
-8. [Примеры использования](#примеры-использования)
+2. [Структура проекта](#структура-проекта)
+3. [Формат ответа API](#формат-ответа-api)
+4. [Правила расчёта](#правила-расчёта)
+5. [HTTP API](#http-api)
+6. [Гайд для фронтенда](#гайд-для-фронтенда)
+7. [Краевые случаи и защита](#краевые-случаи-и-защита)
+8. [Тестовое покрытие](#тестовое-покрытие)
+9. [Чеклист интеграции](#чеклист-интеграции)
 
 ## Введение
 
-Модуль **Pulls** (Зняття товарів) предназначен для автоматического расчёта и обработки задач по извлечению товаров со склада на основе заявок (asks). Модуль вычисляет оптимальные маршруты для сборщиков, группируя позиции по паллетам и сортируя их по секторам для эффективной обработки.
+Модуль `pulls` рассчитывает список паллет, с которых нужно снять товар, исходя из активных заявок (`asks`) и текущих остатков (`poses`). Никаких мутаций складских данных больше нет: контроллер отдаёт только вычисленный список, после чего фронтенд решает, как отображать прогресс и организовывать снятие.
 
-## Что такое Pulls?
+Ключевые изменения по сравнению с прежней версией:
+- убраны эндпоинты `GET /api/pulls/:palletId` и `PATCH /api/pulls/:palletId/positions/:posId`;
+- расчёт учитывает поля `pullQuant` и `pullBox` из заявки;
+- заявки без требуемого количества исключаются из расчёта, если по ним уже зафиксирован любой факт снятия;
+- весь функционал сфокусирован на одном маршруте `GET /api/pulls`.
 
-**Pull** - это виртуальная структура данных, которая представляет собой набор позиций на конкретной паллете, которые нужно обработать (извлечь товар) для выполнения одной или нескольких заявок (asks).
-
-### Ключевые характеристики:
-
-- **Динамический расчёт**: Pulls не хранятся в базе данных, а вычисляются на лету на основе всех активных заявок со статусом "new"
-- **Группировка по паллетам**: Все позиции для обработки группируются по паллетам для оптимизации маршрута сборщика
-- **Сортировка по секторам**: Pulls сортируются по номеру сектора (по возрастанию) для последовательной обработки
-- **Приоритизация**: Позиции обрабатываются в порядке минимизации перемещений по складу
-
-### Структура данных
-
-```typescript
-interface IPull {
-  palletId: Types.ObjectId; // ID паллеты
-  palletTitle: string; // Название паллеты
-  sector: number; // Номер сектора (0 если не указан)
-  rowTitle: string; // Название ряда
-  positions: IPullPosition[]; // Позиции для обработки
-  totalAsks: number; // Количество уникальных asks
-}
-
-interface IPullPosition {
-  posId: Types.ObjectId; // ID позиции
-  artikul: string; // Артикул товара
-  nameukr?: string; // Украинское название
-  currentQuant: number; // Текущее количество на позиции
-  currentBoxes: number; // Текущее количество коробок на позиции
-  requestedQuant: number; // Запрошенное количество (0 для asks без quant)
-  askId: Types.ObjectId; // ID заявки
-  askerData: AskUserData; // Данные заказчика
-}
-```
-
-## Связи с другими модулями
-
-### Модуль Asks (Заявки)
-
-- **Зависимость**: Pulls вычисляются на основе asks со статусом `"new"`
-- **Взаимодействие**:
-  - При обработке позиции pull обновляются actions в ask
-  - При полном выполнении ask автоматически переводится в статус `"completed"`
-  - Отправляются уведомления заказчику при завершении ask
-
-### Модуль Poses (Позиции)
-
-- **Зависимость**: Pulls используют позиции из склада `"pogrebi"` с `quant > 0`
-- **Взаимодействие**: При обработке pull позиции обновляется количество товара на позиции
-
-### Модуль Pallets (Паллеты)
-
-- **Зависимость**: Pulls группируются по паллетам
-- **Взаимодействие**: Используется информация о секторах паллет для сортировки
-
-### Модуль Auth (Аутентификация)
-
-- **Зависимость**: Для обработки позиций требуется информация о пользователе (solver)
-
-## Архитектура модуля
-
-Модуль следует архитектуре проекта с чётким разделением ответственности:
+## Структура проекта
 
 ```
-pulls/
+src/modules/pulls/
 ├── controllers/
-│   ├── __tests__/                          # Интеграционные тесты
-│   │   ├── getPullsController.test.ts
-│   │   ├── getPullByPalletIdController.test.ts
-│   │   └── processPullPositionController.test.ts
-│   ├── get-pulls/
-│   │   ├── getPullsController.ts
-│   │   └── schemas/
-│   │       └── getPullsSchema.ts
-│   ├── get-pull-by-pallet-id/
-│   │   ├── getPullByPalletIdController.ts
-│   │   └── schemas/
-│   │       └── getPullByPalletIdSchema.ts
-│   ├── process-pull-position/
-│   │   ├── processPullPositionController.ts
-│   │   ├── processPullPositionSchema.ts
-│   │   └── utils/
-│   │       ├── __tests__/
-│   │       │   ├── getProcessedQuantFromActionsUtil.test.ts
-│   │       │   └── checkAskCompletionUtil.test.ts
-│   │       ├── updatePosQuantUtil.ts          # Обновляет quant и boxes позиции
-│   │       ├── addPullActionToAskUtil.ts
-│   │       ├── getProcessedQuantFromActionsUtil.ts
-│   │       ├── checkAskCompletionUtil.ts
-│   │       ├── completeAskFromPullUtil.ts
-│   │       └── sendAskCompletionNotificationUtil.ts
-│   └── index.ts
+│   ├── __tests__/
+│   │   └── getPullsController.test.ts
+│   └── get-pulls/
+│       ├── getPullsController.ts
+│       └── schemas/
+│           └── getPullsSchema.ts
 ├── models/
-│   └── Pull.ts                              # Интерфейсы данных
+│   └── Pull.ts
 ├── router.ts
 └── utils/
     ├── __tests__/
+    │   ├── distributeAsksToPositionsUtil.test.ts
+    │   ├── getNewAsksUtil.test.ts
     │   ├── getPositionSector.test.ts
     │   └── sortPositionsBySector.test.ts
-    ├── calculatePullsUtil.ts                # Основная логика расчёта
-    ├── getNewAsksUtil.ts
-    ├── groupAsksByArtikulUtil.ts
-    ├── getAvailablePositionsUtil.ts
-    ├── distributeAsksToPositionsUtil.ts
-    ├── createPullPositionUtil.ts
-    ├── groupPullPositionsByPalletUtil.ts
     ├── buildPullObjectUtil.ts
+    ├── calculatePullsUtil.ts
+    ├── createPullPositionUtil.ts
+    ├── distributeAsksToPositionsUtil.ts
+    ├── getAvailablePositionsUtil.ts
+    ├── getNewAsksUtil.ts
     ├── getPositionSector.ts
-    └── sortPositionsBySector.ts
+    ├── groupAsksByArtikulUtil.ts
+    └── groupPullPositionsByPalletUtil.ts
 ```
 
-## API Endpoints
+## Формат ответа API
 
-### GET /api/pulls
+```typescript
+interface IPullsResponse {
+  pulls: IPull[];
+  totalPulls: number; // количество паллет с заданиями
+  totalAsks: number;  // количество заявок, которые ещё ждут действия
+}
 
-Получить все вычисленные pulls.
+interface IPull {
+  palletId: Types.ObjectId;
+  palletTitle: string;
+  sector: number;   // 0 если сектор не задан
+  rowTitle: string;
+  positions: IPullPosition[];
+  totalAsks: number; // уникальные заявки внутри паллеты
+}
 
-**Доступ**: ADMIN, PRIME
+interface IPullPosition {
+  posId: Types.ObjectId;
+  artikul: string;
+  nameukr?: string;
+  currentQuant: number;
+  currentBoxes: number;
+  plannedQuant: number | null;       // сколько нужно снять именно с этой позиции (null => решает сборщик)
+  totalRequestedQuant: number | null; // полное требуемое количество из заявки (null если не указано)
+  alreadyPulledQuant: number;        // сколько уже снято по заявке (шт.)
+  alreadyPulledBoxes: number;        // сколько уже снято по заявке (коробок)
+  askId: Types.ObjectId;
+  askerData: AskUserData;
+}
+```
 
-**Ответ**:
+### Пример ответа
 
 ```json
 {
@@ -143,381 +94,130 @@ pulls/
   "data": {
     "pulls": [
       {
-        "palletId": "...",
-        "palletTitle": "Pallet-1",
-        "sector": 5,
-        "rowTitle": "Row-A",
-        "positions": [...],
-        "totalAsks": 3
+        "palletId": "6568d4e0550102f4b6b2d001",
+        "palletTitle": "Pallet A",
+        "sector": 3,
+        "rowTitle": "Row 5",
+        "positions": [
+          {
+            "posId": "6568d4e0550102f4b6b2d101",
+            "artikul": "ART-001",
+            "nameukr": "Горіх волоський",
+            "currentQuant": 42,
+            "currentBoxes": 4,
+            "plannedQuant": 7,
+            "totalRequestedQuant": 10,
+            "alreadyPulledQuant": 3,
+            "alreadyPulledBoxes": 1,
+            "askId": "6568d4e0550102f4b6b2d201",
+            "askerData": {
+              "_id": "6568d4e0550102f4b6b2d301",
+              "fullname": "Оператор складу",
+              "telegram": "@warehouse_operator",
+              "photo": ""
+            }
+          }
+        ],
+        "totalAsks": 1
       }
     ],
-    "totalPulls": 10,
-    "totalAsks": 15
+    "totalPulls": 1,
+    "totalAsks": 1
   }
 }
 ```
 
-### GET /api/pulls/:palletId
+## Правила расчёта
 
-Получить pull для конкретной паллеты.
+### 1. Отбор заявок
+1. Берём только заявки со статусом `new`.
+2. Если у заявки указано `quant > 0`, то она попадает в расчёт, только если `pullQuant < quant`.
+3. Если `quant` не задан (или `<= 0`), заявка попадает в расчёт **только** если `pullQuant === 0` и `pullBox === 0`. Любой факт снятия переводит такую заявку в разряд удовлетворённых.
 
-**Доступ**: ADMIN, PRIME
+### 2. Распределение по позициям
+1. Заявки группируются по `artikul`.
+2. Для каждого артикула запрашиваются позиции на складе `"pogrebi"` с `quant > 0`.
+3. Позиции сортируются по сектору (возрастающе).
+4. Остаток количества (`quant - pullQuant`) раскладывается по позициям жадно (минимизируем перемещения, но не уменьшаем фактические остатки в базе).
+5. Для заявок без `quant` формируется одна запись на позицию с минимальным сектором, `plannedQuant` устанавливается в `null`, сигнализируя фронтенду, что решение принимает человек.
 
-**Параметры**:
+### 3. Группировка по паллетам
+1. Все расчётные позиции объединяются по `palletId`.
+2. Метаданные паллеты и ряда подмешиваются через `groupPullPositionsByPalletUtil` за один проход по базе.
+3. Pulls сортируются по секторам, `totalAsks` отражает число уникальных заявок на паллете.
 
-- `palletId` (path) - ID паллеты
+### 4. Агрегаты ответа
+- `totalAsks` в корне ответа — количество заявок, которые ещё требуют внимания (с учётом фильтра по `pullQuant`/`pullBox`).
+- Если подходящих позиций нет, но заявки остались, то `pulls` будет пустым, а `totalAsks > 0` — фронтенд может подсветить дефицит.
 
-**Ответ при наличии**:
+## HTTP API
 
-```json
-{
-  "success": true,
-  "exists": true,
-  "message": "Pull retrieved successfully",
-  "data": {
-    "palletId": "...",
-    "palletTitle": "Pallet-1",
-    "sector": 5,
-    "rowTitle": "Row-A",
-    "positions": [...],
-    "totalAsks": 3
-  }
-}
-```
+### GET `/api/pulls`
 
-**Ответ при отсутствии**:
+- **Доступ**: `ADMIN`, `PRIME`.
+- **Тело запроса**: нет (параметры не требуются).
+- **Ответы**:
+  - `200 OK` — успешный расчёт, структура как в примере выше.
+  - `500 Internal Server Error` — сбой во время расчёта (ошибка логируется, в ответе указывается текст исключения).
 
-```json
-{
-  "success": true,
-  "exists": false,
-  "message": "Pull not found for the specified pallet",
-  "data": null
-}
-```
-
-### PATCH /api/pulls/:palletId/positions/:posId
-
-Обработать позицию pull (извлечь товар).
-
-**Доступ**: ADMIN, PRIME
-
-**Параметры**:
-
-- `palletId` (path) - ID паллеты
-- `posId` (path) - ID позиции
-
-**Тело запроса**:
-
-```json
-{
-  "askId": "...",
-  "actualQuant": 5,
-  "actualBoxes": 2,
-  "solverId": "..."
-}
-```
-
-**Ответ**:
-
-```json
-{
-  "success": true,
-  "message": "Position processed successfully",
-  "data": {
-    "positionId": "...",
-    "palletId": "...",
-    "actualQuant": 5,
-    "remainingQuant": 5,
-    "askProgress": 5,
-    "askFullyProcessed": false,
-    "askRequestedQuant": 10,
-    "remainingAsksInPull": 2,
-    "solverName": "John Doe"
-  }
-}
-```
-
-**Коды ответов**:
-
-- `200` - Успешно обработано
-- `400` - Ошибка валидации
-- `404` - Позиция, ask или пользователь не найдены
-- `422` - Невозможно взять больше товара/коробок чем есть на позиции
-- `500` - Внутренняя ошибка сервера
-
-## Бизнес-логика
-
-### Алгоритм расчёта Pulls
-
-1. **Получение активных заявок**: Находятся все asks со статусом `"new"`
-2. **Группировка по артикулам**: Asks группируются по `artikul`
-3. **Поиск доступных позиций**: Для каждого артикула находятся позиции:
-   - `quant > 0` (не пустые)
-   - `sklad = "pogrebi"` (только из подвала)
-4. **Сортировка позиций**: Позиции сортируются по сектору (по возрастанию)
-5. **Распределение asks по позициям**:
-   - **Для asks с указанным количеством**: Используется жадный алгоритм - asks распределяются по позициям последовательно, пока не будет выполнена вся заявка
-   - **Для asks без количества**: Используется первая позиция (с минимальным сектором) - количество решает сборщик
-6. **Группировка по паллетам**: Все позиции группируются по паллетам
-7. **Создание объектов Pull**: Для каждой паллеты создаётся объект Pull с метаданными
-8. **Сортировка Pulls**: Pulls сортируются по сектору (по возрастанию)
-
-### Обработка позиции
-
-При обработке позиции происходит:
-
-1. **Валидация**: Проверка корректности данных и существования сущностей
-2. **Валидация количества**: Проверка что `actualQuant <= position.quant` и `actualBoxes <= position.boxes`
-3. **Обновление позиции**: Уменьшение `quant` на `actualQuant` и `boxes` на `actualBoxes`
-4. **Добавление action**: Добавление записи в массив `actions` ask с информацией об изъятии (формат: `"знято X шт. (Y кор.) з паллети ..."`)
-5. **Проверка завершённости**: Проверка, выполнена ли ask полностью (суммируются все `actualQuant` из actions)
-6. **Автоматическое завершение**: Если ask выполнен, он автоматически переводится в статус `"completed"`
-7. **Уведомление**: Отправка уведомления заказчику через Telegram (если указан telegram)
-
-### Отслеживание прогресса
-
-Модуль отслеживает прогресс обработки каждой ask:
-
-- **Извлечение из actions**: Количество обработанного товара извлекается из строк actions по паттерну `"знято X шт. (Y кор.) з паллети ..."`
-- **Расчёт прогресса**: Суммируются все количества из всех actions для конкретного ask
-- **Автоматическое завершение**: Ask считается выполненным если `processedQuant >= requestedQuant`
-
-### Обработка коробок
-
-Каждая позиция содержит информацию о количестве товара (`quant`) и количестве коробок (`boxes`). При обработке позиции:
-
-- **Фронтенд передаёт**: `actualQuant` (количество снятого товара) и `actualBoxes` (количество снятых коробок)
-- **Бэкенд валидирует**: что оба значения не превышают текущие значения на позиции
-- **Бэкенд обновляет**: оба поля атомарно в рамках транзакции MongoDB
-- **Бэкенд записывает**: в action информацию о товаре и коробках: `"знято X шт. (Y кор.) з паллети ..."`
-
-## Использование с TanStack Query
-
-### Примеры использования на клиенте
-
-#### Получение всех pulls
+Пример запроса с TanStack Query:
 
 ```typescript
 import { useQuery } from "@tanstack/react-query";
 
-const usePulls = () => {
-  return useQuery({
+export const usePulls = () =>
+  useQuery({
     queryKey: ["pulls"],
     queryFn: async () => {
       const response = await fetch("/api/pulls", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      const data = await response.json();
-      return data.data;
+      if (!response.ok) throw new Error("Failed to load pulls");
+      const payload = await response.json();
+      return payload.data;
     },
-    refetchInterval: 30000, // Обновление каждые 30 секунд
+    refetchInterval: 30_000,
   });
-};
 ```
 
-#### Получение pull для паллеты
+## Гайд для фронтенда
 
-```typescript
-const usePullByPalletId = (palletId: string) => {
-  return useQuery({
-    queryKey: ["pulls", palletId],
-    queryFn: async () => {
-      const response = await fetch(`/api/pulls/${palletId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-      return data.data;
-    },
-    enabled: !!palletId,
-  });
-};
-```
+- **`plannedQuant`**:
+  - > 0 — возьмите указанное количество (остатки уже скоррелированы с учётом `pullQuant`).
+  - `null` — заявка без жёсткого количества, оператор сам решает, сколько снимать; показываем как «відкрита заявка».
+- **`totalRequestedQuant`**:
+  - Можно показывать как «заявлено / виконано»: `alreadyPulledQuant / totalRequestedQuant`.
+  - `null` — у заявки нет целевого значения, показывать только факт снятия (`alreadyPulledQuant`).
+- **`alreadyPulledQuant` / `alreadyPulledBoxes`**:
+  - Фронтенд не должен обнулять прогресс локально. Эти значения приходят непосредственно из заявки.
+- **`totalAsks` в ответе**:
+  - Используйте для виджетов статуса (например, «Очікує виконання: X заявок»).
+- **Обновление данных**:
+  - После действий операторов (через модуль `asks`) достаточно инвалидировать кэш `["pulls"]`.
 
-#### Обработка позиции
+### UX-подсказки
+- Сортировка уже идёт по сектору, фронтенд может группировать вывод по `rowTitle`.
+- Если `totalRequestedQuant` есть, но `plannedQuant` меньше — значит часть заявки уже закрыта или остаток меньше запроса. Отмечайте карточку как частично выполненную.
+- Если паллета пропала из списка, но `totalAsks` уменьшилось, заявка была удовлетворена.
 
-```typescript
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+## Краевые случаи и защита
 
-const useProcessPullPosition = () => {
-  const queryClient = useQueryClient();
+- Позиции, удалённые между расчётом и выборкой, пропускаются с логом (`console.warn`) и не ломают расчёт.
+- Отсутствие доступных позиций для артикула — текущая заявка не попадёт в `pulls`, но будет посчитана в `totalAsks`, чтобы фронтенд мог подсветить дефицит.
+- Все обращения к базе выполняются в максимально «плоских» запросах: `Pos.findById` больше не вызывается в цикле, вместо этого используется батчевое чтение.
 
-  return useMutation({
-    mutationFn: async ({
-      palletId,
-      posId,
-      askId,
-      actualQuant,
-      actualBoxes,
-      solverId,
-    }: {
-      palletId: string;
-      posId: string;
-      askId: string;
-      actualQuant: number;
-      actualBoxes: number;
-      solverId: string;
-    }) => {
-      const response = await fetch(
-        `/api/pulls/${palletId}/positions/${posId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            askId,
-            actualQuant,
-            actualBoxes,
-            solverId,
-          }),
-        }
-      );
-      const data = await response.json();
-      return data.data;
-    },
-    onSuccess: (data, variables) => {
-      // Инвалидируем кэш для обновления данных
-      queryClient.invalidateQueries({ queryKey: ["pulls"] });
-      queryClient.invalidateQueries({
-        queryKey: ["pulls", variables.palletId],
-      });
-      queryClient.invalidateQueries({ queryKey: ["asks"] });
+## Тестовое покрытие
 
-      // Если ask завершён, обновляем список asks
-      if (data.askFullyProcessed) {
-        queryClient.invalidateQueries({ queryKey: ["asks"] });
-      }
-    },
-  });
-};
-```
+- `controllers/__tests__/getPullsController.test.ts` — проверяем корректный HTTP-ответ и обработку ошибок.
+- `utils/__tests__/getNewAsksUtil.test.ts` — фильтрация заявок с учётом `pullQuant/pullBox`.
+- `utils/__tests__/distributeAsksToPositionsUtil.test.ts` — вычисление `plannedQuant` и работа с заявками без количества.
+- Базовые юниты на сортировку и сектор (`getPositionSector`, `sortPositionsBySector`) сохранены.
 
-### Рекомендации по использованию
+## Чеклист интеграции
 
-1. **Polling**: Используйте `refetchInterval` для автоматического обновления списка pulls во время работы сборщика
-2. **Optimistic Updates**: Можно использовать optimistic updates для мгновенного отображения изменений
-3. **Invalidation**: После обработки позиции обязательно инвалидируйте кэш для обновления данных
-4. **Прогресс**: Используйте поле `askProgress` из ответа для отображения прогресса выполнения ask
+- [ ] Подтянуть `GET /api/pulls` и обновить клиентскую схему под новые поля.
+- [ ] Вывести `plannedQuant`, `totalRequestedQuant`, `alreadyPulledQuant` и `alreadyPulledBoxes` в UI.
+- [ ] Для заявок без количества использовать специальный сценарий (manual pick).
+- [ ] Перестать обращаться к удалённым эндпоинтам (`GET /api/pulls/:palletId`, `PATCH /api/pulls/...`).
+- [ ] При изменении заявки (через модуль `asks`) инвалидировать кэш `["pulls"]`.
 
-## Примеры использования
-
-### Workflow обработки pulls
-
-1. **Получение списка pulls**:
-
-   ```typescript
-   const { data: pullsData } = usePulls();
-   // pullsData.pulls - массив pulls, отсортированных по сектору
-   ```
-
-2. **Выбор паллеты для обработки**:
-
-   ```typescript
-   const { data: pull } = usePullByPalletId(palletId);
-   // pull.positions - позиции для обработки на этой паллете
-   ```
-
-3. **Обработка позиций последовательно**:
-
-   ```typescript
-   const processPosition = useProcessPullPosition();
-
-   for (const position of pull.positions) {
-     await processPosition.mutateAsync({
-       palletId: pull.palletId,
-       posId: position.posId,
-       askId: position.askId,
-       actualQuant: position.requestedQuant || actualCount,
-       actualBoxes: calculatedBoxes,
-       solverId: currentUser.id,
-     });
-
-     // Отслеживание прогресса
-     const progress = processPosition.data?.askProgress;
-     const fullyProcessed = processPosition.data?.askFullyProcessed;
-   }
-   ```
-
-4. **Автоматическое обновление**: После каждой обработки данные автоматически обновляются через invalidation
-
-### Отображение прогресса
-
-```typescript
-const PullProgress = ({ pull }) => {
-  const totalPositions = pull.positions.length;
-  const processedPositions = pull.positions.filter(
-    (p) => p.ask.status === "completed"
-  ).length;
-
-  return (
-    <div>
-      <p>
-        Обработано: {processedPositions} / {totalPositions}
-      </p>
-      <p>Asks: {pull.totalAsks}</p>
-      <ProgressBar value={processedPositions} max={totalPositions} />
-    </div>
-  );
-};
-```
-
-## Технические детали
-
-### Валидация
-
-Все endpoints используют Zod схемы для валидации:
-
-- `getPullsSchema` - для GET /api/pulls (текущая версия пустая, может быть расширена)
-- `getPullByPalletIdSchema` - для GET /api/pulls/:palletId
-- `processPullPositionSchema` - для PATCH /api/pulls/:palletId/positions/:posId
-
-### Транзакции
-
-Обработка позиции выполняется в транзакции MongoDB для обеспечения атомарности:
-
-- Обновление позиции
-- Добавление action в ask
-- Завершение ask (если требуется)
-
-### Уведомления
-
-Уведомления отправляются **вне транзакции** чтобы не блокировать основной процесс. Используется модуль `asks` для отправки Telegram сообщений.
-
-### Производительность
-
-- Pulls вычисляются динамически при каждом запросе
-- Для оптимизации используются индексы MongoDB на полях `artikul`, `quant`, `sklad`
-- Группировка и сортировка выполняются в памяти после получения данных из БД
-
-## Тестирование
-
-Модуль покрыт тестами:
-
-### Unit-тесты утилит
-
-- `getPositionSector.test.ts` - тестирование извлечения сектора
-- `sortPositionsBySector.test.ts` - тестирование сортировки
-- `getProcessedQuantFromActionsUtil.test.ts` - тестирование парсинга actions
-- `checkAskCompletionUtil.test.ts` - тестирование проверки завершённости
-
-### Интеграционные тесты контроллеров
-
-- `getPullsController.test.ts` - тестирование получения всех pulls
-- `getPullByPalletIdController.test.ts` - тестирование получения pull по ID
-- `processPullPositionController.test.ts` - тестирование обработки позиции
-
-Запуск тестов:
-
-```bash
-npm test -- src/modules/pulls
-```
-
-## Заключение
-
-Модуль Pulls обеспечивает эффективную систему управления извлечением товаров со склада, автоматизируя расчёт оптимальных маршрутов и отслеживание прогресса выполнения заявок. Интеграция с TanStack Query позволяет создавать отзывчивые интерфейсы с автоматическим обновлением данных.
