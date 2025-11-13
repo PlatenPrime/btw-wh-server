@@ -14,12 +14,18 @@ export const getBtradeArtInfoController = async (req, res) => {
         }
         const data = await fetchBtradeDataUtil(parseResult.data.artikul);
         if (!data) {
-            res.status(404).json({
+            res.status(200).json({
+                exists: false,
                 message: "No products found for this artikul",
+                data: null,
             });
             return;
         }
-        res.status(200).json(data);
+        res.status(200).json({
+            exists: true,
+            message: "Product info retrieved successfully",
+            data,
+        });
     }
     catch (error) {
         console.error("Error fetching data from sharik.ua:", error);

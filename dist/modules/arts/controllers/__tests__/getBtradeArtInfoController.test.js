@@ -30,14 +30,22 @@ describe("getBtradeArtInfoController", () => {
         const req = { params: { artikul: "TEST-001" } };
         await getBtradeArtInfoController(req, res);
         expect(responseStatus.code).toBe(200);
-        expect(responseJson).toEqual(mockData);
+        expect(responseJson).toEqual({
+            exists: true,
+            message: "Product info retrieved successfully",
+            data: mockData,
+        });
     });
-    it("404: возвращает ошибку если товар не найден", async () => {
+    it("200: возвращает exists false если товар не найден", async () => {
         vi.spyOn(utils, "getSharikData").mockResolvedValue(null);
         const req = { params: { artikul: "NONEXISTENT" } };
         await getBtradeArtInfoController(req, res);
-        expect(responseStatus.code).toBe(404);
-        expect(responseJson.message).toBe("No products found for this artikul");
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson).toEqual({
+            exists: false,
+            message: "No products found for this artikul",
+            data: null,
+        });
     });
     it("400: ошибка валидации при пустом artikul", async () => {
         const req = { params: { artikul: "" } };
