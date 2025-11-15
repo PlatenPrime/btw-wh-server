@@ -1,4 +1,4 @@
-import { getPositionSector } from "./getPositionSector.js";
+import { getPositionSectorUtil } from "../../poses/utils/sort-positions-by-pallet-sector-util/getPositionSector.js";
 /**
  * Builds a pull object from positions for a specific pallet
  *
@@ -21,7 +21,7 @@ export const buildPullObjectUtil = (palletId, positions, positionsLookup) => {
     const pull = {
         palletId,
         palletTitle: originalPosition.palletTitle,
-        sector: getPositionSector(originalPosition),
+        sector: getPositionSectorUtil(originalPosition),
         rowTitle: originalPosition.rowTitle,
         positions,
         totalAsks: uniqueAskIds.size,

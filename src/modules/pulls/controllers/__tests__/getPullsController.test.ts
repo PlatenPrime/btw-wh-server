@@ -9,13 +9,14 @@ import {
   vi,
   type Mock,
 } from "vitest";
-import { getPullsController } from "../get-pulls/getPullsController.js";
-import { calculatePullsUtil } from "../../utils/calculatePullsUtil.js";
 import type { IPullsResponse } from "../../models/Pull.js";
+import { getPullsController } from "../get-pulls/getPullsController.js";
+import { calculatePullsUtil } from "../get-pulls/utils/calculatePullsUtil.js";
 
 vi.mock("../../utils/calculatePullsUtil.js", async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import("../../utils/calculatePullsUtil.js")>();
+  const original = await importOriginal<
+    typeof import("../get-pulls/utils/calculatePullsUtil.js")
+  >();
   return {
     ...original,
     calculatePullsUtil: vi.fn(),

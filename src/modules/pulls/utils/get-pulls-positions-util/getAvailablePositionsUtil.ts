@@ -1,5 +1,5 @@
-import { IPos } from "../../poses/models/Pos.js";
-import { Pos } from "../../poses/models/Pos.js";
+import { IPos } from "../../../poses/models/Pos.js";
+import { Pos } from "../../../poses/models/Pos.js";
 
 /**
  * Gets available positions for a specific artikul
@@ -9,12 +9,13 @@ import { Pos } from "../../poses/models/Pos.js";
  * @returns Promise<IPos[]> - Array of available positions
  */
 export const getAvailablePositionsUtil = async (
-  artikul: string
+  artikul: string,
+  sklad: string = "pogrebi"
 ): Promise<IPos[]> => {
   const positions = await Pos.find({
     artikul,
     quant: { $gt: 0 },
-    sklad: "pogrebi",
+    sklad,
   }).lean();
 
   return positions as IPos[];

@@ -1,4 +1,4 @@
-import { calculatePullsUtil } from "../../utils/calculatePullsUtil.js";
+import { calculatePullsUtil } from "./utils/calculatePullsUtil.js";
 /**
  * Controller to get all calculated pulls
  * GET /api/pulls

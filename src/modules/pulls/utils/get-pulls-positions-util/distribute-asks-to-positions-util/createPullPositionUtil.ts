@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
-import { IAsk } from "../../asks/models/Ask.js";
-import { IPos } from "../../poses/models/Pos.js";
-import { IPullPosition } from "../models/Pull.js";
+import { IAsk } from "../../../../asks/models/Ask.js";
+import { IPos } from "../../../../poses/models/Pos.js";
+import { IPullPosition } from "../../../models/Pull.js";
 
 interface CreatePullPositionArgs {
   position: IPos;

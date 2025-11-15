@@ -1,14 +1,13 @@
 import { Types } from "mongoose";
-import { IPull, IPullPosition, IPullsResponse } from "../models/Pull.js";
-import { buildPullObjectUtil } from "./buildPullObjectUtil.js";
-import { distributeAsksToPositionsUtil } from "./distributeAsksToPositionsUtil.js";
-import { getAvailablePositionsUtil } from "./getAvailablePositionsUtil.js";
-import { getNewAsksUtil } from "./getNewAsksUtil.js";
-import { groupAsksByArtikulUtil } from "./groupAsksByArtikulUtil.js";
+import { IPull, IPullsResponse } from "../../../models/Pull.js";
+import { buildPullObjectUtil } from "../../../utils/buildPullObjectUtil.js";
+import { getNewAsksUtil } from "../../../utils/get-new-asks-util/getNewAsksUtil.js";
+import { getPullsPositions } from "../../../utils/get-pulls-positions-util/getPullsPositions.js";
+import { groupAsksByArtikulUtil } from "../../../utils/group-asks-by-artikul-util/groupAsksByArtikulUtil.js";
 import {
   GroupedPullPositions,
   groupPullPositionsByPalletUtil,
-} from "./groupPullPositionsByPalletUtil.js";
+} from "../../../utils/groupPullPositionsByPalletUtil.js";
 
 /**
  * Calculates pulls dynamically based on all "new" asks
@@ -18,7 +17,6 @@ import {
  */
 export const calculatePullsUtil = async (): Promise<IPullsResponse> => {
   try {
-    // 1. Get all asks with "new" status
     const pendingAsks = await getNewAsksUtil();
 
     if (pendingAsks.length === 0) {
@@ -29,26 +27,9 @@ export const calculatePullsUtil = async (): Promise<IPullsResponse> => {
       };
     }
 
-    // 2. Group asks by artikul
     const asksByArtikul = groupAsksByArtikulUtil(pendingAsks);
 
-    // 3. Process each artikul group
-    const pullPositions: IPullPosition[] = [];
-
-    for (const [artikul, asks] of asksByArtikul) {
-      // Find available positions (not empty, only from pogrebi)
-      const positions = await getAvailablePositionsUtil(artikul);
-
-      if (positions.length === 0) {
-        continue;
-      }
-
-      const artikulPullPositions = distributeAsksToPositionsUtil(
-        asks,
-        positions
-      );
-      pullPositions.push(...artikulPullPositions);
-    }
+    const pullPositions = await getPullsPositions(asksByArtikul);
 
     if (pullPositions.length === 0) {
       return {

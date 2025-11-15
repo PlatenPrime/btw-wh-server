@@ -1,4 +1,4 @@
-import { IPos } from "../../poses/models/Pos.js";
+import { IPos } from "../../models/Pos.js";
 
 /**
  * Gets sector number from position, converting null/undefined to 0
@@ -6,7 +6,7 @@ import { IPos } from "../../poses/models/Pos.js";
  * @param position - Position to get sector from
  * @returns Sector number (0 if sector is null/undefined)
  */
-export const getPositionSector = (position: IPos): number => {
+export const getPositionSectorUtil   = (position: IPos): number => {
     return position.palletData.sector
       ? parseInt(position.palletData.sector, 10)
       : 0;

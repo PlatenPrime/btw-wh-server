@@ -10,7 +10,7 @@ export const groupAsksByArtikulUtil = (asks) => {
         if (!asksByArtikul.has(ask.artikul)) {
             asksByArtikul.set(ask.artikul, []);
         }
-        asksByArtikul.get(ask.artikul).push(ask);
+        asksByArtikul.get(ask.artikul)?.push(ask);
     }
     return asksByArtikul;
 };

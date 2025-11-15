@@ -1,8 +1,9 @@
-import { IAsk } from "../../asks/models/Ask.js";
-import { IPos } from "../../poses/models/Pos.js";
-import { IPullPosition } from "../models/Pull.js";
-import { sortPositionsBySector } from "./sortPositionsBySector.js";
+import { IAsk } from "../../../../asks/models/Ask.js";
+import { IPos } from "../../../../poses/models/Pos.js";
+import { sortPositionsByPalletSectorUtil } from "../../../../poses/utils/sort-positions-by-pallet-sector-util/sortPositionsByPalletSectorUtil.js";
+import { IPullPosition } from "../../../models/Pull.js";
 import { createPullPositionUtil } from "./createPullPositionUtil.js";
+import { getAskQuantityDemandUtil } from "./getAskQuantityDemandUtil.js";
 
 /**
  * Distributes asks to available positions using greedy algorithm
@@ -20,23 +21,14 @@ export const distributeAsksToPositionsUtil = (
     return [];
   }
 
+  const sortedPositions = sortPositionsByPalletSectorUtil(positions);
+  
+  
   const pullPositions: IPullPosition[] = [];
-  const sortedPositions = sortPositionsBySector(positions);
-
-  const quantifyDemand = (ask: IAsk): number | null => {
-    if (typeof ask.quant !== "number" || ask.quant <= 0) {
-      return null;
-    }
-
-    const currentPull = typeof ask.pullQuant === "number" ? ask.pullQuant : 0;
-    const remaining = ask.quant - currentPull;
-
-    return remaining > 0 ? remaining : null;
-  };
 
   const quantifiedAsks = asks
     .map((ask) => {
-      const demand = quantifyDemand(ask);
+      const demand = getAskQuantityDemandUtil(ask);
       return demand ? { ask, demand } : null;
     })
     .filter((entry): entry is { ask: IAsk; demand: number } => Boolean(entry));

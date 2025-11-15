@@ -1,5 +1,6 @@
-import { sortPositionsBySector } from "./sortPositionsBySector.js";
+import { sortPositionsByPalletSectorUtil } from "../../../../poses/utils/sort-positions-by-pallet-sector-util/sortPositionsByPalletSectorUtil.js";
 import { createPullPositionUtil } from "./createPullPositionUtil.js";
+import { getAskQuantityDemandUtil } from "./getAskQuantityDemandUtil.js";
 /**
  * Distributes asks to available positions using greedy algorithm
  * Handles asks with specific quantity and asks with null quantity
@@ -12,19 +13,11 @@ export const distributeAsksToPositionsUtil = (asks, positions) => {
     if (positions.length === 0 || asks.length === 0) {
         return [];
     }
+    const sortedPositions = sortPositionsByPalletSectorUtil(positions);
     const pullPositions = [];
-    const sortedPositions = sortPositionsBySector(positions);
-    const quantifyDemand = (ask) => {
-        if (typeof ask.quant !== "number" || ask.quant <= 0) {
-            return null;
-        }
-        const currentPull = typeof ask.pullQuant === "number" ? ask.pullQuant : 0;
-        const remaining = ask.quant - currentPull;
-        return remaining > 0 ? remaining : null;
-    };
     const quantifiedAsks = asks
         .map((ask) => {
-        const demand = quantifyDemand(ask);
+        const demand = getAskQuantityDemandUtil(ask);
         return demand ? { ask, demand } : null;
     })
         .filter((entry) => Boolean(entry));
