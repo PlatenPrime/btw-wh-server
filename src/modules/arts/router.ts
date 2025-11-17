@@ -2,12 +2,15 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import {
+  exportArtsToExcel,
   getAllArts,
   getArt,
   getArtById,
   getArtsByZone,
   getBtradeArtInfo,
+  updateAllBtradeStocks,
   updateArtLimit,
+  updateBtradeStock,
   upsertArts,
 } from "./controllers/index.js";
 
@@ -47,11 +50,30 @@ router.patch(
 );
 
 // Создать/обновить артикулы - доступно для ADMIN и PRIME
-router.post(
-  "/upsert",
+router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), upsertArts);
+
+// Обновить btradeStock для одного артикула - доступно только для ADMIN
+router.patch(
+  "/:artikul/btrade-stock",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  upsertArts
+  updateBtradeStock
+);
+
+// Обновить btradeStock для всех артикулов - доступно только для ADMIN
+router.post(
+  "/btrade-stock/update-all",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  updateAllBtradeStocks
+);
+
+// Экспортировать все артикулы в Excel - доступно только для ADMIN
+router.get(
+  "/export",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  exportArtsToExcel
 );
 
 export default router;

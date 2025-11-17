@@ -5,3 +5,6 @@ export { getArtsByZoneController as getArtsByZone } from "./get-arts-by-zone/get
 export { getBtradeArtInfoController as getBtradeArtInfo } from "./get-btrade-art-info/getBtradeArtInfoController.js";
 export { updateArtLimitController as updateArtLimit } from "./update-art-limit/updateArtLimitController.js";
 export { upsertArtsController as upsertArts } from "./upsert-arts/upsertArtsController.js";
+export { updateBtradeStockController as updateBtradeStock } from "./update-btrade-stock/updateBtradeStockController.js";
+export { updateAllBtradeStocksController as updateAllBtradeStocks } from "./update-all-btrade-stocks/updateAllBtradeStocksController.js";
+export { exportArtsToExcel } from "./export-arts-to-excel/exportArtsToExcel.js";
