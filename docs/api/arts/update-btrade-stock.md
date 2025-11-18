@@ -16,9 +16,9 @@ PATCH /api/arts/:artikul/btrade-stock
 
 #### Параметры пути
 
-| Параметр | Тип   | Обязательный | Описание              |
-| -------- | ----- | ------------- | --------------------- |
-| `artikul` | string | Да            | Артикул товара        |
+| Параметр  | Тип    | Обязательный | Описание       |
+| --------- | ------ | ------------ | -------------- |
+| `artikul` | string | Да           | Артикул товара |
 
 #### Успешный ответ
 
@@ -156,18 +156,90 @@ GET /api/arts/export
 
 Файл содержит следующие колонки:
 
-| Колонка              | Описание                    |
-| -------------------- | ---------------------------- |
-| Артикул              | Артикул товара               |
-| Название (укр)       | Название на украинском       |
-| Название (рус)       | Название на русском           |
-| Зона                 | Зона хранения                |
-| Лимит                | Лимит товара                 |
-| Маркер               | Маркер товара                |
-| Btrade Stock         | Количество на btrade          |
-| Дата Btrade Stock    | Дата обновления btrade stock  |
-| Дата создания        | Дата создания записи          |
-| Дата обновления      | Дата последнего обновления   |
+| Колонка           | Описание                     |
+| ----------------- | ---------------------------- |
+| Артикул           | Артикул товара               |
+| Название (укр)    | Название на украинском       |
+| Название (рус)    | Название на русском          |
+| Зона              | Зона хранения                |
+| Лимит             | Лимит товара                 |
+| Маркер            | Маркер товара                |
+| Btrade Stock      | Количество на btrade         |
+| Дата Btrade Stock | Дата обновления btrade stock |
+| Дата создания     | Дата создания записи         |
+| Дата обновления   | Дата последнего обновления   |
+
+#### Ошибки
+
+**404 Not Found - Артикулы не найдены**
+
+```json
+{
+  "message": "No arts found to export"
+}
+```
+
+**500 Internal Server Error**
+
+```json
+{
+  "message": "Server error",
+  "error": "..." // только в development режиме
+}
+```
+
+---
+
+### 4. Export Arts to Excel with Stocks
+
+#### Endpoint
+
+```
+GET /api/arts/export-with-stocks
+```
+
+#### Описание
+
+Экспортирует все артикулы из базы данных в Excel файл с дополнительными данными о запасах и витрине. Файл содержит все поля модели Art, а также рассчитанные значения:
+
+- **Запасы**: сумма количества товара (`quant`) из всех позиций (`Pos`) для каждого артикула
+- **Витрина**: разница между `btradeStock.value` и Запасами
+
+**Важно:**
+
+- Если у артикула нет позиций в базе данных, значение "Запасы" будет равно `0`
+- Если у артикула нет `btradeStock.value`, значение "Витрина" рассчитывается как `0 - Запасы`
+
+#### Успешный ответ
+
+**Статус:** `200 OK`
+
+**Заголовки:**
+
+- `Content-Type`: `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+- `Content-Disposition`: `attachment; filename="arts_export_with_stocks_YYYY-MM-DD.xlsx"`
+- `Content-Length`: размер файла в байтах
+
+**Тело ответа:** Буфер Excel файла
+
+#### Структура Excel файла
+
+Файл содержит следующие колонки:
+
+| Колонка           | Описание                                                         |
+| ----------------- | ---------------------------------------------------------------- |
+| Артикул           | Артикул товара                                                   |
+| Название (укр)    | Название на украинском                                           |
+| Название (рус)    | Название на русском                                              |
+| Зона              | Зона хранения                                                    |
+| Лимит             | Лимит товара                                                     |
+| Маркер            | Маркер товара                                                    |
+| Btrade Stock      | Количество на btrade                                             |
+| Дата Btrade Stock | Дата обновления btrade stock                                     |
+| **Запасы**        | **Сумма количества товара из всех позиций (Pos)**                |
+| **Витрина**       | **Разница между Btrade Stock и Запасами (btradeStock - Запасы)** |
+| Дата создания     | Дата создания записи                                             |
+| Дата обновления   | Дата последнего обновления                                       |
 
 #### Ошибки
 
@@ -208,55 +280,52 @@ GET /api/arts/export
 
 ```typescript
 const updateBtradeStock = async (artikul: string) => {
-  const token = localStorage.getItem('authToken');
-  
-  const response = await fetch(
-    `/api/arts/${artikul}/btrade-stock`,
-    {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  );
-  
+  const token = localStorage.getItem("authToken");
+
+  const response = await fetch(`/api/arts/${artikul}/btrade-stock`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Failed to update btradeStock');
+    throw new Error(error.message || "Failed to update btradeStock");
   }
-  
+
   return await response.json();
 };
 
 // Использование
-const result = await updateBtradeStock('ART001');
+const result = await updateBtradeStock("ART001");
 console.log(result.data.btradeStock);
 ```
 
 #### Axios
 
 ```typescript
-import axios from 'axios';
+import axios from "axios";
 
 const updateBtradeStock = async (artikul: string) => {
-  const token = localStorage.getItem('authToken');
-  
+  const token = localStorage.getItem("authToken");
+
   const response = await axios.patch(
     `/api/arts/${artikul}/btrade-stock`,
     {},
     {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     }
   );
-  
+
   return response.data;
 };
 
 // Использование
-const result = await updateBtradeStock('ART001');
+const result = await updateBtradeStock("ART001");
 ```
 
 ### 2. Обновить btradeStock для всех артикулов
@@ -265,24 +334,21 @@ const result = await updateBtradeStock('ART001');
 
 ```typescript
 const updateAllBtradeStocks = async () => {
-  const token = localStorage.getItem('authToken');
-  
-  const response = await fetch(
-    '/api/arts/btrade-stock/update-all',
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    }
-  );
-  
+  const token = localStorage.getItem("authToken");
+
+  const response = await fetch("/api/arts/btrade-stock/update-all", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Failed to start btradeStock update');
+    throw new Error(error.message || "Failed to start btradeStock update");
   }
-  
+
   const result = await response.json();
   console.log(result.message); // "BtradeStock update process started"
   // Процесс выполняется в фоне, клиент не ждет завершения
@@ -290,27 +356,27 @@ const updateAllBtradeStocks = async () => {
 
 // Использование
 await updateAllBtradeStocks();
-console.log('Процесс обновления запущен');
+console.log("Процесс обновления запущен");
 ```
 
 #### Axios
 
 ```typescript
-import axios from 'axios';
+import axios from "axios";
 
 const updateAllBtradeStocks = async () => {
-  const token = localStorage.getItem('authToken');
-  
+  const token = localStorage.getItem("authToken");
+
   const response = await axios.post(
-    '/api/arts/btrade-stock/update-all',
+    "/api/arts/btrade-stock/update-all",
     {},
     {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     }
   );
-  
+
   console.log(response.data.message); // "BtradeStock update process started"
   // Процесс выполняется в фоне, клиент не ждет завершения
 };
@@ -325,30 +391,30 @@ await updateAllBtradeStocks();
 
 ```typescript
 const exportArtsToExcel = async () => {
-  const token = localStorage.getItem('authToken');
-  
-  const response = await fetch('/api/arts/export', {
-    method: 'GET',
+  const token = localStorage.getItem("authToken");
+
+  const response = await fetch("/api/arts/export", {
+    method: "GET",
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
-  
+
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Failed to export arts');
+    throw new Error(error.message || "Failed to export arts");
   }
-  
+
   // Получаем имя файла из заголовка
-  const contentDisposition = response.headers.get('Content-Disposition');
+  const contentDisposition = response.headers.get("Content-Disposition");
   const fileName = contentDisposition
-    ? contentDisposition.split('filename=')[1].replace(/"/g, '')
-    : `arts_export_${new Date().toISOString().split('T')[0]}.xlsx`;
-  
+    ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+    : `arts_export_${new Date().toISOString().split("T")[0]}.xlsx`;
+
   // Создаем blob и скачиваем файл
   const blob = await response.blob();
   const url = window.URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = fileName;
   document.body.appendChild(a);
@@ -364,27 +430,27 @@ await exportArtsToExcel();
 #### Axios
 
 ```typescript
-import axios from 'axios';
+import axios from "axios";
 
 const exportArtsToExcel = async () => {
-  const token = localStorage.getItem('authToken');
-  
-  const response = await axios.get('/api/arts/export', {
+  const token = localStorage.getItem("authToken");
+
+  const response = await axios.get("/api/arts/export", {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
-    responseType: 'blob', // Важно указать blob для бинарных данных
+    responseType: "blob", // Важно указать blob для бинарных данных
   });
-  
+
   // Получаем имя файла из заголовка
-  const contentDisposition = response.headers['content-disposition'];
+  const contentDisposition = response.headers["content-disposition"];
   const fileName = contentDisposition
-    ? contentDisposition.split('filename=')[1].replace(/"/g, '')
-    : `arts_export_${new Date().toISOString().split('T')[0]}.xlsx`;
-  
+    ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+    : `arts_export_${new Date().toISOString().split("T")[0]}.xlsx`;
+
   // Создаем blob и скачиваем файл
   const url = window.URL.createObjectURL(new Blob([response.data]));
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = fileName;
   document.body.appendChild(a);
@@ -397,11 +463,89 @@ const exportArtsToExcel = async () => {
 await exportArtsToExcel();
 ```
 
+### 4. Экспортировать артикулы в Excel с данными о запасах и витрине
+
+#### Fetch API
+
+```typescript
+const exportArtsToExcelWithStocks = async () => {
+  const token = localStorage.getItem("authToken");
+
+  const response = await fetch("/api/arts/export-with-stocks", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || "Failed to export arts with stocks");
+  }
+
+  // Получаем имя файла из заголовка
+  const contentDisposition = response.headers.get("Content-Disposition");
+  const fileName = contentDisposition
+    ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+    : `arts_export_with_stocks_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+  // Создаем blob и скачиваем файл
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+};
+
+// Использование
+await exportArtsToExcelWithStocks();
+```
+
+#### Axios
+
+```typescript
+import axios from "axios";
+
+const exportArtsToExcelWithStocks = async () => {
+  const token = localStorage.getItem("authToken");
+
+  const response = await axios.get("/api/arts/export-with-stocks", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    responseType: "blob", // Важно указать blob для бинарных данных
+  });
+
+  // Получаем имя файла из заголовка
+  const contentDisposition = response.headers["content-disposition"];
+  const fileName = contentDisposition
+    ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+    : `arts_export_with_stocks_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+  // Создаем blob и скачиваем файл
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+};
+
+// Использование
+await exportArtsToExcelWithStocks();
+```
+
 #### React компонент с кнопкой
 
 ```typescript
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
+import axios from "axios";
 
 const ExportArtsButton: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -409,22 +553,22 @@ const ExportArtsButton: React.FC = () => {
   const handleExport = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('authToken');
-      
-      const response = await axios.get('/api/arts/export', {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get("/api/arts/export", {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
-        responseType: 'blob',
+        responseType: "blob",
       });
-      
-      const contentDisposition = response.headers['content-disposition'];
+
+      const contentDisposition = response.headers["content-disposition"];
       const fileName = contentDisposition
-        ? contentDisposition.split('filename=')[1].replace(/"/g, '')
-        : `arts_export_${new Date().toISOString().split('T')[0]}.xlsx`;
-      
+        ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+        : `arts_export_${new Date().toISOString().split("T")[0]}.xlsx`;
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = fileName;
       document.body.appendChild(a);
@@ -432,8 +576,8 @@ const ExportArtsButton: React.FC = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Ошибка при экспорте:', error);
-      alert('Не удалось экспортировать артикулы');
+      console.error("Ошибка при экспорте:", error);
+      alert("Не удалось экспортировать артикулы");
     } finally {
       setLoading(false);
     }
@@ -441,12 +585,105 @@ const ExportArtsButton: React.FC = () => {
 
   return (
     <button onClick={handleExport} disabled={loading}>
-      {loading ? 'Экспорт...' : 'Экспортировать в Excel'}
+      {loading ? "Экспорт..." : "Экспортировать в Excel"}
     </button>
   );
 };
 
 export default ExportArtsButton;
+```
+
+#### React компонент с двумя кнопками экспорта
+
+```typescript
+import React, { useState } from "react";
+import axios from "axios";
+
+const ExportArtsButtons: React.FC = () => {
+  const [loadingBasic, setLoadingBasic] = useState(false);
+  const [loadingExtended, setLoadingExtended] = useState(false);
+
+  const handleBasicExport = async () => {
+    setLoadingBasic(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get("/api/arts/export", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
+
+      const contentDisposition = response.headers["content-disposition"];
+      const fileName = contentDisposition
+        ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+        : `arts_export_${new Date().toISOString().split("T")[0]}.xlsx`;
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Ошибка при экспорте:", error);
+      alert("Не удалось экспортировать артикулы");
+    } finally {
+      setLoadingBasic(false);
+    }
+  };
+
+  const handleExtendedExport = async () => {
+    setLoadingExtended(true);
+    try {
+      const token = localStorage.getItem("authToken");
+
+      const response = await axios.get("/api/arts/export-with-stocks", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        responseType: "blob",
+      });
+
+      const contentDisposition = response.headers["content-disposition"];
+      const fileName = contentDisposition
+        ? contentDisposition.split("filename=")[1].replace(/"/g, "")
+        : `arts_export_with_stocks_${
+            new Date().toISOString().split("T")[0]
+          }.xlsx`;
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error("Ошибка при экспорте:", error);
+      alert("Не удалось экспортировать артикулы с запасами");
+    } finally {
+      setLoadingExtended(false);
+    }
+  };
+
+  return (
+    <div>
+      <button onClick={handleBasicExport} disabled={loadingBasic}>
+        {loadingBasic ? "Экспорт..." : "Экспортировать в Excel"}
+      </button>
+      <button onClick={handleExtendedExport} disabled={loadingExtended}>
+        {loadingExtended ? "Экспорт..." : "Экспортировать с запасами"}
+      </button>
+    </div>
+  );
+};
+
+export default ExportArtsButtons;
 ```
 
 ---
@@ -458,5 +695,12 @@ export default ExportArtsButton;
 - Если товар не найден на sharik.ua, артикул пропускается при массовом обновлении
 - Excel файл содержит все поля модели Art, включая пустые значения
 - Формат дат в Excel: `DD.MM.YYYY` (русский формат)
-- Имя файла Excel формируется автоматически: `arts_export_YYYY-MM-DD.xlsx`
-
+- Имя файла Excel формируется автоматически:
+  - Базовый экспорт: `arts_export_YYYY-MM-DD.xlsx`
+  - Расширенный экспорт: `arts_export_with_stocks_YYYY-MM-DD.xlsx`
+- **Расширенный экспорт (`/export-with-stocks`)**:
+  - Использует MongoDB агрегацию для эффективного расчета запасов (один запрос вместо N+1)
+  - Значение "Запасы" рассчитывается как сумма всех `quant` из коллекции `Pos` для каждого артикула
+  - Значение "Витрина" рассчитывается как `btradeStock.value - Запасы`
+  - Если у артикула нет позиций, "Запасы" = `0`
+  - Если у артикула нет `btradeStock.value`, используется `0` для расчета "Витрина"

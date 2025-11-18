@@ -3,6 +3,7 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import {
   exportArtsToExcel,
+  exportArtsToExcelWithStocks,
   getAllArts,
   getArt,
   getArtById,
@@ -74,6 +75,14 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   exportArtsToExcel
+);
+
+// Экспортировать все артикулы в Excel с данными о запасах и витрине - доступно только для ADMIN
+router.get(
+  "/export-with-stocks",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  exportArtsToExcelWithStocks
 );
 
 export default router;

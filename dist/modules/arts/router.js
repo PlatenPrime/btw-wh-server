@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
-import { getAllArts, getArt, getArtById, getArtsByZone, getBtradeArtInfo, updateArtLimit, upsertArts, updateBtradeStock, updateAllBtradeStocks, exportArtsToExcel, } from "./controllers/index.js";
+import { exportArtsToExcel, exportArtsToExcelWithStocks, getAllArts, getArt, getArtById, getArtsByZone, getBtradeArtInfo, updateAllBtradeStocks, updateArtLimit, updateBtradeStock, upsertArts, } from "./controllers/index.js";
 const router = Router();
 // Получить все артикулы - доступно для всех авторизованных пользователей
 router.get("/", checkAuth, checkRoles([RoleType.USER]), getAllArts);
@@ -23,4 +23,6 @@ router.patch("/:artikul/btrade-stock", checkAuth, checkRoles([RoleType.ADMIN]), 
 router.post("/btrade-stock/update-all", checkAuth, checkRoles([RoleType.ADMIN]), updateAllBtradeStocks);
 // Экспортировать все артикулы в Excel - доступно только для ADMIN
 router.get("/export", checkAuth, checkRoles([RoleType.ADMIN]), exportArtsToExcel);
+// Экспортировать все артикулы в Excel с данными о запасах и витрине - доступно только для ADMIN
+router.get("/export-with-stocks", checkAuth, checkRoles([RoleType.ADMIN]), exportArtsToExcelWithStocks);
 export default router;

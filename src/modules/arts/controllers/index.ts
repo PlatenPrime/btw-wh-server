@@ -8,3 +8,4 @@ export { upsertArtsController as upsertArts } from "./upsert-arts/upsertArtsCont
 export { updateBtradeStockController as updateBtradeStock } from "./update-btrade-stock/updateBtradeStockController.js";
 export { updateAllBtradeStocksController as updateAllBtradeStocks } from "./update-all-btrade-stocks/updateAllBtradeStocksController.js";
 export { exportArtsToExcel } from "./export-arts-to-excel/exportArtsToExcel.js";
+export { exportArtsToExcelWithStocks } from "./export-arts-to-excel-with-stocks/exportArtsToExcelWithStocks.js";
