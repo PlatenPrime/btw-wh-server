@@ -30,7 +30,9 @@ export const exportPosesStocksToExcelController = async (req, res) => {
             });
             return;
         }
-        const excelData = formatPosesStocksForExcelUtil(poses);
+        const excelData = formatPosesStocksForExcelUtil(poses, {
+            selectedSklad: sklad,
+        });
         const { buffer, fileName } = generateExcelUtil(excelData, sklad);
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);

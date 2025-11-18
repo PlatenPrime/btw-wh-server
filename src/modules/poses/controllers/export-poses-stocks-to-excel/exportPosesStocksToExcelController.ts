@@ -49,7 +49,9 @@ export const exportPosesStocksToExcelController = async (
       return;
     }
 
-    const excelData = formatPosesStocksForExcelUtil(poses);
+    const excelData = formatPosesStocksForExcelUtil(poses, {
+      selectedSklad: sklad,
+    });
     const { buffer, fileName } = generateExcelUtil(excelData, sklad);
 
     res.setHeader(
@@ -70,5 +72,3 @@ export const exportPosesStocksToExcelController = async (
     }
   }
 };
-
-

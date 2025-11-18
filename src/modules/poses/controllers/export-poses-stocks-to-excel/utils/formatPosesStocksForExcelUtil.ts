@@ -12,15 +12,49 @@ export type ExcelPosRow = {
   Количество: number;
 };
 
+type FormatPosesStocksOptions = {
+  selectedSklad?: "merezhi" | "pogrebi";
+};
+
 const DEFAULT_SKLAD_LABEL = "Не указан";
+const SKLAD_LABELS: Record<string, string> = {
+  merezhi: "Мережі",
+  pogrebi: "Погреби",
+};
+
+const normalizeSkladLabel = (value?: string | null): string => {
+  const trimmed = value?.trim();
+
+  if (!trimmed) {
+    return DEFAULT_SKLAD_LABEL;
+  }
+
+  const mapped = SKLAD_LABELS[trimmed.toLowerCase()];
+
+  return mapped ?? trimmed;
+};
+
+const buildAggregationKey = (
+  artikul: string,
+  skladLabel: string,
+  selectedSklad?: "merezhi" | "pogrebi"
+) => {
+  if (selectedSklad) {
+    return artikul.toLowerCase();
+  }
+
+  return `${artikul.toLowerCase()}::${skladLabel.toLowerCase()}`;
+};
 
 /**
  * Форматирует позиции для экспорта в Excel.
- * Объединяет все позиции с одинаковым артикулом в одну строку
- * и суммирует их остатки.
+ * При выгрузке по конкретному складу суммирует все остатки по артикулу.
+ * При выгрузке по всем складам разделяет строки по складам и суммирует
+ * остатки отдельно для каждого склада.
  */
 export const formatPosesStocksForExcelUtil = (
-  poses: RawPos[]
+  poses: RawPos[],
+  options: FormatPosesStocksOptions = {}
 ): ExcelPosRow[] => {
   const aggregated = poses.reduce<
     Map<
@@ -29,7 +63,7 @@ export const formatPosesStocksForExcelUtil = (
         artikul: string;
         nameukr: string;
         quant: number;
-        sklads: Set<string>;
+        skladLabel: string;
       }
     >
   >((acc, pos) => {
@@ -40,12 +74,9 @@ export const formatPosesStocksForExcelUtil = (
       return acc;
     }
 
-    const key = artikul.toLowerCase();
     const normalizedName = pos.nameukr?.trim() ?? "";
-    const normalizedSklad =
-      pos.sklad?.trim() && pos.sklad.trim().length > 0
-        ? pos.sklad.trim()
-        : DEFAULT_SKLAD_LABEL;
+    const skladLabel = normalizeSkladLabel(pos.sklad);
+    const key = buildAggregationKey(artikul, skladLabel, options.selectedSklad);
 
     const existing = acc.get(key);
 
@@ -54,7 +85,6 @@ export const formatPosesStocksForExcelUtil = (
       if (!existing.nameukr && normalizedName) {
         existing.nameukr = normalizedName;
       }
-      existing.sklads.add(normalizedSklad);
       return acc;
     }
 
@@ -62,18 +92,26 @@ export const formatPosesStocksForExcelUtil = (
       artikul,
       nameukr: normalizedName,
       quant,
-      sklads: new Set([normalizedSklad]),
+      skladLabel,
     });
 
     return acc;
   }, new Map());
 
   return Array.from(aggregated.values())
-    .sort((a, b) => a.artikul.localeCompare(b.artikul, "uk"))
+    .sort((a, b) => {
+      const artikulOrder = a.artikul.localeCompare(b.artikul, "uk");
+
+      if (artikulOrder !== 0) {
+        return artikulOrder;
+      }
+
+      return a.skladLabel.localeCompare(b.skladLabel, "uk");
+    })
     .map((item) => ({
       Артикул: item.artikul,
       "Название (укр)": item.nameukr,
-      Склад: Array.from(item.sklads).join(", "),
+      Склад: item.skladLabel,
       Количество: item.quant,
     }));
 };
