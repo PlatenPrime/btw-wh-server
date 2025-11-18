@@ -1,11 +1,17 @@
 import { Pos } from "../../../../poses/models/Pos.js";
 /**
- * Получает сумму quant из всех позиций, сгруппированных по artikul
+ * Получает сумму quant из позиций склада "pogrebi", сгруппированных по artikul
  * Использует MongoDB агрегацию для эффективного получения данных
+ * Учитываются только позиции с sklad === "pogrebi"
  * @returns Promise с Map, где ключ - artikul, значение - сумма quant
  */
 export const getPosesQuantByArtikulUtil = async () => {
     const aggregationResult = await Pos.aggregate([
+        {
+            $match: {
+                sklad: "pogrebi",
+            },
+        },
         {
             $group: {
                 _id: "$artikul",
