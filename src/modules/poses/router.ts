@@ -12,6 +12,7 @@ import {
   getPosesByRowId,
   updatePos,
   populateMissingPosData,
+  exportPosesStocksToExcel,
 } from "./controllers/index.js";
 
 const asyncHandler = (fn: any) => (req: any, res: any, next: any) =>
@@ -49,6 +50,12 @@ router.post(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(populateMissingPosData)
+);
+router.post(
+  "/export-stocks",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(exportPosesStocksToExcel)
 );
 
 // PUT routes - доступно для ADMIN и PRIME

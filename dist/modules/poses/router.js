@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
-import { bulkCreatePoses, createPos, deletePos, getAllPoses, getPosById, getPosesByArtikul, getPosesByPalletId, getPosesByRowId, updatePos, populateMissingPosData, } from "./controllers/index.js";
+import { bulkCreatePoses, createPos, deletePos, getAllPoses, getPosById, getPosesByArtikul, getPosesByPalletId, getPosesByRowId, updatePos, populateMissingPosData, exportPosesStocksToExcel, } from "./controllers/index.js";
 const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const router = Router();
 // GET routes - доступно для всех авторизованных пользователей
@@ -14,6 +14,7 @@ router.get("/by-row/:rowId", checkAuth, checkRoles([RoleType.USER]), getPosesByR
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), createPos);
 router.post("/bulk", checkAuth, checkRoles([RoleType.ADMIN]), bulkCreatePoses);
 router.post("/populate-missing-data", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(populateMissingPosData));
+router.post("/export-stocks", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(exportPosesStocksToExcel));
 // PUT routes - доступно для ADMIN и PRIME
 router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), updatePos);
 // DELETE routes - доступно для ADMIN и PRIME

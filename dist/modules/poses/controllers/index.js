@@ -8,3 +8,4 @@ export { getPosesByPalletIdController as getPosesByPalletId } from "./get-poses-
 export { getPosesByRowIdController as getPosesByRowId } from "./get-poses-by-row-id/getPosesByRowIdController.js";
 export { updatePosController as updatePos } from "./update-pos/updatePosController.js";
 export { populateMissingPosDataController as populateMissingPosData } from "./populate-missing-pos-data/populateMissingPosDataController.js";
+export { exportPosesStocksToExcelController as exportPosesStocksToExcel } from "./export-poses-stocks-to-excel/exportPosesStocksToExcelController.js";
