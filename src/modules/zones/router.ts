@@ -9,6 +9,7 @@ import {
   getAllZones,
   getZoneById,
   getZoneByTitle,
+  getZonesByBlockId,
   updateZoneById,
   upsertZones,
 } from "./controllers/index.js";
@@ -45,6 +46,14 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getZoneByTitle)
+);
+
+// Получить зоны по ID блока - доступно только для ADMIN
+router.get(
+  "/by-block/:blockId",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getZonesByBlockId)
 );
 
 // Получить зону по ID - доступно только для ADMIN
