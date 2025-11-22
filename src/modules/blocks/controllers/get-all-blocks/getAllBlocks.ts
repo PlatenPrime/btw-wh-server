@@ -6,6 +6,7 @@ export const getAllBlocks = async (req: Request, res: Response) => {
     const blocks = await getAllBlocksUtil();
 
     res.status(200).json({
+      exists: blocks.length > 0,
       message: "Blocks retrieved successfully",
       data: blocks,
     });

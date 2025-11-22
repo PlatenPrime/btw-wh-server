@@ -9,7 +9,7 @@ const blockSchema = new Schema({
     order: {
         type: Number,
         required: true,
-        min: [0, "Order must be non-negative"],
+        min: [1, "Order must be at least 1"],
     },
 }, { timestamps: true });
 // Индексы для оптимизации

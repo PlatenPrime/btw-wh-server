@@ -14,13 +14,15 @@ export const getBlockById = async (req, res) => {
         }
         const block = await getBlockByIdUtil({ id: parseResult.data.id });
         if (!block) {
-            res.status(404).json({
+            res.status(200).json({
+                exists: false,
                 message: "Block not found",
                 data: null,
             });
             return;
         }
         res.status(200).json({
+            exists: true,
             message: "Block retrieved successfully",
             data: block,
         });

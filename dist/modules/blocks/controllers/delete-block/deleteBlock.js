@@ -1,6 +1,5 @@
 import { deleteBlockByIdSchema } from "./schemas/deleteBlockByIdSchema.js";
 import { deleteBlockByIdUtil } from "./utils/deleteBlockByIdUtil.js";
-import { calculateZonesSectorsUtil } from "../../utils/calculateZonesSectorsUtil.js";
 export const deleteBlock = async (req, res) => {
     try {
         const { id } = req.params;
@@ -20,8 +19,6 @@ export const deleteBlock = async (req, res) => {
             });
             return;
         }
-        // Пересчитать сектора всех зон
-        await calculateZonesSectorsUtil();
         res.status(200).json({
             message: "Block deleted successfully",
             data: deletedBlock,

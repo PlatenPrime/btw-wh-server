@@ -7,6 +7,7 @@ import {
   deleteBlock,
   getAllBlocks,
   getBlockById,
+  recalculateZonesSectors,
   resetZonesSectors,
   updateBlock,
 } from "./controllers/index.js";
@@ -59,6 +60,14 @@ router.post(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(resetZonesSectors)
+);
+
+// Пересчитать сектора всех зон на основе позиций блоков и зон - доступно только для ADMIN
+router.post(
+  "/recalculate-zones-sectors",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(recalculateZonesSectors)
 );
 
 export default router;

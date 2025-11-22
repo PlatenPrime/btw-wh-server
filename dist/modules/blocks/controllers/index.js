@@ -5,3 +5,4 @@ export { getAllBlocks } from "./get-all-blocks/getAllBlocks.js";
 export { deleteBlock } from "./delete-block/deleteBlock.js";
 export { updateBlock } from "./update-block/updateBlock.js";
 export { resetZonesSectors } from "./reset-zones-sectors/resetZonesSectors.js";
+export { recalculateZonesSectors } from "./recalculate-zones-sectors/recalculateZonesSectors.js";

@@ -9,13 +9,13 @@ const zoneUpdateSchema = z.object({
       message: "Invalid zone ID format",
     }
   ),
-  order: z.number().int().min(0, "Order must be non-negative"),
+  order: z.number().int().min(1, "Order must be at least 1"),
 });
 
 // Схема для обновления блока
 export const updateBlockSchema = z.object({
   title: z.string().min(1, "Title is required").optional(),
-  order: z.number().int().min(0, "Order must be non-negative").optional(),
+  order: z.number().int().min(1, "Order must be at least 1").optional(),
   zones: z.array(zoneUpdateSchema).optional(),
 });
 

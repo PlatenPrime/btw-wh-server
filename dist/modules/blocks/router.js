@@ -2,7 +2,7 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { createBlock, deleteBlock, getAllBlocks, getBlockById, resetZonesSectors, updateBlock, } from "./controllers/index.js";
+import { createBlock, deleteBlock, getAllBlocks, getBlockById, recalculateZonesSectors, resetZonesSectors, updateBlock, } from "./controllers/index.js";
 const router = Router();
 // Создать блок - доступно только для ADMIN
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createBlock));
@@ -16,4 +16,6 @@ router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateB
 router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deleteBlock));
 // Разовый контроллер: сбросить сектора всех зон - доступно только для ADMIN
 router.post("/reset-zones-sectors", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(resetZonesSectors));
+// Пересчитать сектора всех зон на основе позиций блоков и зон - доступно только для ADMIN
+router.post("/recalculate-zones-sectors", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(recalculateZonesSectors));
 export default router;

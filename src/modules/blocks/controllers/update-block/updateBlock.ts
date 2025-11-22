@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import { updateBlockSchema } from "./schemas/updateBlockSchema.js";
 import { updateBlockUtil } from "./utils/updateBlockUtil.js";
 import { checkBlockDuplicatesUpdateUtil } from "./utils/checkBlockDuplicatesUpdateUtil.js";
-import { calculateZonesSectorsUtil } from "../../utils/calculateZonesSectorsUtil.js";
 
 export const updateBlock = async (req: Request, res: Response) => {
   try {
@@ -62,11 +61,6 @@ export const updateBlock = async (req: Request, res: Response) => {
         message: "Block not found",
       });
       return;
-    }
-
-    // Пересчитать сектора всех зон, если изменился order блока или zones
-    if (updateData.order !== undefined || updateData.zones !== undefined) {
-      await calculateZonesSectorsUtil();
     }
 
     res.status(200).json({

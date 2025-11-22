@@ -4,7 +4,8 @@ import { Block } from "../models/Block.js";
 const SECTOR_MULTIPLIER = 1000;
 /**
  * Рассчитывает и обновляет сектора всех зон на основе позиций блоков и зон внутри них
- * Формула: sector = blockOrder * SECTOR_MULTIPLIER + zoneOrder
+ * Формула: sector = blockOrder * SECTOR_MULTIPLIER + zoneOrder - 1
+ * Блоки и зоны начинаются с order = 1, сектора начинаются с 1000
  * Зоны без блока получают sector = 0
  */
 export const calculateZonesSectorsUtil = async () => {
@@ -23,8 +24,10 @@ export const calculateZonesSectorsUtil = async () => {
             zone.order !== undefined)
             .sort((a, b) => (a.order || 0) - (b.order || 0));
         // Рассчитать сектор для каждой зоны в блоке
-        blockZones.forEach((zone, index) => {
-            const sector = block.order * SECTOR_MULTIPLIER + index;
+        // Формула: sector = blockOrder * 1000 + zoneOrder - 1
+        // Это обеспечивает, что первая зона первого блока получает sector = 1000
+        blockZones.forEach((zone) => {
+            const sector = block.order * SECTOR_MULTIPLIER + (zone.order || 0) - 1;
             operations.push({
                 updateOne: {
                     filter: { _id: zone._id },
