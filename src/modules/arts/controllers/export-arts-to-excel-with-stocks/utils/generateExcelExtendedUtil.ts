@@ -1,19 +1,7 @@
 import * as XLSX from "xlsx";
+import { ExcelArtRowExtended } from "./types.js";
 
-type ExcelArtRowExtended = {
-  Артикул: string;
-  "Название (укр)": string;
-  "Название (рус)": string;
-  Зона: string;
-  Лимит: number | string;
-  Маркер: string;
-  "Btrade Stock": number | string;
-  "Дата Btrade Stock": string;
-  Запасы: number;
-  Витрина: number;
-  "Дата создания": string;
-  "Дата обновления": string;
-};
+
 
 /**
  * Генерирует Excel файл из расширенных данных артикулов
@@ -42,8 +30,7 @@ export const generateExcelExtendedUtil = (
     { wch: 18 }, // Дата Btrade Stock
     { wch: 12 }, // Запасы
     { wch: 12 }, // Витрина
-    { wch: 15 }, // Дата создания
-    { wch: 15 }, // Дата обновления
+
   ];
   worksheet["!cols"] = columnWidths;
 

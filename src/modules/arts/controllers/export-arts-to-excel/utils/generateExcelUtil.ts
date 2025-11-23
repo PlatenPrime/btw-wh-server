@@ -1,17 +1,5 @@
 import * as XLSX from "xlsx";
-
-type ExcelArtRow = {
-  Артикул: string;
-  "Название (укр)": string;
-  "Название (рус)": string;
-  Зона: string;
-  Лимит: number | string;
-  Маркер: string;
-  "Btrade Stock": number | string;
-  "Дата Btrade Stock": string;
-  "Дата создания": string;
-  "Дата обновления": string;
-};
+import { ExcelArtRow } from "./types.js";
 
 /**
  * Генерирует Excel файл из данных артикулов
@@ -34,12 +22,10 @@ export const generateExcelUtil = (
     { wch: 30 }, // Название (укр)
     { wch: 30 }, // Название (рус)
     { wch: 10 }, // Зона
-    { wch: 10 }, // Лимит
+    { wch: 10 }, // Ліміт
     { wch: 15 }, // Маркер
-    { wch: 15 }, // Btrade Stock
-    { wch: 18 }, // Дата Btrade Stock
-    { wch: 15 }, // Дата создания
-    { wch: 15 }, // Дата обновления
+    { wch: 15 }, // Залишки на сайті
+    { wch: 18 }, // Дата оновлення залишків
   ];
   worksheet["!cols"] = columnWidths;
 
@@ -53,10 +39,7 @@ export const generateExcelUtil = (
   });
 
   // Настраиваем имя файла
-  const fileName = `arts_export_${
-    new Date().toISOString().split("T")[0]
-  }.xlsx`;
+  const fileName = `arts_export_${new Date().toISOString().split("T")[0]}.xlsx`;
 
   return { buffer, fileName };
 };
-

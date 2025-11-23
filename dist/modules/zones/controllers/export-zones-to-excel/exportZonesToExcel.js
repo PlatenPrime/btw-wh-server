@@ -1,7 +1,7 @@
 import { formatZonesForExcelUtil } from "./utils/formatZonesForExcelUtil.js";
 import { generateExcelUtil } from "./utils/generateExcelUtil.js";
 import { getZonesForExportUtil } from "./utils/getZonesForExportUtil.js";
-export const exportZonesToExcel = async (req, res) => {
+export const exportZonesToExcelController = async (req, res) => {
     try {
         // Получаем все зоны из базы данных
         const zones = await getZonesForExportUtil();

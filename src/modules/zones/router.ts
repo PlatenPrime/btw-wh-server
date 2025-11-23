@@ -5,7 +5,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   createZone,
   deleteZoneById,
-  exportZonesToExcel,
+  exportZonesToExcelController,
   getAllZones,
   getZoneById,
   getZoneByTitle,
@@ -37,7 +37,7 @@ router.get(
   "/export",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(exportZonesToExcel)
+  asyncHandler(exportZonesToExcelController)
 );
 
 // Получить зону по title - доступно только для ADMIN

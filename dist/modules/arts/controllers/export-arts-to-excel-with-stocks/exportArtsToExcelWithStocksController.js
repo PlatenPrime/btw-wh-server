@@ -7,7 +7,7 @@ import { getPosesQuantByArtikulUtil } from "./utils/getPosesQuantByArtikulUtil.j
  * @route   GET /api/arts/export-with-stocks
  * @access  Private (ADMIN)
  */
-export const exportArtsToExcelWithStocks = async (req, res) => {
+export const exportArtsToExcelWithStocksController = async (req, res) => {
     try {
         // Получаем все артикулы из базы данных
         const arts = await getArtsForExportExtendedUtil();

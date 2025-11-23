@@ -6,7 +6,7 @@ import { Art } from "../../../models/Art.js";
 export const getArtsForExportUtil = async () => {
     const arts = await Art.find()
         .sort({ artikul: 1 })
-        .select("artikul nameukr namerus zone limit marker btradeStock createdAt updatedAt")
+        .select("artikul nameukr namerus zone limit marker btradeStock ")
         .lean();
     return arts;
 };

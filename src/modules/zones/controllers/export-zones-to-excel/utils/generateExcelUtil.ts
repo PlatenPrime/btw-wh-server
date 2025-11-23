@@ -1,12 +1,7 @@
 import * as XLSX from "xlsx";
+import { ExcelZoneRow } from "./types.js";
 
-type ExcelZoneRow = {
-  "Название зоны": string;
-  Штрихкод: number;
-  Сектор: number;
-  "Дата создания": string;
-  "Дата обновления": string;
-};
+
 
 export const generateExcelUtil = (
   excelData: ExcelZoneRow[]
@@ -20,16 +15,15 @@ export const generateExcelUtil = (
 
   // Настраиваем ширину колонок
   const columnWidths = [
-    { wch: 15 }, // Название зоны
+    { wch: 15 }, // Назва зони
     { wch: 12 }, // Штрихкод
     { wch: 10 }, // Сектор
-    { wch: 15 }, // Дата создания
-    { wch: 15 }, // Дата обновления
+
   ];
   worksheet["!cols"] = columnWidths;
 
   // Добавляем лист в книгу
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Зоны");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Зони");
 
   // Генерируем буфер Excel файла
   const buffer = XLSX.write(workbook, {

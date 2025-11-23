@@ -5,15 +5,13 @@ export const generateExcelUtil = (excelData) => {
     const worksheet = XLSX.utils.json_to_sheet(excelData);
     // Настраиваем ширину колонок
     const columnWidths = [
-        { wch: 15 }, // Название зоны
+        { wch: 15 }, // Назва зони
         { wch: 12 }, // Штрихкод
         { wch: 10 }, // Сектор
-        { wch: 15 }, // Дата создания
-        { wch: 15 }, // Дата обновления
     ];
     worksheet["!cols"] = columnWidths;
     // Добавляем лист в книгу
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Зоны");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Зони");
     // Генерируем буфер Excel файла
     const buffer = XLSX.write(workbook, {
         type: "buffer",

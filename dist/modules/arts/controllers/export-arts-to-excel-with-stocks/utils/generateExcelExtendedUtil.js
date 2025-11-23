@@ -20,8 +20,6 @@ export const generateExcelExtendedUtil = (excelData) => {
         { wch: 18 }, // Дата Btrade Stock
         { wch: 12 }, // Запасы
         { wch: 12 }, // Витрина
-        { wch: 15 }, // Дата создания
-        { wch: 15 }, // Дата обновления
     ];
     worksheet["!cols"] = columnWidths;
     // Добавляем лист в книгу

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestZone } from "../../../../test/setup.js";
-import { exportZonesToExcel } from "../export-zones-to-excel/exportZonesToExcel.js";
+import { exportZonesToExcelController } from "../export-zones-to-excel/exportZonesToExcel.js";
 
 describe("exportZonesToExcel Controller", () => {
   let mockRequest: Partial<Request>;
@@ -44,7 +44,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -62,7 +62,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(404);
@@ -80,7 +80,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -99,7 +99,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -116,7 +116,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -132,7 +132,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -146,7 +146,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -163,7 +163,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -191,7 +191,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -207,7 +207,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);
@@ -221,7 +221,7 @@ describe("exportZonesToExcel Controller", () => {
     mockRequest = {};
 
     // Act
-    await exportZonesToExcel(mockRequest as Request, res);
+    await exportZonesToExcelController(mockRequest as Request, res);
 
     // Assert
     expect(responseStatus.code).toBe(200);

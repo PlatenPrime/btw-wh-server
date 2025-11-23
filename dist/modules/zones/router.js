@@ -2,14 +2,14 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { createZone, deleteZoneById, exportZonesToExcel, getAllZones, getZoneById, getZoneByTitle, getZonesByBlockId, updateZoneById, upsertZones, } from "./controllers/index.js";
+import { createZone, deleteZoneById, exportZonesToExcelController, getAllZones, getZoneById, getZoneByTitle, getZonesByBlockId, updateZoneById, upsertZones, } from "./controllers/index.js";
 const router = Router();
 // Создать зону - доступно только для ADMIN
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createZone));
 // Получить все зоны с пагинацией и поиском - доступно только для ADMIN
 router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllZones));
 // Экспорт зон в Excel - доступно только для ADMIN
-router.get("/export", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(exportZonesToExcel));
+router.get("/export", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(exportZonesToExcelController));
 // Получить зону по title - доступно только для ADMIN
 router.get("/title/:title", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getZoneByTitle));
 // Получить зоны по ID блока - доступно только для ADMIN

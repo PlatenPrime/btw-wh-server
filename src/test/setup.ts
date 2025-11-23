@@ -135,18 +135,23 @@ export const createTestPos = async (posData: any = {}) => {
   let pallet = posData.pallet;
   let row = posData.row;
 
+  if (!row) {
+    row = await Row.create({
+      title: `Test Row ${Date.now()}`,
+    });
+  }
+
   if (!pallet) {
     pallet = await Pallet.create({
       title: `Test Pallet ${Date.now()}`,
       sector: 1,
       isDef: false,
       poses: [],
-    });
-  }
-
-  if (!row) {
-    row = await Row.create({
-      title: `Test Row ${Date.now()}`,
+      row: row._id,
+      rowData: {
+        _id: row._id,
+        title: row.title,
+      },
     });
   }
 

@@ -9,7 +9,7 @@ import { getPosesQuantByArtikulUtil } from "./utils/getPosesQuantByArtikulUtil.j
  * @route   GET /api/arts/export-with-stocks
  * @access  Private (ADMIN)
  */
-export const exportArtsToExcelWithStocks = async (
+export const exportArtsToExcelWithStocksController = async (
   req: Request,
   res: Response
 ) => {
@@ -53,4 +53,3 @@ export const exportArtsToExcelWithStocks = async (
     }
   }
 };
-

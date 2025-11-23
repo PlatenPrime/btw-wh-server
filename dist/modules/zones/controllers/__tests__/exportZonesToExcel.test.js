@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestZone } from "../../../../test/setup.js";
-import { exportZonesToExcel } from "../export-zones-to-excel/exportZonesToExcel.js";
+import { exportZonesToExcelController } from "../export-zones-to-excel/exportZonesToExcel.js";
 describe("exportZonesToExcel Controller", () => {
     let mockRequest;
     let responseData;
@@ -37,7 +37,7 @@ describe("exportZonesToExcel Controller", () => {
         await createTestZone({ title: "42-3", bar: 4203, sector: 3 });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseHeaders["Content-Type"]).toBe("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -50,7 +50,7 @@ describe("exportZonesToExcel Controller", () => {
         // Arrange
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(404);
         expect(responseData.message).toBe("No zones found to export");
@@ -64,7 +64,7 @@ describe("exportZonesToExcel Controller", () => {
         });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseHeaders["Content-Type"]).toBe("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -77,7 +77,7 @@ describe("exportZonesToExcel Controller", () => {
         await createTestZone({ title: "42-2", bar: 4202, sector: 2 });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseData).toBeDefined();
@@ -90,7 +90,7 @@ describe("exportZonesToExcel Controller", () => {
         await createTestZone({ title: "1", bar: 1, sector: 4 });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseData).toBeDefined();
@@ -102,7 +102,7 @@ describe("exportZonesToExcel Controller", () => {
         await createTestZone({ title: "42-3", bar: 4203, sector: 1 });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseData).toBeDefined();
@@ -112,7 +112,7 @@ describe("exportZonesToExcel Controller", () => {
         await createTestZone({ title: "42-1", bar: 4201, sector: 1 });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         const today = new Date().toISOString().split("T")[0];
@@ -123,7 +123,7 @@ describe("exportZonesToExcel Controller", () => {
         await createTestZone({ title: "42-1", bar: 4201, sector: 1 });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseHeaders["Content-Type"]).toBe("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -143,7 +143,7 @@ describe("exportZonesToExcel Controller", () => {
         await Promise.all(zones);
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseData).toBeDefined();
@@ -155,7 +155,7 @@ describe("exportZonesToExcel Controller", () => {
         await createTestZone({ title: "42-2", bar: 4202, sector: 2 });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseData).toBeDefined();
@@ -165,7 +165,7 @@ describe("exportZonesToExcel Controller", () => {
         await createTestZone({ title: "42-1", bar: 4201, sector: 1 });
         mockRequest = {};
         // Act
-        await exportZonesToExcel(mockRequest, res);
+        await exportZonesToExcelController(mockRequest, res);
         // Assert
         expect(responseStatus.code).toBe(200);
         expect(responseData).toBeInstanceOf(Buffer);

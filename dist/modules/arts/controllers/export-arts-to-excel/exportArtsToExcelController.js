@@ -6,7 +6,7 @@ import { getArtsForExportUtil } from "./utils/getArtsForExportUtil.js";
  * @route   GET /api/arts/export
  * @access  Private (ADMIN)
  */
-export const exportArtsToExcel = async (req, res) => {
+export const exportArtsToExcelController = async (req, res) => {
     try {
         // Получаем все артикулы из базы данных
         const arts = await getArtsForExportUtil();

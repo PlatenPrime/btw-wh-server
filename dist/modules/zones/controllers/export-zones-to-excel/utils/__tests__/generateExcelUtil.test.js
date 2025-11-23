@@ -4,18 +4,14 @@ describe("generateExcelUtil", () => {
     it("генерирует Excel файл с корректной структурой", () => {
         const excelData = [
             {
-                "Название зоны": "1-1",
+                "Назва": "1-1",
                 Штрихкод: 10101,
                 Сектор: 0,
-                "Дата создания": "01.01.2024",
-                "Дата обновления": "02.01.2024",
             },
             {
-                "Название зоны": "2-1",
+                "Назва": "2-1",
                 Штрихкод: 20201,
                 Сектор: 1,
-                "Дата создания": "01.02.2024",
-                "Дата обновления": "02.02.2024",
             },
         ];
         const result = generateExcelUtil(excelData);
@@ -26,16 +22,13 @@ describe("generateExcelUtil", () => {
     it("генерирует корректное имя файла с текущей датой", () => {
         const excelData = [
             {
-                "Название зоны": "1-1",
+                "Назва": "1-1",
                 Штрихкод: 10101,
                 Сектор: 0,
-                "Дата создания": "01.01.2024",
-                "Дата обновления": "02.01.2024",
-            },
+            }
         ];
-        const today = new Date().toISOString().split("T")[0];
         const result = generateExcelUtil(excelData);
-        expect(result.fileName).toBe(`zones_export_${today}.xlsx`);
+        expect(result.fileName).toBe(`zones_export_${new Date().toISOString().split("T")[0]}.xlsx`);
     });
     it("обрабатывает пустой массив данных", () => {
         const result = generateExcelUtil([]);

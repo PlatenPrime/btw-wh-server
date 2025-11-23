@@ -14,4 +14,3 @@ export const getArtsForExportExtendedUtil = async (): Promise<IArt[]> => {
     .lean();
   return arts;
 };
-

@@ -14,12 +14,10 @@ export const generateExcelUtil = (excelData) => {
         { wch: 30 }, // Название (укр)
         { wch: 30 }, // Название (рус)
         { wch: 10 }, // Зона
-        { wch: 10 }, // Лимит
+        { wch: 10 }, // Ліміт
         { wch: 15 }, // Маркер
-        { wch: 15 }, // Btrade Stock
-        { wch: 18 }, // Дата Btrade Stock
-        { wch: 15 }, // Дата создания
-        { wch: 15 }, // Дата обновления
+        { wch: 15 }, // Залишки на сайті
+        { wch: 18 }, // Дата оновлення залишків
     ];
     worksheet["!cols"] = columnWidths;
     // Добавляем лист в книгу
