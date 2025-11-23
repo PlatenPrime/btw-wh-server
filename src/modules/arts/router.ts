@@ -2,6 +2,7 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import {
+  deleteArtsWithoutLatestMarkerController,
   exportArtsToExcelController,
   exportArtsToExcelWithStocksController,
   getAllArtsController,
@@ -83,6 +84,14 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   exportArtsToExcelWithStocksController
+);
+
+// Удалить все артикулы без последнего актуального маркера - доступно только для PRIME
+router.delete(
+  "/without-latest-marker",
+  checkAuth,
+  checkRoles([RoleType.PRIME]),
+  deleteArtsWithoutLatestMarkerController
 );
 
 export default router;

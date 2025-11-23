@@ -15,7 +15,7 @@ This document describes the available API endpoints for the `arts` module. Use t
 | `namerus`     | `string`          | No       | Name in Russian           |
 | `zone`        | `string`          | Yes      | Zone/category             |
 | `limit`       | `number`          | No       | Limit value               |
-| `marker`      | `string`          | No       | Marker/label              |
+| `marker`      | `string`          | No       | Date marker in YYYYMMDD format (e.g., "20251123" for November 23, 2025). Automatically set on upsert if not provided. |
 | `btradeStock` | `{ value, date }` | No       | Btrade stock info         |
 | `createdAt`   | `Date`            | No       | Creation timestamp        |
 | `updatedAt`   | `Date`            | No       | Update timestamp          |
@@ -133,6 +133,7 @@ This document describes the available API endpoints for the `arts` module. Use t
 ### 6. Upsert Arts (Bulk Insert/Update)
 
 - **URL:** `POST /arts/upsert`
+- **Access:** ADMIN, PRIME
 - **Body:** Array of Art objects (see model above)
 
 ```json
@@ -141,8 +142,9 @@ This document describes the available API endpoints for the `arts` module. Use t
     "artikul": "...",
     "zone": "...",
     "nameukr": "...",
-    "namerus": "..."
-    // ...other fields
+    "namerus": "...",
+    "limit": 10,
+    "marker": "20251123"  // Optional: if not provided, current date marker will be set automatically
   }
   // ...
 ]
@@ -159,9 +161,101 @@ This document describes the available API endpoints for the `arts` module. Use t
 }
 ```
 
+- **Notes:**
+  - If `marker` is not provided in the request, it will be automatically set to the current date in YYYYMMDD format (based on Europe/Kyiv timezone)
+  - You can still manually set `marker` if needed
+  - All arts in the same upsert batch will receive the same auto-generated marker if not explicitly provided
+
 - **Errors:**
-  - `400` — Invalid or empty data
+  - `400` — Invalid or empty data / Validation error
+  - `401` — Unauthorized
+  - `403` — Insufficient permissions (requires ADMIN or PRIME role)
   - `500` — Server error
+
+---
+
+### 7. Delete Arts Without Latest Marker
+
+- **URL:** `DELETE /arts/without-latest-marker`
+- **Access:** PRIME only
+- **Description:** Deletes all arts that don't have the latest marker value. This endpoint finds the maximum marker among all arts in the database and removes all arts with:
+  - Missing marker (null, undefined, empty string)
+  - Marker value less than the maximum marker
+
+- **Request:** No body required
+
+- **Response:**
+
+```json
+{
+  "message": "Arts without latest marker deleted successfully",
+  "result": {
+    "deletedCount": 42,
+    "latestMarker": "20251123"
+  }
+}
+```
+
+- **Response Fields:**
+  - `deletedCount` (number) — Number of arts that were deleted
+  - `latestMarker` (string | null) — The maximum marker value found in the database (null if no markers exist)
+
+- **Example Usage:**
+
+```javascript
+// Using fetch with error handling
+async function deleteArtsWithoutLatestMarker(token) {
+  try {
+    const response = await fetch('/api/arts/without-latest-marker', {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Failed to delete arts');
+    }
+
+    const data = await response.json();
+    console.log(`Deleted ${data.result.deletedCount} arts`);
+    console.log(`Latest marker was: ${data.result.latestMarker}`);
+    
+    return data;
+  } catch (error) {
+    console.error('Error deleting arts:', error);
+    throw error;
+  }
+}
+
+// Usage
+deleteArtsWithoutLatestMarker(userToken)
+  .then(result => {
+    // Handle success
+    alert(`Удалено артикулов: ${result.result.deletedCount}`);
+  })
+  .catch(error => {
+    // Handle error (401, 403, 500, etc.)
+    if (error.message.includes('403')) {
+      alert('Недостаточно прав. Требуется роль PRIME.');
+    } else {
+      alert(`Ошибка: ${error.message}`);
+    }
+  });
+```
+
+- **Errors:**
+  - `401` — Unauthorized (missing or invalid token)
+  - `403` — Insufficient permissions (requires PRIME role)
+  - `500` — Server error
+
+- **Important Notes:**
+  - ⚠️ **This operation is irreversible** — deleted arts cannot be recovered
+  - Only users with PRIME role can access this endpoint
+  - The operation finds the maximum marker value and deletes all arts with markers less than that value or without markers
+  - If no arts exist or no markers are found, `deletedCount` will be 0 and `latestMarker` will be null
 
 ---
 
