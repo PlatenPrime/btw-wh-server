@@ -1,9 +1,9 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
 
-// Интерфейс для связи зоны с блоком
-interface IZoneBlock {
+// Интерфейс для связи зоны с сегментом
+interface IZoneSeg {
   id: mongoose.Types.ObjectId;
-  title: string;
+  title?: string; // Опционально для кеширования
 }
 
 // Интерфейс для Zone
@@ -12,8 +12,7 @@ export interface IZone extends Document {
   title: string; // "42-5-2" (row-rack-shelf)
   bar: number; // 420502 (for Code-128 barcode)
   sector: number; // 0 (default, calculated later by separate service)
-  block?: IZoneBlock; // Связь с блоком (опционально)
-  order?: number; // Позиция внутри блока (опционально, если зона в блоке)
+  seg?: IZoneSeg; // Связь с сегментом (опционально)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,18 +46,14 @@ const zoneSchema = new Schema<IZone>(
       default: 0,
       min: [0, "Sector must be non-negative"],
     },
-    block: {
+    seg: {
       id: {
         type: Schema.Types.ObjectId,
-        ref: "Block",
+        ref: "Seg",
       },
       title: {
         type: String,
       },
-    },
-    order: {
-      type: Number,
-      min: [0, "Order must be non-negative"],
     },
   },
   { timestamps: true }

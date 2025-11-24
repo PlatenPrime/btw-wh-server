@@ -5,6 +5,7 @@ export interface IBlock extends Document {
   _id: Types.ObjectId;
   title: string; // Название блока (уникальное)
   order: number; // Позиция в общем списке блоков (для расчета секторов)
+  segs: Types.ObjectId[]; // Массив ссылок на сегменты
   createdAt: Date;
   updatedAt: Date;
 }
@@ -22,6 +23,7 @@ const blockSchema = new Schema<IBlock>(
       required: true,
       min: [1, "Order must be at least 1"],
     },
+    segs: [{ type: Schema.Types.ObjectId, ref: "Seg" }],
   },
   { timestamps: true }
 );

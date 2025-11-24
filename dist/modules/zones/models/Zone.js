@@ -26,18 +26,14 @@ const zoneSchema = new Schema({
         default: 0,
         min: [0, "Sector must be non-negative"],
     },
-    block: {
+    seg: {
         id: {
             type: Schema.Types.ObjectId,
-            ref: "Block",
+            ref: "Seg",
         },
         title: {
             type: String,
         },
-    },
-    order: {
-        type: Number,
-        min: [0, "Order must be non-negative"],
     },
 }, { timestamps: true });
 // Индексы для оптимизации поиска (уникальные поля уже имеют индексы)

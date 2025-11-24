@@ -11,6 +11,7 @@ const blockSchema = new Schema({
         required: true,
         min: [1, "Order must be at least 1"],
     },
+    segs: [{ type: Schema.Types.ObjectId, ref: "Seg" }],
 }, { timestamps: true });
 // Индексы для оптимизации
 blockSchema.index({ order: 1 }); // Для сортировки по order
