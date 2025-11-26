@@ -521,6 +521,74 @@ const response = await fetch(`/api/segs/${segId}`, {
 - `404`: Segment not found
 - `500`: Server error
 
+### 8. Bulk Upsert Segments
+
+**POST** `/api/segs/upsert`
+
+Creates or updates multiple segments in one request. Existing segments are matched by `_id`; omit `_id` to create new segments. All operations are executed inside a MongoDB transaction to keep blocks, segments, and zones consistent.
+
+#### Request Body
+
+```typescript
+[
+  {
+    _id?: string; // Optional: existing segment ObjectId
+    blockId: string; // Required: parent block id
+    order: number; // Required: >= 1
+    zones: string[]; // Required: >= 1 zone id
+  }
+]
+```
+
+#### Validation Rules
+
+- Each entry must reference an existing block.
+- Zone ids must exist and cannot appear in multiple payload entries.
+- When updating, `blockId` must match the segment's current block (block transfers are not supported via this endpoint).
+- Zones already attached to other segments (outside the payload) will trigger an error—detach them first.
+
+#### Example Request
+
+```typescript
+await fetch("/api/segs/upsert", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify([
+    {
+      blockId: blockId,
+      order: 1,
+      zones: [zoneAId, zoneBId],
+    },
+    {
+      _id: existingSegId,
+      blockId: blockId,
+      order: 2,
+      zones: [zoneCId],
+    },
+  ]),
+});
+```
+
+#### Example Response
+
+```typescript
+{
+  message: "Segments upsert completed",
+  data: {
+    processedSegs: ISeg[];
+  }
+}
+```
+
+#### Notes
+
+- Zones removed from a segment are automatically cleared (`seg` unset, `sector = 0`).
+- Updated segments automatically receive recalculated sectors using the parent block order.
+- Combine this endpoint with `/api/blocks/upsert` for full spreadsheet/drag-and-drop workflows.
+
 ## Frontend Integration
 
 ### TypeScript Types
@@ -718,6 +786,7 @@ const useDeleteSeg = () => {
 4. **Sector Recalculation**: Call `/api/blocks/recalculate-zones-sectors` after updating segment positions
 5. **Error Handling**: Always handle errors and show user-friendly messages
 6. **Cache Management**: Invalidate related queries (segs, zones, blocks) after mutations
+7. **Bulk sync**: Prefer `POST /api/segs/upsert` when saving large reorder operations instead of issuing many `PUT` calls per segment.
 
 ## Notes
 

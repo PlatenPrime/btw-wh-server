@@ -492,6 +492,70 @@ Where:
 
 Zones without a segment receive `sector = 0`.
 
+### 8. Bulk Upsert Blocks
+
+**POST** `/api/blocks/upsert`
+
+Creates or updates multiple blocks in a single request. Existing blocks are matched by `_id`. If `_id` is omitted, a new block is created with a generated ObjectId. This endpoint is ideal for spreadsheets or drag-and-drop editors where the entire list of blocks needs to be synchronized at once.
+
+#### Request Body
+
+```typescript
+[
+  {
+    _id?: string; // Optional: existing block ObjectId
+    title: string; // Required: unique title
+    order: number; // Required: >= 1
+    segs?: string[]; // Optional: array of segment ObjectIds that already belong to this block
+  }
+]
+```
+
+#### Validation Rules
+
+- Each entry must contain a title and order.
+- Titles must be unique within the payload (case-insensitive) and the database.
+- When `segs` is provided, every segment id must already exist and belong to the same block (new blocks should omit `segs`).
+- Blocks cannot share the same `_id` within the payload.
+
+#### Example Request
+
+```typescript
+await fetch("/api/blocks/upsert", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify([
+    { title: "Block Alpha", order: 1 },
+    { _id: existingBlockId, title: "Block Beta (renamed)", order: 2 },
+  ]),
+});
+```
+
+#### Example Response
+
+```typescript
+{
+  message: "Blocks upsert completed",
+  data: {
+    bulkResult: {
+      matchedCount: number;
+      modifiedCount: number;
+      upsertedCount: number;
+    },
+    updatedBlocks: IBlock[];
+  }
+}
+```
+
+#### Notes
+
+- This endpoint does **not** delete blocks missing from the payload.
+- Segment metadata (`blockData.title`) is kept in sync automatically after the upsert.
+- Combine this endpoint with `/api/segs/upsert` to keep blocks and segments updated in lockstep.
+
 ## Frontend Integration
 
 ### TypeScript Types
@@ -812,6 +876,7 @@ const useRecalculateZonesSectors = () => {
 7. **Loading States**: Show loading indicators during sector recalculation (it's a resource-intensive operation)
 8. **Cache Management**: Invalidate zones, segs, and blocks queries after sector recalculation
 9. **Check exists flag**: Always check the `exists` flag in get responses instead of relying on HTTP status codes
+10. **Bulk sync**: Use `POST /api/blocks/upsert` to persist drag-and-drop or spreadsheet edits in one call instead of chaining multiple `PUT /:id` requests.
 
 ## Error Handling
 

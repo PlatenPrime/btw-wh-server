@@ -10,6 +10,7 @@ import {
   recalculateZonesSectors,
   resetZonesSectors,
   updateBlock,
+  upsertBlocksController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -44,6 +45,14 @@ router.put(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(updateBlock)
+);
+
+// Массовый upsert блоков - доступно только для ADMIN
+router.post(
+  "/upsert",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(upsertBlocksController)
 );
 
 // Удалить блок - доступно только для ADMIN

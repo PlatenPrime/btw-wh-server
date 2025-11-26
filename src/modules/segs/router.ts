@@ -10,6 +10,7 @@ import {
   getSegsByBlockId,
   getZonesBySegId,
   updateSeg,
+  upsertSegsController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -20,6 +21,14 @@ router.post(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(createSeg)
+);
+
+// Массовый upsert сегментов - доступно только для ADMIN
+router.post(
+  "/upsert",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(upsertSegsController)
 );
 
 // Получить все сегменты - доступно только для ADMIN

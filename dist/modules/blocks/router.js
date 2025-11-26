@@ -2,7 +2,7 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { createBlock, deleteBlock, getAllBlocks, getBlockById, recalculateZonesSectors, resetZonesSectors, updateBlock, } from "./controllers/index.js";
+import { createBlock, deleteBlock, getAllBlocks, getBlockById, recalculateZonesSectors, resetZonesSectors, updateBlock, upsertBlocksController, } from "./controllers/index.js";
 const router = Router();
 // Создать блок - доступно только для ADMIN
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createBlock));
@@ -12,6 +12,8 @@ router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllBloc
 router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getBlockById));
 // Обновить блок - доступно только для ADMIN
 router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateBlock));
+// Массовый upsert блоков - доступно только для ADMIN
+router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(upsertBlocksController));
 // Удалить блок - доступно только для ADMIN
 router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deleteBlock));
 // Разовый контроллер: сбросить сектора всех зон - доступно только для ADMIN

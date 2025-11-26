@@ -2,10 +2,12 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { createSeg, deleteSeg, getAllSegs, getSegById, getSegsByBlockId, getZonesBySegId, updateSeg, } from "./controllers/index.js";
+import { createSeg, deleteSeg, getAllSegs, getSegById, getSegsByBlockId, getZonesBySegId, updateSeg, upsertSegsController, } from "./controllers/index.js";
 const router = Router();
 // Создать сегмент - доступно только для ADMIN
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createSeg));
+// Массовый upsert сегментов - доступно только для ADMIN
+router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(upsertSegsController));
 // Получить все сегменты - доступно только для ADMIN
 router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllSegs));
 // Получить сегменты по ID блока - доступно только для ADMIN
