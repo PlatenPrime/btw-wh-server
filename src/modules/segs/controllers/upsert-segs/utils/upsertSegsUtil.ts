@@ -107,6 +107,10 @@ export const upsertSegsUtil = async ({
     throw new Error("One or more zones not found");
   }
 
+  // Создать мапу зон для быстрого доступа
+  const zoneMap = new Map<string, (typeof existingZones)[number]>();
+  existingZones.forEach((zone) => zoneMap.set(zone._id.toString(), zone));
+
   const processedSegs: ISeg[] = [];
 
   for (const segInput of normalizedSegs) {
@@ -128,15 +132,15 @@ export const upsertSegsUtil = async ({
 
     const zonesToRemove =
       existingSeg?.zones.filter(
-        (zoneId) =>
+        (zone) =>
           !segInput.zoneIds.some((inputZoneId) =>
-            inputZoneId.equals(zoneId as mongoose.Types.ObjectId)
+            inputZoneId.equals(zone._id)
           )
       ) ?? [];
 
     if (zonesToRemove.length > 0) {
       await Zone.updateMany(
-        { _id: { $in: zonesToRemove } },
+        { _id: { $in: zonesToRemove.map((zone) => zone._id) } },
         {
           $unset: { seg: "" },
           $set: { sector: 0 },
@@ -148,8 +152,8 @@ export const upsertSegsUtil = async ({
     const zonesToAdd = existingSeg
       ? segInput.zoneIds.filter(
           (zoneId) =>
-            !existingSeg.zones.some((existingZoneId) =>
-              zoneId.equals(existingZoneId as mongoose.Types.ObjectId)
+            !existingSeg.zones.some((existingZone) =>
+              zoneId.equals(existingZone._id)
             )
         )
       : segInput.zoneIds;
@@ -185,12 +189,24 @@ export const upsertSegsUtil = async ({
       );
     }
 
+    // Подготовить массив зон с _id и title
+    const zonesData = segInput.zoneIds.map((zoneId) => {
+      const zone = zoneMap.get(zoneId.toString());
+      if (!zone) {
+        throw new Error(`Zone ${zoneId.toString()} not found in zoneMap`);
+      }
+      return {
+        _id: zone._id,
+        title: zone.title,
+      };
+    });
+
     const payload = {
       block: block._id,
       blockData: { _id: block._id, title: block.title },
       order: segInput.order,
       sector,
-      zones: segInput.zoneIds,
+      zones: zonesData,
     };
 
     let segDoc: ISeg | null = null;

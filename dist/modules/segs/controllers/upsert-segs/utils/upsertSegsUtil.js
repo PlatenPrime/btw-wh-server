@@ -62,6 +62,9 @@ export const upsertSegsUtil = async ({ segs, session, }) => {
     if (existingZones.length !== allZoneIds.length) {
         throw new Error("One or more zones not found");
     }
+    // Создать мапу зон для быстрого доступа
+    const zoneMap = new Map();
+    existingZones.forEach((zone) => zoneMap.set(zone._id.toString(), zone));
     const processedSegs = [];
     for (const segInput of normalizedSegs) {
         const block = blockMap.get(segInput.blockId.toString());
@@ -74,15 +77,15 @@ export const upsertSegsUtil = async ({ segs, session, }) => {
         if (existingSeg && existingSeg.block.toString() !== segInput.blockId.toString()) {
             throw new Error(`Segment ${segIdString} cannot change block reference`);
         }
-        const zonesToRemove = existingSeg?.zones.filter((zoneId) => !segInput.zoneIds.some((inputZoneId) => inputZoneId.equals(zoneId))) ?? [];
+        const zonesToRemove = existingSeg?.zones.filter((zone) => !segInput.zoneIds.some((inputZoneId) => inputZoneId.equals(zone._id))) ?? [];
         if (zonesToRemove.length > 0) {
-            await Zone.updateMany({ _id: { $in: zonesToRemove } }, {
+            await Zone.updateMany({ _id: { $in: zonesToRemove.map((zone) => zone._id) } }, {
                 $unset: { seg: "" },
                 $set: { sector: 0 },
             }, { session });
         }
         const zonesToAdd = existingSeg
-            ? segInput.zoneIds.filter((zoneId) => !existingSeg.zones.some((existingZoneId) => zoneId.equals(existingZoneId)))
+            ? segInput.zoneIds.filter((zoneId) => !existingSeg.zones.some((existingZone) => zoneId.equals(existingZone._id)))
             : segInput.zoneIds;
         if (zonesToAdd.length > 0) {
             const conflictingZones = await Zone.find({
@@ -106,12 +109,23 @@ export const upsertSegsUtil = async ({ segs, session, }) => {
                 },
             }, { session });
         }
+        // Подготовить массив зон с _id и title
+        const zonesData = segInput.zoneIds.map((zoneId) => {
+            const zone = zoneMap.get(zoneId.toString());
+            if (!zone) {
+                throw new Error(`Zone ${zoneId.toString()} not found in zoneMap`);
+            }
+            return {
+                _id: zone._id,
+                title: zone.title,
+            };
+        });
         const payload = {
             block: block._id,
             blockData: { _id: block._id, title: block.title },
             order: segInput.order,
             sector,
-            zones: segInput.zoneIds,
+            zones: zonesData,
         };
         let segDoc = null;
         if (existingSeg) {

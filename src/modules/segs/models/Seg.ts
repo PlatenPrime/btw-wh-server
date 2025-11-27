@@ -9,6 +9,14 @@ interface IBlockSubdocument {
 }
 
 /**
+ * Zone subdocument interface for Seg
+ */
+export interface IZoneSubdocument {
+  _id: Types.ObjectId;
+  title: string;
+}
+
+/**
  * Seg document interface
  */
 export interface ISeg extends Document {
@@ -17,12 +25,20 @@ export interface ISeg extends Document {
   blockData: IBlockSubdocument;
   sector: number;
   order: number;
-  zones: Types.ObjectId[];
+  zones: IZoneSubdocument[];
   createdAt?: Date;
   updatedAt?: Date;
 }
 
 const blockSubdocumentSchema = new Schema<IBlockSubdocument>(
+  {
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: { type: String, required: true },
+  },
+  { _id: false }
+);
+
+const zoneSubdocumentSchema = new Schema<IZoneSubdocument>(
   {
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
@@ -45,7 +61,7 @@ const segSchema = new Schema<ISeg>(
       required: true,
       min: [1, "Order must be at least 1"],
     },
-    zones: [{ type: Schema.Types.ObjectId, ref: "Zone" }],
+    zones: [zoneSubdocumentSchema],
   },
   { timestamps: true }
 );
@@ -61,4 +77,3 @@ export { segSchema };
  * @see ISeg
  */
 export const Seg = model<ISeg>("Seg", segSchema);
-

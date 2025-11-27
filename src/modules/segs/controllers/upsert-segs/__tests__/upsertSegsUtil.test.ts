@@ -65,7 +65,7 @@ describe("upsertSegsUtil", () => {
       blockData: { _id: block._id, title: block.title },
       order: 1,
       sector: block.order * 1000 + 1,
-      zones: [zoneInitial._id],
+      zones: [{ _id: zoneInitial._id, title: zoneInitial.title }],
     });
 
     await Zone.updateOne(
@@ -98,7 +98,8 @@ describe("upsertSegsUtil", () => {
     const updatedSeg = await Seg.findById(seg._id).lean().exec();
     expect(updatedSeg?.order).toBe(2);
     expect(updatedSeg?.zones).toHaveLength(1);
-    expect(updatedSeg?.zones[0].toString()).toBe(zoneNew._id.toString());
+    expect(updatedSeg?.zones[0]._id.toString()).toBe(zoneNew._id.toString());
+    expect(updatedSeg?.zones[0].title).toBe(zoneNew.title);
 
     const removedZone = await Zone.findById(zoneInitial._id).lean().exec();
     expect(removedZone?.seg).toBeUndefined();
@@ -118,7 +119,7 @@ describe("upsertSegsUtil", () => {
       blockData: { _id: block._id, title: block.title },
       order: 1,
       sector: block.order * 1000 + 1,
-      zones: [zone._id],
+      zones: [{ _id: zone._id, title: zone.title }],
     });
 
     await Zone.updateOne(

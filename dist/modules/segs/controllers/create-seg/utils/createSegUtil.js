@@ -21,6 +21,11 @@ export const createSegUtil = async ({ blockData, order, zones, session, }) => {
     }
     // Рассчитать сектор для сегмента
     const sector = blockData.order * SECTOR_MULTIPLIER + order;
+    // Подготовить массив зон с _id и title
+    const zonesData = existingZones.map((zone) => ({
+        _id: zone._id,
+        title: zone.title,
+    }));
     // Создать сегмент
     const created = await Seg.create([
         {
@@ -28,7 +33,7 @@ export const createSegUtil = async ({ blockData, order, zones, session, }) => {
             blockData: { _id: blockData._id, title: blockData.title },
             sector,
             order,
-            zones: zoneObjectIds,
+            zones: zonesData,
         },
     ], { session });
     if (!created || !created[0]) {

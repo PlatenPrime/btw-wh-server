@@ -3,6 +3,10 @@ const blockSubdocumentSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
 }, { _id: false });
+const zoneSubdocumentSchema = new Schema({
+    _id: { type: Schema.Types.ObjectId, required: true },
+    title: { type: String, required: true },
+}, { _id: false });
 const segSchema = new Schema({
     block: { type: Schema.Types.ObjectId, required: true, ref: "Block" },
     blockData: { type: blockSubdocumentSchema, required: true },
@@ -17,7 +21,7 @@ const segSchema = new Schema({
         required: true,
         min: [1, "Order must be at least 1"],
     },
-    zones: [{ type: Schema.Types.ObjectId, ref: "Zone" }],
+    zones: [zoneSubdocumentSchema],
 }, { timestamps: true });
 // Индексы для оптимизации
 segSchema.index({ block: 1, order: 1 }); // Для сортировки сегментов в блоке

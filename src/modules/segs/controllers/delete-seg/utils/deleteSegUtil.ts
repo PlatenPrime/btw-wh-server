@@ -23,9 +23,10 @@ export const deleteSegUtil = async ({
 
   // Удалить ссылки seg из всех зон сегмента
   if (existingSeg.zones.length > 0) {
+    const zoneIds = existingSeg.zones.map((zone) => zone._id);
     await Zone.updateMany(
       {
-        _id: { $in: existingSeg.zones },
+        _id: { $in: zoneIds },
       },
       {
         $unset: {

@@ -42,8 +42,8 @@ export const updateSegUtil = async ({ segId, updateData, session, }) => {
         if (zonesWithOtherSegs.length > 0) {
             throw new Error(`Zones already belong to other segments: ${zonesWithOtherSegs.map((z) => z._id.toString()).join(", ")}`);
         }
-        // Собрать старые zoneId
-        const oldZoneIds = existingSeg.zones.map((zoneId) => zoneId.toString());
+        // Собрать старые zoneId (теперь zones - массив объектов)
+        const oldZoneIds = existingSeg.zones.map((zone) => zone._id.toString());
         const newZoneIds = updateData.zones;
         // Найти зоны, которые нужно удалить из сегмента
         const zonesToRemove = oldZoneIds.filter((zoneId) => !newZoneIds.includes(zoneId));
@@ -60,8 +60,13 @@ export const updateSegUtil = async ({ segId, updateData, session, }) => {
                 },
             }, { session });
         }
+        // Подготовить массив зон с _id и title
+        const zonesData = existingZones.map((zone) => ({
+            _id: zone._id,
+            title: zone.title,
+        }));
         // Обновить массив zones в сегменте
-        updateDataSeg.zones = zoneObjectIds;
+        updateDataSeg.zones = zonesData;
         // Обновить ссылки seg в новых зонах
         await Zone.updateMany({
             _id: { $in: zoneObjectIds },
@@ -78,7 +83,7 @@ export const updateSegUtil = async ({ segId, updateData, session, }) => {
     // Обновить сектор во всех зонах сегмента
     const finalZoneIds = updateData.zones !== undefined
         ? updateData.zones.map((id) => new mongoose.Types.ObjectId(id))
-        : existingSeg.zones;
+        : existingSeg.zones.map((zone) => zone._id);
     await Zone.updateMany({
         _id: { $in: finalZoneIds },
     }, {

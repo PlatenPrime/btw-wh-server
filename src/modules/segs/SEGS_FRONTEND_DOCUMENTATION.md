@@ -22,7 +22,10 @@ interface ISeg {
   };
   sector: number; // Calculated sector: blockOrder * 1000 + segOrder
   order: number; // Position within the block (1-based, starts from 1)
-  zones: string[]; // Array of Zone ObjectIds
+  zones: Array<{
+    _id: string; // Zone ObjectId
+    title: string; // Zone title (cached)
+  }>; // Array of zone objects with id and title
   createdAt: Date; // Creation timestamp
   updatedAt: Date; // Last update timestamp
 }
@@ -38,7 +41,7 @@ interface ISeg {
   - `title`: Block title
 - `sector`: Calculated value based on formula: `blockOrder * 1000 + segOrder`
 - `order`: Position within the block (1-based, starts from 1)
-- `zones`: Array of Zone ObjectIds (minimum 1 zone required)
+- `zones`: Array of zone objects with `_id` and `title` (minimum 1 zone required). Zone titles are cached for performance, eliminating the need for additional API calls.
 - `createdAt/updatedAt`: Automatic timestamps
 
 ## Sector Calculation Logic
@@ -134,9 +137,9 @@ const response = await fetch("/api/segs/", {
     sector: 1001,
     order: 1,
     zones: [
-      "507f1f77bcf86cd799439031",
-      "507f1f77bcf86cd799439032",
-      "507f1f77bcf86cd799439033",
+      { _id: "507f1f77bcf86cd799439031", title: "42-1" },
+      { _id: "507f1f77bcf86cd799439032", title: "42-2" },
+      { _id: "507f1f77bcf86cd799439033", title: "42-3" },
     ],
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z"
@@ -183,7 +186,10 @@ const response = await fetch("/api/segs/", {
       },
       sector: 1001,
       order: 1,
-      zones: ["507f1f77bcf86cd799439031", "507f1f77bcf86cd799439032"],
+      zones: [
+        { _id: "507f1f77bcf86cd799439031", title: "42-1" },
+        { _id: "507f1f77bcf86cd799439032", title: "42-2" },
+      ],
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z"
     }
@@ -292,7 +298,7 @@ const response = await fetch(`/api/segs/by-block/${blockId}`, {
       },
       sector: 1001,
       order: 1,
-      zones: ["507f1f77bcf86cd799439031"],
+      zones: [{ _id: "507f1f77bcf86cd799439031", title: "42-1" }],
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z"
     },
@@ -305,7 +311,7 @@ const response = await fetch(`/api/segs/by-block/${blockId}`, {
       },
       sector: 1002,
       order: 2,
-      zones: ["507f1f77bcf86cd799439032"],
+      zones: [{ _id: "507f1f77bcf86cd799439032", title: "42-2" }],
       createdAt: "2024-01-01T00:00:00.000Z",
       updatedAt: "2024-01-01T00:00:00.000Z"
     }
@@ -442,10 +448,10 @@ const response = await fetch(`/api/segs/${segId}`, {
     sector: 1002, // Updated based on new order
     order: 2,
     zones: [
-      "507f1f77bcf86cd799439031",
-      "507f1f77bcf86cd799439032",
-      "507f1f77bcf86cd799439033",
-      "507f1f77bcf86cd799439034",
+      { _id: "507f1f77bcf86cd799439031", title: "42-1" },
+      { _id: "507f1f77bcf86cd799439032", title: "42-2" },
+      { _id: "507f1f77bcf86cd799439033", title: "42-3" },
+      { _id: "507f1f77bcf86cd799439034", title: "42-4" },
     ],
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T01:00:00.000Z"
@@ -502,7 +508,10 @@ const response = await fetch(`/api/segs/${segId}`, {
     },
     sector: 1001,
     order: 1,
-    zones: ["507f1f77bcf86cd799439031", "507f1f77bcf86cd799439032"],
+    zones: [
+      { _id: "507f1f77bcf86cd799439031", title: "42-1" },
+      { _id: "507f1f77bcf86cd799439032", title: "42-2" },
+    ],
     createdAt: "2024-01-01T00:00:00.000Z",
     updatedAt: "2024-01-01T00:00:00.000Z"
   }
@@ -604,7 +613,10 @@ interface Segment {
   };
   sector: number;
   order: number;
-  zones: string[];
+  zones: Array<{
+    _id: string;
+    title: string;
+  }>;
   createdAt: string;
   updatedAt: string;
 }
