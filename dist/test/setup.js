@@ -6,10 +6,12 @@ import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 import "../modules/arts/models/Art.js";
 import "../modules/asks/models/Ask.js";
 import "../modules/auth/models/User.js";
+import "../modules/blocks/models/Block.js";
 import "../modules/defs/models/Def.js";
 import "../modules/pallets/models/Pallet.js";
 import "../modules/poses/models/Pos.js";
 import "../modules/rows/models/Row.js";
+import "../modules/segs/models/Seg.js";
 import "../modules/zones/models/Zone.js";
 // Load environment variables
 dotenv.config({ path: ".env.test" });

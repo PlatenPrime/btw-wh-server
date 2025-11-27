@@ -1,6 +1,6 @@
+import { Seg } from "../../segs/models/Seg.js";
 import { Zone } from "../../zones/models/Zone.js";
 import { Block } from "../models/Block.js";
-import { Seg } from "../../segs/models/Seg.js";
 // Константа для разделения секторов между блоками
 const SECTOR_MULTIPLIER = 1000;
 /**
@@ -18,12 +18,25 @@ export const calculateZonesSectorsUtil = async () => {
     // 3. Подготовить операции для bulkWrite зон и сегментов
     const zoneOperations = [];
     const segOperations = [];
-    // 4. Рассчитать сектора для сегментов в блоках
+    // 4. Получить все сегменты всех блоков одним запросом
+    const blockIds = blocks.map((block) => block._id);
+    const allSegs = await Seg.find({ block: { $in: blockIds } })
+        .sort({ block: 1, order: 1 })
+        .exec();
+    // 5. Сгруппировать сегменты по блокам
+    const segsByBlock = new Map();
+    for (const seg of allSegs) {
+        const blockId = seg.block.toString();
+        if (!segsByBlock.has(blockId)) {
+            segsByBlock.set(blockId, []);
+        }
+        segsByBlock.get(blockId).push(seg);
+    }
+    // 6. Рассчитать сектора для сегментов в блоках
+    // Собираем Set всех зон, которые уже обработаны через сегменты
+    const zonesInSegs = new Set();
     for (const block of blocks) {
-        // Получить все сегменты этого блока, отсортированные по order
-        const segs = await Seg.find({ block: block._id })
-            .sort({ order: 1 })
-            .exec();
+        const segs = segsByBlock.get(block._id.toString()) || [];
         for (const seg of segs) {
             // Рассчитать сектор для сегмента
             // Формула: sector = blockOrder * 1000 + segOrder
@@ -37,6 +50,7 @@ export const calculateZonesSectorsUtil = async () => {
             });
             // Обновить сектор для всех зон этого сегмента
             seg.zones.forEach((zoneId) => {
+                zonesInSegs.add(zoneId.toString());
                 zoneOperations.push({
                     updateOne: {
                         filter: { _id: zoneId },
@@ -46,8 +60,9 @@ export const calculateZonesSectorsUtil = async () => {
             });
         }
     }
-    // 5. Установить sector = 0 для всех зон без сегмента
-    const zonesWithoutSeg = allZones.filter((zone) => !zone.seg || !zone.seg.id);
+    // 7. Установить sector = 0 для всех зон без сегмента
+    // Исключаем зоны, которые уже обработаны через сегменты
+    const zonesWithoutSeg = allZones.filter((zone) => (!zone.seg || !zone.seg.id) && !zonesInSegs.has(zone._id.toString()));
     zonesWithoutSeg.forEach((zone) => {
         zoneOperations.push({
             updateOne: {
@@ -56,11 +71,11 @@ export const calculateZonesSectorsUtil = async () => {
             },
         });
     });
-    // 6. Выполнить bulkWrite для обновления секторов сегментов
+    // 8. Выполнить bulkWrite для обновления секторов сегментов
     if (segOperations.length > 0) {
         await Seg.bulkWrite(segOperations);
     }
-    // 7. Выполнить bulkWrite для обновления секторов зон
+    // 9. Выполнить bulkWrite для обновления секторов зон
     if (zoneOperations.length > 0) {
         await Zone.bulkWrite(zoneOperations);
     }
