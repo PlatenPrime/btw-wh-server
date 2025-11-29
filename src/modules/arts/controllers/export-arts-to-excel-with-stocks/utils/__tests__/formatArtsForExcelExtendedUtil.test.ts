@@ -30,15 +30,15 @@ describe("formatArtsForExcelExtendedUtil", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       Артикул: "ART-001",
+      Факт: "",
+      Вітрина: 30, // 50 - 20
+      Сайт: 50,
+      Склад: 20,
       "Назва (укр)": "Тестовий артикул",
-      "Назва (рус)": "Тестовый артикул",
       Зона: "A1",
       Ліміт: 100,
       Маркер: "MARK",
-      Залишки: 20,
-      Вітрина: 30, // 50 - 20
-      "Залишки на сайті": 50,
-      "Дата оновлення залишків": new Date(
+      "Дата зрізу": new Date(
         "2024-01-15T10:00:00Z"
       ).toLocaleDateString("uk-UA"),
     });
@@ -64,8 +64,8 @@ describe("formatArtsForExcelExtendedUtil", () => {
 
     const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
 
-    expect(result[0].Залишки).toBe(15);
-    expect(result[1].Залишки).toBe(0);
+    expect(result[0].Склад).toBe(15);
+    expect(result[1].Склад).toBe(0);
   });
 
   it("расчет Витрина - проверка формулы: btradeStock.value - Запасы", () => {
@@ -108,15 +108,15 @@ describe("formatArtsForExcelExtendedUtil", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       Артикул: "ART-002",
+      Факт: "",
+      Вітрина: 0,
+      Сайт: 0,
+      Склад: 0,
       "Назва (укр)": "",
-      "Назва (рус)": "",
       Зона: "B2",
       Ліміт: "",
       Маркер: "",
-      Залишки: 0,
-      Вітрина: 0,
-      "Залишки на сайті": 0,
-      "Дата оновлення залишків": "",
+      "Дата зрізу": "",
     });
   });
 
@@ -135,7 +135,7 @@ describe("formatArtsForExcelExtendedUtil", () => {
 
     const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
 
-    expect(result[0]["Залишки на сайті"]).toBe(0);
+    expect(result[0].Сайт).toBe(0);
     expect(result[0].Вітрина).toBe(-10); // 0 - 10 (отрицательная витрина)
   });
 
@@ -158,7 +158,7 @@ describe("formatArtsForExcelExtendedUtil", () => {
 
     const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
 
-    expect(result[0]["Дата оновлення залишків"]).toBe(
+    expect(result[0]["Дата зрізу"]).toBe(
       testDate.toLocaleDateString("uk-UA")
     );
   });
@@ -224,10 +224,10 @@ describe("formatArtsForExcelExtendedUtil", () => {
 
     expect(result).toHaveLength(2);
     expect(result[0].Артикул).toBe("ART-001");
-    expect(result[0].Залишки).toBe(20);
+    expect(result[0].Склад).toBe(20);
     expect(result[0].Вітрина).toBe(80);
     expect(result[1].Артикул).toBe("ART-002");
-    expect(result[1].Залишки).toBe(10);
+    expect(result[1].Склад).toBe(10);
     expect(result[1].Вітрина).toBe(40);
   });
 
@@ -265,7 +265,7 @@ describe("formatArtsForExcelExtendedUtil", () => {
 
     const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
 
-    expect(result[0]["Залишки на сайті"]).toBe(100);
-    expect(result[0]["Дата оновлення залишків"]).toBe("");
+    expect(result[0].Сайт).toBe(100);
+    expect(result[0]["Дата зрізу"]).toBe("");
   });
 });

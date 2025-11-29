@@ -34,7 +34,7 @@ export const getSharikData = async (
     }
 
     const firstElement = productElements.eq(0);
-    const data = parseSharikElement(firstElement);
+    const data = parseSharikElement(artikul, firstElement);
 
     return data || null;
   } catch (error) {
@@ -49,10 +49,12 @@ export const getSharikData = async (
 
 /**
  * Парсит элемент товара с сайта sharik.ua
+ * @param artikul - артикул товара в виде строки
  * @param artElement - Cheerio элемент товара
  * @returns данные о товаре или undefined, если данные неполные
  */
 function parseSharikElement(
+  artikul: string,
   artElement: cheerio.Cheerio
 ): SharikProductInfo | undefined {
   const nameukr = artElement.find(".one-item-tit").text().trim();
@@ -61,6 +63,7 @@ function parseSharikElement(
 
   if (!nameukr || !priceRaw || !quantityRaw) {
     console.warn("Incomplete product data:", {
+      artikul,
       nameukr,
       priceRaw,
       quantityRaw,
@@ -73,13 +76,13 @@ function parseSharikElement(
 
   const quantityMatch = quantityRaw.match(/\d+/);
   if (!quantityMatch) {
-    console.warn("Invalid quantity format:", { quantityRaw });
+    console.warn("Invalid quantity format:", { artikul, quantityRaw });
     return undefined;
   }
   const quantity = parseInt(quantityMatch[0], 10);
 
   if (isNaN(price)) {
-    console.warn("Invalid price format:", { priceStr, quantityRaw });
+    console.warn("Invalid price format:", { artikul, priceStr, quantityRaw });
     return undefined;
   }
 

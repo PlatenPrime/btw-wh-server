@@ -25,15 +25,15 @@ describe("formatArtsForExcelExtendedUtil", () => {
         expect(result).toHaveLength(1);
         expect(result[0]).toEqual({
             Артикул: "ART-001",
+            Факт: "",
+            Вітрина: 30, // 50 - 20
+            Сайт: 50,
+            Склад: 20,
             "Назва (укр)": "Тестовий артикул",
-            "Назва (рус)": "Тестовый артикул",
             Зона: "A1",
             Ліміт: 100,
             Маркер: "MARK",
-            Залишки: 20,
-            Вітрина: 30, // 50 - 20
-            "Залишки на сайті": 50,
-            "Дата оновлення залишків": new Date("2024-01-15T10:00:00Z").toLocaleDateString("uk-UA"),
+            "Дата зрізу": new Date("2024-01-15T10:00:00Z").toLocaleDateString("uk-UA"),
         });
     });
     it("расчет Запасы - получает значение из Map, 0 если нет в Map", () => {
@@ -53,8 +53,8 @@ describe("formatArtsForExcelExtendedUtil", () => {
         posesQuantMap.set("ART-001", 15);
         // ART-002 нет в Map
         const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
-        expect(result[0].Залишки).toBe(15);
-        expect(result[1].Залишки).toBe(0);
+        expect(result[0].Склад).toBe(15);
+        expect(result[1].Склад).toBe(0);
     });
     it("расчет Витрина - проверка формулы: btradeStock.value - Запасы", () => {
         const arts = [
@@ -89,15 +89,15 @@ describe("formatArtsForExcelExtendedUtil", () => {
         expect(result).toHaveLength(1);
         expect(result[0]).toEqual({
             Артикул: "ART-002",
+            Факт: "",
+            Вітрина: 0,
+            Сайт: 0,
+            Склад: 0,
             "Назва (укр)": "",
-            "Назва (рус)": "",
             Зона: "B2",
             Ліміт: "",
             Маркер: "",
-            Залишки: 0,
-            Вітрина: 0,
-            "Залишки на сайті": 0,
-            "Дата оновлення залишків": "",
+            "Дата зрізу": "",
         });
     });
     it("обрабатывает отсутствие btradeStock - используется 0", () => {
@@ -112,7 +112,7 @@ describe("formatArtsForExcelExtendedUtil", () => {
         const posesQuantMap = new Map();
         posesQuantMap.set("ART-003", 10);
         const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
-        expect(result[0]["Залишки на сайті"]).toBe(0);
+        expect(result[0].Сайт).toBe(0);
         expect(result[0].Вітрина).toBe(-10); // 0 - 10 (отрицательная витрина)
     });
     it("форматирует дату в формате uk-UA", () => {
@@ -130,7 +130,7 @@ describe("formatArtsForExcelExtendedUtil", () => {
         ];
         const posesQuantMap = new Map();
         const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
-        expect(result[0]["Дата оновлення залишків"]).toBe(testDate.toLocaleDateString("uk-UA"));
+        expect(result[0]["Дата зрізу"]).toBe(testDate.toLocaleDateString("uk-UA"));
     });
     it("возвращает пустой массив для пустого входного массива", () => {
         const arts = [];
@@ -183,10 +183,10 @@ describe("formatArtsForExcelExtendedUtil", () => {
         const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
         expect(result).toHaveLength(2);
         expect(result[0].Артикул).toBe("ART-001");
-        expect(result[0].Залишки).toBe(20);
+        expect(result[0].Склад).toBe(20);
         expect(result[0].Вітрина).toBe(80);
         expect(result[1].Артикул).toBe("ART-002");
-        expect(result[1].Залишки).toBe(10);
+        expect(result[1].Склад).toBe(10);
         expect(result[1].Вітрина).toBe(40);
     });
     it("обрабатывает limit равный 0", () => {
@@ -216,7 +216,7 @@ describe("formatArtsForExcelExtendedUtil", () => {
         ];
         const posesQuantMap = new Map();
         const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
-        expect(result[0]["Залишки на сайті"]).toBe(100);
-        expect(result[0]["Дата оновлення залишків"]).toBe("");
+        expect(result[0].Сайт).toBe(100);
+        expect(result[0]["Дата зрізу"]).toBe("");
     });
 });

@@ -24,15 +24,15 @@ export const formatArtsForExcelExtendedUtil = (
 
     return {
       Артикул: art.artikul,
+      Факт: "",
+      Вітрина: shelf,
+      Сайт: btradeStockValue,
+      Склад: stocks,
       "Назва (укр)": art.nameukr || "",
-      "Назва (рус)": art.namerus || "",
       Зона: art.zone,
       Ліміт: art.limit ?? "",
       Маркер: art.marker || "",
-      Залишки: stocks,
-      Вітрина: shelf,
-      "Залишки на сайті": btradeStockValue,
-      "Дата оновлення залишків": art.btradeStock?.date
+      "Дата зрізу": art.btradeStock?.date
         ? new Date(art.btradeStock.date).toLocaleDateString("uk-UA")
         : "",
     };

@@ -22,7 +22,9 @@ export const exportArtsToExcelController = async (req, res) => {
         const { buffer, fileName } = generateExcelUtil(excelData);
         // Настраиваем заголовки для скачивания файла
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+        // Используем RFC 5987 формат для лучшей совместимости с браузерами
+        const encodedFileName = encodeURIComponent(fileName);
+        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"; filename*=UTF-8''${encodedFileName}`);
         res.setHeader("Content-Length", buffer.length);
         // Отправляем файл
         res.status(200).send(buffer);

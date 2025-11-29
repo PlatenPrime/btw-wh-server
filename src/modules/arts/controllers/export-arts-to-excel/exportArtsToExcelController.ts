@@ -34,7 +34,12 @@ export const exportArtsToExcelController = async (
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    // Используем RFC 5987 формат для лучшей совместимости с браузерами
+    const encodedFileName = encodeURIComponent(fileName);
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${fileName}"; filename*=UTF-8''${encodedFileName}`
+    );
     res.setHeader("Content-Length", buffer.length);
 
     // Отправляем файл

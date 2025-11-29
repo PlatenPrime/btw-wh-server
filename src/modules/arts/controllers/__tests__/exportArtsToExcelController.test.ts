@@ -99,9 +99,10 @@ describe("exportArtsToExcelController", () => {
     expect(responseHeaders["Content-Type"]).toBe(
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-    expect(responseHeaders["Content-Disposition"]).toBe(
-      `attachment; filename="${mockFileName}"`
-    );
+    // Проверяем RFC 5987 формат заголовка
+    const contentDisposition = responseHeaders["Content-Disposition"] as string;
+    expect(contentDisposition).toContain(`attachment; filename="${mockFileName}"`);
+    expect(contentDisposition).toContain(`filename*=UTF-8''${encodeURIComponent(mockFileName)}`);
     expect(responseHeaders["Content-Length"]).toBe(mockBuffer.length);
     expect(responseBody).toBe(mockBuffer);
   });

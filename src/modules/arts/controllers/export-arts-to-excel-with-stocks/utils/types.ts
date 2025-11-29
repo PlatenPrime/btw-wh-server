@@ -1,13 +1,13 @@
 export type ExcelArtRowExtended = {
     Артикул: string;
+    Факт: string;
     "Назва (укр)": string;
-    "Назва (рус)": string;
     Зона: string;
     Ліміт: number | string;
     Маркер: string;
-    Залишки: number;
+    Склад: number;
     Вітрина: number;
-    "Залишки на сайті": number | string;
-    "Дата оновлення залишків": string;
+    Сайт: number | string;
+    "Дата зрізу": string;
   
   };
