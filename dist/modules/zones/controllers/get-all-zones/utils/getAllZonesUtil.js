@@ -1,4 +1,5 @@
 import { Zone } from "../../../models/Zone.js";
+import { sortZonesByTitle } from "./sortZonesByTitle.js";
 export const getAllZonesUtil = async ({ page, limit, search, sortBy, sortOrder, }) => {
     // Построение поискового запроса
     const searchQuery = search
@@ -6,69 +7,21 @@ export const getAllZonesUtil = async ({ page, limit, search, sortBy, sortOrder, 
             title: { $regex: search, $options: "i" },
         }
         : {};
-    // Если сортировка по title, используем aggregation pipeline для числовой сортировки
+    // Если сортировка по title, используем сортировку в памяти
     if (sortBy === "title") {
-        const sortDirection = sortOrder === "desc" ? -1 : 1;
-        const aggregationResult = await Zone.aggregate([
-            // Поиск
-            { $match: searchQuery },
-            // Преобразуем title в массив чисел для правильной сортировки
-            // Дополняем массивы нулями до 3 элементов для корректного сравнения
-            {
-                $addFields: {
-                    titleParts: {
-                        $let: {
-                            vars: {
-                                parts: {
-                                    $map: {
-                                        input: { $split: ["$title", "-"] },
-                                        as: "part",
-                                        in: { $toInt: "$$part" },
-                                    },
-                                },
-                            },
-                            in: {
-                                $concatArrays: [
-                                    "$$parts",
-                                    {
-                                        $cond: {
-                                            if: { $eq: [{ $size: "$$parts" }, 3] },
-                                            then: [],
-                                            else: {
-                                                $cond: {
-                                                    if: { $eq: [{ $size: "$$parts" }, 2] },
-                                                    then: [0],
-                                                    else: [0, 0],
-                                                },
-                                            },
-                                        },
-                                    },
-                                ],
-                            },
-                        },
-                    },
-                },
-            },
-            // Сортируем по массиву чисел
-            { $sort: { titleParts: sortDirection } },
-            // Используем facet для получения данных и подсчета total одновременно
-            {
-                $facet: {
-                    data: [
-                        { $skip: (page - 1) * limit },
-                        { $limit: limit },
-                        // Удаляем временное поле titleParts из результата
-                        { $unset: "titleParts" },
-                    ],
-                    total: [{ $count: "count" }],
-                },
-            },
-        ]);
-        const zones = aggregationResult[0]?.data || [];
-        const total = aggregationResult[0]?.total[0]?.count || 0;
+        // Получаем все зоны, соответствующие поисковому запросу
+        const allZones = await Zone.find(searchQuery);
+        // Сортируем в памяти с числовым сравнением сегментов
+        const sortedZones = sortZonesByTitle(allZones, sortOrder);
+        // Подсчет общего количества записей
+        const total = sortedZones.length;
+        // Применяем пагинацию после сортировки
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const zones = sortedZones.slice(startIndex, endIndex);
         const totalPages = Math.ceil(total / limit);
         return {
-            zones: zones,
+            zones,
             pagination: {
                 page,
                 limit,
