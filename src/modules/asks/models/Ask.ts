@@ -5,8 +5,13 @@ export type AskUserData = Pick<
   IUser,
   "_id" | "fullname" | "telegram" | "photo"
 >;
-export type AskStatus = "new" | "completed" | "rejected";
-export const validAskStatuses: AskStatus[] = ["new", "completed", "rejected"];
+export type AskStatus = "new" | "processing" | "completed" | "rejected";
+export const validAskStatuses: AskStatus[] = [
+  "new",
+  "processing",
+  "completed",
+  "rejected",
+];
 
 export type AskEventName = "create" | "complete" | "reject" | "pull";
 
@@ -112,7 +117,7 @@ const askSchema = new Schema<IAsk>(
     solverData: { type: askUserDataSchema },
     status: {
       type: String,
-      enum: ["new", "completed", "rejected"],
+      enum: ["new", "processing", "completed", "rejected"],
       default: "new",
     },
     actions: { type: [String], default: [] },

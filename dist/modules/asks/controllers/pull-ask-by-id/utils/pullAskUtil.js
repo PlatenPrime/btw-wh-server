@@ -36,6 +36,9 @@ export const pullAskUtil = async ({ solver, solverId, ask, action, pullAskData, 
         events,
         pullQuant: totals.pullQuant,
         pullBox: totals.pullBox,
+        status: ask.status === "completed" || ask.status === "rejected"
+            ? ask.status
+            : "processing",
     };
     const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
         new: true,

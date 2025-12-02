@@ -77,6 +77,10 @@ export const pullAskUtil = async ({
     events,
     pullQuant: totals.pullQuant,
     pullBox: totals.pullBox,
+    status:
+      ask.status === "completed" || ask.status === "rejected"
+        ? ask.status
+        : "processing",
   };
 
   const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
