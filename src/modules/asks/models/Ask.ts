@@ -38,6 +38,7 @@ export interface IAsk extends Document {
   nameukr?: string;
   quant?: number;
   com?: string;
+  sklad?: string;
   asker: Types.ObjectId;
   askerData: AskUserData;
   solver?: Types.ObjectId;
@@ -111,6 +112,7 @@ const askSchema = new Schema<IAsk>(
     nameukr: { type: String },
     quant: { type: Number },
     com: { type: String },
+    sklad: { type: String, default: "pogrebi" },
     asker: { type: Schema.Types.ObjectId, ref: "User", required: true },
     solver: { type: Schema.Types.ObjectId, ref: "User" },
     askerData: { type: askUserDataSchema, required: true },

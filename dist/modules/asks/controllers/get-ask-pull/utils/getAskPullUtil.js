@@ -1,5 +1,5 @@
 import { Ask } from "../../../models/Ask.js";
-import { getPosesByArtikulUtil } from "../../../../poses/controllers/get-poses-by-artikul/utils/getPosesByArtikulUtil.js";
+import { getPosesByArtikulAndSkladUtil } from "./getPosesByArtikulAndSkladUtil.js";
 import { calculatePositionsForPullUtil } from "./calculatePositionsForPullUtil.js";
 import { getRemainingQuantityUtil } from "./getRemainingQuantityUtil.js";
 /**
@@ -15,8 +15,10 @@ export const getAskPullUtil = async (askId) => {
     }
     // Рассчитываем оставшееся количество
     const remainingQuantity = getRemainingQuantityUtil(ask);
-    // Получаем все позиции с таким же артикулом
-    const positions = await getPosesByArtikulUtil(ask.artikul);
+    // Получаем склад из ask (дефолт "pogrebi" если не указан)
+    const sklad = ask.sklad || "pogrebi";
+    // Получаем позиции с таким же артикулом и складом
+    const positions = await getPosesByArtikulAndSkladUtil(ask.artikul, sklad);
     // Если позиций нет
     if (positions.length === 0) {
         return {

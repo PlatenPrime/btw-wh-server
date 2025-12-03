@@ -8,13 +8,14 @@ import { sendCreateAskMesUtil } from "./utils/sendCreateAskMesUtil.js";
 export const createAskController = async (req, res) => {
     const session = await mongoose.startSession();
     try {
-        const { artikul, nameukr, quant, com, askerId } = req.body;
+        const { artikul, nameukr, quant, com, sklad, askerId } = req.body;
         // Валидация входных данных
         const parseResult = createAskSchema.safeParse({
             artikul,
             nameukr,
             quant,
             com,
+            sklad,
             askerId,
         });
         if (!parseResult.success) {
@@ -41,6 +42,7 @@ export const createAskController = async (req, res) => {
                 nameukr: parseResult.data.nameukr,
                 quant: parseResult.data.quant,
                 com: parseResult.data.com,
+                sklad: parseResult.data.sklad,
                 askerData,
                 actions,
                 session,

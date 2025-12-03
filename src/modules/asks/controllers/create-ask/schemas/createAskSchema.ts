@@ -6,6 +6,7 @@ export const createAskSchema = z.object({
   nameukr: z.string().optional(),
   quant: z.number().optional(),
   com: z.string().optional(),
+  sklad: z.enum(["pogrebi", "merezhi"]).optional(),
   askerId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
     message: "Invalid asker ID format",
   }),

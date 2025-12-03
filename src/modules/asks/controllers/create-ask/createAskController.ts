@@ -11,7 +11,7 @@ export const createAskController = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
 
   try {
-    const { artikul, nameukr, quant, com, askerId } = req.body;
+    const { artikul, nameukr, quant, com, sklad, askerId } = req.body;
 
     // Валидация входных данных
     const parseResult = createAskSchema.safeParse({
@@ -19,6 +19,7 @@ export const createAskController = async (req: Request, res: Response) => {
       nameukr,
       quant,
       com,
+      sklad,
       askerId,
     });
     if (!parseResult.success) {
@@ -49,6 +50,7 @@ export const createAskController = async (req: Request, res: Response) => {
         nameukr: parseResult.data.nameukr,
         quant: parseResult.data.quant,
         com: parseResult.data.com,
+        sklad: parseResult.data.sklad,
         askerData,
         actions,
         session,
