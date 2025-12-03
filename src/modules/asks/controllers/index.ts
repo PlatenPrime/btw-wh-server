@@ -3,6 +3,7 @@ export { createAskController } from "./create-ask/createAskController.js";
 export { deleteAskById } from "./delete-ask-by-id/deleteAskById.js";
 export { getAskById } from "./get-ask-by-id/getAskById.js";
 export { getAsksByDate } from "./get-asks-by-date/getAsksByDate.js";
+export { getAskPullController } from "./get-ask-pull/getAskPullController.js";
 export { pullAskById } from "./pull-ask-by-id/pullAskById.js";
 export { rejectAskById } from "./reject-ask-by-id/rejectAskById.js";
 export { updateAskActionsById } from "./update-ask-actions-by-id/updateAskActionsById.js";

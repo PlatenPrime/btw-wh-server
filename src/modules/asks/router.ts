@@ -12,6 +12,7 @@ import {
   deleteAskById,
   getAskById,
   getAsksByDate,
+  getAskPullController,
   pullAskById,
   rejectAskById,
   updateAskActionsById,
@@ -34,6 +35,14 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getAsksByDate)
+);
+
+// Получить позиции для снятия по ask ID - доступно для всех авторизованных пользователей
+router.get(
+  "/:id/pull",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAskPullController)
 );
 
 // Получить ask по ID - доступно для всех авторизованных пользователей
