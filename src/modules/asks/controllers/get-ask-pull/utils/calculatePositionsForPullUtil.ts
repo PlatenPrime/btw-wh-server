@@ -5,7 +5,10 @@ import { IPositionForPull } from "../types/getAskPullResponse.js";
 /**
  * Рассчитывает список позиций для снятия товара
  * @param positions - Массив всех позиций с нужным артикулом
- * @param remainingQuantity - Оставшееся количество для снятия (null если quant не указан)
+ * @param remainingQuantity - Оставшееся количество для снятия:
+ *   - null - если quant не указан в ask
+ *   - 0 - если уже все снято (pullQuant >= quant)
+ *   - number > 0 - оставшееся количество для снятия
  * @returns Массив позиций с указанием plannedQuant для снятия
  */
 export const calculatePositionsForPullUtil = (

@@ -19,6 +19,15 @@ export const getAskPullUtil = async (
     return null;
   }
 
+  // Проверяем статус ask - если rejected или completed, снятие не требуется
+  if (ask.status === "rejected" || ask.status === "completed") {
+    return {
+      isPullRequired: false,
+      positions: [],
+      remainingQuantity: null,
+    };
+  }
+
   // Рассчитываем оставшееся количество
   const remainingQuantity = getRemainingQuantityUtil(ask);
 
@@ -43,9 +52,12 @@ export const getAskPullUtil = async (
   if (remainingQuantity === null) {
     // Если quant не указан, но есть позиции - снятие требуется
     isPullRequired = positions.length > 0;
-  } else if (remainingQuantity <= 0) {
-    // Если уже все снято или не нужно снимать, снятие не требуется
+  } else if (remainingQuantity === 0) {
+    // Если уже все снято, снятие не требуется
     isPullRequired = false;
+  } else {
+    // Если remainingQuantity > 0, снятие требуется
+    isPullRequired = true;
   }
 
   // Рассчитываем позиции для снятия
