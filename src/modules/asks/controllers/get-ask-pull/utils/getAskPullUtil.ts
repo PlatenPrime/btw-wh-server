@@ -1,8 +1,8 @@
 import { Ask } from "../../../models/Ask.js";
-import { getPosesByArtikulAndSkladUtil } from "./getPosesByArtikulAndSkladUtil.js";
-import { calculatePositionsForPullUtil } from "./calculatePositionsForPullUtil.js";
-import { getRemainingQuantityUtil } from "./getRemainingQuantityUtil.js";
 import { GetAskPullResponse } from "../types/getAskPullResponse.js";
+import { calculatePositionsForPullUtil } from "./calculatePositionsForPullUtil.js";
+import { getPosesByArtikulAndSkladUtil } from "./getPosesByArtikulAndSkladUtil.js";
+import { getRemainingQuantityUtil } from "./getRemainingQuantityUtil.js";
 
 /**
  * Получает информацию о позициях для снятия товара по ask
@@ -14,7 +14,7 @@ export const getAskPullUtil = async (
 ): Promise<GetAskPullResponse | null> => {
   // Получаем ask по ID
   const ask = await Ask.findById(askId).exec();
-  
+
   if (!ask) {
     return null;
   }
@@ -34,7 +34,7 @@ export const getAskPullUtil = async (
   // Получаем склад из ask (дефолт "pogrebi" если не указан)
   const sklad = ask.sklad || "pogrebi";
 
-  // Получаем позиции с таким же артикулом и складом
+  // Получаем позиции с таким же артикулом и складом (только с quant > 0)
   const positions = await getPosesByArtikulAndSkladUtil(ask.artikul, sklad);
 
   // Если позиций нет
@@ -48,10 +48,12 @@ export const getAskPullUtil = async (
 
   // Определяем флаг необходимости снятия
   let isPullRequired = true;
-  
+
   if (remainingQuantity === null) {
-    // Если quant не указан, но есть позиции - снятие требуется
-    isPullRequired = positions.length > 0;
+    // Если quant не указан:
+    // - Если уже было снятие (pullQuant > 0), то снятие не требуется
+    // - Если снятия не было и есть позиции с quant > 0, то снятие требуется
+    isPullRequired = ask.pullQuant === 0 && positions.length > 0;
   } else if (remainingQuantity === 0) {
     // Если уже все снято, снятие не требуется
     isPullRequired = false;
@@ -72,4 +74,3 @@ export const getAskPullUtil = async (
     remainingQuantity,
   };
 };
-

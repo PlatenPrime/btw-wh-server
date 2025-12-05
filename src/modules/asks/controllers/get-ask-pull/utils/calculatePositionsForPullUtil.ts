@@ -24,6 +24,13 @@ export const calculatePositionsForPullUtil = (
   if (remainingQuantity === null) {
     const sortedPositions = sortPositionsByPalletSectorUtil([...positions]);
     const firstPosition = sortedPositions[0];
+    
+    // Проверяем, что первая позиция имеет количество > 0
+    // Если все позиции имеют quant === 0, возвращаем пустой массив
+    if (!firstPosition || firstPosition.quant <= 0) {
+      return [];
+    }
+    
     return [
       {
         ...firstPosition.toObject(),
