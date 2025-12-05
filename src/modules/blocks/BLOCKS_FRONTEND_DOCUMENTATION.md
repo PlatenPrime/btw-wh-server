@@ -352,7 +352,72 @@ const response = await fetch(`/api/blocks/${blockId}`, {
 - `409`: Block with this title already exists
 - `500`: Server error
 
-### 5. Delete Block
+### 5. Rename Block
+
+**PATCH** `/api/blocks/:id/rename`
+
+Renames a block by updating only its title field. This is a specialized endpoint for renaming operations.
+
+#### Path Parameters
+
+- `id`: Block ObjectId (required)
+
+#### Request Body
+
+```typescript
+{
+  title: string; // Required: new block title (must be unique)
+}
+```
+
+#### Validation Rules
+
+- `title`: Required, must be unique, minimum 1 character
+
+#### Example Request
+
+```typescript
+const blockId = "507f1f77bcf86cd799439011";
+const response = await fetch(`/api/blocks/${blockId}/rename`, {
+  method: "PATCH",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify({
+    title: "Renamed Block A",
+  }),
+});
+```
+
+#### Example Response
+
+```typescript
+{
+  message: "Block renamed successfully",
+  data: {
+    _id: "507f1f77bcf86cd799439011",
+    title: "Renamed Block A",
+    order: 1,
+    segs: [
+      "507f1f77bcf86cd799439021",
+      "507f1f77bcf86cd799439022"
+    ],
+    createdAt: "2024-01-01T00:00:00.000Z",
+    updatedAt: "2024-01-01T01:00:00.000Z"
+  }
+}
+```
+
+**Status Codes:**
+
+- `200`: Block renamed successfully
+- `400`: Validation error or invalid block ID format
+- `404`: Block not found
+- `409`: Block with this title already exists
+- `500`: Server error
+
+### 6. Delete Block
 
 **DELETE** `/api/blocks/:id`
 
@@ -404,7 +469,7 @@ const response = await fetch(`/api/blocks/${blockId}`, {
 - `404`: Block not found
 - `500`: Server error
 
-### 6. Reset Zones Sectors (One-time)
+### 7. Reset Zones Sectors (One-time)
 
 **POST** `/api/blocks/reset-zones-sectors`
 
@@ -492,7 +557,7 @@ Where:
 
 Zones without a segment receive `sector = 0`.
 
-### 8. Bulk Upsert Blocks
+### 9. Bulk Upsert Blocks
 
 **POST** `/api/blocks/upsert`
 
@@ -579,6 +644,10 @@ interface UpdateBlockInput {
   title?: string;
   order?: number;
   segs?: string[]; // Array of Segment ObjectIds
+}
+
+interface RenameBlockInput {
+  title: string; // Required: new block title
 }
 
 // Zone types (updated)
@@ -708,6 +777,42 @@ const useUpdateBlock = () => {
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Failed to update block");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["blocks"] });
+      queryClient.invalidateQueries({ queryKey: ["segs"] });
+    },
+  });
+};
+```
+
+#### Rename Block
+
+```typescript
+const useRenameBlock = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      title,
+    }: {
+      id: string;
+      title: string;
+    }) => {
+      const response = await fetch(`${API_BASE_URL}/${id}/rename`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to rename block");
       }
       return response.json();
     },
@@ -1284,7 +1389,67 @@ Content-Type: application/json
 
 ---
 
-### 5. Delete Block
+### 5. Rename Block
+
+**Метод:** `PATCH`  
+**Путь:** `/api/blocks/:id/rename`  
+**Требования:** Bearer Token, роль ADMIN
+
+#### Что принимает сервер (Request)
+
+**Headers:**
+
+```
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+**Path параметры:**
+
+- `id`: string - MongoDB ObjectId блока (обязательно)
+
+**Body:**
+
+```typescript
+{
+  title: string; // Обязательно, минимум 1 символ, уникальное значение
+}
+```
+
+#### Что возвращает сервер (Response)
+
+**Успешный ответ (200):**
+
+```typescript
+{
+  message: "Block renamed successfully",
+  data: {
+    _id: string;
+    title: string; // Новое название
+    order: number;
+    segs: string[]; // Массив Segment ObjectIds
+    createdAt: string;
+    updatedAt: string;
+  }
+}
+```
+
+**Ошибки:**
+
+- `400`: Ошибка валидации - неверный формат данных или ID
+- `404`: Блок не найден
+- `409`: Блок с таким title уже существует
+- `500`: Ошибка сервера
+
+**Важно:**
+
+- Обновляется только поле `title`
+- Сектора зон **НЕ** пересчитываются автоматически
+- Новое название должно быть уникальным
+
+---
+
+### 6. Delete Block
 
 **Метод:** `DELETE`  
 **Путь:** `/api/blocks/:id`  
@@ -1334,7 +1499,7 @@ Authorization: Bearer <token>
 
 ---
 
-### 6. Reset Zones Sectors
+### 7. Reset Zones Sectors
 
 **Метод:** `POST`  
 **Путь:** `/api/blocks/reset-zones-sectors`  
@@ -1372,7 +1537,7 @@ Authorization: Bearer <token>
 
 ---
 
-### 7. Recalculate Zones Sectors
+### 8. Recalculate Zones Sectors
 
 **Метод:** `POST`  
 **Путь:** `/api/blocks/recalculate-zones-sectors`  

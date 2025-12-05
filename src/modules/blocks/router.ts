@@ -8,6 +8,7 @@ import {
   getAllBlocks,
   getBlockById,
   recalculateZonesSectors,
+  renameBlock,
   resetZonesSectors,
   updateBlock,
   upsertBlocksController,
@@ -45,6 +46,14 @@ router.put(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(updateBlock)
+);
+
+// Переименовать блок - доступно только для ADMIN
+router.patch(
+  "/:id/rename",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(renameBlock)
 );
 
 // Массовый upsert блоков - доступно только для ADMIN
