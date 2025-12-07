@@ -11,7 +11,6 @@ import segsRoute from "./modules/segs/router.js";
 import defsRoute from "./modules/defs/router.js";
 import palletsRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
-import pullsRoute from "./modules/pulls/router.js";
 import rowsRoute from "./modules/rows/router.js";
 import zonesRoute from "./modules/zones/router.js";
 dotenv.config();
@@ -27,7 +26,6 @@ app.use("/api/segs", segsRoute);
 app.use("/api/rows", rowsRoute);
 app.use("/api/pallets", palletsRoute);
 app.use("/api/poses", posesRoute);
-app.use("/api/pulls", pullsRoute);
 app.use("/api/defs", defsRoute);
 app.use("/api/zones", zonesRoute);
 // Error handler must be after all routes

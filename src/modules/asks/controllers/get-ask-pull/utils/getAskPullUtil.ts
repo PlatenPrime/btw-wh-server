@@ -62,6 +62,14 @@ export const getAskPullUtil = async (
     isPullRequired = true;
   }
 
+  if (!isPullRequired) {
+    return {
+      isPullRequired,
+      positions: [],
+      remainingQuantity,
+    };
+  }
+
   // Рассчитываем позиции для снятия
   const positionsForPull = calculatePositionsForPullUtil(
     positions,
