@@ -7,17 +7,15 @@ import { IAsk } from "../../../models/Ask.js";
  *   - null - если quant не указан в ask
  *   - number - оставшееся количество для снятия
  */
-export const getRemainingQuantityUtil = (ask: IAsk): number | null => {
-  const currentPull = typeof ask.pullQuant === "number" ? ask.pullQuant : 0;
+export const getRemainingQuantityUtil = (ask: IAsk): number => {
+  const pullQuant = typeof ask.pullQuant === "number" ? ask.pullQuant : 0;
 
   if (typeof ask.quant !== "number" || ask.quant <= 0) {
-    if (currentPull > 0) {
-      return -currentPull;
+    if (pullQuant > 0) {
+      return -pullQuant;
     }
-    return null;
+    return 0;
   }
 
-  const remaining = ask.quant - currentPull;
-
-  return remaining;
+  return ask.quant - pullQuant;
 };

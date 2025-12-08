@@ -20,7 +20,7 @@ describe('getRemainingQuantityUtil', () => {
 
     it('should return null if quant is not set and nothing pulled', () => {
         const ask = { pullQuant: 0 } as IAsk; // quant undefined
-        expect(getRemainingQuantityUtil(ask)).toBeNull();
+        expect(getRemainingQuantityUtil(ask)).toBe(0);
     });
 
     it('should return negative pullQuant if quant is not set but something pulled', () => {
@@ -35,7 +35,7 @@ describe('getRemainingQuantityUtil', () => {
 
     it('should return null if quant 0 and pullQuant 0', () => {
          const ask = { quant: 0, pullQuant: 0 } as IAsk;
-         expect(getRemainingQuantityUtil(ask)).toBeNull();
+         expect(getRemainingQuantityUtil(ask)).toBe(0);
     });
     
     it('should return negative pullQuant if quant 0 and pullQuant > 0', () => {

@@ -19,6 +19,7 @@ export interface GetAskPullResponse {
   /** Оставшееся количество для снятия (null если quant не указан в ask) */
   remainingQuantity: number | null;
   /** Статус снятия */
-  status: "excess" | "completed" | "need_pull";
+  status: "process" | "satisfied" | "no_poses" | "finished";
+  message: string;
 }
 

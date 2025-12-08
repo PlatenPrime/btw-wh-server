@@ -48,7 +48,7 @@ export const createAskController = async (req: Request, res: Response) => {
       createdAsk = await createAskUtil({
         artikul: parseResult.data.artikul,
         nameukr: parseResult.data.nameukr,
-        quant: parseResult.data.quant,
+        quant: parseResult.data.quant || 0,
         com: parseResult.data.com,
         sklad: parseResult.data.sklad,
         askerData,

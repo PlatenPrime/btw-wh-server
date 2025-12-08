@@ -12,79 +12,71 @@ import { getRemainingQuantityUtil } from "./getRemainingQuantityUtil.js";
 export const getAskPullUtil = async (
   askId: string
 ): Promise<GetAskPullResponse | null> => {
-  // Получаем ask по ID
   const ask = await Ask.findById(askId).exec();
 
   if (!ask) {
     return null;
   }
 
-  // Проверяем статус ask - если rejected или completed, снятие не требуется
   if (ask.status === "rejected" || ask.status === "completed") {
     return {
       isPullRequired: false,
       positions: [],
       remainingQuantity: null,
-      status: "completed",
+      status: "finished",
+      message: "Запит вже відпрацьовано",
     };
   }
 
-  // Рассчитываем оставшееся количество
   const remainingQuantity = getRemainingQuantityUtil(ask);
 
-  // Получаем склад из ask (дефолт "pogrebi" если не указан)
-  const sklad = ask.sklad || "pogrebi";
-
-  // Получаем позиции с таким же артикулом и складом (только с quant > 0)
-  const positions = await getPosesByArtikulAndSkladUtil(ask.artikul, sklad);
-
-  // Определяем статус
-  let status: "excess" | "completed" | "need_pull" = "need_pull";
-
-  if (remainingQuantity === null) {
-    // Если quant не указан и ничего не снято (иначе было бы отрицательное число из util)
-    status = "need_pull";
-  } else if (remainingQuantity < 0) {
-    status = "excess";
-  } else if (remainingQuantity === 0) {
-    status = "completed";
-  } else {
-    status = "need_pull";
+  if (remainingQuantity <= 0 && ask.quant) {
+    return {
+      isPullRequired: false,
+      positions: [],
+      remainingQuantity,
+      status: "satisfied",
+      message: "Знімати більше нічого не потрібно",
+    };
   }
 
-  // Если позиций нет
+  if (remainingQuantity < 0) {
+    return {
+      isPullRequired: false,
+      positions: [],
+      remainingQuantity,
+      status: "satisfied",
+      message: "Знімати більше нічого не потрібно",
+    };
+  }
+
+  const positions = await getPosesByArtikulAndSkladUtil(
+    ask.artikul,
+    ask.sklad || "pogrebi"
+  );
+
   if (positions.length === 0) {
     return {
       isPullRequired: false,
       positions: [],
       remainingQuantity,
-      status,
+      status: "no_poses",
+      message: "Позицій для зняття не знайдено",
     };
   }
 
-  // Определяем флаг необходимости снятия
-  // Снятие нужно только если статус need_pull и есть позиции
-  const isPullRequired = status === "need_pull";
-
-  if (!isPullRequired) {
-    return {
-      isPullRequired,
-      positions: [],
-      remainingQuantity,
-      status,
-    };
-  }
-
-  // Рассчитываем позиции для снятия
   const positionsForPull = calculatePositionsForPullUtil(
     positions,
-    remainingQuantity
+    // Если quant не указан, передаем null, чтобы сработал сценарий 1 (одна позиция)
+    // getRemainingQuantityUtil возвращает 0 если quant не указан, но нам для calculatePositions нужно null
+    (ask.quant === undefined || ask.quant === null || ask.quant <= 0) ? null : remainingQuantity
   );
 
   return {
-    isPullRequired,
+    isPullRequired: true,
     positions: positionsForPull,
     remainingQuantity,
-    status,
+    status: "process",
+    message: "Знімати потрібно",
   };
 };

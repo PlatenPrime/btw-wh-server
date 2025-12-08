@@ -51,7 +51,7 @@ describe('getAskPullUtil', () => {
         expect(result).not.toBeNull();
         if (result) {
             expect(result.isPullRequired).toBe(false);
-            expect(result.status).toBe('excess');
+            expect(result.status).toBe('satisfied');
             expect(result.remainingQuantity).toBe(-5); // logic from getRemainingQuantityUtil (-pullQuant)
             expect(result.positions).toHaveLength(0);
         }
@@ -81,8 +81,8 @@ describe('getAskPullUtil', () => {
         expect(result).not.toBeNull();
         if (result) {
             expect(result.isPullRequired).toBe(true);
-            expect(result.status).toBe('need_pull');
-            expect(result.remainingQuantity).toBeNull();
+            expect(result.status).toBe('process');
+            expect(result.remainingQuantity).toBe(0);
             expect(result.positions.length).toBeGreaterThan(0);
         }
     });

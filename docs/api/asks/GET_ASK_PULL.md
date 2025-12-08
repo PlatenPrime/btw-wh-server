@@ -51,6 +51,12 @@ interface GetAskPullResponse {
 
   /** Оставшееся количество для снятия (null если quant не указан в ask) */
   remainingQuantity: number | null;
+
+  /** Статус снятия */
+  status: "process" | "satisfied" | "no_poses" | "finished";
+  
+  /** Сообщение для пользователя */
+  message: string;
 }
 ```
 
@@ -107,13 +113,15 @@ interface IPositionForPull {
 - Если позиций недостаточно для покрытия всего оставшегося количества → возвращаются все доступные позиции с их остатками
 - `remainingQuantity = ask.quant - ask.pullQuant` (или `null` если уже все снято)
 - `isPullRequired = true` (если `remainingQuantity > 0`)
+- `status = "process"` (если нужно снимать) или `"satisfied"` (если все снято)
 
 ### Сценарий 3: Позиций с таким артикулом и складом нет
 
 - Возвращается пустой массив позиций
 - `isPullRequired = false`
 - `remainingQuantity` сохраняется (может быть `null` или числом)
-- Фильтрация происходит по артикулу и складу из ask (склад по умолчанию "pogrebi" если не указан)
+- `status = "no_poses"`
+- `message = "Позицій для зняття не знайдено"`
 
 ### Сценарий 4: Ask не найден
 
@@ -180,6 +188,8 @@ Authorization: Bearer <token>
   "message": "Ask pull positions retrieved successfully",
   "data": {
     "isPullRequired": true,
+    "status": "process",
+    "message": "Знімати потрібно",
     "remainingQuantity": 50,
     "positions": [
       {
@@ -243,6 +253,8 @@ Authorization: Bearer <token>
   "message": "Ask pull positions retrieved successfully",
   "data": {
     "isPullRequired": true,
+    "status": "process",
+    "message": "Знімати потрібно",
     "remainingQuantity": null,
     "positions": [
       {
@@ -265,6 +277,8 @@ Authorization: Bearer <token>
   "message": "Ask pull positions retrieved successfully",
   "data": {
     "isPullRequired": false,
+    "status": "no_poses",
+    "message": "Позицій для зняття не знайдено",
     "remainingQuantity": 50,
     "positions": []
   }
@@ -279,6 +293,8 @@ Authorization: Bearer <token>
   "message": "Ask pull positions retrieved successfully",
   "data": {
     "isPullRequired": false,
+    "status": "satisfied",
+    "message": "Знімати більше нічого не потрібно",
     "remainingQuantity": null,
     "positions": []
   }
