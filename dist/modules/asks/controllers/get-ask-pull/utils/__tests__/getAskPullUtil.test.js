@@ -16,7 +16,7 @@ describe('getAskPullUtil', () => {
     afterEach(() => {
         vi.restoreAllMocks();
     });
-    it('should NOT return positions if no specific quantity requested (quant undefined) and already pulled some amount', async () => {
+    it('should return status "excess" if no specific quantity requested (quant undefined) and already pulled some amount', async () => {
         // Setup mock data
         const mockAsk = {
             _id: 'ask-123',
@@ -34,37 +34,42 @@ describe('getAskPullUtil', () => {
         Ask.findById.mockReturnValue({
             exec: vi.fn().mockResolvedValue(mockAsk)
         });
-        // Mock getRemainingQuantityUtil behavior indirectly (or mock the module if it was exported/imported efficiently, but here we can rely on real implementation or mock it if needed. 
-        // Note: getRemainingQuantityUtil lives in its own file. The controller uses it. 
-        // Let's check getAskPullUtil source. It imports getRemainingQuantityUtil. 
-        // If I want to be purely unit testing getAskPullUtil, I should mock getRemainingQuantityUtil too, 
-        // but given the bug description "Если в ask не было точно указано, сколько нужно снять товара ... то не нужно предоставлять позиции", 
-        // I know getRemainingQuantityUtil(ask) where ask.quant is undefined returns null.
-        // Mocking getPosesByArtikulAndSkladUtil
+        // Mock getPosesByArtikulAndSkladUtil
         vi.spyOn(getPosesByArtikulAndSkladUtilModule, 'getPosesByArtikulAndSkladUtil').mockResolvedValue(mockPositions);
         // Execute
         const result = await getAskPullUtil('ask-123');
         // Assert
-        // Current buggy behavior: isPullRequired might be false, BUT positions might be calculated/returned if the logic falls through.
-        // Wait, looking at the code:
-        /*
-          if (remainingQuantity === null) {
-            // ...
-            isPullRequired = ask.pullQuant === 0 && positions.length > 0;
-          }
-          // ...
-          const positionsForPull = calculatePositionsForPullUtil(...)
-          return { ..., positions: positionsForPull, ... }
-        */
-        // If pullQuant is 5, isPullRequired becomes `false`.
-        // But `positionsForPull` is calculated calling `calculatePositionsForPullUtil(positions, remainingQuantity)`.
-        // `calculatePositionsForPullUtil` with `remainingQuantity === null` returns one position (Scenario 1 in that file).
-        // So `result.positions` will NOT be empty.
-        // We expect it to be empty because isPullRequired is false.
         expect(result).not.toBeNull();
         if (result) {
             expect(result.isPullRequired).toBe(false);
-            expect(result.positions).toHaveLength(0); // This should fail before fix
+            expect(result.status).toBe('excess');
+            expect(result.remainingQuantity).toBe(-5); // logic from getRemainingQuantityUtil (-pullQuant)
+            expect(result.positions).toHaveLength(0);
+        }
+    });
+    it('should return status "need_pull" if quant undefined and nothing pulled', async () => {
+        const mockAsk = {
+            _id: 'ask-124',
+            status: 'in_progress',
+            artikul: 'ART-1',
+            sklad: 'pogrebi',
+            pullQuant: 0,
+            toObject: () => ({}),
+        };
+        const mockPositions = [
+            { _id: 'pos-1', quant: 10, palletSector: 'A1', toObject: () => ({ _id: 'pos-1', quant: 10, palletSector: 'A1' }) }
+        ];
+        Ask.findById.mockReturnValue({
+            exec: vi.fn().mockResolvedValue(mockAsk)
+        });
+        vi.spyOn(getPosesByArtikulAndSkladUtilModule, 'getPosesByArtikulAndSkladUtil').mockResolvedValue(mockPositions);
+        const result = await getAskPullUtil('ask-124');
+        expect(result).not.toBeNull();
+        if (result) {
+            expect(result.isPullRequired).toBe(true);
+            expect(result.status).toBe('need_pull');
+            expect(result.remainingQuantity).toBeNull();
+            expect(result.positions.length).toBeGreaterThan(0);
         }
     });
 });

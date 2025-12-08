@@ -25,6 +25,7 @@ export const getAskPullUtil = async (
       isPullRequired: false,
       positions: [],
       remainingQuantity: null,
+      status: "completed",
     };
   }
 
@@ -37,36 +38,40 @@ export const getAskPullUtil = async (
   // Получаем позиции с таким же артикулом и складом (только с quant > 0)
   const positions = await getPosesByArtikulAndSkladUtil(ask.artikul, sklad);
 
+  // Определяем статус
+  let status: "excess" | "completed" | "need_pull" = "need_pull";
+
+  if (remainingQuantity === null) {
+    // Если quant не указан и ничего не снято (иначе было бы отрицательное число из util)
+    status = "need_pull";
+  } else if (remainingQuantity < 0) {
+    status = "excess";
+  } else if (remainingQuantity === 0) {
+    status = "completed";
+  } else {
+    status = "need_pull";
+  }
+
   // Если позиций нет
   if (positions.length === 0) {
     return {
       isPullRequired: false,
       positions: [],
       remainingQuantity,
+      status,
     };
   }
 
   // Определяем флаг необходимости снятия
-  let isPullRequired = true;
-
-  if (remainingQuantity === null) {
-    // Если quant не указан:
-    // - Если уже было снятие (pullQuant > 0), то снятие не требуется
-    // - Если снятия не было и есть позиции с quant > 0, то снятие требуется
-    isPullRequired = ask.pullQuant === 0 && positions.length > 0;
-  } else if (remainingQuantity === 0) {
-    // Если уже все снято, снятие не требуется
-    isPullRequired = false;
-  } else {
-    // Если remainingQuantity > 0, снятие требуется
-    isPullRequired = true;
-  }
+  // Снятие нужно только если статус need_pull и есть позиции
+  const isPullRequired = status === "need_pull";
 
   if (!isPullRequired) {
     return {
       isPullRequired,
       positions: [],
       remainingQuantity,
+      status,
     };
   }
 
@@ -80,5 +85,6 @@ export const getAskPullUtil = async (
     isPullRequired,
     positions: positionsForPull,
     remainingQuantity,
+    status,
   };
 };
