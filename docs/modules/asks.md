@@ -84,6 +84,23 @@
 
 **Доступ:** Требует роль USER
 
+### GET `/api/asks/pulls`
+
+Получение всех позиций для снятия по всем активным заявкам с автоматическим завершением готовых заявок.
+
+**Запрос:**
+
+- Query параметры отсутствуют
+
+**Ответ:**
+
+- 200: `{ message: string, data: { positionsBySector: Array<PositionsBySector>, completedAsks: Array<string> } }`
+- 500: `{ message: string, error?: string }` - ошибка сервера
+
+**Доступ:** Требует роль USER
+
+**Примечание:** При каждом запросе автоматически проверяются заявки со статусом "processing" и завершаются те, у которых количество снятого товара уже удовлетворяет запрашиваемое количество. При автоматическом завершении создаются события и отправляются уведомления создателям заявок через Telegram.
+
 ### GET `/api/asks/:id`
 
 Получение заявки по идентификатору.
@@ -288,5 +305,23 @@
   remainingQuantity: number | null; // Оставшееся количество для снятия
   status: "process" | "satisfied" | "no_poses" | "finished";
   message: string; // Сообщение о статусе
+}
+```
+
+### PositionsBySector
+
+```typescript
+{
+  sector: number; // Номер сектора паллеты
+  positions: Array<PositionForPull>; // Позиции в данном секторе
+}
+```
+
+### GetAsksPullsResponse
+
+```typescript
+{
+  positionsBySector: Array<PositionsBySector>; // Позиции для снятия, сгруппированные по секторам паллет
+  completedAsks: Array<string>; // ID заявок, которые были автоматически завершены
 }
 ```
