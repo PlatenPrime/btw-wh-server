@@ -8,9 +8,11 @@ import { sortPositionsByPalletSectorUtil } from "../../../../poses/utils/sort-po
  *   - number > 0 - оставшееся количество для снятия
  * @param askId - ID ask, для которого предназначены позиции
  * @param askArtikul - Артикул из ask
+ * @param askQuant - Количество товара, которое просят в ask (null если quant не указан)
+ * @param askRemainingQuantity - Оставшееся количество для снятия по ask (null если quant не указан)
  * @returns Массив позиций с указанием plannedQuant для снятия
  */
-export const calculatePositionsForPullUtil = (positions, remainingQuantity, askId, askArtikul) => {
+export const calculatePositionsForPullUtil = (positions, remainingQuantity, askId, askArtikul, askQuant, askRemainingQuantity) => {
     // Сценарий 3: позиций нет
     if (positions.length === 0) {
         return [];
@@ -30,6 +32,8 @@ export const calculatePositionsForPullUtil = (positions, remainingQuantity, askI
                 plannedQuant: null,
                 askId,
                 askArtikul,
+                askQuant,
+                askRemainingQuantity,
             },
         ];
     }
@@ -51,6 +55,8 @@ export const calculatePositionsForPullUtil = (positions, remainingQuantity, askI
                 plannedQuant,
                 askId,
                 askArtikul,
+                askQuant,
+                askRemainingQuantity,
             });
             remaining -= plannedQuant;
         }

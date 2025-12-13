@@ -292,9 +292,11 @@
 ```typescript
 {
   // Все поля из Pos
-  plannedQuant: number | null; // Планируемое количество для снятия
+  plannedQuant: number | null; // Планируемое количество для снятия с данной позиции
   askId: string; // ID заявки, для которой предназначена позиция
   askArtikul: string; // Артикул из заявки (для удобства и генерации events)
+  askQuant: number | null; // Количество товара, которое просят в заявке
+  askRemainingQuantity: number | null; // Оставшееся количество для снятия по заявке
 }
 ```
 
@@ -323,6 +325,6 @@
 
 ```typescript
 {
-  positionsBySector: Array<PositionsBySector>; // Позиции для снятия, сгруппированные по секторам паллет. Каждая позиция содержит информацию о заявке (askId, askArtikul)
+  positionsBySector: Array<PositionsBySector>; // Позиции для снятия, сгруппированные по секторам паллет. Каждая позиция содержит полную информацию о заявке (askId, askArtikul, askQuant, askRemainingQuantity)
 }
 ```

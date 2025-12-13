@@ -10,6 +10,10 @@ export interface IPositionForPull extends IPos {
   askId: string;
   /** Артикул из ask (для удобства и генерации events) */
   askArtikul: string;
+  /** Количество товара, которое просят в ask (null если quant не указан в ask) */
+  askQuant: number | null;
+  /** Оставшееся количество для снятия по ask (null если quant не указан в ask) */
+  askRemainingQuantity: number | null;
 }
 
 /**
