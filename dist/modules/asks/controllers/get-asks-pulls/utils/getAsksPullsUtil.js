@@ -1,11 +1,9 @@
 import { Ask } from "../../../models/Ask.js";
 import { getAskPullUtil } from "../../get-ask-pull/utils/getAskPullUtil.js";
-import { checkAndCompleteAsksUtil } from "./checkAndCompleteAsksUtil.js";
 import { groupPositionsBySectorUtil } from "./groupPositionsBySectorUtil.js";
 /**
  * Получает все позиции для снятия по всем активным asks
- * и автоматически завершает готовые asks
- * @returns Ответ с позициями, сгруппированными по секторам, и списком завершенных asks
+ * @returns Ответ с позициями, сгруппированными по секторам, и список processing asks для фоновой обработки
  */
 export const getAsksPullsUtil = async () => {
     // Получаем все asks со статусом "new" или "processing"
@@ -26,12 +24,12 @@ export const getAsksPullsUtil = async () => {
             processingAsks.push(ask);
         }
     }
-    // Проверяем и автоматически завершаем готовые asks
-    const completedAskIds = await checkAndCompleteAsksUtil(processingAsks);
     // Группируем позиции по секторам
     const positionsBySector = groupPositionsBySectorUtil(allPositions);
     return {
-        positionsBySector,
-        completedAsks: completedAskIds,
+        response: {
+            positionsBySector,
+        },
+        processingAsks,
     };
 };

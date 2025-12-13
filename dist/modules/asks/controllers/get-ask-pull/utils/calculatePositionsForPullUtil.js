@@ -6,9 +6,11 @@ import { sortPositionsByPalletSectorUtil } from "../../../../poses/utils/sort-po
  *   - null - если quant не указан в ask
  *   - 0 - если уже все снято (pullQuant >= quant)
  *   - number > 0 - оставшееся количество для снятия
+ * @param askId - ID ask, для которого предназначены позиции
+ * @param askArtikul - Артикул из ask
  * @returns Массив позиций с указанием plannedQuant для снятия
  */
-export const calculatePositionsForPullUtil = (positions, remainingQuantity) => {
+export const calculatePositionsForPullUtil = (positions, remainingQuantity, askId, askArtikul) => {
     // Сценарий 3: позиций нет
     if (positions.length === 0) {
         return [];
@@ -26,6 +28,8 @@ export const calculatePositionsForPullUtil = (positions, remainingQuantity) => {
             {
                 ...firstPosition.toObject(),
                 plannedQuant: null,
+                askId,
+                askArtikul,
             },
         ];
     }
@@ -45,6 +49,8 @@ export const calculatePositionsForPullUtil = (positions, remainingQuantity) => {
             positionsForPull.push({
                 ...position.toObject(),
                 plannedQuant,
+                askId,
+                askArtikul,
             });
             remaining -= plannedQuant;
         }

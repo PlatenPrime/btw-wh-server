@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Ask } from "../../../models/Ask.js";
 import { GetAskPullResponse } from "../types/getAskPullResponse.js";
 import { calculatePositionsForPullUtil } from "./calculatePositionsForPullUtil.js";
@@ -69,7 +70,9 @@ export const getAskPullUtil = async (
     positions,
     // Если quant не указан, передаем null, чтобы сработал сценарий 1 (одна позиция)
     // getRemainingQuantityUtil возвращает 0 если quant не указан, но нам для calculatePositions нужно null
-    (ask.quant === undefined || ask.quant === null || ask.quant <= 0) ? null : remainingQuantity
+    (ask.quant === undefined || ask.quant === null || ask.quant <= 0) ? null : remainingQuantity,
+    askId, // Используем параметр функции, который уже является строкой
+    ask.artikul
   );
 
   return {

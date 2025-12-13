@@ -9,11 +9,15 @@ import { IPositionForPull } from "../types/getAskPullResponse.js";
  *   - null - если quant не указан в ask
  *   - 0 - если уже все снято (pullQuant >= quant)
  *   - number > 0 - оставшееся количество для снятия
+ * @param askId - ID ask, для которого предназначены позиции
+ * @param askArtikul - Артикул из ask
  * @returns Массив позиций с указанием plannedQuant для снятия
  */
 export const calculatePositionsForPullUtil = (
   positions: IPos[],
-  remainingQuantity: number | null
+  remainingQuantity: number | null,
+  askId: string,
+  askArtikul: string
 ): IPositionForPull[] => {
   // Сценарий 3: позиций нет
   if (positions.length === 0) {
@@ -35,6 +39,8 @@ export const calculatePositionsForPullUtil = (
       {
         ...firstPosition.toObject(),
         plannedQuant: null,
+        askId,
+        askArtikul,
       } as IPositionForPull,
     ];
   }
@@ -58,6 +64,8 @@ export const calculatePositionsForPullUtil = (
       positionsForPull.push({
         ...position.toObject(),
         plannedQuant,
+        askId,
+        askArtikul,
       } as IPositionForPull);
       remaining -= plannedQuant;
     }

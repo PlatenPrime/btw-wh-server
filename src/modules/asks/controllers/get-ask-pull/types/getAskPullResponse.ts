@@ -6,6 +6,10 @@ import { IPos } from "../../../../poses/models/Pos.js";
 export interface IPositionForPull extends IPos {
   /** Количество для снятия (null если quant не указан в ask) */
   plannedQuant: number | null;
+  /** ID ask, для которого предназначена позиция */
+  askId: string;
+  /** Артикул из ask (для удобства и генерации events) */
+  askArtikul: string;
 }
 
 /**

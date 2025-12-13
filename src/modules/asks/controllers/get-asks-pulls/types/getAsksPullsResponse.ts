@@ -16,7 +16,5 @@ export interface IPositionsBySector {
 export interface GetAsksPullsResponse {
   /** Позиции для снятия, сгруппированные по секторам паллет */
   positionsBySector: IPositionsBySector[];
-  /** ID asks, которые были автоматически завершены */
-  completedAsks: string[];
 }
 

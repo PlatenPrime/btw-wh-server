@@ -3,15 +3,16 @@ import { Ask, IAsk } from "../../../models/Ask.js";
 import { IPositionForPull } from "../../get-ask-pull/types/getAskPullResponse.js";
 import { getAskPullUtil } from "../../get-ask-pull/utils/getAskPullUtil.js";
 import { GetAsksPullsResponse } from "../types/getAsksPullsResponse.js";
-import { checkAndCompleteAsksUtil } from "./checkAndCompleteAsksUtil.js";
 import { groupPositionsBySectorUtil } from "./groupPositionsBySectorUtil.js";
 
 /**
  * Получает все позиции для снятия по всем активным asks
- * и автоматически завершает готовые asks
- * @returns Ответ с позициями, сгруппированными по секторам, и списком завершенных asks
+ * @returns Ответ с позициями, сгруппированными по секторам, и список processing asks для фоновой обработки
  */
-export const getAsksPullsUtil = async (): Promise<GetAsksPullsResponse> => {
+export const getAsksPullsUtil = async (): Promise<{
+  response: GetAsksPullsResponse;
+  processingAsks: IAsk[];
+}> => {
   // Получаем все asks со статусом "new" или "processing"
   const asks = await Ask.find({
     status: { $in: ["new", "processing"] },
@@ -37,15 +38,13 @@ export const getAsksPullsUtil = async (): Promise<GetAsksPullsResponse> => {
     }
   }
 
-  // Проверяем и автоматически завершаем готовые asks
-  const completedAskIds = await checkAndCompleteAsksUtil(processingAsks);
-
   // Группируем позиции по секторам
   const positionsBySector = groupPositionsBySectorUtil(allPositions);
 
   return {
-    positionsBySector,
-    completedAsks: completedAskIds,
+    response: {
+      positionsBySector,
+    },
+    processingAsks,
   };
 };
-
