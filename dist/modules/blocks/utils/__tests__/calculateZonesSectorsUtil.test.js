@@ -58,21 +58,24 @@ describe("calculateZonesSectorsUtil", () => {
             blockData: { _id: block1._id, title: block1.title },
             order: 1,
             sector: 0,
-            zones: [zone1._id, zone2._id],
+            zones: [
+                { _id: zone1._id, title: zone1.title },
+                { _id: zone2._id, title: zone2.title },
+            ],
         });
         const seg2 = await Seg.create({
             block: block1._id,
             blockData: { _id: block1._id, title: block1.title },
             order: 2,
             sector: 0,
-            zones: [zone3._id],
+            zones: [{ _id: zone3._id, title: zone3.title }],
         });
         const seg3 = await Seg.create({
             block: block2._id,
             blockData: { _id: block2._id, title: block2.title },
             order: 1,
             sector: 0,
-            zones: [zone4._id],
+            zones: [{ _id: zone4._id, title: zone4.title }],
         });
         // Выполняем расчет
         const result = await calculateZonesSectorsUtil();
@@ -109,7 +112,7 @@ describe("calculateZonesSectorsUtil", () => {
             blockData: { _id: block._id, title: block.title },
             order: 1,
             sector: 0,
-            zones: [zoneWithSeg._id],
+            zones: [{ _id: zoneWithSeg._id, title: zoneWithSeg.title }],
         });
         // Выполняем расчет
         const result = await calculateZonesSectorsUtil();
@@ -140,21 +143,21 @@ describe("calculateZonesSectorsUtil", () => {
             blockData: { _id: block1._id, title: block1.title },
             order: 1,
             sector: 0,
-            zones: [zone1._id],
+            zones: [{ _id: zone1._id, title: zone1.title }],
         });
         const seg2 = await Seg.create({
             block: block3._id,
             blockData: { _id: block3._id, title: block3.title },
             order: 1,
             sector: 0,
-            zones: [zone2._id],
+            zones: [{ _id: zone2._id, title: zone2.title }],
         });
         const seg3 = await Seg.create({
             block: block5._id,
             blockData: { _id: block5._id, title: block5.title },
             order: 1,
             sector: 0,
-            zones: [zone3._id],
+            zones: [{ _id: zone3._id, title: zone3.title }],
         });
         // Выполняем расчет
         await calculateZonesSectorsUtil();
@@ -185,7 +188,7 @@ describe("calculateZonesSectorsUtil", () => {
             blockData: { _id: blockWithSeg._id, title: blockWithSeg.title },
             order: 1,
             sector: 0,
-            zones: [zone._id],
+            zones: [{ _id: zone._id, title: zone.title }],
         });
         // Выполняем расчет
         const result = await calculateZonesSectorsUtil();
@@ -229,21 +232,21 @@ describe("calculateZonesSectorsUtil", () => {
             blockData: { _id: block1._id, title: block1.title },
             order: 2,
             sector: 0,
-            zones: [zone1._id],
+            zones: [{ _id: zone1._id, title: zone1.title }],
         });
         const seg1 = await Seg.create({
             block: block1._id,
             blockData: { _id: block1._id, title: block1.title },
             order: 1,
             sector: 0,
-            zones: [zone2._id],
+            zones: [{ _id: zone2._id, title: zone2.title }],
         });
         const seg3 = await Seg.create({
             block: block2._id,
             blockData: { _id: block2._id, title: block2.title },
             order: 1,
             sector: 0,
-            zones: [zone3._id],
+            zones: [{ _id: zone3._id, title: zone3.title }],
         });
         // Выполняем расчет
         await calculateZonesSectorsUtil();
@@ -280,7 +283,10 @@ describe("calculateZonesSectorsUtil", () => {
             blockData: { _id: block._id, title: block.title },
             order: 1,
             sector: 0,
-            zones: zones.map((z) => z._id),
+            zones: zones.map((z) => ({
+                _id: z._id,
+                title: z.title,
+            })),
         });
         // Выполняем расчет
         const result = await calculateZonesSectorsUtil();

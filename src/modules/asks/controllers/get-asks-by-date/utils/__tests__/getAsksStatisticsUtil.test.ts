@@ -10,8 +10,11 @@ describe("getAsksStatisticsUtil", () => {
       { status: "rejected" } as any,
     ]);
 
-    expect(stats).toEqual({ newCount: 1, completedCount: 2, rejectedCount: 1 });
+    expect(stats).toEqual({
+      newCount: 1,
+      processingCount: 0,
+      completedCount: 2,
+      rejectedCount: 1,
+    });
   });
 });
-
-

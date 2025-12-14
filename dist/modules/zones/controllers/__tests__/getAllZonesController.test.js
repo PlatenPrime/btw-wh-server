@@ -30,8 +30,8 @@ describe("getAllZonesController", () => {
         expect(responseJson.pagination).toBeTruthy();
     });
     it("200: возвращает зоны с поиском", async () => {
-        await Zone.create({ title: "search-1", bar: 5555, sector: 0 });
-        const req = { query: { search: "search" } };
+        await Zone.create({ title: "50-3", bar: 5555, sector: 0 });
+        const req = { query: { search: "50" } };
         await getAllZones(req, res);
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data).toHaveLength(1);

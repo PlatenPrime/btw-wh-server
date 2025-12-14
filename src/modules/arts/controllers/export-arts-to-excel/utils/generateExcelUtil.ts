@@ -30,7 +30,7 @@ export const generateExcelUtil = (
   worksheet["!cols"] = columnWidths;
 
   // Добавляем лист в книгу
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Артикули");
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Артикулы");
 
   // Генерируем буфер Excel файла
   const buffer = XLSX.write(workbook, {

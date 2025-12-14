@@ -8,24 +8,24 @@ describe("checkZoneDuplicatesUpdateUtil", () => {
   });
 
   it("возвращает null если дубликатов нет", async () => {
-    const zone1 = await Zone.create({ title: "110-1", bar: 11010, sector: 0 });
-    const zone2 = await Zone.create({ title: "110-2", bar: 11020, sector: 0 });
+    const zone1 = await Zone.create({ title: "12-1", bar: 11010, sector: 0 });
+    const zone2 = await Zone.create({ title: "12-2", bar: 11020, sector: 0 });
 
     const result = await checkZoneDuplicatesUpdateUtil({
       id: zone1._id.toString(),
-      updateData: { title: "110-3" },
+      updateData: { title: "12-3" },
     });
 
     expect(result).toBeNull();
   });
 
   it("возвращает дубликат по title", async () => {
-    const zone1 = await Zone.create({ title: "111-1", bar: 11110, sector: 0 });
-    const zone2 = await Zone.create({ title: "111-2", bar: 11120, sector: 0 });
+    const zone1 = await Zone.create({ title: "13-1", bar: 11110, sector: 0 });
+    const zone2 = await Zone.create({ title: "13-2", bar: 11120, sector: 0 });
 
     const result = await checkZoneDuplicatesUpdateUtil({
       id: zone1._id.toString(),
-      updateData: { title: "111-2" },
+      updateData: { title: "13-2" },
     });
 
     expect(result).toBeTruthy();
@@ -33,19 +33,19 @@ describe("checkZoneDuplicatesUpdateUtil", () => {
   });
 
   it("не возвращает саму обновляемую зону", async () => {
-    const zone = await Zone.create({ title: "112-1", bar: 11210, sector: 0 });
+    const zone = await Zone.create({ title: "14-1", bar: 11210, sector: 0 });
 
     const result = await checkZoneDuplicatesUpdateUtil({
       id: zone._id.toString(),
-      updateData: { title: "112-1" },
+      updateData: { title: "14-1" },
     });
 
     expect(result).toBeNull();
   });
 
   it("возвращает дубликат по bar", async () => {
-    const zone1 = await Zone.create({ title: "113-1", bar: 11310, sector: 0 });
-    const zone2 = await Zone.create({ title: "113-2", bar: 11320, sector: 0 });
+    const zone1 = await Zone.create({ title: "15-1", bar: 11310, sector: 0 });
+    const zone2 = await Zone.create({ title: "15-2", bar: 11320, sector: 0 });
 
     const result = await checkZoneDuplicatesUpdateUtil({
       id: zone1._id.toString(),

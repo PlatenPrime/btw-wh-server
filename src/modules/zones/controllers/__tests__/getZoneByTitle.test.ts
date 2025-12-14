@@ -60,10 +60,8 @@ describe("getZoneByTitle Controller", () => {
     await getZoneByTitle(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.exists).toBe(false);
+    expect(responseStatus.code).toBe(404);
     expect(responseJson.message).toBe("Zone not found");
-    expect(responseJson.data).toBe(null);
   });
 
   it("should return 400 for empty title parameter", async () => {
@@ -260,9 +258,7 @@ describe("getZoneByTitle Controller", () => {
     await getZoneByTitle(mockRequest as Request, res);
 
     // Assert
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.exists).toBe(false);
+    expect(responseStatus.code).toBe(404);
     expect(responseJson.message).toBe("Zone not found");
-    expect(responseJson.data).toBe(null);
   });
 });

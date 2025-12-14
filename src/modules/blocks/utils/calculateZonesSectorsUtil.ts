@@ -71,7 +71,8 @@ export const calculateZonesSectorsUtil = async () => {
       });
 
       // Обновить сектор для всех зон этого сегмента
-      seg.zones.forEach((zoneId) => {
+      seg.zones.forEach((zone) => {
+        const zoneId = typeof zone === "object" && zone._id ? zone._id : zone;
         zonesInSegs.add(zoneId.toString());
         zoneOperations.push({
           updateOne: {

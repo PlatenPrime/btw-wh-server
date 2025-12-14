@@ -1,7 +1,7 @@
+import mongoose from "mongoose";
+import { Seg } from "../../../../segs/models/Seg.js";
 import { IZone, Zone } from "../../../models/Zone.js";
 import { UpdateZoneInput } from "../schemas/updateZoneByIdSchema.js";
-import { Seg } from "../../../../segs/models/Seg.js";
-import mongoose from "mongoose";
 
 type UpdateZoneByIdUtilInput = {
   id: string;
@@ -13,6 +13,17 @@ export const updateZoneByIdUtil = async ({
   updateData,
 }: UpdateZoneByIdUtilInput): Promise<IZone | null> => {
   const zoneObjectId = new mongoose.Types.ObjectId(id);
+
+  // Сначала обновляем зону
+  const updatedZone: IZone | null = await Zone.findByIdAndUpdate(
+    id,
+    updateData,
+    { new: true, runValidators: true }
+  );
+
+  if (!updatedZone) {
+    return null;
+  }
 
   // Если обновляется title, нужно синхронизировать его во всех сегментах
   if (updateData.title !== undefined) {
@@ -33,13 +44,5 @@ export const updateZoneByIdUtil = async ({
     }
   }
 
-  const updatedZone: IZone | null = await Zone.findByIdAndUpdate(
-    id,
-    updateData,
-    { new: true, runValidators: true }
-  );
-
   return updatedZone;
 };
-
-

@@ -38,9 +38,9 @@ describe("getAllZonesController", () => {
   });
 
   it("200: возвращает зоны с поиском", async () => {
-    await Zone.create({ title: "search-1", bar: 5555, sector: 0 });
+    await Zone.create({ title: "50-3", bar: 5555, sector: 0 });
 
-    const req = { query: { search: "search" } } as unknown as Request;
+    const req = { query: { search: "50" } } as unknown as Request;
 
     await getAllZones(req, res);
 

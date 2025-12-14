@@ -23,13 +23,13 @@ export const generateExcelExtendedUtil = (excelData) => {
     ];
     worksheet["!cols"] = columnWidths;
     // Добавляем лист в книгу
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Артикули");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Артикулы");
     // Генерируем буфер Excel файла
     const buffer = XLSX.write(workbook, {
         type: "buffer",
         bookType: "xlsx",
     });
     // Настраиваем имя файла
-    const fileName = `arts_export_with_stocks.xlsx`;
+    const fileName = `arts_export_with_stocks_${new Date().toISOString().split("T")[0]}.xlsx`;
     return { buffer, fileName };
 };

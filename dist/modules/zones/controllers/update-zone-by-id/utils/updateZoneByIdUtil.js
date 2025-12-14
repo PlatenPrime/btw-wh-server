@@ -1,8 +1,13 @@
-import { Zone } from "../../../models/Zone.js";
-import { Seg } from "../../../../segs/models/Seg.js";
 import mongoose from "mongoose";
+import { Seg } from "../../../../segs/models/Seg.js";
+import { Zone } from "../../../models/Zone.js";
 export const updateZoneByIdUtil = async ({ id, updateData, }) => {
     const zoneObjectId = new mongoose.Types.ObjectId(id);
+    // Сначала обновляем зону
+    const updatedZone = await Zone.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
+    if (!updatedZone) {
+        return null;
+    }
     // Если обновляется title, нужно синхронизировать его во всех сегментах
     if (updateData.title !== undefined) {
         // Найти все сегменты, содержащие эту зону
@@ -18,6 +23,5 @@ export const updateZoneByIdUtil = async ({ id, updateData, }) => {
             }
         }
     }
-    const updatedZone = await Zone.findByIdAndUpdate(id, updateData, { new: true, runValidators: true });
     return updatedZone;
 };

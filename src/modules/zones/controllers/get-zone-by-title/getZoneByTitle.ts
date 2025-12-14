@@ -19,10 +19,8 @@ export const getZoneByTitle = async (req: Request, res: Response) => {
     const zone = await getZoneByTitleUtil(parseResult.data.title);
 
     if (!zone) {
-      res.status(200).json({
-        exists: false,
+      res.status(404).json({
         message: "Zone not found",
-        data: null,
       });
       return;
     }
@@ -42,5 +40,3 @@ export const getZoneByTitle = async (req: Request, res: Response) => {
     }
   }
 };
-
-

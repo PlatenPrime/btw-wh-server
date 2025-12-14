@@ -35,7 +35,7 @@ export const exportArtsToExcelWithStocksController = async (req, res) => {
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",
-                error: process.env.NODE_ENV === "development" ? error : undefined,
+                error: process.env.NODE_ENV !== "production" ? error : undefined,
             });
         }
     }

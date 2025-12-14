@@ -1,8 +1,12 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createTestRow, createTestPallet, createTestPos } from "../../../../../../test/utils/testHelpers.js";
-import { Pallet } from "../../../../models/Pallet.js";
+import {
+  createTestPallet,
+  createTestPos,
+  createTestRow,
+} from "../../../../../../test/utils/testHelpers.js";
 import { Pos } from "../../../../../poses/models/Pos.js";
+import { Pallet } from "../../../../models/Pallet.js";
 import { movePalletPosesUtil } from "../movePalletPosesUtil.js";
 
 describe("movePalletPosesUtil", () => {
@@ -65,7 +69,6 @@ describe("movePalletPosesUtil", () => {
 
     const session = await mongoose.startSession();
     await session.withTransaction(async () => {
-
       const result = await movePalletPosesUtil({
         sourcePalletId: String(sourcePallet._id),
         targetPalletId: String(targetPallet._id),
@@ -99,16 +102,21 @@ describe("movePalletPosesUtil", () => {
     const targetPallet = await createTestPallet({ poses: [] });
 
     const session = await mongoose.startSession();
-    await session.withTransaction(async () => {
-      await expect(
-        movePalletPosesUtil({
+    try {
+      await session.withTransaction(async () => {
+        await movePalletPosesUtil({
           sourcePalletId: new mongoose.Types.ObjectId().toString(),
           targetPalletId: String(targetPallet._id),
           session,
-        })
-      ).rejects.toThrow("Source pallet not found");
-    });
-    await session.endSession();
+        });
+        // Если дошли сюда, ошибка не была выброшена
+        throw new Error("Expected error was not thrown");
+      });
+    } catch (error: any) {
+      expect(error.message).toContain("Source pallet not found");
+    } finally {
+      await session.endSession();
+    }
   });
 
   it("выбрасывает ошибку если target pallet не пустая", async () => {
@@ -141,16 +149,20 @@ describe("movePalletPosesUtil", () => {
     await targetPallet.save();
 
     const session = await mongoose.startSession();
-    await session.withTransaction(async () => {
-      await expect(
-        movePalletPosesUtil({
+    try {
+      await session.withTransaction(async () => {
+        await movePalletPosesUtil({
           sourcePalletId: String(sourcePallet._id),
           targetPalletId: String(targetPallet._id),
           session,
-        })
-      ).rejects.toThrow("Target pallet must be empty");
-    });
-    await session.endSession();
+        });
+        // Если дошли сюда, ошибка не была выброшена
+        throw new Error("Expected error was not thrown");
+      });
+    } catch (error: any) {
+      expect(error.message).toContain("Target pallet must be empty");
+    } finally {
+      await session.endSession();
+    }
   });
 });
-
