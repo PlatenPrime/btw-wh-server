@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import User from "../../../../auth/models/User.js";
 import { Ask } from "../../../models/Ask.js";
-import { getRemainingQuantityUtil } from "../../get-ask-pull/utils/getRemainingQuantityUtil.js";
 import { completeAskUtil } from "../../complete-ask-by-id/utils/completeAskUtil.js";
 import { getCompleteAskMesUtil } from "../../complete-ask-by-id/utils/getCompleteAskMesUtil.js";
 import { sendCompleteAskMesUtil } from "../../complete-ask-by-id/utils/sendCompleteAskMesUtil.js";
+import { getRemainingQuantityUtil } from "../../get-ask-pull/utils/getRemainingQuantityUtil.js";
 /**
  * Проверяет asks на готовность к завершению и автоматически завершает их
  * @param asks - Массив asks со статусом "processing" для проверки
@@ -18,13 +18,15 @@ export const checkAndCompleteAsksUtil = async (asks) => {
         if (ask.status !== "processing" || !ask.solver) {
             return false;
         }
-        // Проверяем, что quant указан
-        if (typeof ask.quant !== "number" || ask.quant <= 0) {
-            return false;
-        }
-        // Проверяем, что оставшееся количество <= 0 (т.е. pullQuant >= quant)
         const remainingQuantity = getRemainingQuantityUtil(ask);
-        return remainingQuantity <= 0;
+        const pullQuant = typeof ask.pullQuant === "number" ? ask.pullQuant : 0;
+        const hasQuant = typeof ask.quant === "number" && ask.quant > 0;
+        if (hasQuant) {
+            // Проверяем, что оставшееся количество <= 0 (т.е. pullQuant >= quant)
+            return remainingQuantity <= 0;
+        }
+        // Для ask без quant завершаем, если есть хотя бы одно списание
+        return pullQuant > 0;
     });
     // Завершаем каждый готовый ask
     for (const ask of asksToComplete) {
@@ -46,12 +48,16 @@ export const checkAndCompleteAsksUtil = async (asks) => {
                     }
                     // Проверяем еще раз, что ask все еще готов к завершению
                     const remainingQuantity = getRemainingQuantityUtil(currentAsk);
-                    if (currentAsk.status !== "processing" ||
-                        !currentAsk.solver ||
-                        typeof currentAsk.quant !== "number" ||
-                        currentAsk.quant <= 0 ||
-                        remainingQuantity > 0) {
+                    const pullQuant = typeof currentAsk.pullQuant === "number" ? currentAsk.pullQuant : 0;
+                    const hasQuant = typeof currentAsk.quant === "number" && currentAsk.quant > 0;
+                    if (currentAsk.status !== "processing" || !currentAsk.solver) {
                         // Ask уже был обработан или изменился, пропускаем
+                        return;
+                    }
+                    if (hasQuant && remainingQuantity > 0) {
+                        return;
+                    }
+                    if (!hasQuant && pullQuant <= 0) {
                         return;
                     }
                     updatedAsk = await completeAskUtil({

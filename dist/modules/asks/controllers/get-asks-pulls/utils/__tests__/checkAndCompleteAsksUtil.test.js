@@ -77,7 +77,7 @@ describe("checkAndCompleteAsksUtil", () => {
         const result = await checkAndCompleteAsksUtil([ask]);
         expect(result).not.toContain(String(ask._id));
     });
-    it("проверяет quant > 0", async () => {
+    it("заявка без quant не завершается без списаний", async () => {
         const solver = await createTestUser({ username: `solver-${Date.now()}` });
         const askNoQuant = await createTestAsk({
             artikul: "ART-NO-QUANT",
@@ -88,6 +88,21 @@ describe("checkAndCompleteAsksUtil", () => {
         });
         const result = await checkAndCompleteAsksUtil([askNoQuant]);
         expect(result).not.toContain(String(askNoQuant._id));
+    });
+    it("заявка без quant завершается если есть списания", async () => {
+        const solver = await createTestUser({ username: `solver-${Date.now()}` });
+        const askNoQuantPulled = await createTestAsk({
+            artikul: "ART-NO-QUANT-PULLED",
+            quant: undefined,
+            pullQuant: 3,
+            status: "processing",
+            solver: solver._id,
+        });
+        const result = await checkAndCompleteAsksUtil([askNoQuantPulled]);
+        expect(result).toContain(String(askNoQuantPulled._id));
+        const Ask = mongoose.model("Ask");
+        const updatedAsk = await Ask.findById(askNoQuantPulled._id);
+        expect(updatedAsk?.status).toBe("completed");
     });
     it("не завершает заявки где осталось снять (remainingQuantity > 0)", async () => {
         const solver = await createTestUser({ username: `solver-${Date.now()}` });

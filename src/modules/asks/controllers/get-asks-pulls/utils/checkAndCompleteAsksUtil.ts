@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import User from "../../../../auth/models/User.js";
 import { Ask, IAsk } from "../../../models/Ask.js";
-import { getRemainingQuantityUtil } from "../../get-ask-pull/utils/getRemainingQuantityUtil.js";
 import { completeAskUtil } from "../../complete-ask-by-id/utils/completeAskUtil.js";
 import { getCompleteAskMesUtil } from "../../complete-ask-by-id/utils/getCompleteAskMesUtil.js";
 import { sendCompleteAskMesUtil } from "../../complete-ask-by-id/utils/sendCompleteAskMesUtil.js";
+import { getRemainingQuantityUtil } from "../../get-ask-pull/utils/getRemainingQuantityUtil.js";
 
 /**
  * Проверяет asks на готовность к завершению и автоматически завершает их
@@ -23,14 +23,17 @@ export const checkAndCompleteAsksUtil = async (
       return false;
     }
 
-    // Проверяем, что quant указан
-    if (typeof ask.quant !== "number" || ask.quant <= 0) {
-      return false;
+    const remainingQuantity = getRemainingQuantityUtil(ask);
+    const pullQuant = typeof ask.pullQuant === "number" ? ask.pullQuant : 0;
+    const hasQuant = typeof ask.quant === "number" && ask.quant > 0;
+
+    if (hasQuant) {
+      // Проверяем, что оставшееся количество <= 0 (т.е. pullQuant >= quant)
+      return remainingQuantity <= 0;
     }
 
-    // Проверяем, что оставшееся количество <= 0 (т.е. pullQuant >= quant)
-    const remainingQuantity = getRemainingQuantityUtil(ask);
-    return remainingQuantity <= 0;
+    // Для ask без quant завершаем, если есть хотя бы одно списание
+    return pullQuant > 0;
   });
 
   // Завершаем каждый готовый ask
@@ -47,7 +50,9 @@ export const checkAndCompleteAsksUtil = async (
           solver = await User.findById(ask.solver).session(session);
           if (!solver) {
             throw new Error(
-              `Solver user not found for ask ${(ask._id as mongoose.Types.ObjectId).toString()}`
+              `Solver user not found for ask ${(
+                ask._id as mongoose.Types.ObjectId
+              ).toString()}`
             );
           }
 
@@ -57,20 +62,29 @@ export const checkAndCompleteAsksUtil = async (
           ).session(session);
           if (!currentAsk) {
             throw new Error(
-              `Ask not found: ${(ask._id as mongoose.Types.ObjectId).toString()}`
+              `Ask not found: ${(
+                ask._id as mongoose.Types.ObjectId
+              ).toString()}`
             );
           }
 
           // Проверяем еще раз, что ask все еще готов к завершению
           const remainingQuantity = getRemainingQuantityUtil(currentAsk);
-          if (
-            currentAsk.status !== "processing" ||
-            !currentAsk.solver ||
-            typeof currentAsk.quant !== "number" ||
-            currentAsk.quant <= 0 ||
-            remainingQuantity > 0
-          ) {
+          const pullQuant =
+            typeof currentAsk.pullQuant === "number" ? currentAsk.pullQuant : 0;
+          const hasQuant =
+            typeof currentAsk.quant === "number" && currentAsk.quant > 0;
+
+          if (currentAsk.status !== "processing" || !currentAsk.solver) {
             // Ask уже был обработан или изменился, пропускаем
+            return;
+          }
+
+          if (hasQuant && remainingQuantity > 0) {
+            return;
+          }
+
+          if (!hasQuant && pullQuant <= 0) {
             return;
           }
 
@@ -94,16 +108,16 @@ export const checkAndCompleteAsksUtil = async (
           });
         }
 
-        completedAskIds.push(
-          (ask._id as mongoose.Types.ObjectId).toString()
-        );
+        completedAskIds.push((ask._id as mongoose.Types.ObjectId).toString());
       } finally {
         await session.endSession();
       }
     } catch (error) {
       // Логируем ошибку, но продолжаем обработку остальных asks
       console.error(
-        `Error completing ask ${(ask._id as mongoose.Types.ObjectId).toString()}:`,
+        `Error completing ask ${(
+          ask._id as mongoose.Types.ObjectId
+        ).toString()}:`,
         error instanceof Error ? error.message : error
       );
     }
@@ -111,4 +125,3 @@ export const checkAndCompleteAsksUtil = async (
 
   return completedAskIds;
 };
-
