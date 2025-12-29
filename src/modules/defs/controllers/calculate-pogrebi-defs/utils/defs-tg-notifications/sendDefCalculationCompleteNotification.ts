@@ -1,5 +1,8 @@
 import { sendMessageToDefsChat } from "../../../../../../utils/telegram/sendMessageToDefsChat.js";
-import { IDeficitCalculationResult, IDeficitItem } from "../../../../models/Def.js";
+import {
+  IDeficitCalculationResult,
+  IDeficitItem,
+} from "../../../../models/Def.js";
 
 // Функция для разбивки массива на чанки
 const chunkArray = <T>(array: T[], chunkSize: number): T[][] => {
@@ -64,21 +67,33 @@ export const sendDefCalculationCompleteNotification = async (
     // Разделяем дефициты на критичные и лимитированные
     const { critical, limited } = separateDeficitsByStatus(result);
 
-    // Отправляем summary-сообщение
-    const summaryMessage =
-      `✅ Розрахунок дефіцитів завершено\n` +
-      `📊 Результати:\n` +
-      `• Всього дефіцитів: ${totalDeficits}\n` +
-      `• Критичних: ${critical.length}\n` +
-      `• В ліміті: ${limited.length}`;
-
-    await sendMessageToDefsChat(summaryMessage);
-
     if (totalDeficits === 0) {
       await sendMessageToDefsChat(`🎉 Відмінно! 
 Дефіцитів не знайдено
 Всі артикули в нормі`);
     } else {
+      // Отправляем лимитированные дефициты (если есть)
+      if (limited.length > 0) {
+        const limitedChunks = chunkArray(limited, 20);
+
+        for (let i = 0; i < limitedChunks.length; i++) {
+          const chunk = limitedChunks[i];
+          const startIndex = i * 20;
+          const message = createDeficitMessage(
+            chunk,
+            startIndex,
+            limited.length,
+            "limited"
+          );
+
+          await sendMessageToDefsChat(message);
+
+          // Небольшая задержка между сообщениями (500мс)
+          if (i < limitedChunks.length - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+        }
+      }
       // Отправляем критичные дефициты (если есть)
       if (critical.length > 0) {
         const criticalChunks = chunkArray(critical, 20);
@@ -102,28 +117,14 @@ export const sendDefCalculationCompleteNotification = async (
         }
       }
 
-      // Отправляем лимитированные дефициты (если есть)
-      if (limited.length > 0) {
-        const limitedChunks = chunkArray(limited, 20);
+      // Отправляем summary-сообщение
+      const summaryMessage =
+        `✅ Розрахунок дефіцитів завершено\n` +
+        `• Всього дефіцитів: ${totalDeficits}\n` +
+        `• Критичних: ${critical.length}\n` +
+        `• В ліміті: ${limited.length}`;
 
-        for (let i = 0; i < limitedChunks.length; i++) {
-          const chunk = limitedChunks[i];
-          const startIndex = i * 20;
-          const message = createDeficitMessage(
-            chunk,
-            startIndex,
-            limited.length,
-            "limited"
-          );
-
-          await sendMessageToDefsChat(message);
-
-          // Небольшая задержка между сообщениями (500мс)
-          if (i < limitedChunks.length - 1) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-          }
-        }
-      }
+      await sendMessageToDefsChat(summaryMessage);
     }
   } catch (error) {
     console.error(
@@ -133,4 +134,3 @@ export const sendDefCalculationCompleteNotification = async (
     // Не викидаємо помилку, щоб не переривати основний процес
   }
 };
-

@@ -56,19 +56,19 @@ router.patch(
   asyncHandler(renameBlock)
 );
 
-// Массовый upsert блоков - доступно только для ADMIN
+// Массовый upsert блоков - доступно только для PRIME
 router.post(
   "/upsert",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.PRIME]),
   asyncHandler(upsertBlocksController)
 );
 
-// Удалить блок - доступно только для ADMIN
+// Удалить блок - доступно только для PRIME
 router.delete(
   "/:id",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.PRIME]),
   asyncHandler(deleteBlock)
 );
 

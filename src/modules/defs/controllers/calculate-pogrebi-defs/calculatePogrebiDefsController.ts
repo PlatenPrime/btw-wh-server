@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { resetCalculationStatus } from "../../utils/calculationStatus.js";
+import { getCalculationStatus } from "../../utils/calculationStatus.js";
 import { calculateAndSavePogrebiDefsUtil } from "./utils/calculateAndSavePogrebiDefsUtil.js";
 import { calculatePogrebiDefsSchema } from "./schemas/calculatePogrebiDefsSchema.js";
 
@@ -23,8 +23,16 @@ export const calculatePogrebiDefsController = async (
       return;
     }
 
-    // Сбрасываем предыдущий статус
-    resetCalculationStatus();
+    // Проверяем, не выполняется ли уже расчет
+    const currentStatus = getCalculationStatus();
+    if (currentStatus.isRunning) {
+      res.status(409).json({
+        success: false,
+        message: "Розрахунок вже виконується",
+        error: "Calculation is already in progress",
+      });
+      return;
+    }
 
     // Выполняем расчет дефицитов и сохраняем в БД
     const savedDef = await calculateAndSavePogrebiDefsUtil();

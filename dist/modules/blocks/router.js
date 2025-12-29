@@ -14,10 +14,10 @@ router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getBloc
 router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateBlock));
 // Переименовать блок - доступно только для ADMIN
 router.patch("/:id/rename", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(renameBlock));
-// Массовый upsert блоков - доступно только для ADMIN
-router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(upsertBlocksController));
-// Удалить блок - доступно только для ADMIN
-router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deleteBlock));
+// Массовый upsert блоков - доступно только для PRIME
+router.post("/upsert", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(upsertBlocksController));
+// Удалить блок - доступно только для PRIME
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deleteBlock));
 // Разовый контроллер: сбросить сектора всех зон - доступно только для ADMIN
 router.post("/reset-zones-sectors", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(resetZonesSectors));
 // Пересчитать сектора всех зон на основе позиций блоков и зон - доступно только для ADMIN

@@ -21,8 +21,8 @@ export const generateExcelExtendedUtil = (
     { wch: 12 }, // Артикул
     { wch: 15 }, // Факт
     { wch: 15 }, // Вітрина
-    { wch: 15 }, // Сайт
     { wch: 15 }, // Склад
+    { wch: 15 }, // Сайт
     { wch: 45 }, // Назва (укр)
     { wch: 10 }, // Зона
     { wch: 10 }, // Ліміт

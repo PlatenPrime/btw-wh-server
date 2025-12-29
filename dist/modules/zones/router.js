@@ -18,8 +18,8 @@ router.get("/by-block/:blockId", checkAuth, checkRoles([RoleType.ADMIN]), asyncH
 router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getZoneById));
 // Обновить зону - доступно только для ADMIN
 router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateZoneById));
-// Удалить зону - доступно только для ADMIN
-router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deleteZoneById));
-// Массовое создание/обновление зон (upsert) - доступно только для ADMIN
-router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(upsertZones));
+// Удалить зону - доступно только для PRIME
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deleteZoneById));
+// Массовое создание/обновление зон (upsert) - доступно только для PRIME
+router.post("/upsert", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(upsertZones));
 export default router;

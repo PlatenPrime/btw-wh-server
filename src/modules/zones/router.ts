@@ -72,19 +72,19 @@ router.put(
   asyncHandler(updateZoneById)
 );
 
-// Удалить зону - доступно только для ADMIN
+// Удалить зону - доступно только для PRIME
 router.delete(
   "/:id",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.PRIME]),
   asyncHandler(deleteZoneById)
 );
 
-// Массовое создание/обновление зон (upsert) - доступно только для ADMIN
+// Массовое создание/обновление зон (upsert) - доступно только для PRIME
 router.post(
   "/upsert",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.PRIME]),
   asyncHandler(upsertZones)
 );
 
