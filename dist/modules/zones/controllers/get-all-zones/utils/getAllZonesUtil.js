@@ -4,7 +4,18 @@ export const getAllZonesUtil = async ({ page, limit, search, sortBy, sortOrder, 
     // Построение поискового запроса
     const searchQuery = search
         ? {
-            title: { $regex: search, $options: "i" },
+            $or: [
+                { title: { $regex: search, $options: "i" } },
+                {
+                    $expr: {
+                        $regexMatch: {
+                            input: { $toString: "$bar" },
+                            regex: search,
+                            options: "i",
+                        },
+                    },
+                },
+            ],
         }
         : {};
     // Если сортировка по title, используем сортировку в памяти

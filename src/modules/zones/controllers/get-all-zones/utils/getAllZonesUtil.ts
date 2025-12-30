@@ -26,7 +26,18 @@ export const getAllZonesUtil = async ({
   // Построение поискового запроса
   const searchQuery = search
     ? {
-        title: { $regex: search, $options: "i" },
+        $or: [
+          { title: { $regex: search, $options: "i" } },
+          {
+            $expr: {
+              $regexMatch: {
+                input: { $toString: "$bar" },
+                regex: search,
+                options: "i",
+              },
+            },
+          },
+        ],
       }
     : {};
 
