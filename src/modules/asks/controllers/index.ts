@@ -2,6 +2,7 @@ export { completeAskById } from "./complete-ask-by-id/completeAskById.js";
 export { createAskController } from "./create-ask/createAskController.js";
 export { deleteAskById } from "./delete-ask-by-id/deleteAskById.js";
 export { getAskById } from "./get-ask-by-id/getAskById.js";
+export { getAsksByArt } from "./get-asks-by-artikul/getAsksByArt.js";
 export { getAsksByDate } from "./get-asks-by-date/getAsksByDate.js";
 export { getAskPullController } from "./get-ask-pull/getAskPullController.js";
 export { getAsksPullsController } from "./get-asks-pulls/getAsksPullsController.js";

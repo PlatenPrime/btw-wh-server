@@ -11,6 +11,7 @@ import {
   createAskController,
   deleteAskById,
   getAskById,
+  getAsksByArt,
   getAsksByDate,
   getAskPullController,
   getAsksPullsController,
@@ -36,6 +37,14 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getAsksByDate)
+);
+
+// Получить asks по артикулу - доступно для всех авторизованных пользователей
+router.get(
+  "/by-artikul",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAsksByArt)
 );
 
 // Получить все позиции для снятия по всем активным asks - доступно для всех авторизованных пользователей
