@@ -48,6 +48,30 @@ describe("createAskController", () => {
     expect(responseJson._id).toBeDefined();
   });
 
+  it("201: создаёт заявку с полем zone", async () => {
+    const user = await createTestUser({ fullname: "Asker" });
+
+    const req = {
+      body: {
+        artikul: "ART-ZONE",
+        nameukr: "Товар з зоною",
+        quant: 2,
+        com: "коментар",
+        zone: "Зона А",
+        askerId: String(user._id),
+      },
+    } as unknown as Request;
+
+    await createAskController(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    expect(responseJson).toBeTruthy();
+    expect(responseJson.artikul).toBe("ART-ZONE");
+    expect(responseJson.zone).toBe("Зона А");
+    expect(responseJson.status).toBe("new");
+    expect(responseJson._id).toBeDefined();
+  });
+
   it("400: ошибка валидации при отсутствии artikul", async () => {
     const user = await createTestUser();
     const req = {

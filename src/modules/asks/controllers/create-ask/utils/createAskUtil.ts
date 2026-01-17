@@ -12,6 +12,7 @@ type CreateAskInput = {
   quant?: number;
   com?: string;
   sklad?: string;
+  zone?: string;
   askerData: IUser;
   actions: string[];
   session: ClientSession;
@@ -23,6 +24,7 @@ export const createAskUtil = async ({
   quant,
   com,
   sklad,
+  zone,
   askerData,
   actions,
   session,
@@ -38,6 +40,7 @@ export const createAskUtil = async ({
     quant,
     com,
     sklad: sklad || "pogrebi",
+    zone,
     asker: mappedAskerData._id,
     askerData: mappedAskerData,
     actions,

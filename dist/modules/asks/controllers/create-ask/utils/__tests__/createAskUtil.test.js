@@ -40,4 +40,30 @@ describe("createAskUtil", () => {
         });
         await session.endSession();
     });
+    it("создаёт Ask с полем zone и сохраняет его в базе данных", async () => {
+        const session = await mongoose.startSession();
+        await session.withTransaction(async () => {
+            const asker = await createTestUser({ fullname: "Creator Two" });
+            const result = await createAskUtil({
+                artikul: "ART-002",
+                nameukr: "Товар з зоною",
+                quant: 5,
+                com: "з зоною",
+                zone: "Зона Б",
+                askerData: asker,
+                actions: ["2025-01-01 12:00 Creator Two: створив запит"],
+                session,
+            });
+            expect(result).toBeTruthy();
+            expect(result._id).toBeDefined();
+            expect(result.artikul).toBe("ART-002");
+            expect(result.zone).toBe("Зона Б");
+            expect(result.status).toBe("new");
+            const found = await Ask.findById(result._id).session(session);
+            expect(found).not.toBeNull();
+            expect(found?.zone).toBe("Зона Б");
+            expect(found?.asker.toString()).toBe(String(asker._id));
+        });
+        await session.endSession();
+    });
 });

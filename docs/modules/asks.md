@@ -58,7 +58,7 @@
 
 **Запрос:**
 
-- Body: `{ artikul: string, nameukr?: string, quant?: number, com?: string, sklad?: "pogrebi" | "merezhi", askerId: string }`
+- Body: `{ artikul: string, nameukr?: string, quant?: number, com?: string, sklad?: "pogrebi" | "merezhi", zone?: string, askerId: string }`
 
 **Ответ:**
 
@@ -256,6 +256,7 @@
   quant?: number;                 // Требуемое количество
   com?: string;                   // Комментарий
   sklad?: string;                 // Склад ("pogrebi" или "merezhi", по умолчанию "pogrebi")
+  zone?: string;                  // Зона склада
   asker: string;                  // ObjectId пользователя-создателя
   askerData: {                    // Кэшированные данные создателя
     _id: string;

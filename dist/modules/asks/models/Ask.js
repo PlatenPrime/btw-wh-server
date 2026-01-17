@@ -45,6 +45,7 @@ const askSchema = new Schema({
     quant: { type: Number },
     com: { type: String },
     sklad: { type: String, default: "pogrebi" },
+    zone: { type: String },
     asker: { type: Schema.Types.ObjectId, ref: "User", required: true },
     solver: { type: Schema.Types.ObjectId, ref: "User" },
     askerData: { type: askUserDataSchema, required: true },
