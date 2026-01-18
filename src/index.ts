@@ -8,15 +8,12 @@ import artsRoute from "./modules/arts/router.js";
 import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
 import blocksRoute from "./modules/blocks/router.js";
-import segsRoute from "./modules/segs/router.js";
 import defsRoute from "./modules/defs/router.js";
 import palletsRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
 import rowsRoute from "./modules/rows/router.js";
+import segsRoute from "./modules/segs/router.js";
 import zonesRoute from "./modules/zones/router.js";
-import { BTW_PLATEN_ID } from "./constants/telegram.js";
-import { sendMessageToTGChat } from "./utils/telegram/sendMessageToTGChat.js";
-import { sendMessageToDefsChat } from "./utils/telegram/sendMessageToDefsChat.js";
 
 dotenv.config();
 
