@@ -1,6 +1,9 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createTestPallet, createTestPos } from "../../../../../../test/utils/testHelpers.js";
+import {
+  createTestPallet,
+  createTestPos,
+} from "../../../../../../test/utils/testHelpers.js";
 import { Pos } from "../../../../../poses/models/Pos.js";
 import { updatePosesPalletDataUtil } from "../updatePosesPalletDataUtil.js";
 
@@ -14,7 +17,7 @@ describe("updatePosesPalletDataUtil", () => {
     await session.withTransaction(async () => {
       const pallet = await createTestPallet({
         title: "Pallet-1",
-        sector: "A",
+        sector: 1,
         isDef: false,
       });
 
@@ -44,7 +47,7 @@ describe("updatePosesPalletDataUtil", () => {
       await updatePosesPalletDataUtil({
         palletId: String(pallet._id),
         title: "Updated-Pallet",
-        sector: "B",
+        sector: 2,
         isDef: true,
         session,
       });
@@ -53,12 +56,12 @@ describe("updatePosesPalletDataUtil", () => {
       const updatedPos2 = await Pos.findById(pos2._id).session(session);
 
       expect(updatedPos1?.palletData.title).toBe("Updated-Pallet");
-      expect(updatedPos1?.palletData.sector).toBe("B");
+      expect(updatedPos1?.palletData.sector).toBe(2);
       expect(updatedPos1?.palletData.isDef).toBe(true);
       expect(updatedPos1?.palletTitle).toBe("Updated-Pallet");
 
       expect(updatedPos2?.palletData.title).toBe("Updated-Pallet");
-      expect(updatedPos2?.palletData.sector).toBe("B");
+      expect(updatedPos2?.palletData.sector).toBe(2);
       expect(updatedPos2?.palletData.isDef).toBe(true);
     });
     await session.endSession();
@@ -69,7 +72,7 @@ describe("updatePosesPalletDataUtil", () => {
     await session.withTransaction(async () => {
       const pallet = await createTestPallet({
         title: "Pallet-1",
-        sector: "A",
+        sector: 1,
       });
       const pos = await createTestPos({
         pallet: pallet._id,
@@ -95,5 +98,3 @@ describe("updatePosesPalletDataUtil", () => {
     await session.endSession();
   });
 });
-
-

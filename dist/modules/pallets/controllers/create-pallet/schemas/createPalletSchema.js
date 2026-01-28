@@ -11,6 +11,7 @@ export const createPalletSchema = z.object({
             .transform((val) => val),
         title: z.string().min(1, "Row title is required"),
     }),
-    sector: z.string().optional(),
+    // Accept sector from the client as string or number but always coerce to number
+    sector: z.coerce.number().int().nonnegative().optional(),
     isDef: z.boolean().optional(),
 });

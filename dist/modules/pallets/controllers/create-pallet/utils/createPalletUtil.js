@@ -7,7 +7,7 @@ export const createPalletUtil = async ({ title, rowId, sector, isDef, rowData, s
             row: rowData._id,
             rowData: { _id: rowData._id, title: rowData.title },
             poses: [],
-            sector,
+            sector: sector ?? 0,
             isDef,
         },
     ], { session });

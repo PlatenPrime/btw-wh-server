@@ -171,3 +171,4 @@ Authorization: Bearer <token>
 - [Модуль Poses](../modules/poses.md)
 - [Модуль Defs](../modules/defs.md)
 - [Модуль Comps](../modules/comps.md)
+- [Модуль Pallet-groups](../modules/palgrs.md)

@@ -9,7 +9,7 @@ type UpdatePalletInput = {
   title?: string;
   rowId?: string;
   poses?: string[];
-  sector?: string;
+  sector?: number;
   isDef?: boolean;
   rowDoc?: IRow;
   session: ClientSession;

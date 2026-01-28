@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Types } from "mongoose";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { processPosesByArtikulUtil } from "../processPosesByArtikulUtil.js";
 // Мокаем зависимости
 vi.mock("../getPosesByArtikulUtil.js", () => ({
@@ -14,10 +14,10 @@ vi.mock("../calculateWarehouseDataUtil.js", () => ({
 vi.mock("../../../../../pallets/utils/sortPosesByPalletSector.js", () => ({
     sortPosesByPalletSector: vi.fn(),
 }));
+import { sortPosesByPalletSector } from "../../../../../pallets/utils/sortPosesByPalletSector.js";
+import { calculateWarehouseDataUtil } from "../calculateWarehouseDataUtil.js";
 import { getPosesByArtikulUtil } from "../getPosesByArtikulUtil.js";
 import { groupPosesByWarehouseUtil } from "../groupPosesByWarehouseUtil.js";
-import { calculateWarehouseDataUtil } from "../calculateWarehouseDataUtil.js";
-import { sortPosesByPalletSector } from "../../../../../pallets/utils/sortPosesByPalletSector.js";
 describe("processPosesByArtikulUtil", () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -49,7 +49,7 @@ describe("processPosesByArtikulUtil", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-1",
-                    sector: "1",
+                    sector: 1,
                     isDef: false,
                 },
                 rowData: {
@@ -70,7 +70,7 @@ describe("processPosesByArtikulUtil", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "2-1",
-                    sector: "2",
+                    sector: 2,
                     isDef: false,
                 },
                 rowData: {
@@ -91,7 +91,7 @@ describe("processPosesByArtikulUtil", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-2",
-                    sector: "3",
+                    sector: 3,
                     isDef: false,
                 },
                 rowData: {
@@ -151,7 +151,7 @@ describe("processPosesByArtikulUtil", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-1",
-                    sector: "1",
+                    sector: 1,
                     isDef: false,
                 },
                 rowData: {
@@ -172,7 +172,7 @@ describe("processPosesByArtikulUtil", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "2-1",
-                    sector: "2",
+                    sector: 2,
                     isDef: false,
                 },
                 rowData: {
@@ -218,7 +218,7 @@ describe("processPosesByArtikulUtil", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-1",
-                    sector: "5",
+                    sector: 5,
                     isDef: false,
                 },
                 rowData: {

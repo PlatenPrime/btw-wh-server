@@ -9,6 +9,7 @@ import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
 import blocksRoute from "./modules/blocks/router.js";
 import defsRoute from "./modules/defs/router.js";
+import palletGroupsRoute from "./modules/pallet-groups/router.js";
 import palletsRoute from "./modules/pallets/router.js";
 import posesRoute from "./modules/poses/router.js";
 import rowsRoute from "./modules/rows/router.js";
@@ -32,6 +33,7 @@ app.use("/api/blocks", blocksRoute);
 app.use("/api/segs", segsRoute);
 app.use("/api/rows", rowsRoute);
 app.use("/api/pallets", palletsRoute);
+app.use("/api/pallet-groups", palletGroupsRoute);
 app.use("/api/poses", posesRoute);
 app.use("/api/defs", defsRoute);
 app.use("/api/zones", zonesRoute);
@@ -57,7 +59,7 @@ const DB_NAME = process.env.DB_NAME;
 async function start() {
   try {
     await mongoose.connect(
-      `mongodb+srv://${DB_USER}:${DB_PASSWORD}@cluster0.b6qtdz4.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`
+      `mongodb+srv://${DB_USER}:${DB_PASSWORD}@cluster0.b6qtdz4.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`,
     );
 
     startCronOperations();

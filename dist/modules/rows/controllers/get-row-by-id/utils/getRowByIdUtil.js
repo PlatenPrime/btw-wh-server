@@ -8,6 +8,7 @@ export const getRowByIdUtil = async (id) => {
     const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector poses isDef");
     const palletsFormatted = pallets.map((p) => ({
         _id: p._id,
+        id: p._id.toString(),
         title: p.title,
         sector: p.sector,
         isEmpty: p.poses.length === 0,

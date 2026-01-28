@@ -10,6 +10,14 @@ interface IRowSubdocument {
 }
 
 /**
+ * Pallet group subdocument interface for Pallet
+ */
+interface IPalletGroupSubdocument {
+  id: Types.ObjectId;
+  title: string;
+}
+
+/**
  * Pallet document interface
  */
 export interface IPallet extends Document {
@@ -19,7 +27,8 @@ export interface IPallet extends Document {
   rowData: IRowSubdocument;
   poses: Types.ObjectId[];
   isDef: boolean;
-  sector?: string;
+  sector: number;
+  palgr?: IPalletGroupSubdocument;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -32,6 +41,14 @@ const rowSubdocumentSchema = new Schema<IRowSubdocument>(
   { _id: false }
 );
 
+const palletGroupSubdocumentSchema = new Schema<IPalletGroupSubdocument>(
+  {
+    id: { type: Schema.Types.ObjectId, ref: "PalletGroup" },
+    title: { type: String, required: true },
+  },
+  { _id: false }
+);
+
 const palletSchema = new Schema<IPallet>(
   {
     title: { type: String, required: true, unique: true },
@@ -39,7 +56,13 @@ const palletSchema = new Schema<IPallet>(
     row: { type: Schema.Types.ObjectId, required: true },
     poses: [{ type: Schema.Types.ObjectId, ref: "Pos" }],
     isDef: { type: Boolean, default: false },
-    sector: String,
+    sector: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: [0, "Sector must be non-negative"],
+    },
+    palgr: { type: palletGroupSubdocumentSchema, required: false },
   },
   { timestamps: true }
 );

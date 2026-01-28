@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createTestRow, createTestPallet } from "../../../../../../test/utils/testHelpers.js";
+import { createTestPallet, createTestRow, } from "../../../../../../test/utils/testHelpers.js";
 import { Pallet } from "../../../../models/Pallet.js";
 import { updatePalletUtil } from "../updatePalletUtil.js";
 describe("updatePalletUtil", () => {
@@ -12,19 +12,19 @@ describe("updatePalletUtil", () => {
         await session.withTransaction(async () => {
             const pallet = await createTestPallet({
                 title: "Old-Pallet",
-                sector: "A",
+                sector: 1,
             });
             const result = await updatePalletUtil({
                 palletId: String(pallet._id),
                 title: "New-Pallet",
-                sector: "B",
+                sector: 2,
                 session,
             });
             expect(result.title).toBe("New-Pallet");
-            expect(result.sector).toBe("B");
+            expect(result.sector).toBe(2);
             const found = await Pallet.findById(pallet._id).session(session);
             expect(found?.title).toBe("New-Pallet");
-            expect(found?.sector).toBe("B");
+            expect(found?.sector).toBe(2);
         });
         await session.endSession();
     });

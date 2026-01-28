@@ -7,7 +7,7 @@ import { serializeIds } from "../../../utils/serialize-ids.js";
 type CreatePalletInput = {
   title: string;
   rowId: string;
-  sector?: string;
+  sector?: number;
   isDef?: boolean;
   rowData: IRow;
   session: ClientSession;
@@ -28,7 +28,7 @@ export const createPalletUtil = async ({
         row: rowData._id,
         rowData: { _id: rowData._id, title: rowData.title },
         poses: [],
-        sector,
+        sector: sector ?? 0,
         isDef,
       },
     ],

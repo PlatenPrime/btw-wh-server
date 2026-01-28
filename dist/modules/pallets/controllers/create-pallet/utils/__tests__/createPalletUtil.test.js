@@ -15,7 +15,7 @@ describe("createPalletUtil", () => {
             const result = await createPalletUtil({
                 title: "Pallet-1-1",
                 rowId: String(row._id),
-                sector: "A",
+                sector: 1,
                 isDef: false,
                 rowData: row,
                 session,
@@ -23,7 +23,7 @@ describe("createPalletUtil", () => {
             expect(result).toBeTruthy();
             expect(result._id).toBeDefined();
             expect(result.title).toBe("Pallet-1-1");
-            expect(result.sector).toBe("A");
+            expect(result.sector).toBe(1);
             expect(result.isDef).toBe(false);
             const found = await Pallet.findById(result._id).session(session);
             expect(found).not.toBeNull();

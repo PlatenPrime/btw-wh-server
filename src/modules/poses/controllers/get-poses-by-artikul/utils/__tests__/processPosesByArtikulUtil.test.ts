@@ -1,7 +1,7 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Types } from "mongoose";
-import { processPosesByArtikulUtil } from "../processPosesByArtikulUtil.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GetPosesByArtikulResponse } from "../../../../types/getPosesByArtikulResponse.js";
+import { processPosesByArtikulUtil } from "../processPosesByArtikulUtil.js";
 
 // Мокаем зависимости
 vi.mock("../getPosesByArtikulUtil.js", () => ({
@@ -20,11 +20,11 @@ vi.mock("../../../../../pallets/utils/sortPosesByPalletSector.js", () => ({
   sortPosesByPalletSector: vi.fn(),
 }));
 
-import { getPosesByArtikulUtil } from "../getPosesByArtikulUtil.js";
-import { groupPosesByWarehouseUtil } from "../groupPosesByWarehouseUtil.js";
-import { calculateWarehouseDataUtil } from "../calculateWarehouseDataUtil.js";
 import { sortPosesByPalletSector } from "../../../../../pallets/utils/sortPosesByPalletSector.js";
 import { IPos } from "../../../../models/Pos.js";
+import { calculateWarehouseDataUtil } from "../calculateWarehouseDataUtil.js";
+import { getPosesByArtikulUtil } from "../getPosesByArtikulUtil.js";
+import { groupPosesByWarehouseUtil } from "../groupPosesByWarehouseUtil.js";
 
 describe("processPosesByArtikulUtil", () => {
   beforeEach(() => {
@@ -62,7 +62,7 @@ describe("processPosesByArtikulUtil", () => {
         palletData: {
           _id: new Types.ObjectId(),
           title: "1-1",
-          sector: "1",
+          sector: 1,
           isDef: false,
         },
         rowData: {
@@ -83,7 +83,7 @@ describe("processPosesByArtikulUtil", () => {
         palletData: {
           _id: new Types.ObjectId(),
           title: "2-1",
-          sector: "2",
+          sector: 2,
           isDef: false,
         },
         rowData: {
@@ -104,7 +104,7 @@ describe("processPosesByArtikulUtil", () => {
         palletData: {
           _id: new Types.ObjectId(),
           title: "1-2",
-          sector: "3",
+          sector: 3,
           isDef: false,
         },
         rowData: {
@@ -122,7 +122,7 @@ describe("processPosesByArtikulUtil", () => {
     const merezhiPoses = [mockPoses[1]];
 
     (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockPoses
+      mockPoses,
     );
     (groupPosesByWarehouseUtil as ReturnType<typeof vi.fn>).mockReturnValue({
       pogrebi: pogrebiPoses,
@@ -157,10 +157,7 @@ describe("processPosesByArtikulUtil", () => {
     expect(sortPosesByPalletSector).toHaveBeenNthCalledWith(1, pogrebiPoses);
     expect(sortPosesByPalletSector).toHaveBeenNthCalledWith(2, merezhiPoses);
     expect(calculateWarehouseDataUtil).toHaveBeenCalledTimes(2);
-    expect(calculateWarehouseDataUtil).toHaveBeenNthCalledWith(
-      1,
-      pogrebiPoses
-    );
+    expect(calculateWarehouseDataUtil).toHaveBeenNthCalledWith(1, pogrebiPoses);
     expect(calculateWarehouseDataUtil).toHaveBeenNthCalledWith(2, merezhiPoses);
   });
 
@@ -175,7 +172,7 @@ describe("processPosesByArtikulUtil", () => {
         palletData: {
           _id: new Types.ObjectId(),
           title: "1-1",
-          sector: "1",
+          sector: 1,
           isDef: false,
         },
         rowData: {
@@ -196,7 +193,7 @@ describe("processPosesByArtikulUtil", () => {
         palletData: {
           _id: new Types.ObjectId(),
           title: "2-1",
-          sector: "2",
+          sector: 2,
           isDef: false,
         },
         rowData: {
@@ -211,7 +208,7 @@ describe("processPosesByArtikulUtil", () => {
     ];
 
     (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockPoses
+      mockPoses,
     );
     (groupPosesByWarehouseUtil as ReturnType<typeof vi.fn>).mockReturnValue({
       pogrebi: [mockPoses[0]],
@@ -248,7 +245,7 @@ describe("processPosesByArtikulUtil", () => {
         palletData: {
           _id: new Types.ObjectId(),
           title: "1-1",
-          sector: "5",
+          sector: 5,
           isDef: false,
         },
         rowData: {
@@ -265,7 +262,7 @@ describe("processPosesByArtikulUtil", () => {
     const pogrebiPoses = [...mockPoses];
 
     (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockPoses
+      mockPoses,
     );
     (groupPosesByWarehouseUtil as ReturnType<typeof vi.fn>).mockReturnValue({
       pogrebi: pogrebiPoses,
@@ -282,8 +279,7 @@ describe("processPosesByArtikulUtil", () => {
 
     // Проверяем порядок вызовов: сначала сортировка, потом расчет
     expect(sortPosesByPalletSector).toHaveBeenCalledBefore(
-      calculateWarehouseDataUtil as ReturnType<typeof vi.fn>
+      calculateWarehouseDataUtil as ReturnType<typeof vi.fn>,
     );
   });
 });
-

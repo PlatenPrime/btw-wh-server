@@ -11,12 +11,8 @@ type PosWithPalletData = Pick<IPos, "palletData">;
  */
 export function sortPosesByPalletSector(poses: PosWithPalletData[]) {
   return poses.sort((a, b) => {
-    const sectorA = a.palletData.sector
-      ? parseInt(a.palletData.sector, 10)
-      : 0;
-    const sectorB = b.palletData.sector
-      ? parseInt(b.palletData.sector, 10)
-      : 0;
+    const sectorA = typeof a.palletData.sector === "number" ? a.palletData.sector : 0;
+    const sectorB = typeof b.palletData.sector === "number" ? b.palletData.sector : 0;
 
     if (sectorA < sectorB) {
       return -1;

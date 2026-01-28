@@ -4,13 +4,23 @@ const rowSubdocumentSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
 }, { _id: false });
+const palletGroupSubdocumentSchema = new Schema({
+    id: { type: Schema.Types.ObjectId, ref: "PalletGroup" },
+    title: { type: String, required: true },
+}, { _id: false });
 const palletSchema = new Schema({
     title: { type: String, required: true, unique: true },
     rowData: { type: rowSubdocumentSchema, required: true },
     row: { type: Schema.Types.ObjectId, required: true },
     poses: [{ type: Schema.Types.ObjectId, ref: "Pos" }],
     isDef: { type: Boolean, default: false },
-    sector: String,
+    sector: {
+        type: Number,
+        required: true,
+        default: 0,
+        min: [0, "Sector must be non-negative"],
+    },
+    palgr: { type: palletGroupSubdocumentSchema, required: false },
 }, { timestamps: true });
 export { palletSchema };
 /**

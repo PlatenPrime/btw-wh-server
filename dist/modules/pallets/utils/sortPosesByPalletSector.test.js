@@ -1,8 +1,10 @@
+import { Types } from "mongoose";
 import { describe, expect, it } from "vitest";
 import { sortPosesByPalletSector } from "./sortPosesByPalletSector.js";
-import { Types } from "mongoose";
 function mapPosesToSector(poses) {
-    return poses.map((p) => p.palletData.sector ?? "null");
+    return poses.map((p) => typeof p.palletData.sector === "number"
+        ? String(p.palletData.sector)
+        : "null");
 }
 describe("sortPosesByPalletSector", () => {
     it("сортирует позиции по сектору паллеты в порядке возрастания", () => {
@@ -11,7 +13,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "2-10",
-                    sector: "5",
+                    sector: 5,
                     isDef: false,
                 },
             },
@@ -19,7 +21,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-2",
-                    sector: "1",
+                    sector: 1,
                     isDef: false,
                 },
             },
@@ -27,7 +29,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-10",
-                    sector: "3",
+                    sector: 3,
                     isDef: false,
                 },
             },
@@ -35,7 +37,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "2-2",
-                    sector: "2",
+                    sector: 2,
                     isDef: false,
                 },
             },
@@ -49,7 +51,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "2-1",
-                    sector: "5",
+                    sector: 5,
                     isDef: false,
                 },
             },
@@ -65,7 +67,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-2",
-                    sector: "2",
+                    sector: 2,
                     isDef: false,
                 },
             },
@@ -87,7 +89,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-1",
-                    sector: "2",
+                    sector: 2,
                     isDef: false,
                 },
             },
@@ -95,7 +97,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-2",
-                    sector: "2",
+                    sector: 2,
                     isDef: false,
                 },
             },
@@ -103,7 +105,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "2-1",
-                    sector: "3",
+                    sector: 3,
                     isDef: false,
                 },
             },
@@ -120,7 +122,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-1",
-                    sector: "1",
+                    sector: 1,
                     isDef: false,
                 },
             },
@@ -128,7 +130,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-2",
-                    sector: "2",
+                    sector: 2,
                     isDef: false,
                 },
             },
@@ -136,7 +138,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "2-1",
-                    sector: "3",
+                    sector: 3,
                     isDef: false,
                 },
             },
@@ -150,7 +152,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "1-1",
-                    sector: "1001",
+                    sector: 1001,
                     isDef: false,
                 },
             },
@@ -158,7 +160,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "2-1",
-                    sector: "10",
+                    sector: 10,
                     isDef: false,
                 },
             },
@@ -166,7 +168,7 @@ describe("sortPosesByPalletSector", () => {
                 palletData: {
                     _id: new Types.ObjectId(),
                     title: "3-1",
-                    sector: "100",
+                    sector: 100,
                     isDef: false,
                 },
             },

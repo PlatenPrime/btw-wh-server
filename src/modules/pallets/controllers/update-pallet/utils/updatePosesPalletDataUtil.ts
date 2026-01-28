@@ -4,7 +4,7 @@ import { Pos } from "../../../../poses/models/Pos.js";
 type UpdatePosesPalletDataInput = {
   palletId: string;
   title?: string;
-  sector?: string;
+  sector?: number;
   isDef?: boolean;
   session: ClientSession;
 };
@@ -33,15 +33,7 @@ export const updatePosesPalletDataUtil = async ({
 
   if (Object.keys(updateFields).length > 0) {
     await Pos.updateMany({ pallet: palletId }, { $set: updateFields }).session(
-      session
+      session,
     );
   }
 };
-
-
-
-
-
-
-
-

@@ -1,22 +1,21 @@
 import { Pallet } from "../../../../pallets/models/Pallet.js";
+import type { PalletShortDto } from "../../../../pallets/types/PalletShortDto.js";
 import { IRow, Row } from "../../../models/Row.js";
 
 type RowWithPallets = {
   _id: any;
   title: string;
-  pallets: Array<{
-    _id: any;
-    title: string;
-    sector: string | undefined;
-    isEmpty: boolean;
-    isDef: boolean;
-  }>;
+  pallets: Array<
+    PalletShortDto & {
+      _id: any;
+    }
+  >;
   createdAt?: Date;
   updatedAt?: Date;
 };
 
 export const getRowByIdUtil = async (
-  id: string
+  id: string,
 ): Promise<RowWithPallets | null> => {
   const row: IRow | null = await Row.findById(id);
 
@@ -25,11 +24,12 @@ export const getRowByIdUtil = async (
   }
 
   const pallets = await Pallet.find({ "rowData._id": row._id }).select(
-    "_id title sector poses isDef"
+    "_id title sector poses isDef",
   );
 
   const palletsFormatted = pallets.map((p) => ({
     _id: p._id,
+    id: p._id.toString(),
     title: p.title,
     sector: p.sector,
     isEmpty: p.poses.length === 0,

@@ -7,7 +7,7 @@ import { Document, model, Schema, Types } from "mongoose";
 interface IPalletSubdocument {
   _id: Types.ObjectId;
   title: string;
-  sector?: string;
+  sector?: number;
   isDef: boolean;
 }
 
@@ -47,7 +47,11 @@ const palletSubdocumentSchema = new Schema<IPalletSubdocument>(
   {
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
-    sector: String,
+    sector: {
+      type: Number,
+      required: false,
+      min: [0, "Sector must be non-negative"],
+    },
     isDef: { type: Boolean, default: false },
   },
   { _id: false }

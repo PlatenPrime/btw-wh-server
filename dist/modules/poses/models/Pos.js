@@ -3,7 +3,11 @@ import { model, Schema } from "mongoose";
 const palletSubdocumentSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
-    sector: String,
+    sector: {
+        type: Number,
+        required: false,
+        min: [0, "Sector must be non-negative"],
+    },
     isDef: { type: Boolean, default: false },
 }, { _id: false });
 const rowSubdocumentSchema = new Schema({
