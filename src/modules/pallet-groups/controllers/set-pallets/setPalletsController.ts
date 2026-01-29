@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { calculatePalletsSectorsUtil } from "../../utils/calculatePalletsSectorsUtil.js";
 import { getPalletsShortForGroup } from "../../utils/getGroupPalletsShortDtoUtil.js";
 import { setPalletsSchema } from "./schemas/setPalletsSchema.js";
 import { setPalletsUtil } from "./utils/setPalletsUtil.js";
@@ -27,6 +28,8 @@ export const setPalletsController = async (req: Request, res: Response) => {
 
     await session.commitTransaction();
     session.endSession();
+
+    await calculatePalletsSectorsUtil({ groupIds: [group._id] });
 
     const pallets = await getPalletsShortForGroup(group);
 

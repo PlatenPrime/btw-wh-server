@@ -1,10 +1,6 @@
 import mongoose, { ClientSession } from "mongoose";
-import {
-  IPalletGroup,
-  PalletGroup,
-} from "../../../models/PalletGroup.js";
-import { calculatePalletsSectorsUtil } from "../../../utils/calculatePalletsSectorsUtil.js";
 import { Pallet } from "../../../../pallets/models/Pallet.js";
+import { IPalletGroup, PalletGroup } from "../../../models/PalletGroup.js";
 
 type SetPalletsUtilInput = {
   groupId: string;
@@ -72,10 +68,6 @@ export const setPalletsUtil = async ({
       { session },
     );
   }
-
-  await calculatePalletsSectorsUtil({
-    groupIds: [group._id],
-  });
 
   return group;
 };
