@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { calculatePalletsSectorsUtil } from "../../utils/calculatePalletsSectorsUtil.js";
 import { getPalletsShortForGroup } from "../../utils/getGroupPalletsShortDtoUtil.js";
 import { setPalletsSchema } from "./schemas/setPalletsSchema.js";
 import { setPalletsUtil } from "./utils/setPalletsUtil.js";
@@ -20,6 +21,7 @@ export const setPalletsController = async (req, res) => {
         });
         await session.commitTransaction();
         session.endSession();
+        await calculatePalletsSectorsUtil({ groupIds: [group._id] });
         const pallets = await getPalletsShortForGroup(group);
         return res.status(200).json({
             message: "Pallets set for group successfully",

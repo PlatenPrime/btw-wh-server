@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
-import { PalletGroup, } from "../../../models/PalletGroup.js";
-import { calculatePalletsSectorsUtil } from "../../../utils/calculatePalletsSectorsUtil.js";
 import { Pallet } from "../../../../pallets/models/Pallet.js";
+import { PalletGroup } from "../../../models/PalletGroup.js";
 export const setPalletsUtil = async ({ groupId, palletIds, session, }) => {
     const group = await PalletGroup.findById(groupId).session(session);
     if (!group) {
@@ -40,8 +39,5 @@ export const setPalletsUtil = async ({ groupId, palletIds, session, }) => {
             $unset: { palgr: "" },
         }, { session });
     }
-    await calculatePalletsSectorsUtil({
-        groupIds: [group._id],
-    });
     return group;
 };

@@ -9,6 +9,7 @@ import {
   getFreePallets,
   getPalletGroupById,
   recalculatePalletsSectors,
+  reorderPalletGroups,
   resetPalletsSectors,
   setPallets,
   unlinkPallet,
@@ -47,7 +48,14 @@ router.post(
   asyncHandler(createPalletGroup),
 );
 
-// PUT routes - ADMIN only
+// PATCH / PUT routes - ADMIN only
+router.patch(
+  "/reorder",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(reorderPalletGroups),
+);
+
 router.put(
   "/:id",
   checkAuth,

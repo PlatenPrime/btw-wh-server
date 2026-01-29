@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { calculatePalletsSectorsUtil } from "../../utils/calculatePalletsSectorsUtil.js";
 import { getPalletsShortForGroup } from "../../utils/getGroupPalletsShortDtoUtil.js";
 import { unlinkPalletSchema } from "./schemas/unlinkPalletSchema.js";
 import { unlinkPalletUtil } from "./utils/unlinkPalletUtil.js";
@@ -27,6 +28,7 @@ export const unlinkPalletController = async (req, res) => {
                 message: "Pallet is not linked to any group",
             });
         }
+        await calculatePalletsSectorsUtil({ groupIds: [group._id] });
         const pallets = await getPalletsShortForGroup(group);
         return res.status(200).json({
             message: "Pallet unlinked from group successfully",
