@@ -2,10 +2,11 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { createPalletGroup, deletePalletGroup, getAllPalletGroups, getPalletGroupById, recalculatePalletsSectors, resetPalletsSectors, setPallets, unlinkPallet, updatePalletGroup, } from "./controllers/index.js";
+import { createPalletGroup, deletePalletGroup, getAllPalletGroups, getFreePallets, getPalletGroupById, recalculatePalletsSectors, resetPalletsSectors, setPallets, unlinkPallet, updatePalletGroup, } from "./controllers/index.js";
 const router = Router();
 // GET routes - available for all authenticated users
 router.get("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAllPalletGroups));
+router.get("/free-pallets", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getFreePallets));
 router.get("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getPalletGroupById));
 // POST routes - ADMIN only
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createPalletGroup));

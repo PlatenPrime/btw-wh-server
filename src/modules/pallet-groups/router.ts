@@ -6,6 +6,7 @@ import {
   createPalletGroup,
   deletePalletGroup,
   getAllPalletGroups,
+  getFreePallets,
   getPalletGroupById,
   recalculatePalletsSectors,
   resetPalletsSectors,
@@ -22,6 +23,13 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getAllPalletGroups),
+);
+
+router.get(
+  "/free-pallets",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getFreePallets),
 );
 
 router.get(

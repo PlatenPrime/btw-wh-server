@@ -1,6 +1,7 @@
 export { createPalletGroupController as createPalletGroup } from "./create-pallet-group/createPalletGroupController.js";
 export { deletePalletGroupController as deletePalletGroup } from "./delete-pallet-group/deletePalletGroupController.js";
 export { getAllPalletGroupsController as getAllPalletGroups } from "./get-all-pallet-groups/getAllPalletGroupsController.js";
+export { getFreePalletsController as getFreePallets } from "./get-free-pallets/getFreePalletsController.js";
 export { getPalletGroupByIdController as getPalletGroupById } from "./get-pallet-group-by-id/getPalletGroupByIdController.js";
 export { recalculatePalletsSectorsController as recalculatePalletsSectors } from "./recalculate-pallets-sectors/recalculatePalletsSectorsController.js";
 export { resetPalletsSectorsController as resetPalletsSectors } from "./reset-pallets-sectors/resetPalletsSectorsController.js";
