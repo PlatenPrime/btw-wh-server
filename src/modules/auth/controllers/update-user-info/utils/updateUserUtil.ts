@@ -4,6 +4,7 @@ import User, { IUser } from "../../../models/User.js";
 type UpdateUserInput = {
   userId: string;
   updateData: {
+    username?: string;
     password?: string;
     fullname?: string;
     role?: string;

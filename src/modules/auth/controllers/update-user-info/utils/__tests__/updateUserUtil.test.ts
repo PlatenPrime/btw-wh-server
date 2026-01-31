@@ -33,6 +33,45 @@ describe("updateUserUtil", () => {
     await session.endSession();
   });
 
+  it("обновляет username если передан в updateData", async () => {
+    const user = await createTestUser({
+      username: `oldname-${Date.now()}`,
+      fullname: "User",
+    });
+    const newUsername = `newname-${Date.now()}`;
+    const session = await mongoose.startSession();
+    await session.withTransaction(async () => {
+      const updated = await updateUserUtil({
+        userId: user._id.toString(),
+        updateData: { username: newUsername },
+        session,
+      });
+      expect(updated).toBeTruthy();
+      expect(updated?.username).toBe(newUsername);
+      const found = await User.findById(user._id).session(session);
+      expect(found?.username).toBe(newUsername);
+    });
+    await session.endSession();
+  });
+
+  it("не меняет username если он не передан в updateData", async () => {
+    const user = await createTestUser({
+      username: `keepname-${Date.now()}`,
+      fullname: "User",
+    });
+    const session = await mongoose.startSession();
+    await session.withTransaction(async () => {
+      const updated = await updateUserUtil({
+        userId: user._id.toString(),
+        updateData: { fullname: "New Fullname" },
+        session,
+      });
+      expect(updated).toBeTruthy();
+      expect(updated?.username).toBe(user.username);
+    });
+    await session.endSession();
+  });
+
   it("возвращает null если пользователь не найден", async () => {
     const fakeId = new mongoose.Types.ObjectId().toString();
     const session = await mongoose.startSession();

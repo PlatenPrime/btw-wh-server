@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { updateUserInfoSchema } from "./schemas/updateUserInfoSchema.js";
+import { checkUsernameAvailableForUpdateUtil } from "./utils/checkUsernameAvailableForUpdateUtil.js";
 import { hashPasswordIfProvidedUtil } from "./utils/hashPasswordIfProvidedUtil.js";
 import { updateUserUtil } from "./utils/updateUserUtil.js";
 import { getUpdateUserResponseUtil } from "./utils/getUpdateUserResponseUtil.js";
@@ -30,14 +31,31 @@ export const updateUserInfoController = async (
       return;
     }
 
-    // Формирование данных для обновления
-    const updateData = hashPasswordIfProvidedUtil({
+    if (parseResult.data.username !== undefined) {
+      const available = await checkUsernameAvailableForUpdateUtil(
+        parseResult.data.userId,
+        parseResult.data.username
+      );
+      if (!available) {
+        res.status(409).json({
+          message: "Користувач з таким username вже існує",
+        });
+        return;
+      }
+    }
+
+    // Формирование данных для обновления (только определённые поля)
+    const rawUpdateData = hashPasswordIfProvidedUtil({
+      username: parseResult.data.username,
       password: parseResult.data.password,
       fullname: parseResult.data.fullname,
       role: parseResult.data.role,
       telegram: parseResult.data.telegram,
       photo: parseResult.data.photo,
     });
+    const updateData = Object.fromEntries(
+      Object.entries(rawUpdateData).filter(([, v]) => v !== undefined)
+    ) as Parameters<typeof updateUserUtil>[0]["updateData"];
 
     let updatedUser: any = null;
 

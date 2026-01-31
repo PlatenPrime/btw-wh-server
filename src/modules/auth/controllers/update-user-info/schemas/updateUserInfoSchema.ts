@@ -5,6 +5,7 @@ export const updateUserInfoSchema = z.object({
   userId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
     message: "Invalid user ID format",
   }),
+  username: z.string().optional(),
   password: z.string().optional(),
   fullname: z.string().optional(),
   role: z.string().optional(),

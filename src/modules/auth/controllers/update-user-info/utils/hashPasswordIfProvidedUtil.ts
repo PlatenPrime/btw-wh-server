@@ -1,6 +1,7 @@
 import { hashPasswordUtil } from "../../../utils/hashPasswordUtil.js";
 
 type UpdateData = {
+  username?: string;
   password?: string;
   fullname?: string;
   role?: string;

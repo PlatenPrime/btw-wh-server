@@ -77,7 +77,22 @@
 - 200: `Array<User (без password)>`
 - 500: `{ message: string, error: any }` - ошибка сервера
 
-**Доступ:** Требует роль ADMIN
+**Доступ:** Требует роль ADMIN (или выше)
+
+### POST `/api/auth/users`
+
+Создание пользователя (админка). Доступно только для PRIME.
+
+**Запрос:**
+- Body: `{ username: string, password: string, fullname: string, role?: string, telegram?: string, photo?: string }`
+
+**Ответ:**
+- 201: `{ user: User (без password) }`
+- 400: `{ message: string, errors?: array }` - ошибка валидации
+- 409: `{ message: string }` - пользователь с таким username уже существует
+- 500: `{ message: string, error: any }` - ошибка сервера
+
+**Доступ:** Требует роль PRIME
 
 ### GET `/api/auth/users/:id`
 
@@ -111,19 +126,20 @@
 
 ### PUT `/api/auth/users/:userId`
 
-Обновление информации о пользователе.
+Обновление информации о пользователе (все поля, включая username). Доступно только для PRIME.
 
 **Запрос:**
 - Path параметры: `userId` (MongoDB ObjectId)
-- Body: `{ password?: string, fullname?: string, role?: string, telegram?: string, photo?: string }` (все поля опциональны)
+- Body: `{ username?: string, password?: string, fullname?: string, role?: string, telegram?: string, photo?: string }` (все поля опциональны)
 
 **Ответ:**
 - 200: `{ user: User (без password), token: string }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - пользователь не найден
+- 409: `{ message: string }` - пользователь с таким username уже существует
 - 500: `{ message: string, error: any }` - ошибка сервера
 
-**Доступ:** Требует роль ADMIN
+**Доступ:** Требует роль PRIME
 
 ### GET `/api/auth/roles`
 

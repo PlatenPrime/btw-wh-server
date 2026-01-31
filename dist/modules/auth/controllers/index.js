@@ -1,3 +1,4 @@
+export { createUserController as createUser } from "./create-user/createUserController.js";
 export { getAllRolesController as getAllRoles } from "./get-all-roles/getAllRolesController.js";
 export { getAllUsersController as getAllUsers } from "./get-all-users/getAllUsersController.js";
 export { getMeController as getMe } from "./get-me/getMeController.js";
