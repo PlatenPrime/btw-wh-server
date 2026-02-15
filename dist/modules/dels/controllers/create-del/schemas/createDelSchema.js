@@ -1,0 +1,6 @@
+import { z } from "zod";
+const artikulsSchema = z.record(z.string(), z.number());
+export const createDelSchema = z.object({
+    title: z.string().min(1, "Title is required"),
+    artikuls: artikulsSchema.optional().default({}),
+});
