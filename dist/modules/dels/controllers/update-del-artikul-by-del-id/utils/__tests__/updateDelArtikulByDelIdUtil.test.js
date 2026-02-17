@@ -19,7 +19,7 @@ describe("updateDelArtikulByDelIdUtil", () => {
     it("returns null when sharik returns null and updates nothing", async () => {
         const del = await Del.create({
             title: "Del",
-            artikuls: { "ART-1": 0 },
+            artikuls: { "ART-1": { quantity: 0 } },
         });
         vi.mocked(getSharikData).mockResolvedValue(null);
         const result = await updateDelArtikulByDelIdUtil({
@@ -29,12 +29,13 @@ describe("updateDelArtikulByDelIdUtil", () => {
         expect(result).toBeNull();
         expect(getSharikData).toHaveBeenCalledWith("ART-1");
         const found = await Del.findById(del._id);
-        expect((found?.artikuls)["ART-1"]).toBe(0);
+        expect((found?.artikuls)["ART-1"])
+            .toMatchObject({ quantity: 0 });
     });
     it("updates artikul value from sharik data", async () => {
         const del = await Del.create({
             title: "Del",
-            artikuls: { "ART-1": 0 },
+            artikuls: { "ART-1": { quantity: 0 } },
         });
         vi.mocked(getSharikData).mockResolvedValue({
             nameukr: "Товар",
@@ -47,7 +48,7 @@ describe("updateDelArtikulByDelIdUtil", () => {
         });
         expect(result).toBeTruthy();
         const artikuls = result?.toObject().artikuls ?? {};
-        expect(artikuls["ART-1"]).toBe(42);
+        expect(artikuls["ART-1"]).toEqual({ quantity: 42, nameukr: "Товар" });
     });
     it("adds new artikul key when not present", async () => {
         const del = await Del.create({
@@ -65,6 +66,6 @@ describe("updateDelArtikulByDelIdUtil", () => {
         });
         expect(result).toBeTruthy();
         const artikuls = result?.toObject().artikuls ?? {};
-        expect(artikuls["NEW-ART"]).toBe(7);
+        expect(artikuls["NEW-ART"]).toEqual({ quantity: 7, nameukr: "Товар" });
     });
 });

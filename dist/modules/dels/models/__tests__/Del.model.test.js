@@ -22,15 +22,18 @@ describe("Del Model", () => {
         it("should save with title and artikuls object", async () => {
             const delData = {
                 title: "Поставка с артикулами",
-                artikuls: { "ART-001": 10, "ART-002": 5 },
+                artikuls: {
+                    "ART-001": { quantity: 10 },
+                    "ART-002": { quantity: 5, nameukr: "Товар" },
+                },
             };
             const del = new Del(delData);
             const saved = await del.save();
             expect(saved.title).toBe("Поставка с артикулами");
             const artikulsObj = saved.toObject().artikuls;
             expect(artikulsObj).toBeDefined();
-            expect(artikulsObj["ART-001"]).toBe(10);
-            expect(artikulsObj["ART-002"]).toBe(5);
+            expect(artikulsObj["ART-001"]).toEqual({ quantity: 10 });
+            expect(artikulsObj["ART-002"]).toEqual({ quantity: 5, nameukr: "Товар" });
         });
         it("should have timestamps", async () => {
             const del = new Del({ title: "Test", artikuls: {} });

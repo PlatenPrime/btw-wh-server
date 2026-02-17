@@ -37,7 +37,7 @@ describe("getDelByIdController", () => {
     it("200 returns full document", async () => {
         const del = await Del.create({
             title: "Full Del",
-            artikuls: { "A1": 1 },
+            artikuls: { A1: { quantity: 1 } },
         });
         const req = { params: { id: del._id.toString() } };
         await getDelByIdController(req, res);

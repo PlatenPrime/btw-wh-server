@@ -1,10 +1,13 @@
 import mongoose, { Document, Model, Schema, Types } from "mongoose";
 
 /**
- * Объект артикулов поставки: ключ — артикул (как в Art, Def, Pos), значение — число (например количество)
+ * Объект артикулов поставки: ключ — артикул (как в Art, Def, Pos), значение — объект с количеством и опциональным названием (nameukr).
  */
 export interface IDelArtikuls {
-  [artikul: string]: number;
+  [artikul: string]: {
+    quantity: number;
+    nameukr?: string;
+  };
 }
 
 /**

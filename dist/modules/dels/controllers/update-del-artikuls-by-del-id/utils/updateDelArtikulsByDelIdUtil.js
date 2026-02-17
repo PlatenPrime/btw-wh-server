@@ -10,14 +10,24 @@ export const updateDelArtikulsByDelIdUtil = async (delId) => {
         throw new Error("Del not found");
     }
     const raw = del.artikuls;
-    const artikulKeys = Object.keys(raw).filter((k) => typeof raw[k] === "number");
+    const artikulKeys = Object.keys(raw).filter((k) => {
+        const v = raw[k];
+        return (v &&
+            typeof v === "object" &&
+            "quantity" in v &&
+            typeof v.quantity === "number");
+    });
     const result = {
         total: artikulKeys.length,
         updated: 0,
         errors: 0,
         notFound: 0,
     };
-    const artikulsObj = { ...del.artikuls };
+    const artikulsObj = {};
+    for (const k of artikulKeys) {
+        const v = raw[k];
+        artikulsObj[k] = { quantity: v.quantity, nameukr: v.nameukr };
+    }
     for (let i = 0; i < artikulKeys.length; i++) {
         const artikul = artikulKeys[i];
         try {
@@ -26,7 +36,10 @@ export const updateDelArtikulsByDelIdUtil = async (delId) => {
                 result.notFound++;
                 continue;
             }
-            artikulsObj[artikul] = sharikData.quantity;
+            artikulsObj[artikul] = {
+                quantity: sharikData.quantity,
+                nameukr: sharikData.nameukr ?? "",
+            };
             result.updated++;
         }
         catch {

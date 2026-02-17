@@ -1,5 +1,5 @@
 import { getSharikData } from "../../../../comps/utils/getSharikData.js";
-import { Del, IDel } from "../../../models/Del.js";
+import { Del, IDel, IDelArtikuls } from "../../../models/Del.js";
 
 export type UpdateDelArtikulsByDelIdResult = {
   total: number;
@@ -21,9 +21,15 @@ export const updateDelArtikulsByDelIdUtil = async (
   }
 
   const raw = del.artikuls as Record<string, unknown>;
-  const artikulKeys = Object.keys(raw).filter(
-    (k) => typeof raw[k] === "number"
-  );
+  const artikulKeys = Object.keys(raw).filter((k) => {
+    const v = raw[k];
+    return (
+      v &&
+      typeof v === "object" &&
+      "quantity" in v &&
+      typeof (v as { quantity: unknown }).quantity === "number"
+    );
+  });
   const result: UpdateDelArtikulsByDelIdResult = {
     total: artikulKeys.length,
     updated: 0,
@@ -31,7 +37,11 @@ export const updateDelArtikulsByDelIdUtil = async (
     notFound: 0,
   };
 
-  const artikulsObj = { ...(del.artikuls as Record<string, number>) };
+  const artikulsObj: IDelArtikuls = {};
+  for (const k of artikulKeys) {
+    const v = raw[k] as { quantity: number; nameukr?: string };
+    artikulsObj[k] = { quantity: v.quantity, nameukr: v.nameukr };
+  }
 
   for (let i = 0; i < artikulKeys.length; i++) {
     const artikul = artikulKeys[i];
@@ -41,7 +51,10 @@ export const updateDelArtikulsByDelIdUtil = async (
         result.notFound++;
         continue;
       }
-      artikulsObj[artikul] = sharikData.quantity;
+      artikulsObj[artikul] = {
+        quantity: sharikData.quantity,
+        nameukr: sharikData.nameukr ?? "",
+      };
       result.updated++;
     } catch {
       result.errors++;

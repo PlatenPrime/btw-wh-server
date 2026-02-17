@@ -41,7 +41,7 @@
 **Запрос body:**
 
 - `title`: string (обязательно)
-- `artikuls`: объект с ключами string и значениями number (опционально, по умолчанию `{}`)
+- `artikuls`: объект «артикул → количество» (Record<string, number>), опционально, по умолчанию `{}`. Сервер подставляет `nameukr` из коллекции arts по артикулу; если артикул в arts не найден — поле не задаётся.
 
 **Ответ 201:** `{ message: string, data: Del }`.
 
@@ -109,7 +109,7 @@
 
 - `_id`: string (MongoDB ObjectId)
 - `title`: string
-- `artikuls`: объект, ключи — артикулы (string), значения — числа (number)
+- `artikuls`: объект, ключи — артикулы (string), значения — объекты `{ quantity: number, nameukr?: string }`
 - `createdAt`: Date (ISO строка в JSON)
 - `updatedAt`: Date (ISO строка в JSON)
 

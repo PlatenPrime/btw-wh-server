@@ -32,7 +32,7 @@ describe("updateDelArtikulByDelIdController", () => {
   it("404 when del or product not found", async () => {
     const del = await Del.create({
       title: "Del",
-      artikuls: { "ART-1": 0 },
+      artikuls: { "ART-1": { quantity: 0 } },
     });
     vi.mocked(getSharikData).mockResolvedValue(null);
     const req = {
@@ -45,7 +45,7 @@ describe("updateDelArtikulByDelIdController", () => {
   it("200 updates and returns del", async () => {
     const del = await Del.create({
       title: "Del",
-      artikuls: { "ART-1": 0 },
+      artikuls: { "ART-1": { quantity: 0 } },
     });
     vi.mocked(getSharikData).mockResolvedValue({
       nameukr: "Товар",
@@ -58,10 +58,12 @@ describe("updateDelArtikulByDelIdController", () => {
     await updateDelArtikulByDelIdController(req, res);
     expect(responseStatus.code).toBe(200);
     const data = responseJson.data as {
-      toObject?: () => { artikuls?: Record<string, number> };
-      artikuls?: Record<string, number>;
+      toObject?: () => {
+        artikuls?: Record<string, { quantity: number; nameukr?: string }>;
+      };
+      artikuls?: Record<string, { quantity: number; nameukr?: string }>;
     };
     const artikuls = data?.toObject?.()?.artikuls ?? data?.artikuls ?? {};
-    expect(artikuls["ART-1"]).toBe(15);
+    expect(artikuls["ART-1"]).toEqual({ quantity: 15, nameukr: "Товар" });
   });
 });

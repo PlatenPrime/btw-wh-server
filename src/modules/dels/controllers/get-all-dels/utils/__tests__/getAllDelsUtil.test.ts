@@ -15,7 +15,7 @@ describe("getAllDelsUtil", () => {
   it("returns list without artikuls field", async () => {
     await Del.create({
       title: "Поставка 1",
-      artikuls: { "ART-1": 10 },
+      artikuls: { "ART-1": { quantity: 10 } },
     });
     const result = await getAllDelsUtil();
     expect(result).toHaveLength(1);

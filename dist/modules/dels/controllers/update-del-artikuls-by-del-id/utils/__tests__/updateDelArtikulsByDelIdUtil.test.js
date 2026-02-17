@@ -14,11 +14,11 @@ describe("updateDelArtikulsByDelIdUtil", () => {
     it("updates all artikuls from sharik and returns stats", async () => {
         const del = await Del.create({
             title: "Del",
-            artikuls: { "A1": 0, "A2": 0 },
+            artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
         });
         vi.mocked(getSharikData)
-            .mockResolvedValueOnce({ nameukr: "", price: 0, quantity: 10 })
-            .mockResolvedValueOnce({ nameukr: "", price: 0, quantity: 20 });
+            .mockResolvedValueOnce({ nameukr: "Name1", price: 0, quantity: 10 })
+            .mockResolvedValueOnce({ nameukr: "Name2", price: 0, quantity: 20 });
         const result = await updateDelArtikulsByDelIdUtil(del._id.toString());
         expect(result).toEqual({
             total: 2,
@@ -28,13 +28,13 @@ describe("updateDelArtikulsByDelIdUtil", () => {
         });
         const found = await Del.findById(del._id);
         const a = found?.artikuls;
-        expect(a["A1"]).toBe(10);
-        expect(a["A2"]).toBe(20);
+        expect(a["A1"]).toEqual({ quantity: 10, nameukr: "Name1" });
+        expect(a["A2"]).toEqual({ quantity: 20, nameukr: "Name2" });
     });
     it("counts notFound when sharik returns null for one", async () => {
         const del = await Del.create({
             title: "Del",
-            artikuls: { "A1": 0, "A2": 0 },
+            artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
         });
         vi.mocked(getSharikData)
             .mockResolvedValueOnce({ nameukr: "", price: 0, quantity: 10 })

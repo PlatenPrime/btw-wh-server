@@ -15,14 +15,20 @@ describe("getDelByIdUtil", () => {
   it("returns full del document by id", async () => {
     const del = await Del.create({
       title: "Test Del",
-      artikuls: { "ART-1": 5, "ART-2": 10 },
+      artikuls: {
+        "ART-1": { quantity: 5 },
+        "ART-2": { quantity: 10, nameukr: "Товар" },
+      },
     });
     const result = await getDelByIdUtil(del._id.toString());
     expect(result).toBeTruthy();
     expect(result?._id.toString()).toBe(del._id.toString());
     expect(result?.title).toBe("Test Del");
-    const artikuls = (result?.artikuls as Record<string, number>) ?? {};
-    expect(artikuls["ART-1"]).toBe(5);
-    expect(artikuls["ART-2"]).toBe(10);
+    const artikuls = (result?.artikuls as Record<
+      string,
+      { quantity: number; nameukr?: string }
+    >) ?? {};
+    expect(artikuls["ART-1"]).toEqual({ quantity: 5 });
+    expect(artikuls["ART-2"]).toEqual({ quantity: 10, nameukr: "Товар" });
   });
 });

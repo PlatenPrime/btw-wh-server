@@ -11,7 +11,10 @@ export const updateDelArtikulByDelIdUtil = async (input) => {
     const sharikData = await getSharikData(input.artikul);
     if (!sharikData)
         return null;
-    del.set(`artikuls.${input.artikul}`, sharikData.quantity);
+    del.set(`artikuls.${input.artikul}`, {
+        quantity: sharikData.quantity,
+        nameukr: sharikData.nameukr ?? "",
+    });
     await del.save();
     return del;
 };
