@@ -6,6 +6,7 @@ import asksRoute from "../../modules/asks/router.js";
 import authRoute from "../../modules/auth/router.js";
 import blocksRoute from "../../modules/blocks/router.js";
 import defsRoute from "../../modules/defs/router.js";
+import prodsRoute from "../../modules/prods/router.js";
 import palletGroupsRoute from "../../modules/pallet-groups/router.js";
 import palletsRoute from "../../modules/pallets/router.js";
 import posesRoute from "../../modules/poses/router.js";
@@ -28,6 +29,7 @@ app.use("/api/pallets", palletsRoute);
 app.use("/api/pallet-groups", palletGroupsRoute);
 app.use("/api/poses", posesRoute);
 app.use("/api/defs", defsRoute);
+app.use("/api/prods", prodsRoute);
 app.use("/api/zones", zonesRoute);
 
 // Error handler must be after all routes

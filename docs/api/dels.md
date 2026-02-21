@@ -1,32 +1,32 @@
-# API поставок (для фронтенда)
+# API поставок (Dels)
 
-Эндпоинты для работы с поставками (модуль Dels). Список и получение по id доступны роли USER; создание и обновление — ADMIN; удаление — только PRIME.
+Модуль поставок. Список и получение по id — USER; создание, обновление заголовка и артикулов — ADMIN; удаление — PRIME.
 
 ## Эндпоинты
 
 ### GET `/api/dels`
 
-Получение списка поставок. В ответе только `_id`, `title`, `createdAt`, `updatedAt` (поле `artikuls` не передаётся).
+Список поставок (без или с полем artikuls — по реализации getAllDelsUtil).
 
 **Доступ:** checkAuth + checkRoles(USER).
 
-**Запрос:** без тела; query-параметры не используются.
+**Запрос:** без тела.
 
-**Ответ 200:** `{ message: string, data: Array<{ _id, title, createdAt, updatedAt }> }`.
+**Ответ 200:** `{ message: string, data: Array<Del> }`.
 
-**Ошибки:** 401, 500.
+**Ошибки:** 401, 403, 500.
 
 ---
 
 ### GET `/api/dels/id/:id`
 
-Получение поставки по id (полный документ, включая `artikuls`).
+Поставка по id (полный документ).
 
 **Доступ:** checkAuth + checkRoles(USER).
 
-**Запрос:** path-параметр `id` — MongoDB ObjectId.
+**Запрос:** path `id` — MongoDB ObjectId.
 
-**Ответ 200:** `{ message: string, data: Del }`, где Del — объект с полями `_id`, `title`, `artikuls`, `createdAt`, `updatedAt`.
+**Ответ 200:** `{ message: string, data: Del }`.
 
 **Ошибки:** 400 (невалидный id), 401, 403, 404 (поставка не найдена), 500.
 
@@ -38,40 +38,37 @@
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос body:**
-
-- `title`: string (обязательно)
-- `artikuls`: объект «артикул → количество» (Record<string, number>), опционально, по умолчанию `{}`. Сервер подставляет `nameukr` из коллекции arts по артикулу; если артикул в arts не найден — поле не задаётся.
+**Запрос body:** `title` (string, обязательно), `artikuls` (объект «артикул → число», опционально, по умолчанию {}).
 
 **Ответ 201:** `{ message: string, data: Del }`.
 
-**Ошибки:** 400 (валидация, при наличии — поле `errors`), 401, 403, 500.
+**Ошибки:** 400 (валидация, поле `errors`), 401, 403, 500.
 
 ---
 
 ### DELETE `/api/dels/id/:id`
 
-Удаление поставки по id.
+Удаление поставки.
 
 **Доступ:** checkAuth + checkRoles(PRIME).
 
-**Запрос:** path-параметр `id` — MongoDB ObjectId.
+**Запрос:** path `id` — MongoDB ObjectId.
 
-**Ответ 200:** `{ message: string }`.
+**Ответ 200:** сообщение об удалении.
 
-**Ошибки:** 400 (невалидный id), 401, 403, 404 (поставка не найдена), 500.
+**Ошибки:** 400 (невалидный id), 401, 403, 404, 500.
 
 ---
 
 ### PATCH `/api/dels/:id/title`
 
-Изменение названия поставки.
+Обновление заголовка поставки.
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос:** path-параметр `id` — MongoDB ObjectId. Body: `{ title: string }`.
+**Запрос:** path `id` — MongoDB ObjectId; body: `{ title: string }`.
 
-**Ответ 200:** `{ message: string, data: Del }`.
+**Ответ 200:** обновлённая поставка (message/data).
 
 **Ошибки:** 400 (валидация), 401, 403, 404, 500.
 
@@ -79,38 +76,34 @@
 
 ### PATCH `/api/dels/:id/artikuls/:artikul`
 
-Обновление значения одного артикула в поставке данными с sharik.ua. Артикул задаётся в path. Если артикула нет в поставке — он добавляется.
+Обновление одного артикула в поставке (данные с sharik.ua).
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос:** path-параметры `id` (MongoDB ObjectId), `artikul` (string).
+**Запрос:** path `id` — MongoDB ObjectId, `artikul` — строка.
 
 **Ответ 200:** `{ message: string, data: Del }`.
 
-**Ошибки:** 400 (валидация), 401, 403, 404 (поставка не найдена или товар не найден на sharik.ua), 500.
+**Ошибки:** 400, 401, 403, 404 (поставка не найдена или товар не найден на sharik.ua), 500.
 
 ---
 
 ### POST `/api/dels/:id/artikuls/update-all`
 
-Запуск фонового обновления значений всех артикулов поставки (sharik.ua). Ответ приходит сразу, обновление идёт в фоне.
+Запуск фонового обновления всех артикулов поставки (sharik.ua).
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос:** path-параметр `id` — MongoDB ObjectId.
+**Запрос:** path `id` — MongoDB ObjectId.
 
-**Ответ 202:** `{ message: string }` (процесс запущен).
+**Ответ 202:** `{ message: string }`.
 
-**Ошибки:** 400 (невалидный id), 401, 403, 404 (поставка не найдена), 500.
+**Ошибки:** 400, 401, 403, 404, 500.
 
 ## Формат Del
 
-Во всех ответах, где возвращается полный документ поставки:
-
 - `_id`: string (MongoDB ObjectId)
 - `title`: string
-- `artikuls`: объект, ключи — артикулы (string), значения — объекты `{ quantity: number, nameukr?: string }`
-- `createdAt`: Date (ISO строка в JSON)
-- `updatedAt`: Date (ISO строка в JSON)
-
-В списке (GET `/api/dels`) в элементах массива поле `artikuls` отсутствует.
+- `artikuls`: объект, ключ — артикул (string), значение — `{ quantity: number, nameukr?: string }`
+- `createdAt`: Date (ISO строка)
+- `updatedAt`: Date (ISO строка)
