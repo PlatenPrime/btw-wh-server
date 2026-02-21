@@ -16,6 +16,7 @@ export interface IDelArtikuls {
 export interface IDel extends Document {
   _id: Types.ObjectId;
   title: string;
+  prodName: string;
   artikuls: IDelArtikuls;
   createdAt: Date;
   updatedAt: Date;
@@ -32,6 +33,7 @@ const delArtikulsSchema = new Schema<IDelArtikuls>(
 const delSchema = new Schema<IDel>(
   {
     title: { type: String, required: true },
+    prodName: { type: String, required: true },
     artikuls: {
       type: delArtikulsSchema,
       required: true,

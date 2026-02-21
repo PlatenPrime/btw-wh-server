@@ -20,6 +20,7 @@ describe("updateDelArtikulsByDelIdUtil", () => {
   it("updates all artikuls from sharik and returns stats", async () => {
     const del = await Del.create({
       title: "Del",
+      prodName: "prod1",
       artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
     });
     vi.mocked(getSharikData)
@@ -44,6 +45,7 @@ describe("updateDelArtikulsByDelIdUtil", () => {
   it("counts notFound when sharik returns null for one", async () => {
     const del = await Del.create({
       title: "Del",
+      prodName: "prod1",
       artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
     });
     vi.mocked(getSharikData)

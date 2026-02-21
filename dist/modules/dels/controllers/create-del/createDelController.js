@@ -14,13 +14,20 @@ export const createDelController = async (req, res) => {
             });
             return;
         }
-        const del = await createDelUtil({
+        const result = await createDelUtil({
             title: parseResult.data.title,
+            prodName: parseResult.data.prodName,
             artikuls: parseResult.data.artikuls ?? {},
         });
+        if ("error" in result) {
+            res.status(400).json({
+                message: "Производитель с указанным name не найден",
+            });
+            return;
+        }
         res.status(201).json({
             message: "Del created successfully",
-            data: del,
+            data: result,
         });
     }
     catch (error) {

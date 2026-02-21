@@ -28,6 +28,7 @@ describe("getAllDelsController", () => {
   it("200: returns list without artikuls", async () => {
     await Del.create({
       title: "Delivery 1",
+      prodName: "prod1",
       artikuls: { "ART-1": { quantity: 5 } },
     });
     const req = {} as Request;

@@ -19,6 +19,7 @@ describe("updateDelArtikulByDelIdUtil", () => {
     it("returns null when sharik returns null and updates nothing", async () => {
         const del = await Del.create({
             title: "Del",
+            prodName: "prod1",
             artikuls: { "ART-1": { quantity: 0 } },
         });
         vi.mocked(getSharikData).mockResolvedValue(null);
@@ -35,6 +36,7 @@ describe("updateDelArtikulByDelIdUtil", () => {
     it("updates artikul value from sharik data", async () => {
         const del = await Del.create({
             title: "Del",
+            prodName: "prod1",
             artikuls: { "ART-1": { quantity: 0 } },
         });
         vi.mocked(getSharikData).mockResolvedValue({
@@ -53,6 +55,7 @@ describe("updateDelArtikulByDelIdUtil", () => {
     it("adds new artikul key when not present", async () => {
         const del = await Del.create({
             title: "Del",
+            prodName: "prod1",
             artikuls: {},
         });
         vi.mocked(getSharikData).mockResolvedValue({

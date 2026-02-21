@@ -5,4 +5,5 @@ export const updateDelTitleSchema = z.object({
         message: "Invalid del ID format",
     }),
     title: z.string().min(1, "Title is required"),
+    prodName: z.string().min(1, "prodName is required"),
 });

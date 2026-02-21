@@ -1,17 +1,28 @@
 import { Art } from "../../../../arts/models/Art.js";
 import { Del, IDel, IDelArtikuls } from "../../../models/Del.js";
+import { Prod } from "../../../../prods/models/Prod.js";
+
+const PROD_NOT_FOUND = "PROD_NOT_FOUND" as const;
 
 type CreateDelUtilInput = {
   title: string;
+  prodName: string;
   artikuls: Record<string, number>;
 };
+
+export type CreateDelUtilResult = IDel | { error: typeof PROD_NOT_FOUND };
 
 /**
  * Собирает объект artikuls для поставки: для каждого артикула подставляет nameukr из коллекции arts (если найден).
  */
 export const createDelUtil = async (
   input: CreateDelUtilInput
-): Promise<IDel> => {
+): Promise<CreateDelUtilResult> => {
+  const prod = await Prod.findOne({ name: input.prodName }).lean();
+  if (!prod) {
+    return { error: PROD_NOT_FOUND };
+  }
+
   const rawArtikuls = input.artikuls ?? {};
   const artikulKeys = Object.keys(rawArtikuls);
   const artikulsToSave: IDelArtikuls = {};
@@ -36,6 +47,7 @@ export const createDelUtil = async (
 
   const del = await Del.create({
     title: input.title,
+    prodName: input.prodName,
     artikuls: artikulsToSave,
   });
   return del;

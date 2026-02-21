@@ -29,7 +29,11 @@ describe("deleteDelByIdController", () => {
         expect(responseStatus.code).toBe(404);
     });
     it("200 deletes del", async () => {
-        const del = await Del.create({ title: "To delete", artikuls: {} });
+        const del = await Del.create({
+            title: "To delete",
+            prodName: "prod1",
+            artikuls: {},
+        });
         const req = { params: { id: del._id.toString() } };
         await deleteDelByIdController(req, res);
         expect(responseStatus.code).toBe(200);

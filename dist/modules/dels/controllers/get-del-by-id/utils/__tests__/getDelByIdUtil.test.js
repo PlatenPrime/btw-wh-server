@@ -12,6 +12,7 @@ describe("getDelByIdUtil", () => {
     it("returns full del document by id", async () => {
         const del = await Del.create({
             title: "Test Del",
+            prodName: "prod1",
             artikuls: {
                 "ART-1": { quantity: 5 },
                 "ART-2": { quantity: 10, nameukr: "Товар" },

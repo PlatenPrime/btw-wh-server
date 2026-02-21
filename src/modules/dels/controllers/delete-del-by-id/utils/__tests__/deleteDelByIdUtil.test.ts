@@ -13,7 +13,11 @@ describe("deleteDelByIdUtil", () => {
   });
 
   it("deletes del and returns deleted document", async () => {
-    const del = await Del.create({ title: "To delete", artikuls: {} });
+    const del = await Del.create({
+      title: "To delete",
+      prodName: "prod1",
+      artikuls: {},
+    });
     const result = await deleteDelByIdUtil(del._id.toString());
     expect(result).toBeTruthy();
     expect(result?.title).toBe("To delete");

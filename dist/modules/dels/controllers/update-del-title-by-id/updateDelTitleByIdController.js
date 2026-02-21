@@ -7,8 +7,8 @@ import { updateDelTitleByIdUtil } from "./utils/updateDelTitleByIdUtil.js";
 export const updateDelTitleByIdController = async (req, res) => {
     try {
         const { id } = req.params;
-        const { title } = req.body;
-        const parseResult = updateDelTitleSchema.safeParse({ id, title });
+        const { title, prodName } = req.body;
+        const parseResult = updateDelTitleSchema.safeParse({ id, title, prodName });
         if (!parseResult.success) {
             res.status(400).json({
                 message: "Validation error",
@@ -16,17 +16,24 @@ export const updateDelTitleByIdController = async (req, res) => {
             });
             return;
         }
-        const del = await updateDelTitleByIdUtil({
+        const result = await updateDelTitleByIdUtil({
             id: parseResult.data.id,
             title: parseResult.data.title,
+            prodName: parseResult.data.prodName,
         });
-        if (!del) {
+        if (result != null && "error" in result) {
+            res.status(400).json({
+                message: "Производитель с указанным name не найден",
+            });
+            return;
+        }
+        if (!result) {
             res.status(404).json({ message: "Del not found" });
             return;
         }
         res.status(200).json({
             message: "Del title updated successfully",
-            data: del,
+            data: result,
         });
     }
     catch (error) {

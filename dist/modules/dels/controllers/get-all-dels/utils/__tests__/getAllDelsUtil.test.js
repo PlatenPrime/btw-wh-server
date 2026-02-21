@@ -12,23 +12,27 @@ describe("getAllDelsUtil", () => {
     it("returns list without artikuls field", async () => {
         await Del.create({
             title: "Поставка 1",
+            prodName: "prod1",
             artikuls: { "ART-1": { quantity: 10 } },
         });
         const result = await getAllDelsUtil();
         expect(result).toHaveLength(1);
         expect(result[0]).toHaveProperty("title", "Поставка 1");
+        expect(result[0]).toHaveProperty("prodName", "prod1");
         expect(result[0]).toHaveProperty("createdAt");
         expect(result[0]).toHaveProperty("updatedAt");
         expect(result[0]).toHaveProperty("_id");
         expect(result[0]).not.toHaveProperty("artikuls");
     });
     it("returns multiple dels sorted by createdAt desc", async () => {
-        const first = await Del.create({
+        await Del.create({
             title: "First",
+            prodName: "prod1",
             artikuls: {},
         });
-        const second = await Del.create({
+        await Del.create({
             title: "Second",
+            prodName: "prod1",
             artikuls: {},
         });
         const result = await getAllDelsUtil();

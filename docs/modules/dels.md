@@ -8,10 +8,11 @@
 
 ### Del (Поставка)
 
-Поставка представляет собой документ с названием, датами создания и обновления, а также объектом `artikuls`: ключи — строки-артикулы (как в моделях Art, Def, Pos), значения — объекты `{ quantity: number, nameukr?: string }` (количество и опционально название на украинском). При создании поставки поле `nameukr` подставляется из коллекции arts по ключу артикула; если артикул в arts не найден — поле не задаётся. При обновлении артикулов из sharik.ua сохраняются количество и название из ответа getSharikData.
+Поставка представляет собой документ с названием (`title`), обязательной привязкой к производителю (`prodName` — соответствует полю `name` в модели Prod), датами создания и обновления, а также объектом `artikuls`: ключи — строки-артикулы (как в моделях Art, Def, Pos), значения — объекты `{ quantity: number, nameukr?: string }` (количество и опционально название на украинском). При создании поставки поле `nameukr` подставляется из коллекции arts по ключу артикула; если артикул в arts не найден — поле не задаётся. При обновлении артикулов из sharik.ua сохраняются количество и название из ответа getSharikData.
 
 ## Связи между сущностями
 
+- **Del → Prod**: По смыслу поставка привязана к производителю через поле `prodName`, равное `Prod.name`. Явной ссылки (ObjectId) в схеме нет; валидация при создании и обновлении проверяет существование записи в Prod.
 - **Del → Art / Def / Pos**: Косвенная связь по смыслу. Ключи в `artikuls` совпадают с полем `artikul` в артикулах, дефицитах и позициях. Явных ссылок в схеме нет.
 
 ## Концепции и принятые решения
@@ -22,7 +23,7 @@
 
 ### Список без artikuls
 
-Эндпоинт получения списка поставок возвращает только `_id`, `title`, `createdAt`, `updatedAt`, без поля `artikuls`, чтобы уменьшить объём данных при отображении списка.
+Эндпоинт получения списка поставок возвращает только `_id`, `title`, `prodName`, `createdAt`, `updatedAt`, без поля `artikuls`, чтобы уменьшить объём данных при отображении списка.
 
 ### Удаление только для PRIME
 
@@ -40,7 +41,7 @@
 
 **Ответ:**
 
-- 200: `{ message: string, data: Array<{ _id, title, createdAt, updatedAt }> }`
+- 200: `{ message: string, data: Array<{ _id, title, prodName, createdAt, updatedAt }> }`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
 **Доступ:** Требует роль USER
@@ -68,7 +69,7 @@
 
 **Запрос:**
 
-- Body: `{ title: string, artikuls?: Record<string, number> }`
+- Body: `{ title: string, prodName: string, artikuls?: Record<string, number> }` (prodName должен существовать в справочнике производителей)
 
 **Ответ:**
 
@@ -97,17 +98,17 @@
 
 ### PATCH `/api/dels/:id/title`
 
-Обновление названия поставки.
+Обновление названия и производителя поставки (одна форма: оба поля в теле).
 
 **Запрос:**
 
 - Path параметры: `id` (MongoDB ObjectId)
-- Body: `{ title: string }`
+- Body: `{ title: string, prodName: string }` (оба обязательны; prodName должен существовать в Prod)
 
 **Ответ:**
 
 - 200: `{ message: string, data: Del }`
-- 400: `{ message: string, errors?: array }` - ошибка валидации
+- 400: `{ message: string, errors?: array }` - ошибка валидации или производитель не найден
 - 404: `{ message: string }` - поставка не найдена
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -153,28 +154,15 @@
 
 ### Del (полный документ)
 
-```typescript
-{
-  _id: string;                    // MongoDB ObjectId
-  title: string;                  // Название поставки
-  artikuls: {                     // Объект: артикул -> { quantity, nameukr? }
-    [artikul: string]: {
-      quantity: number;
-      nameukr?: string;
-    };
-  };
-  createdAt: Date;                // Дата создания
-  updatedAt: Date;                // Дата обновления
-}
-```
+- `_id`: string (MongoDB ObjectId)
+- `title`: string (название поставки)
+- `prodName`: string (производитель, соответствует Prod.name)
+- `artikuls`: объект «артикул → { quantity, nameukr? }»
+- `createdAt`, `updatedAt`: Date
 
 ### Элемент списка (без artikuls)
 
-```typescript
-{
-  _id: string;
-  title: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-```
+- `_id`: string
+- `title`: string
+- `prodName`: string
+- `createdAt`, `updatedAt`: Date

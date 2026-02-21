@@ -12,7 +12,7 @@
 
 **Запрос:** без тела.
 
-**Ответ 200:** `{ message: string, data: Array<Del> }`.
+**Ответ 200:** `{ message: string, data: Array<DelListItem> }` (каждый элемент: `_id`, `title`, `prodName`, `createdAt`, `updatedAt`; без `artikuls`).
 
 **Ошибки:** 401, 403, 500.
 
@@ -38,11 +38,11 @@
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос body:** `title` (string, обязательно), `artikuls` (объект «артикул → число», опционально, по умолчанию {}).
+**Запрос body:** `title` (string, обязательно), `prodName` (string, обязательно; должен существовать в справочнике производителей как `Prod.name`), `artikuls` (объект «артикул → число», опционально, по умолчанию {}).
 
 **Ответ 201:** `{ message: string, data: Del }`.
 
-**Ошибки:** 400 (валидация, поле `errors`), 401, 403, 500.
+**Ошибки:** 400 (валидация, поле `errors`; или сообщение «Производитель с указанным name не найден»), 401, 403, 500.
 
 ---
 
@@ -62,15 +62,15 @@
 
 ### PATCH `/api/dels/:id/title`
 
-Обновление заголовка поставки.
+Обновление названия и производителя поставки (одна форма на фронте: оба поля в теле запроса).
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос:** path `id` — MongoDB ObjectId; body: `{ title: string }`.
+**Запрос:** path `id` — MongoDB ObjectId; body: `{ title: string, prodName: string }` (оба обязательны; `prodName` должен существовать в справочнике производителей как `Prod.name`).
 
 **Ответ 200:** обновлённая поставка (message/data).
 
-**Ошибки:** 400 (валидация), 401, 403, 404, 500.
+**Ошибки:** 400 (валидация или производитель не найден), 401, 403, 404 (поставка не найдена), 500.
 
 ---
 
@@ -104,6 +104,7 @@
 
 - `_id`: string (MongoDB ObjectId)
 - `title`: string
+- `prodName`: string (соответствует `Prod.name`, производитель поставки)
 - `artikuls`: объект, ключ — артикул (string), значение — `{ quantity: number, nameukr?: string }`
 - `createdAt`: Date (ISO строка)
 - `updatedAt`: Date (ISO строка)

@@ -1,16 +1,30 @@
 import { Del, IDel } from "../../../models/Del.js";
+import { Prod } from "../../../../prods/models/Prod.js";
+
+const PROD_NOT_FOUND = "PROD_NOT_FOUND" as const;
 
 type UpdateDelTitleByIdUtilInput = {
   id: string;
   title: string;
+  prodName: string;
 };
+
+export type UpdateDelTitleByIdUtilResult =
+  | IDel
+  | null
+  | { error: typeof PROD_NOT_FOUND };
 
 export const updateDelTitleByIdUtil = async (
   input: UpdateDelTitleByIdUtilInput
-): Promise<IDel | null> => {
+): Promise<UpdateDelTitleByIdUtilResult> => {
+  const prod = await Prod.findOne({ name: input.prodName }).lean();
+  if (!prod) {
+    return { error: PROD_NOT_FOUND };
+  }
+
   const del = await Del.findByIdAndUpdate(
     input.id,
-    { title: input.title },
+    { title: input.title, prodName: input.prodName },
     { new: true, runValidators: true }
   );
   return del;

@@ -36,6 +36,7 @@ describe("updateDelArtikulsByDelIdController", () => {
   it("202 when del found and process started", async () => {
     const del = await Del.create({
       title: "Del",
+      prodName: "prod1",
       artikuls: { A1: { quantity: 0 } },
     });
     const req = { params: { id: del._id.toString() } } as unknown as Request;

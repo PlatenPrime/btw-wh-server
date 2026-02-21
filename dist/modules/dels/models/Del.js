@@ -5,6 +5,7 @@ const delArtikulsSchema = new Schema({}, {
 });
 const delSchema = new Schema({
     title: { type: String, required: true },
+    prodName: { type: String, required: true },
     artikuls: {
         type: delArtikulsSchema,
         required: true,
