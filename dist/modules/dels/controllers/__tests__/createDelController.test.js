@@ -46,6 +46,10 @@ describe("createDelController", () => {
         expect(responseStatus.code).toBe(201);
         expect(responseJson.data.title).toBe("New");
         expect(responseJson.data.prodName).toBe("acme");
+        expect(responseJson.data.prod).toMatchObject({
+            title: "Acme",
+            imageUrl: "https://example.com/acme.png",
+        });
         const count = await Del.countDocuments();
         expect(count).toBe(1);
     });

@@ -12,7 +12,7 @@
 
 **Запрос:** без тела.
 
-**Ответ 200:** `{ message: string, data: Array<DelListItem> }` (каждый элемент: `_id`, `title`, `prodName`, `createdAt`, `updatedAt`; без `artikuls`).
+**Ответ 200:** `{ message: string, data: Array<DelListItem> }` (каждый элемент: `_id`, `title`, `prodName`, `prod` (опционально), `createdAt`, `updatedAt`; без `artikuls`).
 
 **Ошибки:** 401, 403, 500.
 
@@ -105,6 +105,7 @@
 - `_id`: string (MongoDB ObjectId)
 - `title`: string
 - `prodName`: string (соответствует `Prod.name`, производитель поставки)
+- `prod`: объект (опционально; у старых документов может отсутствовать): `{ title: string, imageUrl: string }` — данные производителя из справочника Prod
 - `artikuls`: объект, ключ — артикул (string), значение — `{ quantity: number, nameukr?: string }`
 - `createdAt`: Date (ISO строка)
 - `updatedAt`: Date (ISO строка)

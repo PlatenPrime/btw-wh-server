@@ -38,15 +38,24 @@ describe("updateDelTitleByIdUtil", () => {
     expect("error" in (result ?? {})).toBe(false);
     expect((result as { title: string })?.title).toBe("New title");
     expect((result as { prodName: string })?.prodName).toBe("acme");
+    expect((result as { prod?: { title: string; imageUrl: string } })?.prod).toMatchObject({
+      title: "Acme",
+      imageUrl: "https://example.com/acme.png",
+    });
     const found = await Del.findById(del._id);
     expect(found?.title).toBe("New title");
     expect(found?.prodName).toBe("acme");
+    expect(found?.prod).toMatchObject({
+      title: "Acme",
+      imageUrl: "https://example.com/acme.png",
+    });
   });
 
   it("returns PROD_NOT_FOUND when prodName does not exist in Prod", async () => {
     const del = await Del.create({
       title: "Old title",
       prodName: "acme",
+      prod: { title: "Acme", imageUrl: "https://example.com/acme.png" },
       artikuls: {},
     });
     const result = await updateDelTitleByIdUtil({

@@ -48,6 +48,7 @@ export const createDelUtil = async (
   const del = await Del.create({
     title: input.title,
     prodName: input.prodName,
+    prod: { title: prod.title, imageUrl: prod.imageUrl },
     artikuls: artikulsToSave,
   });
   return del;

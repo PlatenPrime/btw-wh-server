@@ -32,6 +32,7 @@ describe("updateDelArtikulsByDelIdController", () => {
         const del = await Del.create({
             title: "Del",
             prodName: "prod1",
+            prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
             artikuls: { A1: { quantity: 0 } },
         });
         const req = { params: { id: del._id.toString() } };

@@ -33,6 +33,7 @@ describe("updateDelArtikulByDelIdController", () => {
     const del = await Del.create({
       title: "Del",
       prodName: "prod1",
+      prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
       artikuls: { "ART-1": { quantity: 0 } },
     });
     vi.mocked(getSharikData).mockResolvedValue(null);
@@ -47,6 +48,7 @@ describe("updateDelArtikulByDelIdController", () => {
     const del = await Del.create({
       title: "Del",
       prodName: "prod1",
+      prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
       artikuls: { "ART-1": { quantity: 0 } },
     });
     vi.mocked(getSharikData).mockResolvedValue({

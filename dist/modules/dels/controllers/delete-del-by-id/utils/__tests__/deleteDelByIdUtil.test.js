@@ -13,6 +13,7 @@ describe("deleteDelByIdUtil", () => {
         const del = await Del.create({
             title: "To delete",
             prodName: "prod1",
+            prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
             artikuls: {},
         });
         const result = await deleteDelByIdUtil(del._id.toString());

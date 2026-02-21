@@ -24,7 +24,11 @@ export const updateDelTitleByIdUtil = async (
 
   const del = await Del.findByIdAndUpdate(
     input.id,
-    { title: input.title, prodName: input.prodName },
+    {
+      title: input.title,
+      prodName: input.prodName,
+      prod: { title: prod.title, imageUrl: prod.imageUrl },
+    },
     { new: true, runValidators: true }
   );
   return del;

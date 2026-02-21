@@ -27,9 +27,17 @@ describe("createDelUtil", () => {
         expect(result.prodName).toBe("acme");
         expect(result.createdAt).toBeDefined();
         expect(result.updatedAt).toBeDefined();
+        expect(result.prod).toMatchObject({
+            title: "Acme",
+            imageUrl: "https://example.com/acme.png",
+        });
         const found = await Del.findById(result._id);
         expect(found?.title).toBe("New delivery");
         expect(found?.prodName).toBe("acme");
+        expect(found?.prod).toMatchObject({
+            title: "Acme",
+            imageUrl: "https://example.com/acme.png",
+        });
     });
     it("creates del with title, prodName and artikuls and fills nameukr from arts", async () => {
         await Prod.create({
@@ -51,6 +59,10 @@ describe("createDelUtil", () => {
         const artikuls = result.artikuls;
         expect(artikuls["A1"]).toEqual({ quantity: 1, nameukr: "Товар A1" });
         expect(artikuls["A2"]).toEqual({ quantity: 2 });
+        expect(result.prod).toMatchObject({
+            title: "Acme",
+            imageUrl: "https://example.com/acme.png",
+        });
     });
     it("returns error when prodName does not exist in Prod", async () => {
         const result = await createDelUtil({

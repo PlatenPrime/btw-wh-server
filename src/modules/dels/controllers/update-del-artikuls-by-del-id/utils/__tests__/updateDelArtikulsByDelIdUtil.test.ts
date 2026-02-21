@@ -21,6 +21,7 @@ describe("updateDelArtikulsByDelIdUtil", () => {
     const del = await Del.create({
       title: "Del",
       prodName: "prod1",
+      prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
       artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
     });
     vi.mocked(getSharikData)
@@ -46,6 +47,7 @@ describe("updateDelArtikulsByDelIdUtil", () => {
     const del = await Del.create({
       title: "Del",
       prodName: "prod1",
+      prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
       artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
     });
     vi.mocked(getSharikData)
