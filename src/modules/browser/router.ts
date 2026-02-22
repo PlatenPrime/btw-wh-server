@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getAirStockController } from "./air/controllers/index.js";
+import { getBalunStockController } from "./balun/controllers/index.js";
 import { getSharikStockController } from "./sharik/controllers/index.js";
 import { getSharteStockController } from "./sharte/controllers/index.js";
 
@@ -9,6 +10,10 @@ const router = Router();
 router.get(
   "/air/stock",
   asyncHandler(getAirStockController)
+);
+router.get(
+  "/balun/stock",
+  asyncHandler(getBalunStockController)
 );
 router.get(
   "/sharte/stock/:id",
