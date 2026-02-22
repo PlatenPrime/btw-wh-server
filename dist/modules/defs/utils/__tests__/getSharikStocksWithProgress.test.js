@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getSharikStocksWithProgress } from "../getSharikStocksWithProgress.js";
 // Мокаем зависимости
-vi.mock("../../../comps/utils/getSharikData.js");
+vi.mock("../../../browser/sharik/utils/getSharikStockData.js");
 vi.mock("../calculationStatus.js");
-import { getSharikData } from "../../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../../browser/sharik/utils/getSharikStockData.js";
 import { updateCalculationProgress } from "../calculationStatus.js";
-const mockedGetSharikData = vi.mocked(getSharikData);
+const mockedGetSharikStockData = vi.mocked(getSharikStockData);
 const mockedUpdateCalculationProgress = vi.mocked(updateCalculationProgress);
 describe("getSharikStocksWithProgress", () => {
     beforeEach(() => {
@@ -33,7 +33,7 @@ describe("getSharikStocksWithProgress", () => {
             ART002: 10,
         };
         // Мокаем getSharikData для разных артикулов
-        mockedGetSharikData
+        mockedGetSharikStockData
             .mockResolvedValueOnce({
             nameukr: "Товар 1",
             price: 100,
@@ -66,9 +66,9 @@ describe("getSharikStocksWithProgress", () => {
                 limit: 10,
             },
         });
-        expect(mockedGetSharikData).toHaveBeenCalledTimes(2);
-        expect(mockedGetSharikData).toHaveBeenCalledWith("ART001");
-        expect(mockedGetSharikData).toHaveBeenCalledWith("ART002");
+        expect(mockedGetSharikStockData).toHaveBeenCalledTimes(2);
+        expect(mockedGetSharikStockData).toHaveBeenCalledWith("ART001");
+        expect(mockedGetSharikStockData).toHaveBeenCalledWith("ART002");
     });
     it("должна обрабатывать случаи когда Sharik данные не найдены", async () => {
         const mockStocks = {
@@ -82,7 +82,7 @@ describe("getSharikStocksWithProgress", () => {
             ART001: 20,
         };
         // Мокаем getSharikData возвращающий null
-        mockedGetSharikData.mockResolvedValueOnce(null);
+        mockedGetSharikStockData.mockResolvedValueOnce(null);
         const resultPromise = getSharikStocksWithProgress(mockStocks, mockLimits);
         await vi.runAllTimersAsync();
         const result = await resultPromise;
@@ -110,7 +110,7 @@ describe("getSharikStocksWithProgress", () => {
         };
         const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => { });
         // Мокаем getSharikData выбрасывающий ошибку
-        mockedGetSharikData.mockRejectedValueOnce(new Error("Network error"));
+        mockedGetSharikStockData.mockRejectedValueOnce(new Error("Network error"));
         const resultPromise = getSharikStocksWithProgress(mockStocks, mockLimits);
         await vi.runAllTimersAsync();
         const result = await resultPromise;
@@ -133,7 +133,7 @@ describe("getSharikStocksWithProgress", () => {
         await vi.runAllTimersAsync();
         const result = await resultPromise;
         expect(result).toEqual({});
-        expect(mockedGetSharikData).not.toHaveBeenCalled();
+        expect(mockedGetSharikStockData).not.toHaveBeenCalled();
         expect(mockedUpdateCalculationProgress).not.toHaveBeenCalled();
     });
     it("должна обновлять прогресс каждые 5 артикулов", async () => {
@@ -148,7 +148,7 @@ describe("getSharikStocksWithProgress", () => {
         }
         const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => { });
         // Мокаем getSharikData для всех артикулов
-        mockedGetSharikData.mockResolvedValue({
+        mockedGetSharikStockData.mockResolvedValue({
             nameukr: "Test",
             price: 100,
             quantity: 15,
@@ -180,7 +180,7 @@ describe("getSharikStocksWithProgress", () => {
             ART003: 30,
         };
         // Мокаем разные результаты для разных артикулов
-        mockedGetSharikData
+        mockedGetSharikStockData
             .mockResolvedValueOnce({
             nameukr: "Товар 1",
             price: 100,
@@ -208,26 +208,26 @@ describe("getSharikStocksWithProgress", () => {
             ART001: { nameukr: "Товар 1", quant: 10, boxes: 1 },
             ART002: { nameukr: "Товар 2", quant: 5, boxes: 1 },
         };
-        mockedGetSharikData.mockResolvedValue({
+        mockedGetSharikStockData.mockResolvedValue({
             nameukr: "Test",
             price: 100,
             quantity: 15,
         });
         const resultPromise = getSharikStocksWithProgress(mockStocks);
         // Проверяем, что функция еще не завершилась
-        expect(mockedGetSharikData).toHaveBeenCalledTimes(1);
+        expect(mockedGetSharikStockData).toHaveBeenCalledTimes(1);
         // Пропускаем 100ms
         vi.advanceTimersByTime(100);
         await vi.runAllTimersAsync();
         await resultPromise;
         // Проверяем, что все вызовы были сделаны
-        expect(mockedGetSharikData).toHaveBeenCalledTimes(2);
+        expect(mockedGetSharikStockData).toHaveBeenCalledTimes(2);
     });
     it("должна логировать время выполнения", async () => {
         const mockStocks = {
             ART001: { nameukr: "Товар 1", quant: 10, boxes: 1 },
         };
-        mockedGetSharikData.mockResolvedValue({
+        mockedGetSharikStockData.mockResolvedValue({
             nameukr: "Test",
             price: 100,
             quantity: 15,
@@ -246,7 +246,7 @@ describe("getSharikStocksWithProgress", () => {
         };
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
         // Мокаем критическую ошибку на уровне try-catch в функции
-        mockedGetSharikData.mockRejectedValue(new Error("Critical error"));
+        mockedGetSharikStockData.mockRejectedValue(new Error("Critical error"));
         const resultPromise = getSharikStocksWithProgress(mockStocks);
         await vi.runAllTimersAsync();
         // Функция должна обработать ошибку и вернуть результат с нулевыми значениями

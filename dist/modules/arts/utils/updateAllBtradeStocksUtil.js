@@ -1,4 +1,4 @@
-import { getSharikData } from "../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { Art } from "../models/Art.js";
 /**
  * Обновляет btradeStock для всех артикулов данными с sharik.ua
@@ -24,7 +24,7 @@ export const updateAllBtradeStocksUtil = async () => {
             const artikul = artikuls[i];
             try {
                 // Получаем данные с sharik.ua
-                const sharikData = await getSharikData(artikul);
+                const sharikData = await getSharikStockData(artikul);
                 if (!sharikData) {
                     console.warn(`Товар с артикулом ${artikul} не найден на sharik.ua`);
                     result.notFound++;

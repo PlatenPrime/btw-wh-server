@@ -31,7 +31,7 @@ describe("getBtradeArtInfoController", () => {
       quantity: 10,
     };
 
-    vi.spyOn(utils, "getSharikData").mockResolvedValue(mockData);
+    vi.spyOn(utils, "getSharikStockData").mockResolvedValue(mockData);
 
     const req = { params: { artikul: "TEST-001" } } as unknown as Request;
 
@@ -46,7 +46,7 @@ describe("getBtradeArtInfoController", () => {
   });
 
   it("200: возвращает exists false если товар не найден", async () => {
-    vi.spyOn(utils, "getSharikData").mockResolvedValue(null);
+    vi.spyOn(utils, "getSharikStockData").mockResolvedValue(null);
 
     const req = { params: { artikul: "NONEXISTENT" } } as unknown as Request;
 
@@ -70,7 +70,7 @@ describe("getBtradeArtInfoController", () => {
   });
 
   it("500: обрабатывает ошибки API", async () => {
-    vi.spyOn(utils, "getSharikData").mockRejectedValue(new Error("Network error"));
+    vi.spyOn(utils, "getSharikStockData").mockRejectedValue(new Error("Network error"));
 
     const req = { params: { artikul: "ERROR-ART" } } as unknown as Request;
 

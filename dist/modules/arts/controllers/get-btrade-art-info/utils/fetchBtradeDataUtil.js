@@ -1,5 +1,5 @@
-import { getSharikData } from "../../../../../utils/index.js";
+import { getSharikStockData } from "../../../../../utils/index.js";
 export const fetchBtradeDataUtil = async (artikul) => {
-    const data = await getSharikData(artikul);
+    const data = await getSharikStockData(artikul);
     return data;
 };

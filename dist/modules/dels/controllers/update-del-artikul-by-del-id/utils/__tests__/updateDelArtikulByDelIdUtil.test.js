@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getSharikData } from "../../../../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../../../../browser/sharik/utils/getSharikStockData.js";
 import { Del } from "../../../../models/Del.js";
 import { updateDelArtikulByDelIdUtil } from "../updateDelArtikulByDelIdUtil.js";
-vi.mock("../../../../../comps/utils/getSharikData.js");
+vi.mock("../../../../../browser/sharik/utils/getSharikStockData.js");
 describe("updateDelArtikulByDelIdUtil", () => {
     beforeEach(async () => {
         vi.clearAllMocks();
@@ -14,7 +14,7 @@ describe("updateDelArtikulByDelIdUtil", () => {
             artikul: "ART-1",
         });
         expect(result).toBeNull();
-        expect(getSharikData).not.toHaveBeenCalled();
+        expect(getSharikStockData).not.toHaveBeenCalled();
     });
     it("returns null when sharik returns null and updates nothing", async () => {
         const del = await Del.create({
@@ -23,13 +23,13 @@ describe("updateDelArtikulByDelIdUtil", () => {
             prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
             artikuls: { "ART-1": { quantity: 0 } },
         });
-        vi.mocked(getSharikData).mockResolvedValue(null);
+        vi.mocked(getSharikStockData).mockResolvedValue(null);
         const result = await updateDelArtikulByDelIdUtil({
             delId: del._id.toString(),
             artikul: "ART-1",
         });
         expect(result).toBeNull();
-        expect(getSharikData).toHaveBeenCalledWith("ART-1");
+        expect(getSharikStockData).toHaveBeenCalledWith("ART-1");
         const found = await Del.findById(del._id);
         expect((found?.artikuls)["ART-1"])
             .toMatchObject({ quantity: 0 });
@@ -41,7 +41,7 @@ describe("updateDelArtikulByDelIdUtil", () => {
             prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
             artikuls: { "ART-1": { quantity: 0 } },
         });
-        vi.mocked(getSharikData).mockResolvedValue({
+        vi.mocked(getSharikStockData).mockResolvedValue({
             nameukr: "Товар",
             price: 100,
             quantity: 42,
@@ -61,7 +61,7 @@ describe("updateDelArtikulByDelIdUtil", () => {
             prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
             artikuls: {},
         });
-        vi.mocked(getSharikData).mockResolvedValue({
+        vi.mocked(getSharikStockData).mockResolvedValue({
             nameukr: "Товар",
             price: 50,
             quantity: 7,

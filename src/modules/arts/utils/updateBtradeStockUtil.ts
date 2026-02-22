@@ -1,4 +1,4 @@
-import { getSharikData } from "../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { Art, IArt } from "../models/Art.js";
 
 type UpdateBtradeStockUtilInput = {
@@ -15,7 +15,7 @@ export const updateBtradeStockUtil = async ({
 }: UpdateBtradeStockUtilInput): Promise<IArt | null> => {
   try {
     // Получаем данные с sharik.ua
-    const sharikData = await getSharikData(artikul);
+    const sharikData = await getSharikStockData(artikul);
 
     if (!sharikData) {
       console.warn(`Товар с артикулом ${artikul} не найден на sharik.ua`);

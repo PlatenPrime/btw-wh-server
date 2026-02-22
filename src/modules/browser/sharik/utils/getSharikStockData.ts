@@ -1,5 +1,5 @@
-import axios from "axios";
 import * as cheerio from "cheerio";
+import { browserGet } from "../../utils/browserRequest.js";
 
 export interface SharikProductInfo {
   nameukr: string;
@@ -13,9 +13,9 @@ export interface SharikProductInfo {
  * @returns Promise с данными о товаре или null, если товар не найден
  * @throws Error при ошибке запроса или парсинга
  */
-export const getSharikData = async (
+export async function getSharikStockData(
   artikul: string
-): Promise<SharikProductInfo | null> => {
+): Promise<SharikProductInfo | null> {
   if (!artikul || typeof artikul !== "string") {
     throw new Error("Artikul is required and must be a string");
   }
@@ -24,7 +24,7 @@ export const getSharikData = async (
     const targetUrl = `https://sharik.ua/ua/search/?q=${encodeURIComponent(
       artikul
     )}`;
-    const { data: html } = await axios.get(targetUrl);
+    const html = await browserGet<string>(targetUrl);
     const $ = cheerio.load(html);
 
     const productElements = $(".car-col .one-item");
@@ -45,13 +45,10 @@ export const getSharikData = async (
       }`
     );
   }
-};
+}
 
 /**
  * Парсит элемент товара с сайта sharik.ua
- * @param artikul - артикул товара в виде строки
- * @param artElement - Cheerio элемент товара
- * @returns данные о товаре или undefined, если данные неполные
  */
 function parseSharikElement(
   artikul: string,

@@ -6,24 +6,24 @@ describe("fetchBtradeDataUtil", () => {
         vi.clearAllMocks();
     });
     it("возвращает данные товара", async () => {
-        // Mock getSharikData
+        // Mock getSharikStockData
         const mockData = {
             nameukr: "Тест товар",
             price: 100,
             quantity: 10,
         };
-        vi.spyOn(utils, "getSharikData").mockResolvedValue(mockData);
+        vi.spyOn(utils, "getSharikStockData").mockResolvedValue(mockData);
         const result = await fetchBtradeDataUtil("TEST-ARTIKUL");
         expect(result).toEqual(mockData);
     });
     it("возвращает null если товар не найден", async () => {
-        vi.spyOn(utils, "getSharikData").mockResolvedValue(null);
+        vi.spyOn(utils, "getSharikStockData").mockResolvedValue(null);
         const result = await fetchBtradeDataUtil("NONEXISTENT");
         expect(result).toBeNull();
     });
     it("прокидывает ошибку при ошибке API", async () => {
         const error = new Error("API error");
-        vi.spyOn(utils, "getSharikData").mockRejectedValue(error);
+        vi.spyOn(utils, "getSharikStockData").mockRejectedValue(error);
         await expect(fetchBtradeDataUtil("ERROR-ARTIKUL")).rejects.toThrow("API error");
     });
 });

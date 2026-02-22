@@ -1,4 +1,4 @@
-import { getSharikData } from "../../../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../../../browser/sharik/utils/getSharikStockData.js";
 import { Del } from "../../../models/Del.js";
 /**
  * Обновляет значения всех артикулов поставки данными с sharik.ua.
@@ -31,7 +31,7 @@ export const updateDelArtikulsByDelIdUtil = async (delId) => {
     for (let i = 0; i < artikulKeys.length; i++) {
         const artikul = artikulKeys[i];
         try {
-            const sharikData = await getSharikData(artikul);
+            const sharikData = await getSharikStockData(artikul);
             if (!sharikData) {
                 result.notFound++;
                 continue;

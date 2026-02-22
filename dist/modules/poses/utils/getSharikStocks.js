@@ -1,4 +1,4 @@
-import { getSharikData } from "../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 /**
  * Расширяет объекты массива stocks данными с сайта sharik.ua
  * @param stocks - Объект с объединенными позициями по артикулам
@@ -16,7 +16,7 @@ export async function getSharikStocks(stocks, limits = {}) {
             const artikul = artikuls[i];
             try {
                 const stockData = stocks[artikul];
-                const sharikData = await getSharikData(artikul);
+                const sharikData = await getSharikStockData(artikul);
                 // Если данные с Sharik получены, используем их
                 if (sharikData) {
                     const sharikQuant = sharikData.quantity;

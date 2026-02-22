@@ -1,4 +1,4 @@
-import { getSharikData } from "../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { ISharikStocksResult } from "../../poses/utils/getSharikStocks.js";
 import { IMergedPosesResult } from "../../poses/utils/mergePoses.js";
 import { updateCalculationProgress } from "./calculationStatus.js";
@@ -28,7 +28,7 @@ export async function getSharikStocksWithProgress(
 
       try {
         const stockData = stocks[artikul];
-        const sharikData = await getSharikData(artikul);
+        const sharikData = await getSharikStockData(artikul);
 
         // Если данные с Sharik получены, используем их
         if (sharikData) {

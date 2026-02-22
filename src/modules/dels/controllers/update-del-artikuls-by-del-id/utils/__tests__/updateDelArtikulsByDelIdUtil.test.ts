@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getSharikData } from "../../../../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../../../../browser/sharik/utils/getSharikStockData.js";
 import { Del } from "../../../../models/Del.js";
 import { updateDelArtikulsByDelIdUtil } from "../updateDelArtikulsByDelIdUtil.js";
 
-vi.mock("../../../../../comps/utils/getSharikData.js");
+vi.mock("../../../../../browser/sharik/utils/getSharikStockData.js");
 
 describe("updateDelArtikulsByDelIdUtil", () => {
   beforeEach(async () => {
@@ -24,7 +24,7 @@ describe("updateDelArtikulsByDelIdUtil", () => {
       prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
       artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
     });
-    vi.mocked(getSharikData)
+    vi.mocked(getSharikStockData)
       .mockResolvedValueOnce({ nameukr: "Name1", price: 0, quantity: 10 })
       .mockResolvedValueOnce({ nameukr: "Name2", price: 0, quantity: 20 });
     const result = await updateDelArtikulsByDelIdUtil(del._id.toString());
@@ -50,7 +50,7 @@ describe("updateDelArtikulsByDelIdUtil", () => {
       prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
       artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
     });
-    vi.mocked(getSharikData)
+    vi.mocked(getSharikStockData)
       .mockResolvedValueOnce({ nameukr: "", price: 0, quantity: 10 })
       .mockResolvedValueOnce(null);
     const result = await updateDelArtikulsByDelIdUtil(del._id.toString());

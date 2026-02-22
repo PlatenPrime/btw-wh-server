@@ -1,4 +1,4 @@
-import { getSharikData } from "../../../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../../../browser/sharik/utils/getSharikStockData.js";
 import { Del, IDel, IDelArtikuls } from "../../../models/Del.js";
 
 export type UpdateDelArtikulsByDelIdResult = {
@@ -46,7 +46,7 @@ export const updateDelArtikulsByDelIdUtil = async (
   for (let i = 0; i < artikulKeys.length; i++) {
     const artikul = artikulKeys[i];
     try {
-      const sharikData = await getSharikData(artikul);
+      const sharikData = await getSharikStockData(artikul);
       if (!sharikData) {
         result.notFound++;
         continue;

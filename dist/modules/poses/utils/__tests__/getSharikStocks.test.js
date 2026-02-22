@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getSharikData } from "../../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../../browser/sharik/utils/getSharikStockData.js";
 import { getSharikStocks } from "../../../poses/utils/getSharikStocks.js";
-// Мокаем getSharikData
-vi.mock("../../../comps/utils/getSharikData.js");
-const mockedGetSharikData = vi.mocked(getSharikData);
+// Мокаем getSharikStockData
+vi.mock("../../../browser/sharik/utils/getSharikStockData.js");
+const mockedGetSharikStockData = vi.mocked(getSharikStockData);
 describe("getSharikStocks", () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -27,7 +27,7 @@ describe("getSharikStocks", () => {
             },
         };
         // Мокаем getSharikData для разных артикулов
-        mockedGetSharikData
+        mockedGetSharikStockData
             .mockResolvedValueOnce({
             nameukr: "Товар 1",
             price: 100,
@@ -58,9 +58,9 @@ describe("getSharikStocks", () => {
                 difQuant: 3, // 8 - 5
             },
         });
-        expect(mockedGetSharikData).toHaveBeenCalledTimes(2);
-        expect(mockedGetSharikData).toHaveBeenCalledWith("ART001");
-        expect(mockedGetSharikData).toHaveBeenCalledWith("ART002");
+        expect(mockedGetSharikStockData).toHaveBeenCalledTimes(2);
+        expect(mockedGetSharikStockData).toHaveBeenCalledWith("ART001");
+        expect(mockedGetSharikStockData).toHaveBeenCalledWith("ART002");
     });
     it("должна обрабатывать случаи когда Sharik данные не найдены", async () => {
         const mockStocks = {
@@ -71,7 +71,7 @@ describe("getSharikStocks", () => {
             },
         };
         // Мокаем getSharikData возвращающий null
-        mockedGetSharikData.mockResolvedValueOnce(null);
+        mockedGetSharikStockData.mockResolvedValueOnce(null);
         const resultPromise = getSharikStocks(mockStocks);
         await vi.runAllTimersAsync();
         const result = await resultPromise;
@@ -94,7 +94,7 @@ describe("getSharikStocks", () => {
             },
         };
         // Мокаем getSharikData выбрасывающий ошибку
-        mockedGetSharikData.mockRejectedValueOnce(new Error("Network error"));
+        mockedGetSharikStockData.mockRejectedValueOnce(new Error("Network error"));
         const resultPromise = getSharikStocks(mockStocks);
         await vi.runAllTimersAsync();
         const result = await resultPromise;
@@ -114,7 +114,7 @@ describe("getSharikStocks", () => {
         await vi.runAllTimersAsync();
         const result = await resultPromise;
         expect(result).toEqual({});
-        expect(mockedGetSharikData).not.toHaveBeenCalled();
+        expect(mockedGetSharikStockData).not.toHaveBeenCalled();
     });
     it("должна правильно рассчитывать difQuant для разных сценариев", async () => {
         const mockStocks = {
@@ -123,7 +123,7 @@ describe("getSharikStocks", () => {
             ART003: { nameukr: "Товар 3", quant: 20, boxes: 4 },
         };
         // Мокаем разные сценарии
-        mockedGetSharikData
+        mockedGetSharikStockData
             .mockResolvedValueOnce({ nameukr: "Товар 1", price: 100, quantity: 15 }) // больше чем в БД
             .mockResolvedValueOnce({ nameukr: "Товар 2", price: 200, quantity: 3 }) // меньше чем в БД
             .mockResolvedValueOnce({ nameukr: "Товар 3", price: 300, quantity: 20 }); // равно БД
@@ -146,7 +146,7 @@ describe("getSharikStocks", () => {
             };
         }
         // Мокаем getSharikData для всех артикулов
-        mockedGetSharikData.mockResolvedValue({
+        mockedGetSharikStockData.mockResolvedValue({
             nameukr: "Товар",
             price: 100,
             quantity: 10,
@@ -168,7 +168,7 @@ describe("getSharikStocks", () => {
             ART003: { nameukr: "Товар 3", quant: 15, boxes: 3 },
         };
         // Мокаем разные сценарии
-        mockedGetSharikData
+        mockedGetSharikStockData
             .mockResolvedValueOnce({ nameukr: "Товар 1", price: 100, quantity: 12 }) // успех
             .mockResolvedValueOnce(null) // не найдено
             .mockRejectedValueOnce(new Error("Network error")); // ошибка
@@ -202,7 +202,7 @@ describe("getSharikStocks", () => {
             ART001: { nameukr: "Товар 1", quant: 10, boxes: 2 },
             ART002: { nameukr: "Товар 2", quant: 5, boxes: 1 },
         };
-        mockedGetSharikData
+        mockedGetSharikStockData
             .mockResolvedValueOnce({ nameukr: "Товар 1", price: 100, quantity: 12 })
             .mockResolvedValueOnce({ nameukr: "Товар 2", price: 200, quantity: 8 });
         const resultPromise = getSharikStocks(mockStocks);

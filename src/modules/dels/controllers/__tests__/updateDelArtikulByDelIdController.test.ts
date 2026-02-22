@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getSharikData } from "../../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../../browser/sharik/utils/getSharikStockData.js";
 import { Del } from "../../models/Del.js";
 import { updateDelArtikulByDelIdController } from "../update-del-artikul-by-del-id/updateDelArtikulByDelIdController.js";
 
-vi.mock("../../../comps/utils/getSharikData.js");
+vi.mock("../../../browser/sharik/utils/getSharikStockData.js");
 
 describe("updateDelArtikulByDelIdController", () => {
   let res: Response;
@@ -36,7 +36,7 @@ describe("updateDelArtikulByDelIdController", () => {
       prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
       artikuls: { "ART-1": { quantity: 0 } },
     });
-    vi.mocked(getSharikData).mockResolvedValue(null);
+    vi.mocked(getSharikStockData).mockResolvedValue(null);
     const req = {
       params: { id: del._id.toString(), artikul: "ART-1" },
     } as unknown as Request;
@@ -51,7 +51,7 @@ describe("updateDelArtikulByDelIdController", () => {
       prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
       artikuls: { "ART-1": { quantity: 0 } },
     });
-    vi.mocked(getSharikData).mockResolvedValue({
+    vi.mocked(getSharikStockData).mockResolvedValue({
       nameukr: "Товар",
       price: 100,
       quantity: 15,

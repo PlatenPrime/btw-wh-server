@@ -1,9 +1,9 @@
-import { getSharikData, SharikProductInfo } from "../../../../../utils/index.js";
+import { getSharikStockData, SharikProductInfo } from "../../../../../utils/index.js";
 
 export const fetchBtradeDataUtil = async (
   artikul: string
 ): Promise<SharikProductInfo | null> => {
-  const data = await getSharikData(artikul);
+  const data = await getSharikStockData(artikul);
   return data;
 };
 

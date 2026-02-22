@@ -1,4 +1,4 @@
-import { getSharikData } from "../../comps/utils/getSharikData.js";
+import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { Art } from "../models/Art.js";
 
 type UpdateAllBtradeStocksResult = {
@@ -38,7 +38,7 @@ export const updateAllBtradeStocksUtil =
 
         try {
           // Получаем данные с sharik.ua
-          const sharikData = await getSharikData(artikul);
+          const sharikData = await getSharikStockData(artikul);
 
           if (!sharikData) {
             console.warn(
