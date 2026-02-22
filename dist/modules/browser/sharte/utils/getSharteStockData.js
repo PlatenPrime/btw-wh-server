@@ -15,11 +15,13 @@ export async function getSharteStockData(productId) {
     const stock = parseInt(String(data.CATALOG_QUANTITY), 10);
     const reserved = parseInt(String(data.CATALOG_QUANTITY_RESERVED ?? 0), 10);
     const available = stock - reserved;
+    const price = data["~PRICE"] != null ? Number(data["~PRICE"]) : undefined;
     return {
         id: data.ID ?? productId,
         name: data["~NAME"] ?? "",
         stock,
         reserved,
         available,
+        ...(price !== undefined && !Number.isNaN(price) && { price }),
     };
 }

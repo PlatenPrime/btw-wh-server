@@ -9,6 +9,7 @@ interface SharteAddCartResponse {
   "~NAME"?: string;
   CATALOG_QUANTITY?: number;
   CATALOG_QUANTITY_RESERVED?: number;
+  "~PRICE"?: number | string;
 }
 
 /**
@@ -34,11 +35,15 @@ export async function getSharteStockData(
   );
   const available = stock - reserved;
 
+  const price =
+    data["~PRICE"] != null ? Number(data["~PRICE"]) : undefined;
+
   return {
     id: data.ID ?? productId,
     name: data["~NAME"] ?? "",
     stock,
     reserved,
     available,
+    ...(price !== undefined && !Number.isNaN(price) && { price }),
   };
 }

@@ -8,4 +8,6 @@ export interface StockInfo {
   stock: number;
   reserved: number;
   available: number;
+  /** Цена товара, если источник её отдаёт */
+  price?: number;
 }
