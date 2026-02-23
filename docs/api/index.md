@@ -19,6 +19,7 @@ API системы управления складом предоставляе�
 - [API Poses](poses.md) — `/api/poses` — позиции
 - [API Defs](defs.md) — `/api/defs` — расчёт дефицитов
 - [API Dels](dels.md) — `/api/dels` — поставки
+- [API Konks](konks.md) — `/api/konks` — конкуренты
 - [API Prods](prods.md) — `/api/prods` — производители
 
 ## Аутентификация
@@ -173,6 +174,7 @@ Authorization: Bearer <token>
 - [API Poses](poses.md)
 - [API Defs](defs.md)
 - [API Dels](dels.md)
+- [API Konks](konks.md)
 - [API Prods](prods.md)
 
-Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — auth, arts, asks, blocks, segs, zones, rows, pallets, poses, defs, dels, prods, comps, palgrs.
+Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — auth, arts, asks, blocks, segs, zones, rows, pallets, poses, defs, dels, konks, prods, comps, palgrs.

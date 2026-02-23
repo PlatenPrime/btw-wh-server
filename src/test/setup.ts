@@ -10,6 +10,7 @@ import "../modules/auth/models/User.js";
 import "../modules/blocks/models/Block.js";
 import "../modules/defs/models/Def.js";
 import "../modules/dels/models/Del.js";
+import "../modules/konks/models/Konk.js";
 import "../modules/prods/models/Prod.js";
 import "../modules/pallets/models/Pallet.js";
 import "../modules/poses/models/Pos.js";
