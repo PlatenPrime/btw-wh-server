@@ -7,7 +7,8 @@ import { getSharteStockData } from "../utils/getSharteStockData.js";
 export const getSharteStockController = async (req, res) => {
     try {
         const { id } = req.params;
-        const parseResult = getSharteStockSchema.safeParse({ id });
+        const url = typeof req.query?.url === "string" ? req.query.url : undefined;
+        const parseResult = getSharteStockSchema.safeParse({ id, url });
         if (!parseResult.success) {
             res.status(400).json({
                 message: "Validation error",
@@ -15,7 +16,8 @@ export const getSharteStockController = async (req, res) => {
             });
             return;
         }
-        const stockInfo = await getSharteStockData(parseResult.data.id);
+        const productUrl = parseResult.data.url?.trim() ?? "";
+        const stockInfo = await getSharteStockData(parseResult.data.id, productUrl);
         if (!stockInfo) {
             res.status(404).json({
                 message: "Товар не найден или данные скрыты",
