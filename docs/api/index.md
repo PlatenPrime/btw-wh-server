@@ -8,6 +8,7 @@ API системы управления складом предоставляе�
 
 Все API эндпоинты имеют базовый путь `/api`, за которым следует название модуля:
 
+- [API Analogs](analogs.md) — `/api/analogs` — аналоги артикулов у конкурентов
 - [API Auth](auth.md) — `/api/auth` — аутентификация и управление пользователями
 - [API Arts](arts.md) — `/api/arts` — артикулы
 - [API Asks](asks.md) — `/api/asks` — заявки
@@ -163,6 +164,7 @@ Authorization: Bearer <token>
 
 Детальная документация по эндпоинтам и форматам данных каждого модуля (по базовым путям):
 
+- [API Analogs](analogs.md)
 - [API Auth](auth.md)
 - [API Arts](arts.md)
 - [API Asks](asks.md)
@@ -177,4 +179,4 @@ Authorization: Bearer <token>
 - [API Konks](konks.md)
 - [API Prods](prods.md)
 
-Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — auth, arts, asks, blocks, segs, zones, rows, pallets, poses, defs, dels, konks, prods, comps, palgrs.
+Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — analogs, auth, arts, asks, blocks, segs, zones, rows, pallets, poses, defs, dels, konks, prods, comps, palgrs.

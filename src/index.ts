@@ -4,6 +4,7 @@ import express from "express";
 import mongoose from "mongoose";
 
 import { startCronOperations } from "./cron/startCronOperations.js";
+import analogsRoute from "./modules/analogs/router.js";
 import artsRoute from "./modules/arts/router.js";
 import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
@@ -31,6 +32,7 @@ app.use(cors());
 
 app.use(express.json({ limit: "20mb" }));
 
+app.use("/api/analogs", analogsRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/arts", artsRoute);
 app.use("/api/browser", browserRoute);
