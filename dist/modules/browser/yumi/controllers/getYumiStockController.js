@@ -16,7 +16,7 @@ export const getYumiStockController = async (req, res) => {
             return;
         }
         const data = await getYumiStockData(parseResult.data.link);
-        if (!data) {
+        if (data.stock === -1 && data.price === -1) {
             res.status(404).json({
                 message: "Товар не найден или данные недоступны",
             });

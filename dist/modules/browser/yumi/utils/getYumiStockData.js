@@ -19,10 +19,7 @@ function extractPackCount(title) {
     if (!title) {
         return null;
     }
-    const patterns = [
-        /\((\d+)\s*шт\.?\)/i,
-        /(\d+)\s*шт\.?/i,
-    ];
+    const patterns = [/\((\d+)\s*шт\.?\)/i, /(\d+)\s*шт\.?/i];
     for (const pattern of patterns) {
         const match = title.match(pattern);
         if (match?.[1]) {
@@ -42,12 +39,10 @@ function parseStock($) {
         if (!text) {
             return 0;
         }
-        if (text.includes("немає в наявності") ||
-            text.includes("нет в наличии")) {
+        if (text.includes("немає в наявності") || text.includes("нет в наличии")) {
             return 0;
         }
-        if (text.includes("в наявності") ||
-            text.includes("в наличии")) {
+        if (text.includes("в наявності") || text.includes("в наличии")) {
             const numberMatch = text.match(/\d+/g);
             if (numberMatch && numberMatch.length > 0) {
                 const parsed = parseInt(numberMatch[0], 10);
@@ -85,11 +80,16 @@ function parsePrice($) {
         return null;
     }
     const priceAttr = priceElement.attr("data-qaprice");
-    const priceSource = priceAttr && priceAttr.trim().length > 0
-        ? priceAttr
-        : priceElement.text();
+    const priceSource = priceAttr && priceAttr.trim().length > 0 ? priceAttr : priceElement.text();
     return parseNumberFromText(priceSource);
 }
+const NEGATIVE_OUTCOME = { stock: -1, price: -1 };
+/**
+ * Получает данные о количестве и цене товара со страницы товара сайта Yumi по ссылке.
+ * @param link — URL страницы товара
+ * @returns Promise с объектом { stock, price, title? }; при негативном исходе — { stock: -1, price: -1 }
+ * @throws Error при пустом/не-строковом link
+ */
 export async function getYumiStockData(link) {
     if (!link || typeof link !== "string") {
         throw new Error("Link is required and must be a string");
@@ -101,7 +101,7 @@ export async function getYumiStockData(link) {
         let stock = parseStock($);
         const basePrice = parsePrice($);
         if (basePrice === null) {
-            return null;
+            return NEGATIVE_OUTCOME;
         }
         const packCount = extractPackCount(title);
         const finalPrice = packCount && packCount > 1
@@ -117,7 +117,6 @@ export async function getYumiStockData(link) {
         };
     }
     catch (error) {
-        console.error("Error fetching data from yumi product page:", error);
-        throw new Error(`Failed to fetch data from yumi: ${error instanceof Error ? error.message : "Unknown error"}`);
+        return NEGATIVE_OUTCOME;
     }
 }

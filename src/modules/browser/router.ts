@@ -21,7 +21,7 @@ router.get(
   asyncHandler(getYumiStockController)
 );
 router.get(
-  "/sharte/stock/:id",
+  "/sharte/stock",
   asyncHandler(getSharteStockController)
 );
 router.get(

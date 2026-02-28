@@ -77,16 +77,17 @@ describe("getYumiStockData", () => {
         });
     });
     describe("Отсутствие или невалидные данные", () => {
-        it("должен возвращать null, когда нет цены", async () => {
+        const negativeOutcome = { stock: -1, price: -1 };
+        it("должен возвращать { stock: -1, price: -1 }, когда нет цены", async () => {
             const mockHtml = `
         <div data-qaid="product_name">Товар без цены</div>
         <span data-qaid="product_status_sticky_panel" title="В наявності 10 од.">В наявності 10 од.</span>
       `;
             vi.mocked(browserGet).mockResolvedValue(mockHtml);
             const result = await getYumiStockData("https://example.com/product/5");
-            expect(result).toBeNull();
+            expect(result).toEqual(negativeOutcome);
         });
-        it("должен возвращать null, когда цена нечисловая", async () => {
+        it("должен возвращать { stock: -1, price: -1 }, когда цена нечисловая", async () => {
             const mockHtml = `
         <div data-qaid="product_name">Товар без цены</div>
         <span data-qaid="product_status_sticky_panel" title="В наявності 10 од.">В наявності 10 од.</span>
@@ -94,13 +95,14 @@ describe("getYumiStockData", () => {
       `;
             vi.mocked(browserGet).mockResolvedValue(mockHtml);
             const result = await getYumiStockData("https://example.com/product/6");
-            expect(result).toBeNull();
+            expect(result).toEqual(negativeOutcome);
         });
     });
     describe("Обработка ошибок", () => {
-        it("должен выбрасывать ошибку при ошибке сети", async () => {
+        it("должен возвращать { stock: -1, price: -1 } при ошибке сети", async () => {
             vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
-            await expect(getYumiStockData("https://example.com/product/7")).rejects.toThrow("Failed to fetch data from yumi: Network error");
+            const result = await getYumiStockData("https://example.com/product/7");
+            expect(result).toEqual({ stock: -1, price: -1 });
         });
     });
 });

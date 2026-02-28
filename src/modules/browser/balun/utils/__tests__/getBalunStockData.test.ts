@@ -109,7 +109,9 @@ describe("getBalunStockData", () => {
   });
 
   describe("Отсутствие или невалидные данные price", () => {
-    it("должен возвращать null когда нет data-analytics", async () => {
+    const negativeOutcome = { stock: -1, price: -1 };
+
+    it("должен возвращать { stock: -1, price: -1 } когда нет data-analytics", async () => {
       const mockHtml = `
         <div data-advtracking-fb-product-data='${validFbProductData}'></div>
       `;
@@ -117,10 +119,10 @@ describe("getBalunStockData", () => {
 
       const result = await getBalunStockData("https://example.com/product/1");
 
-      expect(result).toBeNull();
+      expect(result).toEqual(negativeOutcome);
     });
 
-    it("должен возвращать null когда clerk.price_original отсутствует", async () => {
+    it("должен возвращать { stock: -1, price: -1 } когда clerk.price_original отсутствует", async () => {
       const mockHtml = `
         <div data-advtracking-fb-product-data='${validFbProductData}'></div>
         <div data-analytics='{"clerk":{}}'></div>
@@ -129,10 +131,10 @@ describe("getBalunStockData", () => {
 
       const result = await getBalunStockData("https://example.com/product/1");
 
-      expect(result).toBeNull();
+      expect(result).toEqual(negativeOutcome);
     });
 
-    it("должен возвращать null когда цена нечисловая", async () => {
+    it("должен возвращать { stock: -1, price: -1 } когда цена нечисловая", async () => {
       const mockHtml = `
         <div data-advtracking-fb-product-data='${validFbProductData}'></div>
         <div data-analytics='{"clerk":{"price_original":"немає"}}'></div>
@@ -141,17 +143,17 @@ describe("getBalunStockData", () => {
 
       const result = await getBalunStockData("https://example.com/product/1");
 
-      expect(result).toBeNull();
+      expect(result).toEqual(negativeOutcome);
     });
   });
 
   describe("Обработка ошибок", () => {
-    it("должен выбрасывать ошибку при ошибке сети", async () => {
+    it("должен возвращать { stock: -1, price: -1 } при ошибке сети", async () => {
       vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
 
-      await expect(
-        getBalunStockData("https://example.com/product/1")
-      ).rejects.toThrow("Failed to fetch data from balun: Network error");
+      const result = await getBalunStockData("https://example.com/product/1");
+
+      expect(result).toEqual({ stock: -1, price: -1 });
     });
   });
 });

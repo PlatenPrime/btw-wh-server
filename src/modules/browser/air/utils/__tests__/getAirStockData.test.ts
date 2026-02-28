@@ -70,7 +70,9 @@ describe("getAirStockData", () => {
   });
 
   describe("Отсутствие или невалидные данные", () => {
-    it("должен возвращать null когда нет #max-product-quantity", async () => {
+    const negativeOutcome = { stock: -1, price: -1 };
+
+    it("должен возвращать stock: 0 при валидной цене когда нет #max-product-quantity", async () => {
       const mockHtml = `
         <div class="us-price-actual">2.08 грн.</div>
       `;
@@ -78,10 +80,10 @@ describe("getAirStockData", () => {
 
       const result = await getAirStockData("https://example.com/product/1");
 
-      expect(result).toBeNull();
+      expect(result).toEqual({ stock: 0, price: 2.08 });
     });
 
-    it("должен возвращать null когда value у max-product-quantity пустой", async () => {
+    it("должен возвращать stock: 0 при валидной цене когда value у max-product-quantity пустой", async () => {
       const mockHtml = `
         <input type="hidden" id="max-product-quantity" value="" name="max_quantity">
         <div class="us-price-actual">2.08 грн.</div>
@@ -90,10 +92,10 @@ describe("getAirStockData", () => {
 
       const result = await getAirStockData("https://example.com/product/1");
 
-      expect(result).toBeNull();
+      expect(result).toEqual({ stock: 0, price: 2.08 });
     });
 
-    it("должен возвращать null когда нет .us-price-actual", async () => {
+    it("должен возвращать { stock: -1, price: -1 } когда нет .us-price-actual", async () => {
       const mockHtml = `
         <input type="hidden" id="max-product-quantity" value="6600" name="max_quantity">
       `;
@@ -101,10 +103,10 @@ describe("getAirStockData", () => {
 
       const result = await getAirStockData("https://example.com/product/1");
 
-      expect(result).toBeNull();
+      expect(result).toEqual(negativeOutcome);
     });
 
-    it("должен возвращать null когда текст цены нечисловой", async () => {
+    it("должен возвращать { stock: -1, price: -1 } когда текст цены нечисловой", async () => {
       const mockHtml = `
         <input type="hidden" id="max-product-quantity" value="6600" name="max_quantity">
         <div class="us-price-actual">немає ціни</div>
@@ -113,17 +115,17 @@ describe("getAirStockData", () => {
 
       const result = await getAirStockData("https://example.com/product/1");
 
-      expect(result).toBeNull();
+      expect(result).toEqual(negativeOutcome);
     });
   });
 
   describe("Обработка ошибок", () => {
-    it("должен выбрасывать ошибку при ошибке сети", async () => {
+    it("должен возвращать { stock: -1, price: -1 } при ошибке сети", async () => {
       vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
 
-      await expect(
-        getAirStockData("https://example.com/product/1")
-      ).rejects.toThrow("Failed to fetch data from air: Network error");
+      const result = await getAirStockData("https://example.com/product/1");
+
+      expect(result).toEqual({ stock: -1, price: -1 });
     });
   });
 });

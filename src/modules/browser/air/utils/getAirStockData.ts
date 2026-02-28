@@ -9,13 +9,16 @@ export interface AirProductInfo {
 /**
  * Получает данные о количестве и цене товара со страницы товара сайта air по ссылке.
  * При отсутствии товара в наличии (элемент #max-product-quantity отсутствует в разметке) возвращает stock: 0 при валидной цене.
+ * При скидке цена берётся из .us-price-new, если .us-price-actual пуст.
  * @param link — URL страницы товара
- * @returns Promise с объектом { stock, price } или null, если данные не найдены/невалидны
- * @throws Error при пустом/не-строковом link или ошибке запроса
+ * @returns Promise с объектом { stock, price }; при негативном исходе — { stock: -1, price: -1 }
+ * @throws Error при пустом/не-строковом link
  */
+const NEGATIVE_OUTCOME: AirProductInfo = { stock: -1, price: -1 };
+
 export async function getAirStockData(
   link: string
-): Promise<AirProductInfo | null> {
+): Promise<AirProductInfo> {
   if (!link || typeof link !== "string") {
     throw new Error("Link is required and must be a string");
   }
@@ -31,28 +34,26 @@ export async function getAirStockData(
     } else {
       const parsed = parseInt(quantityValue, 10);
       if (Number.isNaN(parsed) || parsed < 0) {
-        return null;
+        return NEGATIVE_OUTCOME;
       }
       stock = parsed;
     }
 
-    const priceRaw = $(".us-price-actual").first().text().trim();
+    const priceRaw =
+      $(".us-price-actual").first().text().trim() ||
+      $(".us-price-new").first().text().trim();
     if (!priceRaw) {
-      return null;
+      return NEGATIVE_OUTCOME;
     }
     const priceStr = priceRaw.replace(/[^\d.,]/g, "").replace(/,/g, ".");
     const price = parseFloat(priceStr);
     if (Number.isNaN(price) || price < 0) {
-      return null;
+      return NEGATIVE_OUTCOME;
     }
 
     return { stock, price };
   } catch (error) {
     console.error("Error fetching data from air product page:", error);
-    throw new Error(
-      `Failed to fetch data from air: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`
-    );
+    return NEGATIVE_OUTCOME;
   }
 }

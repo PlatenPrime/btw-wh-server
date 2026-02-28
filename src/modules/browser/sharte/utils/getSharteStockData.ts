@@ -28,31 +28,54 @@ function parsePriceFromElement(text: string): number | null {
 }
 
 /**
- * Получает данные об остатках товара с sharte.net по ID товара.
- * Если addCart не возвращает остатки (товар не в наличии), при переданном productUrl
- * запрашивает страницу товара и извлекает цену из элемента a.price.changePrice (текст «X грн.»).
- * @param productId — ID товара на sharte.net
- * @param productUrl — URL страницы товара для fallback-парсинга цены при отсутствии в наличии
- * @returns StockInfo или null, если товар не найден или данные скрыты
- * @throws Error при ошибке запроса addCart (fallback по productUrl при ошибке возвращает null)
+ * Извлекает productId из HTML страницы товара (элемент #catalogElement, data-product-id).
+ */
+function extractProductIdFromHtml(html: string): string | null {
+  const $ = cheerio.load(html);
+  const productId = $("#catalogElement").attr("data-product-id");
+  if (productId == null || String(productId).trim() === "") return null;
+  return String(productId).trim();
+}
+
+function negativeOutcome(id: string): StockInfo {
+  return {
+    id,
+    name: "",
+    stock: -1,
+    reserved: 0,
+    available: -1,
+    price: -1,
+  };
+}
+
+/**
+ * Получает данные об остатках товара с sharte.net по URL страницы товара.
+ * productId извлекается из HTML (div#catalogElement[data-product-id]).
+ * Если addCart не возвращает остатки — цена парсится из той же HTML (a.price.changePrice).
+ * @param productUrl — URL страницы товара на sharte.net
+ * @returns StockInfo; при негативном исходе — объект с stock: -1, price: -1
  */
 export async function getSharteStockData(
-  productId: string,
   productUrl: string
-): Promise<StockInfo | null> {
-  const targetUrl = SHARTE_ADD_CART_BASE.replace("${productId}", productId);
-  const data = await browserGet<SharteAddCartResponse>(targetUrl);
+): Promise<StockInfo> {
+  let productId = "";
+  try {
+    const url = productUrl.trim();
+    if (url === "") return negativeOutcome("");
 
-  if (!data || data.CATALOG_QUANTITY === undefined) {
-    if (!productUrl || typeof productUrl !== "string" || productUrl.trim() === "") {
-      return null;
-    }
-    try {
-      const html = await browserGet<string>(productUrl.trim());
+    const html = await browserGet<string>(url);
+    const extractedId = extractProductIdFromHtml(html);
+    if (extractedId === null) return negativeOutcome("");
+    productId = extractedId;
+
+    const targetUrl = SHARTE_ADD_CART_BASE.replace("${productId}", productId);
+    const data = await browserGet<SharteAddCartResponse>(targetUrl);
+
+    if (!data || data.CATALOG_QUANTITY === undefined) {
       const $ = cheerio.load(html);
       const priceText = $("a.price.changePrice").first().text().trim();
       const price = parsePriceFromElement(priceText);
-      if (price === null) return null;
+      if (price === null) return negativeOutcome(productId);
       return {
         id: productId,
         name: "",
@@ -61,27 +84,28 @@ export async function getSharteStockData(
         available: 0,
         price,
       };
-    } catch {
-      return null;
     }
+
+    const stock = parseInt(String(data.CATALOG_QUANTITY), 10);
+    const reserved = parseInt(
+      String(data.CATALOG_QUANTITY_RESERVED ?? 0),
+      10
+    );
+    const available = stock - reserved;
+
+    const price =
+      data["~PRICE"] != null ? Number(data["~PRICE"]) : undefined;
+
+    return {
+      id: data.ID ?? productId,
+      name: data["~NAME"] ?? "",
+      stock,
+      reserved,
+      available,
+      ...(price !== undefined && !Number.isNaN(price) && { price }),
+    };
+  } catch (error) {
+    console.error("Error fetching data from sharte:", error);
+    return negativeOutcome(productId);
   }
-
-  const stock = parseInt(String(data.CATALOG_QUANTITY), 10);
-  const reserved = parseInt(
-    String(data.CATALOG_QUANTITY_RESERVED ?? 0),
-    10
-  );
-  const available = stock - reserved;
-
-  const price =
-    data["~PRICE"] != null ? Number(data["~PRICE"]) : undefined;
-
-  return {
-    id: data.ID ?? productId,
-    name: data["~NAME"] ?? "",
-    stock,
-    reserved,
-    available,
-    ...(price !== undefined && !Number.isNaN(price) && { price }),
-  };
 }

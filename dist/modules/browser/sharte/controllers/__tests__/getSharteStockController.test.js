@@ -22,19 +22,36 @@ describe("getSharteStockController", () => {
             headersSent: false,
         };
     });
-    it("400 when id invalid (empty)", async () => {
-        const req = { params: { id: "" }, query: {} };
+    it("400 when url is missing", async () => {
+        const req = { params: {}, query: {} };
+        await getSharteStockController(req, res);
+        expect(responseStatus.code).toBe(400);
+        expect(getSharteStockData).not.toHaveBeenCalled();
+    });
+    it("400 when url is invalid", async () => {
+        const req = {
+            params: {},
+            query: { url: "not-a-valid-url" },
+        };
         await getSharteStockController(req, res);
         expect(responseStatus.code).toBe(400);
         expect(getSharteStockData).not.toHaveBeenCalled();
     });
     it("404 when product not found", async () => {
-        vi.mocked(getSharteStockData).mockResolvedValue(null);
-        const req = { params: { id: "4777" }, query: {} };
+        vi.mocked(getSharteStockData).mockResolvedValue({
+            id: "4777",
+            name: "",
+            stock: -1,
+            reserved: 0,
+            available: -1,
+            price: -1,
+        });
+        const productUrl = "https://sharte.net/catalog/product/4777/";
+        const req = { params: {}, query: { url: productUrl } };
         await getSharteStockController(req, res);
         expect(responseStatus.code).toBe(404);
         expect(responseJson.message).toBe("Товар не найден или данные скрыты");
-        expect(getSharteStockData).toHaveBeenCalledWith("4777", "");
+        expect(getSharteStockData).toHaveBeenCalledWith(productUrl);
     });
     it("200 returns stock data", async () => {
         const mockStock = {
@@ -45,39 +62,12 @@ describe("getSharteStockController", () => {
             available: 9,
         };
         vi.mocked(getSharteStockData).mockResolvedValue(mockStock);
-        const req = { params: { id: "4777" }, query: {} };
+        const productUrl = "https://sharte.net/catalog/product/4777/";
+        const req = { params: {}, query: { url: productUrl } };
         await getSharteStockController(req, res);
         expect(responseStatus.code).toBe(200);
         expect(responseJson.message).toBe("Sharte stock retrieved successfully");
         expect(responseJson.data).toEqual(mockStock);
-        expect(getSharteStockData).toHaveBeenCalledWith("4777", "");
-    });
-    it("200 passes optional url from query to getSharteStockData", async () => {
-        const mockStock = {
-            id: "999",
-            name: "",
-            stock: 0,
-            reserved: 0,
-            available: 0,
-            price: 1.85,
-        };
-        vi.mocked(getSharteStockData).mockResolvedValue(mockStock);
-        const productUrl = "https://sharte.net/catalog/product/999/";
-        const req = {
-            params: { id: "999" },
-            query: { url: productUrl },
-        };
-        await getSharteStockController(req, res);
-        expect(responseStatus.code).toBe(200);
-        expect(getSharteStockData).toHaveBeenCalledWith("999", productUrl);
-    });
-    it("400 when url is invalid", async () => {
-        const req = {
-            params: { id: "4777" },
-            query: { url: "not-a-valid-url" },
-        };
-        await getSharteStockController(req, res);
-        expect(responseStatus.code).toBe(400);
-        expect(getSharteStockData).not.toHaveBeenCalled();
+        expect(getSharteStockData).toHaveBeenCalledWith(productUrl);
     });
 });

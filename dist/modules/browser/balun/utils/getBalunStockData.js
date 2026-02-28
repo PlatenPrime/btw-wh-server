@@ -23,9 +23,10 @@ function parseJsonAttr(raw) {
  * Stock берётся из data-advtracking-fb-product-data (contents[0].quantity), при отсутствии ключа — 0.
  * Price берётся из data-analytics (clerk.price_original).
  * @param link — URL страницы товара
- * @returns Promise с объектом { stock, price } или null, если данные не найдены/невалидны
- * @throws Error при пустом/не-строковом link или ошибке запроса
+ * @returns Promise с объектом { stock, price }; при негативном исходе — { stock: -1, price: -1 }
+ * @throws Error при пустом/не-строковом link
  */
+const NEGATIVE_OUTCOME = { stock: -1, price: -1 };
 export async function getBalunStockData(link) {
     if (!link || typeof link !== "string") {
         throw new Error("Link is required and must be a string");
@@ -46,16 +47,16 @@ export async function getBalunStockData(link) {
         const analyticsData = parseJsonAttr(analyticsAttr);
         const priceOriginal = analyticsData?.clerk?.price_original;
         if (priceOriginal === undefined || priceOriginal === "") {
-            return null;
+            return NEGATIVE_OUTCOME;
         }
         const price = parseFloat(String(priceOriginal).replace(/,/g, "."));
         if (Number.isNaN(price) || price < 0) {
-            return null;
+            return NEGATIVE_OUTCOME;
         }
         return { stock, price };
     }
     catch (error) {
         console.error("Error fetching data from balun product page:", error);
-        throw new Error(`Failed to fetch data from balun: ${error instanceof Error ? error.message : "Unknown error"}`);
+        return NEGATIVE_OUTCOME;
     }
 }

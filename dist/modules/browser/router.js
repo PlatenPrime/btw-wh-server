@@ -9,6 +9,6 @@ const router = Router();
 router.get("/air/stock", asyncHandler(getAirStockController));
 router.get("/balun/stock", asyncHandler(getBalunStockController));
 router.get("/yumi/stock", asyncHandler(getYumiStockController));
-router.get("/sharte/stock/:id", asyncHandler(getSharteStockController));
+router.get("/sharte/stock", asyncHandler(getSharteStockController));
 router.get("/sharik/stock/:artikul", asyncHandler(getSharikStockController));
 export default router;

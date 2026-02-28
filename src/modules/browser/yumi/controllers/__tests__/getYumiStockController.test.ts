@@ -35,7 +35,7 @@ describe("getYumiStockController", () => {
   });
 
   it("404 when product not found", async () => {
-    vi.mocked(getYumiStockData).mockResolvedValue(null);
+    vi.mocked(getYumiStockData).mockResolvedValue({ stock: -1, price: -1 });
     const req = {
       query: { link: "https://example.com/product/1" },
     } as unknown as Request;

@@ -31,10 +31,7 @@ function extractPackCount(title: string): number | null {
     return null;
   }
 
-  const patterns = [
-    /\((\d+)\s*шт\.?\)/i,
-    /(\d+)\s*шт\.?/i,
-  ];
+  const patterns = [/\((\d+)\s*шт\.?\)/i, /(\d+)\s*шт\.?/i];
 
   for (const pattern of patterns) {
     const match = title.match(pattern);
@@ -53,25 +50,18 @@ function parseStock($: cheerio.Root): number {
   const statusElement = $('[data-qaid="product_status_sticky_panel"]').first();
 
   if (statusElement.length > 0) {
-    const raw =
-      statusElement.attr("title") ?? statusElement.text();
+    const raw = statusElement.attr("title") ?? statusElement.text();
     const text = raw.trim().toLowerCase();
 
     if (!text) {
       return 0;
     }
 
-    if (
-      text.includes("немає в наявності") ||
-      text.includes("нет в наличии")
-    ) {
+    if (text.includes("немає в наявності") || text.includes("нет в наличии")) {
       return 0;
     }
 
-    if (
-      text.includes("в наявності") ||
-      text.includes("в наличии")
-    ) {
+    if (text.includes("в наявності") || text.includes("в наличии")) {
       const numberMatch = text.match(/\d+/g);
       if (numberMatch && numberMatch.length > 0) {
         const parsed = parseInt(numberMatch[0], 10);
@@ -116,16 +106,21 @@ function parsePrice($: cheerio.Root): number | null {
   }
 
   const priceAttr = priceElement.attr("data-qaprice");
-  const priceSource = priceAttr && priceAttr.trim().length > 0
-    ? priceAttr
-    : priceElement.text();
+  const priceSource =
+    priceAttr && priceAttr.trim().length > 0 ? priceAttr : priceElement.text();
 
   return parseNumberFromText(priceSource);
 }
 
-export async function getYumiStockData(
-  link: string
-): Promise<YumiProductInfo | null> {
+const NEGATIVE_OUTCOME: YumiProductInfo = { stock: -1, price: -1 };
+
+/**
+ * Получает данные о количестве и цене товара со страницы товара сайта Yumi по ссылке.
+ * @param link — URL страницы товара
+ * @returns Promise с объектом { stock, price, title? }; при негативном исходе — { stock: -1, price: -1 }
+ * @throws Error при пустом/не-строковом link
+ */
+export async function getYumiStockData(link: string): Promise<YumiProductInfo> {
   if (!link || typeof link !== "string") {
     throw new Error("Link is required and must be a string");
   }
@@ -140,7 +135,7 @@ export async function getYumiStockData(
     const basePrice = parsePrice($);
 
     if (basePrice === null) {
-      return null;
+      return NEGATIVE_OUTCOME;
     }
 
     const packCount = extractPackCount(title);
@@ -159,12 +154,6 @@ export async function getYumiStockData(
       ...(title && { title }),
     };
   } catch (error) {
-    console.error("Error fetching data from yumi product page:", error);
-    throw new Error(
-      `Failed to fetch data from yumi: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`
-    );
+    return NEGATIVE_OUTCOME;
   }
 }
-
