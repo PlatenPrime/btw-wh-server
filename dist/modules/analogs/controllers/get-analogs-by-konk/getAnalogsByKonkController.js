@@ -6,8 +6,10 @@ import { getAnalogsByKonkUtil } from "./utils/getAnalogsByKonkUtil.js";
  */
 export const getAnalogsByKonkController = async (req, res) => {
     try {
-        const { konkName } = req.params;
-        const parseResult = getAnalogsByKonkSchema.safeParse({ konkName });
+        const parseResult = getAnalogsByKonkSchema.safeParse({
+            ...req.params,
+            ...req.query,
+        });
         if (!parseResult.success) {
             res.status(400).json({
                 message: "Validation error",
@@ -15,10 +17,11 @@ export const getAnalogsByKonkController = async (req, res) => {
             });
             return;
         }
-        const analogs = await getAnalogsByKonkUtil(parseResult.data.konkName);
+        const result = await getAnalogsByKonkUtil(parseResult.data);
         res.status(200).json({
             message: "Analogs retrieved successfully",
-            data: analogs,
+            data: result.analogs,
+            pagination: result.pagination,
         });
     }
     catch (error) {

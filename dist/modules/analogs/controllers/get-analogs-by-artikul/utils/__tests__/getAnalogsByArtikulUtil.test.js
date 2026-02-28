@@ -19,4 +19,13 @@ describe("getAnalogsByArtikulUtil", () => {
         const result = await getAnalogsByArtikulUtil("NONE");
         expect(result).toHaveLength(0);
     });
+    it("returns analogs sorted by artikul", async () => {
+        await Analog.create([
+            { konkName: "k1", prodName: "p", url: "https://b.com", artikul: "ART-1" },
+            { konkName: "k2", prodName: "p", url: "https://a.com", artikul: "ART-1" },
+        ]);
+        const result = await getAnalogsByArtikulUtil("ART-1");
+        expect(result).toHaveLength(2);
+        expect(result.every((a) => a.artikul === "ART-1")).toBe(true);
+    });
 });

@@ -26,14 +26,19 @@ describe("getAnalogsByKonkController", () => {
         await getAnalogsByKonkController(req, res);
         expect(responseStatus.code).toBe(400);
     });
-    it("200 returns analogs for konkName", async () => {
+    it("200 returns analogs and pagination for konkName", async () => {
         await Analog.create([
             { konkName: "acme", prodName: "p1", url: "https://a.com" },
             { konkName: "acme", prodName: "p2", url: "https://b.com" },
         ]);
-        const req = { params: { konkName: "acme" } };
+        const req = {
+            params: { konkName: "acme" },
+            query: {},
+        };
         await getAnalogsByKonkController(req, res);
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data.length).toBe(2);
+        expect(responseJson.pagination).toBeDefined();
+        expect(responseJson.pagination.total).toBe(2);
     });
 });

@@ -6,7 +6,7 @@
 
 ### GET `/api/analogs`
 
-Получение списка аналогов с пагинацией и фильтрами по konkName и prodName.
+Получение списка аналогов с пагинацией и фильтрами по konkName и prodName. Сортировка по артикулу.
 
 **Доступ:** checkAuth + checkRoles(USER).
 
@@ -14,6 +14,7 @@
 
 - `konkName`: string (опционально)
 - `prodName`: string (опционально)
+- `search`: string (опционально) — поиск по полям nameukr и title (регистронезависимое совпадение)
 - `page`: string (опционально, по умолчанию 1)
 - `limit`: string (опционально, 1–100, по умолчанию 10)
 
@@ -39,29 +40,29 @@
 
 ### GET `/api/analogs/prod/:prodName`
 
-Получение аналогов по имени производителя.
+Получение аналогов по имени производителя с пагинацией и поиском. Сортировка по артикулу.
 
 **Доступ:** checkAuth + checkRoles(USER).
 
-**Запрос:** path-параметр `prodName` — строка (обязательно).
+**Запрос:** path-параметр `prodName` — строка (обязательно). Query: `page` (опционально, по умолчанию 1), `limit` (опционально, 1–100, по умолчанию 10), `search` (опционально — поиск по nameukr и title).
 
-**Ответ 200:** `{ message: string, data: Array<Analog> }`.
+**Ответ 200:** `{ message: string, data: Array<Analog>, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }`.
 
-**Ошибки:** 400 (пустой prodName), 401, 403, 500.
+**Ошибки:** 400 (пустой prodName или невалидные query), 401, 403, 500.
 
 ---
 
 ### GET `/api/analogs/konk/:konkName`
 
-Получение аналогов по имени конкурента.
+Получение аналогов по имени конкурента с пагинацией и поиском. Сортировка по артикулу.
 
 **Доступ:** checkAuth + checkRoles(USER).
 
-**Запрос:** path-параметр `konkName` — строка (обязательно).
+**Запрос:** path-параметр `konkName` — строка (обязательно). Query: `page` (опционально, по умолчанию 1), `limit` (опционально, 1–100, по умолчанию 10), `search` (опционально — поиск по nameukr и title).
 
-**Ответ 200:** `{ message: string, data: Array<Analog> }`.
+**Ответ 200:** `{ message: string, data: Array<Analog>, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }`.
 
-**Ошибки:** 400 (пустой konkName), 401, 403, 500.
+**Ошибки:** 400 (пустой konkName или невалидные query), 401, 403, 500.
 
 ---
 
@@ -98,7 +99,7 @@
 
 **Ответ 201:** `{ message: string, data: Analog }`.
 
-**Ошибки:** 400 (валидация, при наличии — поле `errors`), 401, 403, 500.
+**Ошибки:** 400 (валидация, при наличии — поле `errors`), 401, 403, 409 (аналог с таким url уже существует), 500.
 
 ---
 

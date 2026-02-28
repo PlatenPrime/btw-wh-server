@@ -68,5 +68,20 @@ describe("Analog Model", () => {
             expect(doc.createdAt).toBeDefined();
             expect(doc.updatedAt).toBeDefined();
         });
+        it("should reject duplicate url", async () => {
+            const url = "https://example.com/unique-page";
+            await Analog.create({
+                konkName: "k1",
+                prodName: "p",
+                url,
+            });
+            await expect(Analog.create({
+                konkName: "k2",
+                prodName: "p",
+                url,
+            })).rejects.toThrow();
+            const count = await Analog.countDocuments();
+            expect(count).toBe(1);
+        });
     });
 });

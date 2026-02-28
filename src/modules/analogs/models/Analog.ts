@@ -22,7 +22,7 @@ const analogSchema = new Schema<IAnalog>(
     prodName: { type: String, required: true },
     artikul: { type: String, default: "" },
     nameukr: { type: String },
-    url: { type: String, required: true },
+    url: { type: String, required: true, unique: true },
     title: { type: String },
     imageUrl: { type: String },
   },

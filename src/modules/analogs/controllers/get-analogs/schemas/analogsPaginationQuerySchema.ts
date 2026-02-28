@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-export const getAnalogsQuerySchema = z.object({
-  konkName: z.string().optional(),
-  prodName: z.string().optional(),
-  search: z.string().optional(),
+export const analogsPaginationQuerySchema = z.object({
   page: z
     .string()
     .optional()
@@ -14,6 +11,7 @@ export const getAnalogsQuerySchema = z.object({
     .optional()
     .transform((val) => (val ? parseInt(val, 10) : 10))
     .refine((val) => val > 0 && val <= 100, "Limit must be between 1 and 100"),
+  search: z.string().optional(),
 });
 
-export type GetAnalogsQuery = z.infer<typeof getAnalogsQuerySchema>;
+export type AnalogsPaginationQuery = z.infer<typeof analogsPaginationQuerySchema>;

@@ -2,6 +2,16 @@ import { Request, Response } from "express";
 import { createAnalogSchema } from "./schemas/createAnalogSchema.js";
 import { createAnalogUtil } from "./utils/createAnalogUtil.js";
 
+function isDuplicateUrlError(err: unknown): err is { code: number; keyPattern?: { url?: number } } {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code: number }).code === 11000 &&
+    (err as { keyPattern?: { url?: number } }).keyPattern?.url !== undefined
+  );
+}
+
 /**
  * @desc    Создать аналог (аналог артикула у конкурента)
  * @route   POST /api/analogs
@@ -28,11 +38,14 @@ export const createAnalogController = async (
     });
   } catch (error) {
     console.error("Error creating analog:", error);
-    if (!res.headersSent) {
-      res.status(500).json({
-        message: "Server error",
-        error: process.env.NODE_ENV === "development" ? error : undefined,
-      });
+    if (res.headersSent) return;
+    if (isDuplicateUrlError(error)) {
+      res.status(409).json({ message: "Analog with this url already exists" });
+      return;
     }
+    res.status(500).json({
+      message: "Server error",
+      error: process.env.NODE_ENV === "development" ? error : undefined,
+    });
   }
 };

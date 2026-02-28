@@ -73,4 +73,31 @@ describe("createAnalogController", () => {
         expect(responseStatus.code).toBe(201);
         expect(responseJson.data.nameukr).toBe("Назва");
     });
+    it("409 when creating analog with duplicate url", async () => {
+        const req1 = {
+            body: {
+                konkName: "k1",
+                prodName: "p",
+                url: "https://same-url.com/page",
+                title: "First",
+                imageUrl: "https://example.com/1.png",
+            },
+        };
+        await createAnalogController(req1, res);
+        expect(responseStatus.code).toBe(201);
+        const req2 = {
+            body: {
+                konkName: "k2",
+                prodName: "p",
+                url: "https://same-url.com/page",
+                title: "Second",
+                imageUrl: "https://example.com/2.png",
+            },
+        };
+        await createAnalogController(req2, res);
+        expect(responseStatus.code).toBe(409);
+        expect(responseJson.message).toBe("Analog with this url already exists");
+        const count = await Analog.countDocuments();
+        expect(count).toBe(1);
+    });
 });

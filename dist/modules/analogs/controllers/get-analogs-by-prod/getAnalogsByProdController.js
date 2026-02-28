@@ -6,8 +6,10 @@ import { getAnalogsByProdUtil } from "./utils/getAnalogsByProdUtil.js";
  */
 export const getAnalogsByProdController = async (req, res) => {
     try {
-        const { prodName } = req.params;
-        const parseResult = getAnalogsByProdSchema.safeParse({ prodName });
+        const parseResult = getAnalogsByProdSchema.safeParse({
+            ...req.params,
+            ...req.query,
+        });
         if (!parseResult.success) {
             res.status(400).json({
                 message: "Validation error",
@@ -15,10 +17,11 @@ export const getAnalogsByProdController = async (req, res) => {
             });
             return;
         }
-        const analogs = await getAnalogsByProdUtil(parseResult.data.prodName);
+        const result = await getAnalogsByProdUtil(parseResult.data);
         res.status(200).json({
             message: "Analogs retrieved successfully",
-            data: analogs,
+            data: result.analogs,
+            pagination: result.pagination,
         });
     }
     catch (error) {
