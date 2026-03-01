@@ -38,6 +38,7 @@ getAnalogs поддерживает query-параметры `konkName`, `prodNa
 
 - **GET `/api/analogs`** — список аналогов с пагинацией и фильтрами (konkName?, prodName?, page, limit). Доступ: USER.
 - **GET `/api/analogs/id/:id`** — аналог по id с полями konk и prod. Доступ: USER.
+- **GET `/api/analogs/id/:id/stock`** — остаток и цена по аналогу (по konkName вызывается утилита air/balun/yumi/sharte). Доступ: USER.
 - **GET `/api/analogs/prod/:prodName`** — аналоги по производителю. Доступ: USER.
 - **GET `/api/analogs/konk/:konkName`** — аналоги по конкуренту. Доступ: USER.
 - **GET `/api/analogs/artikul/:artikul`** — аналоги по артикулу. Доступ: USER.

@@ -6,6 +6,7 @@ import {
   createAnalogController,
   deleteAnalogByIdController,
   getAnalogByIdController,
+  getAnalogStockDataController,
   getAnalogsByArtikulController,
   getAnalogsByKonkController,
   getAnalogsByProdController,
@@ -15,6 +16,12 @@ import {
 
 const router = Router();
 
+router.get(
+  "/id/:id/stock",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAnalogStockDataController)
+);
 router.get(
   "/id/:id",
   checkAuth,
