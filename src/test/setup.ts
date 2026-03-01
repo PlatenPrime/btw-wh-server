@@ -4,8 +4,10 @@ import mongoose from "mongoose";
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
 
 // Import models to register schemas
+import "../modules/analog-slices/models/AnalogSlice.js";
 import "../modules/analogs/models/Analog.js";
 import "../modules/arts/models/Art.js";
+import "../modules/btrade-slices/models/BtradeSlice.js";
 import "../modules/asks/models/Ask.js";
 import "../modules/auth/models/User.js";
 import "../modules/blocks/models/Block.js";
