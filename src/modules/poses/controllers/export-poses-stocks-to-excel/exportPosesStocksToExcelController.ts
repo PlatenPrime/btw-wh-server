@@ -52,7 +52,7 @@ export const exportPosesStocksToExcelController = async (
     const excelData = formatPosesStocksForExcelUtil(poses, {
       selectedSklad: sklad,
     });
-    const { buffer, fileName } = generateExcelUtil(excelData, sklad);
+    const { buffer, fileName } = await generateExcelUtil(excelData, sklad);
 
     res.setHeader(
       "Content-Type",

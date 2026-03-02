@@ -83,7 +83,7 @@ describe("exportArtsToExcelController", () => {
 
     vi.mocked(getArtsForExportUtil).mockResolvedValue(mockArts);
     vi.mocked(formatArtsForExcelUtil).mockReturnValue(mockExcelData);
-    vi.mocked(generateExcelUtil).mockReturnValue({
+    vi.mocked(generateExcelUtil).mockResolvedValue({
       buffer: mockBuffer,
       fileName: mockFileName,
     });
@@ -197,9 +197,7 @@ describe("exportArtsToExcelController", () => {
     const error = new Error("Excel generation error");
     vi.mocked(getArtsForExportUtil).mockResolvedValue(mockArts);
     vi.mocked(formatArtsForExcelUtil).mockReturnValue(mockExcelData);
-    vi.mocked(generateExcelUtil).mockImplementation(() => {
-      throw error;
-    });
+    vi.mocked(generateExcelUtil).mockRejectedValue(error);
 
     const req = {} as unknown as Request;
 

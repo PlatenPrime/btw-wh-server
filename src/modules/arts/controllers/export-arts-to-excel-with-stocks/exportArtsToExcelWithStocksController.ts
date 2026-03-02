@@ -31,7 +31,7 @@ export const exportArtsToExcelWithStocksController = async (
     const excelData = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
 
     // Генерируем Excel файл
-    const { buffer, fileName } = generateExcelExtendedUtil(excelData);
+    const { buffer, fileName } = await generateExcelExtendedUtil(excelData);
 
     // Настраиваем заголовки для скачивания файла
     res.setHeader(

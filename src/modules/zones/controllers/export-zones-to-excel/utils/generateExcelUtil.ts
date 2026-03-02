@@ -1,41 +1,45 @@
-import * as XLSX from "xlsx";
-import { ExcelZoneRow } from "./types.js";
+import ExcelJS from "exceljs";
+import {
+  applyDataRowStyle,
+  applyHeaderStyle,
+} from "../../../../../lib/excel/worksheetStyles.js";
+import type { ExcelZoneRow } from "./types.js";
 
+const SHEET_NAME = "Зони";
+const COLUMN_KEYS: (keyof ExcelZoneRow)[] = ["Назва", "Штрихкод", "Сектор"];
+const COLUMN_WIDTHS = [15, 12, 10];
 
-
-export const generateExcelUtil = (
+export async function generateExcelUtil(
   excelData: ExcelZoneRow[]
-): {
-  buffer: Buffer;
-  fileName: string;
-} => {
-  // Создаем рабочую книгу
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(excelData);
+): Promise<{ buffer: Buffer; fileName: string }> {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet(SHEET_NAME);
 
-  // Настраиваем ширину колонок
-  const columnWidths = [
-    { wch: 15 }, // Назва зони
-    { wch: 12 }, // Штрихкод
-    { wch: 10 }, // Сектор
+  const columnCount = COLUMN_KEYS.length;
 
-  ];
-  worksheet["!cols"] = columnWidths;
+  // Header row
+  const headerRow = worksheet.getRow(1);
+  COLUMN_KEYS.forEach((key, i) => {
+    headerRow.getCell(i + 1).value = key;
+  });
+  applyHeaderStyle(worksheet, columnCount);
 
-  // Добавляем лист в книгу
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Зони");
-
-  // Генерируем буфер Excel файла
-  const buffer = XLSX.write(workbook, {
-    type: "buffer",
-    bookType: "xlsx",
+  // Data rows
+  excelData.forEach((row, idx) => {
+    const r = worksheet.getRow(idx + 2);
+    COLUMN_KEYS.forEach((key, i) => {
+      r.getCell(i + 1).value = row[key];
+    });
+    applyDataRowStyle(worksheet, idx + 2, columnCount);
   });
 
-  // Настраиваем имя файла
-  const fileName = `zones_export_${
-    new Date().toISOString().split("T")[0]
-  }.xlsx`;
+  // Column widths
+  COLUMN_WIDTHS.forEach((w, i) => {
+    worksheet.getColumn(i + 1).width = w;
+  });
 
-  return { buffer, fileName };
-};
+  const buffer = await workbook.xlsx.writeBuffer();
+  const fileName = `zones_export_${new Date().toISOString().split("T")[0]}.xlsx`;
 
+  return { buffer: Buffer.from(buffer), fileName };
+}

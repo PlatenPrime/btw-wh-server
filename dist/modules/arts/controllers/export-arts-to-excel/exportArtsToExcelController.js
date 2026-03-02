@@ -19,7 +19,7 @@ export const exportArtsToExcelController = async (req, res) => {
         // Подготавливаем данные для Excel
         const excelData = formatArtsForExcelUtil(arts);
         // Генерируем Excel файл
-        const { buffer, fileName } = generateExcelUtil(excelData);
+        const { buffer, fileName } = await generateExcelUtil(excelData);
         // Настраиваем заголовки для скачивания файла
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         // Используем RFC 5987 формат для лучшей совместимости с браузерами

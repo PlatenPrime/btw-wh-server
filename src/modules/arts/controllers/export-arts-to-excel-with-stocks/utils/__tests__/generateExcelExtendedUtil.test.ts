@@ -1,10 +1,35 @@
 import { describe, expect, it } from "vitest";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { ExcelArtRowExtended } from "../types.js";
 import { generateExcelExtendedUtil } from "../generateExcelExtendedUtil.js";
 
+async function readSheetToJson(buffer: Buffer): Promise<Record<string, unknown>[]> {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
+  const worksheet = workbook.getWorksheet("Артикулы");
+  if (!worksheet) return [];
+  const rows: Record<string, unknown>[] = [];
+  const headerRow = worksheet.getRow(1);
+  const headers: string[] = [];
+  headerRow.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+    const v = cell.value;
+    headers[colNumber - 1] = typeof v === "string" ? v : String(v ?? "");
+  });
+  const rowCount = worksheet.rowCount ?? 0;
+  for (let r = 2; r <= rowCount; r++) {
+    const row = worksheet.getRow(r);
+    const obj: Record<string, unknown> = {};
+    headers.forEach((h, i) => {
+      const cell = row.getCell(i + 1);
+      obj[h] = cell.value ?? "";
+    });
+    rows.push(obj);
+  }
+  return rows;
+}
+
 describe("generateExcelExtendedUtil", () => {
-  it("генерирует Excel файл с корректной структурой", () => {
+  it("генерирует Excel файл с корректной структурой", async () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
@@ -32,7 +57,7 @@ describe("generateExcelExtendedUtil", () => {
       },
     ];
 
-    const result = generateExcelExtendedUtil(excelData);
+    const result = await generateExcelExtendedUtil(excelData);
 
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer.length).toBeGreaterThan(0);
@@ -41,7 +66,7 @@ describe("generateExcelExtendedUtil", () => {
     );
   });
 
-  it("генерирует корректное имя файла с текущей датой", () => {
+  it("генерирует корректное имя файла с текущей датой", async () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
@@ -58,13 +83,13 @@ describe("generateExcelExtendedUtil", () => {
     ];
 
     const today = new Date().toISOString().split("T")[0];
-    const result = generateExcelExtendedUtil(excelData);
+    const result = await generateExcelExtendedUtil(excelData);
 
     expect(result.fileName).toBe(`arts_export_with_stocks_${today}.xlsx`);
   });
 
-  it("обрабатывает пустой массив данных", () => {
-    const result = generateExcelExtendedUtil([]);
+  it("обрабатывает пустой массив данных", async () => {
+    const result = await generateExcelExtendedUtil([]);
 
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer.length).toBeGreaterThan(0);
@@ -73,7 +98,7 @@ describe("generateExcelExtendedUtil", () => {
     );
   });
 
-  it("проверяет структуру Excel файла - можно прочитать буфер", () => {
+  it("проверяет структуру Excel файла - можно прочитать буфер", async () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
@@ -89,22 +114,21 @@ describe("generateExcelExtendedUtil", () => {
       },
     ];
 
-    const result = generateExcelExtendedUtil(excelData);
+    const result = await generateExcelExtendedUtil(excelData);
 
-    // Проверяем что буфер можно прочитать как Excel файл
-    const workbook = XLSX.read(result.buffer, { type: "buffer" });
-    expect(workbook.SheetNames).toContain("Артикулы");
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(result.buffer as unknown as ArrayBuffer);
+    expect(workbook.worksheets.map((ws) => ws.name)).toContain("Артикулы");
 
-    const worksheet = workbook.Sheets["Артикулы"];
+    const worksheet = workbook.getWorksheet("Артикулы");
     expect(worksheet).toBeDefined();
 
-    // Проверяем что данные присутствуют
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    const jsonData = await readSheetToJson(result.buffer);
     expect(jsonData).toHaveLength(1);
-    expect((jsonData[0] as any)["Артикул"]).toBe("ART-001");
+    expect(jsonData[0]!["Артикул"]).toBe("ART-001");
   });
 
-  it("генерирует файл с корректной структурой листа", () => {
+  it("генерирует файл с корректной структурой листа", async () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
@@ -120,60 +144,52 @@ describe("generateExcelExtendedUtil", () => {
       },
     ];
 
-    const result = generateExcelExtendedUtil(excelData);
-    const workbook = XLSX.read(result.buffer, { type: "buffer" });
-    const worksheet = workbook.Sheets["Артикулы"];
+    const result = await generateExcelExtendedUtil(excelData);
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(result.buffer as unknown as ArrayBuffer);
+    const worksheet = workbook.getWorksheet("Артикулы");
 
-    // Проверяем что лист создан и содержит данные
     expect(worksheet).toBeDefined();
-    expect(worksheet["!ref"]).toBeDefined(); // Диапазон данных
+    expect(worksheet!.rowCount).toBeGreaterThanOrEqual(1);
 
-    // Проверяем что данные присутствуют
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    const jsonData = await readSheetToJson(result.buffer);
     expect(jsonData).toHaveLength(1);
-
-    // Примечание: настройки !cols не сохраняются при чтении буфера через XLSX.read(),
-    // но они устанавливаются в исходном worksheet перед записью в буфер
   });
 
-  it("обрабатывает данные с разными типами значений", () => {
+  it("обрабатывает данные с разными типами значений", async () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
         Факт: "",
         Вітрина: 0,
-        Сайт: "", // пустая строка
+        Сайт: "",
         Склад: 0,
         "Назва (укр)": "Тест",
         Зона: "A1",
-        Ліміт: 0, // число 0
+        Ліміт: 0,
         Маркер: "",
         "Дата зрізу": "",
       },
       {
         Артикул: "ART-002",
         Факт: "",
-        Вітрина: -50, // отрицательное число
+        Вітрина: -50,
         Сайт: 50,
-        Склад: 100, // число
+        Склад: 100,
         "Назва (укр)": "",
         Зона: "B2",
-        Ліміт: "", // строка
+        Ліміт: "",
         Маркер: "MARK",
         "Дата зрізу": "20.01.2024",
       },
     ];
 
-    const result = generateExcelExtendedUtil(excelData);
+    const result = await generateExcelExtendedUtil(excelData);
 
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer.length).toBeGreaterThan(0);
 
-    // Проверяем что файл можно прочитать
-    const workbook = XLSX.read(result.buffer, { type: "buffer" });
-    const worksheet = workbook.Sheets["Артикулы"];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    const jsonData = await readSheetToJson(result.buffer);
     expect(jsonData).toHaveLength(2);
   });
 });
-

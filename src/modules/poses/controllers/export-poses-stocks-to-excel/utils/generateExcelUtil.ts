@@ -1,33 +1,50 @@
-import * as XLSX from "xlsx";
-import { ExcelPosRow } from "./formatPosesStocksForExcelUtil.js";
+import ExcelJS from "exceljs";
+import {
+  applyDataRowStyle,
+  applyHeaderStyle,
+} from "../../../../../lib/excel/worksheetStyles.js";
+import type { ExcelPosRow } from "./formatPosesStocksForExcelUtil.js";
 
-export const generateExcelUtil = (
+const SHEET_NAME = "Остатки";
+const COLUMN_KEYS: (keyof ExcelPosRow)[] = [
+  "Артикул",
+  "Название (укр)",
+  "Склад",
+  "Количество",
+];
+const COLUMN_WIDTHS = [20, 40, 20, 15];
+
+export async function generateExcelUtil(
   excelData: ExcelPosRow[],
   sklad?: string
-): {
-  buffer: Buffer;
-  fileName: string;
-} => {
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.json_to_sheet(excelData);
+): Promise<{ buffer: Buffer; fileName: string }> {
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet(SHEET_NAME);
 
-  worksheet["!cols"] = [
-    { wch: 20 }, // Артикул
-    { wch: 40 }, // Название (укр)
-    { wch: 20 }, // Склад
-    { wch: 15 }, // Количество
-  ];
+  const columnCount = COLUMN_KEYS.length;
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Остатки");
+  const headerRow = worksheet.getRow(1);
+  COLUMN_KEYS.forEach((key, i) => {
+    headerRow.getCell(i + 1).value = key;
+  });
+  applyHeaderStyle(worksheet, columnCount);
 
-  const buffer = XLSX.write(workbook, {
-    type: "buffer",
-    bookType: "xlsx",
+  excelData.forEach((row, idx) => {
+    const r = worksheet.getRow(idx + 2);
+    COLUMN_KEYS.forEach((key, i) => {
+      r.getCell(i + 1).value = row[key];
+    });
+    applyDataRowStyle(worksheet, idx + 2, columnCount);
   });
 
+  COLUMN_WIDTHS.forEach((w, i) => {
+    worksheet.getColumn(i + 1).width = w;
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
   const fileName = `poses_stocks_${(sklad ?? "all").toLowerCase()}_${
     new Date().toISOString().split("T")[0]
   }.xlsx`;
 
-  return { buffer, fileName };
-};
+  return { buffer: Buffer.from(buffer), fileName };
+}

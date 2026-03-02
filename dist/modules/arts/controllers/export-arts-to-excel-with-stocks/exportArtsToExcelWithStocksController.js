@@ -22,7 +22,7 @@ export const exportArtsToExcelWithStocksController = async (req, res) => {
         // Подготавливаем данные для Excel с расчетом Запасы и Витрина
         const excelData = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
         // Генерируем Excel файл
-        const { buffer, fileName } = generateExcelExtendedUtil(excelData);
+        const { buffer, fileName } = await generateExcelExtendedUtil(excelData);
         // Настраиваем заголовки для скачивания файла
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);

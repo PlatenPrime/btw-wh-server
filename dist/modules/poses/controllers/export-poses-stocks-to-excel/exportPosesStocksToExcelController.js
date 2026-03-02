@@ -33,7 +33,7 @@ export const exportPosesStocksToExcelController = async (req, res) => {
         const excelData = formatPosesStocksForExcelUtil(poses, {
             selectedSklad: sklad,
         });
-        const { buffer, fileName } = generateExcelUtil(excelData, sklad);
+        const { buffer, fileName } = await generateExcelUtil(excelData, sklad);
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
         res.setHeader("Content-Length", buffer.length);

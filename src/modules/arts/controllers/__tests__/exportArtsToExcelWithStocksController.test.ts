@@ -92,7 +92,7 @@ describe("exportArtsToExcelWithStocksController", () => {
     vi.mocked(getArtsForExportExtendedUtil).mockResolvedValue(mockArts);
     vi.mocked(getPosesQuantByArtikulUtil).mockResolvedValue(mockPosesQuantMap);
     vi.mocked(formatArtsForExcelExtendedUtil).mockReturnValue(mockExcelData);
-    vi.mocked(generateExcelExtendedUtil).mockReturnValue({
+    vi.mocked(generateExcelExtendedUtil).mockResolvedValue({
       buffer: mockBuffer,
       fileName: mockFileName,
     });
@@ -225,9 +225,7 @@ describe("exportArtsToExcelWithStocksController", () => {
     vi.mocked(getArtsForExportExtendedUtil).mockResolvedValue(mockArts);
     vi.mocked(getPosesQuantByArtikulUtil).mockResolvedValue(mockPosesQuantMap);
     vi.mocked(formatArtsForExcelExtendedUtil).mockReturnValue(mockExcelData);
-    vi.mocked(generateExcelExtendedUtil).mockImplementation(() => {
-      throw error;
-    });
+    vi.mocked(generateExcelExtendedUtil).mockRejectedValue(error);
 
     const req = {} as unknown as Request;
 

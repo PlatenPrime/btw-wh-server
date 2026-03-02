@@ -1,8 +1,8 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { generateExcelUtil } from "../generateExcelUtil.js";
 
 describe("generateExcelUtil", () => {
-  it("генерирует Excel файл с корректной структурой", () => {
+  it("генерирует Excel файл с корректной структурой", async () => {
     const excelData = [
       {
         "Назва": "1-1",
@@ -16,29 +16,31 @@ describe("generateExcelUtil", () => {
       },
     ];
 
-    const result = generateExcelUtil(excelData);
+    const result = await generateExcelUtil(excelData);
 
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer.length).toBeGreaterThan(0);
     expect(result.fileName).toMatch(/^zones_export_\d{4}-\d{2}-\d{2}\.xlsx$/);
   });
 
-  it("генерирует корректное имя файла с текущей датой", () => {
+  it("генерирует корректное имя файла с текущей датой", async () => {
     const excelData = [
       {
         "Назва": "1-1",
         Штрихкод: 10101,
         Сектор: 0,
-      }
+      },
     ];
 
-    const result = generateExcelUtil(excelData);
+    const result = await generateExcelUtil(excelData);
 
-    expect(result.fileName).toBe(`zones_export_${new Date().toISOString().split("T")[0]}.xlsx`);
+    expect(result.fileName).toBe(
+      `zones_export_${new Date().toISOString().split("T")[0]}.xlsx`
+    );
   });
 
-  it("обрабатывает пустой массив данных", () => {
-    const result = generateExcelUtil([]);
+  it("обрабатывает пустой массив данных", async () => {
+    const result = await generateExcelUtil([]);
 
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.fileName).toMatch(/^zones_export_\d{4}-\d{2}-\d{2}\.xlsx$/);
