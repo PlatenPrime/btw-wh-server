@@ -11,7 +11,9 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "migrate:analog-slices-keys": "tsx scripts/migrate-analog-slices-data-keys-to-artikul.ts",
+    "migrate:analog-slices-keys:execute": "tsx scripts/migrate-analog-slices-data-keys-to-artikul.ts --execute"
   },
   "keywords": [],
   "author": "",

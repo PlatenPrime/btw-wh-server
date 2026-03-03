@@ -27,8 +27,8 @@ describe("runAnalogSliceForKonkUtil", () => {
     vi.mocked(Analog.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue([
-          { _id: { toString: () => "id1" } },
-          { _id: { toString: () => "id2" } },
+          { _id: { toString: () => "id1" }, artikul: "ART-001" },
+          { _id: { toString: () => "id2" }, artikul: "ART-002" },
         ]),
       }),
     } as any);
@@ -48,8 +48,8 @@ describe("runAnalogSliceForKonkUtil", () => {
       vi.mocked(Analog.find).mockReturnValue({
         select: vi.fn().mockReturnValue({
           lean: vi.fn().mockResolvedValue([
-            { _id: { toString: () => "id1" } },
-            { _id: { toString: () => "id2" } },
+            { _id: { toString: () => "id1" }, artikul: "ART-001" },
+            { _id: { toString: () => "id2" }, artikul: "ART-002" },
           ]),
         }),
       } as any);
@@ -75,12 +75,12 @@ describe("runAnalogSliceForKonkUtil", () => {
 
       expect(calls[1][0]).toEqual({ konkName: "air", date: sliceDate });
       expect(calls[1][1]).toEqual({
-        $set: { "data.id1": { stock: 10, price: 100 } },
+        $set: { "data.ART-001": { stock: 10, price: 100, artikul: "ART-001" } },
       });
 
       expect(calls[2][0]).toEqual({ konkName: "air", date: sliceDate });
       expect(calls[2][1]).toEqual({
-        $set: { "data.id2": { stock: 5, price: 200 } },
+        $set: { "data.ART-002": { stock: 5, price: 200, artikul: "ART-002" } },
       });
     },
     10000
@@ -107,7 +107,7 @@ describe("runAnalogSliceForKonkUtil", () => {
   it("skips adding to data when getAnalogStockDataUtil returns null and continues", async () => {
     vi.mocked(Analog.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue([{ _id: { toString: () => "id1" } }]),
+        lean: vi.fn().mockResolvedValue([{ _id: { toString: () => "id1" }, artikul: "ART-001" }]),
       }),
     } as any);
     vi.mocked(getAnalogStockDataUtil).mockReset();
