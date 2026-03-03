@@ -2,7 +2,11 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { getAnalogSliceController } from "./controllers/index.js";
+import {
+  getAnalogSliceByDateController,
+  getAnalogSliceController,
+  getAnalogSliceRangeController,
+} from "./controllers/index.js";
 
 const router = Router();
 
@@ -11,6 +15,18 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getAnalogSliceController)
+);
+router.get(
+  "/analog/:analogId/range",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAnalogSliceRangeController)
+);
+router.get(
+  "/analog/:analogId",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAnalogSliceByDateController)
 );
 
 export default router;

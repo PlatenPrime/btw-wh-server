@@ -28,25 +28,27 @@ export async function runAnalogSliceForKonkUtil(konkName, date) {
     for (let i = 0; i < analogs.length; i++) {
         const analog = analogs[i];
         const analogId = analog._id.toString();
-        const label = analog.artikul?.trim() || analogId;
-        console.log(`анализируется аналог ${label} конкурента ${konkName}`);
+        const artikulKey = analog.artikul?.trim();
+        if (!artikulKey) {
+            console.warn(`[AnalogSlice ${konkName}] пропущен аналог ${analogId}: отсутствует artikul`);
+            continue;
+        }
+        console.log(`анализируется аналог ${artikulKey} конкурента ${konkName}`);
         try {
             const result = await getAnalogStockDataUtil(analogId);
             if (result) {
                 const dataItem = {
                     stock: result.stock,
                     price: result.price,
+                    artikul: artikulKey,
                 };
-                if (analog.artikul?.trim()) {
-                    dataItem.artikul = analog.artikul.trim();
-                }
-                await AnalogSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${analogId}`]: dataItem } });
+                await AnalogSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${artikulKey}`]: dataItem } });
                 count += 1;
             }
         }
         catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
-            console.error(`[AnalogSlice ${konkName}] ${analogId}: ${msg}`);
+            console.error(`[AnalogSlice ${konkName}] ${artikulKey}: ${msg}`);
         }
         if (i < analogs.length - 1) {
             await delay(DELAY_MS);
