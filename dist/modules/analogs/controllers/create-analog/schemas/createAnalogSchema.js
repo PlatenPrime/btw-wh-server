@@ -5,16 +5,14 @@ export const createAnalogSchema = z
     prodName: z.string().min(1, "prodName is required"),
     url: z.string().min(1, "url is required"),
     artikul: z.string().optional().default(""),
-    title: z.string().optional(),
-    imageUrl: z.string().optional(),
 })
-    .refine((data) => {
+    .superRefine((data, ctx) => {
     const hasArtikul = Boolean(data.artikul && data.artikul.trim() !== "");
-    if (hasArtikul)
-        return true;
-    return (Boolean(data.title && data.title.trim() !== "") &&
-        Boolean(data.imageUrl && data.imageUrl.trim() !== ""));
-}, {
-    message: "When artikul is empty, title and imageUrl are required",
-    path: ["title"],
+    if (!hasArtikul) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "When artikul is empty, analog must be linked to an existing art",
+            path: ["artikul"],
+        });
+    }
 });

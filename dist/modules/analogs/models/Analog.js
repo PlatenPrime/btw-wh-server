@@ -5,8 +5,6 @@ const analogSchema = new Schema({
     artikul: { type: String, default: "" },
     nameukr: { type: String },
     url: { type: String, required: true, unique: true },
-    title: { type: String },
-    imageUrl: { type: String },
 }, { timestamps: true });
 /**
  * Analog Mongoose model

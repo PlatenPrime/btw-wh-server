@@ -6,7 +6,7 @@ import type { UpdateAnalogByIdInput } from "../schemas/updateAnalogByIdSchema.js
 type AnalogUpdateFields = Partial<
   Pick<
     IAnalog,
-    "konkName" | "prodName" | "artikul" | "nameukr" | "url" | "title" | "imageUrl"
+    "konkName" | "prodName" | "artikul" | "nameukr" | "url"
   >
 >;
 
@@ -20,8 +20,6 @@ export const updateAnalogByIdUtil = async (
     "artikul",
     "nameukr",
     "url",
-    "title",
-    "imageUrl",
   ];
   for (const key of updatable) {
     const val = input[key];

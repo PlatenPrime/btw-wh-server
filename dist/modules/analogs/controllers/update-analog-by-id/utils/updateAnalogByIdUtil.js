@@ -8,8 +8,6 @@ export const updateAnalogByIdUtil = async (input) => {
         "artikul",
         "nameukr",
         "url",
-        "title",
-        "imageUrl",
     ];
     for (const key of updatable) {
         const val = input[key];

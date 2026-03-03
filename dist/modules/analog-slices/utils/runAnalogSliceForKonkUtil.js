@@ -21,14 +21,14 @@ export function toSliceDate(d) {
 export async function runAnalogSliceForKonkUtil(konkName, date) {
     const sliceDate = toSliceDate(date);
     const analogs = await Analog.find({ konkName })
-        .select("_id artikul title")
+        .select("_id artikul")
         .lean();
     await AnalogSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $setOnInsert: { konkName, date: sliceDate, data: {} } }, { upsert: true });
     let count = 0;
     for (let i = 0; i < analogs.length; i++) {
         const analog = analogs[i];
         const analogId = analog._id.toString();
-        const label = analog.artikul?.trim() || analog.title?.trim() || analogId;
+        const label = analog.artikul?.trim() || analogId;
         console.log(`анализируется аналог ${label} конкурента ${konkName}`);
         try {
             const result = await getAnalogStockDataUtil(analogId);
@@ -39,9 +39,6 @@ export async function runAnalogSliceForKonkUtil(konkName, date) {
                 };
                 if (analog.artikul?.trim()) {
                     dataItem.artikul = analog.artikul.trim();
-                }
-                else if (analog.title?.trim()) {
-                    dataItem.title = analog.title.trim();
                 }
                 await AnalogSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${analogId}`]: dataItem } });
                 count += 1;

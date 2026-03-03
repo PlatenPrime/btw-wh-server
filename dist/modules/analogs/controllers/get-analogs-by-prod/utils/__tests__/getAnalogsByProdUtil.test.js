@@ -36,19 +36,24 @@ describe("getAnalogsByProdUtil", () => {
         expect(result.analogs).toHaveLength(0);
         expect(result.pagination.total).toBe(0);
     });
-    it("filters by search when provided", async () => {
+    it("filters by search when provided (nameukr)", async () => {
         await Analog.create([
-            { konkName: "k", prodName: "maker", url: "https://a.com", title: "Match" },
+            {
+                konkName: "k",
+                prodName: "maker",
+                url: "https://a.com",
+                nameukr: "Совпадение",
+            },
             { konkName: "k", prodName: "maker", url: "https://b.com", nameukr: "Інше" },
         ]);
         const result = await getAnalogsByProdUtil({
             prodName: "maker",
             page: 1,
             limit: 10,
-            search: "Match",
+            search: "Совпадение",
         });
         expect(result.analogs).toHaveLength(1);
-        expect(result.analogs[0].title).toBe("Match");
+        expect(result.analogs[0].nameukr).toBe("Совпадение");
     });
     it("returns analogs sorted by artikul", async () => {
         await Analog.create([

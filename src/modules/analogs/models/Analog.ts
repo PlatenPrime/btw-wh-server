@@ -10,8 +10,6 @@ export interface IAnalog extends Document {
   artikul: string;
   nameukr?: string;
   url: string;
-  title?: string;
-  imageUrl?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,8 +21,6 @@ const analogSchema = new Schema<IAnalog>(
     artikul: { type: String, default: "" },
     nameukr: { type: String },
     url: { type: String, required: true, unique: true },
-    title: { type: String },
-    imageUrl: { type: String },
   },
   { timestamps: true }
 );

@@ -61,10 +61,9 @@ describe("getAnalogsUtil", () => {
     expect(result.pagination.totalPages).toBe(0);
   });
 
-  it("filters by search (nameukr and title) when provided", async () => {
+  it("filters by search (nameukr) when provided", async () => {
     await Analog.create([
       { konkName: "k", prodName: "p", url: "https://a.com", nameukr: "Товар один" },
-      { konkName: "k", prodName: "p", url: "https://b.com", title: "Product two" },
       { konkName: "k", prodName: "p", url: "https://c.com", nameukr: "Other" },
     ]);
     const result = await getAnalogsUtil({
@@ -74,13 +73,6 @@ describe("getAnalogsUtil", () => {
     });
     expect(result.analogs).toHaveLength(1);
     expect(result.analogs[0].nameukr).toBe("Товар один");
-    const byTitle = await getAnalogsUtil({
-      page: 1,
-      limit: 10,
-      search: "two",
-    });
-    expect(byTitle.analogs).toHaveLength(1);
-    expect(byTitle.analogs[0].title).toBe("Product two");
   });
 
   it("returns analogs sorted by artikul", async () => {

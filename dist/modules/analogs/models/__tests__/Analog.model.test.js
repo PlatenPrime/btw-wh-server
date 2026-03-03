@@ -43,21 +43,17 @@ describe("Analog Model", () => {
             expect(doc.createdAt).toBeInstanceOf(Date);
             expect(doc.updatedAt).toBeInstanceOf(Date);
         });
-        it("should save with optional artikul, nameukr, title, imageUrl", async () => {
+        it("should save with optional artikul and nameukr", async () => {
             const data = {
                 konkName: "konk",
                 prodName: "prod",
                 url: "https://example.com/p",
                 artikul: "ART-001",
                 nameukr: "Назва товару",
-                title: "Competitor product title",
-                imageUrl: "https://example.com/img.png",
             };
             const doc = await Analog.create(data);
             expect(doc.artikul).toBe("ART-001");
             expect(doc.nameukr).toBe("Назва товару");
-            expect(doc.title).toBe("Competitor product title");
-            expect(doc.imageUrl).toBe("https://example.com/img.png");
         });
         it("should have timestamps", async () => {
             const doc = await Analog.create({

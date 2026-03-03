@@ -33,7 +33,7 @@ describe("createAnalogController", () => {
     expect(responseStatus.code).toBe(400);
   });
 
-  it("400 when no artikul and missing title and imageUrl", async () => {
+  it("400 when no artikul provided", async () => {
     const req = {
       body: {
         konkName: "k",
@@ -43,23 +43,6 @@ describe("createAnalogController", () => {
     } as unknown as Request;
     await createAnalogController(req, res);
     expect(responseStatus.code).toBe(400);
-  });
-
-  it("201 creates analog with required fields and title/imageUrl", async () => {
-    const req = {
-      body: {
-        konkName: "acme",
-        prodName: "maker",
-        url: "https://example.com/page",
-        title: "Product",
-        imageUrl: "https://example.com/img.png",
-      },
-    } as unknown as Request;
-    await createAnalogController(req, res);
-    expect(responseStatus.code).toBe(201);
-    expect((responseJson.data as { konkName: string }).konkName).toBe("acme");
-    const count = await Analog.countDocuments();
-    expect(count).toBe(1);
   });
 
   it("201 creates analog with artikul and pulls nameukr from Art", async () => {
@@ -87,8 +70,7 @@ describe("createAnalogController", () => {
         konkName: "k1",
         prodName: "p",
         url: "https://same-url.com/page",
-        title: "First",
-        imageUrl: "https://example.com/1.png",
+        artikul: "ART-1",
       },
     } as unknown as Request;
     await createAnalogController(req1, res);
@@ -99,8 +81,7 @@ describe("createAnalogController", () => {
         konkName: "k2",
         prodName: "p",
         url: "https://same-url.com/page",
-        title: "Second",
-        imageUrl: "https://example.com/2.png",
+        artikul: "ART-2",
       },
     } as unknown as Request;
     await createAnalogController(req2, res);

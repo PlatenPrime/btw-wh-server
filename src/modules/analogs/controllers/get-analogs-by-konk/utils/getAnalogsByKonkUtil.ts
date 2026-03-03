@@ -10,8 +10,6 @@ type AnalogLean = {
   artikul: string;
   nameukr?: string;
   url: string;
-  title?: string;
-  imageUrl?: string;
   createdAt?: Date;
   updatedAt?: Date;
 };

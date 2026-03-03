@@ -1,7 +1,7 @@
 /**
- * Строит условие фильтрации по полям nameukr и title (регистронезависимое совпадение).
+ * Строит условие фильтрации по полю nameukr (регистронезависимое совпадение).
  * @param search - строка поиска
- * @returns объект для $and с $or по nameukr/title или null, если search пустой
+ * @returns объект для $and с $or по nameukr или null, если search пустой
  */
 export function buildAnalogSearchFilter(search) {
     const trimmed = search?.trim();
@@ -10,6 +10,6 @@ export function buildAnalogSearchFilter(search) {
     const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const re = { $regex: escaped, $options: "i" };
     return {
-        $or: [{ nameukr: re }, { title: re }],
+        $or: [{ nameukr: re }],
     };
 }

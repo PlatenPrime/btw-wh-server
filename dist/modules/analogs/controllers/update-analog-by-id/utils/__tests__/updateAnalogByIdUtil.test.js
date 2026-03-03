@@ -10,24 +10,23 @@ describe("updateAnalogByIdUtil", () => {
     it("returns null for non-existent id", async () => {
         const result = await updateAnalogByIdUtil({
             id: "000000000000000000000000",
-            title: "New title",
+            url: "https://updated.com",
         });
         expect(result).toBeNull();
     });
-    it("updates title and returns updated analog", async () => {
+    it("updates url and returns updated analog", async () => {
         const analog = await Analog.create({
             konkName: "k",
             prodName: "p",
-            url: "https://x.com",
-            title: "Old",
+            url: "https://old.com",
         });
         const result = await updateAnalogByIdUtil({
             id: analog._id.toString(),
-            title: "New title",
+            url: "https://new.com",
         });
-        expect(result?.title).toBe("New title");
+        expect(result?.url).toBe("https://new.com");
         const found = await Analog.findById(analog._id);
-        expect(found?.title).toBe("New title");
+        expect(found?.url).toBe("https://new.com");
     });
     it("updates artikul and pulls nameukr from Art", async () => {
         await Art.create({

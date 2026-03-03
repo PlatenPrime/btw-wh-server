@@ -51,15 +51,13 @@ describe("createAnalogUtil", () => {
         });
         expect(result.nameukr).toBeUndefined();
     });
-    it("creates analog with title and imageUrl when no artikul", async () => {
+    it("does not set nameukr when Art not found", async () => {
         const result = await createAnalogUtil({
             konkName: "k",
             prodName: "p",
             url: "https://x.com",
-            title: "Product title",
-            imageUrl: "https://x.com/img.png",
+            artikul: "NON-EXISTENT",
         });
-        expect(result.title).toBe("Product title");
-        expect(result.imageUrl).toBe("https://x.com/img.png");
+        expect(result.nameukr).toBeUndefined();
     });
 });

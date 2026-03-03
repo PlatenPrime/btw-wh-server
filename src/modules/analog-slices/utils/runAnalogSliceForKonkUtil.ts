@@ -17,7 +17,7 @@ export function toSliceDate(d: Date): Date {
   return copy;
 }
 
-type AnalogLean = { _id: { toString(): string }; artikul?: string; title?: string };
+type AnalogLean = { _id: { toString(): string }; artikul?: string };
 
 /**
  * Собирает срез по всем аналогам конкурента: сначала создаёт документ среза с пустым data,
@@ -30,7 +30,7 @@ export async function runAnalogSliceForKonkUtil(
 ): Promise<{ saved: boolean; count: number }> {
   const sliceDate = toSliceDate(date);
   const analogs = await Analog.find({ konkName })
-    .select("_id artikul title")
+    .select("_id artikul")
     .lean() as AnalogLean[];
 
   await AnalogSlice.findOneAndUpdate(
@@ -43,7 +43,7 @@ export async function runAnalogSliceForKonkUtil(
   for (let i = 0; i < analogs.length; i++) {
     const analog = analogs[i];
     const analogId = analog._id.toString();
-    const label = analog.artikul?.trim() || analog.title?.trim() || analogId;
+    const label = analog.artikul?.trim() || analogId;
     console.log(`анализируется аналог ${label} конкурента ${konkName}`);
 
     try {
@@ -55,8 +55,6 @@ export async function runAnalogSliceForKonkUtil(
         };
         if (analog.artikul?.trim()) {
           dataItem.artikul = analog.artikul.trim();
-        } else if (analog.title?.trim()) {
-          dataItem.title = analog.title.trim();
         }
         await AnalogSlice.findOneAndUpdate(
           { konkName, date: sliceDate },

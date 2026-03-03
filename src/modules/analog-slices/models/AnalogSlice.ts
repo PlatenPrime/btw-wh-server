@@ -5,8 +5,6 @@ export interface IAnalogSliceDataItem {
   price: number;
   /** Заполняется из аналога, если поле artikul не пустое */
   artikul?: string;
-  /** Заполняется из аналога, если artikul пустой, но есть title */
-  title?: string;
 }
 
 /**

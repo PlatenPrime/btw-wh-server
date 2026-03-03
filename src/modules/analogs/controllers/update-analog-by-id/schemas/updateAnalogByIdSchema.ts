@@ -11,8 +11,6 @@ export const updateAnalogByIdSchema = z
     artikul: z.string().optional(),
     nameukr: z.string().optional(),
     url: z.string().min(1).optional(),
-    title: z.string().optional(),
-    imageUrl: z.string().optional(),
   })
   .refine(
     (data) => {

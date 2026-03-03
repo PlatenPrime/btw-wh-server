@@ -14,8 +14,6 @@ export const createAnalogUtil = async (input) => {
         url: input.url,
         artikul,
         nameukr,
-        title: input.title,
-        imageUrl: input.imageUrl,
     });
     return analog;
 };
