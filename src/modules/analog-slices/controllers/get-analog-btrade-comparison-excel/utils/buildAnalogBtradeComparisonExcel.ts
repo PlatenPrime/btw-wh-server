@@ -29,7 +29,10 @@ export async function buildAnalogBtradeComparisonExcel(
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Порівняння");
 
-  const columnCount = items.length + 4;
+  const dataStartCol = 5; // колонка E — первая дата
+  const diffCol = dataStartCol + items.length;
+  const diffPctCol = diffCol + 1;
+  const columnCount = items.length + 6;
 
   if (columnCount > 0) {
     const headerRow = worksheet.getRow(1);
@@ -40,8 +43,10 @@ export async function buildAnalogBtradeComparisonExcel(
     headerRow.getCell(4).value = "";
     items.forEach((item, index) => {
       const dateStr = item.date.toISOString().split("T")[0] ?? "";
-      headerRow.getCell(index + 5).value = dateStr;
+      headerRow.getCell(index + dataStartCol).value = dateStr;
     });
+    headerRow.getCell(diffCol).value = "Різниця";
+    headerRow.getCell(diffPctCol).value = "Різниця, %";
     applyHeaderStyle(worksheet, columnCount);
 
     const analogStockRow = worksheet.getRow(2);
@@ -66,15 +71,43 @@ export async function buildAnalogBtradeComparisonExcel(
     btradePriceRow.getCell(4).value = "Ціна Btrade";
 
     items.forEach((item, index) => {
-      const col = index + 5;
+      const col = index + dataStartCol;
       analogStockRow.getCell(col).value = item.analogStock ?? null;
       analogPriceRow.getCell(col).value = item.analogPrice ?? null;
       btradeStockRow.getCell(col).value = item.btradeStock ?? null;
       btradePriceRow.getCell(col).value = item.btradePrice ?? null;
     });
 
+    // Колонки «Різниця» та «Різниця, %» для кожного рядка даних
+    const metrics = [
+      { row: analogStockRow, getVal: (item: AnalogBtradeCompareItem) => item.analogStock },
+      { row: analogPriceRow, getVal: (item: AnalogBtradeCompareItem) => item.analogPrice },
+      { row: btradeStockRow, getVal: (item: AnalogBtradeCompareItem) => item.btradeStock },
+      { row: btradePriceRow, getVal: (item: AnalogBtradeCompareItem) => item.btradePrice },
+    ] as const;
+    for (const { row, getVal } of metrics) {
+      const firstRaw = items.length > 0 ? getVal(items[0]!) : null;
+      const lastRaw = items.length > 0 ? getVal(items[items.length - 1]!) : null;
+      const firstVal =
+        typeof firstRaw === "number" ? firstRaw : Number(firstRaw ?? NaN);
+      const lastVal =
+        typeof lastRaw === "number" ? lastRaw : Number(lastRaw ?? NaN);
+      if (!Number.isFinite(firstVal) || !Number.isFinite(lastVal)) continue;
+
+      const diff = lastVal - firstVal;
+      row.getCell(diffCol).value = diff;
+
+      if (firstVal === 0) {
+        row.getCell(diffPctCol).value = null;
+        continue;
+      }
+
+      const rawPct = (diff / firstVal) * 100;
+      const roundedPct = Math.round(rawPct * 100) / 100;
+      row.getCell(diffPctCol).value = roundedPct;
+    }
+
     // Условное форматирование: остатки аналога (красный при росте)
-    const dataStartCol = 5; // колонка E
     for (let i = 1; i < items.length; i++) {
       const prevCell = analogStockRow.getCell(dataStartCol + i - 1);
       const currCell = analogStockRow.getCell(dataStartCol + i);

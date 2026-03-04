@@ -24,6 +24,7 @@
 
 - **Срез на одну дату:** по `analogId` (path) и `date` (query YYYY-MM-DD) возвращается одна точка `{ stock, price }`. Используется для карточки товара на конкретную дату.
 - **Срез за период:** по `analogId` (path) и `dateFrom`, `dateTo` (query YYYY-MM-DD) возвращается массив `{ date, stock, price }[]`, отсортированный по дате. Формат удобен для построения графиков (в т.ч. Recharts / shadcn/ui).
+- **Экспорт Excel сравнения аналога и Btrade:** по `analogId` (path) и `dateFrom`, `dateTo` (query) возвращается файл .xlsx с таблицей: остатки и цены аналога (конкурент) и Btrade по датам, колонки «Різниця» и «Різниця, %».
 
 ## Роли доступа
 
@@ -34,5 +35,6 @@
 - **GET `/api/analog-slices`** — срез по конкуренту и дате (query: `konkName`, `date`). Возвращает весь объект среза (konkName, date, data). Доступ: USER.
 - **GET `/api/analog-slices/analog/:analogId`** — срез по конкретному аналогу на одну дату (query: `date`). Ответ: `{ stock, price }`. Доступ: USER.
 - **GET `/api/analog-slices/analog/:analogId/range`** — данные по аналогу за период дат (query: `dateFrom`, `dateTo`). Ответ: массив `{ date, stock, price }[]`. Доступ: USER.
+- **GET `/api/analog-slices/analog/:analogId/comparison-excel`** — экспорт Excel с сравнением срезов аналога и Btrade за период (query: `dateFrom`, `dateTo`). Ответ: файл .xlsx. Доступ: см. [API](../api/analog-slices.md) (сейчас без проверки роли; при включении checkAuth — USER).
 
 Детальное описание запросов и ответов — в [API документации](../api/analog-slices.md).

@@ -58,6 +58,8 @@ describe("buildAnalogBtradeComparisonExcel", () => {
         expect(headerRow[3]).toBe("");
         expect(headerRow[4]).toBe("2026-03-01");
         expect(headerRow[5]).toBe("2026-03-02");
+        expect(headerRow[6]).toBe("Різниця");
+        expect(headerRow[7]).toBe("Різниця, %");
         const analogStockRow = rows[1];
         const analogPriceRow = rows[2];
         const btradeStockRow = rows[3];
@@ -89,6 +91,15 @@ describe("buildAnalogBtradeComparisonExcel", () => {
         expect(btradeStockRow[5]).toBe(20);
         expect(btradePriceRow[4]).toBe(2.0);
         expect(btradePriceRow[5]).toBe(2.1);
+        // Різниця = останнє − перше, Різниця % = (diff / перше) * 100, округлено до 2 знаків
+        expect(analogStockRow[6]).toBe(1); // 2 - 1
+        expect(analogStockRow[7]).toBe(100); // (1/1)*100
+        expect(analogPriceRow[6]).toBeCloseTo(0.1); // 1.6 - 1.5
+        expect(analogPriceRow[7]).toBe(6.67); // округлённое значение (6.666... → 6.67)
+        expect(btradeStockRow[6]).toBe(10); // 20 - 10
+        expect(btradeStockRow[7]).toBe(100);
+        expect(btradePriceRow[6]).toBeCloseTo(0.1); // 2.1 - 2.0
+        expect(btradePriceRow[7]).toBeCloseTo(5); // (0.1/2)*100
     });
     it("applies conditional formatting for analog stock and price", async () => {
         const items = [
@@ -143,9 +154,41 @@ describe("buildAnalogBtradeComparisonExcel", () => {
         expect(priceF3.font?.color?.argb).toBe("FF00AA00");
         // Следующая дата не должна быть зелёной
         expect(priceG3.font?.color?.argb).not.toBe("FF00AA00");
-        // Для Btrade не должно быть цветового форматирования
-        expect(btradeStockRow.getCell(6).font?.color).toBeUndefined();
-        expect(btradePriceRow.getCell(6).font?.color).toBeUndefined();
+        // Для Btrade не применяем условное форматирование (красный/зелёный)
+        expect(btradeStockRow.getCell(6).font?.color?.argb).not.toBe("FFFF0000");
+        expect(btradeStockRow.getCell(6).font?.color?.argb).not.toBe("FF00AA00");
+        expect(btradePriceRow.getCell(6).font?.color?.argb).not.toBe("FFFF0000");
+        expect(btradePriceRow.getCell(6).font?.color?.argb).not.toBe("FF00AA00");
+    });
+    it("fills Різниця and Різниця, % with negative difference (1000 → 400)", async () => {
+        const items = [
+            {
+                date: new Date("2026-03-01T00:00:00.000Z"),
+                analogStock: 1000,
+                analogPrice: 0,
+                btradeStock: 0,
+                btradePrice: 0,
+            },
+            {
+                date: new Date("2026-03-02T00:00:00.000Z"),
+                analogStock: 400,
+                analogPrice: 0,
+                btradeStock: 0,
+                btradePrice: 0,
+            },
+        ];
+        const options = {
+            artikul: "ART",
+            artNameUkr: null,
+            dateFrom: new Date("2026-03-01T00:00:00.000Z"),
+            dateTo: new Date("2026-03-02T00:00:00.000Z"),
+        };
+        const { buffer } = await buildAnalogBtradeComparisonExcel(items, options);
+        const rows = await readSheetToMatrix(buffer);
+        const analogStockRow = rows[1];
+        // Різниця = 400 - 1000 = -600, Різниця % = (-600/1000)*100 = -60
+        expect(analogStockRow[6]).toBe(-600);
+        expect(analogStockRow[7]).toBe(-60);
     });
     it("builds empty excel when no items provided", async () => {
         const items = [];
@@ -158,9 +201,10 @@ describe("buildAnalogBtradeComparisonExcel", () => {
         const { buffer } = await buildAnalogBtradeComparisonExcel(items, options);
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
-        const workbook = new ExcelJS.Workbook();
-        await workbook.xlsx.load(buffer);
-        const worksheet = workbook.getWorksheet("Порівняння");
-        expect(worksheet).toBeDefined();
+        const rows = await readSheetToMatrix(buffer);
+        expect(rows.length).toBeGreaterThanOrEqual(1);
+        const headerRow = rows[0];
+        expect(headerRow[4]).toBe("Різниця");
+        expect(headerRow[5]).toBe("Різниця, %");
     });
 });

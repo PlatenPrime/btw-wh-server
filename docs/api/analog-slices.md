@@ -50,6 +50,28 @@
 
 **Ошибки:** 400 (невалидный analogId, даты или dateFrom > dateTo), 401, 403, 404 (аналог не найден или у аналога пустой artikul), 500.
 
+---
+
+### GET `/api/analog-slices/analog/:analogId/comparison-excel`
+
+Скачивание Excel-файла с таблицей сравнения срезов по аналогу (остаток/цена аналога) и по Btrade (остаток/цена Btrade) за указанный период. Колонки: Артикул, Назва (укр), Виробник, подписи рядов, даты, «Різниця», «Різниця, %».
+
+**Доступ:** в текущей реализации без проверки авторизации (checkAuth/checkRoles закомментированы в роутере). При включении — USER.
+
+**Запрос:** path-параметр `analogId` — MongoDB ObjectId аналога. Query:
+
+- `dateFrom`: string, YYYY-MM-DD (обязательно)
+- `dateTo`: string, YYYY-MM-DD (обязательно), должно быть ≥ dateFrom
+
+**Ответ 200:** бинарное тело (Excel). Заголовки:
+
+- `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+- `Content-Disposition: attachment; filename="analog_btrade_comparison_{artikul}_{dateFrom}_{dateTo}.xlsx"`
+
+**Ошибки:** 400 (невалидный analogId, даты или dateFrom > dateTo; тело JSON: `{ message: "Validation error", errors: [...] }`), 404 (аналог не найден или у аналога пустой artikul; JSON: `{ message: "Analog not found or analog has no artikul" }`), 500.
+
+---
+
 ## Формат данных
 
 - **IAnalogSliceDataItem:** `{ stock: number, price: number, artikul?: string }`.
