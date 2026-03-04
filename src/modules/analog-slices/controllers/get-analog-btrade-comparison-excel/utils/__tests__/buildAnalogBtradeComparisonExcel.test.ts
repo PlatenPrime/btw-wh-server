@@ -1,0 +1,209 @@
+import { describe, expect, it } from "vitest";
+import ExcelJS from "exceljs";
+import {
+  buildAnalogBtradeComparisonExcel,
+  BuildAnalogBtradeComparisonExcelOptions,
+} from "../buildAnalogBtradeComparisonExcel.js";
+import type { AnalogBtradeCompareItem } from "../getAnalogBtradeComparisonRangeUtil.js";
+
+async function readSheetToMatrix(
+  buffer: Buffer
+): Promise<unknown[][]> {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
+  const worksheet = workbook.getWorksheet("Порівняння");
+  if (!worksheet) return [];
+
+  const rows: unknown[][] = [];
+  const rowCount = worksheet.rowCount ?? 0;
+  for (let r = 1; r <= rowCount; r++) {
+    const row = worksheet.getRow(r);
+    const cols: unknown[] = [];
+    row.eachCell({ includeEmpty: true }, (cell) => {
+      cols.push(cell.value ?? null);
+    });
+    rows.push(cols);
+  }
+  return rows;
+}
+
+describe("buildAnalogBtradeComparisonExcel", () => {
+  it("builds excel with correct headers and 4 data rows", async () => {
+    const items: AnalogBtradeCompareItem[] = [
+      {
+        date: new Date("2026-03-01T00:00:00.000Z"),
+        analogStock: 1,
+        analogPrice: 1.5,
+        btradeStock: 10,
+        btradePrice: 2.0,
+      },
+      {
+        date: new Date("2026-03-02T00:00:00.000Z"),
+        analogStock: 2,
+        analogPrice: 1.6,
+        btradeStock: 20,
+        btradePrice: 2.1,
+      },
+    ];
+
+    const options: BuildAnalogBtradeComparisonExcelOptions = {
+      artikul: "1102-0259",
+      artNameUkr: "Тестовий товар",
+      producerName: "Test Producer",
+      dateFrom: new Date("2026-03-01T00:00:00.000Z"),
+      dateTo: new Date("2026-03-02T00:00:00.000Z"),
+    };
+
+    const { buffer, fileName } = await buildAnalogBtradeComparisonExcel(
+      items,
+      options
+    );
+
+    expect(buffer).toBeInstanceOf(Buffer);
+    expect(buffer.length).toBeGreaterThan(0);
+    expect(fileName).toContain(
+      "analog_btrade_comparison_1102-0259_2026-03-01_2026-03-02"
+    );
+
+    const rows = await readSheetToMatrix(buffer);
+    expect(rows.length).toBeGreaterThanOrEqual(5);
+
+    const headerRow = rows[0]!;
+    expect(headerRow[0]).toBe("Артикул");
+    expect(headerRow[1]).toBe("Назва (укр)");
+    expect(headerRow[2]).toBe("Виробник");
+    // Колонка D зарезервирована под підпис рядків
+    expect(headerRow[3]).toBe("");
+    expect(headerRow[4]).toBe("2026-03-01");
+    expect(headerRow[5]).toBe("2026-03-02");
+
+    const analogStockRow = rows[1]!;
+    const analogPriceRow = rows[2]!;
+    const btradeStockRow = rows[3]!;
+    const btradePriceRow = rows[4]!;
+
+    // Колонки A/B/C: артикул, назва, виробник — только в первой строке блока
+    expect(analogStockRow[0]).toBe("1102-0259");
+    expect(analogStockRow[1]).toBe("Тестовий товар");
+    expect(analogStockRow[2]).toBe("Test Producer");
+
+    expect(analogPriceRow[0]).toBeNull();
+    expect(analogPriceRow[1]).toBeNull();
+    expect(analogPriceRow[2]).toBeNull();
+
+    expect(btradeStockRow[0]).toBeNull();
+    expect(btradeStockRow[1]).toBeNull();
+    expect(btradeStockRow[2]).toBeNull();
+
+    expect(btradePriceRow[0]).toBeNull();
+    expect(btradePriceRow[1]).toBeNull();
+    expect(btradePriceRow[2]).toBeNull();
+
+    // Підписи рядків у колонці D
+    expect(analogStockRow[3]).toBe("Залишок аналога");
+    expect(analogPriceRow[3]).toBe("Ціна аналога");
+    expect(btradeStockRow[3]).toBe("Залишок Btrade");
+    expect(btradePriceRow[3]).toBe("Ціна Btrade");
+
+    // Значення по датах починаються з колонки E
+    expect(analogStockRow[4]).toBe(1);
+    expect(analogStockRow[5]).toBe(2);
+    expect(analogPriceRow[4]).toBe(1.5);
+    expect(analogPriceRow[5]).toBe(1.6);
+    expect(btradeStockRow[4]).toBe(10);
+    expect(btradeStockRow[5]).toBe(20);
+    expect(btradePriceRow[4]).toBe(2.0);
+    expect(btradePriceRow[5]).toBe(2.1);
+  });
+
+  it("applies conditional formatting for analog stock and price", async () => {
+    const items: AnalogBtradeCompareItem[] = [
+      {
+        date: new Date("2026-03-01T00:00:00.000Z"),
+        analogStock: 100,
+        analogPrice: 2.0,
+        btradeStock: 0,
+        btradePrice: 0,
+      },
+      {
+        date: new Date("2026-03-02T00:00:00.000Z"),
+        analogStock: 200, // рост остатка -> красный
+        analogPrice: 1.8, // падение цены -> зелёный
+        btradeStock: 0,
+        btradePrice: 0,
+      },
+      {
+        date: new Date("2026-03-03T00:00:00.000Z"),
+        analogStock: 150, // снижение, цвет не должен быть красным
+        analogPrice: 2.1, // рост, цвет не должен быть зелёным
+        btradeStock: 0,
+        btradePrice: 0,
+      },
+    ];
+
+    const options: BuildAnalogBtradeComparisonExcelOptions = {
+      artikul: "1102-0259",
+      artNameUkr: "Тестовий товар",
+      producerName: "Test Producer",
+      dateFrom: new Date("2026-03-01T00:00:00.000Z"),
+      dateTo: new Date("2026-03-03T00:00:00.000Z"),
+    };
+
+    const { buffer } = await buildAnalogBtradeComparisonExcel(items, options);
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
+    const worksheet = workbook.getWorksheet("Порівняння")!;
+
+    const analogStockRow = worksheet.getRow(2);
+    const analogPriceRow = worksheet.getRow(3);
+    const btradeStockRow = worksheet.getRow(4);
+    const btradePriceRow = worksheet.getRow(5);
+
+    const stockE2 = analogStockRow.getCell(5); // 2026-03-01
+    const stockF2 = analogStockRow.getCell(6); // 2026-03-02 (должен быть красный)
+    const stockG2 = analogStockRow.getCell(7); // 2026-03-03 (не красный)
+
+    const priceE3 = analogPriceRow.getCell(5); // 2026-03-01
+    const priceF3 = analogPriceRow.getCell(6); // 2026-03-02 (должен быть зелёный)
+    const priceG3 = analogPriceRow.getCell(7); // 2026-03-03 (не зелёный)
+
+    // Остатки: рост -> красный
+    expect(stockF2.font?.color?.argb).toBe("FFFF0000");
+    // Следующая дата не должна быть красной
+    expect(stockG2.font?.color?.argb).not.toBe("FFFF0000");
+
+    // Цены: снижение -> зелёный
+    expect(priceF3.font?.color?.argb).toBe("FF00AA00");
+    // Следующая дата не должна быть зелёной
+    expect(priceG3.font?.color?.argb).not.toBe("FF00AA00");
+
+    // Для Btrade не должно быть цветового форматирования
+    expect(btradeStockRow.getCell(6).font?.color).toBeUndefined();
+    expect(btradePriceRow.getCell(6).font?.color).toBeUndefined();
+  });
+
+  it("builds empty excel when no items provided", async () => {
+    const items: AnalogBtradeCompareItem[] = [];
+    const options: BuildAnalogBtradeComparisonExcelOptions = {
+      artikul: "1102-0259",
+      artNameUkr: "Тестовий товар",
+      dateFrom: new Date("2026-03-01T00:00:00.000Z"),
+      dateTo: new Date("2026-03-02T00:00:00.000Z"),
+    };
+
+    const { buffer } = await buildAnalogBtradeComparisonExcel(
+      items,
+      options
+    );
+
+    expect(buffer).toBeInstanceOf(Buffer);
+    expect(buffer.length).toBeGreaterThan(0);
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
+    const worksheet = workbook.getWorksheet("Порівняння");
+    expect(worksheet).toBeDefined();
+  });
+});
+
