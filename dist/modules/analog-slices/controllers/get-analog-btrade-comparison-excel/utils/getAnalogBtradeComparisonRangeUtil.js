@@ -4,6 +4,7 @@ import { Prod } from "../../../../prods/models/Prod.js";
 import { BtradeSlice } from "../../../../btrade-slices/models/BtradeSlice.js";
 import { AnalogSlice } from "../../../models/AnalogSlice.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
+import { Konk } from "../../../../konks/models/Konk.js";
 /**
  * Возвращает массив данных сравнения срезов по аналогу и Btrade за период дат.
  * Для каждой даты в диапазоне (dateFrom..dateTo, включая границы) добавляется запись,
@@ -30,6 +31,10 @@ export async function getAnalogBtradeComparisonRangeUtil(input) {
         .select("title")
         .lean();
     const producerName = (prodDoc?.title ?? "").trim() || null;
+    const konkDoc = await Konk.findOne({ name: analog.konkName })
+        .select("title")
+        .lean();
+    const competitorTitle = (konkDoc?.title ?? "").trim() || null;
     // Загружаем документы срезов конкурента за диапазон
     const analogDocs = await AnalogSlice.find({
         konkName: analog.konkName,
@@ -76,5 +81,12 @@ export async function getAnalogBtradeComparisonRangeUtil(input) {
         });
         cursor.setUTCDate(cursor.getUTCDate() + 1);
     }
-    return { ok: true, data, artikul: artikulKey, artNameUkr, producerName };
+    return {
+        ok: true,
+        data,
+        artikul: artikulKey,
+        artNameUkr,
+        producerName,
+        competitorTitle,
+    };
 }

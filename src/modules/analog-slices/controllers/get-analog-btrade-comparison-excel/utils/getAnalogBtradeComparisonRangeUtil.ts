@@ -7,6 +7,7 @@ import { AnalogSlice } from "../../../models/AnalogSlice.js";
 import type { IAnalogSliceDataItem } from "../../../models/AnalogSlice.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
 import type { GetAnalogBtradeComparisonExcelInput } from "../schemas/getAnalogBtradeComparisonExcelSchema.js";
+import { Konk } from "../../../../konks/models/Konk.js";
 
 export type AnalogBtradeCompareItem = {
   date: Date;
@@ -23,6 +24,7 @@ export type GetAnalogBtradeComparisonRangeResult =
       artikul: string;
       artNameUkr: string | null;
       producerName: string | null;
+      competitorTitle: string | null;
     }
   | { ok: false };
 
@@ -57,6 +59,11 @@ export async function getAnalogBtradeComparisonRangeUtil(
     .select("title")
     .lean();
   const producerName = (prodDoc?.title ?? "").trim() || null;
+
+  const konkDoc = await Konk.findOne({ name: analog.konkName })
+    .select("title")
+    .lean();
+  const competitorTitle = (konkDoc?.title ?? "").trim() || null;
 
   // Загружаем документы срезов конкурента за диапазон
   const analogDocs = await AnalogSlice.find({
@@ -110,6 +117,13 @@ export async function getAnalogBtradeComparisonRangeUtil(
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
 
-  return { ok: true, data, artikul: artikulKey, artNameUkr, producerName };
+  return {
+    ok: true,
+    data,
+    artikul: artikulKey,
+    artNameUkr,
+    producerName,
+    competitorTitle,
+  };
 }
 

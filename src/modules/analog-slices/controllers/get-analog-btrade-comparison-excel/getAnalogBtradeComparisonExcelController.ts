@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { getAnalogBtradeComparisonExcelSchema } from "./schemas/getAnalogBtradeComparisonExcelSchema.js";
-import { getAnalogBtradeComparisonRangeUtil } from "./utils/getAnalogBtradeComparisonRangeUtil.js";
 import { buildAnalogBtradeComparisonExcel } from "./utils/buildAnalogBtradeComparisonExcel.js";
+import { getAnalogBtradeComparisonRangeUtil } from "./utils/getAnalogBtradeComparisonRangeUtil.js";
 
 /**
  * @desc    Экспорт сравнительных срезов по аналогу и Btrade в Excel за период дат
@@ -9,7 +9,7 @@ import { buildAnalogBtradeComparisonExcel } from "./utils/buildAnalogBtradeCompa
  */
 export const getAnalogBtradeComparisonExcelController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const parseResult = getAnalogBtradeComparisonExcelSchema.safeParse({
     analogId: req.params.analogId,
@@ -25,7 +25,9 @@ export const getAnalogBtradeComparisonExcelController = async (
     return;
   }
 
-  const rangeResult = await getAnalogBtradeComparisonRangeUtil(parseResult.data);
+  const rangeResult = await getAnalogBtradeComparisonRangeUtil(
+    parseResult.data,
+  );
   if (!rangeResult.ok) {
     res.status(404).json({
       message: "Analog not found or analog has no artikul",
@@ -39,17 +41,17 @@ export const getAnalogBtradeComparisonExcelController = async (
       artikul: rangeResult.artikul,
       artNameUkr: rangeResult.artNameUkr,
       producerName: rangeResult.producerName,
+      competitorTitle: rangeResult.competitorTitle,
       dateFrom: parseResult.data.dateFrom,
       dateTo: parseResult.data.dateTo,
-    }
+    },
   );
 
   res.setHeader(
     "Content-Type",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   );
   res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
 
   res.status(200).send(buffer);
 };
-

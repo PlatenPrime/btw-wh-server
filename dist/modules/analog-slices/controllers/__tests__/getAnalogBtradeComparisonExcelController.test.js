@@ -63,6 +63,7 @@ describe("getAnalogBtradeComparisonExcelController", () => {
             artikul: "1102-0259",
             artNameUkr: "Тестовий товар",
             producerName: "Test Producer",
+            competitorTitle: "Test Konk",
             data: [
                 {
                     date: new Date("2026-03-01T00:00:00.000Z"),

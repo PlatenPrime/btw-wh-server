@@ -1,6 +1,6 @@
 import { getAnalogBtradeComparisonExcelSchema } from "./schemas/getAnalogBtradeComparisonExcelSchema.js";
-import { getAnalogBtradeComparisonRangeUtil } from "./utils/getAnalogBtradeComparisonRangeUtil.js";
 import { buildAnalogBtradeComparisonExcel } from "./utils/buildAnalogBtradeComparisonExcel.js";
+import { getAnalogBtradeComparisonRangeUtil } from "./utils/getAnalogBtradeComparisonRangeUtil.js";
 /**
  * @desc    Экспорт сравнительных срезов по аналогу и Btrade в Excel за период дат
  * @route   GET /api/analog-slices/analog/:analogId/comparison-excel?dateFrom=2026-03-01&dateTo=2026-03-31
@@ -29,6 +29,7 @@ export const getAnalogBtradeComparisonExcelController = async (req, res) => {
         artikul: rangeResult.artikul,
         artNameUkr: rangeResult.artNameUkr,
         producerName: rangeResult.producerName,
+        competitorTitle: rangeResult.competitorTitle,
         dateFrom: parseResult.data.dateFrom,
         dateTo: parseResult.data.dateTo,
     });
