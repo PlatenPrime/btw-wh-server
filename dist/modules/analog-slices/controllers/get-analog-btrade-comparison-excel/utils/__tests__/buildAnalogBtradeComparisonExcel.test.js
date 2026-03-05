@@ -190,6 +190,44 @@ describe("buildAnalogBtradeComparisonExcel", () => {
         expect(analogStockRow[6]).toBe(-600);
         expect(analogStockRow[7]).toBe(-60);
     });
+    it("marks percentage cells with pale pink fill when value cannot be calculated", async () => {
+        const items = [
+            {
+                date: new Date("2026-03-01T00:00:00.000Z"),
+                analogStock: 0,
+                analogPrice: 0,
+                btradeStock: 0,
+                btradePrice: 0,
+            },
+            {
+                date: new Date("2026-03-02T00:00:00.000Z"),
+                analogStock: 0,
+                analogPrice: 0,
+                btradeStock: 0,
+                btradePrice: 0,
+            },
+        ];
+        const options = {
+            artikul: "ART",
+            artNameUkr: null,
+            dateFrom: new Date("2026-03-01T00:00:00.000Z"),
+            dateTo: new Date("2026-03-02T00:00:00.000Z"),
+        };
+        const { buffer } = await buildAnalogBtradeComparisonExcel(items, options);
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.load(buffer);
+        const worksheet = workbook.getWorksheet("Порівняння");
+        const analogStockRow = worksheet.getRow(2);
+        const diffPctCell = analogStockRow.getCell(8); // "Різниця, %"
+        const summaryPctCell = analogStockRow.getCell(10); // "Δ Btrade vs конкурент, %"
+        expect(diffPctCell.value).toBeNull();
+        const diffFill = diffPctCell.fill;
+        expect(diffFill?.fgColor?.argb).toBe("FFFFC0CB");
+        // Для итоговой колонки при нулевой динамике Btrade отображаем 0, без розовой заливки
+        expect(summaryPctCell.value).toBe(0);
+        const summaryFill = summaryPctCell.fill;
+        expect(summaryFill?.fgColor?.argb).not.toBe("FFFFC0CB");
+    });
     it("builds empty excel when no items provided", async () => {
         const items = [];
         const options = {

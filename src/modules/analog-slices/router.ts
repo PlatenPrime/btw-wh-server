@@ -7,6 +7,7 @@ import {
   getAnalogSliceByDateController,
   getAnalogSliceController,
   getAnalogSliceRangeController,
+  getKonkBtradeComparisonExcelController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -28,6 +29,12 @@ router.get(
   // checkAuth,
   // checkRoles([RoleType.USER]),
   asyncHandler(getAnalogBtradeComparisonExcelController)
+);
+router.get(
+  "/konk-btrade/comparison-excel",
+  // checkAuth,
+  // checkRoles([RoleType.USER]),
+  asyncHandler(getKonkBtradeComparisonExcelController)
 );
 router.get(
   "/analog/:analogId",
