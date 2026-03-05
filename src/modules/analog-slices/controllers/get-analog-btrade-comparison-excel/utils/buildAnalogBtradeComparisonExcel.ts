@@ -198,7 +198,23 @@ export async function buildAnalogBtradeComparisonExcel(
 
         if (Number.isFinite(deltaAnalog) && Number.isFinite(deltaBtrade)) {
           const diffPieces = deltaAnalog - deltaBtrade;
-          analogStockRow.getCell(summaryDiffCol).value = diffPieces;
+          const summaryDiffCell = analogStockRow.getCell(summaryDiffCol);
+          summaryDiffCell.value = diffPieces;
+
+          // Цвет шрифта для сводной разницы в штуках
+          const diffPiecesNumeric =
+            typeof diffPieces === "number"
+              ? diffPieces
+              : Number(diffPieces ?? NaN);
+          if (Number.isFinite(diffPiecesNumeric) && diffPiecesNumeric !== 0) {
+            summaryDiffCell.font = {
+              ...(summaryDiffCell.font ?? {}),
+              color:
+                diffPiecesNumeric > 0
+                  ? { argb: "FF00AA00" } // зелёный
+                  : { argb: "FFFF0000" }, // красный
+            };
+          }
 
           if (deltaBtrade === 0) {
             analogStockRow.getCell(summaryDiffPctCol).value = null;
@@ -207,8 +223,25 @@ export async function buildAnalogBtradeComparisonExcel(
               (diffPieces / Math.abs(deltaBtrade)) * 100;
             const roundedSummaryPct =
               Math.round(rawSummaryPct * 100) / 100;
-            analogStockRow.getCell(summaryDiffPctCol).value =
-              roundedSummaryPct;
+
+            const summaryPctCell =
+              analogStockRow.getCell(summaryDiffPctCol);
+            summaryPctCell.value = roundedSummaryPct;
+
+            // Цвет шрифта для сводной разницы в процентах
+            const pctNumeric =
+              typeof roundedSummaryPct === "number"
+                ? roundedSummaryPct
+                : Number(roundedSummaryPct ?? NaN);
+            if (Number.isFinite(pctNumeric) && pctNumeric !== 0) {
+              summaryPctCell.font = {
+                ...(summaryPctCell.font ?? {}),
+                color:
+                  pctNumeric > 0
+                    ? { argb: "FF00AA00" } // зелёный
+                    : { argb: "FFFF0000" }, // красный
+              };
+            }
           }
 
           // объединяем ячейки по строкам 2–5 для обобщающих колонок
