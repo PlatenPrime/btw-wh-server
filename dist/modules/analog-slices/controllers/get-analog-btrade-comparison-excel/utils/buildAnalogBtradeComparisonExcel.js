@@ -1,5 +1,5 @@
 import ExcelJS from "exceljs";
-import { buildAnalogBtradeExcelBlock, setupAnalogBtradeHeaderRow, } from "../../common/buildAnalogBtradeExcelBlock.js";
+import { buildAnalogBtradeExcelBlock, buildAnalogBtradeTotalBlock, setupAnalogBtradeHeaderRow, } from "../../common/buildAnalogBtradeExcelBlock.js";
 /**
  * Створює Excel-файл для порівняння зрізів по аналогу та Btrade.
  * Перша строка: дати стовпців (YYYY-MM-DD).
@@ -20,7 +20,7 @@ export async function buildAnalogBtradeComparisonExcel(items, options) {
     const columnCount = items.length + 9;
     if (columnCount > 0) {
         setupAnalogBtradeHeaderRow(worksheet, items, dataStartCol, diffCol, diffPctCol, summaryDiffCol, summaryDiffPctCol, columnCount);
-        buildAnalogBtradeExcelBlock({
+        const deltas = buildAnalogBtradeExcelBlock({
             worksheet,
             startRow: 2,
             dataStartCol,
@@ -35,6 +35,20 @@ export async function buildAnalogBtradeComparisonExcel(items, options) {
             producerName: options.producerName,
             competitorTitle: options.competitorTitle,
         });
+        const sumDeltaAnalog = deltas?.deltaAnalog ?? 0;
+        const sumDeltaBtrade = deltas?.deltaBtrade ?? 0;
+        buildAnalogBtradeTotalBlock({
+            worksheet,
+            totalStartRow: 6,
+            diffCol,
+            summaryDiffCol,
+            summaryDiffPctCol,
+            columnCount,
+            sumDeltaAnalog,
+            sumDeltaBtrade,
+            competitorTitle: options.competitorTitle,
+            producerName: options.producerName,
+        });
         for (let c = 1; c <= columnCount; c++) {
             worksheet.getColumn(c).width = 14;
         }
@@ -43,6 +57,7 @@ export async function buildAnalogBtradeComparisonExcel(items, options) {
     const safeArtikul = options.artikul.replace(/\s+/g, "_");
     const fromStr = options.dateFrom.toISOString().split("T")[0] ?? "from";
     const toStr = options.dateTo.toISOString().split("T")[0] ?? "to";
+    // const fileName = `Порівняльний_зріз_${safeArtikul}_${fromStr}_${toStr}.xlsx`;
     const fileName = `analog_btrade_comparison_${safeArtikul}_${fromStr}_${toStr}.xlsx`;
     return { buffer: Buffer.from(buffer), fileName };
 }

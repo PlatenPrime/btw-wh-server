@@ -6,13 +6,20 @@ import { buildKonkBtradeComparisonExcel } from "./utils/buildKonkBtradeCompariso
  * @route   GET /api/analog-slices/konk-btrade/comparison-excel?konk=air&prod=gemar&dateFrom=2026-03-01&dateTo=2026-03-31
  */
 export const getKonkBtradeComparisonExcelController = async (req, res) => {
+    const q = req.query;
     const parseResult = getKonkBtradeComparisonExcelSchema.safeParse({
-        konk: req.query.konk,
-        prod: req.query.prod,
-        dateFrom: req.query.dateFrom,
-        dateTo: req.query.dateTo,
+        konk: Array.isArray(q.konk) ? q.konk[0] : q.konk,
+        prod: Array.isArray(q.prod) ? q.prod[0] : q.prod,
+        dateFrom: Array.isArray(q.dateFrom) ? q.dateFrom[0] : q.dateFrom,
+        dateTo: Array.isArray(q.dateTo) ? q.dateTo[0] : q.dateTo,
     });
     if (!parseResult.success) {
+        const errors = parseResult.error.flatten();
+        console.error("[getKonkBtradeComparisonExcel] Validation failed:", {
+            query: req.query,
+            errors: errors.fieldErrors,
+            formErrors: errors.formErrors,
+        });
         res.status(400).json({
             message: "Validation error",
             errors: parseResult.error.errors,

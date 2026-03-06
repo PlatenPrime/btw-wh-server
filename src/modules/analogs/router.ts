@@ -24,8 +24,8 @@ router.get(
 );
 router.get(
   "/id/:id",
-  checkAuth,
-  checkRoles([RoleType.USER]),
+  // checkAuth,
+  // checkRoles([RoleType.USER]),
   asyncHandler(getAnalogByIdController)
 );
 router.get(

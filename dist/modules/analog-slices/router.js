@@ -14,5 +14,8 @@ router.get("/konk-btrade/comparison-excel",
 // checkAuth,
 // checkRoles([RoleType.USER]),
 asyncHandler(getKonkBtradeComparisonExcelController));
-router.get("/analog/:analogId", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSliceByDateController));
+router.get("/analog/:analogId", 
+// checkAuth,
+// checkRoles([RoleType.USER]),
+asyncHandler(getAnalogSliceByDateController));
 export default router;

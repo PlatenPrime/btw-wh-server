@@ -63,7 +63,7 @@ describe("buildKonkBtradeComparisonExcel", () => {
         const { buffer, fileName } = await buildKonkBtradeComparisonExcel(analogs, options);
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
-        expect(fileName).toContain("konk_btrade_comparison_air_gemar_2026-03-01_2026-03-02");
+        expect(fileName).toContain("Порівняльний_зріз_аналогів_та_Btrade_air_gemar_2026-03-01_2026-03-02");
         const workbook = new ExcelJS.Workbook();
         await workbook.xlsx.load(buffer);
         const worksheet = workbook.getWorksheet("Порівняння");

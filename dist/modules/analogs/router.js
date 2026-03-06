@@ -5,7 +5,10 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { createAnalogController, deleteAnalogByIdController, getAnalogByIdController, getAnalogStockDataController, getAnalogsByArtikulController, getAnalogsByKonkController, getAnalogsByProdController, getAnalogsController, updateAnalogByIdController, } from "./controllers/index.js";
 const router = Router();
 router.get("/id/:id/stock", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogStockDataController));
-router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogByIdController));
+router.get("/id/:id", 
+// checkAuth,
+// checkRoles([RoleType.USER]),
+asyncHandler(getAnalogByIdController));
 router.get("/prod/:prodName", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogsByProdController));
 router.get("/konk/:konkName", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogsByKonkController));
 router.get("/artikul/:artikul", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogsByArtikulController));

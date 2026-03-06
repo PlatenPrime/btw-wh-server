@@ -2,6 +2,7 @@ import ExcelJS from "exceljs";
 import type { KonkAnalogInfo } from "./getKonkBtradeComparisonRangeUtil.js";
 import {
   buildAnalogBtradeExcelBlock,
+  buildAnalogBtradeTotalBlock,
   setupAnalogBtradeHeaderRow,
 } from "../../common/buildAnalogBtradeExcelBlock.js";
 
@@ -45,8 +46,11 @@ export async function buildKonkBtradeComparisonExcel(
       .sort((a, b) => a.artikul.localeCompare(b.artikul));
 
     let startRow = 2;
+    let sumDeltaAnalog = 0;
+    let sumDeltaBtrade = 0;
+
     for (const analog of sortedAnalogs) {
-      buildAnalogBtradeExcelBlock({
+      const deltas = buildAnalogBtradeExcelBlock({
         worksheet,
         startRow,
         dataStartCol,
@@ -61,9 +65,25 @@ export async function buildKonkBtradeComparisonExcel(
         producerName: analog.producerName,
         competitorTitle: analog.competitorTitle,
       });
-
+      if (deltas) {
+        sumDeltaAnalog += deltas.deltaAnalog;
+        sumDeltaBtrade += deltas.deltaBtrade;
+      }
       startRow += 4;
     }
+
+    buildAnalogBtradeTotalBlock({
+      worksheet,
+      totalStartRow: startRow,
+      diffCol,
+      summaryDiffCol,
+      summaryDiffPctCol,
+      columnCount,
+      sumDeltaAnalog,
+      sumDeltaBtrade,
+      competitorTitle: sortedAnalogs[0]?.competitorTitle,
+      producerName: sortedAnalogs[0]?.producerName,
+    });
 
     for (let c = 1; c <= columnCount; c++) {
       worksheet.getColumn(c).width = 14;
@@ -74,6 +94,7 @@ export async function buildKonkBtradeComparisonExcel(
   const safeProd = options.prod.replace(/\s+/g, "_");
   const fromStr = options.dateFrom.toISOString().split("T")[0] ?? "from";
   const toStr = options.dateTo.toISOString().split("T")[0] ?? "to";
+  // const fileName = `Порівняльний_зріз_аналогів_та_Btrade_${safeKonk}_${safeProd}_${fromStr}_${toStr}.xlsx`;
   const fileName = `konk_btrade_comparison_${safeKonk}_${safeProd}_${fromStr}_${toStr}.xlsx`;
 
   const buffer = await workbook.xlsx.writeBuffer();

@@ -38,8 +38,8 @@ router.get(
 );
 router.get(
   "/analog/:analogId",
-  checkAuth,
-  checkRoles([RoleType.USER]),
+  // checkAuth,
+  // checkRoles([RoleType.USER]),
   asyncHandler(getAnalogSliceByDateController)
 );
 

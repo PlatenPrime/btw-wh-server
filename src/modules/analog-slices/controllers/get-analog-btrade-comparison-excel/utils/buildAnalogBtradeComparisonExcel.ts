@@ -1,9 +1,10 @@
 import ExcelJS from "exceljs";
-import type { AnalogBtradeCompareItem } from "./getAnalogBtradeComparisonRangeUtil.js";
 import {
   buildAnalogBtradeExcelBlock,
+  buildAnalogBtradeTotalBlock,
   setupAnalogBtradeHeaderRow,
 } from "../../common/buildAnalogBtradeExcelBlock.js";
+import type { AnalogBtradeCompareItem } from "./getAnalogBtradeComparisonRangeUtil.js";
 
 export interface BuildAnalogBtradeComparisonExcelOptions {
   artikul: string;
@@ -25,7 +26,7 @@ export interface BuildAnalogBtradeComparisonExcelOptions {
  */
 export async function buildAnalogBtradeComparisonExcel(
   items: AnalogBtradeCompareItem[],
-  options: BuildAnalogBtradeComparisonExcelOptions
+  options: BuildAnalogBtradeComparisonExcelOptions,
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Порівняння");
@@ -49,7 +50,7 @@ export async function buildAnalogBtradeComparisonExcel(
       columnCount,
     );
 
-    buildAnalogBtradeExcelBlock({
+    const deltas = buildAnalogBtradeExcelBlock({
       worksheet,
       startRow: 2,
       dataStartCol,
@@ -65,6 +66,21 @@ export async function buildAnalogBtradeComparisonExcel(
       competitorTitle: options.competitorTitle,
     });
 
+    const sumDeltaAnalog = deltas?.deltaAnalog ?? 0;
+    const sumDeltaBtrade = deltas?.deltaBtrade ?? 0;
+    buildAnalogBtradeTotalBlock({
+      worksheet,
+      totalStartRow: 6,
+      diffCol,
+      summaryDiffCol,
+      summaryDiffPctCol,
+      columnCount,
+      sumDeltaAnalog,
+      sumDeltaBtrade,
+      competitorTitle: options.competitorTitle,
+      producerName: options.producerName,
+    });
+
     for (let c = 1; c <= columnCount; c++) {
       worksheet.getColumn(c).width = 14;
     }
@@ -75,8 +91,8 @@ export async function buildAnalogBtradeComparisonExcel(
   const safeArtikul = options.artikul.replace(/\s+/g, "_");
   const fromStr = options.dateFrom.toISOString().split("T")[0] ?? "from";
   const toStr = options.dateTo.toISOString().split("T")[0] ?? "to";
+  // const fileName = `Порівняльний_зріз_${safeArtikul}_${fromStr}_${toStr}.xlsx`;
   const fileName = `analog_btrade_comparison_${safeArtikul}_${fromStr}_${toStr}.xlsx`;
 
   return { buffer: Buffer.from(buffer), fileName };
 }
-

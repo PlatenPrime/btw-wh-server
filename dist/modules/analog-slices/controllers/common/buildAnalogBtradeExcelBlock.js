@@ -37,6 +37,7 @@ export function setupAnalogBtradeHeaderRow(worksheet, items, dataStartCol, diffC
 }
 export function buildAnalogBtradeExcelBlock(options) {
     const { worksheet, startRow, dataStartCol, diffCol, diffPctCol, summaryDiffCol, summaryDiffPctCol, columnCount, items, artikul, artNameUkr, producerName, competitorTitle, } = options;
+    let blockDeltas;
     const analogStockRow = worksheet.getRow(startRow);
     const analogPriceRow = worksheet.getRow(startRow + 1);
     const btradeStockRow = worksheet.getRow(startRow + 2);
@@ -134,6 +135,7 @@ export function buildAnalogBtradeExcelBlock(options) {
             const deltaAnalog = analogBounds.last - analogBounds.first;
             const deltaBtrade = btradeBounds.last - btradeBounds.first;
             if (Number.isFinite(deltaAnalog) && Number.isFinite(deltaBtrade)) {
+                blockDeltas = { deltaAnalog, deltaBtrade };
                 const diffPieces = deltaAnalog - deltaBtrade;
                 const summaryDiffCell = analogStockRow.getCell(summaryDiffCol);
                 summaryDiffCell.value = diffPieces;
@@ -149,14 +151,21 @@ export function buildAnalogBtradeExcelBlock(options) {
                     };
                 }
                 const summaryPctCell = analogStockRow.getCell(summaryDiffPctCol);
-                if (deltaBtrade === 0) {
-                    // При нулевой динамике Btrade отображаем 0%, а не пустое значение
-                    summaryPctCell.value = 0;
+                if (deltaAnalog === 0) {
+                    // При нулевой динамике аналога формула (deltaBtrade/deltaAnalog - 1) не определена
+                    summaryPctCell.value = null;
+                    summaryPctCell.fill = {
+                        ...(summaryPctCell.fill ?? {}),
+                        type: "pattern",
+                        pattern: "solid",
+                        fgColor: { argb: "FFFFC0CB" },
+                    };
                 }
                 else {
-                    const rawSummaryPct = (diffPieces / Math.abs(deltaBtrade)) * 100;
+                    const rawSummaryPct = (deltaBtrade / deltaAnalog - 1) * 100;
                     const roundedSummaryPct = Math.round(rawSummaryPct * 100) / 100;
-                    summaryPctCell.value = roundedSummaryPct;
+                    summaryPctCell.value = roundedSummaryPct / 100;
+                    summaryPctCell.numFmt = "0.00%";
                     const pctNumeric = typeof roundedSummaryPct === "number"
                         ? roundedSummaryPct
                         : Number(roundedSummaryPct ?? NaN);
@@ -221,5 +230,91 @@ export function buildAnalogBtradeExcelBlock(options) {
             vertical: "middle",
             wrapText: true,
         };
+    }
+    return blockDeltas;
+}
+export function buildAnalogBtradeTotalBlock(options) {
+    const { worksheet, totalStartRow, diffCol, summaryDiffCol, summaryDiffPctCol, columnCount, sumDeltaAnalog, sumDeltaBtrade, competitorTitle, producerName, } = options;
+    const row1 = worksheet.getRow(totalStartRow);
+    const row2 = worksheet.getRow(totalStartRow + 1);
+    worksheet.mergeCells(totalStartRow, 1, totalStartRow + 1, 1);
+    const cellA = row1.getCell(1);
+    cellA.value = "ВСЬОГО";
+    cellA.font = { ...(cellA.font ?? {}), bold: true };
+    cellA.alignment = { ...(cellA.alignment ?? {}), horizontal: "center", vertical: "middle" };
+    const safeCompetitorTitle = competitorTitle ?? "";
+    const safeProducerName = producerName ?? "";
+    worksheet.mergeCells(totalStartRow, 3, totalStartRow + 1, 3);
+    const cellC = row1.getCell(3);
+    cellC.value = safeCompetitorTitle;
+    cellC.font = { ...(cellC.font ?? {}), bold: true };
+    cellC.alignment = { ...(cellC.alignment ?? {}), horizontal: "center", vertical: "middle" };
+    worksheet.mergeCells(totalStartRow, 4, totalStartRow + 1, 4);
+    const cellD = row1.getCell(4);
+    cellD.value = safeProducerName;
+    cellD.font = { ...(cellD.font ?? {}), bold: true };
+    cellD.alignment = { ...(cellD.alignment ?? {}), horizontal: "center", vertical: "middle" };
+    const cellE1 = row1.getCell(5);
+    cellE1.value = "Аналог";
+    cellE1.font = { ...(cellE1.font ?? {}), bold: true };
+    const cellE2 = row2.getCell(5);
+    cellE2.value = "Btrade";
+    cellE2.font = { ...(cellE2.font ?? {}), bold: true };
+    const cellJ1 = row1.getCell(diffCol);
+    cellJ1.value = sumDeltaAnalog;
+    cellJ1.font = { ...(cellJ1.font ?? {}), bold: true };
+    row2.getCell(diffCol).value = sumDeltaBtrade;
+    row2.getCell(diffCol).font = { ...(row2.getCell(diffCol).font ?? {}), bold: true };
+    worksheet.mergeCells(totalStartRow, summaryDiffCol, totalStartRow + 1, summaryDiffCol);
+    const summaryDiff = sumDeltaAnalog - sumDeltaBtrade;
+    const summaryDiffCell = row1.getCell(summaryDiffCol);
+    summaryDiffCell.value = summaryDiff;
+    summaryDiffCell.font = { ...(summaryDiffCell.font ?? {}), bold: true };
+    if (summaryDiffCol + 1 < summaryDiffPctCol) {
+        worksheet.mergeCells(totalStartRow, summaryDiffCol + 1, totalStartRow + 1, summaryDiffCol + 1);
+    }
+    worksheet.mergeCells(totalStartRow, summaryDiffPctCol, totalStartRow + 1, summaryDiffPctCol);
+    const summaryDiffNumeric = typeof summaryDiff === "number" ? summaryDiff : Number(summaryDiff ?? NaN);
+    if (Number.isFinite(summaryDiffNumeric) && summaryDiffNumeric !== 0) {
+        summaryDiffCell.font = {
+            ...(summaryDiffCell.font ?? {}),
+            bold: true,
+            color: summaryDiffNumeric > 0
+                ? { argb: "FF00AA00" }
+                : { argb: "FFFF0000" },
+        };
+    }
+    const summaryPctCell = row1.getCell(summaryDiffPctCol);
+    summaryPctCell.font = { ...(summaryPctCell.font ?? {}), bold: true };
+    if (sumDeltaAnalog === 0) {
+        summaryPctCell.value = null;
+        summaryPctCell.fill = {
+            ...(summaryPctCell.fill ?? {}),
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFFC0CB" },
+        };
+    }
+    else {
+        const rawSummaryPct = (sumDeltaBtrade / sumDeltaAnalog - 1) * 100;
+        const roundedSummaryPct = Math.round(rawSummaryPct * 100) / 100;
+        summaryPctCell.value = roundedSummaryPct / 100;
+        summaryPctCell.numFmt = "0.00%";
+        const pctNumeric = typeof roundedSummaryPct === "number"
+            ? roundedSummaryPct
+            : Number(roundedSummaryPct ?? NaN);
+        if (Number.isFinite(pctNumeric) && pctNumeric !== 0) {
+            summaryPctCell.font = {
+                ...(summaryPctCell.font ?? {}),
+                bold: true,
+                color: pctNumeric > 0 ? { argb: "FF00AA00" } : { argb: "FFFF0000" },
+            };
+        }
+    }
+    applyDataRowStyle(worksheet, totalStartRow, columnCount);
+    applyDataRowStyle(worksheet, totalStartRow + 1, columnCount);
+    for (let c = 1; c <= columnCount; c++) {
+        row1.getCell(c).font = { ...(row1.getCell(c).font ?? {}), bold: true };
+        row2.getCell(c).font = { ...(row2.getCell(c).font ?? {}), bold: true };
     }
 }
