@@ -47,7 +47,7 @@ describe("buildAnalogBtradeComparisonExcel", () => {
         const { buffer, fileName } = await buildAnalogBtradeComparisonExcel(items, options);
         expect(buffer).toBeInstanceOf(Buffer);
         expect(buffer.length).toBeGreaterThan(0);
-        expect(fileName).toContain("Порівняльний_зріз_1102-0259_2026-03-01_2026-03-02");
+        expect(fileName).toContain("analog_btrade_comparison_1102-0259_2026-03-01_2026-03-02");
         const rows = await readSheetToMatrix(buffer);
         expect(rows.length).toBeGreaterThanOrEqual(5);
         const headerRow = rows[0];

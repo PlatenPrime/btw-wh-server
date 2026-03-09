@@ -109,6 +109,34 @@
 - `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
 - `500` — внутренняя ошибка сервера.
 
+---
+
+### GET `/api/analog-slices/analog/:analogId/sales-comparison-excel`
+
+Скачивание Excel-файла с таблицей сравнения **продаж и выручки** по аналогу (конкурент) и Btrade за указанный период. В ячейках по датам — не остатки, а продажи (разница остатка с предыдущим днём; при отсутствии предыдущего или при росте остатка — 0, в день поставки 0 подсвечивается красным), цены и выручка (продажи × цена). Блок на аналог — 6 строк: Продажі аналога, Ціна аналога, Виручка аналога, Продажі Btrade, Ціна Btrade, Виручка Btrade. Колонка «Всього» — суммы по датам (для продаж и выручки; ячейки цен пустые). Четыре колонки дельт: Δ Продажі Btrade vs конкурент (шт и %), Δ Виручка Btrade vs конкурент (грн и %); логика как для отчёта по остаткам (разница Btrade − конкурент, процент от (Btrade/конкурент − 1)); при нуле знаменателя — пусто и бледно-розовая заливка. Внизу — итоговая секция в две колонки (ключ–значение): суммы продаж и выручки конкурента и Btrade, общая разница продаж (шт), разница выручки (грн), разница продаж (%), разница выручки (%).
+
+**Доступ:** в текущей реализации без проверки авторизации (checkAuth/checkRoles закомментированы в роутере). При включении — USER.
+
+**Запрос:** path-параметр `analogId` — MongoDB ObjectId аналога. Query: `dateFrom`, `dateTo` — string, YYYY-MM-DD (обязательно), dateTo ≥ dateFrom.
+
+**Ответ 200:** бинарное тело (Excel). Заголовки: `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `Content-Disposition: attachment; filename="analog_sales_comparison_{artikul}_{dateFrom}_{dateTo}.xlsx"`.
+
+**Ошибки:** 400 (невалидный analogId или даты; JSON: `{ message: "Validation error", errors: [...] }`), 404 (аналог не найден или пустой artikul; JSON: `{ message: "Analog not found or analog has no artikul" }`), 500.
+
+---
+
+### GET `/api/analog-slices/konk-btrade/sales-comparison-excel`
+
+Скачивание Excel-файла с таблицей сравнения **продаж и выручки** по группе аналогов (фильтр по конкуренту и производителю) за период. Структура та же, что у одиночного отчёта продаж: первые 4 колонки (Артикул, Назва, Конкурент, Виробник), 5-я — подписи 6 строк, далее колонки дат (продажи/ціна/виручка аналога и Btrade), колонка «Всього», четыре колонки дельт (Δ Продажі шт, Δ Продажі %, Δ Виручка грн, Δ Виручка %). Значения дельт записываются в первую строку каждого 6-строчного блока и отображаются в объединённых ячейках. После всех блоков — итоговая секция ключ–значение (суммы продаж/выручки, разницы в шт, грн и в %).
+
+**Доступ:** в текущей реализации без проверки авторизации. При включении — USER.
+
+**Запрос:** только query: `konk`, `prod` (string, обязательно), `dateFrom`, `dateTo` (string, YYYY-MM-DD, обязательно), dateTo ≥ dateFrom.
+
+**Ответ 200:** бинарное тело (Excel). Заголовки: `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `Content-Disposition: attachment; filename="sales_comparison_{konk}_{prod}_{dateFrom}_{dateTo}.xlsx"`.
+
+**Ошибки:** 400 (невалидные параметры; JSON: `{ message: "Validation error", errors: [...] }`), 404 (нет аналогов для konk/prod; JSON: `{ message: "Analogs not found for provided konk/prod" }`), 500.
+
 ## Формат данных
 
 - **IAnalogSliceDataItem:** `{ stock: number, price: number, artikul?: string }`.
