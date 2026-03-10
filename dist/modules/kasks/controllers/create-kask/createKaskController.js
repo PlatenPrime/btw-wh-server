@@ -16,17 +16,17 @@ export const createKaskController = async (req, res) => {
         const created = await Kask.create({
             artikul,
             nameukr,
-            quant,
             zone,
-            com,
+            ...(quant !== undefined && { quant }),
+            ...(com !== undefined && { com }),
         });
         res.status(201).json(created);
         const message = getCreateKaskMessageUtil({
             artikul,
             nameukr,
-            quant,
             zone,
-            com,
+            ...(quant !== undefined && { quant }),
+            ...(com !== undefined && { com }),
         });
         await sendCreateKaskMesUtil({ message, role: req.user?.role });
     }

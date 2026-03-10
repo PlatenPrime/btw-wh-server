@@ -2,14 +2,15 @@ import mongoose, { Document, Model, Schema } from "mongoose";
 
 /**
  * Запрос доставить товар к кассе (kasa + asks).
- * Все поля задаются клиентом при создании.
+ * Обязательные при создании: artikul, nameukr, zone.
+ * quant и com — опциональны.
  */
 export interface IKask extends Document {
   artikul: string;
   nameukr: string;
-  quant: number;
+  quant?: number;
   zone: string;
-  com: string;
+  com?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,9 +19,9 @@ const kaskSchema = new Schema<IKask>(
   {
     artikul: { type: String, required: true },
     nameukr: { type: String, required: true },
-    quant: { type: Number, required: true },
+    quant: { type: Number, required: false },
     zone: { type: String, required: true },
-    com: { type: String, required: true },
+    com: { type: String, required: false },
   },
   { timestamps: true }
 );

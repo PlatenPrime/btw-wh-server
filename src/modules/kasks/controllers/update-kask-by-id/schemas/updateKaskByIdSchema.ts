@@ -13,7 +13,7 @@ export const updateKaskBodySchema = z
     nameukr: z.string().min(1).optional(),
     quant: z.number().optional(),
     zone: z.string().min(1).optional(),
-    com: z.string().min(1).optional(),
+    com: z.string().optional(),
   })
   .refine((obj) => Object.keys(obj).length > 0, {
     message: "At least one field must be provided for update",

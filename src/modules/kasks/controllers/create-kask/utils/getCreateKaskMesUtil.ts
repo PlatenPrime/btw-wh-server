@@ -4,9 +4,9 @@ const SHARIK_IMAGE_BASE =
 interface GetCreateKaskMessageInput {
   artikul: string;
   nameukr: string;
-  quant: number;
+  quant?: number;
   zone: string;
-  com: string;
+  com?: string;
 }
 
 /**
@@ -21,7 +21,8 @@ export const getCreateKaskMessageUtil = ({
   com,
 }: GetCreateKaskMessageInput): string => {
   const imageUrl = `${SHARIK_IMAGE_BASE}/${encodeURIComponent(artikul)}_m1.jpg`;
-  const quantLine = `${quant} шт`;
+  const quantLine =
+    quant !== undefined && quant !== null ? `${quant} шт` : "—";
 
   return `🆕 Новий запит до каси
 
@@ -29,7 +30,7 @@ export const getCreateKaskMessageUtil = ({
   📝 ${nameukr || "—"}
   🔢 ${quantLine}
   📍 ${zone || "—"}
-  💬 ${com || "—"}
+  💬 ${com != null && com !== "" ? com : "—"}
   🖼 ${imageUrl}
 `;
 };

@@ -5,14 +5,14 @@ const SHARIK_IMAGE_BASE = "https://sharik.ua/images/elements_big";
  */
 export const getCreateKaskMessageUtil = ({ artikul, nameukr, quant, zone, com, }) => {
     const imageUrl = `${SHARIK_IMAGE_BASE}/${encodeURIComponent(artikul)}_m1.jpg`;
-    const quantLine = `${quant} шт`;
+    const quantLine = quant !== undefined && quant !== null ? `${quant} шт` : "—";
     return `🆕 Новий запит до каси
 
   📦 ${artikul}
   📝 ${nameukr || "—"}
   🔢 ${quantLine}
   📍 ${zone || "—"}
-  💬 ${com || "—"}
+  💬 ${com != null && com !== "" ? com : "—"}
   🖼 ${imageUrl}
 `;
 };
