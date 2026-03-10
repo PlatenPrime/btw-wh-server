@@ -3,6 +3,7 @@ import express from "express";
 
 import artsRoute from "../../modules/arts/router.js";
 import asksRoute from "../../modules/asks/router.js";
+import kasksRoute from "../../modules/kasks/router.js";
 import authRoute from "../../modules/auth/router.js";
 import blocksRoute from "../../modules/blocks/router.js";
 import constantsRoute from "../../modules/constants/router.js";
@@ -23,6 +24,7 @@ app.use(express.json({ limit: "20mb" }));
 app.use("/api/auth", authRoute);
 app.use("/api/arts", artsRoute);
 app.use("/api/asks", asksRoute);
+app.use("/api/kasks", kasksRoute);
 app.use("/api/blocks", blocksRoute);
 app.use("/api/constants", constantsRoute);
 app.use("/api/segs", segsRoute);

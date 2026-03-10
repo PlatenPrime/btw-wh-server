@@ -9,6 +9,7 @@ import "../modules/analogs/models/Analog.js";
 import "../modules/arts/models/Art.js";
 import "../modules/btrade-slices/models/BtradeSlice.js";
 import "../modules/asks/models/Ask.js";
+import "../modules/kasks/models/Kask.js";
 import "../modules/auth/models/User.js";
 import "../modules/blocks/models/Block.js";
 import "../modules/constants/models/Constant.js";
