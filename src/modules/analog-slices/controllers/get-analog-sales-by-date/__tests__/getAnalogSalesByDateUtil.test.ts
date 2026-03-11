@@ -94,7 +94,7 @@ describe("getAnalogSalesByDateUtil", () => {
 
     expect(result).not.toBeNull();
     expect(result!.sales).toBe(3);
-    expect(result!.revenue).toBe(3 * 1.64);
+    expect(result!.revenue).toBe(4.92);
     expect(result!.price).toBe(1.64);
     expect(result!.isDeliveryDay).toBe(false);
   });

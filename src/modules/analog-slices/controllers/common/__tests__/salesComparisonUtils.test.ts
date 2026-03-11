@@ -56,6 +56,10 @@ describe("salesComparisonUtils", () => {
       expect(computeRevenueForDay(100, 10.5)).toBe(1050);
     });
 
+    it("rounds to 2 decimals to avoid float precision issues", () => {
+      expect(computeRevenueForDay(300, 1.64)).toBe(492);
+    });
+
     it("returns 0 when price is null", () => {
       expect(computeRevenueForDay(200, null)).toBe(0);
     });

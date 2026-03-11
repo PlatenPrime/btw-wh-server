@@ -44,11 +44,12 @@ export function computeSalesFromStockSequence(
 
 /**
  * Выручка за день: продажи × цена. Если цена отсутствует — 0.
+ * Результат округляется до 2 знаков после запятой (деньги).
  */
 export function computeRevenueForDay(
   sales: number,
   price: number | null,
 ): number {
   const p = typeof price === "number" && Number.isFinite(price) ? price : 0;
-  return sales * p;
+  return Math.round(sales * p * 100) / 100;
 }
