@@ -1,10 +1,11 @@
+import mongoose from "mongoose";
 import { z } from "zod";
 import { dateStringSchema } from "../../common/schemas/dateSchema.js";
-const nonEmptyString = z.string().min(1, "Value is required");
-export const getKonkBtradeComparisonExcelSchema = z
+export const getAnalogSalesRangeSchema = z
     .object({
-    konk: nonEmptyString,
-    prod: nonEmptyString,
+    analogId: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+        message: "Invalid analog ID format",
+    }),
     dateFrom: dateStringSchema,
     dateTo: dateStringSchema,
 })

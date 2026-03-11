@@ -52,6 +52,37 @@
 
 ---
 
+### GET `/api/analog-slices/analog/:analogId/sales-by-date`
+
+Получение продаж и выручки по аналогу на одну дату (для графиков). Продажи = разница остатка с предыдущим днём; выручка = продажи × цена на дату.
+
+**Доступ:** checkAuth + checkRoles(USER).
+
+**Запрос:** path-параметр `analogId` — MongoDB ObjectId аналога. Query: `date` — string, формат YYYY-MM-DD (обязательно).
+
+**Ответ 200:** `{ message: string, data: { sales: number, revenue: number, price: number, isDeliveryDay: boolean } }`.
+
+**Ошибки:** 400 (невалидный analogId или date), 401, 403, 404 (аналог не найден, у аналога пустой artikul или нет среза/записи на эту дату), 500.
+
+---
+
+### GET `/api/analog-slices/analog/:analogId/sales-range`
+
+Получение массива продаж и выручки по аналогу за период дат (для графиков). Обе границы периода включительно. Каждый элемент: дата (ISO), продажи, выручка, цена, признак дня поставки.
+
+**Доступ:** checkAuth + checkRoles(USER).
+
+**Запрос:** path-параметр `analogId` — MongoDB ObjectId аналога. Query:
+
+- `dateFrom`: string, YYYY-MM-DD (обязательно)
+- `dateTo`: string, YYYY-MM-DD (обязательно), должна быть не раньше dateFrom
+
+**Ответ 200:** `{ message: string, data: Array<{ date: string, sales: number, revenue: number, price: number, isDeliveryDay: boolean }> }`. Поле `date` — строка в формате ISO. Массив отсортирован по дате по возрастанию. В массив попадают только те даты, по которым есть срез и запись для артикула данного аналога.
+
+**Ошибки:** 400 (невалидный analogId, даты или dateFrom > dateTo), 401, 403, 404 (аналог не найден или у аналога пустой artikul), 500.
+
+---
+
 ### GET `/api/analog-slices/analog/:analogId/comparison-excel`
 
 Скачивание Excel-файла с таблицей сравнения срезов по аналогу (остаток/цена аналога) и по Btrade (остаток/цена Btrade) за указанный период. Колонки: Артикул, Назва (укр), Виробник, подписи рядов, даты, «Різниця», «Різниця, %», «Δ Btrade vs конкурент, шт», «Δ Btrade vs конкурент, %». После блока данных — итоговый блок из 2 строк «ВСЬОГО» с суммами разниц в колонке «Різниця», суммарной разницей в «Δ Btrade vs конкурент, шт» и процентом в «Δ Btrade vs конкурент, %» по формуле (сумма Btrade / сумма аналога − 1).
@@ -141,3 +172,5 @@
 
 - **IAnalogSliceDataItem:** `{ stock: number, price: number, artikul?: string }`.
 - **Элемент массива range:** `{ date: string (ISO), stock: number, price: number }` — подходит для использования в компонентах графиков (Recharts, shadcn/ui Chart).
+- **Ответ sales-by-date:** `{ sales: number, revenue: number, price: number, isDeliveryDay: boolean }`.
+- **Элемент массива sales-range:** `{ date: string (ISO), sales: number, revenue: number, price: number, isDeliveryDay: boolean }`.

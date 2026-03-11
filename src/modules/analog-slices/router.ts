@@ -4,7 +4,9 @@ import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   getAnalogBtradeComparisonExcelController,
+  getAnalogSalesByDateController,
   getAnalogSalesComparisonExcelController,
+  getAnalogSalesRangeController,
   getAnalogSliceByDateController,
   getAnalogSliceController,
   getAnalogSliceRangeController,
@@ -25,6 +27,18 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getAnalogSliceRangeController)
+);
+router.get(
+  "/analog/:analogId/sales-range",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAnalogSalesRangeController)
+);
+router.get(
+  "/analog/:analogId/sales-by-date",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getAnalogSalesByDateController)
 );
 router.get(
   "/analog/:analogId/comparison-excel",
