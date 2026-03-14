@@ -9,6 +9,7 @@ import type { AnalogBtradeCompareItem } from "./getAnalogBtradeComparisonRangeUt
 export interface BuildAnalogBtradeComparisonExcelOptions {
   artikul: string;
   artNameUkr: string | null;
+  artAbc?: string | null;
   producerName?: string | null;
   competitorTitle?: string | null;
   dateFrom: Date;
@@ -31,12 +32,12 @@ export async function buildAnalogBtradeComparisonExcel(
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Порівняння");
 
-  const dataStartCol = 6; // колонка F — первая дата (A–E — службові колонки)
+  const dataStartCol = 7; // колонка G — первая дата (A–F — службові колонки, E = ABC)
   const diffCol = dataStartCol + items.length;
   const diffPctCol = diffCol + 1;
   const summaryDiffCol = diffPctCol + 1;
   const summaryDiffPctCol = summaryDiffCol + 1;
-  const columnCount = items.length + 9;
+  const columnCount = items.length + 10;
 
   if (columnCount > 0) {
     setupAnalogBtradeHeaderRow(
@@ -62,6 +63,7 @@ export async function buildAnalogBtradeComparisonExcel(
       items,
       artikul: options.artikul,
       artNameUkr: options.artNameUkr,
+      artAbc: options.artAbc,
       producerName: options.producerName,
       competitorTitle: options.competitorTitle,
     });

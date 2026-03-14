@@ -23,6 +23,7 @@ export type GetAnalogBtradeComparisonRangeResult =
       data: AnalogBtradeCompareItem[];
       artikul: string;
       artNameUkr: string | null;
+      artAbc: string | null;
       producerName: string | null;
       competitorTitle: string | null;
     }
@@ -51,9 +52,10 @@ export async function getAnalogBtradeComparisonRangeUtil(
   const dateTo = toSliceDate(input.dateTo);
 
   const artDoc = await Art.findOne({ artikul: artikulKey })
-    .select("nameukr")
+    .select("nameukr abc")
     .lean();
   const artNameUkr = (artDoc?.nameukr ?? "").trim() || null;
+  const artAbc = (artDoc?.abc ?? "").trim() || null;
 
   const prodDoc = await Prod.findOne({ name: analog.prodName })
     .select("title")
@@ -122,6 +124,7 @@ export async function getAnalogBtradeComparisonRangeUtil(
     data,
     artikul: artikulKey,
     artNameUkr,
+    artAbc,
     producerName,
     competitorTitle,
   };

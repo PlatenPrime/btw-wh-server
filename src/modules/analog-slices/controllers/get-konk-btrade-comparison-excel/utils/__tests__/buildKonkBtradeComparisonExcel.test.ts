@@ -16,6 +16,7 @@ describe("buildKonkBtradeComparisonExcel", () => {
         analogId: "a2",
         artikul: "1102-0260",
         artNameUkr: "Товар 2",
+        artAbc: "B",
         producerName: "Prod 2",
         competitorTitle: "Konk 1",
         items: [
@@ -39,6 +40,7 @@ describe("buildKonkBtradeComparisonExcel", () => {
         analogId: "a1",
         artikul: "1102-0259",
         artNameUkr: "Товар 1",
+        artAbc: "A",
         producerName: "Prod 1",
         competitorTitle: "Konk 1",
         items: [
@@ -92,8 +94,11 @@ describe("buildKonkBtradeComparisonExcel", () => {
     expect(analog1StockRow.getCell(1).value).toBe("1102-0259");
     expect(analog2StockRow.getCell(1).value).toBe("1102-0260");
 
-    expect(analog1StockRow.getCell(6).value).toBe(1);
-    expect(analog2StockRow.getCell(6).value).toBe(3);
+    expect(analog1StockRow.getCell(5).value).toBe("A");
+    expect(analog2StockRow.getCell(5).value).toBe("B");
+
+    expect(analog1StockRow.getCell(7).value).toBe(1);
+    expect(analog2StockRow.getCell(7).value).toBe(3);
   });
 });
 

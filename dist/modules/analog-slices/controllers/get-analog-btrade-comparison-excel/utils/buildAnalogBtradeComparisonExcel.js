@@ -12,12 +12,12 @@ import { buildAnalogBtradeExcelBlock, buildAnalogBtradeTotalBlock, setupAnalogBt
 export async function buildAnalogBtradeComparisonExcel(items, options) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Порівняння");
-    const dataStartCol = 6; // колонка F — первая дата (A–E — службові колонки)
+    const dataStartCol = 7; // колонка G — первая дата (A–F — службові колонки, E = ABC)
     const diffCol = dataStartCol + items.length;
     const diffPctCol = diffCol + 1;
     const summaryDiffCol = diffPctCol + 1;
     const summaryDiffPctCol = summaryDiffCol + 1;
-    const columnCount = items.length + 9;
+    const columnCount = items.length + 10;
     if (columnCount > 0) {
         setupAnalogBtradeHeaderRow(worksheet, items, dataStartCol, diffCol, diffPctCol, summaryDiffCol, summaryDiffPctCol, columnCount);
         const deltas = buildAnalogBtradeExcelBlock({
@@ -32,6 +32,7 @@ export async function buildAnalogBtradeComparisonExcel(items, options) {
             items,
             artikul: options.artikul,
             artNameUkr: options.artNameUkr,
+            artAbc: options.artAbc,
             producerName: options.producerName,
             competitorTitle: options.competitorTitle,
         });

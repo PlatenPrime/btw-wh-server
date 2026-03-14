@@ -80,6 +80,7 @@ describe("getAnalogBtradeComparisonExcelController", () => {
       ok: true,
       artikul: "1102-0259",
       artNameUkr: "Тестовий товар",
+      artAbc: "A",
       producerName: "Test Producer",
       competitorTitle: "Test Konk",
       data: [

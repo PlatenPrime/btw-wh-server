@@ -26,6 +26,7 @@ export interface BuildAnalogBtradeExcelBlockOptions {
   items: AnalogBtradeCompareItem[];
   artikul: string;
   artNameUkr: string | null;
+  artAbc?: string | null;
   producerName?: string | null;
   competitorTitle?: string | null;
 }
@@ -45,7 +46,8 @@ export function setupAnalogBtradeHeaderRow(
   headerRow.getCell(2).value = "Назва (укр)";
   headerRow.getCell(3).value = "Конкурент";
   headerRow.getCell(4).value = "Виробник";
-  headerRow.getCell(5).value = "";
+  headerRow.getCell(5).value = "ABC";
+  headerRow.getCell(6).value = "";
 
   items.forEach((item, index) => {
     const dateStr = item.date.toISOString().split("T")[0] ?? "";
@@ -101,6 +103,7 @@ export function buildAnalogBtradeExcelBlock(
     items,
     artikul,
     artNameUkr,
+    artAbc,
     producerName,
     competitorTitle,
   } = options;
@@ -120,10 +123,11 @@ export function buildAnalogBtradeExcelBlock(
   analogStockRow.getCell(3).value = safeCompetitorTitle;
   analogStockRow.getCell(4).value = safeProducerName;
 
-  analogStockRow.getCell(5).value = "Залишок аналога";
-  analogPriceRow.getCell(5).value = "Ціна аналога";
-  btradeStockRow.getCell(5).value = "Залишок Btrade";
-  btradePriceRow.getCell(5).value = "Ціна Btrade";
+  analogStockRow.getCell(5).value = artAbc ?? "";
+  analogStockRow.getCell(6).value = "Залишок аналога";
+  analogPriceRow.getCell(6).value = "Ціна аналога";
+  btradeStockRow.getCell(6).value = "Залишок Btrade";
+  btradePriceRow.getCell(6).value = "Ціна Btrade";
 
   items.forEach((item, index) => {
     const col = index + dataStartCol;
@@ -137,12 +141,14 @@ export function buildAnalogBtradeExcelBlock(
   worksheet.mergeCells(startRow, 2, startRow + 3, 2);
   worksheet.mergeCells(startRow, 3, startRow + 3, 3);
   worksheet.mergeCells(startRow, 4, startRow + 3, 4);
+  worksheet.mergeCells(startRow, 5, startRow + 3, 5);
 
   const mergedHeaderCells = [
     analogStockRow.getCell(1),
     analogStockRow.getCell(2),
     analogStockRow.getCell(3),
     analogStockRow.getCell(4),
+    analogStockRow.getCell(5),
   ];
 
   for (const cell of mergedHeaderCells) {
@@ -402,12 +408,14 @@ export function buildAnalogBtradeTotalBlock(
   cellD.font = { ...(cellD.font ?? {}), bold: true };
   cellD.alignment = { ...(cellD.alignment ?? {}), horizontal: "center", vertical: "middle" };
 
-  const cellE1 = row1.getCell(5);
-  cellE1.value = "Аналог";
-  cellE1.font = { ...(cellE1.font ?? {}), bold: true };
-  const cellE2 = row2.getCell(5);
-  cellE2.value = "Btrade";
-  cellE2.font = { ...(cellE2.font ?? {}), bold: true };
+  worksheet.mergeCells(totalStartRow, 5, totalStartRow + 1, 5);
+
+  const cellF1 = row1.getCell(6);
+  cellF1.value = "Аналог";
+  cellF1.font = { ...(cellF1.font ?? {}), bold: true };
+  const cellF2 = row2.getCell(6);
+  cellF2.value = "Btrade";
+  cellF2.font = { ...(cellF2.font ?? {}), bold: true };
 
   const cellJ1 = row1.getCell(diffCol);
   cellJ1.value = sumDeltaAnalog;

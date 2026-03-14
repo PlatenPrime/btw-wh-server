@@ -22,12 +22,12 @@ export async function buildKonkBtradeComparisonExcel(
 
   const firstItems = analogs[0]?.items ?? [];
 
-  const dataStartCol = 6;
+  const dataStartCol = 7;
   const diffCol = dataStartCol + firstItems.length;
   const diffPctCol = diffCol + 1;
   const summaryDiffCol = diffPctCol + 1;
   const summaryDiffPctCol = summaryDiffCol + 1;
-  const columnCount = firstItems.length + 9;
+  const columnCount = firstItems.length + 10;
 
   if (columnCount > 0) {
     setupAnalogBtradeHeaderRow(
@@ -62,6 +62,7 @@ export async function buildKonkBtradeComparisonExcel(
         items: analog.items,
         artikul: analog.artikul,
         artNameUkr: analog.artNameUkr,
+        artAbc: analog.artAbc,
         producerName: analog.producerName,
         competitorTitle: analog.competitorTitle,
       });

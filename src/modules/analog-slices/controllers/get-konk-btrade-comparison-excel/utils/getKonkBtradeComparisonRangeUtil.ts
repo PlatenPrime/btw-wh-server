@@ -18,6 +18,7 @@ export interface KonkAnalogInfo {
   analogId: string;
   artikul: string;
   artNameUkr: string | null;
+  artAbc: string | null;
   producerName: string | null;
   competitorTitle: string | null;
   items: AnalogBtradeCompareItem[];
@@ -79,17 +80,18 @@ export async function getKonkBtradeComparisonRangeUtil(
   const prodNameList = Array.from(prodNameSet);
 
   const [artDocs, prodDocs, konkDoc] = await Promise.all([
-    Art.find({ artikul: { $in: artikulList } }).select("artikul nameukr").lean(),
+    Art.find({ artikul: { $in: artikulList } }).select("artikul nameukr abc").lean(),
     Prod.find({ name: { $in: prodNameList } }).select("name title").lean(),
     Konk.findOne({ name: input.konk }).select("title").lean(),
   ]);
 
   const artNameByArtikul = new Map<string, string | null>();
+  const artAbcByArtikul = new Map<string, string | null>();
   for (const art of artDocs) {
     const artikul = (art.artikul ?? "").trim();
-    const name = (art.nameukr ?? "").trim() || null;
     if (!artikul) continue;
-    artNameByArtikul.set(artikul, name);
+    artNameByArtikul.set(artikul, (art.nameukr ?? "").trim() || null);
+    artAbcByArtikul.set(artikul, (art.abc ?? "").trim() || null);
   }
 
   const producerTitleByProdName = new Map<string, string | null>();
@@ -163,6 +165,7 @@ export async function getKonkBtradeComparisonRangeUtil(
     .sort((a, b) => a.artikul.localeCompare(b.artikul))
     .map((analog) => {
       const artNameUkr = artNameByArtikul.get(analog.artikul) ?? null;
+      const artAbc = artAbcByArtikul.get(analog.artikul) ?? null;
       const producerName =
         producerTitleByProdName.get(analog.prodName) ?? null;
 
@@ -189,6 +192,7 @@ export async function getKonkBtradeComparisonRangeUtil(
         analogId: analog.analogId,
         artikul: analog.artikul,
         artNameUkr,
+        artAbc,
         producerName,
         competitorTitle,
         items,

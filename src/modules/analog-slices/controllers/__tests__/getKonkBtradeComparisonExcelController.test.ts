@@ -95,6 +95,7 @@ describe("getKonkBtradeComparisonExcelController", () => {
           analogId: "analog-1",
           artikul: "1102-0259",
           artNameUkr: "Тестовий товар",
+          artAbc: "A",
           producerName: "Test Producer",
           competitorTitle: "Test Konk",
           items: [

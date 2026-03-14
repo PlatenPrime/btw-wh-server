@@ -9,6 +9,7 @@ import type { AnalogBtradeCompareItem } from "../../get-analog-btrade-comparison
 export interface BuildAnalogSalesComparisonExcelOptions {
   artikul: string;
   artNameUkr: string | null;
+  artAbc?: string | null;
   producerName?: string | null;
   competitorTitle?: string | null;
   dateFrom: Date;
@@ -26,7 +27,7 @@ export async function buildAnalogSalesComparisonExcel(
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Порівняння");
 
-  const dataStartCol = 6;
+  const dataStartCol = 7;
   const totalCol = dataStartCol + items.length;
   const diffSalesCol = totalCol + 1;
   const diffSalesPctCol = totalCol + 2;
@@ -60,6 +61,7 @@ export async function buildAnalogSalesComparisonExcel(
       items,
       artikul: options.artikul,
       artNameUkr: options.artNameUkr,
+      artAbc: options.artAbc,
       producerName: options.producerName,
       competitorTitle: options.competitorTitle,
     });

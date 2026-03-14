@@ -21,7 +21,7 @@ export async function buildSalesComparisonExcel(
   const worksheet = workbook.addWorksheet("Порівняння");
 
   const firstItems = analogs[0]?.items ?? [];
-  const dataStartCol = 6;
+  const dataStartCol = 7;
   const totalCol = dataStartCol + firstItems.length;
   const diffSalesCol = totalCol + 1;
   const diffSalesPctCol = totalCol + 2;
@@ -66,6 +66,7 @@ export async function buildSalesComparisonExcel(
         items: analog.items,
         artikul: analog.artikul,
         artNameUkr: analog.artNameUkr,
+        artAbc: analog.artAbc,
         producerName: analog.producerName,
         competitorTitle: analog.competitorTitle,
       });

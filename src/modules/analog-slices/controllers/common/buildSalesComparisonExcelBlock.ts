@@ -47,7 +47,8 @@ export function setupSalesComparisonHeaderRow(
   headerRow.getCell(2).value = "Назва (укр)";
   headerRow.getCell(3).value = "Конкурент";
   headerRow.getCell(4).value = "Виробник";
-  headerRow.getCell(5).value = "";
+  headerRow.getCell(5).value = "ABC";
+  headerRow.getCell(6).value = "";
 
   items.forEach((item, index) => {
     const dateStr = item.date.toISOString().split("T")[0] ?? "";
@@ -100,6 +101,7 @@ export interface BuildSalesComparisonExcelBlockOptions {
   items: AnalogBtradeCompareItem[];
   artikul: string;
   artNameUkr: string | null;
+  artAbc?: string | null;
   producerName?: string | null;
   competitorTitle?: string | null;
 }
@@ -124,6 +126,7 @@ export function buildSalesComparisonExcelBlock(
     items,
     artikul,
     artNameUkr,
+    artAbc,
     producerName,
     competitorTitle,
   } = options;
@@ -156,7 +159,7 @@ export function buildSalesComparisonExcelBlock(
     "Ціна Btrade",
     "Виручка Btrade",
   ];
-  rows.forEach((row, i) => row.getCell(5).value = labels[i]);
+  rows.forEach((row, i) => row.getCell(6).value = labels[i]);
 
   const safeProducerName = producerName ?? "";
   const safeCompetitorTitle = competitorTitle ?? "";
@@ -169,10 +172,16 @@ export function buildSalesComparisonExcelBlock(
     row.getCell(4).value = safeProducerName;
   });
 
+  rows[0]!.getCell(5).value = artAbc ?? "";
+
   worksheet.mergeCells(startRow, 1, startRow + 5, 1);
   worksheet.mergeCells(startRow, 2, startRow + 5, 2);
   worksheet.mergeCells(startRow, 3, startRow + 5, 3);
   worksheet.mergeCells(startRow, 4, startRow + 5, 4);
+  worksheet.mergeCells(startRow, 5, startRow + 5, 5);
+
+  const abcCell = rows[0]!.getCell(5);
+  abcCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
 
   items.forEach((item, index) => {
     const col = index + dataStartCol;

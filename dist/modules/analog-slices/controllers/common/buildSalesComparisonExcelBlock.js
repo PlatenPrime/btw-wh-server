@@ -12,7 +12,8 @@ export function setupSalesComparisonHeaderRow(params) {
     headerRow.getCell(2).value = "Назва (укр)";
     headerRow.getCell(3).value = "Конкурент";
     headerRow.getCell(4).value = "Виробник";
-    headerRow.getCell(5).value = "";
+    headerRow.getCell(5).value = "ABC";
+    headerRow.getCell(6).value = "";
     items.forEach((item, index) => {
         const dateStr = item.date.toISOString().split("T")[0] ?? "";
         headerRow.getCell(index + dataStartCol).value = dateStr;
@@ -45,7 +46,7 @@ export function setupSalesComparisonHeaderRow(params) {
  * колонка «Всього», 4 колонки дельт. Возвращает агрегаты для итога.
  */
 export function buildSalesComparisonExcelBlock(options) {
-    const { worksheet, startRow, dataStartCol, totalCol, diffSalesCol, diffSalesPctCol, diffRevenueCol, diffRevenuePctCol, columnCount, items, artikul, artNameUkr, producerName, competitorTitle, } = options;
+    const { worksheet, startRow, dataStartCol, totalCol, diffSalesCol, diffSalesPctCol, diffRevenueCol, diffRevenuePctCol, columnCount, items, artikul, artNameUkr, artAbc, producerName, competitorTitle, } = options;
     const analogStockByDay = items.map((i) => i.analogStock);
     const btradeStockByDay = items.map((i) => i.btradeStock);
     const analogSalesResults = computeSalesFromStockSequence(analogStockByDay);
@@ -70,7 +71,7 @@ export function buildSalesComparisonExcelBlock(options) {
         "Ціна Btrade",
         "Виручка Btrade",
     ];
-    rows.forEach((row, i) => row.getCell(5).value = labels[i]);
+    rows.forEach((row, i) => row.getCell(6).value = labels[i]);
     const safeProducerName = producerName ?? "";
     const safeCompetitorTitle = competitorTitle ?? "";
     const artName = artNameUkr ?? "";
@@ -80,10 +81,14 @@ export function buildSalesComparisonExcelBlock(options) {
         row.getCell(3).value = safeCompetitorTitle;
         row.getCell(4).value = safeProducerName;
     });
+    rows[0].getCell(5).value = artAbc ?? "";
     worksheet.mergeCells(startRow, 1, startRow + 5, 1);
     worksheet.mergeCells(startRow, 2, startRow + 5, 2);
     worksheet.mergeCells(startRow, 3, startRow + 5, 3);
     worksheet.mergeCells(startRow, 4, startRow + 5, 4);
+    worksheet.mergeCells(startRow, 5, startRow + 5, 5);
+    const abcCell = rows[0].getCell(5);
+    abcCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
     items.forEach((item, index) => {
         const col = index + dataStartCol;
         const analogSales = analogSalesResults[index].sales;

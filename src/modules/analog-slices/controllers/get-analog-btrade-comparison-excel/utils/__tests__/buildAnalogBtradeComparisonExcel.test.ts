@@ -73,12 +73,12 @@ describe("buildAnalogBtradeComparisonExcel", () => {
     expect(headerRow[1]).toBe("Назва (укр)");
     expect(headerRow[2]).toBe("Конкурент");
     expect(headerRow[3]).toBe("Виробник");
-    // Колонка E — пусто (підпис рядків у наступному стовпці)
-    expect(headerRow[4]).toBe("");
-    expect(headerRow[5]).toBe("2026-03-01");
-    expect(headerRow[6]).toBe("2026-03-02");
-    expect(headerRow[7]).toBe("Різниця");
-    expect(headerRow[8]).toBe("Різниця, %");
+    expect(headerRow[4]).toBe("ABC");
+    expect(headerRow[5]).toBe("");
+    expect(headerRow[6]).toBe("2026-03-01");
+    expect(headerRow[7]).toBe("2026-03-02");
+    expect(headerRow[8]).toBe("Різниця");
+    expect(headerRow[9]).toBe("Різниця, %");
 
     const analogStockRow = rows[1]!;
     const analogPriceRow = rows[2]!;
@@ -93,31 +93,34 @@ describe("buildAnalogBtradeComparisonExcel", () => {
 
     // У злитих комірках при round-trip значення часто з'являється в кожному рядку; перевіряємо лише підписи та дані
 
-    // Підписи рядків у колонці E (індекс 4)
-    expect(analogStockRow[4]).toBe("Залишок аналога");
-    expect(analogPriceRow[4]).toBe("Ціна аналога");
-    expect(btradeStockRow[4]).toBe("Залишок Btrade");
-    expect(btradePriceRow[4]).toBe("Ціна Btrade");
+    // ABC колонка (індекс 4) — artAbc не передано, має бути ""
+    expect(analogStockRow[4]).toBe("");
 
-    // Значення по датах починаються з колонки F (індекс 5)
-    expect(analogStockRow[5]).toBe(1);
-    expect(analogStockRow[6]).toBe(2);
-    expect(analogPriceRow[5]).toBe(1.5);
-    expect(analogPriceRow[6]).toBe(1.6);
-    expect(btradeStockRow[5]).toBe(10);
-    expect(btradeStockRow[6]).toBe(20);
-    expect(btradePriceRow[5]).toBe(2.0);
-    expect(btradePriceRow[6]).toBe(2.1);
+    // Підписи рядків у колонці F (індекс 5)
+    expect(analogStockRow[5]).toBe("Залишок аналога");
+    expect(analogPriceRow[5]).toBe("Ціна аналога");
+    expect(btradeStockRow[5]).toBe("Залишок Btrade");
+    expect(btradePriceRow[5]).toBe("Ціна Btrade");
 
-    // Різниця та Різниця, % у колонках 8 і 9 (індекси 7, 8)
-    expect(analogStockRow[7]).toBe(1); // 2 - 1
-    expect(analogStockRow[8]).toBe(100); // (1/1)*100
-    expect(analogPriceRow[7]).toBeCloseTo(0.1); // 1.6 - 1.5
-    expect(analogPriceRow[8]).toBe(6.67); // округлённое значение (6.666... → 6.67)
-    expect(btradeStockRow[7]).toBe(10); // 20 - 10
-    expect(btradeStockRow[8]).toBe(100);
-    expect(btradePriceRow[7]).toBeCloseTo(0.1); // 2.1 - 2.0
-    expect(btradePriceRow[8]).toBeCloseTo(5); // (0.1/2)*100
+    // Значення по датах починаються з колонки G (індекс 6)
+    expect(analogStockRow[6]).toBe(1);
+    expect(analogStockRow[7]).toBe(2);
+    expect(analogPriceRow[6]).toBe(1.5);
+    expect(analogPriceRow[7]).toBe(1.6);
+    expect(btradeStockRow[6]).toBe(10);
+    expect(btradeStockRow[7]).toBe(20);
+    expect(btradePriceRow[6]).toBe(2.0);
+    expect(btradePriceRow[7]).toBe(2.1);
+
+    // Різниця та Різниця, % у колонках 9 і 10 (індекси 8, 9)
+    expect(analogStockRow[8]).toBe(1); // 2 - 1
+    expect(analogStockRow[9]).toBe(100); // (1/1)*100
+    expect(analogPriceRow[8]).toBeCloseTo(0.1); // 1.6 - 1.5
+    expect(analogPriceRow[9]).toBe(6.67); // округлённое значение (6.666... → 6.67)
+    expect(btradeStockRow[8]).toBe(10); // 20 - 10
+    expect(btradeStockRow[9]).toBe(100);
+    expect(btradePriceRow[8]).toBeCloseTo(0.1); // 2.1 - 2.0
+    expect(btradePriceRow[9]).toBeCloseTo(5); // (0.1/2)*100
   });
 
   it("applies conditional formatting for analog stock and price", async () => {
@@ -164,12 +167,12 @@ describe("buildAnalogBtradeComparisonExcel", () => {
     const btradeStockRow = worksheet.getRow(4);
     const btradePriceRow = worksheet.getRow(5);
 
-    // dataStartCol = 6: колонка 6 = перша дата, 7 = друга (червоний для зростання), 8 = третя
-    const stockF2 = analogStockRow.getCell(7); // 2026-03-02 (рост остатка -> красный)
-    const stockG2 = analogStockRow.getCell(8); // 2026-03-03 (не красный)
+    // dataStartCol = 7: колонка 7 = перша дата, 8 = друга (червоний для зростання), 9 = третя
+    const stockF2 = analogStockRow.getCell(8); // 2026-03-02 (рост остатка -> красный)
+    const stockG2 = analogStockRow.getCell(9); // 2026-03-03 (не красный)
 
-    const priceF3 = analogPriceRow.getCell(7); // 2026-03-02 (падение цены -> зелёный)
-    const priceG3 = analogPriceRow.getCell(8); // 2026-03-03 (не зелёный)
+    const priceF3 = analogPriceRow.getCell(8); // 2026-03-02 (падение цены -> зелёный)
+    const priceG3 = analogPriceRow.getCell(9); // 2026-03-03 (не зелёный)
 
     // Остатки: рост -> красный
     expect(stockF2.font?.color?.argb).toBe("FFFF0000");
@@ -182,10 +185,10 @@ describe("buildAnalogBtradeComparisonExcel", () => {
     expect(priceG3.font?.color?.argb).not.toBe("FF00AA00");
 
     // Для Btrade не применяем условное форматирование (красный/зелёный)
-    expect(btradeStockRow.getCell(7).font?.color?.argb).not.toBe("FFFF0000");
-    expect(btradeStockRow.getCell(7).font?.color?.argb).not.toBe("FF00AA00");
-    expect(btradePriceRow.getCell(7).font?.color?.argb).not.toBe("FFFF0000");
-    expect(btradePriceRow.getCell(7).font?.color?.argb).not.toBe("FF00AA00");
+    expect(btradeStockRow.getCell(8).font?.color?.argb).not.toBe("FFFF0000");
+    expect(btradeStockRow.getCell(8).font?.color?.argb).not.toBe("FF00AA00");
+    expect(btradePriceRow.getCell(8).font?.color?.argb).not.toBe("FFFF0000");
+    expect(btradePriceRow.getCell(8).font?.color?.argb).not.toBe("FF00AA00");
   });
 
   it("fills Різниця and Різниця, % with negative difference (1000 → 400)", async () => {
@@ -214,9 +217,9 @@ describe("buildAnalogBtradeComparisonExcel", () => {
     const { buffer } = await buildAnalogBtradeComparisonExcel(items, options);
     const rows = await readSheetToMatrix(buffer);
     const analogStockRow = rows[1]!;
-    // Різниця та Різниця, % у колонках 8 і 9 (індекси 7, 8). 400 - 1000 = -600, (-600/1000)*100 = -60
-    expect(analogStockRow[7]).toBe(-600);
-    expect(analogStockRow[8]).toBe(-60);
+    // Різниця та Різниця, % у колонках 9 і 10 (індекси 8, 9). 400 - 1000 = -600, (-600/1000)*100 = -60
+    expect(analogStockRow[8]).toBe(-600);
+    expect(analogStockRow[9]).toBe(-60);
   });
 
   it("marks percentage cells with pale pink fill when value cannot be calculated", async () => {
@@ -252,8 +255,8 @@ describe("buildAnalogBtradeComparisonExcel", () => {
 
     const analogStockRow = worksheet.getRow(2);
 
-    const diffPctCell = analogStockRow.getCell(8); // "Різниця, %" (при firstVal===0 код ставить null але exceljs може повертати 0)
-    const summaryPctCell = analogStockRow.getCell(10); // "Δ Btrade vs конкурент, %"
+    const diffPctCell = analogStockRow.getCell(9); // "Різниця, %" (при firstVal===0 код ставить null але exceljs може повертати 0)
+    const summaryPctCell = analogStockRow.getCell(11); // "Δ Btrade vs конкурент, %"
 
     // При firstVal===0 код ставить diffPctCell.value = null і рожеву заливку; після xlsx round-trip заливка може не зберігатись у fgColor.argb
     expect(diffPctCell.value === null || diffPctCell.value === 0).toBe(true);
@@ -284,9 +287,9 @@ describe("buildAnalogBtradeComparisonExcel", () => {
     const rows = await readSheetToMatrix(buffer);
     expect(rows.length).toBeGreaterThanOrEqual(1);
     const headerRow = rows[0]!;
-    // При items=[] дат немає: diffCol=6, diffPctCol=7 — індекси 5, 6
-    expect(headerRow[5]).toBe("Різниця");
-    expect(headerRow[6]).toBe("Різниця, %");
+    // При items=[] дат немає: diffCol=7, diffPctCol=8 — індекси 6, 7
+    expect(headerRow[6]).toBe("Різниця");
+    expect(headerRow[7]).toBe("Різниця, %");
   });
 });
 

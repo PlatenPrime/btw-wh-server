@@ -28,6 +28,7 @@ export const getAnalogBtradeComparisonExcelController = async (req, res) => {
     const { buffer, fileName } = await buildAnalogBtradeComparisonExcel(rangeResult.data, {
         artikul: rangeResult.artikul,
         artNameUkr: rangeResult.artNameUkr,
+        artAbc: rangeResult.artAbc,
         producerName: rangeResult.producerName,
         competitorTitle: rangeResult.competitorTitle,
         dateFrom: parseResult.data.dateFrom,

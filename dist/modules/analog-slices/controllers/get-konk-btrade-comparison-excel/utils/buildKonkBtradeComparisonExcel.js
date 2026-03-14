@@ -4,12 +4,12 @@ export async function buildKonkBtradeComparisonExcel(analogs, options) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Порівняння");
     const firstItems = analogs[0]?.items ?? [];
-    const dataStartCol = 6;
+    const dataStartCol = 7;
     const diffCol = dataStartCol + firstItems.length;
     const diffPctCol = diffCol + 1;
     const summaryDiffCol = diffPctCol + 1;
     const summaryDiffPctCol = summaryDiffCol + 1;
-    const columnCount = firstItems.length + 9;
+    const columnCount = firstItems.length + 10;
     if (columnCount > 0) {
         setupAnalogBtradeHeaderRow(worksheet, firstItems, dataStartCol, diffCol, diffPctCol, summaryDiffCol, summaryDiffPctCol, columnCount);
         const sortedAnalogs = analogs
@@ -31,6 +31,7 @@ export async function buildKonkBtradeComparisonExcel(analogs, options) {
                 items: analog.items,
                 artikul: analog.artikul,
                 artNameUkr: analog.artNameUkr,
+                artAbc: analog.artAbc,
                 producerName: analog.producerName,
                 competitorTitle: analog.competitorTitle,
             });

@@ -38,6 +38,7 @@ export const getAnalogSalesComparisonExcelController = async (
     {
       artikul: rangeResult.artikul,
       artNameUkr: rangeResult.artNameUkr,
+      artAbc: rangeResult.artAbc,
       producerName: rangeResult.producerName,
       competitorTitle: rangeResult.competitorTitle,
       dateFrom: parseResult.data.dateFrom,

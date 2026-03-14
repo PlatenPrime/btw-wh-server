@@ -39,17 +39,18 @@ export async function getKonkBtradeComparisonRangeUtil(input) {
     const artikulList = Array.from(artikulSet);
     const prodNameList = Array.from(prodNameSet);
     const [artDocs, prodDocs, konkDoc] = await Promise.all([
-        Art.find({ artikul: { $in: artikulList } }).select("artikul nameukr").lean(),
+        Art.find({ artikul: { $in: artikulList } }).select("artikul nameukr abc").lean(),
         Prod.find({ name: { $in: prodNameList } }).select("name title").lean(),
         Konk.findOne({ name: input.konk }).select("title").lean(),
     ]);
     const artNameByArtikul = new Map();
+    const artAbcByArtikul = new Map();
     for (const art of artDocs) {
         const artikul = (art.artikul ?? "").trim();
-        const name = (art.nameukr ?? "").trim() || null;
         if (!artikul)
             continue;
-        artNameByArtikul.set(artikul, name);
+        artNameByArtikul.set(artikul, (art.nameukr ?? "").trim() || null);
+        artAbcByArtikul.set(artikul, (art.abc ?? "").trim() || null);
     }
     const producerTitleByProdName = new Map();
     for (const prod of prodDocs) {
@@ -116,6 +117,7 @@ export async function getKonkBtradeComparisonRangeUtil(input) {
         .sort((a, b) => a.artikul.localeCompare(b.artikul))
         .map((analog) => {
         const artNameUkr = artNameByArtikul.get(analog.artikul) ?? null;
+        const artAbc = artAbcByArtikul.get(analog.artikul) ?? null;
         const producerName = producerTitleByProdName.get(analog.prodName) ?? null;
         const analogByDate = analogByArtikulAndDate.get(analog.artikul) ?? new Map();
         const btradeByDate = btradeByArtikulAndDate.get(analog.artikul) ?? new Map();
@@ -135,6 +137,7 @@ export async function getKonkBtradeComparisonRangeUtil(input) {
             analogId: analog.analogId,
             artikul: analog.artikul,
             artNameUkr,
+            artAbc,
             producerName,
             competitorTitle,
             items,
