@@ -10,8 +10,8 @@ describe("upsertArtsUtil", () => {
   it("создаёт новые артикулы", async () => {
     const result = await upsertArtsUtil({
       arts: [
-        { artikul: "ART-001", zone: "A1", nameukr: "Test Art 1" },
-        { artikul: "ART-002", zone: "A2", nameukr: "Test Art 2" },
+        { artikul: "ART-001", zone: "A1", nameukr: "Test Art 1", abc: "A" },
+        { artikul: "ART-002", zone: "A2", nameukr: "Test Art 2", abc: "B" },
       ],
     });
 
@@ -24,7 +24,7 @@ describe("upsertArtsUtil", () => {
 
     const result = await upsertArtsUtil({
       arts: [
-        { artikul: "ART-001", zone: "A2", nameukr: "Updated Art" },
+        { artikul: "ART-001", zone: "A2", nameukr: "Updated Art", abc: "C" },
       ],
     });
 
@@ -54,6 +54,7 @@ describe("upsertArtsUtil", () => {
           nameukr: "Test",
           limit: 100,
           marker: "TEST",
+          abc: "A",
         },
       ],
     });

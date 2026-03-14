@@ -72,6 +72,7 @@ describe("exportArtsToExcelWithStocksController", () => {
                 Зона: "A1",
                 Ліміт: 100,
                 Маркер: "MARK",
+                ABC: "",
                 "Дата зрізу": "15.01.2024",
             },
         ];

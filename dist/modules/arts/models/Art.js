@@ -19,6 +19,7 @@ const artSchema = new Schema({
     },
     limit: { type: Number },
     marker: { type: String },
+    abc: { type: String },
     btradeStock: { type: btradeStockSchema },
 }, { timestamps: true });
 /**

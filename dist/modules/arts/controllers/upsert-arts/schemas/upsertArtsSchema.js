@@ -8,5 +8,6 @@ export const upsertArtsSchema = z
     namerus: z.string().optional(),
     limit: z.number().nonnegative("Limit must be non-negative").optional(),
     marker: z.string().optional(),
+    abc: z.string().optional(),
 }))
     .min(1, "At least one art is required");

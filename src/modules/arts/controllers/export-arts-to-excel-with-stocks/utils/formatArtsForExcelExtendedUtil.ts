@@ -32,6 +32,7 @@ export const formatArtsForExcelExtendedUtil = (
       Зона: art.zone,
       Ліміт: art.limit ?? "",
       Маркер: art.marker || "",
+      ABC: art.abc || "",
       "Дата зрізу": art.btradeStock?.date
         ? new Date(art.btradeStock.date).toLocaleDateString("uk-UA")
         : "",

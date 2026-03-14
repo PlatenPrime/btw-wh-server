@@ -5,6 +5,7 @@ export type ExcelArtRow = {
   Зона: string;
   Ліміт: number | string;
   Маркер: string;
+  ABC: string;
   "Залишки на сайті": number | string;
   "Дата оновлення залишків": string;
 };

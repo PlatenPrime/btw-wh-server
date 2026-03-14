@@ -13,6 +13,7 @@ describe("formatArtsForExcelUtil", () => {
         zone: "A1",
         limit: 100,
         marker: "MARK",
+        abc: "A",
         btradeStock: {
           value: 50,
           date: new Date("2024-01-15T10:00:00Z"),
@@ -30,6 +31,7 @@ describe("formatArtsForExcelUtil", () => {
       Зона: "A1",
       Ліміт: 100,
       Маркер: "MARK",
+      ABC: "A",
       "Залишки на сайті": 50,
       "Дата оновлення залишків": new Date("2024-01-15T10:00:00Z").toLocaleDateString("uk-UA"),
     });
@@ -57,6 +59,7 @@ describe("formatArtsForExcelUtil", () => {
       Зона: "B2",
       Ліміт: "",
       Маркер: "",
+      ABC: "",
       "Залишки на сайті": "",
       "Дата оновлення залишків": "",
     });

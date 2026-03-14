@@ -15,6 +15,7 @@ export interface IArt extends Document {
   zone: string;
   limit?: number;
   marker?: string;
+  abc?: string;
   btradeStock?: IBtradeStock;
   createdAt?: Date;
   updatedAt?: Date;
@@ -45,6 +46,7 @@ const artSchema = new Schema<IArt>(
     },
     limit: { type: Number },
     marker: { type: String },
+    abc: { type: String },
     btradeStock: { type: btradeStockSchema },
   },
   { timestamps: true }

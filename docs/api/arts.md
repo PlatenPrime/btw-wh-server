@@ -94,7 +94,7 @@
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос body:** массив объектов: `artikul` (string), `zone` (string), опционально `nameukr`, `namerus`, `limit` (number), `marker` (string). Минимум один элемент.
+**Запрос body:** массив объектов: `artikul` (string), `zone` (string), опционально `nameukr`, `namerus`, `limit` (number), `marker` (string), `abc` (string). Минимум один элемент.
 
 **Ответ 200:** `{ message: string, result: ... }`.
 

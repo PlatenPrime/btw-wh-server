@@ -14,6 +14,7 @@ export const formatArtsForExcelUtil = (arts: IArt[]): ExcelArtRow[] => {
     Зона: art.zone, 
     Ліміт: art.limit ?? "",
     Маркер: art.marker || "",
+    ABC: art.abc || "",
     "Залишки на сайті": art.btradeStock?.value ?? "",
     "Дата оновлення залишків": art.btradeStock?.date ? new Date(art.btradeStock.date).toLocaleDateString("uk-UA") : "",
   }));

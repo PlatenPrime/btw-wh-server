@@ -96,6 +96,7 @@ export const createTestArt = async (artData: any = {}) => {
     namerus: "Тест Арт",
     zone: "A1",
     limit: 100,
+    abc: "ABC",
     ...artData,
   });
 };

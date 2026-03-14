@@ -41,6 +41,7 @@ describe("generateExcelExtendedUtil", () => {
         Зона: "A1",
         Ліміт: 100,
         Маркер: "MARK",
+        ABC: "",
         "Дата зрізу": "15.01.2024",
       },
       {
@@ -53,6 +54,7 @@ describe("generateExcelExtendedUtil", () => {
         Зона: "B2",
         Ліміт: 200,
         Маркер: "MARK2",
+        ABC: "",
         "Дата зрізу": "20.01.2024",
       },
     ];
@@ -78,6 +80,7 @@ describe("generateExcelExtendedUtil", () => {
         Зона: "A1",
         Ліміт: 100,
         Маркер: "MARK",
+        ABC: "",
         "Дата зрізу": "15.01.2024",
       },
     ];
@@ -110,6 +113,7 @@ describe("generateExcelExtendedUtil", () => {
         Зона: "A1",
         Ліміт: 100,
         Маркер: "MARK",
+        ABC: "",
         "Дата зрізу": "15.01.2024",
       },
     ];
@@ -140,6 +144,7 @@ describe("generateExcelExtendedUtil", () => {
         Зона: "A1",
         Ліміт: 100,
         Маркер: "MARK",
+        ABC: "",
         "Дата зрізу": "15.01.2024",
       },
     ];
@@ -168,6 +173,7 @@ describe("generateExcelExtendedUtil", () => {
         Зона: "A1",
         Ліміт: 0,
         Маркер: "",
+        ABC: "",
         "Дата зрізу": "",
       },
       {
@@ -180,6 +186,7 @@ describe("generateExcelExtendedUtil", () => {
         Зона: "B2",
         Ліміт: "",
         Маркер: "MARK",
+        ABC: "",
         "Дата зрізу": "20.01.2024",
       },
     ];

@@ -26,8 +26,8 @@ describe("upsertArtsController", () => {
   it("200: создаёт новые артикулы", async () => {
     const req = {
       body: [
-        { artikul: "NEW-001", zone: "A1", nameukr: "New Art 1" },
-        { artikul: "NEW-002", zone: "A2", nameukr: "New Art 2" },
+        { artikul: "NEW-001", zone: "A1", nameukr: "New Art 1", abc: "A" },
+        { artikul: "NEW-002", zone: "A2", nameukr: "New Art 2", abc: "B" },
       ],
     } as unknown as Request;
 
@@ -42,7 +42,7 @@ describe("upsertArtsController", () => {
     await createTestArt({ artikul: "EXIST-001", zone: "A1" });
 
     const req = {
-      body: [{ artikul: "EXIST-001", zone: "A2", nameukr: "Updated" }],
+      body: [{ artikul: "EXIST-001", zone: "A2", nameukr: "Updated", abc: "C" }],
     } as unknown as Request;
 
     await upsertArtsController(req, res);

@@ -38,6 +38,18 @@ describe("Art Model - Schema Validation Only", () => {
             expect(savedArt.nameukr).toBe("Українська назва з їїї");
             expect(savedArt.namerus).toBe("Русское название с ёёё");
         });
+        it("should save and retrieve abc field", async () => {
+            const artData = { artikul: "ABC001", zone: "A1", abc: "A" };
+            const art = new Art(artData);
+            const savedArt = await art.save();
+            expect(savedArt.abc).toBe("A");
+        });
+        it("should allow saving without abc field", async () => {
+            const artData = { artikul: "NOABC001", zone: "A1" };
+            const art = new Art(artData);
+            const savedArt = await art.save();
+            expect(savedArt.abc).toBeUndefined();
+        });
         it("should handle numeric, negative, and decimal limit", async () => {
             const art1 = await new Art({
                 artikul: "LIMIT001",
