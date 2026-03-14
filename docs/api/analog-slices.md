@@ -168,6 +168,76 @@
 
 **Ошибки:** 400 (невалидные параметры; JSON: `{ message: "Validation error", errors: [...] }`), 404 (нет аналогов для konk/prod; JSON: `{ message: "Analogs not found for provided konk/prod" }`), 500.
 
+### GET `/api/analog-slices/konk-btrade/sales-comparison`
+
+Получение агрегированных данных о продажах и выручке конкурента vs Btrade по дням за период. Данные суммарные по всем артикулам группы аналогов (не детализированные по каждому артикулу) — предназначены для построения графиков на фронтенде. Логика расчёта продаж и выручки та же, что в Excel-отчёте `sales-comparison-excel`: продажи = разница остатка с предыдущим днём, выручка = продажи × цена.
+
+**Доступ:** checkAuth + checkRoles(USER).
+
+**Запрос:** только query-параметры:
+
+- `konk`: string (обязательно) — ключ конкурента (`Konk.name`).
+- `prod`: string (обязательно) — ключ производителя (`Prod.name`).
+- `dateFrom`: string, YYYY-MM-DD (обязательно).
+- `dateTo`: string, YYYY-MM-DD (обязательно), должно быть ≥ dateFrom.
+
+**Ответ 200:**
+
+```json
+{
+  "message": "Sales comparison data retrieved successfully",
+  "data": {
+    "days": [
+      {
+        "date": "2026-03-01T00:00:00.000Z",
+        "competitorSales": 12,
+        "competitorRevenue": 3456.78,
+        "btradeSales": 15,
+        "btradeRevenue": 4200.50
+      }
+    ],
+    "summary": {
+      "totalCompetitorSales": 150,
+      "totalBtradeSales": 180,
+      "totalCompetitorRevenue": 45000.00,
+      "totalBtradeRevenue": 52000.00,
+      "diffSalesPcs": 30,
+      "diffRevenueUah": 7000.00,
+      "diffSalesPct": 20.00,
+      "diffRevenuePct": 15.56
+    }
+  }
+}
+```
+
+Описание полей:
+
+- `days` — массив объектов по одному на каждый день периода (включая оба края), отсортированный по дате по возрастанию.
+  - `date` — строка в формате ISO.
+  - `competitorSales` — суммарные продажи конкурента (шт) по всем артикулам за этот день.
+  - `competitorRevenue` — суммарная выручка конкурента (грн), округлена до 2 знаков.
+  - `btradeSales` — суммарные продажи Btrade (шт) за день.
+  - `btradeRevenue` — суммарная выручка Btrade (грн), округлена до 2 знаков.
+- `summary` — итоговые показатели за весь период (те же данные, что в итоговом блоке Excel-отчёта):
+  - `totalCompetitorSales` — суммарные продажи конкурента (шт).
+  - `totalBtradeSales` — суммарные продажи Btrade (шт).
+  - `totalCompetitorRevenue` — суммарная выручка конкурента (грн).
+  - `totalBtradeRevenue` — суммарная выручка Btrade (грн).
+  - `diffSalesPcs` — разница продаж: `totalBtradeSales − totalCompetitorSales` (шт).
+  - `diffRevenueUah` — разница выручки: `totalBtradeRevenue − totalCompetitorRevenue` (грн).
+  - `diffSalesPct` — разница продаж в процентах: `(btrade/competitor − 1) × 100`, округлено до 2 знаков. `null` при нулевых продажах конкурента.
+  - `diffRevenuePct` — разница выручки в процентах: `(btrade/competitor − 1) × 100`, округлено до 2 знаков. `null` при нулевой выручке конкурента.
+
+**Ошибки:**
+
+- `400` — невалидные параметры (`konk`, `prod`, даты или dateFrom > dateTo); тело JSON: `{ message: "Validation error", errors: [...] }`.
+- `401` — не авторизован.
+- `403` — недостаточно прав.
+- `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
+- `500` — внутренняя ошибка сервера.
+
+---
+
 ## Формат данных
 
 - **IAnalogSliceDataItem:** `{ stock: number, price: number, artikul?: string }`.

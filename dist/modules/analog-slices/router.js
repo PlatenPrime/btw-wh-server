@@ -2,7 +2,7 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { getAnalogBtradeComparisonExcelController, getAnalogSalesByDateController, getAnalogSalesComparisonExcelController, getAnalogSalesRangeController, getAnalogSliceByDateController, getAnalogSliceController, getAnalogSliceRangeController, getKonkBtradeComparisonExcelController, getSalesComparisonExcelController, } from "./controllers/index.js";
+import { getAnalogBtradeComparisonExcelController, getAnalogSalesByDateController, getAnalogSalesComparisonExcelController, getAnalogSalesRangeController, getAnalogSliceByDateController, getAnalogSliceController, getAnalogSliceRangeController, getKonkBtradeComparisonExcelController, getKonkBtradeSalesComparisonController, getSalesComparisonExcelController, } from "./controllers/index.js";
 const router = Router();
 router.get("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSliceController));
 router.get("/analog/:analogId/range", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSliceRangeController));
@@ -12,6 +12,7 @@ router.get("/analog/:analogId/comparison-excel",
 // checkAuth,
 // checkRoles([RoleType.USER]),
 asyncHandler(getAnalogBtradeComparisonExcelController));
+router.get("/konk-btrade/sales-comparison", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKonkBtradeSalesComparisonController));
 router.get("/konk-btrade/comparison-excel", 
 // checkAuth,
 // checkRoles([RoleType.USER]),

@@ -11,6 +11,7 @@ import {
   getAnalogSliceController,
   getAnalogSliceRangeController,
   getKonkBtradeComparisonExcelController,
+  getKonkBtradeSalesComparisonController,
   getSalesComparisonExcelController,
 } from "./controllers/index.js";
 
@@ -45,6 +46,12 @@ router.get(
   // checkAuth,
   // checkRoles([RoleType.USER]),
   asyncHandler(getAnalogBtradeComparisonExcelController)
+);
+router.get(
+  "/konk-btrade/sales-comparison",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getKonkBtradeSalesComparisonController)
 );
 router.get(
   "/konk-btrade/comparison-excel",
