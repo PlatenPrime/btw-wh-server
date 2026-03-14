@@ -238,6 +238,72 @@
 
 ---
 
+### GET `/api/analog-slices/konk-btrade/stock-comparison`
+
+Получение агрегированных суммарных остатков конкурента vs Btrade по дням за период. Данные суммарные по всем артикулам группы аналогов (не детализированные по каждому артикулу) — предназначены для построения графиков на фронтенде. Для каждого дня суммируются остатки по всем аналогам выбранного конкурента и производителя.
+
+**Доступ:** checkAuth + checkRoles(USER).
+
+**Запрос:** только query-параметры:
+
+- `konk`: string (обязательно) — ключ конкурента (`Konk.name`).
+- `prod`: string (обязательно) — ключ производителя (`Prod.name`).
+- `dateFrom`: string, YYYY-MM-DD (обязательно).
+- `dateTo`: string, YYYY-MM-DD (обязательно), должно быть ≥ dateFrom.
+
+**Ответ 200:**
+
+```json
+{
+  "message": "Stock comparison data retrieved successfully",
+  "data": {
+    "days": [
+      {
+        "date": "2026-03-01T00:00:00.000Z",
+        "competitorStock": 150,
+        "btradeStock": 300
+      }
+    ],
+    "summary": {
+      "firstDayCompetitorStock": 150,
+      "lastDayCompetitorStock": 120,
+      "firstDayBtradeStock": 300,
+      "lastDayBtradeStock": 270,
+      "diffCompetitorStock": -30,
+      "diffBtradeStock": -30,
+      "diffCompetitorStockPct": -20.00,
+      "diffBtradeStockPct": -10.00
+    }
+  }
+}
+```
+
+Описание полей:
+
+- `days` — массив объектов по одному на каждый день периода (включая оба края), отсортированный по дате по возрастанию.
+  - `date` — строка в формате ISO.
+  - `competitorStock` — суммарные остатки конкурента (шт) по всем артикулам за этот день. Если для артикула нет данных среза — считается как 0.
+  - `btradeStock` — суммарные остатки Btrade (шт) за день. Если для артикула нет данных — считается как 0.
+- `summary` — итоговые показатели за весь период:
+  - `firstDayCompetitorStock` — суммарный остаток конкурента на первый день периода (шт).
+  - `lastDayCompetitorStock` — суммарный остаток конкурента на последний день периода (шт).
+  - `firstDayBtradeStock` — суммарный остаток Btrade на первый день периода (шт).
+  - `lastDayBtradeStock` — суммарный остаток Btrade на последний день периода (шт).
+  - `diffCompetitorStock` — изменение остатка конкурента: `lastDay − firstDay` (шт). Отрицательное значение означает уменьшение остатка.
+  - `diffBtradeStock` — изменение остатка Btrade: `lastDay − firstDay` (шт).
+  - `diffCompetitorStockPct` — изменение остатка конкурента в процентах: `(diff / firstDay) × 100`, округлено до 2 знаков. `null` при нулевом остатке на первый день.
+  - `diffBtradeStockPct` — изменение остатка Btrade в процентах: `(diff / firstDay) × 100`, округлено до 2 знаков. `null` при нулевом остатке на первый день.
+
+**Ошибки:**
+
+- `400` — невалидные параметры (`konk`, `prod`, даты или dateFrom > dateTo); тело JSON: `{ message: "Validation error", errors: [...] }`.
+- `401` — не авторизован.
+- `403` — недостаточно прав.
+- `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
+- `500` — внутренняя ошибка сервера.
+
+---
+
 ## Формат данных
 
 - **IAnalogSliceDataItem:** `{ stock: number, price: number, artikul?: string }`.

@@ -8,3 +8,4 @@ export { getAnalogSalesComparisonExcelController } from "./get-analog-sales-comp
 export { getKonkBtradeComparisonExcelController } from "./get-konk-btrade-comparison-excel/getKonkBtradeComparisonExcelController.js";
 export { getSalesComparisonExcelController } from "./get-sales-comparison-excel/getSalesComparisonExcelController.js";
 export { getKonkBtradeSalesComparisonController } from "./get-konk-btrade-sales-comparison/getKonkBtradeSalesComparisonController.js";
+export { getKonkBtradeStockComparisonController } from "./get-konk-btrade-stock-comparison/getKonkBtradeStockComparisonController.js";
