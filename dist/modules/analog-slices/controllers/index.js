@@ -6,6 +6,6 @@ export { getAnalogSalesRangeController } from "./get-analog-sales-range/getAnalo
 export { getAnalogBtradeComparisonExcelController } from "./get-analog-btrade-comparison-excel/getAnalogBtradeComparisonExcelController.js";
 export { getAnalogSalesComparisonExcelController } from "./get-analog-sales-comparison-excel/getAnalogSalesComparisonExcelController.js";
 export { getKonkBtradeComparisonExcelController } from "./get-konk-btrade-comparison-excel/getKonkBtradeComparisonExcelController.js";
-export { getSalesComparisonExcelController } from "./get-sales-comparison-excel/getSalesComparisonExcelController.js";
+export { getKonkBtradeSalesComparisonExcelController } from "./get-konk-btrade-sales-comparison-excel/getKonkBtradeSalesComparisonExcelController.js";
 export { getKonkBtradeSalesComparisonController } from "./get-konk-btrade-sales-comparison/getKonkBtradeSalesComparisonController.js";
 export { getKonkBtradeStockComparisonController } from "./get-konk-btrade-stock-comparison/getKonkBtradeStockComparisonController.js";

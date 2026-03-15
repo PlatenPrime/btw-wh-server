@@ -14,6 +14,16 @@ import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
 import type { GetKonkBtradeComparisonExcelInput } from "../schemas/getKonkBtradeComparisonExcelSchema.js";
 import type { AnalogBtradeCompareItem } from "../../get-analog-btrade-comparison-excel/utils/getAnalogBtradeComparisonRangeUtil.js";
 
+/**
+ * Extracts the numeric part from the beginning of ABC value (e.g. "101B" → 101).
+ * Returns 0 if no leading digits.
+ */
+export function parseAbcNumeric(artAbc: string | null): number {
+  if (artAbc == null || artAbc === "") return 0;
+  const match = artAbc.trim().match(/^(\d+)/);
+  return match ? parseInt(match[1]!, 10) : 0;
+}
+
 export interface KonkAnalogInfo {
   analogId: string;
   artikul: string;
@@ -160,7 +170,7 @@ export async function getKonkBtradeComparisonRangeUtil(
     }
   }
 
-  const analogs: KonkAnalogInfo[] = preparedAnalogs
+  let analogs: KonkAnalogInfo[] = preparedAnalogs
     .slice()
     .sort((a, b) => a.artikul.localeCompare(b.artikul))
     .map((analog) => {
@@ -199,8 +209,34 @@ export async function getKonkBtradeComparisonRangeUtil(
       };
     });
 
+  if (input.abc != null) {
+    const abcUpper = input.abc.toUpperCase();
+    analogs = analogs.filter(
+      (a) =>
+        (a.artAbc ?? "").toUpperCase().includes(abcUpper),
+    );
+  }
+
   if (analogs.length === 0) {
     return { ok: false };
+  }
+
+  const useSortByAbc =
+    input.abc != null && input.sortBy === "abc";
+
+  if (useSortByAbc) {
+    analogs = analogs
+      .slice()
+      .sort((a, b) => {
+        const numA = parseAbcNumeric(a.artAbc);
+        const numB = parseAbcNumeric(b.artAbc);
+        if (numA !== numB) return numA - numB;
+        return a.artikul.localeCompare(b.artikul);
+      });
+  } else {
+    analogs = analogs
+      .slice()
+      .sort((a, b) => a.artikul.localeCompare(b.artikul));
   }
 
   return {

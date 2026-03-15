@@ -1,27 +1,29 @@
 import type { Request, Response } from "express";
 import { getKonkBtradeComparisonRangeUtil } from "../get-konk-btrade-comparison-excel/utils/getKonkBtradeComparisonRangeUtil.js";
-import { getSalesComparisonExcelSchema } from "./schemas/getSalesComparisonExcelSchema.js";
+import { getKonkBtradeSalesComparisonExcelSchema } from "./schemas/getKonkBtradeSalesComparisonExcelSchema.js";
 import { buildSalesComparisonExcel } from "./utils/buildSalesComparisonExcel.js";
 
 /**
  * @desc    Экспорт сравнения продаж по группе аналогов (конкурент + Btrade) в Excel за период
  * @route   GET /api/analog-slices/konk-btrade/sales-comparison-excel?konk=...&prod=...&dateFrom=...&dateTo=...
  */
-export const getSalesComparisonExcelController = async (
+export const getKonkBtradeSalesComparisonExcelController = async (
   req: Request,
   res: Response,
 ): Promise<void> => {
   const q = req.query;
-  const parseResult = getSalesComparisonExcelSchema.safeParse({
+  const parseResult = getKonkBtradeSalesComparisonExcelSchema.safeParse({
     konk: Array.isArray(q.konk) ? q.konk[0] : q.konk,
     prod: Array.isArray(q.prod) ? q.prod[0] : q.prod,
     dateFrom: Array.isArray(q.dateFrom) ? q.dateFrom[0] : q.dateFrom,
     dateTo: Array.isArray(q.dateTo) ? q.dateTo[0] : q.dateTo,
+    abc: Array.isArray(q.abc) ? q.abc[0] : q.abc,
+    sortBy: Array.isArray(q.sortBy) ? q.sortBy[0] : q.sortBy,
   });
 
   if (!parseResult.success) {
     const errors = parseResult.error.flatten();
-    console.error("[getSalesComparisonExcel] Validation failed:", {
+    console.error("[getKonkBtradeSalesComparisonExcel] Validation failed:", {
       query: req.query,
       errors: errors.fieldErrors,
       formErrors: errors.formErrors,

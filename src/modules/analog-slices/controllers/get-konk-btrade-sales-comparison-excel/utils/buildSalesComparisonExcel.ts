@@ -42,17 +42,13 @@ export async function buildSalesComparisonExcel(
       columnCount,
     });
 
-    const sortedAnalogs = analogs
-      .slice()
-      .sort((a, b) => a.artikul.localeCompare(b.artikul));
-
     let startRow = 2;
     let sumAnalogSales = 0;
     let sumAnalogRevenue = 0;
     let sumBtradeSales = 0;
     let sumBtradeRevenue = 0;
 
-    for (const analog of sortedAnalogs) {
+    for (const analog of analogs) {
       const totals = buildSalesComparisonExcelBlock({
         worksheet,
         startRow,

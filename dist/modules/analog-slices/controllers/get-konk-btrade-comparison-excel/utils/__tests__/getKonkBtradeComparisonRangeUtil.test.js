@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Analog } from "../../../../../analogs/models/Analog.js";
+import { Art } from "../../../../../arts/models/Art.js";
 import { AnalogSlice } from "../../../../models/AnalogSlice.js";
 import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
 import { getKonkBtradeComparisonRangeUtil } from "../getKonkBtradeComparisonRangeUtil.js";
@@ -129,5 +130,134 @@ describe("getKonkBtradeComparisonRangeUtil", () => {
             btradeStock: 20,
             btradePrice: 2.2,
         });
+    });
+    it("filters by abc when abc param is passed", async () => {
+        const artikulB = "ART-B-001";
+        const artikulA = "ART-A-002";
+        await Analog.insertMany([
+            {
+                konkName: "air",
+                prodName: "gemar",
+                artikul: artikulB,
+                url: "https://example.com/art-b",
+            },
+            {
+                konkName: "air",
+                prodName: "gemar",
+                artikul: artikulA,
+                url: "https://example.com/art-a",
+            },
+        ]);
+        await Art.insertMany([
+            { artikul: artikulB, zone: "A1", abc: "101B" },
+            { artikul: artikulA, zone: "A1", abc: "50A" },
+        ]);
+        const d1 = new Date("2026-03-01T00:00:00.000Z");
+        await AnalogSlice.create({
+            konkName: "air",
+            date: d1,
+            data: {
+                [artikulB]: { stock: 1, price: 1 },
+                [artikulA]: { stock: 2, price: 2 },
+            },
+        });
+        await BtradeSlice.create({
+            date: d1,
+            data: {
+                [artikulB]: { quantity: 10, price: 1 },
+                [artikulA]: { quantity: 20, price: 2 },
+            },
+        });
+        const result = await getKonkBtradeComparisonRangeUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d1,
+            abc: "B",
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        expect(result.analogs).toHaveLength(1);
+        expect(result.analogs[0].artikul).toBe(artikulB);
+        expect(result.analogs[0].artAbc).toBe("101B");
+    });
+    it("sorts by abc numeric part when abc and sortBy=abc are passed", async () => {
+        const artikul101 = "ART-101";
+        const artikul50 = "ART-50";
+        await Analog.insertMany([
+            {
+                konkName: "air",
+                prodName: "gemar",
+                artikul: artikul101,
+                url: "https://example.com/101",
+            },
+            {
+                konkName: "air",
+                prodName: "gemar",
+                artikul: artikul50,
+                url: "https://example.com/50",
+            },
+        ]);
+        await Art.insertMany([
+            { artikul: artikul101, zone: "A1", abc: "101B" },
+            { artikul: artikul50, zone: "A1", abc: "50B" },
+        ]);
+        const d1 = new Date("2026-03-01T00:00:00.000Z");
+        await AnalogSlice.create({
+            konkName: "air",
+            date: d1,
+            data: {
+                [artikul101]: { stock: 1, price: 1 },
+                [artikul50]: { stock: 2, price: 2 },
+            },
+        });
+        await BtradeSlice.create({
+            date: d1,
+            data: {
+                [artikul101]: { quantity: 10, price: 1 },
+                [artikul50]: { quantity: 20, price: 2 },
+            },
+        });
+        const result = await getKonkBtradeComparisonRangeUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d1,
+            abc: "B",
+            sortBy: "abc",
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        expect(result.analogs).toHaveLength(2);
+        expect(result.analogs[0].artikul).toBe(artikul50);
+        expect(result.analogs[0].artAbc).toBe("50B");
+        expect(result.analogs[1].artikul).toBe(artikul101);
+        expect(result.analogs[1].artAbc).toBe("101B");
+    });
+    it("returns ok: false when abc filter leaves no analogs", async () => {
+        const artikulA = "ART-ONLY-A";
+        await Analog.create({
+            konkName: "air",
+            prodName: "gemar",
+            artikul: artikulA,
+            url: "https://example.com/a",
+        });
+        await Art.create({ artikul: artikulA, zone: "A1", abc: "50A" });
+        const d1 = new Date("2026-03-01T00:00:00.000Z");
+        await AnalogSlice.create({
+            konkName: "air",
+            date: d1,
+            data: { [artikulA]: { stock: 1, price: 1 } },
+        });
+        const result = await getKonkBtradeComparisonRangeUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d1,
+            abc: "B",
+        });
+        expect(result.ok).toBe(false);
     });
 });

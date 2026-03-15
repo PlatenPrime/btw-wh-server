@@ -16,6 +16,8 @@ export const getKonkBtradeStockComparisonController = async (
     prod: Array.isArray(q.prod) ? q.prod[0] : q.prod,
     dateFrom: Array.isArray(q.dateFrom) ? q.dateFrom[0] : q.dateFrom,
     dateTo: Array.isArray(q.dateTo) ? q.dateTo[0] : q.dateTo,
+    abc: Array.isArray(q.abc) ? q.abc[0] : q.abc,
+    sortBy: Array.isArray(q.sortBy) ? q.sortBy[0] : q.sortBy,
   });
 
   if (!parseResult.success) {

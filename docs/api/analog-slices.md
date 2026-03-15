@@ -115,6 +115,10 @@
 - `prod`: string (обязательно) — ключ производителя (`Prod.name`).
 - `dateFrom`: string, YYYY-MM-DD (обязательно).
 - `dateTo`: string, YYYY-MM-DD (обязательно), должно быть ≥ dateFrom.
+- `abc`: string (опционально) — одна из букв `"A"`, `"B"`, `"C"`, `"D"`; фильтрация по наличию этой буквы в поле ABC артикула (без учёта регистра). Если не передан — фильтр не применяется.
+- `sortBy`: string (опционально) — значение `"abc"`; при одновременной передаче `abc` сортировка по числовой части поля ABC (число до буквы, напр. 101 из «101B»); иначе порядок по артикулу.
+
+Итоговый блок «ВСЬОГО» в Excel считается по отфильтрованным и отсортированным данным.
 
 **Ответ 200:** бинарное тело (Excel). Заголовки:
 
@@ -137,7 +141,7 @@
 **Ошибки:**
 
 - `400` — невалидные параметры (`konk`, `prod`, даты или dateFrom > dateTo); тело JSON: `{ message: "Validation error", errors: [...] }`.
-- `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
+- `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul либо после применения фильтра `abc` не осталось ни одного аналога; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
 - `500` — внутренняя ошибка сервера.
 
 ---
@@ -162,11 +166,11 @@
 
 **Доступ:** в текущей реализации без проверки авторизации. При включении — USER.
 
-**Запрос:** только query: `konk`, `prod` (string, обязательно), `dateFrom`, `dateTo` (string, YYYY-MM-DD, обязательно), dateTo ≥ dateFrom.
+**Запрос:** только query: `konk`, `prod` (string, обязательно), `dateFrom`, `dateTo` (string, YYYY-MM-DD, обязательно), dateTo ≥ dateFrom; опционально `abc` (одна из букв A, B, C, D — фильтр по полю ABC артикула без учёта регистра), `sortBy` (значение `"abc"` — при переданном `abc` сортировка по числовой части ABC). Итоговая секция в Excel считается по отфильтрованным и отсортированным данным.
 
 **Ответ 200:** бинарное тело (Excel). Заголовки: `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `Content-Disposition: attachment; filename="sales_comparison_{konk}_{prod}_{dateFrom}_{dateTo}.xlsx"`.
 
-**Ошибки:** 400 (невалидные параметры; JSON: `{ message: "Validation error", errors: [...] }`), 404 (нет аналогов для konk/prod; JSON: `{ message: "Analogs not found for provided konk/prod" }`), 500.
+**Ошибки:** 400 (невалидные параметры; JSON: `{ message: "Validation error", errors: [...] }`), 404 (нет аналогов для konk/prod или после фильтра abc; JSON: `{ message: "Analogs not found for provided konk/prod" }`), 500.
 
 ### GET `/api/analog-slices/konk-btrade/sales-comparison`
 
@@ -180,6 +184,10 @@
 - `prod`: string (обязательно) — ключ производителя (`Prod.name`).
 - `dateFrom`: string, YYYY-MM-DD (обязательно).
 - `dateTo`: string, YYYY-MM-DD (обязательно), должно быть ≥ dateFrom.
+- `abc`: string (опционально) — одна из букв `"A"`, `"B"`, `"C"`, `"D"`; фильтрация по наличию этой буквы в поле ABC артикула (без учёта регистра).
+- `sortBy`: string (опционально) — значение `"abc"`; при переданном `abc` сортировка по числовой части ABC; иначе порядок по артикулу.
+
+Итоги в `days` и `summary` считаются по отфильтрованным данным.
 
 **Ответ 200:**
 
@@ -233,7 +241,7 @@
 - `400` — невалидные параметры (`konk`, `prod`, даты или dateFrom > dateTo); тело JSON: `{ message: "Validation error", errors: [...] }`.
 - `401` — не авторизован.
 - `403` — недостаточно прав.
-- `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
+- `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul либо после применения фильтра `abc` не осталось ни одного аналога; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
 - `500` — внутренняя ошибка сервера.
 
 ---
@@ -250,6 +258,10 @@
 - `prod`: string (обязательно) — ключ производителя (`Prod.name`).
 - `dateFrom`: string, YYYY-MM-DD (обязательно).
 - `dateTo`: string, YYYY-MM-DD (обязательно), должно быть ≥ dateFrom.
+- `abc`: string (опционально) — одна из букв `"A"`, `"B"`, `"C"`, `"D"`; фильтрация по наличию этой буквы в поле ABC артикула (без учёта регистра).
+- `sortBy`: string (опционально) — значение `"abc"`; при переданном `abc` сортировка по числовой части ABC; иначе порядок по артикулу.
+
+Итоги в `days` и `summary` считаются по отфильтрованным данным.
 
 **Ответ 200:**
 
@@ -299,7 +311,7 @@
 - `400` — невалидные параметры (`konk`, `prod`, даты или dateFrom > dateTo); тело JSON: `{ message: "Validation error", errors: [...] }`.
 - `401` — не авторизован.
 - `403` — недостаточно прав.
-- `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
+- `404` — для заданной пары `konk`/`prod` не найдено ни одного аналога с непустым artikul либо после применения фильтра `abc` не осталось ни одного аналога; тело JSON: `{ message: "Analogs not found for provided konk/prod" }`.
 - `500` — внутренняя ошибка сервера.
 
 ---

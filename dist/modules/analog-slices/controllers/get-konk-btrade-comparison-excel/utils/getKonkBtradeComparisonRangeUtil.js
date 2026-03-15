@@ -5,6 +5,16 @@ import { BtradeSlice, } from "../../../../btrade-slices/models/BtradeSlice.js";
 import { AnalogSlice, } from "../../../models/AnalogSlice.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
+/**
+ * Extracts the numeric part from the beginning of ABC value (e.g. "101B" → 101).
+ * Returns 0 if no leading digits.
+ */
+export function parseAbcNumeric(artAbc) {
+    if (artAbc == null || artAbc === "")
+        return 0;
+    const match = artAbc.trim().match(/^(\d+)/);
+    return match ? parseInt(match[1], 10) : 0;
+}
 export async function getKonkBtradeComparisonRangeUtil(input) {
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
@@ -112,7 +122,7 @@ export async function getKonkBtradeComparisonRangeUtil(input) {
             cursor.setUTCDate(cursor.getUTCDate() + 1);
         }
     }
-    const analogs = preparedAnalogs
+    let analogs = preparedAnalogs
         .slice()
         .sort((a, b) => a.artikul.localeCompare(b.artikul))
         .map((analog) => {
@@ -143,8 +153,29 @@ export async function getKonkBtradeComparisonRangeUtil(input) {
             items,
         };
     });
+    if (input.abc != null) {
+        const abcUpper = input.abc.toUpperCase();
+        analogs = analogs.filter((a) => (a.artAbc ?? "").toUpperCase().includes(abcUpper));
+    }
     if (analogs.length === 0) {
         return { ok: false };
+    }
+    const useSortByAbc = input.abc != null && input.sortBy === "abc";
+    if (useSortByAbc) {
+        analogs = analogs
+            .slice()
+            .sort((a, b) => {
+            const numA = parseAbcNumeric(a.artAbc);
+            const numB = parseAbcNumeric(b.artAbc);
+            if (numA !== numB)
+                return numA - numB;
+            return a.artikul.localeCompare(b.artikul);
+        });
+    }
+    else {
+        analogs = analogs
+            .slice()
+            .sort((a, b) => a.artikul.localeCompare(b.artikul));
     }
     return {
         ok: true,

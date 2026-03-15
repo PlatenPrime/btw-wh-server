@@ -12,13 +12,10 @@ export async function buildKonkBtradeComparisonExcel(analogs, options) {
     const columnCount = firstItems.length + 10;
     if (columnCount > 0) {
         setupAnalogBtradeHeaderRow(worksheet, firstItems, dataStartCol, diffCol, diffPctCol, summaryDiffCol, summaryDiffPctCol, columnCount);
-        const sortedAnalogs = analogs
-            .slice()
-            .sort((a, b) => a.artikul.localeCompare(b.artikul));
         let startRow = 2;
         let sumDeltaAnalog = 0;
         let sumDeltaBtrade = 0;
-        for (const analog of sortedAnalogs) {
+        for (const analog of analogs) {
             const deltas = buildAnalogBtradeExcelBlock({
                 worksheet,
                 startRow,
@@ -50,8 +47,8 @@ export async function buildKonkBtradeComparisonExcel(analogs, options) {
             columnCount,
             sumDeltaAnalog,
             sumDeltaBtrade,
-            competitorTitle: sortedAnalogs[0]?.competitorTitle,
-            producerName: sortedAnalogs[0]?.producerName,
+            competitorTitle: analogs[0]?.competitorTitle,
+            producerName: analogs[0]?.producerName,
         });
         for (let c = 1; c <= columnCount; c++) {
             worksheet.getColumn(c).width = 14;

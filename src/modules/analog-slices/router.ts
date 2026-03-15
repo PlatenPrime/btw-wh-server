@@ -13,7 +13,7 @@ import {
   getKonkBtradeComparisonExcelController,
   getKonkBtradeSalesComparisonController,
   getKonkBtradeStockComparisonController,
-  getSalesComparisonExcelController,
+  getKonkBtradeSalesComparisonExcelController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -50,14 +50,14 @@ router.get(
 );
 router.get(
   "/konk-btrade/sales-comparison",
-  checkAuth,
-  checkRoles([RoleType.USER]),
+  // checkAuth,
+  // checkRoles([RoleType.USER]),
   asyncHandler(getKonkBtradeSalesComparisonController)
 );
 router.get(
   "/konk-btrade/stock-comparison",
-  checkAuth,
-  checkRoles([RoleType.USER]),
+  // checkAuth,
+  // checkRoles([RoleType.USER]),
   asyncHandler(getKonkBtradeStockComparisonController)
 );
 router.get(
@@ -70,7 +70,7 @@ router.get(
   "/konk-btrade/sales-comparison-excel",
   // checkAuth,
   // checkRoles([RoleType.USER]),
-  asyncHandler(getSalesComparisonExcelController)
+  asyncHandler(getKonkBtradeSalesComparisonExcelController)
 );
 router.get(
   "/analog/:analogId/sales-comparison-excel",

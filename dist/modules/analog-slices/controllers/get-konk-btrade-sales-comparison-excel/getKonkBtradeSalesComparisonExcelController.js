@@ -1,13 +1,13 @@
-import { getKonkBtradeComparisonExcelSchema } from "./schemas/getKonkBtradeComparisonExcelSchema.js";
-import { getKonkBtradeComparisonRangeUtil } from "./utils/getKonkBtradeComparisonRangeUtil.js";
-import { buildKonkBtradeComparisonExcel } from "./utils/buildKonkBtradeComparisonExcel.js";
+import { getKonkBtradeComparisonRangeUtil } from "../get-konk-btrade-comparison-excel/utils/getKonkBtradeComparisonRangeUtil.js";
+import { getKonkBtradeSalesComparisonExcelSchema } from "./schemas/getKonkBtradeSalesComparisonExcelSchema.js";
+import { buildSalesComparisonExcel } from "./utils/buildSalesComparisonExcel.js";
 /**
- * @desc    Экспорт сравнительных срезов по группе аналогов (конкурент + производитель) и Btrade в Excel за период дат
- * @route   GET /api/analog-slices/konk-btrade/comparison-excel?konk=air&prod=gemar&dateFrom=2026-03-01&dateTo=2026-03-31
+ * @desc    Экспорт сравнения продаж по группе аналогов (конкурент + Btrade) в Excel за период
+ * @route   GET /api/analog-slices/konk-btrade/sales-comparison-excel?konk=...&prod=...&dateFrom=...&dateTo=...
  */
-export const getKonkBtradeComparisonExcelController = async (req, res) => {
+export const getKonkBtradeSalesComparisonExcelController = async (req, res) => {
     const q = req.query;
-    const parseResult = getKonkBtradeComparisonExcelSchema.safeParse({
+    const parseResult = getKonkBtradeSalesComparisonExcelSchema.safeParse({
         konk: Array.isArray(q.konk) ? q.konk[0] : q.konk,
         prod: Array.isArray(q.prod) ? q.prod[0] : q.prod,
         dateFrom: Array.isArray(q.dateFrom) ? q.dateFrom[0] : q.dateFrom,
@@ -17,7 +17,7 @@ export const getKonkBtradeComparisonExcelController = async (req, res) => {
     });
     if (!parseResult.success) {
         const errors = parseResult.error.flatten();
-        console.error("[getKonkBtradeComparisonExcel] Validation failed:", {
+        console.error("[getKonkBtradeSalesComparisonExcel] Validation failed:", {
             query: req.query,
             errors: errors.fieldErrors,
             formErrors: errors.formErrors,
@@ -35,7 +35,7 @@ export const getKonkBtradeComparisonExcelController = async (req, res) => {
         });
         return;
     }
-    const { buffer, fileName } = await buildKonkBtradeComparisonExcel(rangeResult.analogs, {
+    const { buffer, fileName } = await buildSalesComparisonExcel(rangeResult.analogs, {
         konk: rangeResult.konk,
         prod: rangeResult.prod,
         dateFrom: rangeResult.dateFrom,
