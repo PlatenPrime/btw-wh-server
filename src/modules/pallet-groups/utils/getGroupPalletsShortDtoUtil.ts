@@ -4,7 +4,7 @@ import type { PalletShortDto } from "../../pallets/types/PalletShortDto.js";
 import { mapPalletToShortDto } from "../../pallets/utils/mapPalletToShortDto.js";
 import type { IPalletGroup } from "../models/PalletGroup.js";
 
-const PALLET_PROJECTION = "_id title sector poses isDef";
+const PALLET_PROJECTION = "_id title sector poses isDef palgr";
 
 const normalizeObjectIdToString = (id: Types.ObjectId | string): string =>
   typeof id === "string" ? id : id.toString();

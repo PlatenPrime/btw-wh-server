@@ -33,4 +33,14 @@ export type PalletShortDto = {
    * True when pallet has no poses attached.
    */
   isEmpty: boolean;
+
+  /**
+   * Id of the pallet group this pallet belongs to (if any).
+   */
+  palgrId?: string;
+
+  /**
+   * Title of the pallet group this pallet belongs to (if any).
+   */
+  palgrTitle?: string;
 };

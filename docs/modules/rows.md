@@ -130,9 +130,32 @@
 {
   _id: string;                    // MongoDB ObjectId
   title: string;                   // Уникальное название ряда
-  pallets: Array<string>;         // Массив ObjectId паллет
+  pallets: Array<string>;         // Массив ObjectId паллет (для общей схемы)
   createdAt?: Date;                // Дата создания
   updatedAt?: Date;                // Дата обновления
+}
+```
+
+### Ряд с паллетами (GET по id / GET по title)
+
+При запросах GET `/api/rows/id/:id` и GET `/api/rows/title/:title` в ответе поле `pallets` — массив объектов в кратком представлении (PalletShortDto), а не массив id:
+
+```typescript
+{
+  _id: string;
+  title: string;
+  pallets: Array<{
+    _id: string;                  // MongoDB ObjectId
+    id: string;                   // id паллеты (string)
+    title: string;
+    isDef: boolean;
+    sector: number;
+    isEmpty: boolean;
+    palgrId?: string;             // id группы паллет (если паллета в группе)
+    palgrTitle?: string;          // название группы паллет
+  }>;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 ```
 

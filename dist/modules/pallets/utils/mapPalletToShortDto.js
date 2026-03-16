@@ -8,5 +8,7 @@ export const mapPalletToShortDto = (pallet) => {
         sector: pallet.sector,
         isDef: pallet.isDef,
         isEmpty: pallet.poses.length === 0,
+        palgrId: pallet.palgr?.id?.toString() ?? undefined,
+        palgrTitle: pallet.palgr?.title ?? undefined,
     };
 };

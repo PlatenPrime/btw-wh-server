@@ -8,32 +8,11 @@ router.get("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSl
 router.get("/analog/:analogId/range", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSliceRangeController));
 router.get("/analog/:analogId/sales-range", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSalesRangeController));
 router.get("/analog/:analogId/sales-by-date", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSalesByDateController));
-router.get("/analog/:analogId/comparison-excel", 
-// checkAuth,
-// checkRoles([RoleType.USER]),
-asyncHandler(getAnalogBtradeComparisonExcelController));
-router.get("/konk-btrade/sales-comparison", 
-// checkAuth,
-// checkRoles([RoleType.USER]),
-asyncHandler(getKonkBtradeSalesComparisonController));
-router.get("/konk-btrade/stock-comparison", 
-// checkAuth,
-// checkRoles([RoleType.USER]),
-asyncHandler(getKonkBtradeStockComparisonController));
-router.get("/konk-btrade/comparison-excel", 
-// checkAuth,
-// checkRoles([RoleType.USER]),
-asyncHandler(getKonkBtradeComparisonExcelController));
-router.get("/konk-btrade/sales-comparison-excel", 
-// checkAuth,
-// checkRoles([RoleType.USER]),
-asyncHandler(getKonkBtradeSalesComparisonExcelController));
-router.get("/analog/:analogId/sales-comparison-excel", 
-// checkAuth,
-// checkRoles([RoleType.USER]),
-asyncHandler(getAnalogSalesComparisonExcelController));
-router.get("/analog/:analogId", 
-// checkAuth,
-// checkRoles([RoleType.USER]),
-asyncHandler(getAnalogSliceByDateController));
+router.get("/analog/:analogId/comparison-excel", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogBtradeComparisonExcelController));
+router.get("/konk-btrade/sales-comparison", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKonkBtradeSalesComparisonController));
+router.get("/konk-btrade/stock-comparison", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKonkBtradeStockComparisonController));
+router.get("/konk-btrade/comparison-excel", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKonkBtradeComparisonExcelController));
+router.get("/konk-btrade/sales-comparison-excel", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKonkBtradeSalesComparisonExcelController));
+router.get("/analog/:analogId/sales-comparison-excel", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSalesComparisonExcelController));
+router.get("/analog/:analogId", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAnalogSliceByDateController));
 export default router;

@@ -5,7 +5,7 @@ export const getRowByTitleUtil = async (title) => {
     if (!row) {
         return null;
     }
-    const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector poses isDef");
+    const pallets = await Pallet.find({ "rowData._id": row._id }).select("_id title sector poses isDef palgr");
     const palletsFormatted = pallets.map((p) => ({
         _id: p._id,
         id: p._id.toString(),
@@ -13,6 +13,8 @@ export const getRowByTitleUtil = async (title) => {
         sector: p.sector,
         isEmpty: p.poses.length === 0,
         isDef: p.isDef,
+        palgrId: p.palgr?.id?.toString() ?? undefined,
+        palgrTitle: p.palgr?.title ?? undefined,
     }));
     // Сортируем паллеты по title с учетом числовых частей
     const sortedPallets = palletsFormatted.slice().sort((a, b) => {

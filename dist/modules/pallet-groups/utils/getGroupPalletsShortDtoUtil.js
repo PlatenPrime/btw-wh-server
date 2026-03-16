@@ -1,6 +1,6 @@
 import { Pallet } from "../../pallets/models/Pallet.js";
 import { mapPalletToShortDto } from "../../pallets/utils/mapPalletToShortDto.js";
-const PALLET_PROJECTION = "_id title sector poses isDef";
+const PALLET_PROJECTION = "_id title sector poses isDef palgr";
 const normalizeObjectIdToString = (id) => typeof id === "string" ? id : id.toString();
 export const getPalletsShortForGroup = async (group) => {
     if (!group.pallets.length) {

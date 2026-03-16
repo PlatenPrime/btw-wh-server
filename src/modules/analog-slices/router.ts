@@ -44,44 +44,44 @@ router.get(
 );
 router.get(
   "/analog/:analogId/comparison-excel",
-  // checkAuth,
-  // checkRoles([RoleType.USER]),
+  checkAuth,
+  checkRoles([RoleType.USER]),
   asyncHandler(getAnalogBtradeComparisonExcelController)
 );
 router.get(
   "/konk-btrade/sales-comparison",
-  // checkAuth,
-  // checkRoles([RoleType.USER]),
+  checkAuth,
+  checkRoles([RoleType.USER]),
   asyncHandler(getKonkBtradeSalesComparisonController)
 );
 router.get(
   "/konk-btrade/stock-comparison",
-  // checkAuth,
-  // checkRoles([RoleType.USER]),
+  checkAuth,
+  checkRoles([RoleType.USER]),
   asyncHandler(getKonkBtradeStockComparisonController)
 );
 router.get(
   "/konk-btrade/comparison-excel",
-  // checkAuth,
-  // checkRoles([RoleType.USER]),
+  checkAuth,
+  checkRoles([RoleType.USER]),
   asyncHandler(getKonkBtradeComparisonExcelController)
 );
 router.get(
   "/konk-btrade/sales-comparison-excel",
-  // checkAuth,
-  // checkRoles([RoleType.USER]),
+  checkAuth,
+  checkRoles([RoleType.USER]),
   asyncHandler(getKonkBtradeSalesComparisonExcelController)
 );
 router.get(
   "/analog/:analogId/sales-comparison-excel",
-  // checkAuth,
-  // checkRoles([RoleType.USER]),
+  checkAuth,
+  checkRoles([RoleType.USER]),
   asyncHandler(getAnalogSalesComparisonExcelController)
 );
 router.get(
   "/analog/:analogId",
-  // checkAuth,
-  // checkRoles([RoleType.USER]),
+  checkAuth,
+  checkRoles([RoleType.USER]),
   asyncHandler(getAnalogSliceByDateController)
 );
 

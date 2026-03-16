@@ -24,7 +24,7 @@ export const getRowByIdUtil = async (
   }
 
   const pallets = await Pallet.find({ "rowData._id": row._id }).select(
-    "_id title sector poses isDef",
+    "_id title sector poses isDef palgr",
   );
 
   const palletsFormatted = pallets.map((p) => ({
@@ -34,6 +34,8 @@ export const getRowByIdUtil = async (
     sector: p.sector,
     isEmpty: p.poses.length === 0,
     isDef: p.isDef,
+    palgrId: p.palgr?.id?.toString() ?? undefined,
+    palgrTitle: p.palgr?.title ?? undefined,
   }));
 
   // Сортируем паллеты по title с учетом числовых частей

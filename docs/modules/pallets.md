@@ -234,3 +234,19 @@
 }
 ```
 
+### PalletShortDto (краткое представление паллеты)
+
+Используется в ответах: ряд по id/title (поле `pallets`), группы паллет (паллеты внутри группы), свободные паллеты и т.д.
+
+```typescript
+{
+  id: string;                     // id паллеты (string)
+  title: string;
+  isDef: boolean;
+  sector: number;
+  isEmpty: boolean;               // true, если нет привязанных позиций
+  palgrId?: string;               // id группы паллет (если паллета в группе)
+  palgrTitle?: string;            // название группы паллет
+}
+```
+
