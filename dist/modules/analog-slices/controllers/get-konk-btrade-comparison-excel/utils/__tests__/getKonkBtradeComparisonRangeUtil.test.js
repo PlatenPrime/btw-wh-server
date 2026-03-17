@@ -236,6 +236,78 @@ describe("getKonkBtradeComparisonRangeUtil", () => {
         expect(result.analogs[1].artikul).toBe(artikul101);
         expect(result.analogs[1].artAbc).toBe("101B");
     });
+    it("sorts by abc letter then numeric when sortBy=abc without abc filter", async () => {
+        const artikuls = [
+            "art-34C",
+            "art-56A",
+            "art-2B",
+            "art-278D",
+            "art-12A",
+            "art-87C",
+            "art-42B",
+            "art-123C",
+            "art-7B",
+            "art-4D",
+        ];
+        const abcByArtikul = {
+            "art-12A": "12A",
+            "art-56A": "56A",
+            "art-2B": "2B",
+            "art-7B": "7B",
+            "art-42B": "42B",
+            "art-34C": "34C",
+            "art-87C": "87C",
+            "art-123C": "123C",
+            "art-4D": "4D",
+            "art-278D": "278D",
+        };
+        const expectedOrder = [
+            "12A",
+            "56A",
+            "2B",
+            "7B",
+            "42B",
+            "34C",
+            "87C",
+            "123C",
+            "4D",
+            "278D",
+        ];
+        await Analog.insertMany(artikuls.map((artikul) => ({
+            konkName: "air",
+            prodName: "gemar",
+            artikul,
+            url: `https://example.com/${artikul}`,
+        })));
+        await Art.insertMany(artikuls.map((artikul) => ({
+            artikul,
+            zone: "A1",
+            abc: abcByArtikul[artikul],
+        })));
+        const d1 = new Date("2026-03-01T00:00:00.000Z");
+        const data = {};
+        for (const artikul of artikuls) {
+            data[artikul] = { stock: 1, price: 1 };
+        }
+        await AnalogSlice.create({ konkName: "air", date: d1, data });
+        await BtradeSlice.create({
+            date: d1,
+            data: Object.fromEntries(artikuls.map((a) => [a, { quantity: 1, price: 1 }])),
+        });
+        const result = await getKonkBtradeComparisonRangeUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d1,
+            sortBy: "abc",
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        expect(result.analogs).toHaveLength(expectedOrder.length);
+        const actualOrder = result.analogs.map((a) => a.artAbc ?? "");
+        expect(actualOrder).toEqual(expectedOrder);
+    });
     it("returns ok: false when abc filter leaves no analogs", async () => {
         const artikulA = "ART-ONLY-A";
         await Analog.create({

@@ -10,32 +10,8 @@ describe("buildKonkBtradeComparisonExcel", () => {
     const date1 = new Date("2026-03-01T00:00:00.000Z");
     const date2 = new Date("2026-03-02T00:00:00.000Z");
 
-    // передаём аналоги в «перемешанном» порядке, билдер должен отсортировать по артикулу
+    // порядок аналогов задаёт caller (getKonkBtradeComparisonRangeUtil сортирует по артикулу или abc); билдер выводит блоки как есть
     const analogs = [
-      {
-        analogId: "a2",
-        artikul: "1102-0260",
-        artNameUkr: "Товар 2",
-        artAbc: "B",
-        producerName: "Prod 2",
-        competitorTitle: "Konk 1",
-        items: [
-          {
-            date: date1,
-            analogStock: 3,
-            analogPrice: 2.5,
-            btradeStock: 30,
-            btradePrice: 3.0,
-          },
-          {
-            date: date2,
-            analogStock: 4,
-            analogPrice: 2.6,
-            btradeStock: 40,
-            btradePrice: 3.1,
-          },
-        ],
-      },
       {
         analogId: "a1",
         artikul: "1102-0259",
@@ -57,6 +33,30 @@ describe("buildKonkBtradeComparisonExcel", () => {
             analogPrice: 1.6,
             btradeStock: 20,
             btradePrice: 2.1,
+          },
+        ],
+      },
+      {
+        analogId: "a2",
+        artikul: "1102-0260",
+        artNameUkr: "Товар 2",
+        artAbc: "B",
+        producerName: "Prod 2",
+        competitorTitle: "Konk 1",
+        items: [
+          {
+            date: date1,
+            analogStock: 3,
+            analogPrice: 2.5,
+            btradeStock: 30,
+            btradePrice: 3.0,
+          },
+          {
+            date: date2,
+            analogStock: 4,
+            analogPrice: 2.6,
+            btradeStock: 40,
+            btradePrice: 3.1,
           },
         ],
       },

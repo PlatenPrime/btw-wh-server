@@ -24,6 +24,20 @@ export function parseAbcNumeric(artAbc: string | null): number {
   return match ? parseInt(match[1]!, 10) : 0;
 }
 
+/** Order for ABC letter: A=0, B=1, C=2, D=3; missing or other = 4 (sorts last). */
+const ABC_LETTER_ORDER: Record<string, number> = { A: 0, B: 1, C: 2, D: 3 };
+const ABC_ORDER_LAST = 4;
+
+/**
+ * Returns sort order of the ABC letter (e.g. "101B" → 1, "50A" → 0).
+ * Used to sort blocks: A first, then B, C, D; items without A/B/C/D go last.
+ */
+export function getAbcLetterOrder(artAbc: string | null): number {
+  if (artAbc == null || artAbc === "") return ABC_ORDER_LAST;
+  const letter = artAbc.trim().slice(-1).toUpperCase();
+  return ABC_LETTER_ORDER[letter] ?? ABC_ORDER_LAST;
+}
+
 export interface KonkAnalogInfo {
   analogId: string;
   artikul: string;
@@ -221,13 +235,15 @@ export async function getKonkBtradeComparisonRangeUtil(
     return { ok: false };
   }
 
-  const useSortByAbc =
-    input.abc != null && input.sortBy === "abc";
+  const useSortByAbc = input.sortBy === "abc";
 
   if (useSortByAbc) {
     analogs = analogs
       .slice()
       .sort((a, b) => {
+        const orderA = getAbcLetterOrder(a.artAbc);
+        const orderB = getAbcLetterOrder(b.artAbc);
+        if (orderA !== orderB) return orderA - orderB;
         const numA = parseAbcNumeric(a.artAbc);
         const numB = parseAbcNumeric(b.artAbc);
         if (numA !== numB) return numA - numB;
