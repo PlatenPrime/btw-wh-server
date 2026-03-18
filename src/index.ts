@@ -24,6 +24,7 @@ import prodsRoute from "./modules/prods/router.js";
 import rowsRoute from "./modules/rows/router.js";
 import segsRoute from "./modules/segs/router.js";
 import zonesRoute from "./modules/zones/router.js";
+import variantsRoute from "./modules/variants/router.js";
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use(express.json({ limit: "20mb" }));
 
 app.use("/api/analog-slices", analogSlicesRoute);
 app.use("/api/analogs", analogsRoute);
+app.use("/api/variants", variantsRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/arts", artsRoute);
 app.use("/api/browser", browserRoute);

@@ -1,0 +1,51 @@
+import { Router } from "express";
+import { RoleType } from "../../constants/roles.js";
+import { checkAuth, checkRoles } from "../../middleware/index.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import {
+  createVariantController,
+  deleteVariantByIdController,
+  getVariantByIdController,
+  getVariantsController,
+  updateVariantByIdController,
+} from "./controllers/index.js";
+
+const router = Router();
+
+router.get(
+  "/",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getVariantsController)
+);
+
+router.get(
+  "/id/:id",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getVariantByIdController)
+);
+
+router.post(
+  "/",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(createVariantController)
+);
+
+router.patch(
+  "/id/:id",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(updateVariantByIdController)
+);
+
+router.delete(
+  "/id/:id",
+  checkAuth,
+  checkRoles([RoleType.PRIME]),
+  asyncHandler(deleteVariantByIdController)
+);
+
+export default router;
+
