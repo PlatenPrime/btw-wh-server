@@ -23,6 +23,7 @@ import posesRoute from "./modules/poses/router.js";
 import prodsRoute from "./modules/prods/router.js";
 import rowsRoute from "./modules/rows/router.js";
 import segsRoute from "./modules/segs/router.js";
+import skusRoute from "./modules/skus/router.js";
 import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
 
@@ -49,6 +50,7 @@ app.use("/api/dels", delsRoute);
 app.use("/api/constants", constantsRoute);
 app.use("/api/konks", konksRoute);
 app.use("/api/prods", prodsRoute);
+app.use("/api/skus", skusRoute);
 app.use("/api/blocks", blocksRoute);
 app.use("/api/segs", segsRoute);
 app.use("/api/rows", rowsRoute);
