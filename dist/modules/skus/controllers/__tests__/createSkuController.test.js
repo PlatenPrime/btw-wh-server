@@ -31,6 +31,7 @@ describe("createSkuController", () => {
             body: {
                 konkName: "k1",
                 prodName: "p1",
+                productId: "k1-create-ctrl",
                 title: "Sku 1",
                 url: "https://k1.com/sku-1",
             },

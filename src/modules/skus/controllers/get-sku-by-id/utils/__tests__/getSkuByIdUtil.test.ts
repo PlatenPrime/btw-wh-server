@@ -16,6 +16,7 @@ describe("getSkuByIdUtil", () => {
     const sku = await Sku.create({
       konkName: "k1",
       prodName: "p1",
+      productId: "k1-8",
       title: "Sku 1",
       url: "https://k1.com/sku1",
     });

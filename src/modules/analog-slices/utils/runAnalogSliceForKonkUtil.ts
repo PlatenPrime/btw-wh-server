@@ -1,20 +1,14 @@
 import { Analog } from "../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { AnalogSlice } from "../models/AnalogSlice.js";
+import { toSliceDate } from "../../../utils/sliceDate.js";
+
+export { toSliceDate } from "../../../utils/sliceDate.js";
 
 const DELAY_MS = 5000;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-/**
- * Нормализует дату до начала дня по UTC (для консистентного хранения)
- */
-export function toSliceDate(d: Date): Date {
-  const copy = new Date(d);
-  copy.setUTCHours(0, 0, 0, 0);
-  return copy;
 }
 
 type AnalogLean = { _id: { toString(): string }; artikul?: string };

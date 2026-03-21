@@ -23,11 +23,13 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
                 title: "A",
                 url: "https://yumi.example/p1",
                 imageUrl: "https://cdn.example/img1.jpg",
+                productId: "101",
             },
             {
                 title: "B",
                 url: "https://yumi.example/p2",
                 imageUrl: "https://cdn.example/img2.jpg",
+                productId: "102",
             },
         ]);
         const skugr = await Skugr.create({
@@ -44,6 +46,8 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
         expect(result.stats.skippedAlreadyInGroup).toBe(0);
         const skus = await Sku.find({}).sort({ url: 1 }).lean();
         expect(skus).toHaveLength(2);
+        expect(skus[0].productId).toBe("yumi-101");
+        expect(skus[1].productId).toBe("yumi-102");
         expect(skus[0].btradeAnalog).toBe("");
         expect(skus[1].btradeAnalog).toBe("");
         const refreshed = await Skugr.findById(skugr._id).lean();
@@ -53,6 +57,7 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
         const existing = await Sku.create({
             konkName: "yumi",
             prodName: "other",
+            productId: "yumi-999",
             title: "Old title",
             url: "https://yumi.example/ex",
         });
@@ -64,7 +69,12 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
             skus: [existing._id],
         });
         mockFetch.mockResolvedValue([
-            { title: "New", url: "https://yumi.example/ex", imageUrl: "" },
+            {
+                title: "New",
+                url: "https://yumi.example/ex",
+                imageUrl: "",
+                productId: "999",
+            },
         ]);
         const result = await fillSkugrSkusFromBrowserUtil(skugr._id.toString());
         expect(result.stats.skippedAlreadyInGroup).toBe(1);
@@ -77,6 +87,7 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
         const existing = await Sku.create({
             konkName: "yumi",
             prodName: "other",
+            productId: "yumi-888",
             title: "Keep me",
             url: "https://yumi.example/orphan",
         });
@@ -92,6 +103,7 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
                 title: "Would overwrite",
                 url: "https://yumi.example/orphan",
                 imageUrl: "https://cdn.example/x.jpg",
+                productId: "888",
             },
         ]);
         const result = await fillSkugrSkusFromBrowserUtil(skugr._id.toString());
@@ -108,11 +120,13 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
                 title: "First",
                 url: "https://yumi.example/dup",
                 imageUrl: "https://cdn.example/a.jpg",
+                productId: "777",
             },
             {
                 title: "Second",
                 url: "https://yumi.example/dup",
                 imageUrl: "https://cdn.example/b.jpg",
+                productId: "777",
             },
         ]);
         const skugr = await Skugr.create({
@@ -128,5 +142,6 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
         const row = await Sku.findOne({ url: "https://yumi.example/dup" }).lean();
         expect(row.title).toBe("Second");
         expect(row.imageUrl).toBe("https://cdn.example/b.jpg");
+        expect(row.productId).toBe("yumi-777");
     });
 });

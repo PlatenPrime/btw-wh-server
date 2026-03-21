@@ -23,6 +23,7 @@ import "../modules/rows/models/Row.js";
 import "../modules/segs/models/Seg.js";
 import "../modules/skugrs/models/Skugr.js";
 import "../modules/skus/models/Sku.js";
+import "../modules/sku-slices/models/SkuSlice.js";
 import "../modules/zones/models/Zone.js";
 // Load environment variables
 dotenv.config({ path: ".env.test" });

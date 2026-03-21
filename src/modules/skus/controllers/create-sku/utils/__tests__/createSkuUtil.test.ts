@@ -11,6 +11,7 @@ describe("createSkuUtil", () => {
     const result = await createSkuUtil({
       konkName: "konk-a",
       prodName: "prod-a",
+      productId: "konk-a-10",
       btradeAnalog: "BT-001",
       title: "Sku A",
       url: "https://konk-a.com/sku-a",
@@ -22,6 +23,7 @@ describe("createSkuUtil", () => {
     expect(result.btradeAnalog).toBe("BT-001");
     expect(result.title).toBe("Sku A");
     expect(result.url).toBe("https://konk-a.com/sku-a");
+    expect(result.productId).toBe("konk-a-10");
     expect(result.imageUrl).toBe("");
   });
 
@@ -29,6 +31,7 @@ describe("createSkuUtil", () => {
     const result = await createSkuUtil({
       konkName: "konk-a",
       prodName: "prod-a",
+      productId: "konk-a-11",
       title: "Sku B",
       url: "https://konk-a.com/sku-b",
       imageUrl: "https://cdn.example/pic.jpg",

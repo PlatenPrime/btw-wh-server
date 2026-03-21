@@ -11,12 +11,14 @@ describe("getAllSkusUtil", () => {
     await Sku.create({
       konkName: "k1",
       prodName: "p1",
+      productId: "k1-9",
       title: "S1",
       url: "https://k1.com/s1",
     });
     await Sku.create({
       konkName: "k1",
       prodName: "p2",
+      productId: "k1-10",
       title: "S2",
       url: "https://k1.com/s2",
     });
@@ -33,12 +35,14 @@ describe("getAllSkusUtil", () => {
     await Sku.create({
       konkName: "k-filter",
       prodName: "p-filter",
+      productId: "k-filter-1",
       title: "Wanted",
       url: "https://k-filter.com/wanted",
     });
     await Sku.create({
       konkName: "k-other",
       prodName: "p-other",
+      productId: "k-other-1",
       title: "Other",
       url: "https://k-other.com/other",
     });

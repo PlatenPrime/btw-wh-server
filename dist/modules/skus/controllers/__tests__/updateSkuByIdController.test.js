@@ -33,6 +33,7 @@ describe("updateSkuByIdController", () => {
         const sku = await Sku.create({
             konkName: "k1",
             prodName: "p1",
+            productId: "k1-3",
             title: "Old",
             url: "https://k1.com/old-update",
         });
@@ -48,6 +49,7 @@ describe("updateSkuByIdController", () => {
         const sku = await Sku.create({
             konkName: "k1",
             prodName: "p1",
+            productId: "k1-4",
             title: "T",
             url: "https://k1.com/u-img",
         });

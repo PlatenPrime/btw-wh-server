@@ -48,6 +48,7 @@
 
 - `konkName`: string (обязательно)
 - `prodName`: string (обязательно)
+- `productId`: string (обязательно), канонический идентификатор вида `{konkLower}-{rawId}` (например `air-12345`), уникальный в коллекции
 - `btradeAnalog`: string (опционально, по умолчанию `""`)
 - `title`: string (обязательно)
 - `url`: string (обязательно, валидный URL, уникальный)
@@ -66,7 +67,7 @@
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
 **Запрос:** path-параметр `id` — MongoDB ObjectId.  
-Body: `{ konkName?: string, prodName?: string, btradeAnalog?: string, title?: string, url?: string, imageUrl?: string }`.
+Body: `{ konkName?: string, prodName?: string, productId?: string, btradeAnalog?: string, title?: string, url?: string, imageUrl?: string }` (при передаче `productId` — тот же формат, что при создании).
 
 **Ответ 200:** `{ message: string, data: Sku }`.
 
@@ -91,6 +92,7 @@ Body: `{ konkName?: string, prodName?: string, btradeAnalog?: string, title?: st
 - `_id`: string (MongoDB ObjectId)
 - `konkName`: string
 - `prodName`: string
+- `productId`: string
 - `btradeAnalog`: string
 - `title`: string
 - `url`: string

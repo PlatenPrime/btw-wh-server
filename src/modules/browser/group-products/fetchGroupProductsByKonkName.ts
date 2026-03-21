@@ -30,6 +30,7 @@ export async function fetchGroupProductsByKonkName(
         title: p.title,
         url: p.url,
         imageUrl: p.imageUrl,
+        productId: p.productId,
       }));
     }
     case "air": {
@@ -41,6 +42,7 @@ export async function fetchGroupProductsByKonkName(
         title: p.title,
         url: p.url,
         imageUrl: p.imageUrl,
+        productId: p.productId,
       }));
     }
     case "sharte": {
@@ -52,6 +54,7 @@ export async function fetchGroupProductsByKonkName(
         title: p.title,
         url: p.url,
         imageUrl: p.imageUrl,
+        productId: p.productId,
       }));
     }
     case "balun": {
@@ -63,6 +66,7 @@ export async function fetchGroupProductsByKonkName(
         title: p.title,
         url: p.url,
         imageUrl: p.imageUrl,
+        productId: p.productId,
       }));
     }
     default:

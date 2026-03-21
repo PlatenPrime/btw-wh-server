@@ -30,6 +30,7 @@ describe("deleteSkuByIdController", () => {
         const sku = await Sku.create({
             konkName: "k1",
             prodName: "p1",
+            productId: "k1-5",
             title: "To delete",
             url: "https://k1.com/to-delete",
         });

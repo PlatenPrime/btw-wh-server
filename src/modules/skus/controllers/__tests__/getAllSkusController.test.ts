@@ -35,12 +35,14 @@ describe("getAllSkusController", () => {
     await Sku.create({
       konkName: "k1",
       prodName: "p1",
+      productId: "k1-6",
       title: "Wanted",
       url: "https://k1.com/wanted",
     });
     await Sku.create({
       konkName: "k2",
       prodName: "p2",
+      productId: "k2-1",
       title: "Other",
       url: "https://k2.com/other",
     });

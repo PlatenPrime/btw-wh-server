@@ -13,6 +13,7 @@ describe("Sku Model", () => {
             const saved = await Sku.create({
                 konkName: "konk-a",
                 prodName: "prod-a",
+                productId: "konk-a-1",
                 title: "Sku A",
                 url: "https://konk-a.com/sku-a",
             });
@@ -23,12 +24,14 @@ describe("Sku Model", () => {
             const saved = await Sku.create({
                 konkName: "konk-b",
                 prodName: "prod-b",
+                productId: "konk-b-2",
                 btradeAnalog: "BT-123",
                 title: "Sku B",
                 url: "https://konk-b.com/sku-b",
             });
             expect(saved.konkName).toBe("konk-b");
             expect(saved.prodName).toBe("prod-b");
+            expect(saved.productId).toBe("konk-b-2");
             expect(saved.btradeAnalog).toBe("BT-123");
             expect(saved.title).toBe("Sku B");
             expect(saved.url).toBe("https://konk-b.com/sku-b");
@@ -40,14 +43,33 @@ describe("Sku Model", () => {
             await Sku.create({
                 konkName: "konk-c",
                 prodName: "prod-c",
+                productId: "konk-c-1",
                 title: "Sku C1",
                 url: "https://konk-c.com/sku-c",
             });
             const second = new Sku({
                 konkName: "konk-d",
                 prodName: "prod-d",
+                productId: "konk-d-1",
                 title: "Sku C2",
                 url: "https://konk-c.com/sku-c",
+            });
+            await expect(second.save()).rejects.toThrow();
+        });
+        it("should enforce unique productId", async () => {
+            await Sku.create({
+                konkName: "konk-e",
+                prodName: "prod-e",
+                productId: "shared-pid-1",
+                title: "One",
+                url: "https://e.com/1",
+            });
+            const second = new Sku({
+                konkName: "konk-e",
+                prodName: "prod-e",
+                productId: "shared-pid-1",
+                title: "Two",
+                url: "https://e.com/2",
             });
             await expect(second.save()).rejects.toThrow();
         });

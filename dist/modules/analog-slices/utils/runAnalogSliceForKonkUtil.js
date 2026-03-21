@@ -1,17 +1,11 @@
 import { Analog } from "../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { AnalogSlice } from "../models/AnalogSlice.js";
+import { toSliceDate } from "../../../utils/sliceDate.js";
+export { toSliceDate } from "../../../utils/sliceDate.js";
 const DELAY_MS = 5000;
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
-}
-/**
- * Нормализует дату до начала дня по UTC (для консистентного хранения)
- */
-export function toSliceDate(d) {
-    const copy = new Date(d);
-    copy.setUTCHours(0, 0, 0, 0);
-    return copy;
 }
 /**
  * Собирает срез по всем аналогам конкурента: сначала создаёт документ среза с пустым data,

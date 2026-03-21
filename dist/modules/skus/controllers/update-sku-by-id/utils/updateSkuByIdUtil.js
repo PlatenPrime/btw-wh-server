@@ -5,6 +5,8 @@ export const updateSkuByIdUtil = async (input) => {
         update.konkName = input.konkName;
     if (input.prodName !== undefined)
         update.prodName = input.prodName;
+    if (input.productId !== undefined)
+        update.productId = input.productId;
     if (input.btradeAnalog !== undefined)
         update.btradeAnalog = input.btradeAnalog;
     if (input.title !== undefined)

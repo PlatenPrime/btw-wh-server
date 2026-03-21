@@ -22,6 +22,7 @@ describe("createSkugrUtil", () => {
         const sku = await Sku.create({
             konkName: "k1",
             prodName: "p1",
+            productId: "k1-skugr-util",
             title: "S",
             url: "https://k1.com/s",
         });

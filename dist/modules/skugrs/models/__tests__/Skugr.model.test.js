@@ -24,6 +24,7 @@ describe("Skugr Model", () => {
         const sku = await Sku.create({
             konkName: "k1",
             prodName: "p1",
+            productId: "k1-item",
             title: "Item",
             url: "https://k1.com/item",
         });

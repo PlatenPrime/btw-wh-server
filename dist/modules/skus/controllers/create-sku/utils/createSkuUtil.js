@@ -3,6 +3,7 @@ export const createSkuUtil = async (input) => {
     const sku = await Sku.create({
         konkName: input.konkName,
         prodName: input.prodName,
+        productId: input.productId,
         btradeAnalog: input.btradeAnalog ?? "",
         title: input.title,
         url: input.url,
