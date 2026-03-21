@@ -7,6 +7,7 @@ import {
   deleteSkugrByIdController,
   fillSkugrSkusController,
   getAllSkugrsController,
+  getSkugrByIdController,
   updateSkugrByIdController,
 } from "./controllers/index.js";
 
@@ -17,6 +18,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getAllSkugrsController),
+);
+router.get(
+  "/id/:id",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getSkugrByIdController),
 );
 router.post(
   "/",
