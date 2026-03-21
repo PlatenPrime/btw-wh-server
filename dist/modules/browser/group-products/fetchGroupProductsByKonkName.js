@@ -1,4 +1,6 @@
 import { getAirGroupPagesProducts } from "../air/group-pages/utils/getAirGroupPagesProducts.js";
+import { getBalunGroupPagesProducts } from "../balun/group-pages/utils/getBalunGroupPagesProducts.js";
+import { getSharteGroupPagesProducts } from "../sharte/group-pages/utils/getSharteGroupPagesProducts.js";
 import { getYumiGroupPagesProducts } from "../yumi/group-pages/utils/getYumiGroupPagesProducts.js";
 export class UnsupportedKonkForGroupProductsError extends Error {
     konkName;
@@ -10,7 +12,6 @@ export class UnsupportedKonkForGroupProductsError extends Error {
 }
 /**
  * По имени конкурента вызывает соответствующую утилиту обхода страниц группы.
- * Для balun / sharte — добавить ветки по мере готовности парсеров.
  */
 export async function fetchGroupProductsByKonkName(konkName, input) {
     const normalized = konkName.trim().toLowerCase();
@@ -37,8 +38,28 @@ export async function fetchGroupProductsByKonkName(konkName, input) {
                 imageUrl: p.imageUrl,
             }));
         }
-        // case "balun":
-        // case "sharte":
+        case "sharte": {
+            const rows = await getSharteGroupPagesProducts({
+                groupUrl: input.groupUrl,
+                ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
+            });
+            return rows.map((p) => ({
+                title: p.title,
+                url: p.url,
+                imageUrl: p.imageUrl,
+            }));
+        }
+        case "balun": {
+            const rows = await getBalunGroupPagesProducts({
+                groupUrl: input.groupUrl,
+                ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
+            });
+            return rows.map((p) => ({
+                title: p.title,
+                url: p.url,
+                imageUrl: p.imageUrl,
+            }));
+        }
         default:
             throw new UnsupportedKonkForGroupProductsError(konkName);
     }
