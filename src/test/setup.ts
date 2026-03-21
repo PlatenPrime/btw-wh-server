@@ -22,6 +22,8 @@ import "../modules/pallets/models/Pallet.js";
 import "../modules/poses/models/Pos.js";
 import "../modules/rows/models/Row.js";
 import "../modules/segs/models/Seg.js";
+import "../modules/skugrs/models/Skugr.js";
+import "../modules/skus/models/Sku.js";
 import "../modules/zones/models/Zone.js";
 
 // Load environment variables

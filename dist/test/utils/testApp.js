@@ -13,6 +13,7 @@ import palletsRoute from "../../modules/pallets/router.js";
 import posesRoute from "../../modules/poses/router.js";
 import rowsRoute from "../../modules/rows/router.js";
 import segsRoute from "../../modules/segs/router.js";
+import skugrsRoute from "../../modules/skugrs/router.js";
 import skusRoute from "../../modules/skus/router.js";
 import zonesRoute from "../../modules/zones/router.js";
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/poses", posesRoute);
 app.use("/api/defs", defsRoute);
 app.use("/api/prods", prodsRoute);
 app.use("/api/skus", skusRoute);
+app.use("/api/skugrs", skugrsRoute);
 app.use("/api/zones", zonesRoute);
 // Error handler must be after all routes
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,0 +1,103 @@
+# API групп товаров конкурента (Skugrs)
+
+Эндпоинты для групп SKU конкурента. Чтение — роль USER, создание и обновление — ADMIN, удаление — PRIME.
+
+## Эндпоинты
+
+### GET `/api/skugrs`
+
+Список групп с пагинацией и фильтрами.
+
+**Доступ:** checkAuth + checkRoles(USER).
+
+**Query-параметры:**
+
+- `page?: number` — страница, по умолчанию `1`
+- `limit?: number` — размер страницы, по умолчанию `10`, максимум `100`
+- `konkName?: string` — точное совпадение с полем группы
+- `prodName?: string` — точное совпадение с полем группы
+- `search?: string` — регистронезависимый поиск по подстроке в `title` (спецсимволы regex экранируются)
+
+**Ответ 200:**
+
+```json
+{
+  "message": "Skugrs retrieved successfully",
+  "data": [ /* массив Skugr */ ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 0,
+    "totalPages": 0,
+    "hasNext": false,
+    "hasPrev": false
+  }
+}
+```
+
+**Ошибки:** 400 (невалидные query), 401, 403, 500.
+
+---
+
+### POST `/api/skugrs`
+
+Создание группы.
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Body (JSON):**
+
+- `konkName`: string (обязательно)
+- `prodName`: string (обязательно)
+- `title`: string (обязательно)
+- `url`: string (обязательно, валидный URL)
+- `skus`: string[] (опционально, по умолчанию `[]`) — массив MongoDB ObjectId существующих SKU
+
+**Ответ 201:** `{ message, data: Skugr }`.
+
+**Ошибки:** 400 (валидация Zod или несуществующие id в `skus`), 401, 403, 500.
+
+---
+
+### PATCH `/api/skugrs/id/:id`
+
+Частичное обновление метаданных группы. Поле `skus` этим методом не меняется.
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Параметры пути:** `id` — ObjectId группы.
+
+**Body:** любое сочетание полей:
+
+- `konkName?: string`
+- `prodName?: string`
+- `title?: string`
+- `url?: string` (валидный URL)
+
+Пустой объект допустим: возвращается текущий документ без изменений.
+
+**Ответ 200:** `{ message, data: Skugr }`.
+
+**Ошибки:** 400 (валидация), 401, 403, 404, 500.
+
+---
+
+### DELETE `/api/skugrs/id/:id`
+
+Удаление группы по id. Документы `Sku` не удаляются.
+
+**Доступ:** checkAuth + checkRoles(PRIME).
+
+**Ответ 200:** `{ message: "Skugr deleted successfully" }`.
+
+**Ошибки:** 400 (невалидный id), 401, 403, 404, 500.
+
+## Формат Skugr в `data`
+
+- `_id`: string (ObjectId)
+- `konkName`: string
+- `prodName`: string
+- `title`: string
+- `url`: string
+- `skus`: string[] (ObjectId в виде строк)
+- `createdAt`, `updatedAt`: даты (ISO-строка в JSON)
