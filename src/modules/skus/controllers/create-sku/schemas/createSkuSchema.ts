@@ -6,6 +6,7 @@ export const createSkuSchema = z.object({
   btradeAnalog: z.string().default(""),
   title: z.string().min(1, "Title is required"),
   url: z.string().url("Url must be a valid URL"),
+  imageUrl: z.string().default(""),
 });
 
 export type CreateSkuInput = z.infer<typeof createSkuSchema>;

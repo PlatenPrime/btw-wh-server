@@ -7,7 +7,7 @@ import { updateSkuByIdUtil } from "./utils/updateSkuByIdUtil.js";
 export const updateSkuByIdController = async (req, res) => {
     try {
         const { id } = req.params;
-        const { konkName, prodName, btradeAnalog, title, url } = req.body;
+        const { konkName, prodName, btradeAnalog, title, url, imageUrl } = req.body;
         const parseResult = updateSkuByIdSchema.safeParse({
             id,
             konkName,
@@ -15,6 +15,7 @@ export const updateSkuByIdController = async (req, res) => {
             btradeAnalog,
             title,
             url,
+            imageUrl,
         });
         if (!parseResult.success) {
             res.status(400).json({

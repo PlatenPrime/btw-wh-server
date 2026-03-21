@@ -9,4 +9,5 @@ export const updateSkuByIdSchema = z.object({
     btradeAnalog: z.string().optional(),
     title: z.string().min(1).optional(),
     url: z.string().url("Url must be a valid URL").optional(),
+    imageUrl: z.string().optional(),
 });

@@ -11,6 +11,8 @@ export const updateSkuByIdUtil = async (input) => {
         update.title = input.title;
     if (input.url !== undefined)
         update.url = input.url;
+    if (input.imageUrl !== undefined)
+        update.imageUrl = input.imageUrl;
     if (Object.keys(update).length === 0) {
         return Sku.findById(input.id);
     }

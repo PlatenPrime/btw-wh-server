@@ -5,6 +5,7 @@ const skuSchema = new Schema({
     btradeAnalog: { type: String, default: "" },
     title: { type: String, required: true },
     url: { type: String, required: true, unique: true },
+    imageUrl: { type: String, default: "" },
 }, { timestamps: true });
 /**
  * Sku Mongoose model

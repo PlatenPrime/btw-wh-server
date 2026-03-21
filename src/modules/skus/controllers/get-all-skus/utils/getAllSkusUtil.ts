@@ -9,6 +9,7 @@ type SkuLean = {
   btradeAnalog: string;
   title: string;
   url: string;
+  imageUrl: string;
   createdAt?: Date;
   updatedAt?: Date;
 };

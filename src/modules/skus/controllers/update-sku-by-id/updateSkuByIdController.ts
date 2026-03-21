@@ -12,7 +12,8 @@ export const updateSkuByIdController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { konkName, prodName, btradeAnalog, title, url } = req.body;
+    const { konkName, prodName, btradeAnalog, title, url, imageUrl } =
+      req.body;
     const parseResult = updateSkuByIdSchema.safeParse({
       id,
       konkName,
@@ -20,6 +21,7 @@ export const updateSkuByIdController = async (
       btradeAnalog,
       title,
       url,
+      imageUrl,
     });
 
     if (!parseResult.success) {

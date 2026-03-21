@@ -23,7 +23,9 @@
 ```json
 {
   "message": "Skugrs retrieved successfully",
-  "data": [ /* массив Skugr */ ],
+  "data": [
+    /* массив Skugr */
+  ],
   "pagination": {
     "page": 1,
     "limit": 10,
@@ -56,6 +58,42 @@
 **Ответ 201:** `{ message, data: Skugr }`.
 
 **Ошибки:** 400 (валидация Zod или несуществующие id в `skus`), 401, 403, 500.
+
+---
+
+### POST `/api/skugrs/id/:id/fill-skus`
+
+Заполнение массива `skus` группы по данным парсера страниц группы в модуле `browser`. Для `konkName` выбирается реализация (сейчас: `yumi`); для неподдерживаемого конкурента — **400**.
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Параметры пути:** `id` — ObjectId группы.
+
+**Body (JSON, опционально):**
+
+- `maxPages?: number` — лимит страниц пагинации для парсера (1–200), только для конкурентов, где параметр применим (например Yumi).
+
+**Ответ 200:**
+
+```json
+{
+  "message": "Skugr skus filled from browser successfully",
+  "data": {
+    /* Skugr DTO после обновления */
+  },
+  "stats": {
+    "fetched": 0,
+    "dedupedByUrl": 0,
+    "skippedAlreadyInGroup": 0,
+    "linkedExisting": 0,
+    "created": 0
+  }
+}
+```
+
+Поле `stats`: сколько позиций вернул парсер (`fetched`), сколько отброшено из‑за дубликата `url` в выдаче (`dedupedByUrl`), сколько URL уже были в группе (`skippedAlreadyInGroup`), сколько существующих SKU только добавлено в группу (`linkedExisting`), сколько создано новых документов SKU (`created`). У **новых** SKU при создании заполняются `title`, `url` и `imageUrl` из ответа парсера (у уже существующих SKU поля не меняются).
+
+**Ошибки:** 400 (валидация или неподдерживаемый `konkName`), 404 (группа не найдена), 401, 403, 500.
 
 ---
 

@@ -32,4 +32,20 @@ describe("updateSkuByIdUtil", () => {
     expect(result?.konkName).toBe("k1");
     expect(result?.prodName).toBe("p1");
   });
+
+  it("updates imageUrl when provided", async () => {
+    const sku = await Sku.create({
+      konkName: "k1",
+      prodName: "p1",
+      title: "T",
+      url: "https://k1.com/u1",
+    });
+
+    const result = await updateSkuByIdUtil({
+      id: sku._id.toString(),
+      imageUrl: "https://cdn.example/i.png",
+    });
+
+    expect(result?.imageUrl).toBe("https://cdn.example/i.png");
+  });
 });

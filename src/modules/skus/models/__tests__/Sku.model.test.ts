@@ -12,7 +12,7 @@ describe("Sku Model", () => {
       await expect(sku.save()).rejects.toThrow();
     });
 
-    it("should set btradeAnalog as empty string by default", async () => {
+    it("should set btradeAnalog and imageUrl as empty string by default", async () => {
       const saved = await Sku.create({
         konkName: "konk-a",
         prodName: "prod-a",
@@ -21,6 +21,7 @@ describe("Sku Model", () => {
       });
 
       expect(saved.btradeAnalog).toBe("");
+      expect(saved.imageUrl).toBe("");
     });
 
     it("should save with all required fields", async () => {
@@ -37,6 +38,7 @@ describe("Sku Model", () => {
       expect(saved.btradeAnalog).toBe("BT-123");
       expect(saved.title).toBe("Sku B");
       expect(saved.url).toBe("https://konk-b.com/sku-b");
+      expect(saved.imageUrl).toBe("");
       expect(saved.createdAt).toBeInstanceOf(Date);
       expect(saved.updatedAt).toBeInstanceOf(Date);
     });

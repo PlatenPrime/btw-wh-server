@@ -51,6 +51,7 @@
 - `btradeAnalog`: string (опционально, по умолчанию `""`)
 - `title`: string (обязательно)
 - `url`: string (обязательно, валидный URL, уникальный)
+- `imageUrl`: string (опционально, по умолчанию `""`)
 
 **Ответ 201:** `{ message: string, data: Sku }`.
 
@@ -65,7 +66,7 @@
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
 **Запрос:** path-параметр `id` — MongoDB ObjectId.  
-Body: `{ konkName?: string, prodName?: string, btradeAnalog?: string, title?: string, url?: string }`.
+Body: `{ konkName?: string, prodName?: string, btradeAnalog?: string, title?: string, url?: string, imageUrl?: string }`.
 
 **Ответ 200:** `{ message: string, data: Sku }`.
 
@@ -93,5 +94,6 @@ Body: `{ konkName?: string, prodName?: string, btradeAnalog?: string, title?: st
 - `btradeAnalog`: string
 - `title`: string
 - `url`: string
+- `imageUrl`: string
 - `createdAt`: Date (ISO строка)
 - `updatedAt`: Date (ISO строка)

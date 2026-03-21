@@ -19,5 +19,16 @@ describe("createSkuUtil", () => {
         expect(result.btradeAnalog).toBe("BT-001");
         expect(result.title).toBe("Sku A");
         expect(result.url).toBe("https://konk-a.com/sku-a");
+        expect(result.imageUrl).toBe("");
+    });
+    it("persists imageUrl when provided", async () => {
+        const result = await createSkuUtil({
+            konkName: "konk-a",
+            prodName: "prod-a",
+            title: "Sku B",
+            url: "https://konk-a.com/sku-b",
+            imageUrl: "https://cdn.example/pic.jpg",
+        });
+        expect(result.imageUrl).toBe("https://cdn.example/pic.jpg");
     });
 });

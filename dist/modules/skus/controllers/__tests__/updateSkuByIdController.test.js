@@ -44,4 +44,19 @@ describe("updateSkuByIdController", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data.title).toBe("New");
     });
+    it("200 updates imageUrl", async () => {
+        const sku = await Sku.create({
+            konkName: "k1",
+            prodName: "p1",
+            title: "T",
+            url: "https://k1.com/u-img",
+        });
+        const req = {
+            params: { id: sku._id.toString() },
+            body: { imageUrl: "https://img.example/x.webp" },
+        };
+        await updateSkuByIdController(req, res);
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.data.imageUrl).toBe("https://img.example/x.webp");
+    });
 });

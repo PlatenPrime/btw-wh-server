@@ -5,6 +5,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   createSkugrController,
   deleteSkugrByIdController,
+  fillSkugrSkusController,
   getAllSkugrsController,
   updateSkugrByIdController,
 } from "./controllers/index.js";
@@ -22,6 +23,12 @@ router.post(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(createSkugrController),
+);
+router.post(
+  "/id/:id/fill-skus",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(fillSkugrSkusController),
 );
 router.patch(
   "/id/:id",

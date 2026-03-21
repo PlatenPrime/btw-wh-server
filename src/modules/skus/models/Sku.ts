@@ -10,6 +10,7 @@ export interface ISku extends Document {
   btradeAnalog: string;
   title: string;
   url: string;
+  imageUrl: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +22,7 @@ const skuSchema = new Schema<ISku>(
     btradeAnalog: { type: String, default: "" },
     title: { type: String, required: true },
     url: { type: String, required: true, unique: true },
+    imageUrl: { type: String, default: "" },
   },
   { timestamps: true }
 );

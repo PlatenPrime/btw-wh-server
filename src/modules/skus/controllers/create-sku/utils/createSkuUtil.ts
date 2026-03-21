@@ -6,6 +6,7 @@ type CreateSkuUtilInput = {
   btradeAnalog?: string;
   title: string;
   url: string;
+  imageUrl?: string;
 };
 
 export const createSkuUtil = async (
@@ -17,6 +18,7 @@ export const createSkuUtil = async (
     btradeAnalog: input.btradeAnalog ?? "",
     title: input.title,
     url: input.url,
+    imageUrl: input.imageUrl ?? "",
   });
 
   return sku;

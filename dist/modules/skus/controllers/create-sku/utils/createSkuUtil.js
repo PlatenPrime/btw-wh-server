@@ -6,6 +6,7 @@ export const createSkuUtil = async (input) => {
         btradeAnalog: input.btradeAnalog ?? "",
         title: input.title,
         url: input.url,
+        imageUrl: input.imageUrl ?? "",
     });
     return sku;
 };
