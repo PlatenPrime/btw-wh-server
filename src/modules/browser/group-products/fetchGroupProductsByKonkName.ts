@@ -1,3 +1,4 @@
+import { getAirGroupPagesProducts } from "../air/group-pages/utils/getAirGroupPagesProducts.js";
 import { getYumiGroupPagesProducts } from "../yumi/group-pages/utils/getYumiGroupPagesProducts.js";
 import type { FetchGroupProductsInput, GroupBrowserProduct } from "./types.js";
 
@@ -10,7 +11,7 @@ export class UnsupportedKonkForGroupProductsError extends Error {
 
 /**
  * По имени конкурента вызывает соответствующую утилиту обхода страниц группы.
- * Для air / balun / sharte — добавить ветки по мере готовности парсеров.
+ * Для balun / sharte — добавить ветки по мере готовности парсеров.
  */
 export async function fetchGroupProductsByKonkName(
   konkName: string,
@@ -30,7 +31,17 @@ export async function fetchGroupProductsByKonkName(
         imageUrl: p.imageUrl,
       }));
     }
-    // case "air":
+    case "air": {
+      const rows = await getAirGroupPagesProducts({
+        groupUrl: input.groupUrl,
+        ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
+      });
+      return rows.map((p) => ({
+        title: p.title,
+        url: p.url,
+        imageUrl: p.imageUrl,
+      }));
+    }
     // case "balun":
     // case "sharte":
     default:
