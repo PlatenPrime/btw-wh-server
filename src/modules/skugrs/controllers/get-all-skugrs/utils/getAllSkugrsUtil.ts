@@ -48,7 +48,7 @@ export const getAllSkugrsUtil = async ({
 
   const [skugrs, total] = await Promise.all([
     Skugr.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ title: 1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .lean() as Promise<SkugrLean[]>,

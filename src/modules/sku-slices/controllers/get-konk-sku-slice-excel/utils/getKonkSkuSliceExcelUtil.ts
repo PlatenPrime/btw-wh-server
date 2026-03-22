@@ -1,3 +1,5 @@
+import { Konk } from "../../../../konks/models/Konk.js";
+import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
@@ -54,6 +56,15 @@ export async function getKonkSkuSliceExcelUtil(
     byDate.set(t, (sl.data ?? {}) as Record<string, ISkuSliceDataItem>);
   }
 
+  const [konkDoc, prodDoc] = await Promise.all([
+    Konk.findOne({ name: input.konk }).select("title").lean(),
+    Prod.findOne({ name: input.prod }).select("title").lean(),
+  ]);
+  const titles = {
+    competitorTitle: (konkDoc?.title ?? "").trim(),
+    producerName: (prodDoc?.title ?? "").trim(),
+  };
+
   const { buffer } = await buildSkuSliceExcelForSkus(
     rows,
     dateFrom,
@@ -62,7 +73,8 @@ export async function getKonkSkuSliceExcelUtil(
       if (kn !== input.konk) return undefined;
       const rec = byDate.get(toSliceDate(d).getTime());
       return rec?.[pid];
-    }
+    },
+    titles
   );
 
   const fileName = `sku_slice_konk_${safeFilePart(input.konk)}_${safeFilePart(input.prod)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;
