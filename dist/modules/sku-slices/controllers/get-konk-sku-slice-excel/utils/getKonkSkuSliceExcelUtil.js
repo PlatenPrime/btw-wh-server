@@ -50,7 +50,10 @@ export async function getKonkSkuSliceExcelUtil(input) {
             return undefined;
         const rec = byDate.get(toSliceDate(d).getTime());
         return rec?.[pid];
-    }, titles);
+    }, titles, {
+        includeTotalsRow: true,
+        totalsRowLabel: "Підсумок",
+    });
     const fileName = `sku_slice_konk_${safeFilePart(input.konk)}_${safeFilePart(input.prod)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;
     return { ok: true, buffer, fileName };
 }

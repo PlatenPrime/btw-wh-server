@@ -3,10 +3,10 @@ import { getKonkSkuSliceExcelSchema } from "./schemas/getKonkSkuSliceExcelSchema
 import { getKonkSkuSliceExcelUtil } from "./utils/getKonkSkuSliceExcelUtil.js";
 
 /**
- * @desc    Excel срезов по группе SKU (konk + prod) за период
+ * @desc    Excel остатков по группе SKU (konk + prod) за период с итогом Підсумок
  * @route   GET /api/sku-slices/konk/excel?konk=&prod=&dateFrom=&dateTo=
  */
-export const getKonkSkuSliceExcelController = async (
+export const getKonkSkuStockSliceExcelController = async (
   req: Request,
   res: Response
 ): Promise<void> => {

@@ -40,7 +40,7 @@ describe("buildSkuSliceExcelForSkus", () => {
     expect(fileName.endsWith(".xlsx")).toBe(true);
   });
 
-  it("uses analog-like layout: metric column F, diff columns, merges, sales footer", async () => {
+  it("uses stock layout: metric column F, diff columns, merges, no revenue/stats rows", async () => {
     const from = new Date("2026-01-10T00:00:00.000Z");
     const to = new Date("2026-01-11T00:00:00.000Z");
     const { buffer } = await buildSkuSliceExcelForSkus(
@@ -81,7 +81,7 @@ describe("buildSkuSliceExcelForSkus", () => {
     expect(ws!.getRow(2).getCell(4).value).toBe("Виробник UA");
     expect(ws!.getRow(2).getCell(6).value).toBe("Залишок");
     expect(ws!.getRow(3).getCell(6).value).toBe("Ціна");
-    expect(ws!.getRow(4).getCell(6).value).toBe("Виручка");
+    expect(ws!.getRow(4).getCell(6).value).not.toBe("Виручка");
 
     expect(ws!.getRow(3).getCell(7).value).toBe(5);
     expect(ws!.getRow(3).getCell(8).value).toBe(5);
@@ -89,7 +89,7 @@ describe("buildSkuSliceExcelForSkus", () => {
     expect(ws!.getRow(2).getCell(9).value).toBe(-3);
 
     const merged = ws!.model.merges ?? [];
-    expect(merged.some((m) => /^A2:A4$/.test(String(m)))).toBe(true);
+    expect(merged.some((m) => /^A2:A3$/.test(String(m)))).toBe(true);
 
     let foundStats = false;
     let foundRazom = false;
@@ -98,8 +98,53 @@ describe("buildSkuSliceExcelForSkus", () => {
       if (v === "Статистика продажів") foundStats = true;
       if (v === "Разом") foundRazom = true;
     });
-    expect(foundStats).toBe(true);
-    expect(foundRazom).toBe(true);
+    expect(foundStats).toBe(false);
+    expect(foundRazom).toBe(false);
+  });
+
+  it("adds konk totals row for diff and diff pct", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSliceExcelForSkus(
+      [
+        {
+          title: "N1",
+          url: "https://x.com/1",
+          productId: "air-1",
+          konkName: "air",
+          prodName: "p",
+        },
+        {
+          title: "N2",
+          url: "https://x.com/2",
+          productId: "air-2",
+          konkName: "air",
+          prodName: "p",
+        },
+      ],
+      from,
+      to,
+      (_kn, pid, d) => {
+        const t = d.getTime();
+        if (pid === "air-1" && t === from.getTime()) return { stock: 10, price: 5 };
+        if (pid === "air-1" && t === to.getTime()) return { stock: 7, price: 6 };
+        if (pid === "air-2" && t === from.getTime()) return { stock: 4, price: 8 };
+        if (pid === "air-2" && t === to.getTime()) return { stock: 6, price: 8 };
+        return undefined;
+      },
+      TITLES,
+      { includeTotalsRow: true, totalsRowLabel: "Підсумок" }
+    );
+
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
+    const ws = wb.getWorksheet("Срез");
+    expect(ws).toBeDefined();
+
+    // Two SKU blocks (2 rows each) => totals row starts at row 6.
+    expect(ws!.getRow(6).getCell(1).value).toBe("Підсумок");
+    expect(ws!.getRow(6).getCell(9).value).toBe(-1); // (-3) + (+2)
+    expect(ws!.getRow(6).getCell(10).value).toBe(-7.14); // -1 / (10+4) * 100
   });
 });
 

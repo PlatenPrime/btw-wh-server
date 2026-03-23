@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
-import { getKonkSkuSliceExcelController } from "../getKonkSkuSliceExcelController.js";
-describe("getKonkSkuSliceExcelController", () => {
+import { getKonkSkuStockSliceExcelController } from "../getKonkSkuSliceExcelController.js";
+describe("getKonkSkuStockSliceExcelController", () => {
     let res;
     let responseStatus;
     let responseJson;
@@ -44,7 +44,7 @@ describe("getKonkSkuSliceExcelController", () => {
                 dateTo: "2026-06-01",
             },
         };
-        await getKonkSkuSliceExcelController(req, res);
+        await getKonkSkuStockSliceExcelController(req, res);
         expect(responseStatus.code).toBe(400);
     });
     it("404 when no skus for group", async () => {
@@ -56,7 +56,7 @@ describe("getKonkSkuSliceExcelController", () => {
                 dateTo: "2026-06-01",
             },
         };
-        await getKonkSkuSliceExcelController(req, res);
+        await getKonkSkuStockSliceExcelController(req, res);
         expect(responseStatus.code).toBe(404);
     });
     it("200 sends excel for group", async () => {
@@ -81,7 +81,7 @@ describe("getKonkSkuSliceExcelController", () => {
                 dateTo: "2026-06-01",
             },
         };
-        await getKonkSkuSliceExcelController(req, res);
+        await getKonkSkuStockSliceExcelController(req, res);
         expect(responseStatus.code).toBe(200);
         expect(Buffer.isBuffer(responseBody)).toBe(true);
         expect(String(responseHeaders["Content-Disposition"])).toContain("gemar");

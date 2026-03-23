@@ -3,10 +3,10 @@ import { getSkuSliceExcelSchema } from "./schemas/getSkuSliceExcelSchema.js";
 import { getSkuSliceExcelUtil } from "./utils/getSkuSliceExcelUtil.js";
 
 /**
- * @desc    Excel среза по одному SKU за период (без Btrade)
+ * @desc    Excel остатков по одному SKU за период (метрики: Залишок, Ціна; без Btrade)
  * @route   GET /api/sku-slices/sku/:skuId/slice-excel?dateFrom=&dateTo=
  */
-export const getSkuSliceExcelController = async (
+export const getSkuStockSliceExcelController = async (
   req: Request,
   res: Response
 ): Promise<void> => {

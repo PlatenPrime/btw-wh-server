@@ -2,9 +2,9 @@ import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
-import { getKonkSkuSliceExcelController } from "../getKonkSkuSliceExcelController.js";
+import { getKonkSkuStockSliceExcelController } from "../getKonkSkuSliceExcelController.js";
 
-describe("getKonkSkuSliceExcelController", () => {
+describe("getKonkSkuStockSliceExcelController", () => {
   let res: Response;
   let responseStatus: { code?: number };
   let responseJson: Record<string, unknown>;
@@ -48,7 +48,7 @@ describe("getKonkSkuSliceExcelController", () => {
         dateTo: "2026-06-01",
       },
     } as unknown as Request;
-    await getKonkSkuSliceExcelController(req, res);
+    await getKonkSkuStockSliceExcelController(req, res);
     expect(responseStatus.code).toBe(400);
   });
 
@@ -61,7 +61,7 @@ describe("getKonkSkuSliceExcelController", () => {
         dateTo: "2026-06-01",
       },
     } as unknown as Request;
-    await getKonkSkuSliceExcelController(req, res);
+    await getKonkSkuStockSliceExcelController(req, res);
     expect(responseStatus.code).toBe(404);
   });
 
@@ -87,7 +87,7 @@ describe("getKonkSkuSliceExcelController", () => {
         dateTo: "2026-06-01",
       },
     } as unknown as Request;
-    await getKonkSkuSliceExcelController(req, res);
+    await getKonkSkuStockSliceExcelController(req, res);
     expect(responseStatus.code).toBe(200);
     expect(Buffer.isBuffer(responseBody as Buffer)).toBe(true);
     expect(String(responseHeaders["Content-Disposition"])).toContain(

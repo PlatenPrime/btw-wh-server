@@ -3,10 +3,6 @@ import {
   applyDataRowStyle,
   applyHeaderStyle,
 } from "../../../lib/excel/worksheetStyles.js";
-import {
-  computeRevenueForDay,
-  computeSalesFromStockSequence,
-} from "../../analog-slices/controllers/common/salesComparisonUtils.js";
 import type { ISkuSliceDataItem } from "../models/SkuSlice.js";
 
 const HEADER_LABELS = [
@@ -17,9 +13,9 @@ const HEADER_LABELS = [
   "Посилання",
 ] as const;
 
-const METRIC_LABELS = ["Залишок", "Ціна", "Виручка"] as const;
+const METRIC_LABELS = ["Залишок", "Ціна"] as const;
 
-const ROWS_PER_SKU_BLOCK = 3;
+const ROWS_PER_SKU_BLOCK = 2;
 
 export function formatDateHeader(d: Date): string {
   const y = d.getUTCFullYear();
@@ -53,6 +49,11 @@ export type SkuSliceExcelSkuRow = {
 export type SkuSliceExcelTitles = {
   competitorTitle: string;
   producerName: string;
+};
+
+export type SkuSliceExcelOptions = {
+  includeTotalsRow?: boolean;
+  totalsRowLabel?: string;
 };
 
 function getFirstAndLastNumeric(
@@ -158,23 +159,6 @@ function highlightPriceDecreases(
   }
 }
 
-function computePeriodSalesTotals(
-  stocks: (number | null)[],
-  prices: (number | null)[]
-): { totalSales: number; totalRevenue: number } {
-  const salesResults = computeSalesFromStockSequence(stocks);
-  let totalSales = 0;
-  let totalRevenue = 0;
-  for (let i = 0; i < salesResults.length; i++) {
-    const day = salesResults[i]!;
-    const p = prices[i];
-    const price = typeof p === "number" && Number.isFinite(p) ? p : null;
-    totalSales += day.sales;
-    totalRevenue += computeRevenueForDay(day.sales, price);
-  }
-  return { totalSales, totalRevenue };
-}
-
 function setMergedMetaAlignment(cell: ExcelJS.Cell): void {
   const prev = cell.alignment ?? {};
   cell.alignment = {
@@ -186,8 +170,8 @@ function setMergedMetaAlignment(cell: ExcelJS.Cell): void {
 }
 
 /**
- * Excel: блоки по SKU (Залишок / Ціна / Виручка), колонка F — підписи метрик,
- * дати з G, потім «Різниця» та «Різниця, %»; внизу — статистика продажів.
+ * Excel: блоки по SKU (Залишок / Ціна), колонка F — підписи метрик,
+ * дати з G, потім «Різниця» та «Різниця, %».
  */
 export async function buildSkuSliceExcelForSkus(
   skus: SkuSliceExcelSkuRow[],
@@ -198,7 +182,8 @@ export async function buildSkuSliceExcelForSkus(
     productId: string,
     sliceDate: Date
   ) => ISkuSliceDataItem | null | undefined,
-  titles: SkuSliceExcelTitles
+  titles: SkuSliceExcelTitles,
+  options: SkuSliceExcelOptions = {}
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const dates = enumerateSliceDates(dateFrom, dateTo);
   const dateCount = dates.length;
@@ -224,12 +209,8 @@ export async function buildSkuSliceExcelForSkus(
 
   applyHeaderStyle(sheet, columnCount);
 
-  const salesSummaryRows: {
-    productId: string;
-    totalSales: number;
-    totalRevenue: number;
-  }[] = [];
-
+  let totalDiff = 0;
+  let totalFirstStock = 0;
   let startRow = 2;
   for (let s = 0; s < skus.length; s++) {
     const sku = skus[s]!;
@@ -247,17 +228,8 @@ export async function buildSkuSliceExcelForSkus(
       }
     }
 
-    const salesByDay = computeSalesFromStockSequence(stocks);
-    const revenues: (number | null)[] = salesByDay.map((day, i) => {
-      if (stocks[i] === null) return null;
-      const p = prices[i];
-      const price = typeof p === "number" && Number.isFinite(p) ? p : null;
-      return computeRevenueForDay(day.sales, price);
-    });
-
     const stockRow = sheet.getRow(startRow);
     const priceRow = sheet.getRow(startRow + 1);
-    const revenueRow = sheet.getRow(startRow + 2);
 
     stockRow.getCell(1).value = sku.productId;
     stockRow.getCell(2).value = sku.title;
@@ -267,7 +239,6 @@ export async function buildSkuSliceExcelForSkus(
 
     stockRow.getCell(6).value = METRIC_LABELS[0];
     priceRow.getCell(6).value = METRIC_LABELS[1];
-    revenueRow.getCell(6).value = METRIC_LABELS[2];
 
     for (let i = 0; i < dateCount; i++) {
       const col = dataStartCol + i;
@@ -275,14 +246,13 @@ export async function buildSkuSliceExcelForSkus(
       const pr = prices[i];
       stockRow.getCell(col).value = st ?? null;
       priceRow.getCell(col).value = pr ?? null;
-      revenueRow.getCell(col).value = revenues[i] ?? null;
     }
 
-    sheet.mergeCells(startRow, 1, startRow + 2, 1);
-    sheet.mergeCells(startRow, 2, startRow + 2, 2);
-    sheet.mergeCells(startRow, 3, startRow + 2, 3);
-    sheet.mergeCells(startRow, 4, startRow + 2, 4);
-    sheet.mergeCells(startRow, 5, startRow + 2, 5);
+    sheet.mergeCells(startRow, 1, startRow + 1, 1);
+    sheet.mergeCells(startRow, 2, startRow + 1, 2);
+    sheet.mergeCells(startRow, 3, startRow + 1, 3);
+    sheet.mergeCells(startRow, 4, startRow + 1, 4);
+    sheet.mergeCells(startRow, 5, startRow + 1, 5);
 
     for (const c of [1, 2, 3, 4, 5] as const) {
       setMergedMetaAlignment(stockRow.getCell(c));
@@ -290,61 +260,44 @@ export async function buildSkuSliceExcelForSkus(
 
     applyRowDiffAndPct(stockRow, stocks, dataStartCol, diffCol, diffPctCol);
     applyRowDiffAndPct(priceRow, prices, dataStartCol, diffCol, diffPctCol);
-    applyRowDiffAndPct(revenueRow, revenues, dataStartCol, diffCol, diffPctCol);
 
     highlightStockIncreases(stockRow, dataStartCol, dateCount);
     highlightPriceDecreases(priceRow, dataStartCol, dateCount);
 
-    for (let r = startRow; r <= startRow + 2; r++) {
+    for (let r = startRow; r <= startRow + 1; r++) {
       applyDataRowStyle(sheet, r, columnCount);
     }
 
-    const totals = computePeriodSalesTotals(stocks, prices);
-    salesSummaryRows.push({
-      productId: sku.productId,
-      totalSales: totals.totalSales,
-      totalRevenue: totals.totalRevenue,
-    });
+    const stockBounds = getFirstAndLastNumeric(stocks);
+    if (stockBounds) {
+      totalDiff += stockBounds.last - stockBounds.first;
+      totalFirstStock += stockBounds.first;
+    }
 
     startRow += ROWS_PER_SKU_BLOCK;
   }
 
-  startRow += 1;
-  const summaryTitleRow = sheet.getRow(startRow);
-  summaryTitleRow.getCell(1).value = "Статистика продажів";
-  summaryTitleRow.getCell(1).font = {
-    ...(summaryTitleRow.getCell(1).font ?? {}),
-    bold: true,
-  };
-  startRow += 1;
+  if (options.includeTotalsRow) {
+    const totalsRow = sheet.getRow(startRow);
+    totalsRow.getCell(1).value = options.totalsRowLabel ?? "Підсумок";
+    totalsRow.getCell(diffCol).value = totalDiff;
 
-  const sumHeader = sheet.getRow(startRow);
-  sumHeader.getCell(1).value = "Ідентифікатор товару";
-  sumHeader.getCell(2).value = "Продано, шт";
-  sumHeader.getCell(3).value = "Виручка";
-  sumHeader.font = { bold: true };
-  applyDataRowStyle(sheet, startRow, 3);
-  startRow += 1;
+    const totalDiffPctCell = totalsRow.getCell(diffPctCol);
+    if (totalFirstStock === 0) {
+      totalDiffPctCell.value = null;
+      totalDiffPctCell.fill = {
+        ...(totalDiffPctCell.fill ?? {}),
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: "FFFFC0CB" },
+      };
+    } else {
+      totalDiffPctCell.value = Math.round((totalDiff / totalFirstStock) * 10000) / 100;
+    }
 
-  let grandSales = 0;
-  let grandRevenue = 0;
-  for (const line of salesSummaryRows) {
-    const row = sheet.getRow(startRow);
-    row.getCell(1).value = line.productId;
-    row.getCell(2).value = line.totalSales;
-    row.getCell(3).value = line.totalRevenue;
-    applyDataRowStyle(sheet, startRow, 3);
-    grandSales += line.totalSales;
-    grandRevenue += line.totalRevenue;
-    startRow += 1;
+    totalsRow.font = { ...(totalsRow.font ?? {}), bold: true };
+    applyDataRowStyle(sheet, startRow, columnCount);
   }
-
-  const totalRow = sheet.getRow(startRow);
-  totalRow.getCell(1).value = "Разом";
-  totalRow.getCell(2).value = grandSales;
-  totalRow.getCell(3).value = grandRevenue;
-  totalRow.font = { bold: true };
-  applyDataRowStyle(sheet, startRow, 3);
 
   for (let c = 1; c <= columnCount; c++) {
     sheet.getColumn(c).width = 14;

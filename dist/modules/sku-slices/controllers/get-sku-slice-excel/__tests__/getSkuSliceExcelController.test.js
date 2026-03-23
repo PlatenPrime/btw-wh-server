@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
-import { getSkuSliceExcelController } from "../getSkuSliceExcelController.js";
-describe("getSkuSliceExcelController", () => {
+import { getSkuStockSliceExcelController } from "../getSkuSliceExcelController.js";
+describe("getSkuStockSliceExcelController", () => {
     let res;
     let responseStatus;
     let responseJson;
@@ -40,7 +40,7 @@ describe("getSkuSliceExcelController", () => {
             params: { skuId: "507f1f77bcf86cd799439011" },
             query: { dateFrom: "2026-05-10", dateTo: "2026-05-01" },
         };
-        await getSkuSliceExcelController(req, res);
+        await getSkuStockSliceExcelController(req, res);
         expect(responseStatus.code).toBe(400);
         expect(responseJson.message).toBe("Validation error");
     });
@@ -49,7 +49,7 @@ describe("getSkuSliceExcelController", () => {
             params: { skuId: "507f1f77bcf86cd799439011" },
             query: { dateFrom: "2026-05-01", dateTo: "2026-05-01" },
         };
-        await getSkuSliceExcelController(req, res);
+        await getSkuStockSliceExcelController(req, res);
         expect(responseStatus.code).toBe(404);
     });
     it("200 sends xlsx buffer and headers", async () => {
@@ -70,7 +70,7 @@ describe("getSkuSliceExcelController", () => {
             params: { skuId: sku._id.toString() },
             query: { dateFrom: "2026-05-01", dateTo: "2026-05-01" },
         };
-        await getSkuSliceExcelController(req, res);
+        await getSkuStockSliceExcelController(req, res);
         expect(responseStatus.code).toBe(200);
         expect(responseHeaders["Content-Type"]).toContain("spreadsheetml");
         expect(String(responseHeaders["Content-Disposition"])).toContain("attachment");
