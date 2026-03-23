@@ -16,6 +16,7 @@
 - `limit?: number` — размер страницы, по умолчанию `10`, максимум `100`
 - `konkName?: string` — фильтр по имени-ключу конкурента
 - `prodName?: string` — фильтр по имени-ключу производителя
+- `search?: string` — регистронезависимый поиск по подстроке в `title` (спецсимволы regex экранируются)
 
 **Ответ 200:**  
 `{ message: string, data: Array<Sku>, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }`.

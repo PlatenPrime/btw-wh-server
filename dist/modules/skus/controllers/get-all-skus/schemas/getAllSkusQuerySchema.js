@@ -2,6 +2,7 @@ import { z } from "zod";
 export const getAllSkusQuerySchema = z.object({
     konkName: z.string().optional(),
     prodName: z.string().optional(),
+    search: z.string().optional(),
     page: z
         .string()
         .optional()

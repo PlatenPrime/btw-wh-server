@@ -2,6 +2,10 @@ import type { Types } from "mongoose";
 import { Sku } from "../../../models/Sku.js";
 import type { GetAllSkusQuery } from "../schemas/getAllSkusQuerySchema.js";
 
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 type SkuLean = {
   _id: Types.ObjectId;
   konkName: string;
@@ -29,12 +33,19 @@ type GetAllSkusResult = {
 export const getAllSkusUtil = async ({
   konkName,
   prodName,
+  search,
   page,
   limit,
 }: GetAllSkusQuery): Promise<GetAllSkusResult> => {
   const filter: Record<string, unknown> = {};
   if (konkName && konkName.trim() !== "") filter.konkName = konkName;
   if (prodName && prodName.trim() !== "") filter.prodName = prodName;
+  if (search && search.trim() !== "") {
+    filter.title = {
+      $regex: escapeRegex(search.trim()),
+      $options: "i",
+    };
+  }
 
   const [skus, total] = await Promise.all([
     Sku.find(filter)

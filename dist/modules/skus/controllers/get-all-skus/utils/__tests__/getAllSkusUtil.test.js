@@ -52,4 +52,53 @@ describe("getAllSkusUtil", () => {
         expect(result.skus[0].title).toBe("Wanted");
         expect(result.pagination.total).toBe(1);
     });
+    it("applies search by title substring (case-insensitive)", async () => {
+        await Sku.create({
+            konkName: "k1",
+            prodName: "p1",
+            productId: "k1-a",
+            title: "Alpha Widget",
+            url: "https://k1.com/a",
+        });
+        await Sku.create({
+            konkName: "k1",
+            prodName: "p1",
+            productId: "k1-b",
+            title: "Beta Gadget",
+            url: "https://k1.com/b",
+        });
+        const result = await getAllSkusUtil({
+            page: 1,
+            limit: 10,
+            search: "widget",
+        });
+        expect(result.skus).toHaveLength(1);
+        expect(result.skus[0].title).toBe("Alpha Widget");
+        expect(result.pagination.total).toBe(1);
+    });
+    it("combines search with konkName and prodName", async () => {
+        await Sku.create({
+            konkName: "k-x",
+            prodName: "p-x",
+            productId: "k-x-1",
+            title: "Match Here",
+            url: "https://kx.com/1",
+        });
+        await Sku.create({
+            konkName: "k-y",
+            prodName: "p-y",
+            productId: "k-y-1",
+            title: "Match There",
+            url: "https://ky.com/1",
+        });
+        const result = await getAllSkusUtil({
+            page: 1,
+            limit: 10,
+            konkName: "k-x",
+            prodName: "p-x",
+            search: "match",
+        });
+        expect(result.skus).toHaveLength(1);
+        expect(result.skus[0].title).toBe("Match Here");
+    });
 });
