@@ -5,6 +5,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   createSkuController,
   deleteSkuByIdController,
+  fixIncorrectSkuDataController,
   getAllSkusController,
   getSkuByIdController,
   updateSkuByIdController,
@@ -29,6 +30,12 @@ router.post(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(createSkuController)
+);
+router.post(
+  "/fix-incorrect-sku-data",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(fixIncorrectSkuDataController)
 );
 router.patch(
   "/id/:id",
