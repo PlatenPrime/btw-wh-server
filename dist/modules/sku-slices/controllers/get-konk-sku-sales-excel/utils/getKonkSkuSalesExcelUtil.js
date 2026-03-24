@@ -6,7 +6,12 @@ import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { formatDateHeader, safeFilePart, } from "../../../utils/buildSkuSliceExcel.js";
 import { buildSkuSalesExcelForSkus, } from "../../get-sku-sales-excel/utils/buildSkuSalesExcel.js";
 export async function getKonkSkuSalesExcelUtil(input) {
-    const skus = await Sku.find({ konkName: input.konk }).sort({ productId: 1 }).lean();
+    const skus = await Sku.find({
+        konkName: input.konk,
+        prodName: input.prod,
+    })
+        .sort({ productId: 1 })
+        .lean();
     if (skus.length === 0)
         return { ok: false };
     const rowsBase = skus
@@ -32,23 +37,19 @@ export async function getKonkSkuSalesExcelUtil(input) {
     for (const sl of slices) {
         byDate.set(toSliceDate(sl.date).getTime(), (sl.data ?? {}));
     }
-    const prodNames = [...new Set(rowsBase.map((row) => row.prodName))];
-    const [konkDoc, prodDocs] = await Promise.all([
+    const [konkDoc, prodDoc] = await Promise.all([
         Konk.findOne({ name: input.konk }).select("title").lean(),
-        Prod.find({ name: { $in: prodNames } }).select("name title").lean(),
+        Prod.findOne({ name: input.prod }).select("title").lean(),
     ]);
-    const producerByName = new Map();
-    for (const prod of prodDocs) {
-        producerByName.set(prod.name, (prod.title ?? "").trim());
-    }
     const competitorTitle = (konkDoc?.title ?? "").trim();
+    const producerName = (prodDoc?.title ?? "").trim();
     const rows = rowsBase.map((row) => ({
         title: row.title,
         url: row.url,
         productId: row.productId,
         konkName: row.konkName,
         competitorTitle,
-        producerName: producerByName.get(row.prodName) ?? "",
+        producerName,
     }));
     const { buffer } = await buildSkuSalesExcelForSkus(rows, dateFrom, dateTo, (kn, pid, d) => {
         if (kn !== input.konk)
@@ -60,6 +61,6 @@ export async function getKonkSkuSalesExcelUtil(input) {
         summarySalesLabel: "Загальні продажі, шт",
         summaryRevenueLabel: "Загальна виручка, грн",
     });
-    const fileName = `sku_sales_konk_${safeFilePart(input.konk)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;
+    const fileName = `sku_sales_konk_${safeFilePart(input.konk)}_${safeFilePart(input.prod)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;
     return { ok: true, buffer, fileName };
 }

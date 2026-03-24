@@ -43,6 +43,22 @@ describe("getKonkSkuSalesExcelController", () => {
     const req = {
       query: {
         konk: "",
+        prod: "gemar",
+        dateFrom: "2026-06-01",
+        dateTo: "2026-06-01",
+      },
+    } as unknown as Request;
+
+    await getKonkSkuSalesExcelController(req, res);
+
+    expect(responseStatus.code).toBe(400);
+  });
+
+  it("400 when prod empty", async () => {
+    const req = {
+      query: {
+        konk: "air",
+        prod: "",
         dateFrom: "2026-06-01",
         dateTo: "2026-06-01",
       },
@@ -57,6 +73,7 @@ describe("getKonkSkuSalesExcelController", () => {
     const req = {
       query: {
         konk: "air",
+        prod: "gemar",
         dateFrom: "2026-06-01",
         dateTo: "2026-06-01",
       },
@@ -85,6 +102,7 @@ describe("getKonkSkuSalesExcelController", () => {
     const req = {
       query: {
         konk: "air",
+        prod: "gemar",
         dateFrom: "2026-06-01",
         dateTo: "2026-06-02",
       },
@@ -94,6 +112,8 @@ describe("getKonkSkuSalesExcelController", () => {
 
     expect(responseStatus.code).toBe(200);
     expect(Buffer.isBuffer(responseBody as Buffer)).toBe(true);
-    expect(String(responseHeaders["Content-Disposition"])).toContain("sku_sales_konk");
+    const disposition = String(responseHeaders["Content-Disposition"]);
+    expect(disposition).toContain("sku_sales_konk");
+    expect(disposition).toContain("gemar");
   });
 });

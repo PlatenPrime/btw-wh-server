@@ -9,9 +9,29 @@ describe("getKonkSkuSalesExcelUtil", () => {
     await SkuSlice.deleteMany({});
   });
 
-  it("returns ok false when no skus for konk", async () => {
+  it("returns ok false when no skus for konk/prod", async () => {
     const result = await getKonkSkuSalesExcelUtil({
       konk: "air",
+      prod: "gemar",
+      dateFrom: new Date("2026-03-01T00:00:00.000Z"),
+      dateTo: new Date("2026-03-01T00:00:00.000Z"),
+    });
+
+    expect(result.ok).toBe(false);
+  });
+
+  it("returns ok false when prod does not match skus", async () => {
+    await Sku.create({
+      konkName: "air",
+      prodName: "gemar",
+      productId: "air-sales-wrong-prod",
+      title: "A",
+      url: "https://e.com/a",
+    });
+
+    const result = await getKonkSkuSalesExcelUtil({
+      konk: "air",
+      prod: "other",
       dateFrom: new Date("2026-03-01T00:00:00.000Z"),
       dateTo: new Date("2026-03-01T00:00:00.000Z"),
     });
@@ -58,6 +78,7 @@ describe("getKonkSkuSalesExcelUtil", () => {
 
     const result = await getKonkSkuSalesExcelUtil({
       konk: "air",
+      prod: "gemar",
       dateFrom: d1,
       dateTo: d2,
     });
@@ -67,6 +88,7 @@ describe("getKonkSkuSalesExcelUtil", () => {
       expect(result.buffer.length).toBeGreaterThan(200);
       expect(result.fileName).toContain("sku_sales_konk");
       expect(result.fileName).toContain("air");
+      expect(result.fileName).toContain("gemar");
     }
   });
 });

@@ -6,7 +6,7 @@ import {
 import { SkuSlice } from "../models/SkuSlice.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 
-const DELAY_MS = 5000;
+const DELAY_MS = 1000;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -19,7 +19,7 @@ type SkuLean = {
 
 /**
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
- * с паузой 5 с — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
+ * с паузой 1 с — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
  */
 export async function runSkuSliceForKonkUtil(
   konkName: string,

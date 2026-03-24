@@ -2,13 +2,13 @@ import { Sku } from "../../skus/models/Sku.js";
 import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE, } from "../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-const DELAY_MS = 5000;
+const DELAY_MS = 1000;
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 /**
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
- * с паузой 5 с — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
+ * с паузой 1 с — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
  */
 export async function runSkuSliceForKonkUtil(konkName, date) {
     const sliceDate = toSliceDate(date);

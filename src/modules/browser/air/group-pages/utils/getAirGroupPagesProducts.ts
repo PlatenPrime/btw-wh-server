@@ -14,7 +14,7 @@ export type AirGroupPageProduct = {
 };
 
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
-const NEXT_PAGE_DELAY_MS = 2_000;
+const NEXT_PAGE_DELAY_MS = 1_000;
 
 function resolveUrl(href: string, baseUrl: string): string | null {
   const trimmed = href.trim();

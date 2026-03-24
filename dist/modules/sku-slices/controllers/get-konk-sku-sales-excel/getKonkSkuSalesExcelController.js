@@ -2,11 +2,12 @@ import { getKonkSkuSalesExcelSchema } from "./schemas/getKonkSkuSalesExcelSchema
 import { getKonkSkuSalesExcelUtil } from "./utils/getKonkSkuSalesExcelUtil.js";
 /**
  * @desc    Excel продаж по всем SKU конкурента за период
- * @route   GET /api/sku-slices/konk/sales-excel?konk=&dateFrom=&dateTo=
+ * @route   GET /api/sku-slices/konk/sales-excel?konk=&prod=&dateFrom=&dateTo=
  */
 export const getKonkSkuSalesExcelController = async (req, res) => {
     const parseResult = getKonkSkuSalesExcelSchema.safeParse({
         konk: req.query.konk,
+        prod: req.query.prod,
         dateFrom: req.query.dateFrom,
         dateTo: req.query.dateTo,
     });
@@ -20,7 +21,7 @@ export const getKonkSkuSalesExcelController = async (req, res) => {
     const result = await getKonkSkuSalesExcelUtil(parseResult.data);
     if (!result.ok) {
         res.status(404).json({
-            message: "No skus found for provided konk, or no sku with productId in group",
+            message: "No skus found for provided konk/prod, or no sku with productId in group",
         });
         return;
     }

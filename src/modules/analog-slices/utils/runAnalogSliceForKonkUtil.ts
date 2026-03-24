@@ -5,7 +5,7 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 
 export { toSliceDate } from "../../../utils/sliceDate.js";
 
-const DELAY_MS = 5000;
+const DELAY_MS = 1000;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

@@ -4,6 +4,7 @@ import { dateStringSchema } from "../../common/schemas/dateSchema.js";
 export const getKonkSkuSalesExcelSchema = z
   .object({
     konk: z.string().trim().min(1, "konk is required"),
+    prod: z.string().trim().min(1, "prod is required"),
     dateFrom: dateStringSchema,
     dateTo: dateStringSchema,
   })

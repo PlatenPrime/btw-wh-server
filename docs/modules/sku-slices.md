@@ -43,6 +43,6 @@
 - **GET `/api/sku-slices/sku/:skuId/slice-excel`** — Excel по одному SKU за период.
 - **GET `/api/sku-slices/konk/excel`** — Excel по группе SKU (`konk`, `prod`, период).
 - **GET `/api/sku-slices/sku/:skuId/sales-excel`** — Excel продаж по одному SKU за период.
-- **GET `/api/sku-slices/konk/sales-excel`** — Excel продаж по всем SKU конкурента за период.
+- **GET `/api/sku-slices/konk/sales-excel`** — Excel продаж по SKU группы `konk` + `prod` за период.
 
 Подробные форматы запросов и ответов — в [API документации](../api/sku-slices.md).

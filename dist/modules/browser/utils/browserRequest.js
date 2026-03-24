@@ -1,5 +1,5 @@
 import axios from "axios";
-const BROWSER_REQUEST_TIMEOUT_MS = 60_000;
+const BROWSER_REQUEST_TIMEOUT_MS = 120_000;
 const BROWSER_HEADERS = {
     "X-Requested-With": "XMLHttpRequest",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
