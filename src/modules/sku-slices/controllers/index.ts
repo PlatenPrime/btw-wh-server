@@ -5,3 +5,5 @@ export { getSkuSalesByDateController } from "./get-sku-sales-by-date/getSkuSales
 export { getSkuSalesRangeController } from "./get-sku-sales-range/getSkuSalesRangeController.js";
 export { getSkuStockSliceExcelController } from "./get-sku-slice-excel/getSkuSliceExcelController.js";
 export { getKonkSkuStockSliceExcelController } from "./get-konk-sku-slice-excel/getKonkSkuSliceExcelController.js";
+export { getSkuSalesExcelController } from "./get-sku-sales-excel/getSkuSalesExcelController.js";
+export { getKonkSkuSalesExcelController } from "./get-konk-sku-sales-excel/getKonkSkuSalesExcelController.js";

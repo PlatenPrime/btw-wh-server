@@ -3,7 +3,9 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
+  getKonkSkuSalesExcelController,
   getKonkSkuStockSliceExcelController,
+  getSkuSalesExcelController,
   getSkuSalesByDateController,
   getSkuSalesRangeController,
   getSkuSliceByDateController,
@@ -25,6 +27,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getKonkSkuStockSliceExcelController)
+);
+router.get(
+  "/konk/sales-excel",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getKonkSkuSalesExcelController)
 );
 router.get(
   "/sku/:skuId/range",
@@ -49,6 +57,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getSkuStockSliceExcelController)
+);
+router.get(
+  "/sku/:skuId/sales-excel",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getSkuSalesExcelController)
 );
 router.get(
   "/sku/:skuId",
