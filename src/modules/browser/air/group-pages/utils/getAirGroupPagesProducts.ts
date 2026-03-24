@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { browserGet } from "../../../utils/browserRequest.js";
+import { sleep } from "../../../utils/sleep.js";
 import {
   getAirGroupPagesProductsSchema,
   type GetAirGroupPagesProductsInput,
@@ -13,6 +14,7 @@ export type AirGroupPageProduct = {
 };
 
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
+const NEXT_PAGE_DELAY_MS = 2_000;
 
 function resolveUrl(href: string, baseUrl: string): string | null {
   const trimmed = href.trim();
@@ -179,6 +181,7 @@ export async function getAirGroupPagesProducts(
       break;
     }
 
+    await sleep(NEXT_PAGE_DELAY_MS);
     currentUrl = nextUrl;
     fetchedPages += 1;
   }

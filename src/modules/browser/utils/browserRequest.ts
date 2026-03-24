@@ -1,5 +1,7 @@
 import axios, { type AxiosInstance } from "axios";
 
+const BROWSER_REQUEST_TIMEOUT_MS = 60_000;
+
 const BROWSER_HEADERS = {
   "X-Requested-With": "XMLHttpRequest",
   "User-Agent":
@@ -16,7 +18,7 @@ export function getBrowserAxios(): AxiosInstance {
   if (!browserAxiosInstance) {
     browserAxiosInstance = axios.create({
       headers: BROWSER_HEADERS,
-      timeout: 15000,
+      timeout: BROWSER_REQUEST_TIMEOUT_MS,
     });
   }
   return browserAxiosInstance;

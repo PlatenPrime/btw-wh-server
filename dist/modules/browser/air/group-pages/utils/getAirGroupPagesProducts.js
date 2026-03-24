@@ -1,7 +1,9 @@
 import * as cheerio from "cheerio";
 import { browserGet } from "../../../utils/browserRequest.js";
+import { sleep } from "../../../utils/sleep.js";
 import { getAirGroupPagesProductsSchema, } from "./getAirGroupPagesProductsSchema.js";
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
+const NEXT_PAGE_DELAY_MS = 2_000;
 function resolveUrl(href, baseUrl) {
     const trimmed = href.trim();
     if (!trimmed) {
@@ -127,6 +129,7 @@ export async function getAirGroupPagesProducts(input) {
         if (!nextUrl || nextUrl === currentUrl || visited.has(nextUrl)) {
             break;
         }
+        await sleep(NEXT_PAGE_DELAY_MS);
         currentUrl = nextUrl;
         fetchedPages += 1;
     }

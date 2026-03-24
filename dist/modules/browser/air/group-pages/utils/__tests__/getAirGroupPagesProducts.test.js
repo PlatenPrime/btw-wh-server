@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getAirGroupPagesProducts } from "../getAirGroupPagesProducts.js";
 import { browserGet } from "../../../../utils/browserRequest.js";
+import { sleep } from "../../../../utils/sleep.js";
 vi.mock("../../../../utils/browserRequest.js");
+vi.mock("../../../../utils/sleep.js");
 const GROUP_URL = "https://air.example.test/ua/index.php?route=product/category&path=1";
 const PAGE2_URL = "https://air.example.test/ua/index.php?route=product/category&path=1&page=2";
 function airProductCard(opts) {
@@ -32,6 +34,7 @@ function airPageHtml(opts) {
 describe("getAirGroupPagesProducts", () => {
     beforeEach(() => {
         vi.mocked(browserGet).mockReset();
+        vi.mocked(sleep).mockResolvedValue(undefined);
     });
     it("parses products across two pages", async () => {
         const html1 = airPageHtml({
