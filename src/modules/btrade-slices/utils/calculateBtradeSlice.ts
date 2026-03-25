@@ -1,4 +1,5 @@
 import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
+import { toSliceDate } from "../../../utils/sliceDate.js";
 import { BtradeSlice } from "../models/BtradeSlice.js";
 import { getUniqueArtikulsFromAnalogsUtil } from "./getUniqueArtikulsFromAnalogsUtil.js";
 
@@ -6,12 +7,6 @@ const DELAY_MS = 5000;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function toSliceDate(d: Date): Date {
-  const copy = new Date(d);
-  copy.setUTCHours(0, 0, 0, 0);
-  return copy;
 }
 
 /**

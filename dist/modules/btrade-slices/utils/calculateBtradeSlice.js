@@ -1,14 +1,10 @@
 import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
+import { toSliceDate } from "../../../utils/sliceDate.js";
 import { BtradeSlice } from "../models/BtradeSlice.js";
 import { getUniqueArtikulsFromAnalogsUtil } from "./getUniqueArtikulsFromAnalogsUtil.js";
 const DELAY_MS = 5000;
 function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
-}
-function toSliceDate(d) {
-    const copy = new Date(d);
-    copy.setUTCHours(0, 0, 0, 0);
-    return copy;
 }
 /**
  * Собирает ежедневный срез цен и остатков Btrade (Sharik) по артикулам из analogs:

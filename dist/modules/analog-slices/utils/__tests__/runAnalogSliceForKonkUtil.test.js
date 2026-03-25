@@ -93,9 +93,3 @@ describe("runAnalogSliceForKonkUtil", () => {
         expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
     });
 });
-describe("toSliceDate", () => {
-    it("normalizes date to start of day UTC", () => {
-        const d = new Date("2025-03-01T15:30:00.000Z");
-        expect(toSliceDate(d).toISOString()).toBe("2025-03-01T00:00:00.000Z");
-    });
-});
