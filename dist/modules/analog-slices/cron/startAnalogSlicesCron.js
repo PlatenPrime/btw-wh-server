@@ -3,6 +3,7 @@ import { calculateAirSlice } from "../utils/calculateAirSlice.js";
 import { calculateBalunSlice } from "../utils/calculateBalunSlice.js";
 import { calculateSharteSlice } from "../utils/calculateSharteSlice.js";
 import { calculateYumiSlice } from "../utils/calculateYumiSlice.js";
+import { getExcludedCompetitorSet, normalizeCompetitorName, } from "../../slices/config/excludedCompetitors.js";
 /**
  * Запускает cron для ежедневных срезов аналогов (air, balun, sharte, yumi).
  * Ежедневно в 04:00 по киевскому времени. Все четыре среза считаются параллельно.
@@ -10,14 +11,28 @@ import { calculateYumiSlice } from "../utils/calculateYumiSlice.js";
 export function startAnalogSlicesCron() {
     const job = new CronJob("0 0 4 * * *", async () => {
         try {
-            console.log(`[CRON AnalogSlices] Starting all slices...`);
-            const [air, balun, sharte, yumi] = await Promise.all([
-                calculateAirSlice(),
-                calculateBalunSlice(),
-                calculateSharteSlice(),
-                calculateYumiSlice(),
-            ]);
-            console.log(`[CRON AnalogSlices] Done: air=${air.count} balun=${balun.count} sharte=${sharte.count} yumi=${yumi.count}`);
+            const tasks = [
+                { konkName: "air", run: calculateAirSlice },
+                { konkName: "balun", run: calculateBalunSlice },
+                { konkName: "sharte", run: calculateSharteSlice },
+                { konkName: "yumi", run: calculateYumiSlice },
+            ];
+            const excluded = getExcludedCompetitorSet("analogSlices");
+            const excludedList = tasks
+                .map((task) => task.konkName)
+                .filter((name) => excluded.has(normalizeCompetitorName(name)));
+            const enabledTasks = tasks.filter((task) => !excluded.has(normalizeCompetitorName(task.konkName)));
+            console.log(`[CRON AnalogSlices] Starting for: ${enabledTasks
+                .map((task) => task.konkName)
+                .join(", ") || "none"}`);
+            if (excludedList.length > 0) {
+                console.log(`[CRON AnalogSlices] Excluded competitors: ${excludedList.join(", ")}`);
+            }
+            const results = await Promise.all(enabledTasks.map((task) => task.run()));
+            const summary = enabledTasks
+                .map((task, index) => `${task.konkName}=${results[index]?.count ?? 0}`)
+                .join(" ");
+            console.log(`[CRON AnalogSlices] Done: ${summary || "no competitors to process"}`);
         }
         catch (error) {
             console.error(`[CRON AnalogSlices] Error:`, error instanceof Error ? error.message : "Unknown error");
