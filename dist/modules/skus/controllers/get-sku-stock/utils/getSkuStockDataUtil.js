@@ -2,12 +2,14 @@ import { Sku } from "../../../models/Sku.js";
 import { getAirStockData } from "../../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../../browser/balun/utils/getBalunStockData.js";
 import { getYumiStockData } from "../../../../browser/yumi/utils/getYumiStockData.js";
+import { getYuminStockData } from "../../../../browser/yumin/utils/getYuminStockData.js";
 import { getSharteStockData } from "../../../../browser/sharte/utils/getSharteStockData.js";
 export const UNSUPPORTED_KONK_CODE = "UNSUPPORTED_KONK";
 const KONK_STOCK_GETTERS = {
     air: getAirStockData,
     balun: getBalunStockData,
     yumi: getYumiStockData,
+    yumin: getYuminStockData,
     sharte: getSharteStockData,
 };
 /**

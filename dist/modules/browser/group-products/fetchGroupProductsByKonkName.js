@@ -2,6 +2,7 @@ import { getAirGroupPagesProducts } from "../air/group-pages/utils/getAirGroupPa
 import { getBalunGroupPagesProducts } from "../balun/group-pages/utils/getBalunGroupPagesProducts.js";
 import { getSharteGroupPagesProducts } from "../sharte/group-pages/utils/getSharteGroupPagesProducts.js";
 import { getYumiGroupPagesProducts } from "../yumi/group-pages/utils/getYumiGroupPagesProducts.js";
+import { getYuminGroupPagesProducts } from "../yumin/group-pages/utils/getYuminGroupPagesProducts.js";
 export class UnsupportedKonkForGroupProductsError extends Error {
     konkName;
     constructor(konkName) {
@@ -18,6 +19,18 @@ export async function fetchGroupProductsByKonkName(konkName, input) {
     switch (normalized) {
         case "yumi": {
             const rows = await getYumiGroupPagesProducts({
+                groupUrl: input.groupUrl,
+                ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
+            });
+            return rows.map((p) => ({
+                title: p.title,
+                url: p.url,
+                imageUrl: p.imageUrl,
+                productId: p.productId,
+            }));
+        }
+        case "yumin": {
+            const rows = await getYuminGroupPagesProducts({
                 groupUrl: input.groupUrl,
                 ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
             });

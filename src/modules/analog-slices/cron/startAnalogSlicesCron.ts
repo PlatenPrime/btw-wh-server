@@ -3,14 +3,15 @@ import { calculateAirSlice } from "../utils/calculateAirSlice.js";
 import { calculateBalunSlice } from "../utils/calculateBalunSlice.js";
 import { calculateSharteSlice } from "../utils/calculateSharteSlice.js";
 import { calculateYumiSlice } from "../utils/calculateYumiSlice.js";
+import { calculateYuminSlice } from "../utils/calculateYuminSlice.js";
 import {
   getExcludedCompetitorSet,
   normalizeCompetitorName,
 } from "../../slices/config/excludedCompetitors.js";
 
 /**
- * Запускает cron для ежедневных срезов аналогов (air, balun, sharte, yumi).
- * Ежедневно в 04:00 по киевскому времени. Все четыре среза считаются параллельно.
+ * Запускает cron для ежедневных срезов аналогов (air, balun, sharte, yumi, yumin).
+ * Ежедневно в 04:00 по киевскому времени. Все пять срезов считаются параллельно.
  */
 export function startAnalogSlicesCron(): CronJob {
   const job = new CronJob(
@@ -22,6 +23,7 @@ export function startAnalogSlicesCron(): CronJob {
           { konkName: "balun", run: calculateBalunSlice },
           { konkName: "sharte", run: calculateSharteSlice },
           { konkName: "yumi", run: calculateYumiSlice },
+          { konkName: "yumin", run: calculateYuminSlice },
         ] as const;
 
         const excluded = getExcludedCompetitorSet("analogSlices");

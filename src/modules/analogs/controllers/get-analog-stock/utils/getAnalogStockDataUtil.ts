@@ -2,6 +2,7 @@ import { Analog } from "../../../models/Analog.js";
 import { getAirStockData } from "../../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../../browser/balun/utils/getBalunStockData.js";
 import { getYumiStockData } from "../../../../browser/yumi/utils/getYumiStockData.js";
+import { getYuminStockData } from "../../../../browser/yumin/utils/getYuminStockData.js";
 import { getSharteStockData } from "../../../../browser/sharte/utils/getSharteStockData.js";
 
 export const UNSUPPORTED_KONK_CODE = "UNSUPPORTED_KONK";
@@ -17,6 +18,7 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
   air: getAirStockData,
   balun: getBalunStockData,
   yumi: getYumiStockData,
+  yumin: getYuminStockData,
   sharte: getSharteStockData,
 };
 
@@ -36,7 +38,8 @@ export async function getAnalogStockDataUtil(
 
   if (!analog) return null;
 
-  const getter = KONK_STOCK_GETTERS[analog.konkName];
+  const key = (analog.konkName ?? "").trim().toLowerCase();
+  const getter = KONK_STOCK_GETTERS[key];
   if (!getter) {
     const err = new Error(
       `Unsupported competitor for stock: ${analog.konkName}`
