@@ -5,6 +5,7 @@ import { getBalunStockController } from "./balun/controllers/index.js";
 import { getSharikStockController } from "./sharik/controllers/index.js";
 import { getSharteStockController } from "./sharte/controllers/index.js";
 import { getYumiStockController } from "./yumi/controllers/index.js";
+import { getYuminStockController } from "./yumin/controllers/index.js";
 
 const router = Router();
 
@@ -19,6 +20,10 @@ router.get(
 router.get(
   "/yumi/stock",
   asyncHandler(getYumiStockController)
+);
+router.get(
+  "/yumin/stock",
+  asyncHandler(getYuminStockController)
 );
 router.get(
   "/sharte/stock",
