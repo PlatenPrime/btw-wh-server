@@ -1,6 +1,6 @@
 import axios, { type AxiosInstance } from "axios";
 
-const BROWSER_REQUEST_TIMEOUT_MS = 120_000;
+const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
 
 const BROWSER_HEADERS = {
   "X-Requested-With": "XMLHttpRequest",
