@@ -21,3 +21,15 @@ export const toSkugrDto = (doc: SkugrDocLike) => ({
   createdAt: doc.createdAt,
   updatedAt: doc.updatedAt,
 });
+
+export type SkugrWithoutSkusDto = Omit<ReturnType<typeof toSkugrDto>, "skus">;
+
+export const toSkugrWithoutSkusDto = (doc: SkugrDocLike): SkugrWithoutSkusDto => ({
+  _id: doc._id.toString(),
+  konkName: doc.konkName,
+  prodName: doc.prodName,
+  title: doc.title,
+  url: doc.url,
+  createdAt: doc.createdAt,
+  updatedAt: doc.updatedAt,
+});

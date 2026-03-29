@@ -36,7 +36,7 @@ describe("getSkugrByIdController", () => {
         await getSkugrByIdController(req, res);
         expect(responseStatus.code).toBe(404);
     });
-    it("200 with empty skus array", async () => {
+    it("200 with metadata only, no skus field", async () => {
         const skugr = await Skugr.create({
             konkName: "k1",
             prodName: "p1",
@@ -51,29 +51,22 @@ describe("getSkugrByIdController", () => {
         expect(responseStatus.code).toBe(200);
         const data = responseJson.data;
         expect(data.title).toBe("G");
-        expect(data.skus).toEqual([]);
+        expect(data).not.toHaveProperty("skus");
     });
-    it("200 returns skus in group order", async () => {
-        const skuA = await Sku.create({
+    it("200 omits skus even when group references sku ids", async () => {
+        const sku = await Sku.create({
             konkName: "k1",
             prodName: "p1",
-            productId: "k1-skugr-get-a",
-            title: "A",
-            url: "https://k1.com/a-order",
-        });
-        const skuB = await Sku.create({
-            konkName: "k1",
-            prodName: "p1",
-            productId: "k1-skugr-get-b",
-            title: "B",
-            url: "https://k1.com/b-order",
+            productId: "k1-skugr-get-one",
+            title: "S",
+            url: "https://k1.com/s-one",
         });
         const skugr = await Skugr.create({
             konkName: "k1",
             prodName: "p1",
-            title: "Ordered",
-            url: "https://k1.com/g-order",
-            skus: [skuB._id, skuA._id],
+            title: "WithRefs",
+            url: "https://k1.com/g-refs",
+            skus: [sku._id],
         });
         const req = {
             params: { id: skugr._id.toString() },
@@ -81,31 +74,7 @@ describe("getSkugrByIdController", () => {
         await getSkugrByIdController(req, res);
         expect(responseStatus.code).toBe(200);
         const data = responseJson.data;
-        expect(data.skus.map((s) => s.title)).toEqual(["B", "A"]);
-    });
-    it("skips missing sku documents but keeps order for the rest", async () => {
-        const skuOk = await Sku.create({
-            konkName: "k1",
-            prodName: "p1",
-            productId: "k1-skugr-get-ok",
-            title: "Ok",
-            url: "https://k1.com/orphan-ok",
-        });
-        const ghostId = new mongoose.Types.ObjectId();
-        const skugr = await Skugr.create({
-            konkName: "k1",
-            prodName: "p1",
-            title: "Orphan",
-            url: "https://k1.com/g-orphan",
-            skus: [ghostId, skuOk._id],
-        });
-        const req = {
-            params: { id: skugr._id.toString() },
-        };
-        await getSkugrByIdController(req, res);
-        expect(responseStatus.code).toBe(200);
-        const data = responseJson.data;
-        expect(data.skus).toHaveLength(1);
-        expect(data.skus[0].title).toBe("Ok");
+        expect(data.title).toBe("WithRefs");
+        expect(data).not.toHaveProperty("skus");
     });
 });

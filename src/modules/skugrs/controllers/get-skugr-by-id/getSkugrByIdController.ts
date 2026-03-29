@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { getSkugrByIdSchema } from "./schemas/getSkugrByIdSchema.js";
-import { getSkugrByIdWithSkusUtil } from "./utils/getSkugrByIdWithSkusUtil.js";
+import { getSkugrByIdUtil } from "./utils/getSkugrByIdUtil.js";
 
 /**
- * @desc    Получить группу товаров конкурента по id со списком SKU как полными документами
+ * @desc    Получить группу товаров конкурента по id (метаданные без поля skus)
  * @route   GET /api/skugrs/id/:id
  */
 export const getSkugrByIdController = async (
@@ -20,7 +20,7 @@ export const getSkugrByIdController = async (
       return;
     }
 
-    const data = await getSkugrByIdWithSkusUtil(parseResult.data.id);
+    const data = await getSkugrByIdUtil(parseResult.data.id);
     if (!data) {
       res.status(404).json({ message: "Skugr not found" });
       return;

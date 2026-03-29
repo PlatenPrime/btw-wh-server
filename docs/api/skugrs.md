@@ -43,15 +43,13 @@
 
 ### GET `/api/skugrs/id/:id`
 
-Данные для страницы одной товарной группы: те же поля группы, что в обычном DTO, но **`skus` — массив полных документов SKU** (как в [API Skus](skus.md), раздел «Формат Sku»), в **том же порядке**, что id в массиве `skus` у группы в БД.
+Одна товарная группа: **метаданные без поля `skus`** — в ответе только `_id`, `konkName`, `prodName`, `title`, `url`, `createdAt`, `updatedAt` (см. раздел «Формат Skugr в `data`» и примечание ниже).
 
 **Доступ:** checkAuth + checkRoles(USER).
 
 **Параметры пути:** `id` — ObjectId группы.
 
-**Ответ 200:** `{ message: "Skugr retrieved successfully", data: SkugrPage }` (см. ниже «Формат Skugr для страницы группы»).
-
-Если в группе есть ObjectId, для которого документа SKU уже нет (например, SKU удалили), такой id **пропускается** — в массиве `data.skus` остаются только найденные документы, порядок сохраняется среди существующих.
+**Ответ 200:** `{ message: "Skugr retrieved successfully", data: { ... } }` — объект без ключа `skus`.
 
 **Ошибки:** 400 (невалидный id), 401, 403, 404 (группа не найдена), 500.
 
@@ -158,8 +156,4 @@
 - `skus`: string[] (ObjectId в виде строк)
 - `createdAt`, `updatedAt`: даты (ISO-строка в JSON)
 
-## Формат Skugr для страницы группы (`GET /api/skugrs/id/:id`)
-
-Поля группы те же, что выше, но:
-
-- `skus`: массив объектов **Sku** — см. [API Skus — Формат Sku](skus.md#формат-sku) (`_id`, `konkName`, `prodName`, `productId`, `btradeAnalog`, `title`, `url`, `imageUrl`, `createdAt`, `updatedAt`).
+**`GET /api/skugrs/id/:id`:** те же поля, что в списке выше, **кроме** `skus` — поле в JSON **отсутствует** (не пустой массив).

@@ -25,6 +25,28 @@
 
 ---
 
+### GET `/api/skus/by-skugr/:skugrId`
+
+Получение SKU, входящих в указанную товарную группу (`skugr`): выборка по `_id` из массива `skugr.skus`, с теми же фильтрами и пагинацией, что у `GET /api/skus`.
+
+**Доступ:** checkAuth + checkRoles(USER).
+
+**Параметры пути:**
+
+- `skugrId` — MongoDB ObjectId группы (`Skugr`).
+
+**Query параметры:** те же, что у `GET /api/skus`:
+
+- `page`, `limit`, `konkName`, `prodName`, `search` (подстрока в `title`, regex экранируется).
+
+**Ответ 200:**  
+`{ message: string, data: Array<Sku>, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }`.  
+Если у группы пустой массив `skus`, `data` — пустой массив, `total` — `0`.
+
+**Ошибки:** 400 (невалидный `skugrId` или query), 401, 403, 404 (группа не найдена), 500.
+
+---
+
 ### GET `/api/skus/id/:id`
 
 Получение SKU по id.

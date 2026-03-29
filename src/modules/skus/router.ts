@@ -7,6 +7,7 @@ import {
   deleteSkuByIdController,
   fixIncorrectSkuDataController,
   getAllSkusController,
+  getSkusBySkugrIdController,
   getSkuByIdController,
   updateSkuByIdController,
 } from "./controllers/index.js";
@@ -18,6 +19,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getAllSkusController)
+);
+router.get(
+  "/by-skugr/:skugrId",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getSkusBySkugrIdController)
 );
 router.get(
   "/id/:id",
