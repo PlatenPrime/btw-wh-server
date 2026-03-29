@@ -5,6 +5,23 @@ import { sleep } from "../../utils/sleep.js";
 export type ResolveListingHref = (href: string, baseUrl: string) => string | null;
 
 /**
+ * Копирует все query-параметры из `sourceUrl` в `targetUrl` (совпадающие ключи перезаписываются).
+ * Для Prom.ua/Balun: `<link rel="next">` часто указывает на URL без строки запроса, хотя первая
+ * страница открыта с фильтром в query (`csbss*`, `product_items_per_page` и т.д.).
+ */
+export function mergeSearchParamsFromSource(
+  targetUrl: string,
+  sourceUrl: string
+): string {
+  const target = new URL(targetUrl);
+  const source = new URL(sourceUrl);
+  for (const [key, value] of source.searchParams) {
+    target.searchParams.set(key, value);
+  }
+  return target.toString();
+}
+
+/**
  * Следующая страница из `<link rel="next" href="...">` (как у air / balun / yumi).
  */
 export function getNextPageUrlFromLinkRelNext(

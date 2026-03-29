@@ -1,4 +1,4 @@
-import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
+import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, mergeSearchParamsFromSource, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { getBalunGroupPagesProductsSchema, } from "./getBalunGroupPagesProductsSchema.js";
 function resolveUrl(href, baseUrl) {
     const trimmed = href.trim();
@@ -67,6 +67,12 @@ export async function getBalunGroupPagesProducts(input) {
         startUrl: groupUrl,
         maxPages,
         parseProductsFromPage,
-        getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+        getNextPageUrl: ($, url) => {
+            const next = getNextPageUrlFromLinkRelNext($, url, resolveUrl);
+            if (!next) {
+                return null;
+            }
+            return mergeSearchParamsFromSource(next, groupUrl);
+        },
     });
 }

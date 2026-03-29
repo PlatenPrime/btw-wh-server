@@ -90,4 +90,43 @@ describe("getBalunGroupPagesProducts", () => {
     expect(result.some((p) => p.productId === "928707587")).toBe(false);
     expect(result.some((p) => p.productId === "819105543")).toBe(true);
   });
+
+  it("preserves groupUrl query on paginated next URL (Prom.ua rel=next without query)", async () => {
+    const groupWithQuery =
+      "https://balun.example.test/ua/g123-pastel?product_items_per_page=48&csbss47=793893717&csbss49=835890110";
+    const page2NoQuery =
+      "https://balun.example.test/ua/g123-pastel/page_2";
+    const page2WithQuery =
+      "https://balun.example.test/ua/g123-pastel/page_2?product_items_per_page=48&csbss47=793893717&csbss49=835890110";
+
+    const html1 = pageHtml({
+      productId: "111",
+      titleAttr: "One",
+      productPath: "/ua/p111.html",
+      imageUrl: "https://images.prom.ua/a.jpg",
+      nextHref: page2NoQuery,
+    });
+    const html2 = pageHtml({
+      productId: "222",
+      titleAttr: "Two",
+      productPath: "/ua/p222.html",
+      imageUrl: "https://images.prom.ua/b.jpg",
+    });
+
+    vi.mocked(browserGet).mockImplementation(async (url: string) => {
+      if (url === groupWithQuery) return html1;
+      if (url === page2WithQuery) return html2;
+      throw new Error(`Unexpected url: ${url}`);
+    });
+
+    const result = await getBalunGroupPagesProducts({
+      groupUrl: groupWithQuery,
+      maxPages: 2,
+    });
+
+    expect(result).toHaveLength(2);
+    const calls = vi.mocked(browserGet).mock.calls.map((c) => c[0]);
+    expect(calls[0]).toBe(groupWithQuery);
+    expect(calls[1]).toBe(page2WithQuery);
+  });
 });

@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, } from "../crawlHtmlGroupListingPages.js";
+import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, mergeSearchParamsFromSource, } from "../crawlHtmlGroupListingPages.js";
 import { browserGet } from "../../../utils/browserRequest.js";
 import { sleep } from "../../../utils/sleep.js";
 vi.mock("../../../utils/browserRequest.js");
@@ -29,6 +29,16 @@ describe("getNextPageUrlFromLinkRelNext", () => {
         const base = "https://example.test/list/";
         const resolved = getNextPageUrlFromLinkRelNext($, base, (href, b) => new URL(href, b).toString());
         expect(resolved).toBe("https://example.test/list/page2");
+    });
+});
+describe("mergeSearchParamsFromSource", () => {
+    it("appends all search params from source onto target", () => {
+        const merged = mergeSearchParamsFromSource("https://balun.example.test/ua/g1/page_2", "https://balun.example.test/ua/g1?product_items_per_page=48&csbss47=793");
+        expect(merged).toBe("https://balun.example.test/ua/g1/page_2?product_items_per_page=48&csbss47=793");
+    });
+    it("overwrites keys on target with values from source", () => {
+        const merged = mergeSearchParamsFromSource("https://example.test/list/page_2?foo=old&keep=1", "https://example.test/list?foo=new");
+        expect(merged).toBe("https://example.test/list/page_2?foo=new&keep=1");
     });
 });
 describe("crawlHtmlGroupListingPages", () => {

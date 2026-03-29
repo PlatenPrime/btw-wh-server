@@ -2,6 +2,19 @@ import * as cheerio from "cheerio";
 import { browserGet } from "../../utils/browserRequest.js";
 import { sleep } from "../../utils/sleep.js";
 /**
+ * Копирует все query-параметры из `sourceUrl` в `targetUrl` (совпадающие ключи перезаписываются).
+ * Для Prom.ua/Balun: `<link rel="next">` часто указывает на URL без строки запроса, хотя первая
+ * страница открыта с фильтром в query (`csbss*`, `product_items_per_page` и т.д.).
+ */
+export function mergeSearchParamsFromSource(targetUrl, sourceUrl) {
+    const target = new URL(targetUrl);
+    const source = new URL(sourceUrl);
+    for (const [key, value] of source.searchParams) {
+        target.searchParams.set(key, value);
+    }
+    return target.toString();
+}
+/**
  * Следующая страница из `<link rel="next" href="...">` (как у air / balun / yumi).
  */
 export function getNextPageUrlFromLinkRelNext($, currentPageUrl, resolveUrl) {

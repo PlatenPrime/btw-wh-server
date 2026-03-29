@@ -2,6 +2,7 @@ import * as cheerio from "cheerio";
 import {
   crawlHtmlGroupListingPages,
   getNextPageUrlFromLinkRelNext,
+  mergeSearchParamsFromSource,
 } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import {
   getBalunGroupPagesProductsSchema,
@@ -104,6 +105,12 @@ export async function getBalunGroupPagesProducts(
     startUrl: groupUrl,
     maxPages,
     parseProductsFromPage,
-    getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+    getNextPageUrl: ($, url) => {
+      const next = getNextPageUrlFromLinkRelNext($, url, resolveUrl);
+      if (!next) {
+        return null;
+      }
+      return mergeSearchParamsFromSource(next, groupUrl);
+    },
   });
 }
