@@ -1,5 +1,8 @@
 import * as cheerio from "cheerio";
-import { browserGet } from "../../../utils/browserRequest.js";
+import {
+  crawlHtmlGroupListingPages,
+  getNextPageUrlFromLinkRelNext,
+} from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import {
   getYumiGroupPagesProductsSchema,
   type GetYumiGroupPagesProductsInput,
@@ -91,15 +94,6 @@ function parseProductsFromPage(
   return result;
 }
 
-function getNextPageUrl($: cheerio.Root, currentPageUrl: string): string | null {
-  const nextHref = $('link[rel="next"]').first().attr("href")?.trim();
-  if (!nextHref) {
-    return null;
-  }
-
-  return resolveUrl(nextHref, currentPageUrl);
-}
-
 export async function getYumiGroupPagesProducts(
   input: GetYumiGroupPagesProductsInput
 ): Promise<YumiGroupPageProduct[]> {
@@ -110,40 +104,13 @@ export async function getYumiGroupPagesProducts(
     throw new Error(parseResult.error.message);
   }
 
-  const { groupUrl, maxPages = 50 } = parseResult.data;
+  const { groupUrl, maxPages = 100 } = parseResult.data;
 
-  const visited = new Set<string>();
-  const products = new Map<string, YumiGroupPageProduct>();
-
-  let currentUrl: string | null = groupUrl;
-  let fetchedPages = 0;
-
-  while (currentUrl) {
-    if (fetchedPages >= maxPages) {
-      break;
-    }
-
-    if (visited.has(currentUrl)) {
-      break; // loop detected
-    }
-    visited.add(currentUrl);
-
-    const html = await browserGet<string>(currentUrl);
-    const $ = cheerio.load(html);
-
-    for (const [id, product] of parseProductsFromPage($, currentUrl)) {
-      products.set(id, product);
-    }
-
-    const nextUrl = getNextPageUrl($, currentUrl);
-    if (!nextUrl || nextUrl === currentUrl || visited.has(nextUrl)) {
-      break;
-    }
-
-    currentUrl = nextUrl;
-    fetchedPages += 1;
-  }
-
-  return [...products.values()];
+  return crawlHtmlGroupListingPages({
+    startUrl: groupUrl,
+    maxPages,
+    parseProductsFromPage,
+    getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+  });
 }
 

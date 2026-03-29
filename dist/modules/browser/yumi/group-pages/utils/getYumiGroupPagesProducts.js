@@ -1,5 +1,4 @@
-import * as cheerio from "cheerio";
-import { browserGet } from "../../../utils/browserRequest.js";
+import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { getYumiGroupPagesProductsSchema, } from "./getYumiGroupPagesProductsSchema.js";
 function resolveUrl(href, baseUrl) {
     const trimmed = href.trim();
@@ -62,13 +61,6 @@ function parseProductsFromPage($, currentPageUrl) {
     });
     return result;
 }
-function getNextPageUrl($, currentPageUrl) {
-    const nextHref = $('link[rel="next"]').first().attr("href")?.trim();
-    if (!nextHref) {
-        return null;
-    }
-    return resolveUrl(nextHref, currentPageUrl);
-}
 export async function getYumiGroupPagesProducts(input) {
     const parseResult = getYumiGroupPagesProductsSchema.safeParse(input);
     if (!parseResult.success) {
@@ -76,30 +68,11 @@ export async function getYumiGroupPagesProducts(input) {
         // а тут — корректный error, чтобы вызывающая сторона решила сама.
         throw new Error(parseResult.error.message);
     }
-    const { groupUrl, maxPages = 50 } = parseResult.data;
-    const visited = new Set();
-    const products = new Map();
-    let currentUrl = groupUrl;
-    let fetchedPages = 0;
-    while (currentUrl) {
-        if (fetchedPages >= maxPages) {
-            break;
-        }
-        if (visited.has(currentUrl)) {
-            break; // loop detected
-        }
-        visited.add(currentUrl);
-        const html = await browserGet(currentUrl);
-        const $ = cheerio.load(html);
-        for (const [id, product] of parseProductsFromPage($, currentUrl)) {
-            products.set(id, product);
-        }
-        const nextUrl = getNextPageUrl($, currentUrl);
-        if (!nextUrl || nextUrl === currentUrl || visited.has(nextUrl)) {
-            break;
-        }
-        currentUrl = nextUrl;
-        fetchedPages += 1;
-    }
-    return [...products.values()];
+    const { groupUrl, maxPages = 100 } = parseResult.data;
+    return crawlHtmlGroupListingPages({
+        startUrl: groupUrl,
+        maxPages,
+        parseProductsFromPage,
+        getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+    });
 }

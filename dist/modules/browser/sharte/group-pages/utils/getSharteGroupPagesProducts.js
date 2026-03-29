@@ -1,5 +1,4 @@
-import * as cheerio from "cheerio";
-import { browserGet } from "../../../utils/browserRequest.js";
+import { crawlHtmlGroupListingPages } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { getSharteGroupPagesProductsSchema, } from "./getSharteGroupPagesProductsSchema.js";
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
 function resolveUrl(href, baseUrl) {
@@ -115,33 +114,11 @@ export async function getSharteGroupPagesProducts(input) {
         throw new Error(parseResult.error.message);
     }
     const { groupUrl, maxPages = 100 } = parseResult.data;
-    const visited = new Set();
-    const products = new Map();
-    let currentUrl = groupUrl;
-    let fetchedPages = 0;
-    while (currentUrl) {
-        if (fetchedPages >= maxPages) {
-            break;
-        }
-        if (visited.has(currentUrl)) {
-            break;
-        }
-        visited.add(currentUrl);
-        const html = await browserGet(currentUrl);
-        const $ = cheerio.load(html);
-        const pageProducts = parseProductsFromPage($, currentUrl);
-        if (pageProducts.size === 0) {
-            break;
-        }
-        for (const [id, product] of pageProducts) {
-            products.set(id, product);
-        }
-        const nextUrl = getNextPageUrl($, currentUrl);
-        if (!nextUrl || nextUrl === currentUrl || visited.has(nextUrl)) {
-            break;
-        }
-        currentUrl = nextUrl;
-        fetchedPages += 1;
-    }
-    return [...products.values()];
+    return crawlHtmlGroupListingPages({
+        startUrl: groupUrl,
+        maxPages,
+        parseProductsFromPage,
+        getNextPageUrl,
+        stopOnEmptyPage: true,
+    });
 }

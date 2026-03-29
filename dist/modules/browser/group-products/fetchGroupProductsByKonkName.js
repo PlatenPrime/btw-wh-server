@@ -3,6 +3,21 @@ import { getBalunGroupPagesProducts } from "../balun/group-pages/utils/getBalunG
 import { getSharteGroupPagesProducts } from "../sharte/group-pages/utils/getSharteGroupPagesProducts.js";
 import { getYumiGroupPagesProducts } from "../yumi/group-pages/utils/getYumiGroupPagesProducts.js";
 import { getYuminGroupPagesProducts } from "../yumin/group-pages/utils/getYuminGroupPagesProducts.js";
+function buildGroupPagesFetchArgs(input) {
+    return {
+        groupUrl: input.groupUrl,
+        ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
+    };
+}
+async function fetchGroupPagesProductsVia(input, fetcher) {
+    const rows = await fetcher(buildGroupPagesFetchArgs(input));
+    return rows.map((p) => ({
+        title: p.title,
+        url: p.url,
+        imageUrl: p.imageUrl,
+        productId: p.productId,
+    }));
+}
 export class UnsupportedKonkForGroupProductsError extends Error {
     konkName;
     constructor(konkName) {
@@ -17,66 +32,16 @@ export class UnsupportedKonkForGroupProductsError extends Error {
 export async function fetchGroupProductsByKonkName(konkName, input) {
     const normalized = konkName.trim().toLowerCase();
     switch (normalized) {
-        case "yumi": {
-            const rows = await getYumiGroupPagesProducts({
-                groupUrl: input.groupUrl,
-                ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-            });
-            return rows.map((p) => ({
-                title: p.title,
-                url: p.url,
-                imageUrl: p.imageUrl,
-                productId: p.productId,
-            }));
-        }
-        case "yumin": {
-            const rows = await getYuminGroupPagesProducts({
-                groupUrl: input.groupUrl,
-                ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-            });
-            return rows.map((p) => ({
-                title: p.title,
-                url: p.url,
-                imageUrl: p.imageUrl,
-                productId: p.productId,
-            }));
-        }
-        case "air": {
-            const rows = await getAirGroupPagesProducts({
-                groupUrl: input.groupUrl,
-                ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-            });
-            return rows.map((p) => ({
-                title: p.title,
-                url: p.url,
-                imageUrl: p.imageUrl,
-                productId: p.productId,
-            }));
-        }
-        case "sharte": {
-            const rows = await getSharteGroupPagesProducts({
-                groupUrl: input.groupUrl,
-                ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-            });
-            return rows.map((p) => ({
-                title: p.title,
-                url: p.url,
-                imageUrl: p.imageUrl,
-                productId: p.productId,
-            }));
-        }
-        case "balun": {
-            const rows = await getBalunGroupPagesProducts({
-                groupUrl: input.groupUrl,
-                ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-            });
-            return rows.map((p) => ({
-                title: p.title,
-                url: p.url,
-                imageUrl: p.imageUrl,
-                productId: p.productId,
-            }));
-        }
+        case "yumi":
+            return fetchGroupPagesProductsVia(input, getYumiGroupPagesProducts);
+        case "yumin":
+            return fetchGroupPagesProductsVia(input, getYuminGroupPagesProducts);
+        case "air":
+            return fetchGroupPagesProductsVia(input, getAirGroupPagesProducts);
+        case "sharte":
+            return fetchGroupPagesProductsVia(input, getSharteGroupPagesProducts);
+        case "balun":
+            return fetchGroupPagesProductsVia(input, getBalunGroupPagesProducts);
         default:
             throw new UnsupportedKonkForGroupProductsError(konkName);
     }

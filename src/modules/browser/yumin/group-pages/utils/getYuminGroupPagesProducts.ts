@@ -65,7 +65,7 @@ export async function getYuminGroupPagesProducts(
     throw new Error(parseResult.error.message);
   }
 
-  const { groupUrl, maxPages = 50 } = parseResult.data;
+  const { groupUrl, maxPages = 100 } = parseResult.data;
 
   const visited = new Set<string>();
   const products = new Map<string, YuminGroupPageProduct>();

@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { browserGet } from "../../../utils/browserRequest.js";
+import { crawlHtmlGroupListingPages } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import {
   getSharteGroupPagesProductsSchema,
   type GetSharteGroupPagesProductsInput,
@@ -165,42 +165,11 @@ export async function getSharteGroupPagesProducts(
 
   const { groupUrl, maxPages = 100 } = parseResult.data;
 
-  const visited = new Set<string>();
-  const products = new Map<string, SharteGroupPageProduct>();
-
-  let currentUrl: string | null = groupUrl;
-  let fetchedPages = 0;
-
-  while (currentUrl) {
-    if (fetchedPages >= maxPages) {
-      break;
-    }
-
-    if (visited.has(currentUrl)) {
-      break;
-    }
-    visited.add(currentUrl);
-
-    const html = await browserGet<string>(currentUrl);
-    const $ = cheerio.load(html);
-
-    const pageProducts = parseProductsFromPage($, currentUrl);
-    if (pageProducts.size === 0) {
-      break;
-    }
-
-    for (const [id, product] of pageProducts) {
-      products.set(id, product);
-    }
-
-    const nextUrl = getNextPageUrl($, currentUrl);
-    if (!nextUrl || nextUrl === currentUrl || visited.has(nextUrl)) {
-      break;
-    }
-
-    currentUrl = nextUrl;
-    fetchedPages += 1;
-  }
-
-  return [...products.values()];
+  return crawlHtmlGroupListingPages({
+    startUrl: groupUrl,
+    maxPages,
+    parseProductsFromPage,
+    getNextPageUrl,
+    stopOnEmptyPage: true,
+  });
 }

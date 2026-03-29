@@ -5,6 +5,32 @@ import { getYumiGroupPagesProducts } from "../yumi/group-pages/utils/getYumiGrou
 import { getYuminGroupPagesProducts } from "../yumin/group-pages/utils/getYuminGroupPagesProducts.js";
 import type { FetchGroupProductsInput, GroupBrowserProduct } from "./types.js";
 
+type GroupPageProductRow = Pick<GroupBrowserProduct, keyof GroupBrowserProduct>;
+
+function buildGroupPagesFetchArgs(
+  input: FetchGroupProductsInput
+): FetchGroupProductsInput {
+  return {
+    groupUrl: input.groupUrl,
+    ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
+  };
+}
+
+async function fetchGroupPagesProductsVia(
+  input: FetchGroupProductsInput,
+  fetcher: (
+    args: FetchGroupProductsInput
+  ) => Promise<ReadonlyArray<GroupPageProductRow>>
+): Promise<GroupBrowserProduct[]> {
+  const rows = await fetcher(buildGroupPagesFetchArgs(input));
+  return rows.map((p) => ({
+    title: p.title,
+    url: p.url,
+    imageUrl: p.imageUrl,
+    productId: p.productId,
+  }));
+}
+
 export class UnsupportedKonkForGroupProductsError extends Error {
   constructor(public readonly konkName: string) {
     super(`Group products fetch is not implemented for konkName: ${konkName}`);
@@ -22,66 +48,16 @@ export async function fetchGroupProductsByKonkName(
   const normalized = konkName.trim().toLowerCase();
 
   switch (normalized) {
-    case "yumi": {
-      const rows = await getYumiGroupPagesProducts({
-        groupUrl: input.groupUrl,
-        ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-      });
-      return rows.map((p) => ({
-        title: p.title,
-        url: p.url,
-        imageUrl: p.imageUrl,
-        productId: p.productId,
-      }));
-    }
-    case "yumin": {
-      const rows = await getYuminGroupPagesProducts({
-        groupUrl: input.groupUrl,
-        ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-      });
-      return rows.map((p) => ({
-        title: p.title,
-        url: p.url,
-        imageUrl: p.imageUrl,
-        productId: p.productId,
-      }));
-    }
-    case "air": {
-      const rows = await getAirGroupPagesProducts({
-        groupUrl: input.groupUrl,
-        ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-      });
-      return rows.map((p) => ({
-        title: p.title,
-        url: p.url,
-        imageUrl: p.imageUrl,
-        productId: p.productId,
-      }));
-    }
-    case "sharte": {
-      const rows = await getSharteGroupPagesProducts({
-        groupUrl: input.groupUrl,
-        ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-      });
-      return rows.map((p) => ({
-        title: p.title,
-        url: p.url,
-        imageUrl: p.imageUrl,
-        productId: p.productId,
-      }));
-    }
-    case "balun": {
-      const rows = await getBalunGroupPagesProducts({
-        groupUrl: input.groupUrl,
-        ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
-      });
-      return rows.map((p) => ({
-        title: p.title,
-        url: p.url,
-        imageUrl: p.imageUrl,
-        productId: p.productId,
-      }));
-    }
+    case "yumi":
+      return fetchGroupPagesProductsVia(input, getYumiGroupPagesProducts);
+    case "yumin":
+      return fetchGroupPagesProductsVia(input, getYuminGroupPagesProducts);
+    case "air":
+      return fetchGroupPagesProductsVia(input, getAirGroupPagesProducts);
+    case "sharte":
+      return fetchGroupPagesProductsVia(input, getSharteGroupPagesProducts);
+    case "balun":
+      return fetchGroupPagesProductsVia(input, getBalunGroupPagesProducts);
     default:
       throw new UnsupportedKonkForGroupProductsError(konkName);
   }

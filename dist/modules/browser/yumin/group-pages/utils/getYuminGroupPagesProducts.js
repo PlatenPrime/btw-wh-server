@@ -43,7 +43,7 @@ export async function getYuminGroupPagesProducts(input) {
     if (!parseResult.success) {
         throw new Error(parseResult.error.message);
     }
-    const { groupUrl, maxPages = 50 } = parseResult.data;
+    const { groupUrl, maxPages = 100 } = parseResult.data;
     const visited = new Set();
     const products = new Map();
     let currentUrl = normalizeListingStartUrl(groupUrl);
