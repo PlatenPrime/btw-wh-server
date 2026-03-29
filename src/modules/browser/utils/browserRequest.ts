@@ -1,5 +1,6 @@
-import axios, { type AxiosInstance } from "axios";
+import axios, { type AxiosInstance, isAxiosError } from "axios";
 
+/** Лимит ожидания одного HTTP GET (один URL / одна «страница»). На весь обход N страниц — до N × этого значения в худшем случае. */
 const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
 
 const BROWSER_HEADERS = {
@@ -25,13 +26,47 @@ export function getBrowserAxios(): AxiosInstance {
 }
 
 /**
+ * Краткое описание ошибки внешнего GET без вложенных объектов Axios (удобно для логов и JSON).
+ */
+export function formatBrowserFetchError(url: string, err: unknown): string {
+  if (isAxiosError(err)) {
+    const msgLower = err.message.toLowerCase();
+    if (
+      err.code === "ECONNABORTED" ||
+      msgLower.includes("timeout") ||
+      msgLower.includes("exceeded")
+    ) {
+      return `Browser GET timeout (${BROWSER_REQUEST_TIMEOUT_MS}ms): ${url}`;
+    }
+    if (err.response) {
+      const status = err.response.status;
+      const statusText = err.response.statusText?.trim();
+      const tail = statusText ? ` ${statusText}` : "";
+      return `Browser GET HTTP ${status}${tail}: ${url}`;
+    }
+    const code = err.code ? ` (${err.code})` : "";
+    return `Browser GET failed${code}: ${url} — ${err.message}`;
+  }
+  if (err instanceof Error) {
+    return err.message;
+  }
+  return String(err);
+}
+
+/**
  * Выполняет GET-запрос к URL с браузерными заголовками.
  * @param url — полный URL
  * @returns data ответа (тип задаётся вызывающим)
- * @throws Error при сетевой ошибке или не-2xx статусе
+ * @throws Error с коротким message; исходная ошибка в `cause`, если поддерживается средой
  */
 export async function browserGet<T = unknown>(url: string): Promise<T> {
   const client = getBrowserAxios();
-  const response = await client.get<T>(url);
-  return response.data;
+  try {
+    const response = await client.get<T>(url, {
+      timeout: BROWSER_REQUEST_TIMEOUT_MS,
+    });
+    return response.data;
+  } catch (err) {
+    throw new Error(formatBrowserFetchError(url, err), { cause: err });
+  }
 }

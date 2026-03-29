@@ -38,11 +38,12 @@ export const fillSkugrSkusController = async (req, res) => {
             res.status(400).json({ message: error.message });
             return;
         }
-        console.error("Error filling skugr skus from browser:", error);
+        const details = error instanceof Error ? error.message : String(error);
+        console.error("Error filling skugr skus from browser:", details);
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",
-                error: process.env.NODE_ENV === "development" ? error : undefined,
+                ...(process.env.NODE_ENV === "development" && { details }),
             });
         }
     }
