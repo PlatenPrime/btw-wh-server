@@ -6,19 +6,21 @@ type UpdateSkugrByIdUtilInput = {
   prodName?: string;
   title?: string;
   url?: string;
+  isSliced?: boolean;
 };
 
 export const updateSkugrByIdUtil = async (
   input: UpdateSkugrByIdUtilInput,
 ): Promise<ISkugr | null> => {
   const update: Partial<
-    Pick<ISkugr, "konkName" | "prodName" | "title" | "url">
+    Pick<ISkugr, "konkName" | "prodName" | "title" | "url" | "isSliced">
   > = {};
 
   if (input.konkName !== undefined) update.konkName = input.konkName;
   if (input.prodName !== undefined) update.prodName = input.prodName;
   if (input.title !== undefined) update.title = input.title;
   if (input.url !== undefined) update.url = input.url;
+  if (input.isSliced !== undefined) update.isSliced = input.isSliced;
 
   if (Object.keys(update).length === 0) {
     return Skugr.findById(input.id);

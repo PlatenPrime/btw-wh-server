@@ -17,6 +17,7 @@
 - `konkName?: string` — точное совпадение с полем группы
 - `prodName?: string` — точное совпадение с полем группы
 - `search?: string` — регистронезависимый поиск по подстроке в `title` (спецсимволы regex экранируются)
+- `isSliced?: boolean` — фильтр по участию товарной группы в срезах (`true`/`false`)
 
 **Ответ 200:**
 
@@ -125,6 +126,7 @@
 - `prodName?: string`
 - `title?: string`
 - `url?: string` (валидный URL)
+- `isSliced?: boolean`
 
 Пустой объект допустим: возвращается текущий документ без изменений.
 
@@ -144,6 +146,30 @@
 
 **Ошибки:** 400 (невалидный id), 401, 403, 404, 500.
 
+---
+
+### POST `/api/skugrs/set-is-sliced`
+
+Единоразово проставляет `isSliced: true` всем текущим группам, у которых поле ещё отсутствует.
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Body:** не требуется.
+
+**Ответ 200:**
+
+```json
+{
+  "message": "Skugr isSliced field set successfully",
+  "data": {
+    "matchedCount": 0,
+    "modifiedCount": 0
+  }
+}
+```
+
+**Ошибки:** 401, 403, 500.
+
 ## Формат Skugr в `data`
 
 Используется в ответах `GET /api/skugrs` (каждый элемент массива), `POST /api/skugrs`, `PATCH /api/skugrs/id/:id`, `POST /api/skugrs/id/:id/fill-skus` (поле `data`).
@@ -153,6 +179,7 @@
 - `prodName`: string
 - `title`: string
 - `url`: string
+- `isSliced`: boolean
 - `skus`: string[] (ObjectId в виде строк)
 - `createdAt`, `updatedAt`: даты (ISO-строка в JSON)
 

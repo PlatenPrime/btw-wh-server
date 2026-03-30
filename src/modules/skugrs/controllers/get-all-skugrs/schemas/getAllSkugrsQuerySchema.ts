@@ -4,6 +4,10 @@ export const getAllSkugrsQuerySchema = z.object({
   konkName: z.string().optional(),
   prodName: z.string().optional(),
   search: z.string().optional(),
+  isSliced: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((val) => (val === undefined ? undefined : val === "true")),
   page: z
     .string()
     .optional()

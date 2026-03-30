@@ -12,6 +12,7 @@ type SkugrLean = {
   prodName: string;
   title: string;
   url: string;
+  isSliced: boolean;
   skus: Types.ObjectId[];
   createdAt?: Date;
   updatedAt?: Date;
@@ -33,6 +34,7 @@ export const getAllSkugrsUtil = async ({
   konkName,
   prodName,
   search,
+  isSliced,
   page,
   limit,
 }: GetAllSkugrsQuery): Promise<GetAllSkugrsResult> => {
@@ -45,6 +47,7 @@ export const getAllSkugrsUtil = async ({
       $options: "i",
     };
   }
+  if (isSliced !== undefined) filter.isSliced = isSliced;
 
   const [skugrs, total] = await Promise.all([
     Skugr.find(filter)

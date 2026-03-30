@@ -9,6 +9,7 @@ export interface ISkugr extends Document {
   prodName: string;
   title: string;
   url: string;
+  isSliced: boolean;
   skus: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +21,7 @@ const skugrSchema = new Schema<ISkugr>(
     prodName: { type: String, required: true },
     title: { type: String, required: true },
     url: { type: String, required: true },
+    isSliced: { type: Boolean, required: true, default: true },
     skus: [
       {
         type: Schema.Types.ObjectId,

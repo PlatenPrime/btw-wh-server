@@ -4,6 +4,7 @@ const skugrSchema = new Schema({
     prodName: { type: String, required: true },
     title: { type: String, required: true },
     url: { type: String, required: true },
+    isSliced: { type: Boolean, required: true, default: true },
     skus: [
         {
             type: Schema.Types.ObjectId,

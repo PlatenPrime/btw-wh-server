@@ -12,6 +12,7 @@
 - `prodName`: string — имя-ключ производителя
 - `title`: string — название группы
 - `url`: string — ссылка на страницу сайта конкурента с этой группой товаров
+- `isSliced`: boolean — участвует ли группа в срезах
 - `skus`: массив MongoDB ObjectId — ссылки на документы коллекции `skus`
 - `_id`, `createdAt`, `updatedAt`: системные поля
 
@@ -32,6 +33,11 @@
 ### Редактирование метаданных
 
 Через `PATCH` можно менять только `konkName`, `prodName`, `title`, `url`.
+Через `PATCH` также можно менять `isSliced`.
+
+### Участие в срезах и backfill
+
+Поле `isSliced` определяет, должна ли товарная группа участвовать в срезах. Для старых документов без этого поля предусмотрен единоразовый endpoint `POST /api/skugrs/set-is-sliced`, который проставляет `isSliced: true` только там, где поле отсутствует.
 
 ### Индексы
 
@@ -48,8 +54,10 @@
 ## API эндпоинты
 
 - `GET /api/skugrs` — список групп с фильтрами и пагинацией
+- `GET /api/skugrs` поддерживает фильтр `isSliced=true|false`
 - `GET /api/skugrs/id/:id` — одна группа: метаданные без поля `skus` в ответе
 - `POST /api/skugrs` — создание группы
+- `POST /api/skugrs/set-is-sliced` — единоразовый backfill `isSliced=true` для старых документов
 - `POST /api/skugrs/id/:id/fill-skus` — заполнение группы SKU из парсера browser по `konkName`
 - `PATCH /api/skugrs/id/:id` — обновление полей группы
 - `DELETE /api/skugrs/id/:id` — удаление группы

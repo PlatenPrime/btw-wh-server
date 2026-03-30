@@ -19,6 +19,7 @@ describe("Skugr Model", () => {
             skus: [],
         });
         expect(saved.skus).toHaveLength(0);
+        expect(saved.isSliced).toBe(true);
     });
     it("saves with sku references", async () => {
         const sku = await Sku.create({

@@ -8,4 +8,5 @@ export const updateSkugrByIdSchema = z.object({
     prodName: z.string().min(1).optional(),
     title: z.string().min(1).optional(),
     url: z.string().url("Url must be a valid URL").optional(),
+    isSliced: z.boolean().optional(),
 });

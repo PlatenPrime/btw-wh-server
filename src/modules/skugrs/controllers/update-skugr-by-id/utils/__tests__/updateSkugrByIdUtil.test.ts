@@ -34,4 +34,22 @@ describe("updateSkugrByIdUtil", () => {
     expect(updated?.url).toBe("https://k.com/new");
     expect(updated?.konkName).toBe("k");
   });
+
+  it("updates isSliced field", async () => {
+    const created = await Skugr.create({
+      konkName: "k",
+      prodName: "p",
+      title: "Old",
+      url: "https://k.com/old-2",
+      skus: [],
+      isSliced: true,
+    });
+
+    const updated = await updateSkugrByIdUtil({
+      id: created._id.toString(),
+      isSliced: false,
+    });
+
+    expect(updated?.isSliced).toBe(false);
+  });
 });

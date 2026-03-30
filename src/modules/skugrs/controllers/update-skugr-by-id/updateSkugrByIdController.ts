@@ -4,7 +4,7 @@ import { updateSkugrByIdSchema } from "./schemas/updateSkugrByIdSchema.js";
 import { updateSkugrByIdUtil } from "./utils/updateSkugrByIdUtil.js";
 
 /**
- * @desc    Обновить поля skugr (konkName, prodName, title, url)
+ * @desc    Обновить поля skugr (konkName, prodName, title, url, isSliced)
  * @route   PATCH /api/skugrs/id/:id
  */
 export const updateSkugrByIdController = async (
@@ -18,6 +18,7 @@ export const updateSkugrByIdController = async (
       prodName: req.body.prodName,
       title: req.body.title,
       url: req.body.url,
+      isSliced: req.body.isSliced,
     });
 
     if (!parseResult.success) {

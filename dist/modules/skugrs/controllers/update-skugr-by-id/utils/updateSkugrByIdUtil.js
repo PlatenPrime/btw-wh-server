@@ -9,6 +9,8 @@ export const updateSkugrByIdUtil = async (input) => {
         update.title = input.title;
     if (input.url !== undefined)
         update.url = input.url;
+    if (input.isSliced !== undefined)
+        update.isSliced = input.isSliced;
     if (Object.keys(update).length === 0) {
         return Skugr.findById(input.id);
     }

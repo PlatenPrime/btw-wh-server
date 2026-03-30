@@ -8,6 +8,7 @@ import {
   fillSkugrSkusController,
   getAllSkugrsController,
   getSkugrByIdController,
+  setIsSlicedController,
   updateSkugrByIdController,
 } from "./controllers/index.js";
 
@@ -36,6 +37,12 @@ router.post(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(fillSkugrSkusController),
+);
+router.post(
+  "/set-is-sliced",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(setIsSlicedController),
 );
 router.patch(
   "/id/:id",

@@ -23,6 +23,7 @@ describe("Skugr Model", () => {
     });
 
     expect(saved.skus).toHaveLength(0);
+    expect(saved.isSliced).toBe(true);
   });
 
   it("saves with sku references", async () => {

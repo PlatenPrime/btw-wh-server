@@ -45,4 +45,21 @@ describe("updateSkugrByIdController", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data.title).toBe("New");
     });
+    it("200 updates isSliced", async () => {
+        const doc = await Skugr.create({
+            konkName: "k",
+            prodName: "p",
+            title: "Old 2",
+            url: "https://k.com/o2",
+            skus: [],
+            isSliced: true,
+        });
+        const req = {
+            params: { id: doc._id.toString() },
+            body: { isSliced: false },
+        };
+        await updateSkugrByIdController(req, res);
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.data.isSliced).toBe(false);
+    });
 });

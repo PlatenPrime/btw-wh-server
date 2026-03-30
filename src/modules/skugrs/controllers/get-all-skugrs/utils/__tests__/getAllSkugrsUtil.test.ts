@@ -27,6 +27,7 @@ describe("getAllSkugrsUtil", () => {
       konkName: "ka",
       prodName: undefined,
       search: undefined,
+      isSliced: undefined,
       page: 1,
       limit: 10,
     });
@@ -37,10 +38,43 @@ describe("getAllSkugrsUtil", () => {
       konkName: undefined,
       prodName: undefined,
       search: "beta",
+      isSliced: undefined,
       page: 1,
       limit: 10,
     });
     expect(bySearch.skugrs).toHaveLength(1);
     expect(bySearch.skugrs[0].konkName).toBe("kb");
+  });
+
+  it("filters by isSliced", async () => {
+    await Skugr.create({
+      konkName: "ka",
+      prodName: "pa",
+      title: "Alpha group",
+      url: "https://a.com/1",
+      skus: [],
+      isSliced: true,
+    });
+    await Skugr.create({
+      konkName: "ka",
+      prodName: "pa",
+      title: "Beta group",
+      url: "https://a.com/2",
+      skus: [],
+      isSliced: false,
+    });
+
+    const slicedOnly = await getAllSkugrsUtil({
+      konkName: undefined,
+      prodName: undefined,
+      search: undefined,
+      isSliced: true,
+      page: 1,
+      limit: 10,
+    });
+
+    expect(slicedOnly.skugrs).toHaveLength(1);
+    expect(slicedOnly.skugrs[0].title).toBe("Alpha group");
+    expect(slicedOnly.skugrs[0].isSliced).toBe(true);
   });
 });

@@ -2,7 +2,7 @@ import { Skugr } from "../../../models/Skugr.js";
 function escapeRegex(value) {
     return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
-export const getAllSkugrsUtil = async ({ konkName, prodName, search, page, limit, }) => {
+export const getAllSkugrsUtil = async ({ konkName, prodName, search, isSliced, page, limit, }) => {
     const filter = {};
     if (konkName && konkName.trim() !== "")
         filter.konkName = konkName;
@@ -14,6 +14,8 @@ export const getAllSkugrsUtil = async ({ konkName, prodName, search, page, limit
             $options: "i",
         };
     }
+    if (isSliced !== undefined)
+        filter.isSliced = isSliced;
     const [skugrs, total] = await Promise.all([
         Skugr.find(filter)
             .sort({ title: 1 })
