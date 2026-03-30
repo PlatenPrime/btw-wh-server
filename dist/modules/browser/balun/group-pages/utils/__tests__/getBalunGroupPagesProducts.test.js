@@ -106,4 +106,27 @@ describe("getBalunGroupPagesProducts", () => {
         expect(calls[0]).toBe(groupWithQuery);
         expect(calls[1]).toBe(page2WithQuery);
     });
+    it("parses out-of-stock product-block without buy button", async () => {
+        const html = `<!DOCTYPE html><html><head></head><body>
+<li class="b-product-gallery__item" data-qaid="product-block" data-product-id="2688595028">
+  <a class="b-product-gallery__image-link" href="/ua/p2688595028-z.html" title="OOS">
+    <img class="b-product-gallery__image" src="https://images.prom.ua/oos.jpg" alt="" />
+  </a>
+  <div class="b-product-gallery__details-panel">
+    <a class="b-product-gallery__title" href="/ua/p2688595028-z.html">OOS product</a>
+  </div>
+  <div class="b-product-gallery__order-bar"><div class="b-drop-phones"></div></div>
+</li>
+</body></html>`;
+        vi.mocked(browserGet).mockImplementation(async () => html);
+        const result = await getBalunGroupPagesProducts({
+            groupUrl: GROUP_URL,
+            maxPages: 1,
+        });
+        expect(result).toHaveLength(1);
+        expect(result[0]?.productId).toBe("2688595028");
+        expect(result[0]?.url).toBe("https://balun.example.test/ua/p2688595028-z.html");
+        expect(result[0]?.title).toBe("OOS product");
+        expect(result[0]?.imageUrl).toBe("https://images.prom.ua/oos.jpg");
+    });
 });
