@@ -10,6 +10,22 @@ const BROWSER_HEADERS = {
 };
 
 let browserAxiosInstance: AxiosInstance | null = null;
+const MAX_BROWSER_ERROR_MESSAGE_LENGTH = 240;
+
+function truncateMessage(message: string): string {
+  const trimmed = message.trim();
+  if (trimmed.length <= MAX_BROWSER_ERROR_MESSAGE_LENGTH) {
+    return trimmed;
+  }
+  return `${trimmed.slice(0, MAX_BROWSER_ERROR_MESSAGE_LENGTH)}... [truncated]`;
+}
+
+function formatUnknownError(err: unknown): string {
+  if (err instanceof Error) {
+    return truncateMessage(err.message);
+  }
+  return truncateMessage(String(err));
+}
 
 /**
  * Возвращает axios instance с заголовками «как из браузера» (AJAX).
@@ -20,6 +36,8 @@ export function getBrowserAxios(): AxiosInstance {
     browserAxiosInstance = axios.create({
       headers: BROWSER_HEADERS,
       timeout: BROWSER_REQUEST_TIMEOUT_MS,
+      responseType: "text",
+      transformResponse: [(data: unknown) => data],
     });
   }
   return browserAxiosInstance;
@@ -45,12 +63,9 @@ export function formatBrowserFetchError(url: string, err: unknown): string {
       return `Browser GET HTTP ${status}${tail}: ${url}`;
     }
     const code = err.code ? ` (${err.code})` : "";
-    return `Browser GET failed${code}: ${url} — ${err.message}`;
+    return `Browser GET failed${code}: ${url} — ${truncateMessage(err.message)}`;
   }
-  if (err instanceof Error) {
-    return err.message;
-  }
-  return String(err);
+  return formatUnknownError(err);
 }
 
 /**
@@ -65,8 +80,22 @@ export async function browserGet<T = unknown>(url: string): Promise<T> {
     const response = await client.get<T>(url, {
       timeout: BROWSER_REQUEST_TIMEOUT_MS,
     });
-    return response.data;
+    return response.data as T;
   } catch (err) {
     throw new Error(formatBrowserFetchError(url, err), { cause: err });
   }
+}
+
+export function summarizeBrowserError(err: unknown): string {
+  if (isAxiosError(err)) {
+    const requestUrl = err.config?.url?.trim();
+    if (requestUrl) {
+      return formatBrowserFetchError(requestUrl, err);
+    }
+  }
+  return formatUnknownError(err);
+}
+
+export function logBrowserError(context: string, err: unknown): void {
+  console.error(`${context} ${summarizeBrowserError(err)}`);
 }

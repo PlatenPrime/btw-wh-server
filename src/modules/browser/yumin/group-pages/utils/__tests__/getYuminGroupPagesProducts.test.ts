@@ -29,10 +29,10 @@ function jsonPage(
   items: ReturnType<typeof apiProduct>[],
   next: string | null
 ) {
-  return {
+  return JSON.stringify({
     data: items,
     links: { next },
-  };
+  });
 }
 
 describe("getYuminGroupPagesProducts", () => {
@@ -153,17 +153,19 @@ describe("getYuminGroupPagesProducts", () => {
   });
 
   it("uses original_image_url when large is missing", async () => {
-    vi.mocked(browserGet).mockResolvedValue({
-      data: [
-        {
-          id: 5,
-          name: "Img",
-          url_key: "img-k",
-          base_image: { original_image_url: "https://yumi.market/o.webp" },
-        },
-      ],
-      links: { next: null },
-    });
+    vi.mocked(browserGet).mockResolvedValue(
+      JSON.stringify({
+        data: [
+          {
+            id: 5,
+            name: "Img",
+            url_key: "img-k",
+            base_image: { original_image_url: "https://yumi.market/o.webp" },
+          },
+        ],
+        links: { next: null },
+      })
+    );
 
     const result = await getYuminGroupPagesProducts({ groupUrl: GROUP_URL });
 

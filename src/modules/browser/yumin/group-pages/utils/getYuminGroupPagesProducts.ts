@@ -57,6 +57,14 @@ function pickImageUrl(
   return original || null;
 }
 
+function parseYuminProductsPage(raw: string, pageUrl: string): unknown {
+  try {
+    return JSON.parse(raw) as unknown;
+  } catch {
+    throw new Error(`Invalid JSON in Yumin listing response: ${pageUrl}`);
+  }
+}
+
 export async function getYuminGroupPagesProducts(
   input: GetYuminGroupPagesProductsInput
 ): Promise<YuminGroupPageProduct[]> {
@@ -82,8 +90,10 @@ export async function getYuminGroupPagesProducts(
     }
     visited.add(currentUrl);
 
-    const raw = await browserGet<unknown>(currentUrl);
-    const pageParsed = yuminProductsPageSchema.safeParse(raw);
+    const raw = await browserGet<string>(currentUrl);
+    const pageParsed = yuminProductsPageSchema.safeParse(
+      parseYuminProductsPage(raw, currentUrl)
+    );
     if (!pageParsed.success) {
       throw new Error(pageParsed.error.message);
     }

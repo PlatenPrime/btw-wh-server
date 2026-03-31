@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 import type { StockInfo } from "../../utils/types.js";
-import { browserGet } from "../../utils/browserRequest.js";
+import { browserGet, logBrowserError } from "../../utils/browserRequest.js";
 
 const SHARTE_ADD_CART_BASE =
   "https://sharte.net/ajax.php?act=addCart&id=${productId}&q=1&site_id=s1";
@@ -13,6 +13,14 @@ interface SharteAddCartResponse {
   CATALOG_QUANTITY?: number;
   CATALOG_QUANTITY_RESERVED?: number;
   "~PRICE"?: number | string;
+}
+
+function parseAddCartResponse(raw: string, url: string): SharteAddCartResponse {
+  try {
+    return JSON.parse(raw) as SharteAddCartResponse;
+  } catch {
+    throw new Error(`Invalid JSON in Sharte addCart response: ${url}`);
+  }
 }
 
 /**
@@ -69,7 +77,8 @@ export async function getSharteStockData(
     productId = extractedId;
 
     const targetUrl = SHARTE_ADD_CART_BASE.replace("${productId}", productId);
-    const data = await browserGet<SharteAddCartResponse>(targetUrl);
+    const addCartRaw = await browserGet<string>(targetUrl);
+    const data = parseAddCartResponse(addCartRaw, targetUrl);
 
     if (!data || data.CATALOG_QUANTITY === undefined) {
       const $ = cheerio.load(html);
@@ -105,7 +114,7 @@ export async function getSharteStockData(
       ...(price !== undefined && !Number.isNaN(price) && { price }),
     };
   } catch (error) {
-    console.error("Error fetching data from sharte:", error);
+    logBrowserError("Error fetching data from sharte:", error);
     return negativeOutcome(productId);
   }
 }

@@ -1,5 +1,6 @@
 import { getBalunStockSchema } from "../utils/getBalunStockSchema.js";
 import { getBalunStockData } from "../utils/getBalunStockData.js";
+import { logBrowserError } from "../../utils/browserRequest.js";
 /**
  * @desc    Получить остатки и цену товара с сайта Balun по ссылке на страницу товара
  * @route   GET /api/browser/balun/stock?link=<url>
@@ -28,7 +29,7 @@ export const getBalunStockController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching Balun stock by link:", error);
+        logBrowserError("Error fetching Balun stock by link:", error);
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

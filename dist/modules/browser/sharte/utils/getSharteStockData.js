@@ -1,7 +1,15 @@
 import * as cheerio from "cheerio";
-import { browserGet } from "../../utils/browserRequest.js";
+import { browserGet, logBrowserError } from "../../utils/browserRequest.js";
 const SHARTE_ADD_CART_BASE = "https://sharte.net/ajax.php?act=addCart&id=${productId}&q=1&site_id=s1";
 const PRICE_TEXT_REGEX = /([\d\s,\.]+)\s*грн/i;
+function parseAddCartResponse(raw, url) {
+    try {
+        return JSON.parse(raw);
+    }
+    catch {
+        throw new Error(`Invalid JSON in Sharte addCart response: ${url}`);
+    }
+}
 /**
  * Извлекает цену из текста элемента a.price.changePrice (формат «1.85 грн.»).
  */
@@ -54,7 +62,8 @@ export async function getSharteStockData(productUrl) {
             return negativeOutcome("");
         productId = extractedId;
         const targetUrl = SHARTE_ADD_CART_BASE.replace("${productId}", productId);
-        const data = await browserGet(targetUrl);
+        const addCartRaw = await browserGet(targetUrl);
+        const data = parseAddCartResponse(addCartRaw, targetUrl);
         if (!data || data.CATALOG_QUANTITY === undefined) {
             const $ = cheerio.load(html);
             const priceText = $("a.price.changePrice").first().text().trim();
@@ -84,7 +93,7 @@ export async function getSharteStockData(productUrl) {
         };
     }
     catch (error) {
-        console.error("Error fetching data from sharte:", error);
+        logBrowserError("Error fetching data from sharte:", error);
         return negativeOutcome(productId);
     }
 }

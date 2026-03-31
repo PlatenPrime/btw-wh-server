@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { browserGet } from "../../utils/browserRequest.js";
+import { browserGet, logBrowserError } from "../../utils/browserRequest.js";
 /**
  * Парсит JSON из data-атрибута; при необходимости декодирует HTML-entities.
  */
@@ -56,7 +56,7 @@ export async function getBalunStockData(link) {
         return { stock, price };
     }
     catch (error) {
-        console.error("Error fetching data from balun product page:", error);
+        logBrowserError("Error fetching data from balun product page:", error);
         return NEGATIVE_OUTCOME;
     }
 }

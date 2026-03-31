@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { browserGet } from "../../utils/browserRequest.js";
+import { browserGet, logBrowserError, summarizeBrowserError, } from "../../utils/browserRequest.js";
 /**
  * Получает данные о товаре с сайта sharik.ua по артикулу
  * @param artikul - артикул товара в виде строки
@@ -23,8 +23,8 @@ export async function getSharikStockData(artikul) {
         return data || null;
     }
     catch (error) {
-        console.error("Error fetching data from sharik.ua:", error);
-        throw new Error(`Failed to fetch data from sharik.ua: ${error instanceof Error ? error.message : "Unknown error"}`);
+        logBrowserError("Error fetching data from sharik.ua:", error);
+        throw new Error(`Failed to fetch data from sharik.ua: ${summarizeBrowserError(error)}`);
     }
 }
 /**

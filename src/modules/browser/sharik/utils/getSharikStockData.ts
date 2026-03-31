@@ -1,5 +1,9 @@
 import * as cheerio from "cheerio";
-import { browserGet } from "../../utils/browserRequest.js";
+import {
+  browserGet,
+  logBrowserError,
+  summarizeBrowserError,
+} from "../../utils/browserRequest.js";
 
 export interface SharikProductInfo {
   nameukr: string;
@@ -38,11 +42,9 @@ export async function getSharikStockData(
 
     return data || null;
   } catch (error) {
-    console.error("Error fetching data from sharik.ua:", error);
+    logBrowserError("Error fetching data from sharik.ua:", error);
     throw new Error(
-      `Failed to fetch data from sharik.ua: ${
-        error instanceof Error ? error.message : "Unknown error"
-      }`
+      `Failed to fetch data from sharik.ua: ${summarizeBrowserError(error)}`
     );
   }
 }

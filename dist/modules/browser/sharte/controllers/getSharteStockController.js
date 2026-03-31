@@ -1,5 +1,6 @@
 import { getSharteStockSchema } from "../utils/getSharteStockSchema.js";
 import { getSharteStockData } from "../utils/getSharteStockData.js";
+import { logBrowserError } from "../../utils/browserRequest.js";
 /**
  * @desc    Получить остатки товара с sharte.net по URL страницы товара
  * @route   GET /api/browser/sharte/stock?url=...
@@ -28,7 +29,7 @@ export const getSharteStockController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching Sharte stock by url:", error);
+        logBrowserError("Error fetching Sharte stock by url:", error);
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

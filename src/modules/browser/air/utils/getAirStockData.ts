@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { browserGet } from "../../utils/browserRequest.js";
+import { browserGet, logBrowserError } from "../../utils/browserRequest.js";
 
 export interface AirProductInfo {
   stock: number;
@@ -53,7 +53,7 @@ export async function getAirStockData(
 
     return { stock, price };
   } catch (error) {
-    console.error("Error fetching data from air product page:", error);
+    logBrowserError("Error fetching data from air product page:", error);
     return NEGATIVE_OUTCOME;
   }
 }

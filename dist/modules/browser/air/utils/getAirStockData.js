@@ -1,5 +1,5 @@
 import * as cheerio from "cheerio";
-import { browserGet } from "../../utils/browserRequest.js";
+import { browserGet, logBrowserError } from "../../utils/browserRequest.js";
 /**
  * Получает данные о количестве и цене товара со страницы товара сайта air по ссылке.
  * При отсутствии товара в наличии (элемент #max-product-quantity отсутствует в разметке) возвращает stock: 0 при валидной цене.
@@ -41,7 +41,7 @@ export async function getAirStockData(link) {
         return { stock, price };
     }
     catch (error) {
-        console.error("Error fetching data from air product page:", error);
+        logBrowserError("Error fetching data from air product page:", error);
         return NEGATIVE_OUTCOME;
     }
 }

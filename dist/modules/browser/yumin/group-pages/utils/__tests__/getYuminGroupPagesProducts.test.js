@@ -14,10 +14,10 @@ function apiProduct(id, name, urlKey, image = "https://yumi.market/cache/large/p
     };
 }
 function jsonPage(items, next) {
-    return {
+    return JSON.stringify({
         data: items,
         links: { next },
-    };
+    });
 }
 describe("getYuminGroupPagesProducts", () => {
     beforeEach(() => {
@@ -107,7 +107,7 @@ describe("getYuminGroupPagesProducts", () => {
         expect(result[0].productId).toBe("1");
     });
     it("uses original_image_url when large is missing", async () => {
-        vi.mocked(browserGet).mockResolvedValue({
+        vi.mocked(browserGet).mockResolvedValue(JSON.stringify({
             data: [
                 {
                     id: 5,
@@ -117,7 +117,7 @@ describe("getYuminGroupPagesProducts", () => {
                 },
             ],
             links: { next: null },
-        });
+        }));
         const result = await getYuminGroupPagesProducts({ groupUrl: GROUP_URL });
         expect(result[0].imageUrl).toBe("https://yumi.market/o.webp");
     });

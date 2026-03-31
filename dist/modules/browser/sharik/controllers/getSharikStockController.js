@@ -1,5 +1,6 @@
 import { getSharikStockSchema } from "../utils/getSharikStockSchema.js";
 import { getSharikStockData } from "../utils/getSharikStockData.js";
+import { logBrowserError } from "../../utils/browserRequest.js";
 /**
  * @desc    Получить остатки товара с sharik.ua по артикулу
  * @route   GET /api/browser/sharik/stock/:artikul
@@ -28,7 +29,7 @@ export const getSharikStockController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching Sharik stock by artikul:", error);
+        logBrowserError("Error fetching Sharik stock by artikul:", error);
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

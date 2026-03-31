@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getYumiStockSchema } from "../utils/getYumiStockSchema.js";
 import { getYumiStockData } from "../utils/getYumiStockData.js";
+import { logBrowserError } from "../../utils/browserRequest.js";
 
 /**
  * @desc    Получить остатки и цену товара с сайта Yumi по ссылке на страницу товара
@@ -35,7 +36,7 @@ export const getYumiStockController = async (
       data,
     });
   } catch (error) {
-    console.error("Error fetching Yumi stock by link:", error);
+    logBrowserError("Error fetching Yumi stock by link:", error);
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

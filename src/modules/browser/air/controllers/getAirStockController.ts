@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAirStockSchema } from "../utils/getAirStockSchema.js";
 import { getAirStockData } from "../utils/getAirStockData.js";
+import { logBrowserError } from "../../utils/browserRequest.js";
 
 /**
  * @desc    Получить остатки и цену товара с сайта air по ссылке на страницу товара
@@ -34,7 +35,7 @@ export const getAirStockController = async (
       data,
     });
   } catch (error) {
-    console.error("Error fetching Air stock by link:", error);
+    logBrowserError("Error fetching Air stock by link:", error);
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

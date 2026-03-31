@@ -25,4 +25,10 @@ describe("formatBrowserFetchError", () => {
     it("пробрасывает message обычного Error", () => {
         expect(formatBrowserFetchError("https://a", new Error("plain failure"))).toBe("plain failure");
     });
+    it("усекает слишком длинный message", () => {
+        const longMessage = "x".repeat(500);
+        const formatted = formatBrowserFetchError("https://a", new Error(longMessage));
+        expect(formatted.endsWith("... [truncated]")).toBe(true);
+        expect(formatted.length).toBeLessThan(300);
+    });
 });

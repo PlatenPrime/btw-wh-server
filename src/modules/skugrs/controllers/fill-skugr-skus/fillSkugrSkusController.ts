@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { UnsupportedKonkForGroupProductsError } from "../../../browser/group-products/fetchGroupProductsByKonkName.js";
+import { summarizeBrowserError } from "../../../browser/utils/browserRequest.js";
 import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../utils/fillSkugrSkusFromBrowserUtil.js";
 import { fillSkugrSkusSchema } from "./schemas/fillSkugrSkusSchema.js";
@@ -47,8 +48,7 @@ export const fillSkugrSkusController = async (
       res.status(400).json({ message: error.message });
       return;
     }
-    const details =
-      error instanceof Error ? error.message : String(error);
+    const details = summarizeBrowserError(error);
     console.error("Error filling skugr skus from browser:", details);
     if (!res.headersSent) {
       res.status(500).json({

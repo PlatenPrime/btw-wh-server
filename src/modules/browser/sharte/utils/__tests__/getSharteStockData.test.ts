@@ -20,13 +20,15 @@ describe("getSharteStockData", () => {
     const productUrl = "https://sharte.net/catalog/product/4777/";
     vi.mocked(browserGet)
       .mockResolvedValueOnce(productPageWithCatalogElement("4777"))
-      .mockResolvedValueOnce({
-        ID: "4777",
-        "~NAME": "Product Name",
-        CATALOG_QUANTITY: 10,
-        CATALOG_QUANTITY_RESERVED: 2,
-        "~PRICE": 123.45,
-      });
+      .mockResolvedValueOnce(
+        JSON.stringify({
+          ID: "4777",
+          "~NAME": "Product Name",
+          CATALOG_QUANTITY: 10,
+          CATALOG_QUANTITY_RESERVED: 2,
+          "~PRICE": 123.45,
+        })
+      );
     const result = await getSharteStockData(productUrl);
     expect(result).toEqual({
       id: "4777",
@@ -81,7 +83,7 @@ describe("getSharteStockData", () => {
     );
     vi.mocked(browserGet)
       .mockResolvedValueOnce(html)
-      .mockResolvedValueOnce({});
+      .mockResolvedValueOnce("{}");
     const result = await getSharteStockData(productUrl);
     expect(result).toEqual({
       id: "999",
@@ -102,7 +104,7 @@ describe("getSharteStockData", () => {
     const productUrl = "https://sharte.net/product/999";
     vi.mocked(browserGet)
       .mockResolvedValueOnce(productPageWithCatalogElement("999"))
-      .mockResolvedValueOnce({});
+      .mockResolvedValueOnce("{}");
     const result = await getSharteStockData(productUrl);
     expect(result).toEqual({
       id: "999",
@@ -134,12 +136,14 @@ describe("getSharteStockData", () => {
     const productUrl = "https://sharte.net/catalog/product/4778/";
     vi.mocked(browserGet)
       .mockResolvedValueOnce(productPageWithCatalogElement("4778"))
-      .mockResolvedValueOnce({
-        ID: "4778",
-        "~NAME": "Product Without Price",
-        CATALOG_QUANTITY: 5,
-        CATALOG_QUANTITY_RESERVED: 0,
-      });
+      .mockResolvedValueOnce(
+        JSON.stringify({
+          ID: "4778",
+          "~NAME": "Product Without Price",
+          CATALOG_QUANTITY: 5,
+          CATALOG_QUANTITY_RESERVED: 0,
+        })
+      );
     const result = await getSharteStockData(productUrl);
     expect(result).toEqual({
       id: "4778",

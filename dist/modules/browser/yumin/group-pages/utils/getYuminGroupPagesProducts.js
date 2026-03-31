@@ -38,6 +38,14 @@ function pickImageUrl(baseImage) {
     const original = baseImage?.original_image_url?.trim();
     return original || null;
 }
+function parseYuminProductsPage(raw, pageUrl) {
+    try {
+        return JSON.parse(raw);
+    }
+    catch {
+        throw new Error(`Invalid JSON in Yumin listing response: ${pageUrl}`);
+    }
+}
 export async function getYuminGroupPagesProducts(input) {
     const parseResult = getYuminGroupPagesProductsSchema.safeParse(input);
     if (!parseResult.success) {
@@ -57,7 +65,7 @@ export async function getYuminGroupPagesProducts(input) {
         }
         visited.add(currentUrl);
         const raw = await browserGet(currentUrl);
-        const pageParsed = yuminProductsPageSchema.safeParse(raw);
+        const pageParsed = yuminProductsPageSchema.safeParse(parseYuminProductsPage(raw, currentUrl));
         if (!pageParsed.success) {
             throw new Error(pageParsed.error.message);
         }

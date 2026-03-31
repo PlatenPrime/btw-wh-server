@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getYuminStockSchema } from "../utils/getYuminStockSchema.js";
 import { getYuminStockData } from "../utils/getYuminStockData.js";
+import { logBrowserError } from "../../utils/browserRequest.js";
 
 /**
  * @desc    Получить остатки и цену товара с сайта Yumin по ссылке на страницу товара
@@ -35,7 +36,7 @@ export const getYuminStockController = async (
       data,
     });
   } catch (error) {
-    console.error("Error fetching Yumin stock by link:", error);
+    logBrowserError("Error fetching Yumin stock by link:", error);
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",
