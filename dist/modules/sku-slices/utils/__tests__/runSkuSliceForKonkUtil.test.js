@@ -6,6 +6,11 @@ vi.mock("../../../skus/models/Sku.js", () => ({
         find: vi.fn(),
     },
 }));
+vi.mock("../../../skugrs/models/Skugr.js", () => ({
+    Skugr: {
+        find: vi.fn(),
+    },
+}));
 vi.mock("../../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js", () => ({
     getSkuStockDataUtil: vi.fn(),
     UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
@@ -16,12 +21,22 @@ vi.mock("../../models/SkuSlice.js", () => ({
     },
 }));
 import { Sku } from "../../../skus/models/Sku.js";
+import { Skugr } from "../../../skugrs/models/Skugr.js";
 import { getSkuStockDataUtil } from "../../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../models/SkuSlice.js";
 describe("runSkuSliceForKonkUtil", () => {
     const sliceDate = toSliceDate(new Date("2025-03-01T12:00:00.000Z"));
     beforeEach(() => {
         vi.mocked(SkuSlice.findOneAndUpdate).mockResolvedValue({});
+        vi.mocked(Skugr.find).mockReturnValue({
+            select: vi.fn().mockReturnValue({
+                lean: vi.fn().mockResolvedValue([
+                    {
+                        skus: [{ toString: () => "id1" }, { toString: () => "id2" }],
+                    },
+                ]),
+            }),
+        });
         vi.mocked(Sku.find).mockReturnValue({
             select: vi.fn().mockReturnValue({
                 lean: vi.fn().mockResolvedValue([
@@ -45,6 +60,11 @@ describe("runSkuSliceForKonkUtil", () => {
         vi.useRealTimers();
         expect(result).toEqual({ saved: true, count: 2 });
         expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(3);
+        expect(Skugr.find).toHaveBeenCalledWith({ konkName: "air", isSliced: true });
+        expect(Sku.find).toHaveBeenCalledWith({
+            konkName: "air",
+            _id: { $in: ["id1", "id2"] },
+        });
         const calls = vi.mocked(SkuSlice.findOneAndUpdate).mock.calls;
         expect(calls[0][0]).toEqual({ konkName: "air", date: sliceDate });
         expect(calls[0][1]).toEqual({
@@ -73,5 +93,48 @@ describe("runSkuSliceForKonkUtil", () => {
         const result = await resultPromise;
         vi.useRealTimers();
         expect(result.count).toBe(1);
+    });
+    it("uses deduplicated sku ids from sliced groups", async () => {
+        vi.mocked(Skugr.find).mockReturnValue({
+            select: vi.fn().mockReturnValue({
+                lean: vi.fn().mockResolvedValue([
+                    {
+                        skus: [{ toString: () => "id1" }, { toString: () => "id2" }],
+                    },
+                    {
+                        skus: [{ toString: () => "id2" }, { toString: () => "id3" }],
+                    },
+                ]),
+            }),
+        });
+        vi.useFakeTimers();
+        const resultPromise = runSkuSliceForKonkUtil("air", new Date("2025-03-01T12:00:00.000Z"));
+        await vi.runAllTimersAsync();
+        await resultPromise;
+        vi.useRealTimers();
+        expect(Sku.find).toHaveBeenCalledWith({
+            konkName: "air",
+            _id: { $in: ["id1", "id2", "id3"] },
+        });
+    });
+    it("does not process sku data when there are no sliced groups", async () => {
+        vi.mocked(Skugr.find).mockReturnValue({
+            select: vi.fn().mockReturnValue({
+                lean: vi.fn().mockResolvedValue([]),
+            }),
+        });
+        vi.mocked(Sku.find).mockReturnValue({
+            select: vi.fn().mockReturnValue({
+                lean: vi.fn().mockResolvedValue([]),
+            }),
+        });
+        const result = await runSkuSliceForKonkUtil("air", new Date("2025-03-01T12:00:00.000Z"));
+        expect(result).toEqual({ saved: true, count: 0 });
+        expect(getSkuStockDataUtil).not.toHaveBeenCalled();
+        expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
+        expect(Sku.find).toHaveBeenCalledWith({
+            konkName: "air",
+            _id: { $in: [] },
+        });
     });
 });

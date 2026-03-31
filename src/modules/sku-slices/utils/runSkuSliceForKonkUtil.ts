@@ -1,4 +1,5 @@
 import { Sku } from "../../skus/models/Sku.js";
+import { Skugr } from "../../skugrs/models/Skugr.js";
 import {
   getSkuStockDataUtil,
   UNSUPPORTED_KONK_CODE,
@@ -17,6 +18,10 @@ type SkuLean = {
   productId?: string;
 };
 
+type SkugrLean = {
+  skus?: Array<{ toString(): string }>;
+};
+
 /**
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
  * с паузой 1 с — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
@@ -26,7 +31,17 @@ export async function runSkuSliceForKonkUtil(
   date: Date
 ): Promise<{ saved: boolean; count: number }> {
   const sliceDate = toSliceDate(date);
-  const skus = (await Sku.find({ konkName })
+  const skugrs = (await Skugr.find({ konkName, isSliced: true })
+    .select("skus")
+    .lean()) as SkugrLean[];
+  const slicedSkuIds = Array.from(
+    new Set(
+      skugrs.flatMap((group) =>
+        (group.skus ?? []).map((skuId) => skuId.toString())
+      )
+    )
+  );
+  const skus = (await Sku.find({ konkName, _id: { $in: slicedSkuIds } })
     .select("_id productId")
     .lean()) as SkuLean[];
 

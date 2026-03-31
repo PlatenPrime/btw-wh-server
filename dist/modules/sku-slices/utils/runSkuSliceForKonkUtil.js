@@ -1,4 +1,5 @@
 import { Sku } from "../../skus/models/Sku.js";
+import { Skugr } from "../../skugrs/models/Skugr.js";
 import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE, } from "../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
@@ -12,7 +13,11 @@ function delay(ms) {
  */
 export async function runSkuSliceForKonkUtil(konkName, date) {
     const sliceDate = toSliceDate(date);
-    const skus = (await Sku.find({ konkName })
+    const skugrs = (await Skugr.find({ konkName, isSliced: true })
+        .select("skus")
+        .lean());
+    const slicedSkuIds = Array.from(new Set(skugrs.flatMap((group) => (group.skus ?? []).map((skuId) => skuId.toString()))));
+    const skus = (await Sku.find({ konkName, _id: { $in: slicedSkuIds } })
         .select("_id productId")
         .lean());
     await SkuSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $setOnInsert: { konkName, date: sliceDate, data: {} } }, { upsert: true });
