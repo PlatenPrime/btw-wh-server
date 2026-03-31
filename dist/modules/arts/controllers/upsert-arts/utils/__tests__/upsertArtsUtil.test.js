@@ -50,4 +50,11 @@ describe("upsertArtsUtil", () => {
         });
         expect(result.upsertedCount).toBe(1);
     });
+    it("сохраняет prodName при upsert", async () => {
+        await upsertArtsUtil({
+            arts: [{ artikul: "ART-PR-001", zone: "A1", prodName: "gemar" }],
+        });
+        const saved = await Art.findOne({ artikul: "ART-PR-001" });
+        expect(saved?.prodName).toBe("gemar");
+    });
 });

@@ -22,6 +22,7 @@ export const upsertArtsUtil = async ({ arts }: UpsertArtsUtilInput) => {
         update: {
           $set: {
             zone: art.zone,
+            prodName: art.prodName,
             namerus: art.namerus,
             nameukr: art.nameukr,
             abc: art.abc,

@@ -15,6 +15,7 @@ export const formatArtsForExcelExtendedUtil = (arts, posesQuantMap) => {
         const shelf = btradeStockValue - stocks;
         return {
             Артикул: art.artikul,
+            Виробник: art.prodName || "",
             Факт: "",
             Вітрина: shelf,
             Склад: stocks,

@@ -1,5 +1,6 @@
 export type ExcelArtRowExtended = {
     Артикул: string;
+    Виробник?: string;
     Факт: string;
     "Назва (укр)": string;
     Зона: string;

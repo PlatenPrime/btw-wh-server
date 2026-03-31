@@ -11,6 +11,7 @@ const artSchema = new Schema({
         required: true,
         unique: true,
     },
+    prodName: { type: String },
     nameukr: { type: String },
     namerus: { type: String },
     zone: {

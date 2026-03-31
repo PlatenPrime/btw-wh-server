@@ -9,6 +9,7 @@ import { ExcelArtRow } from "./types.js";
 export const formatArtsForExcelUtil = (arts: IArt[]): ExcelArtRow[] => {
   return arts.map((art) => ({
     Артикул: art.artikul,
+    Виробник: art.prodName || "",
     "Назва (укр)": art.nameukr || "",
     "Назва (рус)": art.namerus || "",
     Зона: art.zone, 

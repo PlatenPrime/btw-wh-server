@@ -6,6 +6,7 @@ describe("formatArtsForExcelUtil", () => {
             {
                 _id: {},
                 artikul: "ART-001",
+                prodName: "Gemar",
                 nameukr: "Тестовий артикул",
                 namerus: "Тестовый артикул",
                 zone: "A1",
@@ -22,6 +23,7 @@ describe("formatArtsForExcelUtil", () => {
         expect(result).toHaveLength(1);
         expect(result[0]).toEqual({
             Артикул: "ART-001",
+            Виробник: "Gemar",
             "Назва (укр)": "Тестовий артикул",
             "Назва (рус)": "Тестовый артикул",
             Зона: "A1",
@@ -47,6 +49,7 @@ describe("formatArtsForExcelUtil", () => {
         expect(result).toHaveLength(1);
         expect(result[0]).toEqual({
             Артикул: "ART-002",
+            Виробник: "",
             "Назва (укр)": "",
             "Назва (рус)": "",
             Зона: "B2",

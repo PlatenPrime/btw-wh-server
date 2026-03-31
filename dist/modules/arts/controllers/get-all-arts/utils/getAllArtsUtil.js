@@ -5,6 +5,7 @@ export const getAllArtsUtil = async ({ page, limit, search, }) => {
         ? {
             $or: [
                 { artikul: { $regex: search, $options: "i" } },
+                { prodName: { $regex: search, $options: "i" } },
                 { nameukr: { $regex: search, $options: "i" } },
                 { namerus: { $regex: search, $options: "i" } },
             ],

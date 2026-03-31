@@ -10,7 +10,7 @@
 
 **Доступ:** checkAuth + checkRoles(USER).
 
-**Запрос:** query — `page` (number, по умолчанию 1), `limit` (1–100, по умолчанию 10), `search` (string, опционально).
+**Запрос:** query — `page` (number, по умолчанию 1), `limit` (1–100, по умолчанию 10), `search` (string, опционально; поиск по `artikul`, `prodName`, `nameukr`, `namerus`).
 
 **Ответ 200:** `{ data: Array<Art>, total: number, page: number, totalPages: number }`.
 
@@ -94,7 +94,7 @@
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос body:** массив объектов: `artikul` (string), `zone` (string), опционально `nameukr`, `namerus`, `limit` (number), `marker` (string), `abc` (string). Минимум один элемент.
+**Запрос body:** массив объектов: `artikul` (string), `zone` (string), опционально `prodName` (string), `nameukr`, `namerus`, `limit` (number), `marker` (string), `abc` (string). Минимум один элемент.
 
 **Ответ 200:** `{ message: string, result: ... }`.
 

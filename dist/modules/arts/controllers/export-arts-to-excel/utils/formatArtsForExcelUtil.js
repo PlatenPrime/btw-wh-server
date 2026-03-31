@@ -6,6 +6,7 @@
 export const formatArtsForExcelUtil = (arts) => {
     return arts.map((art) => ({
         Артикул: art.artikul,
+        Виробник: art.prodName || "",
         "Назва (укр)": art.nameukr || "",
         "Назва (рус)": art.namerus || "",
         Зона: art.zone,

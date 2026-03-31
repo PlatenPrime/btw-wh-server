@@ -3,8 +3,8 @@
  * Для исключения конкурента достаточно добавить его имя в нужный список.
  */
 export const excludedCompetitors = {
-    analogSlices: ["air"],
-    skuSlices: ["air", "yumi"],
+    analogSlices: [],
+    skuSlices: ["yumi"],
 };
 export function normalizeCompetitorName(value) {
     return value.trim().toLowerCase();

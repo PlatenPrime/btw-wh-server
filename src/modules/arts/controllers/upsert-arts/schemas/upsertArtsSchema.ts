@@ -6,6 +6,7 @@ export const upsertArtsSchema = z
     z.object({
       artikul: z.string().min(1, "Artikul is required"),
       zone: z.string().min(1, "Zone is required"),
+      prodName: z.string().optional(),
       nameukr: z.string().optional(),
       namerus: z.string().optional(),
       limit: z.number().nonnegative("Limit must be non-negative").optional(),

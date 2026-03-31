@@ -24,6 +24,7 @@ export const formatArtsForExcelExtendedUtil = (
 
     return {
       Артикул: art.artikul,
+      Виробник: art.prodName || "",
       Факт: "",
       Вітрина: shelf,
       Склад: stocks,

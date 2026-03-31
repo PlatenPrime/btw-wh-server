@@ -7,8 +7,8 @@ type ExcludedCompetitorsConfig = Record<SliceType, readonly string[]>;
  * Для исключения конкурента достаточно добавить его имя в нужный список.
  */
 export const excludedCompetitors: ExcludedCompetitorsConfig = {
-  analogSlices: ["air"],
-  skuSlices: ["air", "yumi"],
+  analogSlices: [],
+  skuSlices: [ "yumi"],
 };
 
 export function normalizeCompetitorName(value: string): string {

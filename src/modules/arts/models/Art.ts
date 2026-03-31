@@ -10,6 +10,7 @@ export interface IBtradeStock {
 export interface IArt extends Document {
   _id: mongoose.Types.ObjectId;
   artikul: string;
+  prodName?: string;
   nameukr?: string;
   namerus?: string;
   zone: string;
@@ -38,6 +39,7 @@ const artSchema = new Schema<IArt>(
       required: true,
       unique: true,
     },
+    prodName: { type: String },
     nameukr: { type: String },
     namerus: { type: String },
     zone: {

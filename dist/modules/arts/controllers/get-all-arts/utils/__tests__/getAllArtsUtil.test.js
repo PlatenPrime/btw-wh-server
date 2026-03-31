@@ -84,6 +84,25 @@ describe("getAllArtsUtil", () => {
         expect(result.arts).toHaveLength(1);
         expect(result.arts[0].namerus).toBe("Русское название");
     });
+    it("возвращает результаты поиска по prodName", async () => {
+        await Art.create({
+            artikul: "ART-001",
+            prodName: "Gemar",
+            zone: "A1",
+        });
+        await Art.create({
+            artikul: "ART-002",
+            prodName: "Belbal",
+            zone: "A2",
+        });
+        const result = await getAllArtsUtil({
+            page: 1,
+            limit: 10,
+            search: "gem",
+        });
+        expect(result.arts).toHaveLength(1);
+        expect(result.arts[0].prodName).toBe("Gemar");
+    });
     it("возвращает пустой массив когда артикулов нет", async () => {
         const result = await getAllArtsUtil({
             page: 1,

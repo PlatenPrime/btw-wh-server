@@ -52,6 +52,22 @@ describe("Art Model - Schema Validation Only", () => {
       const savedArt = await art.save();
       expect(savedArt.abc).toBeUndefined();
     });
+    it("should save and retrieve optional prodName field", async () => {
+      const artData = {
+        artikul: "PROD001",
+        zone: "A1",
+        prodName: "Gemar",
+      };
+      const art = new Art(artData);
+      const savedArt = await art.save();
+      expect(savedArt.prodName).toBe("Gemar");
+    });
+    it("should allow saving without prodName field", async () => {
+      const artData = { artikul: "NOPROD001", zone: "A1" };
+      const art = new Art(artData);
+      const savedArt = await art.save();
+      expect(savedArt.prodName).toBeUndefined();
+    });
     it("should handle numeric, negative, and decimal limit", async () => {
       const art1 = await new Art({
         artikul: "LIMIT001",
