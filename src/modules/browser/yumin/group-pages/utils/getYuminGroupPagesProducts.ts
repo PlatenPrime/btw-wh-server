@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { browserGet } from "../../../utils/browserRequest.js";
+import { sleep } from "../../../utils/sleep.js";
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import {
   getYuminGroupPagesProductsSchema,
   type GetYuminGroupPagesProductsInput,
@@ -129,6 +131,7 @@ export async function getYuminGroupPagesProducts(
     if (!next || next === currentUrl || visited.has(next)) {
       break;
     }
+    await sleep(getGroupPagesThrottleDelayMs());
     currentUrl = next;
   }
 

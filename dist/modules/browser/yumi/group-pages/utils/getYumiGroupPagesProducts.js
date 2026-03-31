@@ -1,3 +1,4 @@
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { parsePromUaGroupListingProducts } from "../../../group-pages/utils/parsePromUaGroupListingProducts.js";
 import { getYumiGroupPagesProductsSchema, } from "./getYumiGroupPagesProductsSchema.js";
@@ -29,5 +30,6 @@ export async function getYumiGroupPagesProducts(input) {
         maxPages,
         parseProductsFromPage,
         getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+        delayBeforeNextMs: getGroupPagesThrottleDelayMs,
     });
 }

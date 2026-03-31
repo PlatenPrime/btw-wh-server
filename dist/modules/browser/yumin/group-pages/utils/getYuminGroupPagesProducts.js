@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { browserGet } from "../../../utils/browserRequest.js";
+import { sleep } from "../../../utils/sleep.js";
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { getYuminGroupPagesProductsSchema, } from "./getYuminGroupPagesProductsSchema.js";
 const yuminProductsPageSchema = z.object({
     data: z.array(z.object({
@@ -96,6 +98,7 @@ export async function getYuminGroupPagesProducts(input) {
         if (!next || next === currentUrl || visited.has(next)) {
             break;
         }
+        await sleep(getGroupPagesThrottleDelayMs());
         currentUrl = next;
     }
     return [...products.values()];

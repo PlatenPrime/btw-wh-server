@@ -1,7 +1,7 @@
 import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { getAirGroupPagesProductsSchema, } from "./getAirGroupPagesProductsSchema.js";
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
-const NEXT_PAGE_DELAY_MS = 1_000;
 function resolveUrl(href, baseUrl) {
     const trimmed = href.trim();
     if (!trimmed) {
@@ -101,6 +101,6 @@ export async function getAirGroupPagesProducts(input) {
         parseProductsFromPage,
         getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
         stopOnEmptyPage: true,
-        delayBeforeNextMs: NEXT_PAGE_DELAY_MS,
+        delayBeforeNextMs: getGroupPagesThrottleDelayMs,
     });
 }

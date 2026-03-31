@@ -54,8 +54,11 @@ export async function crawlHtmlGroupListingPages(options) {
         if (!nextUrl || nextUrl === currentUrl || visited.has(nextUrl)) {
             break;
         }
-        if (delayBeforeNextMs > 0) {
-            await sleep(delayBeforeNextMs);
+        const delayMs = typeof delayBeforeNextMs === "function"
+            ? delayBeforeNextMs()
+            : delayBeforeNextMs;
+        if (delayMs > 0) {
+            await sleep(delayMs);
         }
         currentUrl = nextUrl;
         fetchedPages += 1;

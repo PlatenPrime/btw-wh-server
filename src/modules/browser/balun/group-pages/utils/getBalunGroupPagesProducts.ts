@@ -4,6 +4,7 @@ import {
   getNextPageUrlFromLinkRelNext,
   mergeSearchParamsFromSource,
 } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { parsePromUaGroupListingProducts } from "../../../group-pages/utils/parsePromUaGroupListingProducts.js";
 import {
   getBalunGroupPagesProductsSchema,
@@ -58,5 +59,6 @@ export async function getBalunGroupPagesProducts(
       }
       return mergeSearchParamsFromSource(next, groupUrl);
     },
+    delayBeforeNextMs: getGroupPagesThrottleDelayMs,
   });
 }

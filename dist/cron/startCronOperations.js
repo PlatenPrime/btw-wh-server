@@ -2,6 +2,7 @@ import { startAnalogSlicesCron } from "../modules/analog-slices/cron/startAnalog
 import { startBtradeSlicesCron } from "../modules/btrade-slices/cron/startBtradeSlicesCron.js";
 import { startSkuSlicesCron } from "../modules/sku-slices/cron/startSkuSlicesCron.js";
 import { startDeficitCalculationCron } from "../modules/defs/cron/startDeficitCalculationCron.js";
+import { startFillSkugrSkusCron } from "../modules/skugrs/cron/startFillSkugrSkusCron.js";
 import { startCollectionsBackupCron } from "./startCollectionsBackupCron.js";
 import { startFillPosNameukrFromArtsCron } from "./startFillPosNameukrFromArtsCron.js";
 export const startCronOperations = () => {
@@ -11,4 +12,5 @@ export const startCronOperations = () => {
     startAnalogSlicesCron();
     startBtradeSlicesCron();
     startSkuSlicesCron();
+    startFillSkugrSkusCron();
 };

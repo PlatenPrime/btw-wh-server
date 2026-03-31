@@ -1,4 +1,5 @@
 import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, mergeSearchParamsFromSource, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { parsePromUaGroupListingProducts } from "../../../group-pages/utils/parsePromUaGroupListingProducts.js";
 import { getBalunGroupPagesProductsSchema, } from "./getBalunGroupPagesProductsSchema.js";
 function resolveUrl(href, baseUrl) {
@@ -33,5 +34,6 @@ export async function getBalunGroupPagesProducts(input) {
             }
             return mergeSearchParamsFromSource(next, groupUrl);
         },
+        delayBeforeNextMs: getGroupPagesThrottleDelayMs,
     });
 }

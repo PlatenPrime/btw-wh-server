@@ -219,4 +219,27 @@ describe("crawlHtmlGroupListingPages", () => {
         expect(sleep).toHaveBeenCalledTimes(1);
         expect(sleep).toHaveBeenCalledWith(42);
     });
+    it("calls sleep with value from delay provider", async () => {
+        const h1 = htmlWithNext("<i></i>", PAGE2);
+        const h2 = htmlWithNext("<i></i>");
+        vi.mocked(browserGet).mockImplementation(async (url) => {
+            if (url === START)
+                return h1;
+            if (url === PAGE2)
+                return h2;
+            throw new Error(`Unexpected url: ${url}`);
+        });
+        const resolve = (href, base) => new URL(href, base).toString();
+        const delayProvider = vi.fn(() => 123);
+        await crawlHtmlGroupListingPages({
+            startUrl: START,
+            maxPages: 5,
+            parseProductsFromPage: () => new Map([["1", { ok: true }]]),
+            getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolve),
+            delayBeforeNextMs: delayProvider,
+        });
+        expect(delayProvider).toHaveBeenCalledTimes(1);
+        expect(sleep).toHaveBeenCalledTimes(1);
+        expect(sleep).toHaveBeenCalledWith(123);
+    });
 });

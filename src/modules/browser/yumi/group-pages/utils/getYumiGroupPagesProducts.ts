@@ -1,4 +1,4 @@
-import * as cheerio from "cheerio";
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import {
   crawlHtmlGroupListingPages,
   getNextPageUrlFromLinkRelNext,
@@ -31,13 +31,13 @@ function resolveUrl(href: string, baseUrl: string): string | null {
 
 function parseProductsFromPage(
   $: cheerio.Root,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, YumiGroupPageProduct> {
   return parsePromUaGroupListingProducts($, currentPageUrl);
 }
 
 export async function getYumiGroupPagesProducts(
-  input: GetYumiGroupPagesProductsInput
+  input: GetYumiGroupPagesProductsInput,
 ): Promise<YumiGroupPageProduct[]> {
   const parseResult = getYumiGroupPagesProductsSchema.safeParse(input);
   if (!parseResult.success) {
@@ -52,7 +52,8 @@ export async function getYumiGroupPagesProducts(
     startUrl: groupUrl,
     maxPages,
     parseProductsFromPage,
-    getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+    getNextPageUrl: ($, url) =>
+      getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+    delayBeforeNextMs: getGroupPagesThrottleDelayMs,
   });
 }
-

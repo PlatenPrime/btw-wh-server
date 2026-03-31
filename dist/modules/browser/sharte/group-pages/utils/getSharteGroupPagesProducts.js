@@ -1,3 +1,4 @@
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { crawlHtmlGroupListingPages } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { getSharteGroupPagesProductsSchema, } from "./getSharteGroupPagesProductsSchema.js";
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
@@ -20,7 +21,9 @@ function decodeHtmlEntities(input) {
             : rawCode;
         const base = rawCode.startsWith("x") || rawCode.startsWith("X") ? 16 : 10;
         const codePoint = Number.parseInt(code, base);
-        if (!Number.isFinite(codePoint) || codePoint < 0 || codePoint > 0x10ffff) {
+        if (!Number.isFinite(codePoint) ||
+            codePoint < 0 ||
+            codePoint > 0x10ffff) {
             return _match;
         }
         return String.fromCodePoint(codePoint);
@@ -120,5 +123,6 @@ export async function getSharteGroupPagesProducts(input) {
         parseProductsFromPage,
         getNextPageUrl,
         stopOnEmptyPage: true,
+        delayBeforeNextMs: getGroupPagesThrottleDelayMs,
     });
 }

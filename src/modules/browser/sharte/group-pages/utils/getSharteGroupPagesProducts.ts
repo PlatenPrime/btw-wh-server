@@ -1,4 +1,4 @@
-import * as cheerio from "cheerio";
+import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { crawlHtmlGroupListingPages } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import {
   getSharteGroupPagesProductsSchema,
@@ -35,14 +35,17 @@ function decodeHtmlEntities(input: string): string {
         rawCode.startsWith("x") || rawCode.startsWith("X")
           ? rawCode.slice(1)
           : rawCode;
-      const base =
-        rawCode.startsWith("x") || rawCode.startsWith("X") ? 16 : 10;
+      const base = rawCode.startsWith("x") || rawCode.startsWith("X") ? 16 : 10;
       const codePoint = Number.parseInt(code, base);
-      if (!Number.isFinite(codePoint) || codePoint < 0 || codePoint > 0x10ffff) {
+      if (
+        !Number.isFinite(codePoint) ||
+        codePoint < 0 ||
+        codePoint > 0x10ffff
+      ) {
         return _match;
       }
       return String.fromCodePoint(codePoint);
-    }
+    },
   );
 
   return numericDecoded
@@ -54,7 +57,10 @@ function decodeHtmlEntities(input: string): string {
     .replace(/&nbsp;/g, " ");
 }
 
-function extractImageUrl($img: cheerio.Cheerio, baseUrl: string): string | null {
+function extractImageUrl(
+  $img: cheerio.Cheerio,
+  baseUrl: string,
+): string | null {
   const src = $img.attr("src")?.trim();
   const dataSrcset = $img.attr("data-srcset")?.trim();
 
@@ -81,7 +87,7 @@ function extractImageUrl($img: cheerio.Cheerio, baseUrl: string): string | null 
 
 function pickProductHref(
   $card: cheerio.Cheerio,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): string | null {
   const pictureHref = $card.find("a.picture").first().attr("href")?.trim();
   if (pictureHref && pictureHref !== "#") {
@@ -101,7 +107,7 @@ function pickProductHref(
 
 function parseProductsFromPage(
   $: cheerio.Root,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, SharteGroupPageProduct> {
   const result = new Map<string, SharteGroupPageProduct>();
 
@@ -138,7 +144,10 @@ function parseProductsFromPage(
   return result;
 }
 
-function getNextPageUrl($: cheerio.Root, currentPageUrl: string): string | null {
+function getNextPageUrl(
+  $: cheerio.Root,
+  currentPageUrl: string,
+): string | null {
   const nextFromPagination = $(".bx-pagination li.bx-pag-next a")
     .first()
     .attr("href")
@@ -156,7 +165,7 @@ function getNextPageUrl($: cheerio.Root, currentPageUrl: string): string | null 
 }
 
 export async function getSharteGroupPagesProducts(
-  input: GetSharteGroupPagesProductsInput
+  input: GetSharteGroupPagesProductsInput,
 ): Promise<SharteGroupPageProduct[]> {
   const parseResult = getSharteGroupPagesProductsSchema.safeParse(input);
   if (!parseResult.success) {
@@ -171,5 +180,6 @@ export async function getSharteGroupPagesProducts(
     parseProductsFromPage,
     getNextPageUrl,
     stopOnEmptyPage: true,
+    delayBeforeNextMs: getGroupPagesThrottleDelayMs,
   });
 }

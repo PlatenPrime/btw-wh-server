@@ -46,8 +46,11 @@ export type CrawlHtmlGroupListingPagesOptions<T> = {
   getNextPageUrl: ($: cheerio.Root, pageUrl: string) => string | null;
   /** Прервать обход, если парсер вернул пустую страницу (air, sharte). */
   stopOnEmptyPage?: boolean;
-  /** Пауза перед запросом следующей страницы (air). */
-  delayBeforeNextMs?: number;
+  /**
+   * Пауза перед запросом следующей страницы.
+   * Можно передать фиксированное число мс или функцию-генератор (jitter).
+   */
+  delayBeforeNextMs?: number | (() => number);
 };
 
 /**
@@ -98,8 +101,12 @@ export async function crawlHtmlGroupListingPages<T>(
       break;
     }
 
-    if (delayBeforeNextMs > 0) {
-      await sleep(delayBeforeNextMs);
+    const delayMs =
+      typeof delayBeforeNextMs === "function"
+        ? delayBeforeNextMs()
+        : delayBeforeNextMs;
+    if (delayMs > 0) {
+      await sleep(delayMs);
     }
     currentUrl = nextUrl;
     fetchedPages += 1;

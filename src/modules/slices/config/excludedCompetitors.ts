@@ -8,7 +8,7 @@ type ExcludedCompetitorsConfig = Record<SliceType, readonly string[]>;
  */
 export const excludedCompetitors: ExcludedCompetitorsConfig = {
   analogSlices: ["air"],
-  skuSlices: ["air"],
+  skuSlices: ["air", "yumi"],
 };
 
 export function normalizeCompetitorName(value: string): string {

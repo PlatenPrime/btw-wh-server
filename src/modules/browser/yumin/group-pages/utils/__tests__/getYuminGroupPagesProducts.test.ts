@@ -1,8 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getYuminGroupPagesProducts } from "../getYuminGroupPagesProducts.js";
 import { browserGet } from "../../../../utils/browserRequest.js";
+import { sleep } from "../../../../utils/sleep.js";
+import { getGroupPagesThrottleDelayMs } from "../../../../group-pages/config/groupPagesThrottle.js";
 
 vi.mock("../../../../utils/browserRequest.js");
+vi.mock("../../../../utils/sleep.js", () => ({
+  sleep: vi.fn(() => Promise.resolve()),
+}));
+vi.mock("../../../../group-pages/config/groupPagesThrottle.js", () => ({
+  getGroupPagesThrottleDelayMs: vi.fn(() => 999),
+}));
 
 const GROUP_URL =
   "https://yumi.market/api/products?category_id=769&proizvoditel=425";
@@ -38,6 +46,8 @@ function jsonPage(
 describe("getYuminGroupPagesProducts", () => {
   beforeEach(() => {
     vi.mocked(browserGet).mockReset();
+    vi.mocked(sleep).mockClear();
+    vi.mocked(getGroupPagesThrottleDelayMs).mockClear();
   });
 
   it("parses products across two pages via links.next", async () => {
@@ -65,6 +75,8 @@ describe("getYuminGroupPagesProducts", () => {
     expect(p1?.url).toBe("https://yumi.market/first-slug");
     const p2 = result.find((p) => p.productId === "222");
     expect(p2?.url).toBe("https://yumi.market/second-slug");
+    expect(vi.mocked(getGroupPagesThrottleDelayMs)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(sleep)).toHaveBeenCalledWith(999);
   });
 
   it("stops when links.next is null on first page", async () => {
@@ -76,6 +88,7 @@ describe("getYuminGroupPagesProducts", () => {
 
     expect(result).toHaveLength(1);
     expect(vi.mocked(browserGet)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(sleep)).not.toHaveBeenCalled();
   });
 
   it("normalizes groupUrl by removing page param for first request", async () => {

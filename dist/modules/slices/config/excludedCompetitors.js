@@ -4,7 +4,7 @@
  */
 export const excludedCompetitors = {
     analogSlices: ["air"],
-    skuSlices: ["air"],
+    skuSlices: ["air", "yumi"],
 };
 export function normalizeCompetitorName(value) {
     return value.trim().toLowerCase();
