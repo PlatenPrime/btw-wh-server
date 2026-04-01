@@ -120,7 +120,23 @@ describe("getSharteStockData", () => {
         });
         expect(result).not.toHaveProperty("price");
     });
-    it("returns negative outcome when browserGet for addCart fails", async () => {
+    it("returns StockInfo from HTML when addCart request fails but price is on page", async () => {
+        const productUrl = "https://sharte.net/catalog/product/4777/";
+        const html = productPageWithCatalogElement("4777", '<a class="price changePrice">14.61 грн.</a>');
+        vi.mocked(browserGet)
+            .mockResolvedValueOnce(html)
+            .mockRejectedValueOnce(new Error("Network error"));
+        const result = await getSharteStockData(productUrl);
+        expect(result).toEqual({
+            id: "4777",
+            name: "",
+            stock: 0,
+            reserved: 0,
+            available: 0,
+            price: 14.61,
+        });
+    });
+    it("returns negative outcome when addCart request fails and page has no price", async () => {
         const productUrl = "https://sharte.net/catalog/product/4777/";
         vi.mocked(browserGet)
             .mockResolvedValueOnce(productPageWithCatalogElement("4777"))
@@ -133,6 +149,41 @@ describe("getSharteStockData", () => {
             reserved: 0,
             available: -1,
             price: -1,
+        });
+    });
+    it("returns StockInfo from HTML when addCart returns non-JSON body", async () => {
+        const productUrl = "https://sharte.net/catalog/product/6117/";
+        const html = productPageWithCatalogElement("6117", '<a class="price changePrice">14.61 грн.</a>');
+        vi.mocked(browserGet)
+            .mockResolvedValueOnce(html)
+            .mockResolvedValueOnce("<!DOCTYPE html><html>not json</html>");
+        const result = await getSharteStockData(productUrl);
+        expect(result).toEqual({
+            id: "6117",
+            name: "",
+            stock: 0,
+            reserved: 0,
+            available: 0,
+            price: 14.61,
+        });
+    });
+    it("uses HTML fallback when CATALOG_QUANTITY is null in JSON", async () => {
+        const productUrl = "https://sharte.net/catalog/product/100/";
+        const html = productPageWithCatalogElement("100", '<a class="price changePrice">2 грн.</a>');
+        vi.mocked(browserGet)
+            .mockResolvedValueOnce(html)
+            .mockResolvedValueOnce(JSON.stringify({
+            ID: "100",
+            CATALOG_QUANTITY: null,
+        }));
+        const result = await getSharteStockData(productUrl);
+        expect(result).toEqual({
+            id: "100",
+            name: "",
+            stock: 0,
+            reserved: 0,
+            available: 0,
+            price: 2,
         });
     });
     it("returns negative outcome when productUrl is empty string", async () => {

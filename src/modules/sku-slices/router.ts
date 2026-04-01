@@ -5,6 +5,9 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   getKonkSkuSalesExcelController,
   getKonkSkuStockSliceExcelController,
+  getSkugrDailySummaryController,
+  getSkugrSalesExcelController,
+  getSkugrSliceExcelController,
   getSkuSalesExcelController,
   getSkuSalesByDateController,
   getSkuSalesRangeController,
@@ -33,6 +36,24 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getKonkSkuSalesExcelController)
+);
+router.get(
+  "/skugr/:skugrId/daily-summary",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getSkugrDailySummaryController)
+);
+router.get(
+  "/skugr/:skugrId/slice-excel",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getSkugrSliceExcelController)
+);
+router.get(
+  "/skugr/:skugrId/sales-excel",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getSkugrSalesExcelController)
 );
 router.get(
   "/sku/:skuId/range",

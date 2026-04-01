@@ -64,6 +64,8 @@
 
 Подробности: [API Skugrs](../api/skugrs.md).
 
+Отчёты по составу группы (`skus`) за период — в модуле [SKU Slices](sku-slices.md): JSON для графиков и Excel остатков/продаж по `skugrId` описаны в [API sku-slices](../api/sku-slices.md).
+
 ## Формат данных в ответах API
 
 В типичных ответах (`GET` списка, `POST`, `PATCH`, `fill-skus`) поле `_id` и элементы массива `skus` отдаются строками (hex ObjectId). Остальные поля группы — как в модели.

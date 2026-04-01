@@ -184,3 +184,7 @@
 - `createdAt`, `updatedAt`: даты (ISO-строка в JSON)
 
 **`GET /api/skugrs/id/:id`:** те же поля, что в списке выше, **кроме** `skus` — поле в JSON **отсутствует** (не пустой массив).
+
+## Отчёты и графики по составу группы (`skus`)
+
+Дневные агрегаты и Excel по остаткам/продажам для списка SKU группы (`skugr.skus`) отдаются модулем **sku-slices** (роль USER): см. [API срезов SKU](sku-slices.md) — маршруты `/api/sku-slices/skugr/:skugrId/daily-summary`, `.../slice-excel`, `.../sales-excel` с query `dateFrom` и `dateTo`.
