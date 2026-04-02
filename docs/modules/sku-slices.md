@@ -38,7 +38,7 @@
 
 ## API эндпоинты
 
-- **GET `/api/sku-slices`** — срез по `konkName` и `date`.
+- **GET `/api/sku-slices`** — срез по `konkName` и `date` с пагинацией (`page`, `limit`); в ответе массив `items` (строки среза + маппинг на документы Sku по `productId`), см. [API документацию](../api/sku-slices.md).
 - **GET `/api/sku-slices/sku/:skuId`** — точка среза на дату (query `date`).
 - **GET `/api/sku-slices/sku/:skuId/range`** — срез за период (`dateFrom`, `dateTo`).
 - **GET `/api/sku-slices/sku/:skuId/sales-by-date`** и **sales-range** — продажи и выручка на дату и за период.

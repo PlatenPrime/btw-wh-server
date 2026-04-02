@@ -1,8 +1,8 @@
 import { getSkuSliceQuerySchema } from "./schemas/getSkuSliceQuerySchema.js";
 import { getSkuSliceUtil } from "./utils/getSkuSliceUtil.js";
 /**
- * @desc    Срез SKU по конкуренту и дате
- * @route   GET /api/sku-slices?konkName=&date=
+ * @desc    Срез SKU по конкуренту и дате (пагинация, строки с маппингом на Sku)
+ * @route   GET /api/sku-slices?konkName=&date=&page=&limit=
  */
 export const getSkuSliceController = async (req, res) => {
     const parseResult = getSkuSliceQuerySchema.safeParse(req.query);
@@ -18,8 +18,10 @@ export const getSkuSliceController = async (req, res) => {
         res.status(404).json({ message: "Sku slice not found" });
         return;
     }
+    const { items, pagination, konkName, date } = result;
     res.status(200).json({
         message: "Sku slice retrieved successfully",
-        data: result,
+        data: { konkName, date, items },
+        pagination,
     });
 };

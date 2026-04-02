@@ -6,13 +6,42 @@
 
 ### GET `/api/sku-slices`
 
-Срез по конкуренту и дате: весь документ (`konkName`, `date`, `data`). Ключи в `data` — `Sku.productId`, значения — `{ stock: number, price: number }`.
+Срез по конкуренту и дате: постраничная выдача записей из поля `data` документа среза. Каждая запись сопоставляется с документом **Sku** по `productId` (ключ в `data` среза совпадает с `Sku.productId`). Порядок строк на всех страницах — лексикографическая сортировка по `productId`.
 
-**Query:** `konkName` (string, обязательно), `date` (string, YYYY-MM-DD, обязательно).
+**Query:**
 
-**Ответ 200:** `{ message: string, data: { konkName, date, data: Record<string, { stock, price }> } }`.
+- `konkName` (string, обязательно)
+- `date` (string, YYYY-MM-DD, обязательно)
+- `page` (string или number в query, опционально) — номер страницы, по умолчанию `1`, должен быть > 0
+- `limit` (string или number в query, опционально) — размер страницы, по умолчанию `10`, от 1 до 100 включительно (как у `GET /api/skus`)
 
-**Ошибки:** 400, 401, 403, 404 (срез не найден), 500.
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    konkName: string,
+    date: Date (ISO в JSON),
+    items: Array<{
+      productId: string,
+      stock: number,
+      price: number,
+      sku: Sku | null   // lean-документ из коллекции skus или null, если SKU с таким productId нет
+    }>
+  },
+  pagination: {
+    page: number,
+    limit: number,
+    total: number,       // число ключей в data среза
+    totalPages: number,
+    hasNext: boolean,
+    hasPrev: boolean
+  }
+}
+```
+
+**Ошибки:** 400 (невалидные query, в т.ч. `page`/`limit`), 401, 403, 404 (срез не найден), 500.
 
 ---
 
