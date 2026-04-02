@@ -11,6 +11,7 @@ import {
   getArtsByZoneController,
   getBtradeArtInfoController,
   updateAllBtradeStocksController,
+  updateArtByIdController,
   updateArtLimitController,
   updateBtradeStockController,
   upsertArtsController,
@@ -43,7 +44,7 @@ router.get(
   getBtradeArtInfoController
 );
 
-// Обновить лимит артикула - доступно для ADMIN и PRIME
+// Обновить лимит артикула - доступно для ADMIN
 router.patch(
   "/:id/limit",
   checkAuth,
@@ -60,6 +61,14 @@ router.patch(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   updateBtradeStockController
+);
+
+// Обновить limit и/или prodName артикула по id - доступно для ADMIN
+router.patch(
+  "/:id",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  updateArtByIdController
 );
 
 // Обновить btradeStock для всех артикулов - доступно только для ADMIN

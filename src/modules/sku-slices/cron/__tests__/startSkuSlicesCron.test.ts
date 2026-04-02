@@ -46,7 +46,7 @@ describe("startSkuSlicesCron", () => {
     startSkuSlicesCron();
 
     expect(mockedCronJob).toHaveBeenCalledWith(
-      "0 0 0 * * *",
+      "0 0 20 * * *",
       expect.any(Function),
       null,
       true,
@@ -55,24 +55,31 @@ describe("startSkuSlicesCron", () => {
   });
 
   it("filters excluded competitors and removes duplicates case-insensitively", async () => {
-    vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set(["yumi"]));
-    startSkuSlicesCron();
+    vi.useFakeTimers({ now: new Date("2026-04-02T17:00:00.000Z") });
+    try {
+      vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set(["yumi"]));
+      startSkuSlicesCron();
 
-    expect(cronCallback).toBeDefined();
-    if (cronCallback) {
-      await cronCallback();
+      expect(cronCallback).toBeDefined();
+      if (cronCallback) {
+        await cronCallback();
+      }
+
+      expect(runSkuSliceForKonkUtil).toHaveBeenCalledTimes(2);
+      expect(runSkuSliceForKonkUtil).toHaveBeenNthCalledWith(
+        1,
+        "air",
+        expect.any(Date)
+      );
+      expect(runSkuSliceForKonkUtil).toHaveBeenNthCalledWith(
+        2,
+        "balun",
+        expect.any(Date)
+      );
+      const d1 = vi.mocked(runSkuSliceForKonkUtil).mock.calls[0]![1];
+      expect(d1.toISOString()).toBe("2026-04-03T00:00:00.000Z");
+    } finally {
+      vi.useRealTimers();
     }
-
-    expect(runSkuSliceForKonkUtil).toHaveBeenCalledTimes(2);
-    expect(runSkuSliceForKonkUtil).toHaveBeenNthCalledWith(
-      1,
-      "air",
-      expect.any(Date)
-    );
-    expect(runSkuSliceForKonkUtil).toHaveBeenNthCalledWith(
-      2,
-      "balun",
-      expect.any(Date)
-    );
   });
 });

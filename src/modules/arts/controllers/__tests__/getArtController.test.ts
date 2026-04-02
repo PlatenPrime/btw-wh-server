@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { Prod } from "../../../prods/models/Prod.js";
 import { createTestArt } from "../../../../test/setup.js";
 import { getArtController } from "../get-art/getArtController.js";
 
@@ -39,6 +40,33 @@ describe("getArtController", () => {
     expect(responseJson.message).toBe("Art retrieved successfully");
     expect(responseJson.data.artikul).toBe("ART-001");
     expect(responseJson.data._id).toBeDefined();
+    expect(responseJson.data.prod).toBeNull();
+  });
+
+  it("200: включает prod при совпадении prodName с записью Prod", async () => {
+    await Prod.create({
+      name: "acme",
+      title: "Acme Corp",
+      imageUrl: "https://example.com/acme.png",
+    });
+    await createTestArt({
+      artikul: "ART-WITH-PROD",
+      nameukr: "With Prod",
+      zone: "Z1",
+      prodName: "acme",
+    });
+
+    const req = { params: { artikul: "ART-WITH-PROD" } } as unknown as Request;
+
+    await getArtController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.exists).toBe(true);
+    expect(responseJson.data.prod).toEqual({
+      name: "acme",
+      title: "Acme Corp",
+      imageUrl: "https://example.com/acme.png",
+    });
   });
 
   it("200: возвращает exists false если артикул не найден", async () => {

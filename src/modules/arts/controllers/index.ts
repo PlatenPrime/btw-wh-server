@@ -7,6 +7,7 @@ export { getArtController } from "./get-art/getArtController.js";
 export { getArtsByZoneController } from "./get-arts-by-zone/getArtsByZoneController.js";
 export { getBtradeArtInfoController } from "./get-btrade-art-info/getBtradeArtInfoController.js";
 export { updateAllBtradeStocksController } from "./update-all-btrade-stocks/updateAllBtradeStocksController.js";
+export { updateArtByIdController } from "./update-art-by-id/updateArtByIdController.js";
 export { updateArtLimitController } from "./update-art-limit/updateArtLimitController.js";
 export { updateBtradeStockController } from "./update-btrade-stock/updateBtradeStockController.js";
 export { upsertArtsController } from "./upsert-arts/upsertArtsController.js";

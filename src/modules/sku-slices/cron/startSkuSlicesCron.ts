@@ -1,4 +1,5 @@
 import { CronJob } from "cron";
+import { toNextKyivSliceDate } from "../../../utils/sliceDate.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { runSkuSliceForKonkUtil } from "../utils/runSkuSliceForKonkUtil.js";
 import {
@@ -7,11 +8,12 @@ import {
 } from "../../slices/config/excludedCompetitors.js";
 
 /**
- * Ежедневно в 00:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
+ * Ежедневно в 20:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
+ * Ключ дня среза — следующий календарный день в Киеве (как при старом запуске в полночь).
  */
 export function startSkuSlicesCron(): CronJob {
   const job = new CronJob(
-    "0 0 0 * * *",
+    "0 0 20 * * *",
     async () => {
       try {
         const names = await Sku.distinct("konkName");
@@ -41,7 +43,10 @@ export function startSkuSlicesCron(): CronJob {
         }
         const results = await Promise.all(
           konkNames.map(async (k) => {
-            const r = await runSkuSliceForKonkUtil(k, new Date());
+            const r = await runSkuSliceForKonkUtil(
+              k,
+              toNextKyivSliceDate(new Date())
+            );
             return { k, count: r.count };
           })
         );
@@ -59,6 +64,6 @@ export function startSkuSlicesCron(): CronJob {
     "Europe/Kiev"
   );
 
-  console.log(`[CRON SkuSlices] Started: daily at 00:00 (Kiev time)`);
+  console.log(`[CRON SkuSlices] Started: daily at 20:00 (Kiev time)`);
   return job;
 }

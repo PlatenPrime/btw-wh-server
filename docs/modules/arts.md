@@ -82,9 +82,10 @@ BtradeStock представляет информацию об остатках 
 - Path параметры: `artikul` (string)
 
 **Ответ:**
-- 200: `Art`
+- 200: `{ exists: boolean, message: string, data: ArtWithProd | null }`
+  - при `exists: false` поле `data` равно `null` (артикул не найден);
+  - при `exists: true` поле `data` — объект артикула в формате **ArtWithProd** (поля `Art` плюс вложенный **`prod`**, см. ниже).
 - 400: `{ message: string, errors?: array }` - ошибка валидации
-- 404: `{ message: string }` - артикул не найден
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
 **Доступ:** Требует роль USER
@@ -191,6 +192,22 @@ BtradeStock представляет информацию об остатках 
 
 **Доступ:** Требует роль ADMIN
 
+### PATCH `/api/arts/:id`
+
+Частичное обновление артикула по идентификатору: поля **`limit`** и/или **`prodName`**. Расширяет возможности узкого эндпоинта `PATCH /api/arts/:id/limit` (только лимит); здесь можно менять оба поля за один запрос или только одно из них.
+
+**Запрос:**
+- Path параметры: `id` (MongoDB ObjectId)
+- Body: `{ limit?: number, prodName?: string }` — должно быть указано **хотя бы одно** поле; `limit` неотрицательный, `prodName` — строка (в т.ч. пустая для сброса текстового значения в БД)
+
+**Ответ:**
+- 200: `Art` (в ответе присутствует `prodName` среди выбранных полей)
+- 400: `{ message: string, errors?: array }` — ошибка валидации (неверный id, отсутствуют оба поля, отрицательный `limit` и т.д.)
+- 404: `{ message: string }` — артикул не найден
+- 500: `{ message: string, error?: any }` — ошибка сервера
+
+**Доступ:** Требует роль ADMIN
+
 ### PATCH `/api/arts/:artikul/btrade-stock`
 
 Обновление информации об остатках Btrade для одного артикула.
@@ -245,6 +262,20 @@ BtradeStock представляет информацию об остатках 
   createdAt?: Date;                // Дата создания
   updatedAt?: Date;               // Дата обновления
 }
+```
+
+### ArtWithProd (ответ GET `/api/arts/artikul/:artikul` при `exists: true`)
+
+Расширение объекта `Art`: те же поля, что в документе коллекции `arts`, плюс поле **`prod`** — данные производителя из коллекции `prods`, сопоставление по `Art.prodName === Prod.name`.
+
+```typescript
+type ArtWithProd = Art & {
+  prod: {
+    name: string;       // Уникальный идентификатор производителя (как в Prod.name)
+    title: string;
+    imageUrl: string;
+  } | null;             // null, если prodName отсутствует или запись в prods не найдена
+};
 ```
 
 ### Btrade Art Info

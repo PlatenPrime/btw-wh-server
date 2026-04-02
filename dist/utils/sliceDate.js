@@ -25,3 +25,22 @@ export function toSliceDate(d) {
     const ymd = formatKyivYmd(d);
     return new Date(`${ymd}T00:00:00.000Z`);
 }
+/**
+ * Ключ среза на следующий календарный день в Киеве (для вечернего крона: та же дата,
+ * что дал бы `toSliceDate` в полночь наступившего дня).
+ */
+export function toNextKyivSliceDate(d) {
+    const ymd = formatKyivYmd(d);
+    const [yStr, mStr, dStr] = ymd.split("-");
+    const y = Number(yStr);
+    const m = Number(mStr);
+    const day = Number(dStr);
+    if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(day)) {
+        throw new Error("toNextKyivSliceDate: invalid YMD from Europe/Kiev");
+    }
+    const next = new Date(Date.UTC(y, m - 1, day + 1));
+    const yy = next.getUTCFullYear();
+    const mm = String(next.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(next.getUTCDate()).padStart(2, "0");
+    return new Date(`${yy}-${mm}-${dd}T00:00:00.000Z`);
+}
