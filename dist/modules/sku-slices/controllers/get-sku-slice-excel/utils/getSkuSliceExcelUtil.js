@@ -34,6 +34,7 @@ export async function getSkuSliceExcelUtil(input) {
         productId: productKey,
         konkName: sku.konkName,
         prodName: sku.prodName,
+        createdAt: sku.createdAt,
     };
     const [konkDoc, prodDoc] = await Promise.all([
         Konk.findOne({ name: sku.konkName }).select("title").lean(),

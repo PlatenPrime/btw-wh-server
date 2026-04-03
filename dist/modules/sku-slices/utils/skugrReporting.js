@@ -44,7 +44,7 @@ export async function loadSkugrWithOrderedSkus(skugrId) {
         return { skugr, skus: [] };
     }
     const found = await Sku.find({ _id: { $in: skugr.skus } })
-        .select("konkName prodName title url productId")
+        .select("konkName prodName title url productId createdAt")
         .lean();
     const byId = new Map(found.map((s) => [s._id.toString(), s]));
     const skus = [];

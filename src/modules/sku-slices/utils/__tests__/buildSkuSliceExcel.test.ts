@@ -4,6 +4,8 @@ import {
   buildSkuSliceExcelForSkus,
   formatDateHeader,
   safeFilePart,
+  SKU_SLICE_EXCEL_STOCK_NEW_SKU_FILL_ARGB,
+  SKU_SLICE_EXCEL_STOCK_SUPPLY_FILL_ARGB,
 } from "../buildSkuSliceExcel.js";
 
 const TITLES = { competitorTitle: "Конкурент UA", producerName: "Виробник UA" };
@@ -145,6 +147,120 @@ describe("buildSkuSliceExcelForSkus", () => {
     expect(ws!.getRow(6).getCell(1).value).toBe("Підсумок");
     expect(ws!.getRow(6).getCell(9).value).toBe(-1); // (-3) + (+2)
     expect(ws!.getRow(6).getCell(10).value).toBe(-7.14); // -1 / (10+4) * 100
+  });
+
+  it("highlights stock increase day with supply fill, not red font", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSliceExcelForSkus(
+      [
+        {
+          title: "N",
+          url: "https://x.com",
+          productId: "air-1",
+          konkName: "air",
+          prodName: "p",
+        },
+      ],
+      from,
+      to,
+      (_kn, pid, d) => {
+        if (pid !== "air-1") return undefined;
+        const t = d.getTime();
+        if (t === from.getTime()) return { stock: 1, price: 2 };
+        if (t === to.getTime()) return { stock: 3, price: 2 };
+        return undefined;
+      },
+      TITLES
+    );
+
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
+    const ws = wb.getWorksheet("Срез");
+    expect(ws).toBeDefined();
+
+    const stockSecondDay = ws!.getRow(2).getCell(8);
+    expect(stockSecondDay.value).toBe(3);
+    expect(stockSecondDay.fill).toMatchObject({
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: SKU_SLICE_EXCEL_STOCK_SUPPLY_FILL_ARGB },
+    });
+    expect(stockSecondDay.font?.color?.argb).not.toBe("FFFF0000");
+  });
+
+  it("new sku day fill wins over supply day when both apply", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSliceExcelForSkus(
+      [
+        {
+          title: "N",
+          url: "https://x.com",
+          productId: "air-1",
+          konkName: "air",
+          prodName: "p",
+          createdAt: new Date("2026-01-11T12:00:00.000Z"),
+        },
+      ],
+      from,
+      to,
+      (_kn, pid, d) => {
+        if (pid !== "air-1") return undefined;
+        const t = d.getTime();
+        if (t === from.getTime()) return { stock: 1, price: 2 };
+        if (t === to.getTime()) return { stock: 5, price: 2 };
+        return undefined;
+      },
+      TITLES
+    );
+
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
+    const ws = wb.getWorksheet("Срез");
+    expect(ws).toBeDefined();
+
+    const stockSecondDay = ws!.getRow(2).getCell(8);
+    expect(stockSecondDay.fill).toMatchObject({
+      type: "pattern",
+      pattern: "solid",
+      fgColor: { argb: SKU_SLICE_EXCEL_STOCK_NEW_SKU_FILL_ARGB },
+    });
+  });
+
+  it("highlights price increase with red font on price row", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSliceExcelForSkus(
+      [
+        {
+          title: "N",
+          url: "https://x.com",
+          productId: "air-1",
+          konkName: "air",
+          prodName: "p",
+        },
+      ],
+      from,
+      to,
+      (_kn, pid, d) => {
+        if (pid !== "air-1") return undefined;
+        const t = d.getTime();
+        if (t === from.getTime()) return { stock: 1, price: 10 };
+        if (t === to.getTime()) return { stock: 1, price: 12 };
+        return undefined;
+      },
+      TITLES
+    );
+
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
+    const ws = wb.getWorksheet("Срез");
+    expect(ws).toBeDefined();
+
+    const priceSecondDay = ws!.getRow(3).getCell(8);
+    expect(priceSecondDay.value).toBe(12);
+    expect(priceSecondDay.font?.color?.argb?.toUpperCase()).toBe("FFFF0000");
   });
 });
 

@@ -52,6 +52,7 @@ export async function getSkuSliceExcelUtil(
     productId: productKey,
     konkName: sku.konkName,
     prodName: sku.prodName,
+    createdAt: sku.createdAt,
   };
 
   const [konkDoc, prodDoc] = await Promise.all([

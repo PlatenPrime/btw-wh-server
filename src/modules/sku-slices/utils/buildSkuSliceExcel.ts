@@ -3,7 +3,13 @@ import {
   applyDataRowStyle,
   applyHeaderStyle,
 } from "../../../lib/excel/worksheetStyles.js";
+import { toSliceDate } from "../../../utils/sliceDate.js";
 import type { ISkuSliceDataItem } from "../models/SkuSlice.js";
+
+/** Заливка комірки «Залишок»: день створення SKU (календар Kyiv). */
+export const SKU_SLICE_EXCEL_STOCK_NEW_SKU_FILL_ARGB = "FFC8E6C9";
+/** Заливка комірки «Залишок»: день зростання залишку vs попередній день періоду. */
+export const SKU_SLICE_EXCEL_STOCK_SUPPLY_FILL_ARGB = "FFFFCDD2";
 
 const HEADER_LABELS = [
   "Ідентифікатор товару",
@@ -44,6 +50,8 @@ export type SkuSliceExcelSkuRow = {
   productId: string;
   konkName: string;
   prodName: string;
+  /** Для підсвітки «новинки»: день `toSliceDate(createdAt)` у колонках дат. */
+  createdAt?: Date;
 };
 
 export type SkuSliceExcelTitles = {
@@ -107,14 +115,32 @@ function applyRowDiffAndPct(
   diffPctCell.value = Math.round(rawPct * 100) / 100;
 }
 
-function highlightStockIncreases(
+function applyStockDayCellHighlights(
   stockRow: ExcelJS.Row,
   dataStartCol: number,
-  dateCount: number
+  dates: Date[],
+  createdAt?: Date
 ): void {
-  for (let i = 1; i < dateCount; i++) {
-    const prevCell = stockRow.getCell(dataStartCol + i - 1);
+  const dateCount = dates.length;
+  const newSkuDayMs =
+    createdAt != null ? toSliceDate(createdAt).getTime() : null;
+
+  for (let i = 0; i < dateCount; i++) {
+    const sliceDayMs = toSliceDate(dates[i]!).getTime();
     const currCell = stockRow.getCell(dataStartCol + i);
+
+    if (newSkuDayMs != null && sliceDayMs === newSkuDayMs) {
+      currCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: SKU_SLICE_EXCEL_STOCK_NEW_SKU_FILL_ARGB },
+      };
+      continue;
+    }
+
+    if (i < 1) continue;
+
+    const prevCell = stockRow.getCell(dataStartCol + i - 1);
     const prevVal =
       typeof prevCell.value === "number"
         ? prevCell.value
@@ -125,15 +151,16 @@ function highlightStockIncreases(
         : Number(currCell.value ?? NaN);
     if (!Number.isFinite(prevVal) || !Number.isFinite(currVal)) continue;
     if (currVal > prevVal) {
-      currCell.font = {
-        ...(currCell.font ?? {}),
-        color: { argb: "FFFF0000" },
+      currCell.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: SKU_SLICE_EXCEL_STOCK_SUPPLY_FILL_ARGB },
       };
     }
   }
 }
 
-function highlightPriceDecreases(
+function highlightPriceChanges(
   priceRow: ExcelJS.Row,
   dataStartCol: number,
   dateCount: number
@@ -154,6 +181,11 @@ function highlightPriceDecreases(
       currCell.font = {
         ...(currCell.font ?? {}),
         color: { argb: "FF00AA00" },
+      };
+    } else if (currVal > prevVal) {
+      currCell.font = {
+        ...(currCell.font ?? {}),
+        color: { argb: "FFFF0000" },
       };
     }
   }
@@ -261,12 +293,18 @@ export async function buildSkuSliceExcelForSkus(
     applyRowDiffAndPct(stockRow, stocks, dataStartCol, diffCol, diffPctCol);
     applyRowDiffAndPct(priceRow, prices, dataStartCol, diffCol, diffPctCol);
 
-    highlightStockIncreases(stockRow, dataStartCol, dateCount);
-    highlightPriceDecreases(priceRow, dataStartCol, dateCount);
+    highlightPriceChanges(priceRow, dataStartCol, dateCount);
 
     for (let r = startRow; r <= startRow + 1; r++) {
       applyDataRowStyle(sheet, r, columnCount);
     }
+
+    applyStockDayCellHighlights(
+      stockRow,
+      dataStartCol,
+      dates,
+      sku.createdAt
+    );
 
     const stockBounds = getFirstAndLastNumeric(stocks);
     if (stockBounds) {

@@ -17,6 +17,7 @@ export async function getSkugrSliceExcelUtil(input) {
         productId: s.productId,
         konkName: s.konkName,
         prodName: s.prodName,
+        createdAt: s.createdAt,
     }));
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);

@@ -20,6 +20,7 @@ export async function getKonkSkuSliceExcelUtil(input) {
         productId: (s.productId ?? "").trim(),
         konkName: s.konkName,
         prodName: s.prodName,
+        createdAt: s.createdAt,
     }))
         .filter((r) => r.productId !== "");
     if (rows.length === 0)

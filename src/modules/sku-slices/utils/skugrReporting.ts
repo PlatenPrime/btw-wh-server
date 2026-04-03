@@ -19,6 +19,7 @@ export type SkuReportingLean = {
   title: string;
   url: string;
   productId: string;
+  createdAt?: Date;
 };
 
 /** Карта: konkName → (день UTC ms → data по productId). */
@@ -82,7 +83,7 @@ export async function loadSkugrWithOrderedSkus(
   }
 
   const found = await Sku.find({ _id: { $in: skugr.skus } })
-    .select("konkName prodName title url productId")
+    .select("konkName prodName title url productId createdAt")
     .lean<SkuReportingLean[]>();
 
   const byId = new Map(found.map((s) => [s._id.toString(), s]));
