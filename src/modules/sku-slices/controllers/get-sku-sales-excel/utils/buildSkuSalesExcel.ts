@@ -74,6 +74,19 @@ function writeSummaryRow(
   row.getCell(1).font = { ...(row.getCell(1).font ?? {}), bold: true };
 }
 
+function applyRevenueRowBold(
+  sheet: ExcelJS.Worksheet,
+  rowIndex: number,
+  fromCol: number,
+  toCol: number
+): void {
+  const row = sheet.getRow(rowIndex);
+  for (let c = fromCol; c <= toCol; c++) {
+    const cell = row.getCell(c);
+    cell.font = { ...(cell.font ?? {}), bold: true };
+  }
+}
+
 export async function buildSkuSalesExcelForSkus(
   skus: SkuSalesExcelSkuRow[],
   dateFrom: Date,
@@ -170,6 +183,7 @@ export async function buildSkuSalesExcelForSkus(
     for (let r = startRow; r <= startRow + 2; r++) {
       applyDataRowStyle(sheet, r, columnCount);
     }
+    applyRevenueRowBold(sheet, startRow + 2, 6, totalCol);
 
     startRow += ROWS_PER_SKU_BLOCK;
 

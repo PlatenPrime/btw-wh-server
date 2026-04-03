@@ -40,6 +40,13 @@ function writeSummaryRow(sheet, rowIndex, label, value) {
     row.getCell(2).value = value;
     row.getCell(1).font = { ...(row.getCell(1).font ?? {}), bold: true };
 }
+function applyRevenueRowBold(sheet, rowIndex, fromCol, toCol) {
+    const row = sheet.getRow(rowIndex);
+    for (let c = fromCol; c <= toCol; c++) {
+        const cell = row.getCell(c);
+        cell.font = { ...(cell.font ?? {}), bold: true };
+    }
+}
 export async function buildSkuSalesExcelForSkus(skus, dateFrom, dateTo, getItem, options = {}) {
     const dates = enumerateSliceDates(dateFrom, dateTo);
     const dateCount = dates.length;
@@ -109,6 +116,7 @@ export async function buildSkuSalesExcelForSkus(skus, dateFrom, dateTo, getItem,
         for (let r = startRow; r <= startRow + 2; r++) {
             applyDataRowStyle(sheet, r, columnCount);
         }
+        applyRevenueRowBold(sheet, startRow + 2, 6, totalCol);
         startRow += ROWS_PER_SKU_BLOCK;
         if (summaryMode === "perSku") {
             writeSummaryRow(sheet, startRow, summarySalesLabel, totalSales);
