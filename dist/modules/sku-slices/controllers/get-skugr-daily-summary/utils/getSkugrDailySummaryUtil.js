@@ -1,6 +1,6 @@
 import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { aggregateSkuSlices, sliceDataProjectForProductIdList, } from "../../../utils/sliceDataAggregationStages.js";
 import { buildSliceMapsByKonk, enumerateReportingDates, getSliceItem, loadSkugrWithOrderedSkus, uniqueKonkNamesFromSkus, } from "../../../utils/skugrReporting.js";
 export async function getSkugrDailySummaryUtil(input) {
     const loaded = await loadSkugrWithOrderedSkus(input.skugrId);
@@ -12,12 +12,16 @@ export async function getSkugrDailySummaryUtil(input) {
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
     const konkNames = uniqueKonkNamesFromSkus(skus);
-    const sliceDocs = await SkuSlice.find({
-        konkName: { $in: konkNames },
-        date: { $gte: dateFrom, $lte: dateTo },
-    })
-        .select("konkName date data")
-        .lean();
+    const allowedProductIds = [...new Set(skus.map((s) => s.productId))];
+    const sliceDocs = await aggregateSkuSlices([
+        {
+            $match: {
+                konkName: { $in: konkNames },
+                date: { $gte: dateFrom, $lte: dateTo },
+            },
+        },
+        sliceDataProjectForProductIdList(allowedProductIds),
+    ]);
     const maps = buildSliceMapsByKonk(sliceDocs);
     const dates = enumerateReportingDates(dateFrom, dateTo);
     const perSku = [];

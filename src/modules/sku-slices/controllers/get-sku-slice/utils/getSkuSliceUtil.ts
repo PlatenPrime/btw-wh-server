@@ -1,7 +1,6 @@
-import type { Types } from "mongoose";
+import type { PipelineStage, Types } from "mongoose";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
-import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
 import type { GetSkuSliceQuery } from "../schemas/getSkuSliceQuerySchema.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 
@@ -39,29 +38,99 @@ export type GetSkuSliceResult = {
   };
 };
 
+type SliceFacetMeta = {
+  konkName: string;
+  date: Date;
+  total: number;
+};
+
+type SliceFacetRow = {
+  productId: string;
+  stock: number;
+  price: number;
+};
+
+type SliceFacetBucket = {
+  meta: SliceFacetMeta[];
+  rows: SliceFacetRow[];
+};
+
+function buildSlicePagePipeline(
+  konkName: string,
+  sliceDate: Date,
+  skip: number,
+  limit: number
+): PipelineStage[] {
+  return [
+    { $match: { konkName, date: sliceDate } },
+    {
+      $facet: {
+        meta: [
+          {
+            $project: {
+              _id: 0,
+              konkName: 1,
+              date: 1,
+              total: {
+                $size: {
+                  $objectToArray: { $ifNull: ["$data", {}] },
+                },
+              },
+            },
+          },
+        ],
+        rows: [
+          {
+            $project: {
+              entries: { $objectToArray: { $ifNull: ["$data", {}] } },
+            },
+          },
+          { $unwind: "$entries" },
+          { $sort: { "entries.k": 1 } },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 0,
+              productId: "$entries.k",
+              stock: "$entries.v.stock",
+              price: "$entries.v.price",
+            },
+          },
+        ],
+      },
+    },
+  ];
+}
+
 export async function getSkuSliceUtil(
   input: GetSkuSliceQuery
 ): Promise<GetSkuSliceResult | null> {
   const { page, limit } = input;
   const sliceDate = toSliceDate(input.date);
-  const doc = await SkuSlice.findOne({
-    konkName: input.konkName,
-    date: sliceDate,
-  })
-    .select("konkName date data")
-    .lean();
+  const skip = (page - 1) * limit;
 
-  if (!doc) return null;
-
-  const data = (doc.data ?? {}) as Record<string, ISkuSliceDataItem>;
-  const sortedEntries = Object.entries(data).sort(([a], [b]) =>
-    a.localeCompare(b)
+  const pipeline = buildSlicePagePipeline(
+    input.konkName,
+    sliceDate,
+    skip,
+    limit
   );
-  const total = sortedEntries.length;
-  const start = (page - 1) * limit;
-  const pageEntries = sortedEntries.slice(start, start + limit);
 
-  const productIds = pageEntries.map(([productId]) => productId);
+  const aggResult = await SkuSlice.aggregate<SliceFacetBucket>(pipeline)
+    .option({ allowDiskUse: true })
+    .exec();
+  const bucket = aggResult[0];
+
+  if (!bucket) return null;
+
+  const meta = bucket.meta[0];
+  if (!meta) return null;
+
+  const { konkName, date, total } = meta;
+  const rows = bucket.rows ?? [];
+
+  const productIds = rows.map((r) => r.productId);
   const skus =
     productIds.length > 0
       ? ((await Sku.find({ productId: { $in: productIds } })
@@ -74,18 +143,18 @@ export async function getSkuSliceUtil(
     skuByProductId.set(sku.productId, sku);
   }
 
-  const items: GetSkuSliceItem[] = pageEntries.map(([productId, metrics]) => ({
-    productId,
-    stock: metrics.stock,
-    price: metrics.price,
-    sku: skuByProductId.get(productId) ?? null,
+  const items: GetSkuSliceItem[] = rows.map((row) => ({
+    productId: row.productId,
+    stock: row.stock,
+    price: row.price,
+    sku: skuByProductId.get(row.productId) ?? null,
   }));
 
   const totalPages = Math.ceil(total / limit) || 0;
 
   return {
-    konkName: doc.konkName,
-    date: doc.date,
+    konkName,
+    date,
     items,
     pagination: {
       page,

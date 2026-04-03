@@ -1,6 +1,9 @@
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
+import {
+  aggregateSkuSlices,
+  sliceDataProjectForSingleProductId,
+} from "../../../utils/sliceDataAggregationStages.js";
 import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
@@ -29,20 +32,21 @@ export async function getSkuSalesByDateUtil(
   const prevDate = new Date(sliceDate);
   prevDate.setUTCDate(prevDate.getUTCDate() - 1);
 
-  const [currDoc, prevDoc] = await Promise.all([
-    SkuSlice.findOne({
-      konkName: sku.konkName,
-      date: sliceDate,
-    })
-      .select("data")
-      .lean(),
-    SkuSlice.findOne({
-      konkName: sku.konkName,
-      date: prevDate,
-    })
-      .select("data")
-      .lean(),
+  const [currRows, prevRows] = await Promise.all([
+    aggregateSkuSlices([
+      { $match: { konkName: sku.konkName, date: sliceDate } },
+      { $limit: 1 },
+      sliceDataProjectForSingleProductId(productKey),
+    ]),
+    aggregateSkuSlices([
+      { $match: { konkName: sku.konkName, date: prevDate } },
+      { $limit: 1 },
+      sliceDataProjectForSingleProductId(productKey),
+    ]),
   ]);
+
+  const currDoc = currRows[0];
+  const prevDoc = prevRows[0];
 
   const currData = (currDoc?.data ?? {}) as Record<string, ISkuSliceDataItem>;
   const currItem = currData[productKey];

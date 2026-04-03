@@ -1,8 +1,8 @@
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { aggregateSkuSlices, sliceDataProjectForProductIdList, } from "../../../utils/sliceDataAggregationStages.js";
 import { buildSkuSliceExcelForSkus, formatDateHeader, safeFilePart, } from "../../../utils/buildSkuSliceExcel.js";
 export async function getKonkSkuSliceExcelUtil(input) {
     const skus = await Sku.find({
@@ -26,12 +26,17 @@ export async function getKonkSkuSliceExcelUtil(input) {
         return { ok: false };
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
-    const slices = await SkuSlice.find({
-        konkName: input.konk,
-        date: { $gte: dateFrom, $lte: dateTo },
-    })
-        .select("date data")
-        .lean();
+    const allowedProductIds = rows.map((r) => r.productId);
+    const slices = await aggregateSkuSlices([
+        {
+            $match: {
+                konkName: input.konk,
+                date: { $gte: dateFrom, $lte: dateTo },
+            },
+        },
+        { $sort: { date: 1 } },
+        sliceDataProjectForProductIdList(allowedProductIds),
+    ]);
     const byDate = new Map();
     for (const sl of slices) {
         const t = toSliceDate(sl.date).getTime();

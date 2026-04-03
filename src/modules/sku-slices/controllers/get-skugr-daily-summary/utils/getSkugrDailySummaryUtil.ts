@@ -2,8 +2,12 @@ import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import {
+  aggregateSkuSlices,
+  type SliceAggregateRowWithKonk,
+  sliceDataProjectForProductIdList,
+} from "../../../utils/sliceDataAggregationStages.js";
 import {
   buildSliceMapsByKonk,
   enumerateReportingDates,
@@ -36,12 +40,16 @@ export async function getSkugrDailySummaryUtil(
   const dateTo = toSliceDate(input.dateTo);
   const konkNames = uniqueKonkNamesFromSkus(skus);
 
-  const sliceDocs = await SkuSlice.find({
-    konkName: { $in: konkNames },
-    date: { $gte: dateFrom, $lte: dateTo },
-  })
-    .select("konkName date data")
-    .lean();
+  const allowedProductIds = [...new Set(skus.map((s) => s.productId))];
+  const sliceDocs = await aggregateSkuSlices<SliceAggregateRowWithKonk>([
+    {
+      $match: {
+        konkName: { $in: konkNames },
+        date: { $gte: dateFrom, $lte: dateTo },
+      },
+    },
+    sliceDataProjectForProductIdList(allowedProductIds),
+  ]);
 
   const maps = buildSliceMapsByKonk(sliceDocs);
   const dates = enumerateReportingDates(dateFrom, dateTo);

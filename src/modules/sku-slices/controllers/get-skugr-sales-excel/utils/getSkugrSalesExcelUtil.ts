@@ -1,7 +1,11 @@
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import {
+  aggregateSkuSlices,
+  type SliceAggregateRowWithKonk,
+  sliceDataProjectForProductIdList,
+} from "../../../utils/sliceDataAggregationStages.js";
 import {
   formatDateHeader,
   safeFilePart,
@@ -33,12 +37,16 @@ export async function getSkugrSalesExcelUtil(
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
 
-  const slices = await SkuSlice.find({
-    konkName: { $in: uniqueKonkNamesFromSkus(skus) },
-    date: { $gte: dateFrom, $lte: dateTo },
-  })
-    .select("konkName date data")
-    .lean();
+  const allowedProductIds = [...new Set(skus.map((s) => s.productId))];
+  const slices = await aggregateSkuSlices<SliceAggregateRowWithKonk>([
+    {
+      $match: {
+        konkName: { $in: uniqueKonkNamesFromSkus(skus) },
+        date: { $gte: dateFrom, $lte: dateTo },
+      },
+    },
+    sliceDataProjectForProductIdList(allowedProductIds),
+  ]);
 
   const maps = buildSliceMapsByKonk(slices);
 

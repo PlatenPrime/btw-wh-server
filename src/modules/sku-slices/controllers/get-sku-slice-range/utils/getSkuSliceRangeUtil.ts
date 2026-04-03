@@ -1,7 +1,10 @@
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import {
+  aggregateSkuSlices,
+  sliceDataProjectForSingleProductId,
+} from "../../../utils/sliceDataAggregationStages.js";
 import type { GetSkuSliceRangeInput } from "../schemas/getSkuSliceRangeSchema.js";
 
 export type SkuSliceRangeItem = { date: string; stock: number; price: number };
@@ -23,13 +26,16 @@ export async function getSkuSliceRangeUtil(
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
 
-  const docs = await SkuSlice.find({
-    konkName: sku.konkName,
-    date: { $gte: dateFrom, $lte: dateTo },
-  })
-    .select("date data")
-    .sort({ date: 1 })
-    .lean();
+  const docs = await aggregateSkuSlices([
+    {
+      $match: {
+        konkName: sku.konkName,
+        date: { $gte: dateFrom, $lte: dateTo },
+      },
+    },
+    { $sort: { date: 1 } },
+    sliceDataProjectForSingleProductId(productKey),
+  ]);
 
   const data: SkuSliceRangeItem[] = [];
   for (const doc of docs) {

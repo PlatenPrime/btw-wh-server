@@ -16,7 +16,7 @@ export const getAllSkusUtil = async ({ konkName, prodName, search, page, limit, 
     }
     const [skus, total] = await Promise.all([
         Sku.find(filter)
-            .sort({ createdAt: -1 })
+            .sort({ title: 1 })
             .skip((page - 1) * limit)
             .limit(limit)
             .lean(),

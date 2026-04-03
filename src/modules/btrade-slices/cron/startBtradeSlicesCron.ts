@@ -3,11 +3,11 @@ import { calculateBtradeSlice } from "../utils/calculateBtradeSlice.js";
 
 /**
  * Запускает cron для ежедневного среза Btrade (Sharik).
- * Ежедневно в 04:00 по киевскому времени.
+ * Ежедневно в 00:00 по Europe/Kiev (полночь календарного дня среза).
  */
 export function startBtradeSlicesCron(): CronJob {
   const job = new CronJob(
-    "0 0 4 * * *",
+    "0 0 0 * * *",
     async () => {
       try {
         console.log(`[CRON BtradeSlices] Starting...`);
@@ -25,6 +25,6 @@ export function startBtradeSlicesCron(): CronJob {
     "Europe/Kiev"
   );
 
-  console.log(`[CRON BtradeSlices] Started: daily at 04:00 (Kiev time)`);
+  console.log(`[CRON BtradeSlices] Started: daily at 00:00 (Europe/Kiev)`);
   return job;
 }

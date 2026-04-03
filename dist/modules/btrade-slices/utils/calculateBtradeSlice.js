@@ -1,19 +1,15 @@
 import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
+import { delay } from "../../../utils/delay.js";
+import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { BtradeSlice } from "../models/BtradeSlice.js";
 import { getUniqueArtikulsFromArtsUtil } from "./getUniqueArtikulsFromArtsUtil.js";
-const JITTER_MIN_MS = 800;
-const JITTER_MAX_MS = 1600;
-function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
-function getRandomDelayMs(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+const JITTER_MIN_MS = 200;
+const JITTER_MAX_MS = 1000;
 /**
  * Собирает ежедневный срез цен и остатков Btrade (Sharik) по артикулам из arts:
  * сначала создаёт документ среза с пустым data, затем по мере обработки каждого артикула
- * (с jitter-паузой 800-1600 мс) добавляет запись в data.
+ * (с jitter-паузой 200–1000 мс) добавляет запись в data.
  * Ошибка по одному артикулу не прерывает обработку остальных.
  */
 export async function calculateBtradeSlice() {
@@ -23,7 +19,7 @@ export async function calculateBtradeSlice() {
     let count = 0;
     for (let i = 0; i < artikuls.length; i++) {
         const artikul = artikuls[i];
-        console.log(`анализируется артикул ${artikul} Btrade`);
+        console.log(`анализируется артикул ${i + 1} из ${artikuls.length} ${artikul} Btrade`);
         try {
             const result = await getSharikStockData(artikul);
             if (result) {
@@ -36,7 +32,7 @@ export async function calculateBtradeSlice() {
             console.error(`[BtradeSlice] ${artikul}: ${msg}`);
         }
         if (i < artikuls.length - 1) {
-            await delay(getRandomDelayMs(JITTER_MIN_MS, JITTER_MAX_MS));
+            await delay(jitterMs(JITTER_MIN_MS, JITTER_MAX_MS));
         }
     }
     return { saved: true, count };

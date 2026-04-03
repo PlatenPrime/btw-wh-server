@@ -1,7 +1,10 @@
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import {
+  aggregateSkuSlices,
+  sliceDataProjectForSingleProductId,
+} from "../../../utils/sliceDataAggregationStages.js";
 import type { GetSkuSliceByDateInput } from "../schemas/getSkuSliceByDateSchema.js";
 
 export type SkuSliceByDateResult = { stock: number; price: number };
@@ -17,16 +20,17 @@ export async function getSkuSliceByDateUtil(
   if (!productKey) return null;
 
   const sliceDate = toSliceDate(input.date);
-  const doc = await SkuSlice.findOne({
-    konkName: sku.konkName,
-    date: sliceDate,
-  })
-    .select("data")
-    .lean();
+  const [doc] = await aggregateSkuSlices([
+    { $match: { konkName: sku.konkName, date: sliceDate } },
+    { $limit: 1 },
+    sliceDataProjectForSingleProductId(productKey),
+  ]);
 
-  if (!doc?.data) return null;
+  if (!doc) return null;
 
-  const item = (doc.data as Record<string, ISkuSliceDataItem>)[productKey];
+  const item = (doc.data as Record<string, ISkuSliceDataItem> | undefined)?.[
+    productKey
+  ];
   if (!item) return null;
 
   return { stock: item.stock, price: item.price };
