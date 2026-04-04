@@ -3,6 +3,10 @@ import { dateStringSchema } from "../../common/schemas/dateSchema.js";
 export const getSkuSliceQuerySchema = z.object({
     konkName: z.string().min(1, "konkName is required"),
     date: dateStringSchema,
+    isInvalid: z
+        .enum(["true", "false"])
+        .optional()
+        .transform((val) => (val === undefined ? undefined : val === "true")),
     page: z
         .string()
         .optional()

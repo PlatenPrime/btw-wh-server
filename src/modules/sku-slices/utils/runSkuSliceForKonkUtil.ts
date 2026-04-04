@@ -8,9 +8,10 @@ import { SkuSlice } from "../models/SkuSlice.js";
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-
-const JITTER_MIN_MS = 500;
-const JITTER_MAX_MS = 1500;
+import {
+  SKU_SLICE_REQUEST_JITTER_MAX_MS,
+  SKU_SLICE_REQUEST_JITTER_MIN_MS,
+} from "../constants/skuSliceRequestJitterMs.js";
 
 type SkuLean = {
   _id: { toString(): string };
@@ -85,7 +86,9 @@ export async function runSkuSliceForKonkUtil(
     }
 
     if (i < withPid.length - 1) {
-      await delay(jitterMs(JITTER_MIN_MS, JITTER_MAX_MS));
+      await delay(
+        jitterMs(SKU_SLICE_REQUEST_JITTER_MIN_MS, SKU_SLICE_REQUEST_JITTER_MAX_MS)
+      );
     }
   }
 

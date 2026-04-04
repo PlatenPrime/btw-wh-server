@@ -1,67 +1,49 @@
 import { Sku } from "../../skus/models/Sku.js";
 import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE, } from "../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../sku-slices/models/SkuSlice.js";
-import { getExcludedCompetitorSet, normalizeCompetitorName, } from "../../slices/config/excludedCompetitors.js";
-import { isFullMinusOneSliceItem } from "./isFullMinusOneSliceItem.js";
-const DELAY_MS = 1000;
-function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { getExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
+import { buildCompensatingDataKeyQueue, runCompensatingSliceRefetchLoop, } from "./compensatingSliceRunner.js";
+import { shouldRefetchSkuSliceItem } from "./shouldRefetchSkuSliceItem.js";
 /**
- * Повторный опрос позиций SkuSlice за sliceDate с data entry stock/price оба -1.
- * При ответе, где уже не оба -1, перезаписывает ключ в том же документе.
+ * Повторный опрос позиций SkuSlice за sliceDate: -1/-1 или цена не конечное неотрицательное число.
+ * Если ответ опроса не в режиме полного -1/-1, перезаписывает ключ в том же документе.
  */
 export async function runCompensatingSkuSlices(sliceDate) {
     const excluded = getExcludedCompetitorSet("skuSlices");
     const docs = (await SkuSlice.find({ date: sliceDate })
         .select("konkName data")
         .lean());
-    const queue = [];
-    for (const doc of docs) {
-        const kn = doc.konkName ?? "";
-        if (excluded.has(normalizeCompetitorName(kn)))
-            continue;
-        const data = doc.data ?? {};
-        for (const [productKey, item] of Object.entries(data)) {
-            if (isFullMinusOneSliceItem(item)) {
-                queue.push({ konkName: kn, productKey });
-            }
-        }
-    }
-    let refetched = 0;
-    let updated = 0;
-    for (let i = 0; i < queue.length; i++) {
-        const { konkName, productKey } = queue[i];
+    const queue = buildCompensatingDataKeyQueue(docs, excluded, shouldRefetchSkuSliceItem);
+    return runCompensatingSliceRefetchLoop(queue, async ({ konkName, dataKey }) => {
+        const productKey = dataKey;
         try {
             const sku = (await Sku.findOne({ konkName, productId: productKey })
                 .select("_id")
                 .lean());
             if (!sku) {
                 console.warn(`[CompensatingSkuSlices] нет SKU ${productKey} у ${konkName}, пропуск`);
-                continue;
+                return { refetched: 0, updated: 0 };
             }
             const result = await getSkuStockDataUtil(sku._id.toString());
             if (!result)
-                continue;
-            refetched += 1;
+                return { refetched: 0, updated: 0 };
+            let updated = 0;
             if (!(result.stock === -1 && result.price === -1)) {
                 const dataItem = { stock: result.stock, price: result.price };
                 await SkuSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${productKey}`]: dataItem } });
-                updated += 1;
+                updated = 1;
             }
+            return { refetched: 1, updated };
         }
         catch (err) {
             const e = err;
             if (e.code === UNSUPPORTED_KONK_CODE) {
                 console.warn(`[CompensatingSkuSlices] неподдерживаемый конкурент, пропуск ${konkName} ${productKey}`);
-                continue;
+                return { refetched: 0, updated: 0 };
             }
             const msg = err instanceof Error ? err.message : String(err);
             console.error(`[CompensatingSkuSlices] ${konkName} ${productKey}: ${msg}`);
+            return { refetched: 0, updated: 0 };
         }
-        if (i < queue.length - 1) {
-            await delay(DELAY_MS);
-        }
-    }
-    return { refetched, updated };
+    });
 }

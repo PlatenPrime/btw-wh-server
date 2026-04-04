@@ -55,6 +55,49 @@ type SliceFacetBucket = {
   rows: SliceFacetRow[];
 };
 
+const BSON_NUMBER_TYPES = ["double", "int", "long", "decimal"] as const;
+
+/**
+ * Критерий «невалидной» позиции для фильтра GET /api/sku-slices (isInvalid=true).
+ * Держать в sync с isInvalidSkuSliceDataItem в slice-compensation.
+ */
+function invalidSliceEntryCondition(
+  variableRoot: "e" | "entries"
+): Record<string, unknown> {
+  const stock =
+    variableRoot === "e" ? "$$e.v.stock" : "$entries.v.stock";
+  const price =
+    variableRoot === "e" ? "$$e.v.price" : "$entries.v.price";
+
+  const invalidPrice: Record<string, unknown> = {
+    $or: [
+      { $not: [{ $in: [{ $type: price }, [...BSON_NUMBER_TYPES]] }] },
+      { $lt: [price, 0] },
+      {
+        $and: [
+          { $in: [{ $type: price }, [...BSON_NUMBER_TYPES]] },
+          { $not: [{ $eq: [price, price] }] },
+        ],
+      },
+      { $eq: [price, { $literal: Infinity }] },
+      { $eq: [price, { $literal: -Infinity }] },
+    ],
+  };
+
+  return {
+    $or: [
+      {
+        $and: [{ $eq: [stock, -1] }, { $eq: [price, -1] }],
+      },
+      invalidPrice,
+    ],
+  };
+}
+
+const dataEntriesArray = {
+  $objectToArray: { $ifNull: ["$data", {}] },
+} as const;
+
 function buildSlicePagePipeline(
   konkName: string,
   sliceDate: Date,
@@ -72,8 +115,58 @@ function buildSlicePagePipeline(
               konkName: 1,
               date: 1,
               total: {
+                $size: dataEntriesArray,
+              },
+            },
+          },
+        ],
+        rows: [
+          {
+            $project: {
+              entries: dataEntriesArray,
+            },
+          },
+          { $unwind: "$entries" },
+          { $sort: { "entries.k": 1 } },
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 0,
+              productId: "$entries.k",
+              stock: "$entries.v.stock",
+              price: "$entries.v.price",
+            },
+          },
+        ],
+      },
+    },
+  ];
+}
+
+function buildInvalidSlicePagePipeline(
+  konkName: string,
+  sliceDate: Date,
+  skip: number,
+  limit: number
+): PipelineStage[] {
+  return [
+    { $match: { konkName, date: sliceDate } },
+    {
+      $facet: {
+        meta: [
+          {
+            $project: {
+              _id: 0,
+              konkName: 1,
+              date: 1,
+              total: {
                 $size: {
-                  $objectToArray: { $ifNull: ["$data", {}] },
+                  $filter: {
+                    input: dataEntriesArray,
+                    as: "e",
+                    cond: invalidSliceEntryCondition("e"),
+                  },
                 },
               },
             },
@@ -82,10 +175,11 @@ function buildSlicePagePipeline(
         rows: [
           {
             $project: {
-              entries: { $objectToArray: { $ifNull: ["$data", {}] } },
+              entries: dataEntriesArray,
             },
           },
           { $unwind: "$entries" },
+          { $match: { $expr: invalidSliceEntryCondition("entries") } },
           { $sort: { "entries.k": 1 } },
           { $skip: skip },
           { $limit: limit },
@@ -110,12 +204,14 @@ export async function getSkuSliceUtil(
   const sliceDate = toSliceDate(input.date);
   const skip = (page - 1) * limit;
 
-  const pipeline = buildSlicePagePipeline(
-    input.konkName,
-    sliceDate,
-    skip,
-    limit
-  );
+  const pipeline = input.isInvalid
+    ? buildInvalidSlicePagePipeline(
+        input.konkName,
+        sliceDate,
+        skip,
+        limit
+      )
+    : buildSlicePagePipeline(input.konkName, sliceDate, skip, limit);
 
   const aggResult = await SkuSlice.aggregate<SliceFacetBucket>(pipeline)
     .option({ allowDiskUse: true })

@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("../../../../utils/delay.js", () => ({
+  delay: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("../../../skus/models/Sku.js", () => ({
   Sku: { findOne: vi.fn() },
 }));
@@ -97,6 +101,46 @@ describe("runCompensatingSkuSlices", () => {
       { konkName: "air", date: sliceDate },
       { $set: { "data.P1": { stock: 5, price: -1 } } }
     );
+  });
+
+  it("refetches and updates when stored price is invalid string", async () => {
+    mockFindLean([
+      { konkName: "air", data: { P1: { stock: 10, price: "x" } } },
+    ]);
+    mockSkuFindOne("sid1");
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 2, price: 100 });
+
+    const r = await runCompensatingSkuSlices(sliceDate);
+
+    expect(r).toEqual({ refetched: 1, updated: 1 });
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(1);
+    expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledWith(
+      { konkName: "air", date: sliceDate },
+      { $set: { "data.P1": { stock: 2, price: 100 } } }
+    );
+  });
+
+  it("refetches when stored price is negative", async () => {
+    mockFindLean([
+      { konkName: "air", data: { P1: { stock: 0, price: -5 } } },
+    ]);
+    mockSkuFindOne("sid1");
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 1, price: 10 });
+
+    const r = await runCompensatingSkuSlices(sliceDate);
+
+    expect(r).toEqual({ refetched: 1, updated: 1 });
+  });
+
+  it("does not refetch when price is valid non-negative number", async () => {
+    mockFindLean([
+      { konkName: "air", data: { P1: { stock: -1, price: 10 } } },
+    ]);
+
+    const r = await runCompensatingSkuSlices(sliceDate);
+
+    expect(r).toEqual({ refetched: 0, updated: 0 });
+    expect(getSkuStockDataUtil).not.toHaveBeenCalled();
   });
 
   it("skips on UNSUPPORTED_KONK without throwing", async () => {

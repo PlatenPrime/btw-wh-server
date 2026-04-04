@@ -4,7 +4,7 @@ import { getSkuSliceUtil } from "./utils/getSkuSliceUtil.js";
 
 /**
  * @desc    Срез SKU по конкуренту и дате (пагинация, строки с маппингом на Sku)
- * @route   GET /api/sku-slices?konkName=&date=&page=&limit=
+ * @route   GET /api/sku-slices?konkName=&date=&page=&limit=&isInvalid=
  */
 export const getSkuSliceController = async (
   req: Request,

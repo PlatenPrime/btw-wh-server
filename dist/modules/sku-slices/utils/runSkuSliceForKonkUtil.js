@@ -5,8 +5,7 @@ import { SkuSlice } from "../models/SkuSlice.js";
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-const JITTER_MIN_MS = 500;
-const JITTER_MAX_MS = 1500;
+import { SKU_SLICE_REQUEST_JITTER_MAX_MS, SKU_SLICE_REQUEST_JITTER_MIN_MS, } from "../constants/skuSliceRequestJitterMs.js";
 /**
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
  * с паузой 500–1500 мс (jitter) — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
@@ -46,7 +45,7 @@ export async function runSkuSliceForKonkUtil(konkName, date) {
             console.error(`[SkuSlice ${konkName}] ${productKey}: ${msg}`);
         }
         if (i < withPid.length - 1) {
-            await delay(jitterMs(JITTER_MIN_MS, JITTER_MAX_MS));
+            await delay(jitterMs(SKU_SLICE_REQUEST_JITTER_MIN_MS, SKU_SLICE_REQUEST_JITTER_MAX_MS));
         }
     }
     return { saved: true, count };

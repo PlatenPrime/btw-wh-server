@@ -81,6 +81,26 @@ describe("getSkuSliceController", () => {
     expect(pagination.totalPages).toBe(1);
   });
 
+  it("200 with isInvalid true returns only invalid slice rows", async () => {
+    await SkuSlice.create({
+      konkName: "air",
+      date: new Date("2026-03-01T00:00:00.000Z"),
+      data: {
+        "air-ok": { stock: 1, price: 1 },
+        "air-bad": { stock: -1, price: -1 },
+      },
+    });
+    const req = {
+      query: { konkName: "air", date: "2026-03-01", isInvalid: "true" },
+    } as unknown as Request;
+    await getSkuSliceController(req, res);
+    expect(responseStatus.code).toBe(200);
+    const data = responseJson.data as { items: { productId: string }[] };
+    expect(data.items.map((i) => i.productId)).toEqual(["air-bad"]);
+    const pagination = responseJson.pagination as { total: number };
+    expect(pagination.total).toBe(1);
+  });
+
   it("200 respects page and limit", async () => {
     await SkuSlice.create({
       konkName: "air",

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { shouldRefetchSkuSliceItem } from "../../../../slice-compensation/utils/shouldRefetchSkuSliceItem.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
 import { getSkuSliceUtil } from "../utils/getSkuSliceUtil.js";
@@ -103,5 +104,83 @@ describe("getSkuSliceUtil", () => {
             date: new Date("2025-03-01T00:00:00.000Z"),
         });
         expect(result).toBeNull();
+    });
+    it("with isInvalid true returns only refetch-like rows and total matches filter", async () => {
+        const date = new Date("2025-03-01T00:00:00.000Z");
+        await SkuSlice.create({
+            konkName: "air",
+            date,
+            data: {
+                "air-ok": { stock: 10, price: 100 },
+                "air-bad-full": { stock: -1, price: -1 },
+                "air-bad-price": { stock: 1, price: -5 },
+            },
+        });
+        const result = await getSkuSliceUtil({
+            ...baseQuery,
+            konkName: "air",
+            date,
+            isInvalid: true,
+        });
+        expect(result).not.toBeNull();
+        expect(result.pagination.total).toBe(2);
+        expect(result.items.map((i) => i.productId).sort()).toEqual([
+            "air-bad-full",
+            "air-bad-price",
+        ]);
+        for (const row of result.items) {
+            expect(shouldRefetchSkuSliceItem({ stock: row.stock, price: row.price })).toBe(true);
+        }
+        expect(shouldRefetchSkuSliceItem({ stock: 10, price: 100 })).toBe(false);
+    });
+    it("with isInvalid true and all valid entries yields total 0 and empty items", async () => {
+        const date = new Date("2025-03-01T00:00:00.000Z");
+        await SkuSlice.create({
+            konkName: "air",
+            date,
+            data: { "air-1": { stock: 1, price: 2 } },
+        });
+        const result = await getSkuSliceUtil({
+            ...baseQuery,
+            konkName: "air",
+            date,
+            isInvalid: true,
+        });
+        expect(result).not.toBeNull();
+        expect(result.pagination.total).toBe(0);
+        expect(result.items).toEqual([]);
+    });
+    it("paginates invalid-only rows by productId", async () => {
+        const date = new Date("2025-03-01T00:00:00.000Z");
+        await SkuSlice.create({
+            konkName: "air",
+            date,
+            data: {
+                "air-ok": { stock: 1, price: 1 },
+                "air-bad-b": { stock: -1, price: -1 },
+                "air-bad-a": { stock: 1 },
+                "air-bad-c": { stock: 2, price: -1 },
+            },
+        });
+        const page1 = await getSkuSliceUtil({
+            konkName: "air",
+            date,
+            page: 1,
+            limit: 2,
+            isInvalid: true,
+        });
+        expect(page1.pagination.total).toBe(3);
+        expect(page1.items.map((i) => i.productId)).toEqual([
+            "air-bad-a",
+            "air-bad-b",
+        ]);
+        const page2 = await getSkuSliceUtil({
+            konkName: "air",
+            date,
+            page: 2,
+            limit: 2,
+            isInvalid: true,
+        });
+        expect(page2.items.map((i) => i.productId)).toEqual(["air-bad-c"]);
     });
 });

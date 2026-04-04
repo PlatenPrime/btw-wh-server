@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("../../../../utils/delay.js", () => ({
+  delay: vi.fn().mockResolvedValue(undefined),
+}));
+
 vi.mock("../../../analogs/models/Analog.js", () => ({
   Analog: { findOne: vi.fn() },
 }));
@@ -19,6 +23,7 @@ import { Analog } from "../../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { AnalogSlice } from "../../../analog-slices/models/AnalogSlice.js";
 import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
+import { delay } from "../../../../utils/delay.js";
 import { runCompensatingAnalogSlices } from "../runCompensatingAnalogSlices.js";
 
 describe("runCompensatingAnalogSlices", () => {
@@ -126,8 +131,7 @@ describe("runCompensatingAnalogSlices", () => {
     expect(Analog.findOne).not.toHaveBeenCalled();
   });
 
-  it("applies delay between two queued items", async () => {
-    vi.useFakeTimers();
+  it("calls delay between two queued items", async () => {
     mockFindLean([
       {
         konkName: "sharte",
@@ -147,11 +151,9 @@ describe("runCompensatingAnalogSlices", () => {
       price: 1,
     });
 
-    const p = runCompensatingAnalogSlices(sliceDate);
-    await vi.runAllTimersAsync();
-    await p;
+    await runCompensatingAnalogSlices(sliceDate);
 
     expect(getAnalogStockDataUtil).toHaveBeenCalledTimes(2);
-    vi.useRealTimers();
+    expect(vi.mocked(delay)).toHaveBeenCalledTimes(1);
   });
 });
