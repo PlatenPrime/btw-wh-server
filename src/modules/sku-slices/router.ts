@@ -3,6 +3,8 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
+  getKonkProdSkuSalesChartDataController,
+  getKonkProdSkuStockChartDataController,
   getKonkSkuSalesExcelController,
   getKonkSkuStockSliceExcelController,
   getSkugrDailySummaryController,
@@ -36,6 +38,18 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getKonkSkuSalesExcelController)
+);
+router.get(
+  "/konk-prod/stock-chart-data",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getKonkProdSkuStockChartDataController)
+);
+router.get(
+  "/konk-prod/sales-chart-data",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getKonkProdSkuSalesChartDataController)
 );
 router.get(
   "/skugr/:skugrId/daily-summary",
