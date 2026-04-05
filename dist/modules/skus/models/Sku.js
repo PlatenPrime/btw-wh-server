@@ -7,7 +7,9 @@ const skuSchema = new Schema({
     title: { type: String, required: true },
     url: { type: String, required: true, unique: true },
     imageUrl: { type: String, default: "" },
+    isInvalid: { type: Boolean, default: false },
 }, { timestamps: true });
+skuSchema.index({ konkName: 1, isInvalid: 1 });
 /**
  * Sku Mongoose model
  * @see ISku

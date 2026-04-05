@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { toSliceDate } from "../../../../../../utils/sliceDate.js";
 import { Sku } from "../../../../models/Sku.js";
 import { getAllSkusUtil } from "../getAllSkusUtil.js";
 describe("getAllSkusUtil", () => {
@@ -100,5 +101,63 @@ describe("getAllSkusUtil", () => {
         });
         expect(result.skus).toHaveLength(1);
         expect(result.skus[0].title).toBe("Match Here");
+    });
+    it("filters by isInvalid", async () => {
+        await Sku.create({
+            konkName: "k-inv",
+            prodName: "p1",
+            productId: "k-inv-1",
+            title: "A",
+            url: "https://k-inv.com/1",
+            isInvalid: true,
+        });
+        await Sku.create({
+            konkName: "k-inv",
+            prodName: "p1",
+            productId: "k-inv-2",
+            title: "B",
+            url: "https://k-inv.com/2",
+            isInvalid: false,
+        });
+        const onlyInvalid = await getAllSkusUtil({
+            page: 1,
+            limit: 10,
+            isInvalid: true,
+        });
+        expect(onlyInvalid.skus).toHaveLength(1);
+        expect(onlyInvalid.skus[0].isInvalid).toBe(true);
+        const onlyValid = await getAllSkusUtil({
+            page: 1,
+            limit: 10,
+            isInvalid: false,
+        });
+        expect(onlyValid.skus.some((s) => s.productId === "k-inv-2")).toBe(true);
+        expect(onlyValid.skus.some((s) => s.productId === "k-inv-1")).toBe(false);
+    });
+    it("filters by createdFrom", async () => {
+        const cutoff = new Date("2026-02-01T00:00:00.000Z");
+        await Sku.create({
+            konkName: "k-old",
+            prodName: "p1",
+            productId: "k-old-1",
+            title: "Old",
+            url: "https://k-old.com/1",
+            createdAt: new Date("2026-01-01T00:00:00.000Z"),
+        });
+        await Sku.create({
+            konkName: "k-new",
+            prodName: "p1",
+            productId: "k-new-1",
+            title: "New",
+            url: "https://k-new.com/1",
+            createdAt: new Date("2026-03-01T00:00:00.000Z"),
+        });
+        const result = await getAllSkusUtil({
+            page: 1,
+            limit: 10,
+            createdFrom: toSliceDate(cutoff),
+        });
+        expect(result.skus).toHaveLength(1);
+        expect(result.skus[0].productId).toBe("k-new-1");
     });
 });

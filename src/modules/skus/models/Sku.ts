@@ -13,6 +13,8 @@ export interface ISku extends Document {
   title: string;
   url: string;
   imageUrl: string;
+  /** true если 7 подряд дней срезов с stock=-1 и price=-1 (см. крон SkuInvalid). */
+  isInvalid: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -26,9 +28,12 @@ const skuSchema = new Schema<ISku>(
     title: { type: String, required: true },
     url: { type: String, required: true, unique: true },
     imageUrl: { type: String, default: "" },
+    isInvalid: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
+
+skuSchema.index({ konkName: 1, isInvalid: 1 });
 
 /**
  * Sku Mongoose model

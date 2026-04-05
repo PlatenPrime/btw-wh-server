@@ -23,6 +23,7 @@ describe("Sku Model", () => {
 
       expect(saved.btradeAnalog).toBe("");
       expect(saved.imageUrl).toBe("");
+      expect(saved.isInvalid).toBe(false);
     });
 
     it("should save with all required fields", async () => {

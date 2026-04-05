@@ -8,6 +8,10 @@ import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+import {
+  coalesceSkuSliceItemsAlongDates,
+  sliceDateMinusDays,
+} from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 
 const HEADER_LABELS = [
   "Ідентифікатор товару",
@@ -98,7 +102,14 @@ export async function buildSkuSalesExcelForSkus(
   ) => ISkuSliceDataItem | null | undefined,
   options: SkuSalesExcelOptions = {}
 ): Promise<{ buffer: Buffer }> {
-  const dates = enumerateSliceDates(dateFrom, dateTo);
+  const datesReport = enumerateSliceDates(dateFrom, dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
+  const datesFull =
+    warmStart.getTime() < dateFrom.getTime()
+      ? [warmStart, ...datesReport]
+      : datesReport;
+  const reportOffset = datesFull.length - datesReport.length;
+  const dates = datesReport;
   const dateCount = dates.length;
   const dataStartCol = 7;
   const totalCol = dataStartCol + dateCount;
@@ -129,13 +140,12 @@ export async function buildSkuSalesExcelForSkus(
   let startRow = 2;
 
   for (const sku of skus) {
-    const stocks: (number | null)[] = [];
-    const prices: (number | null)[] = [];
-    for (const d of dates) {
-      const item = getItem(sku.konkName, sku.productId, d);
-      stocks.push(item?.stock ?? null);
-      prices.push(item?.price ?? null);
-    }
+    const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) =>
+      getItem(sku.konkName, sku.productId, d),
+    );
+    const forReport = coalesced.slice(reportOffset);
+    const stocks = forReport.map((c) => c.stock);
+    const prices = forReport.map((c) => c.price);
 
     const salesByDay = computeSalesFromStockSequence(stocks).map((x) => x.sales);
     const revenueByDay = salesByDay.map((sales, i) =>

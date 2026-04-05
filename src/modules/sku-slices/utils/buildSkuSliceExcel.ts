@@ -5,6 +5,10 @@ import {
 } from "../../../lib/excel/worksheetStyles.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import type { ISkuSliceDataItem } from "../models/SkuSlice.js";
+import {
+  coalesceSkuSliceItemsAlongDates,
+  sliceDateMinusDays,
+} from "./coalesceSkuSliceItemsForReporting.js";
 
 /** Заливка комірки «Залишок»: день створення SKU (календар Kyiv). */
 export const SKU_SLICE_EXCEL_STOCK_NEW_SKU_FILL_ARGB = "FFC8E6C9";
@@ -217,7 +221,14 @@ export async function buildSkuSliceExcelForSkus(
   titles: SkuSliceExcelTitles,
   options: SkuSliceExcelOptions = {}
 ): Promise<{ buffer: Buffer; fileName: string }> {
-  const dates = enumerateSliceDates(dateFrom, dateTo);
+  const datesReport = enumerateSliceDates(dateFrom, dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
+  const datesFull =
+    warmStart.getTime() < dateFrom.getTime()
+      ? [warmStart, ...datesReport]
+      : datesReport;
+  const reportOffset = datesFull.length - datesReport.length;
+  const dates = datesReport;
   const dateCount = dates.length;
   const dataStartCol = 7;
   const diffCol = dataStartCol + dateCount;
@@ -246,19 +257,12 @@ export async function buildSkuSliceExcelForSkus(
   let startRow = 2;
   for (let s = 0; s < skus.length; s++) {
     const sku = skus[s]!;
-    const stocks: (number | null)[] = [];
-    const prices: (number | null)[] = [];
-
-    for (const d of dates) {
-      const item = getItem(sku.konkName, sku.productId, d);
-      if (item != null) {
-        stocks.push(item.stock);
-        prices.push(item.price);
-      } else {
-        stocks.push(null);
-        prices.push(null);
-      }
-    }
+    const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) =>
+      getItem(sku.konkName, sku.productId, d),
+    );
+    const forReport = coalesced.slice(reportOffset);
+    const stocks = forReport.map((c) => c.stock);
+    const prices = forReport.map((c) => c.price);
 
     const stockRow = sheet.getRow(startRow);
     const priceRow = sheet.getRow(startRow + 1);

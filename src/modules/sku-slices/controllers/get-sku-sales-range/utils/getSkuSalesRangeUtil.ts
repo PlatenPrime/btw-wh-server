@@ -5,10 +5,15 @@ import {
   sliceDataProjectForSingleProductId,
 } from "../../../utils/sliceDataAggregationStages.js";
 import {
+  coalesceSkuSliceItemsAlongDates,
+  sliceDateMinusDays,
+} from "../../../utils/coalesceSkuSliceItemsForReporting.js";
+import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
 import type { GetSkuSalesRangeInput } from "../schemas/getSkuSalesRangeSchema.js";
 
 export type SkuSalesRangeItem = {
@@ -36,40 +41,54 @@ export async function getSkuSalesRangeUtil(
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
 
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
+
   const docs = await aggregateSkuSlices([
     {
       $match: {
         konkName: sku.konkName,
-        date: { $gte: dateFrom, $lte: dateTo },
+        date: { $gte: warmStart, $lte: dateTo },
       },
     },
     { $sort: { date: 1 } },
     sliceDataProjectForSingleProductId(productKey),
   ]);
 
-  const sliceItems: { date: string; stock: number; price: number }[] = [];
+  const byDate = new Map<number, Record<string, ISkuSliceDataItem>>();
   for (const doc of docs) {
-    const dataRecord = (doc.data ?? {}) as Record<string, ISkuSliceDataItem>;
-    const item = dataRecord[productKey];
-    if (!item) continue;
-    sliceItems.push({
-      date: doc.date.toISOString(),
-      stock: item.stock,
-      price: item.price,
-    });
+    byDate.set(
+      toSliceDate(doc.date).getTime(),
+      (doc.data ?? {}) as Record<string, ISkuSliceDataItem>
+    );
   }
 
-  const stockByDay = sliceItems.map((d) => d.stock);
+  const datesFull = enumerateReportingDates(warmStart, dateTo);
+  const indexStart = datesFull.findIndex(
+    (d) => toSliceDate(d).getTime() >= toSliceDate(dateFrom).getTime()
+  );
+  if (indexStart < 0) return { ok: false };
+
+  const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) => {
+    const rec = byDate.get(toSliceDate(d).getTime());
+    return rec?.[productKey];
+  });
+
+  const datesReport = datesFull.slice(indexStart);
+  const coalescedReport = coalesced.slice(indexStart);
+  const stockByDay = coalescedReport.map((c) => c.stock);
   const salesResults = computeSalesFromStockSequence(stockByDay);
 
-  const data: SkuSalesRangeItem[] = sliceItems.map((d, i) => {
+  const data: SkuSalesRangeItem[] = datesReport.map((d, i) => {
     const dayResult = salesResults[i]!;
-    const revenue = computeRevenueForDay(dayResult.sales, d.price);
+    const priceVal = coalescedReport[i]!.price;
+    const price =
+      typeof priceVal === "number" && Number.isFinite(priceVal) ? priceVal : 0;
+    const revenue = computeRevenueForDay(dayResult.sales, priceVal ?? null);
     return {
-      date: d.date,
+      date: d.toISOString(),
       sales: dayResult.sales,
       revenue,
-      price: d.price,
+      price,
       isDeliveryDay: dayResult.isDeliveryDay,
     };
   });

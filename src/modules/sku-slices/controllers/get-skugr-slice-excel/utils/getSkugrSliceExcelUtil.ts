@@ -1,6 +1,7 @@
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { sliceDateMinusDays } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import {
   aggregateSkuSlices,
   type SliceAggregateRowWithKonk,
@@ -43,13 +44,14 @@ export async function getSkugrSliceExcelUtil(
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
 
   const allowedProductIds = [...new Set(skus.map((s) => s.productId))];
   const slices = await aggregateSkuSlices<SliceAggregateRowWithKonk>([
     {
       $match: {
         konkName: { $in: uniqueKonkNamesFromSkus(skus) },
-        date: { $gte: dateFrom, $lte: dateTo },
+        date: { $gte: warmStart, $lte: dateTo },
       },
     },
     sliceDataProjectForProductIdList(allowedProductIds),

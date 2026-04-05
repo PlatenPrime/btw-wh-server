@@ -1,3 +1,4 @@
+import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../models/Sku.js";
 function escapeRegex(value) {
@@ -8,7 +9,7 @@ export const getSkusBySkugrIdUtil = async (skugrId, query) => {
     if (!skugr) {
         return null;
     }
-    const { konkName, prodName, search, page, limit } = query;
+    const { konkName, prodName, search, isInvalid, createdFrom, page, limit } = query;
     if (!skugr.skus.length) {
         return {
             skus: [],
@@ -36,6 +37,11 @@ export const getSkusBySkugrIdUtil = async (skugrId, query) => {
             $regex: escapeRegex(search.trim()),
             $options: "i",
         };
+    }
+    if (typeof isInvalid === "boolean")
+        filter.isInvalid = isInvalid;
+    if (createdFrom != null) {
+        filter.createdAt = { $gte: toSliceDate(createdFrom) };
     }
     const [skus, total] = await Promise.all([
         Sku.find(filter)

@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { applyDataRowStyle, applyHeaderStyle, } from "../../../lib/excel/worksheetStyles.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
+import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "./coalesceSkuSliceItemsForReporting.js";
 /** Заливка комірки «Залишок»: день створення SKU (календар Kyiv). */
 export const SKU_SLICE_EXCEL_STOCK_NEW_SKU_FILL_ARGB = "FFC8E6C9";
 /** Заливка комірки «Залишок»: день зростання залишку vs попередній день періоду. */
@@ -145,7 +146,13 @@ function setMergedMetaAlignment(cell) {
  * дати з G, потім «Різниця» та «Різниця, %».
  */
 export async function buildSkuSliceExcelForSkus(skus, dateFrom, dateTo, getItem, titles, options = {}) {
-    const dates = enumerateSliceDates(dateFrom, dateTo);
+    const datesReport = enumerateSliceDates(dateFrom, dateTo);
+    const warmStart = sliceDateMinusDays(dateFrom, 1);
+    const datesFull = warmStart.getTime() < dateFrom.getTime()
+        ? [warmStart, ...datesReport]
+        : datesReport;
+    const reportOffset = datesFull.length - datesReport.length;
+    const dates = datesReport;
     const dateCount = dates.length;
     const dataStartCol = 7;
     const diffCol = dataStartCol + dateCount;
@@ -169,19 +176,10 @@ export async function buildSkuSliceExcelForSkus(skus, dateFrom, dateTo, getItem,
     let startRow = 2;
     for (let s = 0; s < skus.length; s++) {
         const sku = skus[s];
-        const stocks = [];
-        const prices = [];
-        for (const d of dates) {
-            const item = getItem(sku.konkName, sku.productId, d);
-            if (item != null) {
-                stocks.push(item.stock);
-                prices.push(item.price);
-            }
-            else {
-                stocks.push(null);
-                prices.push(null);
-            }
-        }
+        const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) => getItem(sku.konkName, sku.productId, d));
+        const forReport = coalesced.slice(reportOffset);
+        const stocks = forReport.map((c) => c.stock);
+        const prices = forReport.map((c) => c.price);
         const stockRow = sheet.getRow(startRow);
         const priceRow = sheet.getRow(startRow + 1);
         stockRow.getCell(1).value = sku.productId;

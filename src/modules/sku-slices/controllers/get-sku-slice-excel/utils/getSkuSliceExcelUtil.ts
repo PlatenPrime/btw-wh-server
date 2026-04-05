@@ -3,6 +3,7 @@ import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { sliceDateMinusDays } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import {
   aggregateSkuSlices,
   sliceDataProjectForSingleProductId,
@@ -28,12 +29,13 @@ export async function getSkuSliceExcelUtil(
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
 
   const slices = await aggregateSkuSlices([
     {
       $match: {
         konkName: sku.konkName,
-        date: { $gte: dateFrom, $lte: dateTo },
+        date: { $gte: warmStart, $lte: dateTo },
       },
     },
     { $sort: { date: 1 } },

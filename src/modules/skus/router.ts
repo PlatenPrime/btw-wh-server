@@ -4,9 +4,12 @@ import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   createSkuController,
+  deleteKonkInvalidSkusController,
   deleteSkuByIdController,
   fixIncorrectSkuDataController,
   getAllSkusController,
+  getKonkInvalidExcelController,
+  getKonkNewSinceExcelController,
   getSkusBySkugrIdController,
   getSkuByIdController,
   updateSkuByIdController,
@@ -19,6 +22,24 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getAllSkusController)
+);
+router.get(
+  "/konk/:konkName/new-since-excel",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getKonkNewSinceExcelController)
+);
+router.get(
+  "/konk/:konkName/invalid-excel",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getKonkInvalidExcelController)
+);
+router.delete(
+  "/konk/:konkName/invalid",
+  checkAuth,
+  checkRoles([RoleType.PRIME]),
+  asyncHandler(deleteKonkInvalidSkusController)
 );
 router.get(
   "/by-skugr/:skugrId",

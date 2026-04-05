@@ -1,4 +1,5 @@
 import type { Types } from "mongoose";
+import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../models/Sku.js";
 import type { GetAllSkusQuery } from "../../get-all-skus/schemas/getAllSkusQuerySchema.js";
@@ -11,10 +12,12 @@ type SkuLean = {
   _id: Types.ObjectId;
   konkName: string;
   prodName: string;
+  productId: string;
   btradeAnalog: string;
   title: string;
   url: string;
   imageUrl: string;
+  isInvalid: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 };
@@ -40,7 +43,8 @@ export const getSkusBySkugrIdUtil = async (
     return null;
   }
 
-  const { konkName, prodName, search, page, limit } = query;
+  const { konkName, prodName, search, isInvalid, createdFrom, page, limit } =
+    query;
 
   if (!skugr.skus.length) {
     return {
@@ -70,6 +74,10 @@ export const getSkusBySkugrIdUtil = async (
       $regex: escapeRegex(search.trim()),
       $options: "i",
     };
+  }
+  if (typeof isInvalid === "boolean") filter.isInvalid = isInvalid;
+  if (createdFrom != null) {
+    filter.createdAt = { $gte: toSliceDate(createdFrom) };
   }
 
   const [skus, total] = await Promise.all([

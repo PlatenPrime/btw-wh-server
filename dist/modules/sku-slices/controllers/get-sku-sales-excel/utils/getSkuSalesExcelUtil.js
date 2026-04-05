@@ -2,6 +2,7 @@ import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { sliceDateMinusDays } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import { aggregateSkuSlices, sliceDataProjectForSingleProductId, } from "../../../utils/sliceDataAggregationStages.js";
 import { formatDateHeader, safeFilePart, } from "../../../utils/buildSkuSliceExcel.js";
 import { buildSkuSalesExcelForSkus, } from "./buildSkuSalesExcel.js";
@@ -14,11 +15,12 @@ export async function getSkuSalesExcelUtil(input) {
         return { ok: false };
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
+    const warmStart = sliceDateMinusDays(dateFrom, 1);
     const slices = await aggregateSkuSlices([
         {
             $match: {
                 konkName: sku.konkName,
-                date: { $gte: dateFrom, $lte: dateTo },
+                date: { $gte: warmStart, $lte: dateTo },
             },
         },
         { $sort: { date: 1 } },

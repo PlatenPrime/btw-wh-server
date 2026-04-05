@@ -9,6 +9,10 @@ import {
   sliceDataProjectForProductIdList,
 } from "./sliceDataAggregationStages.js";
 import {
+  coalesceSkuSliceItemsAlongDates,
+  sliceDateMinusDays,
+} from "./coalesceSkuSliceItemsForReporting.js";
+import {
   buildSliceMapsByKonk,
   enumerateReportingDates,
   getSliceItem,
@@ -41,18 +45,26 @@ export async function aggregateDailySkuSliceMetricsForSkus(
   const konkNames = [...new Set(skus.map((s) => s.konkName))];
   const allowedProductIds = [...new Set(skus.map((s) => s.productId))];
 
+  const warmupStart = sliceDateMinusDays(dateFrom, 1);
+
   const sliceDocs = await aggregateSkuSlices<SliceAggregateRowWithKonk>([
     {
       $match: {
         konkName: { $in: konkNames },
-        date: { $gte: dateFrom, $lte: dateTo },
+        date: { $gte: warmupStart, $lte: dateTo },
       },
     },
     sliceDataProjectForProductIdList(allowedProductIds),
   ]);
 
   const maps = buildSliceMapsByKonk(sliceDocs);
-  const dates = enumerateReportingDates(dateFrom, dateTo);
+  const datesFull = enumerateReportingDates(warmupStart, dateTo);
+  const indexStart = datesFull.findIndex(
+    (d) => toSliceDate(d).getTime() >= toSliceDate(dateFrom).getTime(),
+  );
+  if (indexStart < 0 || indexStart >= datesFull.length) return { ok: false };
+
+  const dates = datesFull.slice(indexStart);
 
   const perSku: {
     stocks: (number | null)[];
@@ -61,22 +73,23 @@ export async function aggregateDailySkuSliceMetricsForSkus(
   }[] = [];
 
   for (const sku of skus) {
-    const stocks: (number | null)[] = dates.map((d) => {
-      const item = getSliceItem(maps, sku.konkName, sku.productId, d);
-      if (!item) return null;
-      const v = item.stock;
-      return typeof v === "number" && Number.isFinite(v) ? v : null;
-    });
+    const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) =>
+      getSliceItem(maps, sku.konkName, sku.productId, d),
+    );
 
-    const salesSeq = computeSalesFromStockSequence(stocks);
-    const sales = salesSeq.map((r) => r.sales);
-    const revenue = dates.map((d, i) => {
-      const item = getSliceItem(maps, sku.konkName, sku.productId, d);
-      const price = item?.price;
-      const p =
-        typeof price === "number" && Number.isFinite(price) ? price : null;
-      return computeRevenueForDay(sales[i]!, p);
-    });
+    const stocksFull = coalesced.map((c) => c.stock);
+    const salesSeq = computeSalesFromStockSequence(stocksFull);
+
+    const stocks: (number | null)[] = [];
+    const sales: number[] = [];
+    const revenue: number[] = [];
+    for (let i = indexStart; i < datesFull.length; i++) {
+      const c = coalesced[i]!;
+      const seq = salesSeq[i]!;
+      stocks.push(c.stock);
+      sales.push(seq.sales);
+      revenue.push(computeRevenueForDay(seq.sales, c.price));
+    }
 
     perSku.push({ stocks, sales, revenue });
   }
