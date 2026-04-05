@@ -9,7 +9,7 @@ function firstQuery(q: Request["query"], key: string): string | undefined {
 
 /**
  * @desc    Данные для графика остатков: сумма SKU конкурента vs Btrade по производителю
- * @route   GET /api/sku-slices/konk-prod/stock-chart-data?konk=&prod=&dateFrom=&dateTo=
+ * @route   GET /api/sku-slices/konk-prod/stock-chart-data?konk=&prod=&dateFrom=&dateTo= (prod=all — весь konk и все Art по артикулам)
  */
 export const getKonkProdSkuStockChartDataController = async (
   req: Request,

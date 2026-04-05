@@ -75,4 +75,34 @@ describe("getKonkProdSkuSalesChartDataController", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data).toBeDefined();
     });
+    it("200 accepts prod=all and passes it to util", async () => {
+        vi.mocked(getKonkProdSkuSalesChartDataUtil).mockResolvedValue({
+            ok: true,
+            data: {
+                days: [],
+                summary: {
+                    totalCompetitorSales: 0,
+                    totalBtradeSales: 0,
+                    totalCompetitorRevenue: 0,
+                    totalBtradeRevenue: 0,
+                    diffSalesPcs: 0,
+                    diffRevenueUah: 0,
+                    diffSalesPct: null,
+                    diffRevenuePct: null,
+                },
+            },
+        });
+        const req = {
+            query: {
+                konk: "k",
+                prod: "all",
+                dateFrom: "2026-04-01",
+                dateTo: "2026-04-01",
+            },
+        };
+        await getKonkProdSkuSalesChartDataController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const arg = vi.mocked(getKonkProdSkuSalesChartDataUtil).mock.calls[0][0];
+        expect(arg.prod).toBe("all");
+    });
 });

@@ -6,7 +6,7 @@ function firstQuery(q, key) {
 }
 /**
  * @desc    Данные для графика продаж/выручки: сумма SKU конкурента vs Btrade по производителю
- * @route   GET /api/sku-slices/konk-prod/sales-chart-data?konk=&prod=&dateFrom=&dateTo=
+ * @route   GET /api/sku-slices/konk-prod/sales-chart-data?konk=&prod=&dateFrom=&dateTo= (prod=all — весь konk и все Art по артикулам)
  */
 export const getKonkProdSkuSalesChartDataController = async (req, res) => {
     const q = req.query;

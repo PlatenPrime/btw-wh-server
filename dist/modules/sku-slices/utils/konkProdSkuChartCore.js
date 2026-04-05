@@ -6,20 +6,24 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "./aggregateDailySkuSliceMetricsForSkus.js";
 import { enumerateReportingDates } from "./skugrReporting.js";
 /**
- * Конкурент: SKU с `konkName` + `prodName` из query, срезы SkuSlice.
- * Btrade: все артикулы из Art, у которых `prodName` (trim, без учёта регистра)
+ * Конкурент: SKU с `konkName` + `prodName` из query (точное совпадение `prodName`),
+ * срезы SkuSlice. Btrade: артикулы из Art, у которых `prodName` (trim, без учёта регистра)
  * совпадает с query `prod`; по ним — BtradeSlice. Поле Sku.btradeAnalog не используется.
  *
- * При очень большом числе артикулов у производителя при необходимости можно батчить
+ * Зарезервировано: если после trim `prod` строго равен `"all"`, конкурент — все SKU с
+ * данным `konkName` (без фильтра по производителю); Btrade — все уникальные непустые
+ * `artikul` из Art. Для Excel `konk`/`prod` это значение не обрабатывается особым образом.
+ *
+ * При очень большом числе артикулов при необходимости можно батчить
  * `sliceDataProjectForArtikulList` по чанкам и суммировать в памяти.
  */
 export async function loadKonkProdSkuChartSeries(input) {
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
-    const skuDocs = await Sku.find({
-        konkName: input.konk,
-        prodName: input.prod,
-    })
+    const isAllProd = input.prod.trim() === "all";
+    const skuDocs = await Sku.find(isAllProd
+        ? { konkName: input.konk }
+        : { konkName: input.konk, prodName: input.prod })
         .sort({ productId: 1 })
         .select("konkName productId")
         .lean();
@@ -46,19 +50,31 @@ export async function loadKonkProdSkuChartSeries(input) {
     const competitorStock = compMetrics.data.map((d) => d.stock);
     const competitorSales = compMetrics.data.map((d) => d.sales);
     const competitorRevenue = compMetrics.data.map((d) => d.revenue);
-    const prodKeyLower = input.prod.trim().toLowerCase();
-    const arts = await Art.find({
-        $expr: {
-            $eq: [
-                {
-                    $toLower: {
-                        $trim: { input: { $ifNull: ["$prodName", ""] } },
+    const arts = await Art.find(isAllProd
+        ? {
+            $expr: {
+                $gt: [
+                    {
+                        $strLenCP: {
+                            $trim: { input: { $ifNull: ["$artikul", ""] } },
+                        },
                     },
-                },
-                prodKeyLower,
-            ],
-        },
-    })
+                    0,
+                ],
+            },
+        }
+        : {
+            $expr: {
+                $eq: [
+                    {
+                        $toLower: {
+                            $trim: { input: { $ifNull: ["$prodName", ""] } },
+                        },
+                    },
+                    input.prod.trim().toLowerCase(),
+                ],
+            },
+        })
         .select("artikul")
         .lean();
     const allowedArtikuls = [];

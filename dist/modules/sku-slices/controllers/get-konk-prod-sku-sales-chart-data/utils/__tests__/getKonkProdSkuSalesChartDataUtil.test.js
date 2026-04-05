@@ -92,4 +92,101 @@ describe("getKonkProdSkuSalesChartDataUtil", () => {
         expect(r.data.summary.totalCompetitorSales).toBe(5);
         expect(r.data.summary.totalBtradeSales).toBe(7);
     });
+    it("prod=all sums sales across all skus for konk and all Art artikuls; single prod is a subset", async () => {
+        const konk = "all-sal-k";
+        const prodP1 = "all-sal-p1";
+        const prodP2 = "all-sal-p2";
+        const bt1 = "ALL-SAL-BT-1";
+        const bt2 = "ALL-SAL-BT-2";
+        await Sku.insertMany([
+            {
+                konkName: konk,
+                prodName: prodP1,
+                productId: `${konk}-a`,
+                title: "A",
+                url: "https://e.com/sal-a",
+            },
+            {
+                konkName: konk,
+                prodName: prodP2,
+                productId: `${konk}-b`,
+                title: "B",
+                url: "https://e.com/sal-b",
+            },
+        ]);
+        await Art.insertMany([
+            { artikul: bt1, prodName: prodP1, zone: "Z1" },
+            { artikul: bt2, prodName: prodP2, zone: "Z2" },
+        ]);
+        const d1 = new Date("2026-10-10T00:00:00.000Z");
+        const d2 = new Date("2026-10-11T00:00:00.000Z");
+        await SkuSlice.insertMany([
+            {
+                konkName: konk,
+                date: d1,
+                data: {
+                    [`${konk}-a`]: { stock: 10, price: 2 },
+                    [`${konk}-b`]: { stock: 6, price: 3 },
+                },
+            },
+            {
+                konkName: konk,
+                date: d2,
+                data: {
+                    [`${konk}-a`]: { stock: 7, price: 2 },
+                    [`${konk}-b`]: { stock: 3, price: 3 },
+                },
+            },
+        ]);
+        await BtradeSlice.insertMany([
+            {
+                date: d1,
+                data: {
+                    [bt1]: { quantity: 40, price: 10 },
+                    [bt2]: { quantity: 24, price: 10 },
+                },
+            },
+            {
+                date: d2,
+                data: {
+                    [bt1]: { quantity: 35, price: 10 },
+                    [bt2]: { quantity: 20, price: 10 },
+                },
+            },
+        ]);
+        const oneProd = await getKonkProdSkuSalesChartDataUtil({
+            konk,
+            prod: prodP1,
+            dateFrom: d1,
+            dateTo: d2,
+        });
+        expect(oneProd.ok).toBe(true);
+        if (!oneProd.ok)
+            return;
+        expect(oneProd.data.days[0]).toMatchObject({
+            competitorSales: 0,
+            btradeSales: 0,
+        });
+        expect(oneProd.data.days[1]).toMatchObject({
+            competitorSales: 3,
+            btradeSales: 5,
+        });
+        expect(oneProd.data.summary.totalCompetitorSales).toBe(3);
+        expect(oneProd.data.summary.totalBtradeSales).toBe(5);
+        const allProd = await getKonkProdSkuSalesChartDataUtil({
+            konk,
+            prod: "all",
+            dateFrom: d1,
+            dateTo: d2,
+        });
+        expect(allProd.ok).toBe(true);
+        if (!allProd.ok)
+            return;
+        expect(allProd.data.days[1]).toMatchObject({
+            competitorSales: 6,
+            btradeSales: 9,
+        });
+        expect(allProd.data.summary.totalCompetitorSales).toBe(6);
+        expect(allProd.data.summary.totalBtradeSales).toBe(9);
+    });
 });
