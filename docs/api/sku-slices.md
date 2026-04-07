@@ -216,7 +216,7 @@ JSON для секторной диаграммы конкурента по пр
 
 **Query:** `konk` (string, обязательно, trim и непустой после trim), `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
 
-**Ответ 200:** `{ message: string, data: { [prodName: string]: { title: string, salesPcs: number, salesUah: number } } }`.
+**Ответ 200:** `{ message: string, data: { [prodName: string]: { title: string, salesPcs: number, salesUah: number } } }`, где `title` берется из `Prod.title` при `Prod.name === prodName`; если запись в `Prod` отсутствует, используется fallback `title = prodName`.
 
 **Ошибки:** 400, 401, 403, 404 (нет SKU/данных для расчета в указанном диапазоне), 500.
 

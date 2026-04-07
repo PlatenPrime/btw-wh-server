@@ -1,4 +1,5 @@
 import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
@@ -22,6 +23,18 @@ export async function getKonkProdManufacturersPieDataUtil(input) {
     const productIds = [...productToManufacturer.keys()];
     if (productIds.length === 0)
         return { ok: false };
+    const manufacturerNames = [...new Set(productToManufacturer.values())];
+    const prodDocs = await Prod.find({ name: { $in: manufacturerNames } })
+        .select("name title")
+        .lean();
+    const prodTitleByName = new Map();
+    for (const prodDoc of prodDocs) {
+        const name = (prodDoc.name ?? "").trim();
+        const title = (prodDoc.title ?? "").trim();
+        if (!name || !title)
+            continue;
+        prodTitleByName.set(name, title);
+    }
     const sliceRows = await aggregateSkuSlices([
         {
             $match: {
@@ -70,7 +83,7 @@ export async function getKonkProdManufacturersPieDataUtil(input) {
         }
         if (!result[manufacturer]) {
             result[manufacturer] = {
-                title: manufacturer,
+                title: prodTitleByName.get(manufacturer) ?? manufacturer,
                 salesPcs: 0,
                 salesUah: 0,
             };

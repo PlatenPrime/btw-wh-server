@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { Prod } from "../../../../../prods/models/Prod.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { getKonkProdManufacturersPieDataUtil } from "../getKonkProdManufacturersPieDataUtil.js";
 
 describe("getKonkProdManufacturersPieDataUtil", () => {
   beforeEach(async () => {
+    await Prod.deleteMany({});
     await Sku.deleteMany({});
     await SkuSlice.deleteMany({});
   });
@@ -42,6 +44,11 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
         url: "https://e.com/pie-b",
       },
     ]);
+    await Prod.create({
+      name: prod,
+      title: "ACME Extended Title",
+      imageUrl: "https://e.com/prod-acme.png",
+    });
 
     await SkuSlice.insertMany([
       {
@@ -80,7 +87,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     if (!result.ok) return;
 
     expect(result.data[prod]).toEqual({
-      title: prod,
+      title: "ACME Extended Title",
       salesPcs: 6, // A:2+1, B:1+2
       salesUah: 90, // A:20+10, B:20+40
     });
@@ -194,6 +201,53 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       title: prod,
       salesPcs: 4,
       salesUah: 16,
+    });
+  });
+
+  it("falls back to prodName when Prod record is missing", async () => {
+    const konk = "pie-konk-4";
+    const prod = "No Prod In Collection";
+    const d0 = new Date("2026-12-19T00:00:00.000Z");
+    const d1 = new Date("2026-12-20T00:00:00.000Z");
+
+    await Sku.create({
+      konkName: konk,
+      prodName: prod,
+      productId: `${konk}-fallback`,
+      title: "Fallback SKU",
+      url: "https://e.com/pie4-x",
+    });
+
+    await SkuSlice.insertMany([
+      {
+        konkName: konk,
+        date: d0,
+        data: {
+          [`${konk}-fallback`]: { stock: 5, price: 2 },
+        },
+      },
+      {
+        konkName: konk,
+        date: d1,
+        data: {
+          [`${konk}-fallback`]: { stock: 3, price: 2 },
+        },
+      },
+    ]);
+
+    const result = await getKonkProdManufacturersPieDataUtil({
+      konk,
+      dateFrom: d1,
+      dateTo: d1,
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.data[prod]).toEqual({
+      title: prod,
+      salesPcs: 2,
+      salesUah: 4,
     });
   });
 });
