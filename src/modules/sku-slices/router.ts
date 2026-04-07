@@ -3,6 +3,7 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
+  getKonkProdManufacturersPieDataController,
   getKonkProdSkuSalesChartDataController,
   getKonkProdSkuStockChartDataController,
   getKonkSkuSalesExcelController,
@@ -38,6 +39,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.USER]),
   asyncHandler(getKonkSkuSalesExcelController)
+);
+router.get(
+  "/konk-prod/manufacturers-pie-data",
+  checkAuth,
+  checkRoles([RoleType.USER]),
+  asyncHandler(getKonkProdManufacturersPieDataController)
 );
 router.get(
   "/konk-prod/stock-chart-data",
