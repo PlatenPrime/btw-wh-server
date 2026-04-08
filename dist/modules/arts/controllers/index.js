@@ -1,4 +1,5 @@
 export { deleteArtsWithoutLatestMarkerController } from "./delete-arts-without-latest-marker/deleteArtsWithoutLatestMarkerController.js";
+export { exportArtsToExcelWithKeysController } from "./export-arts-to-excel-with-keys/exportArtsToExcelWithKeysController.js";
 export { exportArtsToExcelWithStocksController } from "./export-arts-to-excel-with-stocks/exportArtsToExcelWithStocksController.js";
 export { exportArtsToExcelController } from "./export-arts-to-excel/exportArtsToExcelController.js";
 export { getAllArtsController } from "./get-all-arts/getAllArtsController.js";

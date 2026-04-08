@@ -3,6 +3,7 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import {
   deleteArtsWithoutLatestMarkerController,
+  exportArtsToExcelWithKeysController,
   exportArtsToExcelController,
   exportArtsToExcelWithStocksController,
   getAllArtsController,
@@ -93,6 +94,14 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   exportArtsToExcelWithStocksController
+);
+
+// Экспортировать все артикулы в key-based Excel - доступно только для ADMIN
+router.get(
+  "/export-keys",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  exportArtsToExcelWithKeysController
 );
 
 // Удалить все артикулы без последнего актуального маркера - доступно только для PRIME

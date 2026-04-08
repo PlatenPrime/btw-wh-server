@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
-import { deleteArtsWithoutLatestMarkerController, exportArtsToExcelController, exportArtsToExcelWithStocksController, getAllArtsController, getArtController, getArtByIdController, getArtsByZoneController, getBtradeArtInfoController, updateAllBtradeStocksController, updateArtByIdController, updateArtLimitController, updateBtradeStockController, upsertArtsController, } from "./controllers/index.js";
+import { deleteArtsWithoutLatestMarkerController, exportArtsToExcelWithKeysController, exportArtsToExcelController, exportArtsToExcelWithStocksController, getAllArtsController, getArtController, getArtByIdController, getArtsByZoneController, getBtradeArtInfoController, updateAllBtradeStocksController, updateArtByIdController, updateArtLimitController, updateBtradeStockController, upsertArtsController, } from "./controllers/index.js";
 const router = Router();
 // Получить все артикулы - доступно для всех авторизованных пользователей
 router.get("/", checkAuth, checkRoles([RoleType.USER]), getAllArtsController);
@@ -27,6 +27,8 @@ router.post("/btrade-stock/update-all", checkAuth, checkRoles([RoleType.ADMIN]),
 router.get("/export", checkAuth, checkRoles([RoleType.ADMIN]), exportArtsToExcelController);
 // Экспортировать все артикулы в Excel с данными о запасах и витрине - доступно только для ADMIN
 router.get("/export-with-stocks", checkAuth, checkRoles([RoleType.ADMIN]), exportArtsToExcelWithStocksController);
+// Экспортировать все артикулы в key-based Excel - доступно только для ADMIN
+router.get("/export-keys", checkAuth, checkRoles([RoleType.ADMIN]), exportArtsToExcelWithKeysController);
 // Удалить все артикулы без последнего актуального маркера - доступно только для PRIME
 router.delete("/without-latest-marker", checkAuth, checkRoles([RoleType.PRIME]), deleteArtsWithoutLatestMarkerController);
 export default router;
