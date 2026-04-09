@@ -7,7 +7,7 @@ import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
  * в сегодняшних AnalogSlice и SkuSlice.
  */
 export function startCompensatingSlicesCron() {
-    const job = new CronJob("0 0 11,16 * * *", async () => {
+    const job = new CronJob("0 0 11,12,16 * * *", async () => {
         try {
             const sliceDate = toSliceDate(new Date());
             console.log(`[CRON CompensatingSlices] Starting for ${sliceDate.toISOString().slice(0, 10)}...`);

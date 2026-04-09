@@ -2,8 +2,17 @@ import axios, { isAxiosError } from "axios";
 /** Лимит ожидания одного HTTP GET (один URL / одна «страница»). На весь обход N страниц — до N × этого значения в худшем случае. */
 const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
 const BROWSER_HEADERS = {
-    "X-Requested-With": "XMLHttpRequest",
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "uk-UA,uk;q=0.9,ru;q=0.8,en-US;q=0.7,en;q=0.6",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    Connection: "keep-alive",
+    "Cache-Control": "max-age=0",
 };
 let browserAxiosInstance = null;
 const MAX_BROWSER_ERROR_MESSAGE_LENGTH = 240;
@@ -21,7 +30,7 @@ function formatUnknownError(err) {
     return truncateMessage(String(err));
 }
 /**
- * Возвращает axios instance с заголовками «как из браузера» (AJAX).
+ * Возвращает axios instance с навигационными заголовками Chrome (имитация прямого перехода по URL).
  * Переиспользуется всеми утилитами модуля browser при запросах к внешним сайтам.
  */
 export function getBrowserAxios() {

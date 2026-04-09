@@ -9,7 +9,7 @@ import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
  */
 export function startCompensatingSlicesCron(): CronJob {
   const job = new CronJob(
-    "0 0 11,16 * * *",
+    "0 0 11,12,16 * * *",
     async () => {
       try {
         const sliceDate = toSliceDate(new Date());

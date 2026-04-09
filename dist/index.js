@@ -9,6 +9,7 @@ import artsRoute from "./modules/arts/router.js";
 import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
 import blocksRoute from "./modules/blocks/router.js";
+import { getAirStockData } from "./modules/browser/air/utils/getAirStockData.js";
 import browserRoute from "./modules/browser/router.js";
 import btradeSlicesRoute from "./modules/btrade-slices/router.js";
 import constantsRoute from "./modules/constants/router.js";
@@ -85,3 +86,6 @@ async function start() {
     }
 }
 start();
+getAirStockData("https://airballoons.com.ua/product/shary-linkaluny-malinovye-s-hvostikom-pastelnye-6-16sm-2")
+    .then(console.log)
+    .catch(console.log);
