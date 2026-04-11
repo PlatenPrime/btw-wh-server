@@ -10,6 +10,7 @@ export { getKonkSkuSalesExcelController } from "./get-konk-sku-sales-excel/getKo
 export { getKonkProdSkuSalesChartDataController } from "./get-konk-prod-sku-sales-chart-data/getKonkProdSkuSalesChartDataController.js";
 export { getKonkProdSkuStockChartDataController } from "./get-konk-prod-sku-stock-chart-data/getKonkProdSkuStockChartDataController.js";
 export { getKonkProdManufacturersPieDataController } from "./get-konk-prod-manufacturers-pie-data/getKonkProdManufacturersPieDataController.js";
+export { getKonkProdSkugrGroupsSalesController } from "./get-konk-prod-skugr-groups-sales/getKonkProdSkugrGroupsSalesController.js";
 export { getSkugrDailySummaryController } from "./get-skugr-daily-summary/getSkugrDailySummaryController.js";
 export { getSkugrSliceExcelController } from "./get-skugr-slice-excel/getSkugrSliceExcelController.js";
 export { getSkugrSalesExcelController } from "./get-skugr-sales-excel/getSkugrSalesExcelController.js";
