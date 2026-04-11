@@ -3,6 +3,7 @@ import {
   applyDataRowStyle,
   applyHeaderStyle,
 } from "../../../lib/excel/worksheetStyles.js";
+import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import type { ISkuSliceDataItem } from "../models/SkuSlice.js";
 import {
@@ -245,7 +246,7 @@ export async function buildSkuSliceExcelForSkus(
   headerRow.getCell(6).value = "";
 
   dates.forEach((d, index) => {
-    headerRow.getCell(dataStartCol + index).value = formatDateHeader(d);
+    headerRow.getCell(dataStartCol + index).value = formatExcelDateHeaderUk(d);
   });
   headerRow.getCell(diffCol).value = "Різниця";
   headerRow.getCell(diffPctCol).value = "Різниця, %";
@@ -342,7 +343,8 @@ export async function buildSkuSliceExcelForSkus(
   }
 
   for (let c = 1; c <= columnCount; c++) {
-    sheet.getColumn(c).width = 14;
+    sheet.getColumn(c).width =
+      c >= dataStartCol && c < diffCol ? 22 : 14;
   }
 
   const buf = await workbook.xlsx.writeBuffer();

@@ -15,6 +15,7 @@ import {
 import type { GetKonkSkuSalesExcelInput } from "../schemas/getKonkSkuSalesExcelSchema.js";
 import {
   buildSkuSalesExcelForSkus,
+  computeSkuSalesPeriodMetrics,
   type SkuSalesExcelSkuRow,
 } from "../../get-sku-sales-excel/utils/buildSkuSalesExcel.js";
 
@@ -84,15 +85,58 @@ export async function getKonkSkuSalesExcelUtil(
     producerName,
   }));
 
+  const getSliceItem = (
+    kn: string,
+    pid: string,
+    d: Date
+  ): ISkuSliceDataItem | undefined => {
+    if (kn !== input.konk) return undefined;
+    const rec = byDate.get(toSliceDate(d).getTime());
+    return rec?.[pid];
+  };
+
+  let rowsOrdered: SkuSalesExcelSkuRow[] = rows;
+  if (input.sortBy === "sales") {
+    rowsOrdered = [...rows].sort((a, b) => {
+      const ta = computeSkuSalesPeriodMetrics(
+        a,
+        dateFrom,
+        dateTo,
+        getSliceItem
+      ).totalSales;
+      const tb = computeSkuSalesPeriodMetrics(
+        b,
+        dateFrom,
+        dateTo,
+        getSliceItem
+      ).totalSales;
+      if (tb !== ta) return tb - ta;
+      return a.productId.localeCompare(b.productId);
+    });
+  } else if (input.sortBy === "revenue") {
+    rowsOrdered = [...rows].sort((a, b) => {
+      const ta = computeSkuSalesPeriodMetrics(
+        a,
+        dateFrom,
+        dateTo,
+        getSliceItem
+      ).totalRevenue;
+      const tb = computeSkuSalesPeriodMetrics(
+        b,
+        dateFrom,
+        dateTo,
+        getSliceItem
+      ).totalRevenue;
+      if (tb !== ta) return tb - ta;
+      return a.productId.localeCompare(b.productId);
+    });
+  }
+
   const { buffer } = await buildSkuSalesExcelForSkus(
-    rows,
+    rowsOrdered,
     dateFrom,
     dateTo,
-    (kn, pid, d) => {
-      if (kn !== input.konk) return undefined;
-      const rec = byDate.get(toSliceDate(d).getTime());
-      return rec?.[pid];
-    },
+    getSliceItem,
     {
       summaryMode: "bottomOnly",
       summarySalesLabel: "Загальні продажі, шт",

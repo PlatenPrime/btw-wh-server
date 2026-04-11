@@ -4,7 +4,7 @@ import {
   applyHeaderStyle,
 } from "../../../lib/excel/worksheetStyles.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-import { formatDateHeader } from "../../sku-slices/utils/buildSkuSliceExcel.js";
+import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
 
 const HEADER_LABELS = [
   "Ідентифікатор товару",
@@ -48,7 +48,9 @@ export async function buildSkuCatalogExcelBuffer(
     excelRow.getCell(4).value = row.title;
     excelRow.getCell(5).value = row.url;
     excelRow.getCell(6).value =
-      row.createdAt != null ? formatDateHeader(toSliceDate(row.createdAt)) : "";
+      row.createdAt != null
+        ? formatExcelDateHeaderUk(toSliceDate(row.createdAt))
+        : "";
     excelRow.getCell(7).value = row.isInvalid ? "так" : "ні";
     applyDataRowStyle(sheet, r + 2, HEADER_LABELS.length);
   }

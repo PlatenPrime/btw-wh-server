@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import ExcelJS from "exceljs";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
+import { formatExcelDateHeaderUk } from "../../../../../../lib/excel/formatExcelDateHeaderUk.js";
 import { getKonkSkuSalesExcelUtil } from "../getKonkSkuSalesExcelUtil.js";
 describe("getKonkSkuSalesExcelUtil", () => {
     beforeEach(async () => {
@@ -80,5 +82,125 @@ describe("getKonkSkuSalesExcelUtil", () => {
             expect(result.fileName).toContain("air");
             expect(result.fileName).toContain("gemar");
         }
+    });
+    it("sortBy=revenue orders blocks by total revenue desc", async () => {
+        const warm = new Date("2026-04-10T00:00:00.000Z");
+        const d1 = new Date("2026-04-11T00:00:00.000Z");
+        const d2 = new Date("2026-04-12T00:00:00.000Z");
+        await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "aaa-many-sales",
+            title: "A",
+            url: "https://e.com/a",
+        });
+        await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "zzz-high-revenue",
+            title: "Z",
+            url: "https://e.com/z",
+        });
+        await SkuSlice.insertMany([
+            {
+                konkName: "air",
+                date: warm,
+                data: {
+                    "aaa-many-sales": { stock: 100, price: 1 },
+                    "zzz-high-revenue": { stock: 20, price: 50 },
+                },
+            },
+            {
+                konkName: "air",
+                date: d1,
+                data: {
+                    "aaa-many-sales": { stock: 80, price: 1 },
+                    "zzz-high-revenue": { stock: 19, price: 50 },
+                },
+            },
+            {
+                konkName: "air",
+                date: d2,
+                data: {
+                    "aaa-many-sales": { stock: 70, price: 1 },
+                    "zzz-high-revenue": { stock: 18, price: 50 },
+                },
+            },
+        ]);
+        const result = await getKonkSkuSalesExcelUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d2,
+            sortBy: "revenue",
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(result.buffer);
+        const ws = wb.getWorksheet("Продажі");
+        expect(ws?.getRow(1).getCell(7).value).toBe(formatExcelDateHeaderUk(d1));
+        expect(ws?.getRow(2).getCell(1).value).toBe("zzz-high-revenue");
+        expect(ws?.getRow(5).getCell(1).value).toBe("aaa-many-sales");
+    });
+    it("default order follows productId ascending", async () => {
+        const warm = new Date("2026-05-10T00:00:00.000Z");
+        const d1 = new Date("2026-05-11T00:00:00.000Z");
+        const d2 = new Date("2026-05-12T00:00:00.000Z");
+        await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "zzz-high-sales",
+            title: "Z",
+            url: "https://e.com/z",
+        });
+        await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "aaa-low-sales",
+            title: "A",
+            url: "https://e.com/a",
+        });
+        await SkuSlice.insertMany([
+            {
+                konkName: "air",
+                date: warm,
+                data: {
+                    "aaa-low-sales": { stock: 10, price: 5 },
+                    "zzz-high-sales": { stock: 100, price: 2 },
+                },
+            },
+            {
+                konkName: "air",
+                date: d1,
+                data: {
+                    "aaa-low-sales": { stock: 9, price: 5 },
+                    "zzz-high-sales": { stock: 50, price: 2 },
+                },
+            },
+            {
+                konkName: "air",
+                date: d2,
+                data: {
+                    "aaa-low-sales": { stock: 8, price: 5 },
+                    "zzz-high-sales": { stock: 40, price: 2 },
+                },
+            },
+        ]);
+        const result = await getKonkSkuSalesExcelUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d2,
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(result.buffer);
+        const ws = wb.getWorksheet("Продажі");
+        expect(ws?.getRow(2).getCell(1).value).toBe("aaa-low-sales");
+        expect(ws?.getRow(5).getCell(1).value).toBe("zzz-high-sales");
     });
 });

@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { describe, expect, it } from "vitest";
+import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
 import { buildSkuSliceExcelForSkus, formatDateHeader, safeFilePart, SKU_SLICE_EXCEL_STOCK_NEW_SKU_FILL_ARGB, SKU_SLICE_EXCEL_STOCK_SUPPLY_FILL_ARGB, } from "../buildSkuSliceExcel.js";
 const TITLES = { competitorTitle: "Конкурент UA", producerName: "Виробник UA" };
 describe("buildSkuSliceExcelForSkus", () => {
@@ -55,8 +56,8 @@ describe("buildSkuSliceExcelForSkus", () => {
         const ws = wb.getWorksheet("Срез");
         expect(ws).toBeDefined();
         expect(ws.getRow(1).getCell(6).value).toBe("");
-        expect(ws.getRow(1).getCell(7).value).toBe("2026-01-10");
-        expect(ws.getRow(1).getCell(8).value).toBe("2026-01-11");
+        expect(ws.getRow(1).getCell(7).value).toBe(formatExcelDateHeaderUk(from));
+        expect(ws.getRow(1).getCell(8).value).toBe(formatExcelDateHeaderUk(to));
         expect(ws.getRow(1).getCell(9).value).toBe("Різниця");
         expect(ws.getRow(1).getCell(10).value).toBe("Різниця, %");
         expect(ws.getRow(2).getCell(1).value).toBe("air-1");

@@ -3,6 +3,7 @@ import {
   applyDataRowStyle,
   applyHeaderStyle,
 } from "../../../../lib/excel/worksheetStyles.js";
+import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { AnalogBtradeCompareItem } from "../get-analog-btrade-comparison-excel/utils/getAnalogBtradeComparisonRangeUtil.js";
 import {
   computeRevenueForDay,
@@ -51,8 +52,9 @@ export function setupSalesComparisonHeaderRow(
   headerRow.getCell(6).value = "";
 
   items.forEach((item, index) => {
-    const dateStr = item.date.toISOString().split("T")[0] ?? "";
-    headerRow.getCell(index + dataStartCol).value = dateStr;
+    headerRow.getCell(index + dataStartCol).value = formatExcelDateHeaderUk(
+      item.date,
+    );
   });
 
   headerRow.getCell(totalCol).value = "Всього";

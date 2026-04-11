@@ -1,4 +1,5 @@
 import { applyDataRowStyle, applyHeaderStyle, } from "../../../../lib/excel/worksheetStyles.js";
+import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
 import { computeRevenueForDay, computeSalesFromStockSequence, } from "./salesComparisonUtils.js";
 const DELIVERY_DAY_RED = "FFFF0000";
 /**
@@ -15,8 +16,7 @@ export function setupSalesComparisonHeaderRow(params) {
     headerRow.getCell(5).value = "ABC";
     headerRow.getCell(6).value = "";
     items.forEach((item, index) => {
-        const dateStr = item.date.toISOString().split("T")[0] ?? "";
-        headerRow.getCell(index + dataStartCol).value = dateStr;
+        headerRow.getCell(index + dataStartCol).value = formatExcelDateHeaderUk(item.date);
     });
     headerRow.getCell(totalCol).value = "Всього";
     headerRow.getCell(diffSalesCol).value = "Δ Продажі Btrade vs конкурент, шт";

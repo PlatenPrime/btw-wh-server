@@ -5,7 +5,7 @@ import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import { aggregateSkuSlices, sliceDataProjectForProductIdList, } from "../../../utils/sliceDataAggregationStages.js";
 import { formatDateHeader, safeFilePart, } from "../../../utils/buildSkuSliceExcel.js";
-import { buildSkuSalesExcelForSkus, } from "../../get-sku-sales-excel/utils/buildSkuSalesExcel.js";
+import { buildSkuSalesExcelForSkus, computeSkuSalesPeriodMetrics, } from "../../get-sku-sales-excel/utils/buildSkuSalesExcel.js";
 export async function getKonkSkuSalesExcelUtil(input) {
     const skus = await Sku.find({
         konkName: input.konk,
@@ -58,12 +58,32 @@ export async function getKonkSkuSalesExcelUtil(input) {
         competitorTitle,
         producerName,
     }));
-    const { buffer } = await buildSkuSalesExcelForSkus(rows, dateFrom, dateTo, (kn, pid, d) => {
+    const getSliceItem = (kn, pid, d) => {
         if (kn !== input.konk)
             return undefined;
         const rec = byDate.get(toSliceDate(d).getTime());
         return rec?.[pid];
-    }, {
+    };
+    let rowsOrdered = rows;
+    if (input.sortBy === "sales") {
+        rowsOrdered = [...rows].sort((a, b) => {
+            const ta = computeSkuSalesPeriodMetrics(a, dateFrom, dateTo, getSliceItem).totalSales;
+            const tb = computeSkuSalesPeriodMetrics(b, dateFrom, dateTo, getSliceItem).totalSales;
+            if (tb !== ta)
+                return tb - ta;
+            return a.productId.localeCompare(b.productId);
+        });
+    }
+    else if (input.sortBy === "revenue") {
+        rowsOrdered = [...rows].sort((a, b) => {
+            const ta = computeSkuSalesPeriodMetrics(a, dateFrom, dateTo, getSliceItem).totalRevenue;
+            const tb = computeSkuSalesPeriodMetrics(b, dateFrom, dateTo, getSliceItem).totalRevenue;
+            if (tb !== ta)
+                return tb - ta;
+            return a.productId.localeCompare(b.productId);
+        });
+    }
+    const { buffer } = await buildSkuSalesExcelForSkus(rowsOrdered, dateFrom, dateTo, getSliceItem, {
         summaryMode: "bottomOnly",
         summarySalesLabel: "Загальні продажі, шт",
         summaryRevenueLabel: "Загальна виручка, грн",

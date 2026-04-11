@@ -3,6 +3,7 @@ import {
   applyDataRowStyle,
   applyHeaderStyle,
 } from "../../../../../lib/excel/worksheetStyles.js";
+import { formatExcelDateHeaderUk } from "../../../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
 import {
   computeRevenueForDay,
@@ -39,11 +40,47 @@ export type SkuSalesExcelOptions = {
   summaryRevenueLabel?: string;
 };
 
-function formatDateHeader(d: Date): string {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(d.getUTCDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+export type SkuSalesPeriodMetrics = {
+  salesByDay: number[];
+  revenueByDay: number[];
+  prices: (number | null)[];
+  totalSales: number;
+  totalRevenue: number;
+};
+
+/**
+ * Продажі/виручка по днях і підсумки за період — та сама логіка, що в Excel-рядку SKU.
+ */
+export function computeSkuSalesPeriodMetrics(
+  sku: SkuSalesExcelSkuRow,
+  dateFrom: Date,
+  dateTo: Date,
+  getItem: (
+    konkName: string,
+    productId: string,
+    sliceDate: Date
+  ) => ISkuSliceDataItem | null | undefined
+): SkuSalesPeriodMetrics {
+  const datesReport = enumerateSliceDates(dateFrom, dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
+  const datesFull =
+    warmStart.getTime() < dateFrom.getTime()
+      ? [warmStart, ...datesReport]
+      : datesReport;
+  const reportOffset = datesFull.length - datesReport.length;
+  const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) =>
+    getItem(sku.konkName, sku.productId, d),
+  );
+  const forReport = coalesced.slice(reportOffset);
+  const stocks = forReport.map((c) => c.stock);
+  const prices = forReport.map((c) => c.price);
+  const salesByDay = computeSalesFromStockSequence(stocks).map((x) => x.sales);
+  const revenueByDay = salesByDay.map((sales, i) =>
+    computeRevenueForDay(sales, prices[i] ?? null)
+  );
+  const totalSales = salesByDay.reduce((acc, val) => acc + val, 0);
+  const totalRevenue = revenueByDay.reduce((acc, val) => acc + val, 0);
+  return { salesByDay, revenueByDay, prices, totalSales, totalRevenue };
 }
 
 function enumerateSliceDates(from: Date, to: Date): Date[] {
@@ -103,12 +140,6 @@ export async function buildSkuSalesExcelForSkus(
   options: SkuSalesExcelOptions = {}
 ): Promise<{ buffer: Buffer }> {
   const datesReport = enumerateSliceDates(dateFrom, dateTo);
-  const warmStart = sliceDateMinusDays(dateFrom, 1);
-  const datesFull =
-    warmStart.getTime() < dateFrom.getTime()
-      ? [warmStart, ...datesReport]
-      : datesReport;
-  const reportOffset = datesFull.length - datesReport.length;
   const dates = datesReport;
   const dateCount = dates.length;
   const dataStartCol = 7;
@@ -124,7 +155,7 @@ export async function buildSkuSalesExcelForSkus(
   }
   headerRow.getCell(6).value = "";
   dates.forEach((d, index) => {
-    headerRow.getCell(dataStartCol + index).value = formatDateHeader(d);
+    headerRow.getCell(dataStartCol + index).value = formatExcelDateHeaderUk(d);
   });
   headerRow.getCell(totalCol).value = "Всього";
   applyHeaderStyle(sheet, columnCount);
@@ -140,19 +171,8 @@ export async function buildSkuSalesExcelForSkus(
   let startRow = 2;
 
   for (const sku of skus) {
-    const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) =>
-      getItem(sku.konkName, sku.productId, d),
-    );
-    const forReport = coalesced.slice(reportOffset);
-    const stocks = forReport.map((c) => c.stock);
-    const prices = forReport.map((c) => c.price);
-
-    const salesByDay = computeSalesFromStockSequence(stocks).map((x) => x.sales);
-    const revenueByDay = salesByDay.map((sales, i) =>
-      computeRevenueForDay(sales, prices[i] ?? null)
-    );
-    const totalSales = salesByDay.reduce((acc, val) => acc + val, 0);
-    const totalRevenue = revenueByDay.reduce((acc, val) => acc + val, 0);
+    const { salesByDay, revenueByDay, prices, totalSales, totalRevenue } =
+      computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem);
     grandTotalSales += totalSales;
     grandTotalRevenue += totalRevenue;
 
@@ -210,7 +230,7 @@ export async function buildSkuSalesExcelForSkus(
   }
 
   for (let c = 1; c <= columnCount; c++) {
-    sheet.getColumn(c).width = 14;
+    sheet.getColumn(c).width = c >= dataStartCol && c < totalCol ? 22 : 14;
   }
 
   const buf = await workbook.xlsx.writeBuffer();

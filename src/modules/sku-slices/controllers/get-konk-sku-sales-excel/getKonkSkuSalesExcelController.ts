@@ -4,7 +4,7 @@ import { getKonkSkuSalesExcelUtil } from "./utils/getKonkSkuSalesExcelUtil.js";
 
 /**
  * @desc    Excel продаж по всем SKU конкурента за период
- * @route   GET /api/sku-slices/konk/sales-excel?konk=&prod=&dateFrom=&dateTo=
+ * @route   GET /api/sku-slices/konk/sales-excel?konk=&prod=&dateFrom=&dateTo=&sortBy=
  */
 export const getKonkSkuSalesExcelController = async (
   req: Request,
@@ -15,6 +15,7 @@ export const getKonkSkuSalesExcelController = async (
     prod: req.query.prod,
     dateFrom: req.query.dateFrom,
     dateTo: req.query.dateTo,
+    sortBy: req.query.sortBy,
   });
   if (!parseResult.success) {
     res.status(400).json({

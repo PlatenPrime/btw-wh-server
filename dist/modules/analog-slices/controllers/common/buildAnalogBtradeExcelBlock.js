@@ -1,4 +1,5 @@
 import { applyDataRowStyle, applyHeaderStyle, } from "../../../../lib/excel/worksheetStyles.js";
+import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
 export function setupAnalogBtradeHeaderRow(worksheet, items, dataStartCol, diffCol, diffPctCol, summaryDiffCol, summaryDiffPctCol, columnCount) {
     const headerRow = worksheet.getRow(1);
     headerRow.getCell(1).value = "Артикул";
@@ -8,8 +9,7 @@ export function setupAnalogBtradeHeaderRow(worksheet, items, dataStartCol, diffC
     headerRow.getCell(5).value = "ABC";
     headerRow.getCell(6).value = "";
     items.forEach((item, index) => {
-        const dateStr = item.date.toISOString().split("T")[0] ?? "";
-        headerRow.getCell(index + dataStartCol).value = dateStr;
+        headerRow.getCell(index + dataStartCol).value = formatExcelDateHeaderUk(item.date);
     });
     headerRow.getCell(diffCol).value = "Різниця";
     headerRow.getCell(diffPctCol).value = "Різниця, %";

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import ExcelJS from "exceljs";
+import { formatExcelDateHeaderUk } from "../../../../../../lib/excel/formatExcelDateHeaderUk.js";
 import { buildAnalogBtradeComparisonExcel, } from "../buildAnalogBtradeComparisonExcel.js";
 async function readSheetToMatrix(buffer) {
     const workbook = new ExcelJS.Workbook();
@@ -57,8 +58,8 @@ describe("buildAnalogBtradeComparisonExcel", () => {
         expect(headerRow[3]).toBe("Виробник");
         expect(headerRow[4]).toBe("ABC");
         expect(headerRow[5]).toBe("");
-        expect(headerRow[6]).toBe("2026-03-01");
-        expect(headerRow[7]).toBe("2026-03-02");
+        expect(headerRow[6]).toBe(formatExcelDateHeaderUk(new Date("2026-03-01T00:00:00.000Z")));
+        expect(headerRow[7]).toBe(formatExcelDateHeaderUk(new Date("2026-03-02T00:00:00.000Z")));
         expect(headerRow[8]).toBe("Різниця");
         expect(headerRow[9]).toBe("Різниця, %");
         const analogStockRow = rows[1];
