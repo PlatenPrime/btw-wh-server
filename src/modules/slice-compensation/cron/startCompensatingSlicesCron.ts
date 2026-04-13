@@ -9,38 +9,38 @@ import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
  */
 export function startCompensatingSlicesCron(): CronJob {
   const job = new CronJob(
-    "0 0 11,12,16 * * *",
+    "0 0 11,16 * * *",
     async () => {
       try {
         const sliceDate = toSliceDate(new Date());
         console.log(
-          `[CRON CompensatingSlices] Starting for ${sliceDate.toISOString().slice(0, 10)}...`
+          `[CRON CompensatingSlices] Starting for ${sliceDate.toISOString().slice(0, 10)}...`,
         );
         const [analog, sku] = await Promise.all([
           runCompensatingAnalogSlices(sliceDate),
           runCompensatingSkuSlices(sliceDate),
         ]);
         console.log(
-          `[CRON CompensatingSlices] Analog: refetched=${analog.refetched} updated=${analog.updated}`
+          `[CRON CompensatingSlices] Analog: refetched=${analog.refetched} updated=${analog.updated}`,
         );
         console.log(
-          `[CRON CompensatingSlices] Sku: refetched=${sku.refetched} updated=${sku.updated}`
+          `[CRON CompensatingSlices] Sku: refetched=${sku.refetched} updated=${sku.updated}`,
         );
         console.log(`[CRON CompensatingSlices] Done`);
       } catch (error) {
         console.error(
           `[CRON CompensatingSlices] Error:`,
-          error instanceof Error ? error.message : "Unknown error"
+          error instanceof Error ? error.message : "Unknown error",
         );
       }
     },
     null,
     true,
-    "Europe/Kiev"
+    "Europe/Kiev",
   );
 
   console.log(
-    `[CRON CompensatingSlices] Started: 11:00 and 16:00 daily (Kiev time)`
+    `[CRON CompensatingSlices] Started: 11:00 and 16:00 daily (Kiev time)`,
   );
   return job;
 }

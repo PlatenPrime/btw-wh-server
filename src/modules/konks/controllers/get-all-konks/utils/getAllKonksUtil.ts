@@ -1,6 +1,6 @@
-import { Konk, IKonk } from "../../../models/Konk.js";
+import { IKonk, Konk } from "../../../models/Konk.js";
 
 export const getAllKonksUtil = async (): Promise<IKonk[]> => {
-  const list = await Konk.find().sort({ createdAt: -1 }).lean();
+  const list = await Konk.find().sort({ title: 1 }).lean();
   return list as IKonk[];
 };

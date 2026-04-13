@@ -1,7 +1,7 @@
 import { getKonkInvalidExcelParamsSchema } from "./schemas/getKonkInvalidExcelSchema.js";
 import { getKonkInvalidExcelUtil } from "./utils/getKonkInvalidExcelUtil.js";
 /**
- * @desc    Excel: SKU конкурента з isInvalid=true
+ * @desc    Excel: SKU з isInvalid=true (конкурент або `all` — усі конкуренти)
  * @route   GET /api/skus/konk/:konkName/invalid-excel
  */
 export const getKonkInvalidExcelController = async (req, res) => {

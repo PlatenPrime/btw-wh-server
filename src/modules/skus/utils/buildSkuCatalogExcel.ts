@@ -9,6 +9,7 @@ import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeade
 const HEADER_LABELS = [
   "Ідентифікатор товару",
   "Конкурент (ключ)",
+  "Конкурент (назва)",
   "Виробник (ключ)",
   "Назва",
   "Посилання",
@@ -19,6 +20,8 @@ const HEADER_LABELS = [
 export type SkuCatalogExcelRow = {
   productId: string;
   konkName: string;
+  /** `Konk.title` для `Konk.name === konkName` */
+  konkTitle: string;
   prodName: string;
   title: string;
   url: string;
@@ -44,14 +47,15 @@ export async function buildSkuCatalogExcelBuffer(
     const excelRow = sheet.getRow(r + 2);
     excelRow.getCell(1).value = row.productId;
     excelRow.getCell(2).value = row.konkName;
-    excelRow.getCell(3).value = row.prodName;
-    excelRow.getCell(4).value = row.title;
-    excelRow.getCell(5).value = row.url;
-    excelRow.getCell(6).value =
+    excelRow.getCell(3).value = row.konkTitle;
+    excelRow.getCell(4).value = row.prodName;
+    excelRow.getCell(5).value = row.title;
+    excelRow.getCell(6).value = row.url;
+    excelRow.getCell(7).value =
       row.createdAt != null
         ? formatExcelDateHeaderUk(toSliceDate(row.createdAt))
         : "";
-    excelRow.getCell(7).value = row.isInvalid ? "так" : "ні";
+    excelRow.getCell(8).value = row.isInvalid ? "так" : "ні";
     applyDataRowStyle(sheet, r + 2, HEADER_LABELS.length);
   }
 

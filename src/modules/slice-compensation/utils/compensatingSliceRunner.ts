@@ -54,6 +54,7 @@ export async function runCompensatingSliceRefetchLoop(
   let refetched = 0;
   let updated = 0;
   for (let i = 0; i < queue.length; i++) {
+    console.log(`[CompensatingSliceRefetchLoop] Processing item ${i + 1} of ${queue.length}`);
     const stats = await processItem(queue[i]!);
     refetched += stats.refetched;
     updated += stats.updated;

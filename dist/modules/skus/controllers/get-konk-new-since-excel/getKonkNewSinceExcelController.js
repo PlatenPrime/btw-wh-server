@@ -1,7 +1,7 @@
 import { getKonkNewSinceExcelParamsSchema, getKonkNewSinceExcelQuerySchema, } from "./schemas/getKonkNewSinceExcelSchema.js";
 import { getKonkNewSinceExcelUtil } from "./utils/getKonkNewSinceExcelUtil.js";
 /**
- * @desc    Excel: SKU конкурента, створені не раніше дати since (createdFrom)
+ * @desc    Excel: SKU, створені не раніше since (конкурент або `all` — усі)
  * @route   GET /api/skus/konk/:konkName/new-since-excel?since=YYYY-MM-DD
  */
 export const getKonkNewSinceExcelController = async (req, res) => {

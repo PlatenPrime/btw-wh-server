@@ -30,7 +30,7 @@ describe("getAllKonksUtil", () => {
     expect(result[0]).toHaveProperty("updatedAt");
   });
 
-  it("returns multiple konks sorted by createdAt desc", async () => {
+  it("returns multiple konks sorted by title", async () => {
     await Konk.create({
       name: "first",
       title: "First",
@@ -43,9 +43,16 @@ describe("getAllKonksUtil", () => {
       url: "https://s.com",
       imageUrl: "https://s.com/1.png",
     });
+    await Konk.create({
+      name: "third",
+      title: "Third",
+      url: "https://t.com",
+      imageUrl: "https://t.com/1.png",
+    });
     const result = await getAllKonksUtil();
-    expect(result).toHaveLength(2);
-    expect(result[0].name).toBe("second");
-    expect(result[1].name).toBe("first");
+    expect(result).toHaveLength(3);
+    expect(result[0].title).toBe("First");
+    expect(result[1].title).toBe("Second");
+    expect(result[2].title).toBe("Third");
   });
 });
