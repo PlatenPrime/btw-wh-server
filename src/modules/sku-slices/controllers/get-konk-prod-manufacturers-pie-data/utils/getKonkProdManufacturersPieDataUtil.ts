@@ -17,6 +17,8 @@ import {
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
 import type { GetKonkProdManufacturersPieDataInput } from "../schemas/getKonkProdManufacturersPieDataSchema.js";
 
+const ALL_MANUFACTURERS_TITLE = "Всі виробники";
+
 type ManufacturerPieItem = {
   title: string;
   salesPcs: number;
@@ -24,7 +26,11 @@ type ManufacturerPieItem = {
 };
 
 export type GetKonkProdManufacturersPieDataResult =
-  | { ok: true; data: Record<string, ManufacturerPieItem> }
+  | {
+      ok: true;
+      data: Record<string, ManufacturerPieItem>;
+      all: ManufacturerPieItem;
+    }
   | { ok: false };
 
 type SkuLean = {
@@ -149,5 +155,17 @@ export async function getKonkProdManufacturersPieDataUtil(
 
   if (Object.keys(result).length === 0) return { ok: false };
 
-  return { ok: true, data: result };
+  let totalPcs = 0;
+  let totalUah = 0;
+  for (const item of Object.values(result)) {
+    totalPcs += item.salesPcs;
+    totalUah += item.salesUah;
+  }
+  const all: ManufacturerPieItem = {
+    title: ALL_MANUFACTURERS_TITLE,
+    salesPcs: totalPcs,
+    salesUah: Math.round(totalUah * 100) / 100,
+  };
+
+  return { ok: true, data: result, all };
 }

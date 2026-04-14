@@ -91,6 +91,11 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       salesPcs: 6, // A:2+1, B:1+2
       salesUah: 90, // A:20+10, B:20+40
     });
+    expect(result.all).toEqual({
+      title: "Всі виробники",
+      salesPcs: 6,
+      salesUah: 90,
+    });
   });
 
   it("returns map grouped by different manufacturers", async () => {
@@ -146,6 +151,11 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     expect(Object.keys(result.data).sort()).toEqual(["Maker A", "Maker B"]);
     expect(result.data["Maker A"]).toMatchObject({ salesPcs: 2, salesUah: 10 });
     expect(result.data["Maker B"]).toMatchObject({ salesPcs: 1, salesUah: 4 });
+    expect(result.all).toEqual({
+      title: "Всі виробники",
+      salesPcs: 3,
+      salesUah: 14,
+    });
   });
 
   it("normalizes -1 and missing values via carry before sales calculation", async () => {
@@ -202,6 +212,11 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       salesPcs: 4,
       salesUah: 16,
     });
+    expect(result.all).toEqual({
+      title: "Всі виробники",
+      salesPcs: 4,
+      salesUah: 16,
+    });
   });
 
   it("falls back to prodName when Prod record is missing", async () => {
@@ -246,6 +261,11 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
 
     expect(result.data[prod]).toEqual({
       title: prod,
+      salesPcs: 2,
+      salesUah: 4,
+    });
+    expect(result.all).toEqual({
+      title: "Всі виробники",
       salesPcs: 2,
       salesUah: 4,
     });

@@ -5,6 +5,7 @@ import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import { aggregateSkuSlices, sliceDataProjectForProductIdList, } from "../../../utils/sliceDataAggregationStages.js";
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
+const ALL_MANUFACTURERS_TITLE = "Всі виробники";
 export async function getKonkProdManufacturersPieDataUtil(input) {
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
@@ -97,5 +98,16 @@ export async function getKonkProdManufacturersPieDataUtil(input) {
     }
     if (Object.keys(result).length === 0)
         return { ok: false };
-    return { ok: true, data: result };
+    let totalPcs = 0;
+    let totalUah = 0;
+    for (const item of Object.values(result)) {
+        totalPcs += item.salesPcs;
+        totalUah += item.salesUah;
+    }
+    const all = {
+        title: ALL_MANUFACTURERS_TITLE,
+        salesPcs: totalPcs,
+        salesUah: Math.round(totalUah * 100) / 100,
+    };
+    return { ok: true, data: result, all };
 }

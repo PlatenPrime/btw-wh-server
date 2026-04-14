@@ -8,7 +8,7 @@ function firstQuery(q: Request["query"], key: string): string | undefined {
 }
 
 /**
- * @desc    Данные для pie диаграммы конкурента: продажи в шт/грн по производителям
+ * @desc    Данные для pie диаграммы конкурента: продажи в шт/грн по производителям в `data`; итог «Всі виробники» в поле `all`
  * @route   GET /api/sku-slices/konk-prod/manufacturers-pie-data?konk=&dateFrom=&dateTo=
  */
 export const getKonkProdManufacturersPieDataController = async (
@@ -41,5 +41,6 @@ export const getKonkProdManufacturersPieDataController = async (
   res.status(200).json({
     message: "Konk manufacturers pie data retrieved successfully",
     data: result.data,
+    all: result.all,
   });
 };
