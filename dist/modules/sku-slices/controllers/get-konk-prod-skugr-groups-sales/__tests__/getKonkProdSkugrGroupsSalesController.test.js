@@ -57,6 +57,11 @@ describe("getKonkProdSkugrGroupsSalesController", () => {
                     salesUah: 12.5,
                 },
             ],
+            all: {
+                title: "Всі групи",
+                salesPcs: 3,
+                salesUah: 12.5,
+            },
         });
         const req = {
             query: {
@@ -76,5 +81,10 @@ describe("getKonkProdSkugrGroupsSalesController", () => {
                 salesUah: 12.5,
             },
         ]);
+        expect(responseJson.all).toEqual({
+            title: "Всі групи",
+            salesPcs: 3,
+            salesUah: 12.5,
+        });
     });
 });

@@ -46,6 +46,11 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
       salesPcs: 0,
       salesUah: 0,
     });
+    expect(result.all).toEqual({
+      title: "Всі групи",
+      salesPcs: 0,
+      salesUah: 0,
+    });
   });
 
   it("aggregates two skugrs sorted by title with independent sales", async () => {
@@ -136,5 +141,122 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
       salesPcs: 5,
       salesUah: 25,
     });
+    expect(result.all).toEqual({
+      title: "Всі групи",
+      salesPcs: 10,
+      salesUah: 35,
+    });
+  });
+
+  it("calculates all from full konk/prod sku base without skugr duplication", async () => {
+    const konk = "ggs-konk-overlap";
+    const prod = "ggs-prod-overlap";
+    const d0 = new Date("2026-10-01T00:00:00.000Z");
+    const d1 = new Date("2026-10-02T00:00:00.000Z");
+    const d2 = new Date("2026-10-03T00:00:00.000Z");
+
+    const skuShared = await Sku.create({
+      konkName: konk,
+      prodName: prod,
+      productId: `${konk}-shared`,
+      title: "Shared",
+      url: "https://e.com/shared",
+    });
+    const skuA = await Sku.create({
+      konkName: konk,
+      prodName: prod,
+      productId: `${konk}-a`,
+      title: "A",
+      url: "https://e.com/a",
+    });
+    const skuOnlyInAll = await Sku.create({
+      konkName: konk,
+      prodName: prod,
+      productId: `${konk}-all-only`,
+      title: "All only",
+      url: "https://e.com/all-only",
+    });
+    await Sku.create({
+      konkName: konk,
+      prodName: prod,
+      productId: ` ${konk}-all-only `,
+      title: "All only duplicate",
+      url: "https://e.com/all-only-dup",
+    });
+
+    await Skugr.create({
+      konkName: konk,
+      prodName: prod,
+      title: "Group A",
+      url: "https://e.com/group-a",
+      isSliced: true,
+      skus: [skuShared._id, skuA._id],
+    });
+    await Skugr.create({
+      konkName: konk,
+      prodName: prod,
+      title: "Group B",
+      url: "https://e.com/group-b",
+      isSliced: true,
+      skus: [skuShared._id],
+    });
+
+    await SkuSlice.insertMany([
+      {
+        konkName: konk,
+        date: d0,
+        data: {
+          [`${konk}-shared`]: { stock: 20, price: 3 },
+          [`${konk}-a`]: { stock: 10, price: 2 },
+          [`${konk}-all-only`]: { stock: 8, price: 4 },
+        },
+      },
+      {
+        konkName: konk,
+        date: d1,
+        data: {
+          [`${konk}-shared`]: { stock: 15, price: 3 },
+          [`${konk}-a`]: { stock: 8, price: 2 },
+          [`${konk}-all-only`]: { stock: 6, price: 4 },
+        },
+      },
+      {
+        konkName: konk,
+        date: d2,
+        data: {
+          [`${konk}-shared`]: { stock: 10, price: 3 },
+          [`${konk}-a`]: { stock: 7, price: 2 },
+          [`${konk}-all-only`]: { stock: 5, price: 4 },
+        },
+      },
+    ]);
+
+    const result = await getKonkProdSkugrGroupsSalesUtil({
+      konk,
+      prod,
+      dateFrom: d1,
+      dateTo: d2,
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    const groupA = result.data.find((row) => row.title === "Group A");
+    const groupB = result.data.find((row) => row.title === "Group B");
+    expect(groupA).toMatchObject({ salesPcs: 13, salesUah: 36 });
+    expect(groupB).toMatchObject({ salesPcs: 10, salesUah: 30 });
+
+    // all = unique sku base for konk/prod: shared + a + all-only (without duplication from groups/sku docs)
+    expect(result.all).toEqual({
+      title: "Всі групи",
+      salesPcs: 16,
+      salesUah: 48,
+    });
+
+    const groupsSumPcs = result.data.reduce((acc, row) => acc + row.salesPcs, 0);
+    expect(groupsSumPcs).toBe(23);
+    expect(result.all.salesPcs).not.toBe(groupsSumPcs);
+
+    expect(skuOnlyInAll.productId).toBe(`${konk}-all-only`);
   });
 });

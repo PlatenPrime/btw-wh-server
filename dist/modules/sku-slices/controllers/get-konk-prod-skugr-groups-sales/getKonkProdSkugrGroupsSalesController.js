@@ -33,5 +33,6 @@ export const getKonkProdSkugrGroupsSalesController = async (req, res) => {
     res.status(200).json({
         message: "Konk/prod skugr groups sales retrieved successfully",
         data: result.data,
+        all: result.all,
     });
 };

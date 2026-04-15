@@ -1,7 +1,9 @@
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { Sku } from "../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "../../../utils/aggregateDailySkuSliceMetricsForSkus.js";
 import { loadSkugrWithOrderedSkus } from "../../../utils/skugrReporting.js";
+const ALL_SKUGR_GROUPS_TITLE = "Всі групи";
 export async function getKonkProdSkugrGroupsSalesUtil(input) {
     const skugrs = await Skugr.find({
         konkName: input.konk,
@@ -56,5 +58,34 @@ export async function getKonkProdSkugrGroupsSalesUtil(input) {
             salesUah,
         });
     }
-    return { ok: true, data };
+    const producerSkus = await Sku.find({
+        konkName: input.konk,
+        prodName: input.prod,
+    })
+        .select("konkName productId")
+        .lean();
+    const allSkuRows = [...new Map(producerSkus
+            .map((sku) => ({
+            konkName: sku.konkName,
+            productId: (sku.productId ?? "").trim(),
+        }))
+            .filter((sku) => sku.productId !== "")
+            .map((sku) => [sku.productId, sku])).values()];
+    let totalSalesPcs = 0;
+    let totalSalesUah = 0;
+    if (allSkuRows.length > 0) {
+        const allMetrics = await aggregateDailySkuSliceMetricsForSkus(allSkuRows, dateFrom, dateTo);
+        if (allMetrics.ok) {
+            for (const day of allMetrics.data) {
+                totalSalesPcs += day.sales;
+                totalSalesUah += day.revenue;
+            }
+        }
+    }
+    const all = {
+        title: ALL_SKUGR_GROUPS_TITLE,
+        salesPcs: totalSalesPcs,
+        salesUah: Math.round(totalSalesUah * 100) / 100,
+    };
+    return { ok: true, data, all };
 }
