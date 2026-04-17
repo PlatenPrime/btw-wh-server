@@ -95,11 +95,11 @@ Excel-файл со списком SKU с `isInvalid: true`: либо тольк
 
 ### DELETE `/api/skus/konk/:konkName/invalid`
 
-Удаление **всех** SKU данного конкурента с `isInvalid: true`.
+Удаление **всех** SKU с `isInvalid: true`: либо только для конкурента с ключом `konkName`, либо для **всех** конкурентов, если в пути передано зарезервированное **`all`** (в БД не должен существовать конкурент с `name: "all"`).
 
 **Доступ:** checkAuth + checkRoles(PRIME).
 
-**Параметры пути:** `konkName`.
+**Параметры пути:** `konkName` или `all`.
 
 **Ответ 200:** `{ message: string, deletedCount: number }`.
 

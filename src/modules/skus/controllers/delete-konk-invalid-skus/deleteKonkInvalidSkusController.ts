@@ -3,7 +3,7 @@ import { deleteKonkInvalidSkusParamsSchema } from "./schemas/deleteKonkInvalidSk
 import { deleteKonkInvalidSkusUtil } from "./utils/deleteKonkInvalidSkusUtil.js";
 
 /**
- * @desc    Видалити всі SKU конкурента з isInvalid=true
+ * @desc    Видалити всі SKU з isInvalid=true для конкурента :konkName або для всіх конкурентів, якщо :konkName === "all"
  * @route   DELETE /api/skus/konk/:konkName/invalid
  * @access  PRIME
  */
