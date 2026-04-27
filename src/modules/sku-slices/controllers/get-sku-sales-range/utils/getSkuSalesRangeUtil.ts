@@ -9,12 +9,14 @@ import {
   sliceDateMinusDays,
 } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import {
+  applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
 import type { GetSkuSalesRangeInput } from "../schemas/getSkuSalesRangeSchema.js";
+import { Konk } from "../../../../konks/models/Konk.js";
 
 export type SkuSalesRangeItem = {
   date: string;
@@ -37,6 +39,10 @@ export async function getSkuSalesRangeUtil(
 
   const productKey = sku.productId?.trim();
   if (!productKey) return { ok: false };
+  const konkDoc = await Konk.findOne({ name: sku.konkName })
+    .select("recountDays")
+    .lean();
+  const recountDays = new Set((konkDoc?.recountDays ?? []).map(String));
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
@@ -80,13 +86,14 @@ export async function getSkuSalesRangeUtil(
 
   const data: SkuSalesRangeItem[] = datesReport.map((d, i) => {
     const dayResult = salesResults[i]!;
+    const sales = applyRecountDayToSales(dayResult.sales, d, recountDays);
     const priceVal = coalescedReport[i]!.price;
     const price =
       typeof priceVal === "number" && Number.isFinite(priceVal) ? priceVal : 0;
-    const revenue = computeRevenueForDay(dayResult.sales, priceVal ?? null);
+    const revenue = computeRevenueForDay(sales, priceVal ?? null);
     return {
       date: d.toISOString(),
-      sales: dayResult.sales,
+      sales,
       revenue,
       price,
       isDeliveryDay: dayResult.isDeliveryDay,

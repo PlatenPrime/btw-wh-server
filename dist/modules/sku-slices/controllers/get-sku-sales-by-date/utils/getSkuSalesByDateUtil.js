@@ -1,9 +1,10 @@
 import { Sku } from "../../../../skus/models/Sku.js";
 import { aggregateSkuSlices, sliceDataProjectForSingleProductId, } from "../../../utils/sliceDataAggregationStages.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
-import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
+import { Konk } from "../../../../konks/models/Konk.js";
 export async function getSkuSalesByDateUtil(input) {
     const sku = await Sku.findById(input.skuId).select("konkName productId").lean();
     if (!sku)
@@ -11,6 +12,10 @@ export async function getSkuSalesByDateUtil(input) {
     const productKey = sku.productId?.trim();
     if (!productKey)
         return null;
+    const konkDoc = await Konk.findOne({ name: sku.konkName })
+        .select("recountDays")
+        .lean();
+    const recountDays = new Set((konkDoc?.recountDays ?? []).map(String));
     const sliceDate = toSliceDate(input.date);
     const prevDate = sliceDateMinusDays(sliceDate, 1);
     const warmStart = sliceDateMinusDays(sliceDate, 31);
@@ -54,13 +59,14 @@ export async function getSkuSalesByDateUtil(input) {
     const stockByDay = [prevStock, currStock];
     const salesResults = computeSalesFromStockSequence(stockByDay);
     const dayResult = salesResults[1];
+    const sales = applyRecountDayToSales(dayResult.sales, sliceDate, recountDays);
     const coalescedPrice = coalesced[idxCurr].price;
-    const revenue = computeRevenueForDay(dayResult.sales, coalescedPrice);
+    const revenue = computeRevenueForDay(sales, coalescedPrice);
     const price = typeof coalescedPrice === "number" && Number.isFinite(coalescedPrice)
         ? coalescedPrice
         : 0;
     return {
-        sales: dayResult.sales,
+        sales,
         revenue,
         price,
         isDeliveryDay: dayResult.isDeliveryDay,

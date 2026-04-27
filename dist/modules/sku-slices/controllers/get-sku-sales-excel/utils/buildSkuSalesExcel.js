@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { applyDataRowStyle, applyHeaderStyle, } from "../../../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../../../lib/excel/formatExcelDateHeaderUk.js";
-import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, toUtcDateKey, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 const HEADER_LABELS = [
     "Ідентифікатор товару",
@@ -12,10 +12,11 @@ const HEADER_LABELS = [
 ];
 const METRIC_LABELS = ["Продажі", "Ціна", "Виручка"];
 const ROWS_PER_SKU_BLOCK = 3;
+const RECOUNT_DAY_PURPLE_FILL_ARGB = "FF800080";
 /**
  * Продажі/виручка по днях і підсумки за період — та сама логіка, що в Excel-рядку SKU.
  */
-export function computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem) {
+export function computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem, recountDays = new Set()) {
     const datesReport = enumerateSliceDates(dateFrom, dateTo);
     const warmStart = sliceDateMinusDays(dateFrom, 1);
     const datesFull = warmStart.getTime() < dateFrom.getTime()
@@ -26,11 +27,19 @@ export function computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem) {
     const forReport = coalesced.slice(reportOffset);
     const stocks = forReport.map((c) => c.stock);
     const prices = forReport.map((c) => c.price);
-    const salesByDay = computeSalesFromStockSequence(stocks).map((x) => x.sales);
+    const isRecountDayByDay = datesReport.map((date) => recountDays.has(toUtcDateKey(date)));
+    const salesByDay = computeSalesFromStockSequence(stocks).map((x, index) => applyRecountDayToSales(x.sales, datesReport[index], recountDays));
     const revenueByDay = salesByDay.map((sales, i) => computeRevenueForDay(sales, prices[i] ?? null));
     const totalSales = salesByDay.reduce((acc, val) => acc + val, 0);
     const totalRevenue = revenueByDay.reduce((acc, val) => acc + val, 0);
-    return { salesByDay, revenueByDay, prices, totalSales, totalRevenue };
+    return {
+        salesByDay,
+        revenueByDay,
+        prices,
+        isRecountDayByDay,
+        totalSales,
+        totalRevenue,
+    };
 }
 function enumerateSliceDates(from, to) {
     const out = [];
@@ -85,11 +94,12 @@ export async function buildSkuSalesExcelForSkus(skus, dateFrom, dateTo, getItem,
     const summaryMode = options.summaryMode ?? "bottomOnly";
     const summarySalesLabel = options.summarySalesLabel ?? "Продажі конкурента (всього), шт";
     const summaryRevenueLabel = options.summaryRevenueLabel ?? "Виручка конкурента (всього), грн";
+    const recountDays = new Set((options.recountDays ?? []).map(String));
     let grandTotalSales = 0;
     let grandTotalRevenue = 0;
     let startRow = 2;
     for (const sku of skus) {
-        const { salesByDay, revenueByDay, prices, totalSales, totalRevenue } = computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem);
+        const { salesByDay, revenueByDay, prices, isRecountDayByDay, totalSales, totalRevenue, } = computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem, recountDays);
         grandTotalSales += totalSales;
         grandTotalRevenue += totalRevenue;
         const salesRow = sheet.getRow(startRow);
@@ -105,7 +115,15 @@ export async function buildSkuSalesExcelForSkus(skus, dateFrom, dateTo, getItem,
         revenueRow.getCell(6).value = METRIC_LABELS[2];
         for (let i = 0; i < dateCount; i++) {
             const col = dataStartCol + i;
-            salesRow.getCell(col).value = salesByDay[i] ?? null;
+            const salesCell = salesRow.getCell(col);
+            salesCell.value = salesByDay[i] ?? null;
+            if (isRecountDayByDay[i]) {
+                salesCell.fill = {
+                    type: "pattern",
+                    pattern: "solid",
+                    fgColor: { argb: RECOUNT_DAY_PURPLE_FILL_ARGB },
+                };
+            }
             priceRow.getCell(col).value = prices[i] ?? null;
             revenueRow.getCell(col).value = revenueByDay[i] ?? null;
         }

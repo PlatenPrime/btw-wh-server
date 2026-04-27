@@ -33,7 +33,7 @@ export async function getAnalogBtradeComparisonRangeUtil(input) {
         .lean();
     const producerName = (prodDoc?.title ?? "").trim() || null;
     const konkDoc = await Konk.findOne({ name: analog.konkName })
-        .select("title")
+        .select("title recountDays")
         .lean();
     const competitorTitle = (konkDoc?.title ?? "").trim() || null;
     // Загружаем документы срезов конкурента за диапазон
@@ -90,5 +90,6 @@ export async function getAnalogBtradeComparisonRangeUtil(input) {
         artAbc,
         producerName,
         competitorTitle,
+        recountDays: (konkDoc?.recountDays ?? []).map(String),
     };
 }

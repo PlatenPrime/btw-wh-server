@@ -11,6 +11,7 @@ export interface BuildSalesComparisonExcelOptions {
   dateTo: Date;
   konk: string;
   prod: string;
+  recountDays?: string[];
 }
 
 export async function buildSalesComparisonExcel(
@@ -19,6 +20,7 @@ export async function buildSalesComparisonExcel(
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Порівняння");
+  const recountDays = new Set((options.recountDays ?? []).map(String));
 
   const firstItems = analogs[0]?.items ?? [];
   const dataStartCol = 7;
@@ -65,6 +67,7 @@ export async function buildSalesComparisonExcel(
         artAbc: analog.artAbc,
         producerName: analog.producerName,
         competitorTitle: analog.competitorTitle,
+        recountDays,
       });
       sumAnalogSales += totals.totalAnalogSales;
       sumAnalogRevenue += totals.totalAnalogRevenue;

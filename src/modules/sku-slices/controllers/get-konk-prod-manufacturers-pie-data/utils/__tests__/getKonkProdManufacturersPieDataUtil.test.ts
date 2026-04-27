@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { Konk } from "../../../../../konks/models/Konk.js";
 import { Prod } from "../../../../../prods/models/Prod.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
@@ -6,6 +7,7 @@ import { getKonkProdManufacturersPieDataUtil } from "../getKonkProdManufacturers
 
 describe("getKonkProdManufacturersPieDataUtil", () => {
   beforeEach(async () => {
+    await Konk.deleteMany({});
     await Prod.deleteMany({});
     await Sku.deleteMany({});
     await SkuSlice.deleteMany({});
@@ -268,6 +270,51 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       title: "Всі виробники",
       salesPcs: 2,
       salesUah: 4,
+    });
+  });
+
+  it("applies recount days to manufacturer totals", async () => {
+    const konk = "pie-konk-rec";
+    const prod = "Rec Maker";
+    await Konk.create({
+      name: konk,
+      title: "Rec Konk",
+      url: "https://e.com/k",
+      imageUrl: "https://e.com/k.png",
+      recountDays: ["2026-12-22"],
+    });
+    const d0 = new Date("2026-12-21T00:00:00.000Z");
+    const d1 = new Date("2026-12-22T00:00:00.000Z");
+    const d2 = new Date("2026-12-23T00:00:00.000Z");
+    await Sku.create({
+      konkName: konk,
+      prodName: prod,
+      productId: `${konk}-x`,
+      title: "X",
+      url: "https://e.com/x",
+    });
+    await SkuSlice.insertMany([
+      { konkName: konk, date: d0, data: { [`${konk}-x`]: { stock: 10, price: 5 } } },
+      { konkName: konk, date: d1, data: { [`${konk}-x`]: { stock: 8, price: 5 } } },
+      { konkName: konk, date: d2, data: { [`${konk}-x`]: { stock: 6, price: 5 } } },
+    ]);
+
+    const result = await getKonkProdManufacturersPieDataUtil({
+      konk,
+      dateFrom: d1,
+      dateTo: d2,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data[prod]).toEqual({
+      title: prod,
+      salesPcs: 2,
+      salesUah: 10,
+    });
+    expect(result.all).toEqual({
+      title: "Всі виробники",
+      salesPcs: 2,
+      salesUah: 10,
     });
   });
 });

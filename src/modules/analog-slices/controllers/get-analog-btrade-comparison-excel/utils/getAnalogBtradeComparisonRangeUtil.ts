@@ -26,6 +26,7 @@ export type GetAnalogBtradeComparisonRangeResult =
       artAbc: string | null;
       producerName: string | null;
       competitorTitle: string | null;
+      recountDays: string[];
     }
   | { ok: false };
 
@@ -63,7 +64,7 @@ export async function getAnalogBtradeComparisonRangeUtil(
   const producerName = (prodDoc?.title ?? "").trim() || null;
 
   const konkDoc = await Konk.findOne({ name: analog.konkName })
-    .select("title")
+    .select("title recountDays")
     .lean();
   const competitorTitle = (konkDoc?.title ?? "").trim() || null;
 
@@ -127,6 +128,7 @@ export async function getAnalogBtradeComparisonRangeUtil(
     artAbc,
     producerName,
     competitorTitle,
+    recountDays: (konkDoc?.recountDays ?? []).map(String),
   };
 }
 

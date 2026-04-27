@@ -52,4 +52,20 @@ describe("updateKonkByIdController", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data.title).toBe("New Title");
     });
+    it("200 clears recountDays via patch", async () => {
+        const konk = await Konk.create({
+            name: "x2",
+            title: "Old",
+            url: "https://x.com",
+            imageUrl: "https://x.com/1.png",
+            recountDays: ["2026-04-01"],
+        });
+        const req = {
+            params: { id: konk._id.toString() },
+            body: { recountDays: [] },
+        };
+        await updateKonkByIdController(req, res);
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.data.recountDays).toEqual([]);
+    });
 });

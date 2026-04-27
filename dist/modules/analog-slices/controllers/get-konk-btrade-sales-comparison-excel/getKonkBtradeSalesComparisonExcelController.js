@@ -40,6 +40,7 @@ export const getKonkBtradeSalesComparisonExcelController = async (req, res) => {
         prod: rangeResult.prod,
         dateFrom: rangeResult.dateFrom,
         dateTo: rangeResult.dateTo,
+        recountDays: rangeResult.recountDays,
     });
     res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);

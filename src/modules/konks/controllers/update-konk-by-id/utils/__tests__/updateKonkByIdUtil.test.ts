@@ -45,4 +45,19 @@ describe("updateKonkByIdUtil", () => {
     expect(result?.name).toBe("x");
     expect(result?.title).toBe("X");
   });
+
+  it("updates recountDays when provided", async () => {
+    const konk = await Konk.create({
+      name: "rec",
+      title: "Rec",
+      url: "https://x.com",
+      imageUrl: "https://x.com/1.png",
+      recountDays: ["2026-04-01"],
+    });
+    const result = await updateKonkByIdUtil({
+      id: konk._id.toString(),
+      recountDays: ["2026-04-05"],
+    });
+    expect(result?.recountDays).toEqual(["2026-04-05"]);
+  });
 });

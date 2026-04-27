@@ -6,8 +6,10 @@ import {
 import { formatExcelDateHeaderUk } from "../../../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
 import {
+  applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
+  toUtcDateKey,
 } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
 import {
   coalesceSkuSliceItemsAlongDates,
@@ -24,6 +26,7 @@ const HEADER_LABELS = [
 
 const METRIC_LABELS = ["Продажі", "Ціна", "Виручка"] as const;
 const ROWS_PER_SKU_BLOCK = 3;
+const RECOUNT_DAY_PURPLE_FILL_ARGB = "FF800080";
 
 export type SkuSalesExcelSkuRow = {
   title: string;
@@ -38,12 +41,14 @@ export type SkuSalesExcelOptions = {
   summaryMode?: "perSku" | "bottomOnly";
   summarySalesLabel?: string;
   summaryRevenueLabel?: string;
+  recountDays?: string[];
 };
 
 export type SkuSalesPeriodMetrics = {
   salesByDay: number[];
   revenueByDay: number[];
   prices: (number | null)[];
+  isRecountDayByDay: boolean[];
   totalSales: number;
   totalRevenue: number;
 };
@@ -59,7 +64,8 @@ export function computeSkuSalesPeriodMetrics(
     konkName: string,
     productId: string,
     sliceDate: Date
-  ) => ISkuSliceDataItem | null | undefined
+  ) => ISkuSliceDataItem | null | undefined,
+  recountDays: ReadonlySet<string> = new Set(),
 ): SkuSalesPeriodMetrics {
   const datesReport = enumerateSliceDates(dateFrom, dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
@@ -74,13 +80,25 @@ export function computeSkuSalesPeriodMetrics(
   const forReport = coalesced.slice(reportOffset);
   const stocks = forReport.map((c) => c.stock);
   const prices = forReport.map((c) => c.price);
-  const salesByDay = computeSalesFromStockSequence(stocks).map((x) => x.sales);
+  const isRecountDayByDay = datesReport.map((date) =>
+    recountDays.has(toUtcDateKey(date)),
+  );
+  const salesByDay = computeSalesFromStockSequence(stocks).map((x, index) =>
+    applyRecountDayToSales(x.sales, datesReport[index]!, recountDays),
+  );
   const revenueByDay = salesByDay.map((sales, i) =>
     computeRevenueForDay(sales, prices[i] ?? null)
   );
   const totalSales = salesByDay.reduce((acc, val) => acc + val, 0);
   const totalRevenue = revenueByDay.reduce((acc, val) => acc + val, 0);
-  return { salesByDay, revenueByDay, prices, totalSales, totalRevenue };
+  return {
+    salesByDay,
+    revenueByDay,
+    prices,
+    isRecountDayByDay,
+    totalSales,
+    totalRevenue,
+  };
 }
 
 function enumerateSliceDates(from: Date, to: Date): Date[] {
@@ -165,14 +183,27 @@ export async function buildSkuSalesExcelForSkus(
     options.summarySalesLabel ?? "Продажі конкурента (всього), шт";
   const summaryRevenueLabel =
     options.summaryRevenueLabel ?? "Виручка конкурента (всього), грн";
+  const recountDays = new Set((options.recountDays ?? []).map(String));
 
   let grandTotalSales = 0;
   let grandTotalRevenue = 0;
   let startRow = 2;
 
   for (const sku of skus) {
-    const { salesByDay, revenueByDay, prices, totalSales, totalRevenue } =
-      computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem);
+    const {
+      salesByDay,
+      revenueByDay,
+      prices,
+      isRecountDayByDay,
+      totalSales,
+      totalRevenue,
+    } = computeSkuSalesPeriodMetrics(
+      sku,
+      dateFrom,
+      dateTo,
+      getItem,
+      recountDays,
+    );
     grandTotalSales += totalSales;
     grandTotalRevenue += totalRevenue;
 
@@ -192,7 +223,15 @@ export async function buildSkuSalesExcelForSkus(
 
     for (let i = 0; i < dateCount; i++) {
       const col = dataStartCol + i;
-      salesRow.getCell(col).value = salesByDay[i] ?? null;
+      const salesCell = salesRow.getCell(col);
+      salesCell.value = salesByDay[i] ?? null;
+      if (isRecountDayByDay[i]) {
+        salesCell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: RECOUNT_DAY_PURPLE_FILL_ARGB },
+        };
+      }
       priceRow.getCell(col).value = prices[i] ?? null;
       revenueRow.getCell(col).value = revenueByDay[i] ?? null;
     }

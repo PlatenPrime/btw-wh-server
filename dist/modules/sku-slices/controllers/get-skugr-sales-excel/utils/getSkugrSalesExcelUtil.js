@@ -28,7 +28,7 @@ export async function getSkugrSalesExcelUtil(input) {
     ]);
     const maps = buildSliceMapsByKonk(slices);
     const [konkDoc, prodDoc] = await Promise.all([
-        Konk.findOne({ name: skugr.konkName }).select("title").lean(),
+        Konk.findOne({ name: skugr.konkName }).select("title recountDays").lean(),
         Prod.findOne({ name: skugr.prodName }).select("title").lean(),
     ]);
     const competitorTitle = (konkDoc?.title ?? "").trim();
@@ -45,6 +45,7 @@ export async function getSkugrSalesExcelUtil(input) {
         summaryMode: "bottomOnly",
         summarySalesLabel: "Загальні продажі, шт",
         summaryRevenueLabel: "Загальна виручка, грн",
+        recountDays: (konkDoc?.recountDays ?? []).map(String),
     });
     const idPart = safeFilePart(skugr._id.toString());
     const fileName = `sku_sales_skugr_${idPart}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;

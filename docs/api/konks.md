@@ -58,6 +58,7 @@
 - `title`: string (обязательно)
 - `url`: string (обязательно)
 - `imageUrl`: string (обязательно)
+- `recountDays`: string[] (опционально, даты в формате `YYYY-MM-DD`, UTC)
 
 **Ответ 201:** `{ message: string, data: Konk }`.
 
@@ -71,7 +72,7 @@
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос:** path-параметр `id` — MongoDB ObjectId. Body: `{ name?: string, title?: string, url?: string, imageUrl?: string }` (name — одним словом при передаче).
+**Запрос:** path-параметр `id` — MongoDB ObjectId. Body: `{ name?: string, title?: string, url?: string, imageUrl?: string, recountDays?: string[] }` (name — одним словом при передаче; для очистки дней переучета передать `recountDays: []`).
 
 **Ответ 200:** `{ message: string, data: Konk }`.
 
@@ -100,5 +101,6 @@
 - `title`: string
 - `url`: string
 - `imageUrl`: string
+- `recountDays`: string[] (`YYYY-MM-DD`, UTC)
 - `createdAt`: Date (ISO строка в JSON)
 - `updatedAt`: Date (ISO строка в JSON)

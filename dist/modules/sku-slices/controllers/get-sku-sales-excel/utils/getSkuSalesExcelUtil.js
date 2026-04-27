@@ -31,7 +31,7 @@ export async function getSkuSalesExcelUtil(input) {
         byDate.set(toSliceDate(sl.date).getTime(), (sl.data ?? {}));
     }
     const [konkDoc, prodDoc] = await Promise.all([
-        Konk.findOne({ name: sku.konkName }).select("title").lean(),
+        Konk.findOne({ name: sku.konkName }).select("title recountDays").lean(),
         Prod.findOne({ name: sku.prodName }).select("title").lean(),
     ]);
     const row = {
@@ -47,7 +47,10 @@ export async function getSkuSalesExcelUtil(input) {
             return undefined;
         const rec = byDate.get(toSliceDate(d).getTime());
         return rec?.[pid];
-    }, { summaryMode: "perSku" });
+    }, {
+        summaryMode: "perSku",
+        recountDays: (konkDoc?.recountDays ?? []).map(String),
+    });
     const fileName = `sku_sales_${safeFilePart(productKey)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;
     return { ok: true, buffer, fileName };
 }

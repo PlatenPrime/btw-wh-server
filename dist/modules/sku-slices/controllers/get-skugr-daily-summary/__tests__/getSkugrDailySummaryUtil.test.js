@@ -1,13 +1,55 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { Konk } from "../../../../konks/models/Konk.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
 import { getSkugrDailySummaryUtil } from "../utils/getSkugrDailySummaryUtil.js";
 describe("getSkugrDailySummaryUtil", () => {
     beforeEach(async () => {
+        await Konk.deleteMany({});
         await Sku.deleteMany({});
         await Skugr.deleteMany({});
         await SkuSlice.deleteMany({});
+    });
+    it("zeros sales on recount day in skugr summary", async () => {
+        await Konk.create({
+            name: "agg-k-rec",
+            title: "K rec",
+            url: "https://e.com/k",
+            imageUrl: "https://e.com/k.png",
+            recountDays: ["2026-06-02"],
+        });
+        const sku = await Sku.create({
+            konkName: "agg-k-rec",
+            prodName: "p1",
+            productId: "agg-k-rec-a",
+            title: "A",
+            url: "https://e.com/a",
+        });
+        const skugr = await Skugr.create({
+            konkName: "agg-k-rec",
+            prodName: "p1",
+            title: "G rec",
+            url: "https://e.com/g",
+            isSliced: true,
+            skus: [sku._id],
+        });
+        const d1 = new Date("2026-06-01T00:00:00.000Z");
+        const d2 = new Date("2026-06-02T00:00:00.000Z");
+        await SkuSlice.insertMany([
+            { konkName: "agg-k-rec", date: d1, data: { "agg-k-rec-a": { stock: 10, price: 2 } } },
+            { konkName: "agg-k-rec", date: d2, data: { "agg-k-rec-a": { stock: 8, price: 2 } } },
+        ]);
+        const result = await getSkugrDailySummaryUtil({
+            skugrId: skugr._id.toString(),
+            dateFrom: d1,
+            dateTo: d2,
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        expect(result.data[1].sales).toBe(0);
+        expect(result.data[1].revenue).toBe(0);
     });
     it("aggregates stock, sales and revenue across skus by calendar day", async () => {
         const s1 = await Sku.create({

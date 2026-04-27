@@ -11,6 +11,7 @@ export const createKonkSchema = z.object({
   title: z.string().min(1, "Title is required"),
   url: z.string().min(1, "Url is required"),
   imageUrl: z.string().min(1, "ImageUrl is required"),
+  recountDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).default([]),
 });
 
 export type CreateKonkInput = z.infer<typeof createKonkSchema>;

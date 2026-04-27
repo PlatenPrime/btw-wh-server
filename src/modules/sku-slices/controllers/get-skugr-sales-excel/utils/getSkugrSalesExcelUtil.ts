@@ -53,7 +53,7 @@ export async function getSkugrSalesExcelUtil(
   const maps = buildSliceMapsByKonk(slices);
 
   const [konkDoc, prodDoc] = await Promise.all([
-    Konk.findOne({ name: skugr.konkName }).select("title").lean(),
+    Konk.findOne({ name: skugr.konkName }).select("title recountDays").lean(),
     Prod.findOne({ name: skugr.prodName }).select("title").lean(),
   ]);
 
@@ -77,6 +77,7 @@ export async function getSkugrSalesExcelUtil(
       summaryMode: "bottomOnly",
       summarySalesLabel: "Загальні продажі, шт",
       summaryRevenueLabel: "Загальна виручка, грн",
+      recountDays: (konkDoc?.recountDays ?? []).map(String),
     },
   );
 

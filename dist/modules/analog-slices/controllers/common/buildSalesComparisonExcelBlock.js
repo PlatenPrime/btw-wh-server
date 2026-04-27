@@ -1,7 +1,8 @@
 import { applyDataRowStyle, applyHeaderStyle, } from "../../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
-import { computeRevenueForDay, computeSalesFromStockSequence, } from "./salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, toUtcDateKey, } from "./salesComparisonUtils.js";
 const DELIVERY_DAY_RED = "FFFF0000";
+const RECOUNT_DAY_PURPLE_FILL = "FF800080";
 /**
  * Первая строка листа: колонки 1–4 (Артикул, Назва, Конкурент, Виробник), колонка 5 пустая,
  * далее даты, колонка «Всього», затем 4 колонки дельт.
@@ -46,7 +47,7 @@ export function setupSalesComparisonHeaderRow(params) {
  * колонка «Всього», 4 колонки дельт. Возвращает агрегаты для итога.
  */
 export function buildSalesComparisonExcelBlock(options) {
-    const { worksheet, startRow, dataStartCol, totalCol, diffSalesCol, diffSalesPctCol, diffRevenueCol, diffRevenuePctCol, columnCount, items, artikul, artNameUkr, artAbc, producerName, competitorTitle, } = options;
+    const { worksheet, startRow, dataStartCol, totalCol, diffSalesCol, diffSalesPctCol, diffRevenueCol, diffRevenuePctCol, columnCount, items, artikul, artNameUkr, artAbc, producerName, competitorTitle, recountDays = new Set(), } = options;
     const analogStockByDay = items.map((i) => i.analogStock);
     const btradeStockByDay = items.map((i) => i.btradeStock);
     const analogSalesResults = computeSalesFromStockSequence(analogStockByDay);
@@ -91,7 +92,8 @@ export function buildSalesComparisonExcelBlock(options) {
     abcCell.alignment = { horizontal: "center", vertical: "middle", wrapText: true };
     items.forEach((item, index) => {
         const col = index + dataStartCol;
-        const analogSales = analogSalesResults[index].sales;
+        const isRecountDay = recountDays.has(toUtcDateKey(item.date));
+        const analogSales = applyRecountDayToSales(analogSalesResults[index].sales, item.date, recountDays);
         const analogIsDelivery = analogSalesResults[index].isDeliveryDay;
         const btradeSales = btradeSalesResults[index].sales;
         const btradeIsDelivery = btradeSalesResults[index].isDeliveryDay;
@@ -104,7 +106,14 @@ export function buildSalesComparisonExcelBlock(options) {
         // Row 0: Продажі аналога
         const cellAnalogSales = rows[0].getCell(col);
         cellAnalogSales.value = analogSales;
-        if (analogIsDelivery && analogSales === 0) {
+        if (isRecountDay) {
+            cellAnalogSales.fill = {
+                type: "pattern",
+                pattern: "solid",
+                fgColor: { argb: RECOUNT_DAY_PURPLE_FILL },
+            };
+        }
+        else if (analogIsDelivery && analogSales === 0) {
             cellAnalogSales.font = {
                 ...(cellAnalogSales.font ?? {}),
                 color: { argb: DELIVERY_DAY_RED },

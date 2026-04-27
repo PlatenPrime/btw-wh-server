@@ -56,6 +56,7 @@ export type GetKonkBtradeComparisonRangeResult =
       dateTo: Date;
       konk: string;
       prod: string;
+      recountDays: string[];
     }
   | { ok: false };
 
@@ -106,7 +107,7 @@ export async function getKonkBtradeComparisonRangeUtil(
   const [artDocs, prodDocs, konkDoc] = await Promise.all([
     Art.find({ artikul: { $in: artikulList } }).select("artikul nameukr abc").lean(),
     Prod.find({ name: { $in: prodNameList } }).select("name title").lean(),
-    Konk.findOne({ name: input.konk }).select("title").lean(),
+    Konk.findOne({ name: input.konk }).select("title recountDays").lean(),
   ]);
 
   const artNameByArtikul = new Map<string, string | null>();
@@ -262,6 +263,7 @@ export async function getKonkBtradeComparisonRangeUtil(
     dateTo,
     konk: input.konk,
     prod: input.prod,
+    recountDays: (konkDoc?.recountDays ?? []).map(String),
   };
 }
 

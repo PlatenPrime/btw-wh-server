@@ -1,9 +1,10 @@
 import { Sku } from "../../../../skus/models/Sku.js";
 import { aggregateSkuSlices, sliceDataProjectForSingleProductId, } from "../../../utils/sliceDataAggregationStages.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
-import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
+import { Konk } from "../../../../konks/models/Konk.js";
 export async function getSkuSalesRangeUtil(input) {
     const sku = await Sku.findById(input.skuId).select("konkName productId").lean();
     if (!sku)
@@ -11,6 +12,10 @@ export async function getSkuSalesRangeUtil(input) {
     const productKey = sku.productId?.trim();
     if (!productKey)
         return { ok: false };
+    const konkDoc = await Konk.findOne({ name: sku.konkName })
+        .select("recountDays")
+        .lean();
+    const recountDays = new Set((konkDoc?.recountDays ?? []).map(String));
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
     const warmStart = sliceDateMinusDays(dateFrom, 1);
@@ -42,12 +47,13 @@ export async function getSkuSalesRangeUtil(input) {
     const salesResults = computeSalesFromStockSequence(stockByDay);
     const data = datesReport.map((d, i) => {
         const dayResult = salesResults[i];
+        const sales = applyRecountDayToSales(dayResult.sales, d, recountDays);
         const priceVal = coalescedReport[i].price;
         const price = typeof priceVal === "number" && Number.isFinite(priceVal) ? priceVal : 0;
-        const revenue = computeRevenueForDay(dayResult.sales, priceVal ?? null);
+        const revenue = computeRevenueForDay(sales, priceVal ?? null);
         return {
             date: d.toISOString(),
-            sales: dayResult.sales,
+            sales,
             revenue,
             price,
             isDeliveryDay: dayResult.isDeliveryDay,

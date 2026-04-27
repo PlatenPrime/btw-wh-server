@@ -12,6 +12,7 @@ export interface BuildAnalogSalesComparisonExcelOptions {
   artAbc?: string | null;
   producerName?: string | null;
   competitorTitle?: string | null;
+  recountDays?: string[];
   dateFrom: Date;
   dateTo: Date;
 }
@@ -64,6 +65,7 @@ export async function buildAnalogSalesComparisonExcel(
       artAbc: options.artAbc,
       producerName: options.producerName,
       competitorTitle: options.competitorTitle,
+      recountDays: new Set((options.recountDays ?? []).map(String)),
     });
 
     const summaryStartRow = 9;

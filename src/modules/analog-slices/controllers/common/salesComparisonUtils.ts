@@ -8,6 +8,21 @@ export interface DaySalesResult {
   isDeliveryDay: boolean;
 }
 
+export function toUtcDateKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
+export function applyRecountDayToSales(
+  sales: number,
+  date: Date,
+  recountDays: ReadonlySet<string>,
+): number {
+  if (recountDays.has(toUtcDateKey(date))) {
+    return 0;
+  }
+  return sales;
+}
+
 /**
  * По последовательности остатков по дням возвращает для каждого дня:
  * - sales: объём продаж (разница с предыдущим днём); если нет предыдущего или остаток вырос — 0.

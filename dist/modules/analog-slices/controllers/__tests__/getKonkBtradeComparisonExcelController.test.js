@@ -72,6 +72,7 @@ describe("getKonkBtradeComparisonExcelController", () => {
             prod: "gemar",
             dateFrom: new Date("2026-03-01T00:00:00.000Z"),
             dateTo: new Date("2026-03-31T00:00:00.000Z"),
+            recountDays: [],
             analogs: [
                 {
                     analogId: "analog-1",

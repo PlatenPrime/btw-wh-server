@@ -5,6 +5,7 @@ type CreateKonkUtilInput = {
   title: string;
   url: string;
   imageUrl: string;
+  recountDays: string[];
 };
 
 export const createKonkUtil = async (
@@ -15,6 +16,7 @@ export const createKonkUtil = async (
     title: input.title,
     url: input.url,
     imageUrl: input.imageUrl,
+    recountDays: input.recountDays,
   });
   return konk;
 };

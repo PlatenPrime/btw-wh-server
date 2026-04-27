@@ -1,8 +1,10 @@
 import { getKonkBtradeComparisonRangeUtil } from "../../get-konk-btrade-comparison-excel/utils/getKonkBtradeComparisonRangeUtil.js";
 import {
+  applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../common/salesComparisonUtils.js";
+import { Konk } from "../../../../konks/models/Konk.js";
 import type { GetKonkBtradeSalesComparisonInput } from "../schemas/getKonkBtradeSalesComparisonSchema.js";
 
 export interface DaySalesComparison {
@@ -43,6 +45,8 @@ export async function getKonkBtradeSalesComparisonUtil(
 
   const { analogs } = rangeResult;
   const dayCount = analogs[0]?.items.length ?? 0;
+  const konkDoc = await Konk.findOne({ name: input.konk }).select("recountDays").lean();
+  const recountDays = new Set((konkDoc?.recountDays ?? []).map(String));
 
   if (dayCount === 0) {
     return { ok: false };
@@ -61,9 +65,17 @@ export async function getKonkBtradeSalesComparisonUtil(
     const btradeSalesResults = computeSalesFromStockSequence(btradeStockByDay);
 
     for (let d = 0; d < dayCount; d++) {
-      const analogSales = analogSalesResults[d]!.sales;
+      const dayDate = analog.items[d]!.date;
+      const analogSales = applyRecountDayToSales(
+        analogSalesResults[d]!.sales,
+        dayDate,
+        recountDays,
+      );
       const btradeSales = btradeSalesResults[d]!.sales;
-      const analogRevenue = computeRevenueForDay(analogSales, analog.items[d]!.analogPrice);
+      const analogRevenue = computeRevenueForDay(
+        analogSales,
+        analog.items[d]!.analogPrice,
+      );
       const btradeRevenue = computeRevenueForDay(btradeSales, analog.items[d]!.btradePrice);
 
       dayCompetitorSales[d] += analogSales;

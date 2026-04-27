@@ -1,9 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { Analog } from "../../../../../analogs/models/Analog.js";
 import { AnalogSlice } from "../../../../models/AnalogSlice.js";
 import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
+import { Konk } from "../../../../../konks/models/Konk.js";
 import { getKonkBtradeSalesComparisonUtil } from "../getKonkBtradeSalesComparisonUtil.js";
 describe("getKonkBtradeSalesComparisonUtil", () => {
+    beforeEach(async () => {
+        await Analog.deleteMany({});
+        await AnalogSlice.deleteMany({});
+        await BtradeSlice.deleteMany({});
+        await Konk.deleteMany({});
+    });
     it("returns ok: false when no analogs for konk/prod", async () => {
         const result = await getKonkBtradeSalesComparisonUtil({
             konk: "air",
@@ -193,5 +200,43 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
         expect(result.data.summary.totalCompetitorRevenue).toBe(0);
         expect(result.data.summary.diffRevenuePct).toBeNull();
         expect(result.data.summary.diffSalesPct).toBeNull();
+    });
+    it("zeros competitor sales on recount days but keeps btrade sales", async () => {
+        const artikul = "1102-0999";
+        await Konk.create({
+            name: "air",
+            title: "Air",
+            url: "https://air.example.com",
+            imageUrl: "https://air.example.com/logo.png",
+            recountDays: ["2026-03-02"],
+        });
+        await Analog.create({
+            konkName: "air",
+            prodName: "gemar",
+            artikul,
+            url: "https://example.com/a-rec",
+        });
+        const d1 = new Date("2026-03-01T00:00:00.000Z");
+        const d2 = new Date("2026-03-02T00:00:00.000Z");
+        await AnalogSlice.insertMany([
+            { konkName: "air", date: d1, data: { [artikul]: { stock: 10, price: 10 } } },
+            { konkName: "air", date: d2, data: { [artikul]: { stock: 5, price: 10 } } },
+        ]);
+        await BtradeSlice.insertMany([
+            { date: d1, data: { [artikul]: { quantity: 10, price: 10 } } },
+            { date: d2, data: { [artikul]: { quantity: 7, price: 10 } } },
+        ]);
+        const result = await getKonkBtradeSalesComparisonUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d2,
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        expect(result.data.days[1].competitorSales).toBe(0);
+        expect(result.data.days[1].competitorRevenue).toBe(0);
+        expect(result.data.days[1].btradeSales).toBe(3);
     });
 });

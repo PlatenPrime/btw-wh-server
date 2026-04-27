@@ -70,9 +70,11 @@ export async function getKonkSkuSalesExcelUtil(
   }
 
   const [konkDoc, prodDoc] = await Promise.all([
-    Konk.findOne({ name: input.konk }).select("title").lean(),
+    Konk.findOne({ name: input.konk }).select("title recountDays").lean(),
     Prod.findOne({ name: input.prod }).select("title").lean(),
   ]);
+  const recountDays = (konkDoc?.recountDays ?? []).map(String);
+  const recountDaysSet = new Set(recountDays);
 
   const competitorTitle = (konkDoc?.title ?? "").trim();
   const producerName = (prodDoc?.title ?? "").trim();
@@ -102,13 +104,15 @@ export async function getKonkSkuSalesExcelUtil(
         a,
         dateFrom,
         dateTo,
-        getSliceItem
+        getSliceItem,
+        recountDaysSet,
       ).totalSales;
       const tb = computeSkuSalesPeriodMetrics(
         b,
         dateFrom,
         dateTo,
-        getSliceItem
+        getSliceItem,
+        recountDaysSet,
       ).totalSales;
       if (tb !== ta) return tb - ta;
       return a.productId.localeCompare(b.productId);
@@ -119,13 +123,15 @@ export async function getKonkSkuSalesExcelUtil(
         a,
         dateFrom,
         dateTo,
-        getSliceItem
+        getSliceItem,
+        recountDaysSet,
       ).totalRevenue;
       const tb = computeSkuSalesPeriodMetrics(
         b,
         dateFrom,
         dateTo,
-        getSliceItem
+        getSliceItem,
+        recountDaysSet,
       ).totalRevenue;
       if (tb !== ta) return tb - ta;
       return a.productId.localeCompare(b.productId);
@@ -141,6 +147,7 @@ export async function getKonkSkuSalesExcelUtil(
       summaryMode: "bottomOnly",
       summarySalesLabel: "Загальні продажі, шт",
       summaryRevenueLabel: "Загальна виручка, грн",
+      recountDays,
     }
   );
 

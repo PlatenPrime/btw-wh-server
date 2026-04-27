@@ -57,11 +57,15 @@ describe("createKonkController", () => {
         title: "Acme Corp",
         url: "https://example.com",
         imageUrl: "https://example.com/acme.png",
+        recountDays: ["2026-04-01"],
       },
     } as unknown as Request;
     await createKonkController(req, res);
     expect(responseStatus.code).toBe(201);
     expect((responseJson.data as { name: string }).name).toBe("acme");
+    expect((responseJson.data as { recountDays: string[] }).recountDays).toEqual([
+      "2026-04-01",
+    ]);
     const count = await Konk.countDocuments();
     expect(count).toBe(1);
   });

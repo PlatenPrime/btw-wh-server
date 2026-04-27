@@ -1,4 +1,5 @@
-import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, } from "../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { Konk } from "../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { aggregateSkuSlices, sliceDataProjectForProductIdList, } from "./sliceDataAggregationStages.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "./coalesceSkuSliceItemsForReporting.js";
@@ -27,6 +28,13 @@ export async function aggregateDailySkuSliceMetricsForSkus(skus, dateFrom, dateT
     if (indexStart < 0 || indexStart >= datesFull.length)
         return { ok: false };
     const dates = datesFull.slice(indexStart);
+    const konkDocs = await Konk.find({ name: { $in: konkNames } })
+        .select("name recountDays")
+        .lean();
+    const recountDaysByKonk = new Map();
+    for (const doc of konkDocs) {
+        recountDaysByKonk.set(doc.name, new Set((doc.recountDays ?? []).map(String)));
+    }
     const perSku = [];
     for (const sku of skus) {
         const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) => getSliceItem(maps, sku.konkName, sku.productId, d));
@@ -38,9 +46,11 @@ export async function aggregateDailySkuSliceMetricsForSkus(skus, dateFrom, dateT
         for (let i = indexStart; i < datesFull.length; i++) {
             const c = coalesced[i];
             const seq = salesSeq[i];
+            const recountDays = recountDaysByKonk.get(sku.konkName) ?? new Set();
+            const salesValue = applyRecountDayToSales(seq.sales, dates[i - indexStart], recountDays);
             stocks.push(c.stock);
-            sales.push(seq.sales);
-            revenue.push(computeRevenueForDay(seq.sales, c.price));
+            sales.push(salesValue);
+            revenue.push(computeRevenueForDay(salesValue, c.price));
         }
         perSku.push({ stocks, sales, revenue });
     }

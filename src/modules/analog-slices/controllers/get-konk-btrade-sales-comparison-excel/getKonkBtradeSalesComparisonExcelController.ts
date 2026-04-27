@@ -50,6 +50,7 @@ export const getKonkBtradeSalesComparisonExcelController = async (
       prod: rangeResult.prod,
       dateFrom: rangeResult.dateFrom,
       dateTo: rangeResult.dateTo,
+      recountDays: rangeResult.recountDays,
     },
   );
 

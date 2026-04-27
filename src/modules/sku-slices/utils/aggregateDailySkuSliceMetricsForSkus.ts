@@ -1,7 +1,9 @@
 import {
+  applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { Konk } from "../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import {
   aggregateSkuSlices,
@@ -65,6 +67,13 @@ export async function aggregateDailySkuSliceMetricsForSkus(
   if (indexStart < 0 || indexStart >= datesFull.length) return { ok: false };
 
   const dates = datesFull.slice(indexStart);
+  const konkDocs = await Konk.find({ name: { $in: konkNames } })
+    .select("name recountDays")
+    .lean();
+  const recountDaysByKonk = new Map<string, Set<string>>();
+  for (const doc of konkDocs) {
+    recountDaysByKonk.set(doc.name, new Set((doc.recountDays ?? []).map(String)));
+  }
 
   const perSku: {
     stocks: (number | null)[];
@@ -86,9 +95,15 @@ export async function aggregateDailySkuSliceMetricsForSkus(
     for (let i = indexStart; i < datesFull.length; i++) {
       const c = coalesced[i]!;
       const seq = salesSeq[i]!;
+      const recountDays = recountDaysByKonk.get(sku.konkName) ?? new Set<string>();
+      const salesValue = applyRecountDayToSales(
+        seq.sales,
+        dates[i - indexStart]!,
+        recountDays,
+      );
       stocks.push(c.stock);
-      sales.push(seq.sales);
-      revenue.push(computeRevenueForDay(seq.sales, c.price));
+      sales.push(salesValue);
+      revenue.push(computeRevenueForDay(salesValue, c.price));
     }
 
     perSku.push({ stocks, sales, revenue });

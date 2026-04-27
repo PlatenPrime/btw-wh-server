@@ -1,7 +1,9 @@
 import {
+  applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
@@ -64,6 +66,8 @@ export async function getKonkProdManufacturersPieDataUtil(
   const productIds = [...productToManufacturer.keys()];
   if (productIds.length === 0) return { ok: false };
   const manufacturerNames = [...new Set(productToManufacturer.values())];
+  const konkDoc = await Konk.findOne({ name: input.konk }).select("recountDays").lean();
+  const recountDays = new Set((konkDoc?.recountDays ?? []).map(String));
 
   const prodDocs = await Prod.find({ name: { $in: manufacturerNames } })
     .select("name title")
@@ -132,7 +136,9 @@ export async function getKonkProdManufacturersPieDataUtil(
     let salesPcs = 0;
     let salesUah = 0;
     for (let i = indexStart; i < datesFull.length; i++) {
-      const sales = salesSequence[i]?.sales ?? 0;
+      const date = datesFull[i]!;
+      const salesRaw = salesSequence[i]?.sales ?? 0;
+      const sales = applyRecountDayToSales(salesRaw, date, recountDays);
       salesPcs += sales;
       salesUah += computeRevenueForDay(sales, coalesced[i]?.price ?? null);
     }

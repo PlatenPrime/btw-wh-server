@@ -60,8 +60,20 @@ describe("Konk Model", () => {
       expect(saved.title).toBe("Acme Corp");
       expect(saved.url).toBe("https://example.com");
       expect(saved.imageUrl).toBe("https://example.com/acme.png");
+      expect(saved.recountDays).toEqual([]);
       expect(saved.createdAt).toBeInstanceOf(Date);
       expect(saved.updatedAt).toBeInstanceOf(Date);
+    });
+
+    it("should persist recountDays when provided", async () => {
+      const konk = await Konk.create({
+        name: "recount-k",
+        title: "Recount K",
+        url: "https://example.com",
+        imageUrl: "https://example.com/recount.png",
+        recountDays: ["2026-04-01", "2026-04-05"],
+      });
+      expect(konk.recountDays).toEqual(["2026-04-01", "2026-04-05"]);
     });
 
     it("should have timestamps", async () => {

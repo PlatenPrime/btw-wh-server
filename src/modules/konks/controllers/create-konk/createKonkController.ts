@@ -25,6 +25,7 @@ export const createKonkController = async (
       title: parseResult.data.title,
       url: parseResult.data.url,
       imageUrl: parseResult.data.imageUrl,
+      recountDays: parseResult.data.recountDays,
     });
 
     res.status(201).json({

@@ -65,6 +65,7 @@ describe("getAnalogBtradeComparisonExcelController", () => {
             artAbc: "A",
             producerName: "Test Producer",
             competitorTitle: "Test Konk",
+            recountDays: [],
             data: [
                 {
                     date: new Date("2026-03-01T00:00:00.000Z"),

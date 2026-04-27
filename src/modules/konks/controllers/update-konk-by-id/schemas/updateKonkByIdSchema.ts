@@ -15,6 +15,7 @@ export const updateKonkByIdSchema = z.object({
   title: z.string().min(1).optional(),
   url: z.string().min(1).optional(),
   imageUrl: z.string().min(1).optional(),
+  recountDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).optional(),
 });
 
 export type UpdateKonkByIdInput = z.infer<typeof updateKonkByIdSchema>;

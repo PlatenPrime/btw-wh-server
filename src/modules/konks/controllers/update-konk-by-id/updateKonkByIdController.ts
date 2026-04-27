@@ -12,13 +12,14 @@ export const updateKonkByIdController = async (
 ): Promise<void> => {
   try {
     const { id } = req.params;
-    const { name, title, url, imageUrl } = req.body;
+    const { name, title, url, imageUrl, recountDays } = req.body;
     const parseResult = updateKonkByIdSchema.safeParse({
       id,
       name,
       title,
       url,
       imageUrl,
+      recountDays,
     });
     if (!parseResult.success) {
       res.status(400).json({
@@ -34,6 +35,7 @@ export const updateKonkByIdController = async (
       title: parseResult.data.title,
       url: parseResult.data.url,
       imageUrl: parseResult.data.imageUrl,
+      recountDays: parseResult.data.recountDays,
     });
     if (!konk) {
       res.status(404).json({ message: "Konk not found" });

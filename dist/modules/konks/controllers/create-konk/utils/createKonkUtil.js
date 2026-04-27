@@ -5,6 +5,7 @@ export const createKonkUtil = async (input) => {
         title: input.title,
         url: input.url,
         imageUrl: input.imageUrl,
+        recountDays: input.recountDays,
     });
     return konk;
 };

@@ -45,9 +45,11 @@ export async function getKonkSkuSalesExcelUtil(input) {
         byDate.set(toSliceDate(sl.date).getTime(), (sl.data ?? {}));
     }
     const [konkDoc, prodDoc] = await Promise.all([
-        Konk.findOne({ name: input.konk }).select("title").lean(),
+        Konk.findOne({ name: input.konk }).select("title recountDays").lean(),
         Prod.findOne({ name: input.prod }).select("title").lean(),
     ]);
+    const recountDays = (konkDoc?.recountDays ?? []).map(String);
+    const recountDaysSet = new Set(recountDays);
     const competitorTitle = (konkDoc?.title ?? "").trim();
     const producerName = (prodDoc?.title ?? "").trim();
     const rows = rowsBase.map((row) => ({
@@ -67,8 +69,8 @@ export async function getKonkSkuSalesExcelUtil(input) {
     let rowsOrdered = rows;
     if (input.sortBy === "sales") {
         rowsOrdered = [...rows].sort((a, b) => {
-            const ta = computeSkuSalesPeriodMetrics(a, dateFrom, dateTo, getSliceItem).totalSales;
-            const tb = computeSkuSalesPeriodMetrics(b, dateFrom, dateTo, getSliceItem).totalSales;
+            const ta = computeSkuSalesPeriodMetrics(a, dateFrom, dateTo, getSliceItem, recountDaysSet).totalSales;
+            const tb = computeSkuSalesPeriodMetrics(b, dateFrom, dateTo, getSliceItem, recountDaysSet).totalSales;
             if (tb !== ta)
                 return tb - ta;
             return a.productId.localeCompare(b.productId);
@@ -76,8 +78,8 @@ export async function getKonkSkuSalesExcelUtil(input) {
     }
     else if (input.sortBy === "revenue") {
         rowsOrdered = [...rows].sort((a, b) => {
-            const ta = computeSkuSalesPeriodMetrics(a, dateFrom, dateTo, getSliceItem).totalRevenue;
-            const tb = computeSkuSalesPeriodMetrics(b, dateFrom, dateTo, getSliceItem).totalRevenue;
+            const ta = computeSkuSalesPeriodMetrics(a, dateFrom, dateTo, getSliceItem, recountDaysSet).totalRevenue;
+            const tb = computeSkuSalesPeriodMetrics(b, dateFrom, dateTo, getSliceItem, recountDaysSet).totalRevenue;
             if (tb !== ta)
                 return tb - ta;
             return a.productId.localeCompare(b.productId);
@@ -87,6 +89,7 @@ export async function getKonkSkuSalesExcelUtil(input) {
         summaryMode: "bottomOnly",
         summarySalesLabel: "Загальні продажі, шт",
         summaryRevenueLabel: "Загальна виручка, грн",
+        recountDays,
     });
     const fileName = `sku_sales_konk_${safeFilePart(input.konk)}_${safeFilePart(input.prod)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;
     return { ok: true, buffer, fileName };

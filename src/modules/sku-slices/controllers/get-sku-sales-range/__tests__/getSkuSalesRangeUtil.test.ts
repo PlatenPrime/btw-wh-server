@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { Konk } from "../../../../konks/models/Konk.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
 import { getSkuSalesRangeUtil } from "../utils/getSkuSalesRangeUtil.js";
 
 describe("getSkuSalesRangeUtil", () => {
   beforeEach(async () => {
+    await Konk.deleteMany({});
     await Sku.deleteMany({});
     await SkuSlice.deleteMany({});
   });
@@ -46,5 +48,42 @@ describe("getSkuSalesRangeUtil", () => {
       expect(result.data[0]!.price).toBe(2);
       expect(result.data[1]!.date).toBe(d2.toISOString());
     }
+  });
+
+  it("zeros only recount-day values in range", async () => {
+    await Konk.create({
+      name: "air",
+      title: "Air",
+      url: "https://example.com",
+      imageUrl: "https://example.com/air.png",
+      recountDays: ["2026-03-02"],
+    });
+    const sku = await Sku.create({
+      konkName: "air",
+      prodName: "gemar",
+      productId: "air-sr2",
+      title: "T",
+      url: "https://example.com/sr2",
+    });
+    const d0 = new Date("2026-03-01T00:00:00.000Z");
+    const d1 = new Date("2026-03-02T00:00:00.000Z");
+    const d2 = new Date("2026-03-03T00:00:00.000Z");
+    await SkuSlice.insertMany([
+      { konkName: "air", date: d0, data: { "air-sr2": { stock: 10, price: 2 } } },
+      { konkName: "air", date: d1, data: { "air-sr2": { stock: 8, price: 2 } } },
+      { konkName: "air", date: d2, data: { "air-sr2": { stock: 6, price: 2 } } },
+    ]);
+
+    const result = await getSkuSalesRangeUtil({
+      skuId: sku._id.toString(),
+      dateFrom: d1,
+      dateTo: d2,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data[0]!.sales).toBe(0);
+    expect(result.data[0]!.revenue).toBe(0);
+    expect(result.data[1]!.sales).toBe(2);
+    expect(result.data[1]!.revenue).toBe(4);
   });
 });

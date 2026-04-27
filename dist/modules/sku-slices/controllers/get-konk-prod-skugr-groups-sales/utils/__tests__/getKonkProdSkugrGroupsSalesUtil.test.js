@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { Konk } from "../../../../../konks/models/Konk.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { getKonkProdSkugrGroupsSalesUtil } from "../getKonkProdSkugrGroupsSalesUtil.js";
 describe("getKonkProdSkugrGroupsSalesUtil", () => {
     beforeEach(async () => {
+        await Konk.deleteMany({});
         await Sku.deleteMany({});
         await Skugr.deleteMany({});
         await SkuSlice.deleteMany({});
@@ -238,5 +240,52 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
         expect(groupsSumPcs).toBe(23);
         expect(result.all.salesPcs).not.toBe(groupsSumPcs);
         expect(skuOnlyInAll.productId).toBe(`${konk}-all-only`);
+    });
+    it("applies recount days to skugr totals and all total", async () => {
+        const konk = "ggs-konk-rec";
+        const prod = "ggs-prod-rec";
+        await Konk.create({
+            name: konk,
+            title: "Rec konk",
+            url: "https://e.com/k",
+            imageUrl: "https://e.com/k.png",
+            recountDays: ["2026-08-02"],
+        });
+        const d0 = new Date("2026-08-01T00:00:00.000Z");
+        const d1 = new Date("2026-08-02T00:00:00.000Z");
+        const d2 = new Date("2026-08-03T00:00:00.000Z");
+        const sku = await Sku.create({
+            konkName: konk,
+            prodName: prod,
+            productId: `${konk}-a`,
+            title: "A",
+            url: "https://e.com/a",
+        });
+        await Skugr.create({
+            konkName: konk,
+            prodName: prod,
+            title: "Group rec",
+            url: "https://e.com/g",
+            isSliced: true,
+            skus: [sku._id],
+        });
+        await SkuSlice.insertMany([
+            { konkName: konk, date: d0, data: { [`${konk}-a`]: { stock: 10, price: 2 } } },
+            { konkName: konk, date: d1, data: { [`${konk}-a`]: { stock: 8, price: 2 } } },
+            { konkName: konk, date: d2, data: { [`${konk}-a`]: { stock: 6, price: 2 } } },
+        ]);
+        const result = await getKonkProdSkugrGroupsSalesUtil({
+            konk,
+            prod,
+            dateFrom: d1,
+            dateTo: d2,
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        expect(result.data[0].salesPcs).toBe(2);
+        expect(result.data[0].salesUah).toBe(4);
+        expect(result.all.salesPcs).toBe(2);
+        expect(result.all.salesUah).toBe(4);
     });
 });

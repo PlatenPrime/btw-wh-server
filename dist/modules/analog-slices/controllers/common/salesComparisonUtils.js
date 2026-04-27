@@ -2,6 +2,15 @@
  * Чистые функции для расчёта продаж и выручки по дням на основе остатков.
  * Используются в Excel-отчётах сравнения продаж (getKonkBtradeSalesComparisonExcel).
  */
+export function toUtcDateKey(date) {
+    return date.toISOString().slice(0, 10);
+}
+export function applyRecountDayToSales(sales, date, recountDays) {
+    if (recountDays.has(toUtcDateKey(date))) {
+        return 0;
+    }
+    return sales;
+}
 /**
  * По последовательности остатков по дням возвращает для каждого дня:
  * - sales: объём продаж (разница с предыдущим днём); если нет предыдущего или остаток вырос — 0.

@@ -9,6 +9,8 @@ export const updateKonkByIdUtil = async (input) => {
         update.url = input.url;
     if (input.imageUrl !== undefined)
         update.imageUrl = input.imageUrl;
+    if (input.recountDays !== undefined)
+        update.recountDays = input.recountDays;
     if (Object.keys(update).length === 0) {
         return Konk.findById(input.id);
     }

@@ -3,6 +3,7 @@ import { buildSalesComparisonExcelBlock, buildSalesComparisonSummaryBlock, setup
 export async function buildSalesComparisonExcel(analogs, options) {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Порівняння");
+    const recountDays = new Set((options.recountDays ?? []).map(String));
     const firstItems = analogs[0]?.items ?? [];
     const dataStartCol = 7;
     const totalCol = dataStartCol + firstItems.length;
@@ -45,6 +46,7 @@ export async function buildSalesComparisonExcel(analogs, options) {
                 artAbc: analog.artAbc,
                 producerName: analog.producerName,
                 competitorTitle: analog.competitorTitle,
+                recountDays,
             });
             sumAnalogSales += totals.totalAnalogSales;
             sumAnalogRevenue += totals.totalAnalogRevenue;

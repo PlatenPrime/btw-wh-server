@@ -6,11 +6,14 @@ import {
 import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { AnalogBtradeCompareItem } from "../get-analog-btrade-comparison-excel/utils/getAnalogBtradeComparisonRangeUtil.js";
 import {
+  applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
+  toUtcDateKey,
 } from "./salesComparisonUtils.js";
 
 const DELIVERY_DAY_RED = "FFFF0000";
+const RECOUNT_DAY_PURPLE_FILL = "FF800080";
 
 export interface SetupSalesComparisonHeaderRowParams {
   worksheet: ExcelJS.Worksheet;
@@ -106,6 +109,7 @@ export interface BuildSalesComparisonExcelBlockOptions {
   artAbc?: string | null;
   producerName?: string | null;
   competitorTitle?: string | null;
+  recountDays?: ReadonlySet<string>;
 }
 
 /**
@@ -131,6 +135,7 @@ export function buildSalesComparisonExcelBlock(
     artAbc,
     producerName,
     competitorTitle,
+    recountDays = new Set(),
   } = options;
 
   const analogStockByDay = items.map((i) => i.analogStock);
@@ -187,7 +192,12 @@ export function buildSalesComparisonExcelBlock(
 
   items.forEach((item, index) => {
     const col = index + dataStartCol;
-    const analogSales = analogSalesResults[index]!.sales;
+    const isRecountDay = recountDays.has(toUtcDateKey(item.date));
+    const analogSales = applyRecountDayToSales(
+      analogSalesResults[index]!.sales,
+      item.date,
+      recountDays,
+    );
     const analogIsDelivery = analogSalesResults[index]!.isDeliveryDay;
     const btradeSales = btradeSalesResults[index]!.sales;
     const btradeIsDelivery = btradeSalesResults[index]!.isDeliveryDay;
@@ -203,7 +213,13 @@ export function buildSalesComparisonExcelBlock(
     // Row 0: Продажі аналога
     const cellAnalogSales = rows[0]!.getCell(col);
     cellAnalogSales.value = analogSales;
-    if (analogIsDelivery && analogSales === 0) {
+    if (isRecountDay) {
+      cellAnalogSales.fill = {
+        type: "pattern",
+        pattern: "solid",
+        fgColor: { argb: RECOUNT_DAY_PURPLE_FILL },
+      };
+    } else if (analogIsDelivery && analogSales === 0) {
       cellAnalogSales.font = {
         ...(cellAnalogSales.font ?? {}),
         color: { argb: DELIVERY_DAY_RED },

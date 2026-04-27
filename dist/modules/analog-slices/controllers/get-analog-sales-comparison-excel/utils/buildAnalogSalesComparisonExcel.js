@@ -42,6 +42,7 @@ export async function buildAnalogSalesComparisonExcel(items, options) {
             artAbc: options.artAbc,
             producerName: options.producerName,
             competitorTitle: options.competitorTitle,
+            recountDays: new Set((options.recountDays ?? []).map(String)),
         });
         const summaryStartRow = 9;
         buildSalesComparisonSummaryBlock({
