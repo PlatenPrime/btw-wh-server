@@ -25,3 +25,15 @@
 **Ответ 404:** `{ message: string }` — товар не найден или данные недоступны (`stock: -1`, `price: -1`).
 
 **Ответ 400:** `{ message: string, errors: ... }` — ошибка валидации `link` (Zod).
+
+---
+
+### GET `/api/browser/perfect/stock`
+
+**Запрос:** query `link` — полный URL страницы товара на сайте PerfectParty.
+
+**Ответ 200:** `{ message: string, data: { stock: number, price: number, title?: string } }`.
+
+**Ответ 404:** `{ message: string }` — товар не найден или данные недоступны (`stock: -1`, `price: -1`).
+
+**Ответ 400:** `{ message: string, errors: ... }` — ошибка валидации `link` (Zod).
