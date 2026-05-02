@@ -39,6 +39,26 @@ function extractPackCountFromTitle(title) {
     }
     return null;
 }
+/** «Штук в упаковці: N» на карточке (укр.), если в названии нет «N шт». */
+const PACK_COUNT_UK_HTML_REGEX = /Штук\s+в\s+упаковці\s*:\s*(\d+)/i;
+function extractPackCountFromProductHtml(html) {
+    const match = html.match(PACK_COUNT_UK_HTML_REGEX);
+    if (!match?.[1])
+        return null;
+    const count = parseInt(match[1], 10);
+    if (!Number.isFinite(count) || count <= 0)
+        return null;
+    return count;
+}
+function resolvePackCount(title, html) {
+    const fromTitle = extractPackCountFromTitle(title);
+    if (fromTitle !== null)
+        return fromTitle;
+    if (html?.trim()) {
+        return extractPackCountFromProductHtml(html);
+    }
+    return null;
+}
 function extractToken(html) {
     const tokenPatterns = [
         /token:\s*"([a-z0-9]{16,})"/i,
@@ -149,8 +169,9 @@ function parsePackPrice(product) {
         return embeddedText;
     return parseNumberLike(product.price);
 }
-function toStockAndPrice(stockPacks, packPrice, title) {
-    const packCount = extractPackCountFromTitle(title);
+/** Остаток в штуках и цена за штуку, если известна фасовка из title или блока «Штук в упаковці» в HTML. */
+function toStockAndPrice(stockPacks, packPrice, title, html) {
+    const packCount = resolvePackCount(title, html);
     if (!packCount) {
         return {
             stock: stockPacks,
@@ -164,9 +185,72 @@ function toStockAndPrice(stockPacks, packPrice, title) {
         ...(title && { title }),
     };
 }
+function extractDisplayPriceFromProductHtml(html) {
+    const $ = cheerio.load(html);
+    const metaAmount = $('meta[property="product:price:amount"]').attr("content");
+    const fromMeta = parseNumberLike(metaAmount);
+    if (fromMeta !== null)
+        return fromMeta;
+    const priceEl = $("[itemprop=price]").first();
+    const fromItempropContent = parseNumberLike(priceEl.attr("content"));
+    if (fromItempropContent !== null)
+        return fromItempropContent;
+    const fromItempropText = parseNumberLike(priceEl.text());
+    if (fromItempropText !== null)
+        return fromItempropText;
+    const currentPriceText = $(".current-price, .product-price .current-price")
+        .first()
+        .text();
+    const fromCurrent = parseNumberLike(currentPriceText);
+    if (fromCurrent !== null)
+        return fromCurrent;
+    const priceAmountMatch = html.match(/"price_amount"\s*:\s*([0-9]+(?:\.[0-9]+)?)/);
+    if (priceAmountMatch?.[1]) {
+        const n = parseNumberLike(priceAmountMatch[1]);
+        if (n !== null)
+            return n;
+    }
+    return null;
+}
+function isPerfectProductPageOutOfStock(html) {
+    const $ = cheerio.load(html);
+    const availMeta = $('meta[property="product:availability"]').attr("content") ?? "";
+    if (/out_of_stock|unavailable|discontinued/i.test(availMeta)) {
+        return true;
+    }
+    const schemaOos = $("link[itemprop=availability]")
+        .toArray()
+        .some((el) => {
+        const href = $(el).attr("href") ?? "";
+        return /OutOfStock/i.test(href);
+    });
+    if (schemaOos)
+        return true;
+    const flagsBlock = $(".product-flags");
+    if (flagsBlock.length) {
+        const flagText = flagsBlock.text();
+        if (/розпродано/i.test(flagText))
+            return true;
+        if (flagsBlock.find('[class*="out-of-stock"], [class*="out_of_stock"], .product-flag--out-of-stock')
+            .length) {
+            return true;
+        }
+    }
+    return false;
+}
+function tryPerfectHtmlFallback(html, pageTitle) {
+    if (!isPerfectProductPageOutOfStock(html))
+        return null;
+    const packPrice = extractDisplayPriceFromProductHtml(html);
+    if (packPrice === null)
+        return null;
+    const title = pageTitle.trim();
+    return toStockAndPrice(0, packPrice, title, html);
+}
 /**
  * Получает остаток и цену товара с perfectparty.in.ua через запрос add-to-cart в корзину.
- * Если в названии товара найдено «N шт», возвращает остаток в штуках и цену за штуку.
+ * Фасовка: «N шт» в названии или «Штук в упаковці: N» на странице — тогда остаток в штуках и цена за штуку.
+ * Если товар не попадает в ответ корзины (часто «розпродано»), подставляет цену и остаток 0 с HTML карточки.
  */
 export async function getPerfectStockData(link) {
     if (!link || typeof link !== "string") {
@@ -235,19 +319,21 @@ export async function getPerfectStockData(link) {
         });
         const cartData = parseCartResponse(String(cartResp.data ?? ""));
         const product = cartData?.cart?.products?.[0];
-        if (!product)
-            return NEGATIVE_OUTCOME;
+        if (!product) {
+            return tryPerfectHtmlFallback(html, pageTitle) ?? NEGATIVE_OUTCOME;
+        }
         const stockPacksRaw = parseNumberLike(product.stock_quantity);
         const packPrice = parsePackPrice(product);
-        if (stockPacksRaw === null || packPrice === null)
-            return NEGATIVE_OUTCOME;
+        if (stockPacksRaw === null || packPrice === null) {
+            return tryPerfectHtmlFallback(html, pageTitle) ?? NEGATIVE_OUTCOME;
+        }
         const stockPacks = Math.floor(stockPacksRaw);
         if (!Number.isFinite(stockPacks) || stockPacks < 0)
             return NEGATIVE_OUTCOME;
         const title = (product.name ??
             product.embedded_attributes?.name ??
             pageTitle).trim();
-        return toStockAndPrice(stockPacks, packPrice, title);
+        return toStockAndPrice(stockPacks, packPrice, title, html);
     }
     catch (error) {
         logBrowserError("Error fetching data from perfectparty product page:", error);
