@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { browserGet, logBrowserError } from "../../utils/browserRequest.js";
+import { parseJsonHtmlAttribute } from "../../utils/parse-json-html-attribute/parseJsonHtmlAttribute.js";
 
 export interface BalunProductInfo {
   stock: number;
@@ -12,24 +13,6 @@ interface FbProductData {
 
 interface AnalyticsData {
   clerk?: { price_original?: string };
-}
-
-/**
- * Парсит JSON из data-атрибута; при необходимости декодирует HTML-entities.
- */
-function parseJsonAttr(raw: string | undefined): unknown {
-  if (raw === undefined || raw === "") {
-    return undefined;
-  }
-  try {
-    return JSON.parse(raw) as unknown;
-  } catch {
-    const decoded = raw
-      .replace(/&#34;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&quot;/g, '"');
-    return JSON.parse(decoded) as unknown;
-  }
 }
 
 /**
@@ -57,7 +40,7 @@ export async function getBalunStockData(
     const fbAttr = $("[data-advtracking-fb-product-data]").first().attr(
       "data-advtracking-fb-product-data"
     );
-    const fbData = parseJsonAttr(fbAttr) as FbProductData | undefined;
+    const fbData = parseJsonHtmlAttribute(fbAttr) as FbProductData | undefined;
     if (fbData?.contents?.[0] != null && typeof fbData.contents[0].quantity === "number") {
       const q = fbData.contents[0].quantity;
       if (Number.isFinite(q) && q >= 0) {
@@ -66,7 +49,7 @@ export async function getBalunStockData(
     }
 
     const analyticsAttr = $("[data-analytics]").first().attr("data-analytics");
-    const analyticsData = parseJsonAttr(analyticsAttr) as AnalyticsData | undefined;
+    const analyticsData = parseJsonHtmlAttribute(analyticsAttr) as AnalyticsData | undefined;
     const priceOriginal = analyticsData?.clerk?.price_original;
     if (priceOriginal === undefined || priceOriginal === "") {
       return NEGATIVE_OUTCOME;

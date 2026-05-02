@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import {
   crawlHtmlGroupListingPages,
   getNextPageUrlFromLinkRelNext,
@@ -17,19 +18,6 @@ export type BalunGroupPageProduct = {
   url: string;
   imageUrl: string;
 };
-
-function resolveUrl(href: string, baseUrl: string): string | null {
-  const trimmed = href.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    return new URL(trimmed, baseUrl).toString();
-  } catch {
-    return null;
-  }
-}
 
 function parseProductsFromPage(
   $: cheerio.Root,
@@ -53,7 +41,7 @@ export async function getBalunGroupPagesProducts(
     maxPages,
     parseProductsFromPage,
     getNextPageUrl: ($, url) => {
-      const next = getNextPageUrlFromLinkRelNext($, url, resolveUrl);
+      const next = getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase);
       if (!next) {
         return null;
       }

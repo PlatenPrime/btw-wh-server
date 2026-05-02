@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { browserGet, logBrowserError, summarizeBrowserError, } from "../../utils/browserRequest.js";
+import { parseSharikSearchCard } from "./sharik-search-result-card/parseSharikSearchCard.js";
 /**
  * Получает данные о товаре с сайта sharik.ua по артикулу
  * @param artikul - артикул товара в виде строки
@@ -19,41 +20,11 @@ export async function getSharikStockData(artikul) {
             return null;
         }
         const firstElement = productElements.eq(0);
-        const data = parseSharikElement(artikul, firstElement);
+        const data = parseSharikSearchCard(artikul, firstElement);
         return data || null;
     }
     catch (error) {
         logBrowserError("Error fetching data from sharik.ua:", error);
         throw new Error(`Failed to fetch data from sharik.ua: ${summarizeBrowserError(error)}`);
     }
-}
-/**
- * Парсит элемент товара с сайта sharik.ua
- */
-function parseSharikElement(artikul, artElement) {
-    const nameukr = artElement.find(".one-item-tit").text().trim();
-    const priceRaw = artElement.find(".one-item-price").text().trim();
-    const quantityRaw = artElement.find(".one-item-quantity").text().trim();
-    if (!nameukr || !priceRaw || !quantityRaw) {
-        console.warn("Incomplete product data:", {
-            artikul,
-            nameukr,
-            priceRaw,
-            quantityRaw,
-        });
-        return undefined;
-    }
-    const priceStr = priceRaw.replace(/[^\d.,]/g, "").replace(/,/g, "");
-    const price = parseFloat(priceStr);
-    const quantityMatch = quantityRaw.match(/\d+/);
-    if (!quantityMatch) {
-        console.warn("Invalid quantity format:", { artikul, quantityRaw });
-        return undefined;
-    }
-    const quantity = parseInt(quantityMatch[0], 10);
-    if (isNaN(price)) {
-        console.warn("Invalid price format:", { artikul, priceStr, quantityRaw });
-        return undefined;
-    }
-    return { nameukr, price, quantity };
 }

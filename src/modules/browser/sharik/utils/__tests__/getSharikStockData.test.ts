@@ -1,8 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getSharikStockData } from "../getSharikStockData.js";
-import { browserGet } from "../../../utils/browserRequest.js";
+import type * as BrowserRequest from "../../../utils/browserRequest.js";
 
-vi.mock("../../../utils/browserRequest.js");
+vi.mock("../../../utils/browserRequest.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof BrowserRequest>();
+  return {
+    ...actual,
+    browserGet: vi.fn(),
+    logBrowserError: vi.fn(),
+  };
+});
+
+import { browserGet } from "../../../utils/browserRequest.js";
 
 describe("getSharikStockData", () => {
   beforeEach(() => {

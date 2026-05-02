@@ -1,3 +1,4 @@
+import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import {
   crawlHtmlGroupListingPages,
@@ -15,19 +16,6 @@ export type YumiGroupPageProduct = {
   url: string;
   imageUrl: string;
 };
-
-function resolveUrl(href: string, baseUrl: string): string | null {
-  const trimmed = href.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    return new URL(trimmed, baseUrl).toString();
-  } catch {
-    return null;
-  }
-}
 
 function parseProductsFromPage(
   $: cheerio.Root,
@@ -53,7 +41,7 @@ export async function getYumiGroupPagesProducts(
     maxPages,
     parseProductsFromPage,
     getNextPageUrl: ($, url) =>
-      getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+      getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
     delayBeforeNextMs: getGroupPagesThrottleDelayMs,
   });
 }

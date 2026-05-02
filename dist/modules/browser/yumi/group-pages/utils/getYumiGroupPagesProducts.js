@@ -1,19 +1,8 @@
+import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { parsePromUaGroupListingProducts } from "../../../group-pages/utils/parsePromUaGroupListingProducts.js";
 import { getYumiGroupPagesProductsSchema, } from "./getYumiGroupPagesProductsSchema.js";
-function resolveUrl(href, baseUrl) {
-    const trimmed = href.trim();
-    if (!trimmed) {
-        return null;
-    }
-    try {
-        return new URL(trimmed, baseUrl).toString();
-    }
-    catch {
-        return null;
-    }
-}
 function parseProductsFromPage($, currentPageUrl) {
     return parsePromUaGroupListingProducts($, currentPageUrl);
 }
@@ -29,7 +18,7 @@ export async function getYumiGroupPagesProducts(input) {
         startUrl: groupUrl,
         maxPages,
         parseProductsFromPage,
-        getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+        getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
         delayBeforeNextMs: getGroupPagesThrottleDelayMs,
     });
 }

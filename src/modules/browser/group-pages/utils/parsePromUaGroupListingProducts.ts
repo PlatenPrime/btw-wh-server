@@ -1,4 +1,6 @@
 import * as cheerio from "cheerio";
+import { decodeHtmlEntities } from "../../utils/decode-html-entities/decodeHtmlEntities.js";
+import { resolveHrefAgainstBase } from "../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 
 export type PromUaGroupPageProduct = {
   productId: string;
@@ -6,46 +8,6 @@ export type PromUaGroupPageProduct = {
   url: string;
   imageUrl: string;
 };
-
-function resolveUrl(href: string, baseUrl: string): string | null {
-  const trimmed = href.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    return new URL(trimmed, baseUrl).toString();
-  } catch {
-    return null;
-  }
-}
-
-function decodeHtmlEntities(input: string): string {
-  const numericDecoded = input.replace(
-    /&#(x?[0-9a-fA-F]+);/g,
-    (_match, rawCode: string) => {
-      const code =
-        rawCode.startsWith("x") || rawCode.startsWith("X")
-          ? rawCode.slice(1)
-          : rawCode;
-      const base =
-        rawCode.startsWith("x") || rawCode.startsWith("X") ? 16 : 10;
-      const codePoint = Number.parseInt(code, base);
-      if (!Number.isFinite(codePoint) || codePoint < 0 || codePoint > 0x10ffff) {
-        return _match;
-      }
-      return String.fromCodePoint(codePoint);
-    }
-  );
-
-  return numericDecoded
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&nbsp;/g, " ");
-}
 
 /**
  * Листинг группы Prom.ua (Balun, Yumi и т.п.): в наличии — кнопка «Купити» с data-product-*;
@@ -69,7 +31,7 @@ export function parsePromUaGroupListingProducts(
     }
 
     const title = decodeHtmlEntities(rawTitle).replace(/\s+/g, " ").trim();
-    const url = resolveUrl(rawUrl, currentPageUrl);
+    const url = resolveHrefAgainstBase(rawUrl, currentPageUrl);
 
     if (!title || !url) {
       return;
@@ -97,7 +59,7 @@ export function parsePromUaGroupListingProducts(
       $titleLink.attr("href")?.trim() ??
       $imgLink.attr("href")?.trim() ??
       "";
-    const url = resolveUrl(href, currentPageUrl);
+    const url = resolveHrefAgainstBase(href, currentPageUrl);
     if (!url) {
       return;
     }
@@ -114,7 +76,7 @@ export function parsePromUaGroupListingProducts(
     const rawImg =
       $img.attr("src")?.trim() ?? $img.attr("data-src")?.trim() ?? "";
     const imageUrl =
-      resolveUrl(rawImg, currentPageUrl) ??
+      resolveHrefAgainstBase(rawImg, currentPageUrl) ??
       (rawImg.startsWith("http") ? rawImg : null);
     if (!imageUrl) {
       return;

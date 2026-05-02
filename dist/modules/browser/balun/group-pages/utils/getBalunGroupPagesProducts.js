@@ -1,19 +1,8 @@
+import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, mergeSearchParamsFromSource, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { parsePromUaGroupListingProducts } from "../../../group-pages/utils/parsePromUaGroupListingProducts.js";
 import { getBalunGroupPagesProductsSchema, } from "./getBalunGroupPagesProductsSchema.js";
-function resolveUrl(href, baseUrl) {
-    const trimmed = href.trim();
-    if (!trimmed) {
-        return null;
-    }
-    try {
-        return new URL(trimmed, baseUrl).toString();
-    }
-    catch {
-        return null;
-    }
-}
 function parseProductsFromPage($, currentPageUrl) {
     return parsePromUaGroupListingProducts($, currentPageUrl);
 }
@@ -28,7 +17,7 @@ export async function getBalunGroupPagesProducts(input) {
         maxPages,
         parseProductsFromPage,
         getNextPageUrl: ($, url) => {
-            const next = getNextPageUrlFromLinkRelNext($, url, resolveUrl);
+            const next = getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase);
             if (!next) {
                 return null;
             }

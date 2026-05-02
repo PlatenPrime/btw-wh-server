@@ -1,4 +1,6 @@
 import * as cheerio from "cheerio";
+import { decodeHtmlEntities } from "../../../utils/decode-html-entities/decodeHtmlEntities.js";
+import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import {
   crawlHtmlGroupListingPages,
   getNextPageUrlFromLinkRelNext,
@@ -17,45 +19,6 @@ export type AirGroupPageProduct = {
 };
 
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
-function resolveUrl(href: string, baseUrl: string): string | null {
-  const trimmed = href.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    return new URL(trimmed, baseUrl).toString();
-  } catch {
-    return null;
-  }
-}
-
-function decodeHtmlEntities(input: string): string {
-  const numericDecoded = input.replace(
-    /&#(x?[0-9a-fA-F]+);/g,
-    (_match, rawCode: string) => {
-      const code =
-        rawCode.startsWith("x") || rawCode.startsWith("X")
-          ? rawCode.slice(1)
-          : rawCode;
-      const base =
-        rawCode.startsWith("x") || rawCode.startsWith("X") ? 16 : 10;
-      const codePoint = Number.parseInt(code, base);
-      if (!Number.isFinite(codePoint) || codePoint < 0 || codePoint > 0x10ffff) {
-        return _match;
-      }
-      return String.fromCodePoint(codePoint);
-    }
-  );
-
-  return numericDecoded
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&nbsp;/g, " ");
-}
 
 function pickProductCards($: cheerio.Root): cheerio.Cheerio {
   const fromGrid = $(".us-category-products div.product-layout[data-pid]");
@@ -70,13 +33,13 @@ function extractImageUrl($img: cheerio.Cheerio, baseUrl: string): string | null 
   const dataSrcset = $img.attr("data-srcset")?.trim();
 
   if (src && !src.includes(LAZY_IMAGE_MARKER)) {
-    return resolveUrl(src, baseUrl);
+    return resolveHrefAgainstBase(src, baseUrl);
   }
 
   if (dataSrcset) {
     const firstPart = dataSrcset.split(/\s+/)[0]?.trim();
     if (firstPart) {
-      const resolved = resolveUrl(firstPart, baseUrl);
+      const resolved = resolveHrefAgainstBase(firstPart, baseUrl);
       if (resolved) {
         return resolved;
       }
@@ -84,7 +47,7 @@ function extractImageUrl($img: cheerio.Cheerio, baseUrl: string): string | null 
   }
 
   if (src) {
-    return resolveUrl(src, baseUrl);
+    return resolveHrefAgainstBase(src, baseUrl);
   }
 
   return null;
@@ -113,7 +76,7 @@ function parseProductsFromPage(
     const $imgLink = $card.find(".us-module-img a").first();
     const href =
       $imgLink.attr("href")?.trim() ?? $titleLink.attr("href")?.trim() ?? "";
-    const url = resolveUrl(href, currentPageUrl);
+    const url = resolveHrefAgainstBase(href, currentPageUrl);
 
     if (!title || !url || !imageUrl) {
       return;
@@ -144,7 +107,8 @@ export async function getAirGroupPagesProducts(
     startUrl: groupUrl,
     maxPages,
     parseProductsFromPage,
-    getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveUrl),
+    getNextPageUrl: ($, url) =>
+      getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
     stopOnEmptyPage: true,
     delayBeforeNextMs: getGroupPagesThrottleDelayMs,
   });

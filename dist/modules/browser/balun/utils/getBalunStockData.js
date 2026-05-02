@@ -1,23 +1,6 @@
 import * as cheerio from "cheerio";
 import { browserGet, logBrowserError } from "../../utils/browserRequest.js";
-/**
- * Парсит JSON из data-атрибута; при необходимости декодирует HTML-entities.
- */
-function parseJsonAttr(raw) {
-    if (raw === undefined || raw === "") {
-        return undefined;
-    }
-    try {
-        return JSON.parse(raw);
-    }
-    catch {
-        const decoded = raw
-            .replace(/&#34;/g, '"')
-            .replace(/&#39;/g, "'")
-            .replace(/&quot;/g, '"');
-        return JSON.parse(decoded);
-    }
-}
+import { parseJsonHtmlAttribute } from "../../utils/parse-json-html-attribute/parseJsonHtmlAttribute.js";
 /**
  * Получает данные о количестве и цене товара со страницы товара сайта Balun по ссылке.
  * Stock берётся из data-advtracking-fb-product-data (contents[0].quantity), при отсутствии ключа — 0.
@@ -36,7 +19,7 @@ export async function getBalunStockData(link) {
         const $ = cheerio.load(html);
         let stock = 0;
         const fbAttr = $("[data-advtracking-fb-product-data]").first().attr("data-advtracking-fb-product-data");
-        const fbData = parseJsonAttr(fbAttr);
+        const fbData = parseJsonHtmlAttribute(fbAttr);
         if (fbData?.contents?.[0] != null && typeof fbData.contents[0].quantity === "number") {
             const q = fbData.contents[0].quantity;
             if (Number.isFinite(q) && q >= 0) {
@@ -44,7 +27,7 @@ export async function getBalunStockData(link) {
             }
         }
         const analyticsAttr = $("[data-analytics]").first().attr("data-analytics");
-        const analyticsData = parseJsonAttr(analyticsAttr);
+        const analyticsData = parseJsonHtmlAttribute(analyticsAttr);
         const priceOriginal = analyticsData?.clerk?.price_original;
         if (priceOriginal === undefined || priceOriginal === "") {
             return NEGATIVE_OUTCOME;
