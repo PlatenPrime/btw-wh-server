@@ -1,6 +1,7 @@
 export { createSkuController } from "./create-sku/createSkuController.js";
 export { deleteKonkInvalidSkusController } from "./delete-konk-invalid-skus/deleteKonkInvalidSkusController.js";
 export { deleteSkuByIdController } from "./delete-sku-by-id/deleteSkuByIdController.js";
+export { deleteSkusNotInAnySkugrController } from "./delete-skus-not-in-any-skugr/deleteSkusNotInAnySkugrController.js";
 export { fixIncorrectSkuDataController } from "./fix-incorrect-sku-data/fixIncorrectSkuDataController.js";
 export { getAllSkusController } from "./get-all-skus/getAllSkusController.js";
 export { getKonkInvalidExcelController } from "./get-konk-invalid-excel/getKonkInvalidExcelController.js";

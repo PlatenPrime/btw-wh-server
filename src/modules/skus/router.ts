@@ -6,6 +6,7 @@ import {
   createSkuController,
   deleteKonkInvalidSkusController,
   deleteSkuByIdController,
+  deleteSkusNotInAnySkugrController,
   fixIncorrectSkuDataController,
   getAllSkusController,
   getKonkInvalidExcelController,
@@ -40,6 +41,12 @@ router.delete(
   checkAuth,
   checkRoles([RoleType.PRIME]),
   asyncHandler(deleteKonkInvalidSkusController)
+);
+router.delete(
+  "/not-in-any-skugr",
+  checkAuth,
+  checkRoles([RoleType.PRIME]),
+  asyncHandler(deleteSkusNotInAnySkugrController)
 );
 router.get(
   "/by-skugr/:skugrId",

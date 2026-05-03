@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { toSliceDate } from "../../../../../../utils/sliceDate.js";
+import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../models/Sku.js";
 import { getAllSkusUtil } from "../getAllSkusUtil.js";
 
 describe("getAllSkusUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
+    await Skugr.deleteMany({});
   });
 
   it("returns paginated skus", async () => {
@@ -176,5 +178,56 @@ describe("getAllSkusUtil", () => {
     });
     expect(result.skus).toHaveLength(1);
     expect(result.skus[0]!.productId).toBe("k-new-1");
+  });
+
+  it("notInAnySkugr lists only skus not referenced by any skugr", async () => {
+    const inGroup = await Sku.create({
+      konkName: "k-o",
+      prodName: "p-o",
+      productId: "k-o-in",
+      title: "In group",
+      url: "https://ko.com/in",
+    });
+    await Sku.create({
+      konkName: "k-o",
+      prodName: "p-o",
+      productId: "k-o-out",
+      title: "Orphan",
+      url: "https://ko.com/out",
+    });
+    await Skugr.create({
+      konkName: "k-o",
+      prodName: "p-o",
+      title: "G",
+      url: "https://ko.com/g",
+      skus: [inGroup._id],
+    });
+
+    const result = await getAllSkusUtil({
+      page: 1,
+      limit: 10,
+      notInAnySkugr: true,
+    });
+
+    expect(result.pagination.total).toBe(1);
+    expect(result.skus[0]!.productId).toBe("k-o-out");
+  });
+
+  it("notInAnySkugr with empty distinct returns all skus", async () => {
+    await Sku.create({
+      konkName: "k-e",
+      prodName: "p-e",
+      productId: "k-e-1",
+      title: "Only",
+      url: "https://ke.com/1",
+    });
+
+    const result = await getAllSkusUtil({
+      page: 1,
+      limit: 10,
+      notInAnySkugr: true,
+    });
+
+    expect(result.pagination.total).toBe(1);
   });
 });

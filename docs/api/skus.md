@@ -18,6 +18,7 @@
 - `prodName?: string` — фильтр по имени-ключу производителя
 - `search?: string` — регистронезависимый поиск по подстроке в `title` (спецсимволы regex экранируются)
 - `isInvalid?: string` — только `"true"` или `"false"`; фильтр по полю `Sku.isInvalid`
+- `notInAnySkugr?: string` — только `"true"` или `"false"`; при `"true"` в выборку попадают только SKU, чей `_id` не встречается ни в одном массиве `Skugr.skus` (пустое объединение всех групп не превращается в `$nin: []`)
 - `createdFrom?: string` — дата `YYYY-MM-DD`; в выборку попадают SKU с `createdAt` **не раньше** календарного ключа среза для этой даты (`toSliceDate`, часовой пояс как у срезов)
 
 **Ответ 200:**  
@@ -39,7 +40,7 @@
 
 **Query параметры:** те же, что у `GET /api/skus`:
 
-- `page`, `limit`, `konkName`, `prodName`, `search`, `isInvalid`, `createdFrom` — те же смыслы, что у `GET /api/skus`.
+- `page`, `limit`, `konkName`, `prodName`, `search`, `isInvalid`, `createdFrom`, `notInAnySkugr` — те же смыслы, что у `GET /api/skus`. Параметр `notInAnySkugr` в этом маршруте **игнорируется** (состав группы задаётся только массивом `skugr.skus`).
 
 **Ответ 200:**  
 `{ message: string, data: Array<Sku>, pagination: { page, limit, total, totalPages, hasNext, hasPrev } }`.  
@@ -107,6 +108,20 @@ Excel-файл со списком SKU с `isInvalid: true`: либо тольк
 
 ---
 
+### DELETE `/api/skus/not-in-any-skugr`
+
+Удаление всех SKU, которые **ни в одной** товарной группе не указаны в `skugr.skus`. Опционально можно сузить выборку теми же query-полями, что и у `GET /api/skus`, **кроме** пагинации: `konkName`, `prodName`, `search`, `isInvalid`, `createdFrom`. Условие «не входит ни в одну группу» к отбору применяется всегда.
+
+**Доступ:** checkAuth + checkRoles(PRIME).
+
+**Query:** необязательные строковые фильтры в том же формате, что у `GET /api/skus` для перечисленных полей; `page` и `limit` не используются.
+
+**Ответ 200:** `{ message: string, deletedCount: number }`.
+
+**Ошибки:** 400 (невалидные query), 401, 403, 500.
+
+---
+
 ### POST `/api/skus`
 
 Создание SKU.
@@ -146,7 +161,7 @@ Body: `{ konkName?: string, prodName?: string, productId?: string, btradeAnalog?
 
 ### DELETE `/api/skus/id/:id`
 
-Удаление SKU по id.
+Удаление SKU по id. При успешном удалении этот `_id` удаляется из массива `skus` **во всех** товарных группах, где он встречался.
 
 **Доступ:** checkAuth + checkRoles(PRIME).
 

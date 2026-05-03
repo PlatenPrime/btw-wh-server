@@ -1,25 +1,7 @@
-import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { Sku } from "../../../models/Sku.js";
-function escapeRegex(value) {
-    return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-export const getAllSkusUtil = async ({ konkName, prodName, search, isInvalid, createdFrom, page, limit, }) => {
-    const filter = {};
-    if (konkName && konkName.trim() !== "")
-        filter.konkName = konkName;
-    if (prodName && prodName.trim() !== "")
-        filter.prodName = prodName;
-    if (search && search.trim() !== "") {
-        filter.title = {
-            $regex: escapeRegex(search.trim()),
-            $options: "i",
-        };
-    }
-    if (typeof isInvalid === "boolean")
-        filter.isInvalid = isInvalid;
-    if (createdFrom != null) {
-        filter.createdAt = { $gte: toSliceDate(createdFrom) };
-    }
+import { buildSkuListMongoFilter } from "../../../utils/buildSkuListMongoFilter.js";
+export const getAllSkusUtil = async ({ page, limit, ...query }) => {
+    const filter = await buildSkuListMongoFilter(query);
     const [skus, total] = await Promise.all([
         Sku.find(filter)
             .sort({ title: 1 })

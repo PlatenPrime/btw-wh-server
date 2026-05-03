@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { Skugr } from "../../../skugrs/models/Skugr.js";
 import { Sku } from "../../models/Sku.js";
 import { getAllSkusController } from "../get-all-skus/getAllSkusController.js";
 describe("getAllSkusController", () => {
@@ -7,6 +8,7 @@ describe("getAllSkusController", () => {
     let responseStatus;
     beforeEach(async () => {
         await Sku.deleteMany({});
+        await Skugr.deleteMany({});
         responseJson = {};
         responseStatus = {};
         res = {

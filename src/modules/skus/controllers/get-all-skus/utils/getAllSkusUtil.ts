@@ -1,11 +1,7 @@
 import type { Types } from "mongoose";
-import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { Sku } from "../../../models/Sku.js";
+import { buildSkuListMongoFilter } from "../../../utils/buildSkuListMongoFilter.js";
 import type { GetAllSkusQuery } from "../schemas/getAllSkusQuerySchema.js";
-
-function escapeRegex(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
 
 type SkuLean = {
   _id: Types.ObjectId;
@@ -34,27 +30,11 @@ type GetAllSkusResult = {
 };
 
 export const getAllSkusUtil = async ({
-  konkName,
-  prodName,
-  search,
-  isInvalid,
-  createdFrom,
   page,
   limit,
+  ...query
 }: GetAllSkusQuery): Promise<GetAllSkusResult> => {
-  const filter: Record<string, unknown> = {};
-  if (konkName && konkName.trim() !== "") filter.konkName = konkName;
-  if (prodName && prodName.trim() !== "") filter.prodName = prodName;
-  if (search && search.trim() !== "") {
-    filter.title = {
-      $regex: escapeRegex(search.trim()),
-      $options: "i",
-    };
-  }
-  if (typeof isInvalid === "boolean") filter.isInvalid = isInvalid;
-  if (createdFrom != null) {
-    filter.createdAt = { $gte: toSliceDate(createdFrom) };
-  }
+  const filter = await buildSkuListMongoFilter(query);
 
   const [skus, total] = await Promise.all([
     Sku.find(filter)

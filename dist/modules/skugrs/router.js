@@ -2,7 +2,7 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { createSkugrController, deleteSkugrByIdController, fillSkugrSkusController, getAllSkugrsController, getSkugrByIdController, setIsSlicedController, updateSkugrByIdController, } from "./controllers/index.js";
+import { clearSkugrSkusController, createSkugrController, deleteSkugrByIdController, deleteSkugrWithSkusController, fillSkugrSkusController, getAllSkugrsController, getSkugrByIdController, setIsSlicedController, updateSkugrByIdController, } from "./controllers/index.js";
 const router = Router();
 router.get("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAllSkugrsController));
 router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getSkugrByIdController));
@@ -10,5 +10,7 @@ router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createSku
 router.post("/id/:id/fill-skus", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(fillSkugrSkusController));
 router.post("/set-is-sliced", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(setIsSlicedController));
 router.patch("/id/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateSkugrByIdController));
+router.post("/id/:id/clear-skus", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(clearSkugrSkusController));
+router.delete("/id/:id/with-skus", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deleteSkugrWithSkusController));
 router.delete("/id/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deleteSkugrByIdController));
 export default router;

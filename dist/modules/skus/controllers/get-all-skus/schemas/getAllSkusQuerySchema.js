@@ -8,6 +8,10 @@ export const getAllSkusQuerySchema = z.object({
         .union([z.literal("true"), z.literal("false")])
         .optional()
         .transform((v) => (v === undefined ? undefined : v === "true")),
+    notInAnySkugr: z
+        .union([z.literal("true"), z.literal("false")])
+        .optional()
+        .transform((v) => (v === undefined ? undefined : v === "true")),
     createdFrom: dateStringSchema.optional(),
     page: z
         .string()

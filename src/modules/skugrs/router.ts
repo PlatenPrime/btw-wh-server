@@ -3,8 +3,10 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
+  clearSkugrSkusController,
   createSkugrController,
   deleteSkugrByIdController,
+  deleteSkugrWithSkusController,
   fillSkugrSkusController,
   getAllSkugrsController,
   getSkugrByIdController,
@@ -49,6 +51,18 @@ router.patch(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(updateSkugrByIdController),
+);
+router.post(
+  "/id/:id/clear-skus",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(clearSkugrSkusController),
+);
+router.delete(
+  "/id/:id/with-skus",
+  checkAuth,
+  checkRoles([RoleType.PRIME]),
+  asyncHandler(deleteSkugrWithSkusController),
 );
 router.delete(
   "/id/:id",
