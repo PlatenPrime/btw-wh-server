@@ -5,11 +5,9 @@ import { startCompensatingSlicesCron } from "../modules/slice-compensation/cron/
 import { startDeficitCalculationCron } from "../modules/defs/cron/startDeficitCalculationCron.js";
 import { startFillSkugrSkusCron } from "../modules/skugrs/cron/startFillSkugrSkusCron.js";
 import { startSkuInvalidFlagCron } from "../modules/skus/cron/startSkuInvalidFlagCron.js";
-import { startCollectionsBackupCron } from "./startCollectionsBackupCron.js";
 import { startFillPosNameukrFromArtsCron } from "./startFillPosNameukrFromArtsCron.js";
 export const startCronOperations = () => {
     startDeficitCalculationCron();
-    startCollectionsBackupCron();
     startFillPosNameukrFromArtsCron();
     startAnalogSlicesCron();
     startBtradeSlicesCron();

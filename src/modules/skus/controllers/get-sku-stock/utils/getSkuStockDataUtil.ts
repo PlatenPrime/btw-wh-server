@@ -4,6 +4,7 @@ import { getBalunStockData } from "../../../../browser/balun/utils/getBalunStock
 import { getYumiStockData } from "../../../../browser/yumi/utils/getYumiStockData.js";
 import { getYuminStockData } from "../../../../browser/yumin/utils/getYuminStockData.js";
 import { getSharteStockData } from "../../../../browser/sharte/utils/getSharteStockData.js";
+import { getPerfectStockData } from "../../../../browser/perfect/utils/getPerfectStockData.js";
 
 export const UNSUPPORTED_KONK_CODE = "UNSUPPORTED_KONK";
 
@@ -20,6 +21,7 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
   yumi: getYumiStockData,
   yumin: getYuminStockData,
   sharte: getSharteStockData,
+  perfect: getPerfectStockData,
 };
 
 /**

@@ -10,7 +10,6 @@ import { startFillPosNameukrFromArtsCron } from "./startFillPosNameukrFromArtsCr
 
 export const startCronOperations = () => {
   startDeficitCalculationCron();
-  startCollectionsBackupCron();
   startFillPosNameukrFromArtsCron();
   startAnalogSlicesCron();
   startBtradeSlicesCron();
