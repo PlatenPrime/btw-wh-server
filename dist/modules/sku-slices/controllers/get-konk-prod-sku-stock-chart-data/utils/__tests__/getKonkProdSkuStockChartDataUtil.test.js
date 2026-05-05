@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Art } from "../../../../../arts/models/Art.js";
 import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
+import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { getKonkProdSkuStockChartDataUtil } from "../getKonkProdSkuStockChartDataUtil.js";
 describe("getKonkProdSkuStockChartDataUtil", () => {
     beforeEach(async () => {
         await Sku.deleteMany({});
+        await Skugr.deleteMany({});
         await SkuSlice.deleteMany({});
         await BtradeSlice.deleteMany({});
         await Art.deleteMany({});
@@ -282,5 +284,51 @@ describe("getKonkProdSkuStockChartDataUtil", () => {
             competitorStock: 5,
             btradeStock: 0,
         });
+    });
+    it("with skugrIds includes only SKU from chosen groups in competitor sum", async () => {
+        const konk = "kp-skugr";
+        const prod = "kp-skugr-prod";
+        const sIn = await Sku.create({
+            konkName: konk,
+            prodName: prod,
+            productId: `${konk}-in`,
+            title: "In",
+            url: "https://e.com/in",
+        });
+        await Sku.create({
+            konkName: konk,
+            prodName: prod,
+            productId: `${konk}-out`,
+            title: "Out",
+            url: "https://e.com/out",
+        });
+        const g = await Skugr.create({
+            konkName: konk,
+            prodName: prod,
+            title: "G",
+            url: "https://e.com/g",
+            isSliced: true,
+            skus: [sIn._id],
+        });
+        const d1 = new Date("2026-09-01T00:00:00.000Z");
+        await SkuSlice.create({
+            konkName: konk,
+            date: d1,
+            data: {
+                [`${konk}-in`]: { stock: 7, price: 1 },
+                [`${konk}-out`]: { stock: 100, price: 1 },
+            },
+        });
+        const r = await getKonkProdSkuStockChartDataUtil({
+            konk,
+            prod,
+            dateFrom: d1,
+            dateTo: d1,
+            skugrIds: [g._id.toString()],
+        });
+        expect(r.ok).toBe(true);
+        if (!r.ok)
+            return;
+        expect(r.data.days[0]).toMatchObject({ competitorStock: 7 });
     });
 });

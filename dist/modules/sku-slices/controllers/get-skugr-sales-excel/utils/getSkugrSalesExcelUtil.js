@@ -40,6 +40,7 @@ export async function getSkugrSalesExcelUtil(input) {
         konkName: sku.konkName,
         competitorTitle,
         producerName,
+        skugrTitle: skugr.title,
     }));
     const { buffer } = await buildSkuSalesExcelForSkus(rows, dateFrom, dateTo, (kn, pid, d) => getSliceItem(maps, kn, pid, d), {
         summaryMode: "bottomOnly",

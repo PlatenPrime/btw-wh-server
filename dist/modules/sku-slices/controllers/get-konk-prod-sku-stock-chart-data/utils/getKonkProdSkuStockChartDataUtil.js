@@ -5,6 +5,7 @@ export async function getKonkProdSkuStockChartDataUtil(input) {
         prod: input.prod,
         dateFrom: input.dateFrom,
         dateTo: input.dateTo,
+        skugrIds: input.skugrIds,
     });
     if (!loaded.ok)
         return { ok: false };

@@ -21,6 +21,7 @@ export const getKonkProdSkuStockChartDataController = async (
     prod: firstQuery(q, "prod"),
     dateFrom: firstQuery(q, "dateFrom"),
     dateTo: firstQuery(q, "dateTo"),
+    skugrIds: q.skugrIds,
   });
 
   if (!parseResult.success) {

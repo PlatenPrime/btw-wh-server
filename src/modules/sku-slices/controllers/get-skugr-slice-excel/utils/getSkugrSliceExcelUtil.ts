@@ -39,6 +39,7 @@ export async function getSkugrSliceExcelUtil(
     productId: s.productId,
     konkName: s.konkName,
     prodName: s.prodName,
+    skugrTitle: skugr.title,
     createdAt: s.createdAt,
   }));
 

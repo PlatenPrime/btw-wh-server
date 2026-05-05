@@ -11,6 +11,7 @@ export const getKonkSkuSalesExcelController = async (req, res) => {
         dateFrom: req.query.dateFrom,
         dateTo: req.query.dateTo,
         sortBy: req.query.sortBy,
+        skugrIds: req.query.skugrIds,
     });
     if (!parseResult.success) {
         res.status(400).json({

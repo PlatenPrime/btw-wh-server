@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../../../konks/models/Konk.js";
 import { Prod } from "../../../../../prods/models/Prod.js";
+import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { getKonkProdManufacturersPieDataUtil } from "../getKonkProdManufacturersPieDataUtil.js";
@@ -8,6 +9,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     beforeEach(async () => {
         await Konk.deleteMany({});
         await Prod.deleteMany({});
+        await Skugr.deleteMany({});
         await Sku.deleteMany({});
         await SkuSlice.deleteMany({});
     });
@@ -292,5 +294,63 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
             salesPcs: 2,
             salesUah: 10,
         });
+    });
+    it("with skugrIds aggregates only SKU inside chosen Skugr groups", async () => {
+        const konk = "pie-konk-skugr";
+        const prodIn = "Maker-In";
+        const prodOut = "Maker-Out";
+        const d0 = new Date("2026-12-25T00:00:00.000Z");
+        const d1 = new Date("2026-12-26T00:00:00.000Z");
+        const sIn = await Sku.create({
+            konkName: konk,
+            prodName: prodIn,
+            productId: `${konk}-in`,
+            title: "In",
+            url: "https://e.com/pie-in",
+        });
+        await Sku.create({
+            konkName: konk,
+            prodName: prodOut,
+            productId: `${konk}-out`,
+            title: "Out",
+            url: "https://e.com/pie-out",
+        });
+        const g = await Skugr.create({
+            konkName: konk,
+            prodName: prodIn,
+            title: "G",
+            url: "https://e.com/g",
+            isSliced: true,
+            skus: [sIn._id],
+        });
+        await SkuSlice.insertMany([
+            {
+                konkName: konk,
+                date: d0,
+                data: {
+                    [`${konk}-in`]: { stock: 10, price: 5 },
+                    [`${konk}-out`]: { stock: 50, price: 5 },
+                },
+            },
+            {
+                konkName: konk,
+                date: d1,
+                data: {
+                    [`${konk}-in`]: { stock: 6, price: 5 },
+                    [`${konk}-out`]: { stock: 30, price: 5 },
+                },
+            },
+        ]);
+        const result = await getKonkProdManufacturersPieDataUtil({
+            konk,
+            dateFrom: d1,
+            dateTo: d1,
+            skugrIds: [g._id.toString()],
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        expect(Object.keys(result.data)).toEqual([prodIn]);
+        expect(result.data[prodIn]).toMatchObject({ salesPcs: 4, salesUah: 20 });
     });
 });

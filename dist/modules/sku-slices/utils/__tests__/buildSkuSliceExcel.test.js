@@ -55,20 +55,22 @@ describe("buildSkuSliceExcelForSkus", () => {
         await wb.xlsx.load(buffer);
         const ws = wb.getWorksheet("Срез");
         expect(ws).toBeDefined();
-        expect(ws.getRow(1).getCell(6).value).toBe("");
-        expect(ws.getRow(1).getCell(7).value).toBe(formatExcelDateHeaderUk(from));
-        expect(ws.getRow(1).getCell(8).value).toBe(formatExcelDateHeaderUk(to));
-        expect(ws.getRow(1).getCell(9).value).toBe("Різниця");
-        expect(ws.getRow(1).getCell(10).value).toBe("Різниця, %");
+        expect(ws.getRow(1).getCell(5).value).toBe("Товарна група");
+        expect(ws.getRow(1).getCell(6).value).toBe("Посилання");
+        expect(ws.getRow(1).getCell(7).value).toBe("");
+        expect(ws.getRow(1).getCell(8).value).toBe(formatExcelDateHeaderUk(from));
+        expect(ws.getRow(1).getCell(9).value).toBe(formatExcelDateHeaderUk(to));
+        expect(ws.getRow(1).getCell(10).value).toBe("Різниця");
+        expect(ws.getRow(1).getCell(11).value).toBe("Різниця, %");
         expect(ws.getRow(2).getCell(1).value).toBe("air-1");
         expect(ws.getRow(2).getCell(3).value).toBe("Конкурент UA");
         expect(ws.getRow(2).getCell(4).value).toBe("Виробник UA");
-        expect(ws.getRow(2).getCell(6).value).toBe("Залишок");
-        expect(ws.getRow(3).getCell(6).value).toBe("Ціна");
-        expect(ws.getRow(4).getCell(6).value).not.toBe("Виручка");
-        expect(ws.getRow(3).getCell(7).value).toBe(5);
+        expect(ws.getRow(2).getCell(7).value).toBe("Залишок");
+        expect(ws.getRow(3).getCell(7).value).toBe("Ціна");
+        expect(ws.getRow(4).getCell(7).value).not.toBe("Виручка");
         expect(ws.getRow(3).getCell(8).value).toBe(5);
-        expect(ws.getRow(2).getCell(9).value).toBe(-3);
+        expect(ws.getRow(3).getCell(9).value).toBe(5);
+        expect(ws.getRow(2).getCell(10).value).toBe(-3);
         const merged = ws.model.merges ?? [];
         expect(merged.some((m) => /^A2:A3$/.test(String(m)))).toBe(true);
         let foundStats = false;
@@ -119,8 +121,8 @@ describe("buildSkuSliceExcelForSkus", () => {
         expect(ws).toBeDefined();
         // Two SKU blocks (2 rows each) => totals row starts at row 6.
         expect(ws.getRow(6).getCell(1).value).toBe("Підсумок");
-        expect(ws.getRow(6).getCell(9).value).toBe(-1); // (-3) + (+2)
-        expect(ws.getRow(6).getCell(10).value).toBe(-7.14); // -1 / (10+4) * 100
+        expect(ws.getRow(6).getCell(10).value).toBe(-1); // (-3) + (+2)
+        expect(ws.getRow(6).getCell(11).value).toBe(-7.14); // -1 / (10+4) * 100
     });
     it("highlights stock increase day with supply fill, not red font", async () => {
         const from = new Date("2026-01-10T00:00:00.000Z");
@@ -147,7 +149,7 @@ describe("buildSkuSliceExcelForSkus", () => {
         await wb.xlsx.load(buffer);
         const ws = wb.getWorksheet("Срез");
         expect(ws).toBeDefined();
-        const stockSecondDay = ws.getRow(2).getCell(8);
+        const stockSecondDay = ws.getRow(2).getCell(9);
         expect(stockSecondDay.value).toBe(3);
         expect(stockSecondDay.fill).toMatchObject({
             type: "pattern",
@@ -182,7 +184,7 @@ describe("buildSkuSliceExcelForSkus", () => {
         await wb.xlsx.load(buffer);
         const ws = wb.getWorksheet("Срез");
         expect(ws).toBeDefined();
-        const stockSecondDay = ws.getRow(2).getCell(8);
+        const stockSecondDay = ws.getRow(2).getCell(9);
         expect(stockSecondDay.fill).toMatchObject({
             type: "pattern",
             pattern: "solid",
@@ -214,9 +216,47 @@ describe("buildSkuSliceExcelForSkus", () => {
         await wb.xlsx.load(buffer);
         const ws = wb.getWorksheet("Срез");
         expect(ws).toBeDefined();
-        const priceSecondDay = ws.getRow(3).getCell(8);
+        const priceSecondDay = ws.getRow(3).getCell(9);
         expect(priceSecondDay.value).toBe(12);
         expect(priceSecondDay.font?.color?.argb?.toUpperCase()).toBe("FFFF0000");
+    });
+});
+describe("buildSkuSliceExcelForSkus skugr column", () => {
+    it("places skugrTitle into column 5 and url into column 6", async () => {
+        const from = new Date("2026-01-10T00:00:00.000Z");
+        const to = new Date("2026-01-10T00:00:00.000Z");
+        const { buffer } = await buildSkuSliceExcelForSkus([
+            {
+                title: "N",
+                url: "https://x.com/a",
+                productId: "air-1",
+                konkName: "air",
+                prodName: "p",
+                skugrTitle: "Group A",
+            },
+        ], from, to, () => ({ stock: 1, price: 1 }), TITLES);
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(buffer);
+        const ws = wb.getWorksheet("Срез");
+        expect(ws.getRow(2).getCell(5).value).toBe("Group A");
+        expect(ws.getRow(2).getCell(6).value).toBe("https://x.com/a");
+    });
+    it("falls back to empty string when skugrTitle is not provided", async () => {
+        const from = new Date("2026-01-10T00:00:00.000Z");
+        const to = new Date("2026-01-10T00:00:00.000Z");
+        const { buffer } = await buildSkuSliceExcelForSkus([
+            {
+                title: "N",
+                url: "https://x.com/a",
+                productId: "air-1",
+                konkName: "air",
+                prodName: "p",
+            },
+        ], from, to, () => ({ stock: 1, price: 1 }), TITLES);
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(buffer);
+        const ws = wb.getWorksheet("Срез");
+        expect(ws.getRow(2).getCell(5).value).toBe("");
     });
 });
 describe("buildSkuSliceExcel helpers", () => {

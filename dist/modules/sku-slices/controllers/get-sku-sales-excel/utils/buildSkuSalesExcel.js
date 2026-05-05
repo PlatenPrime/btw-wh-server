@@ -8,10 +8,13 @@ const HEADER_LABELS = [
     "Назва",
     "Конкурент",
     "Виробник",
+    "Товарна група",
     "Посилання",
 ];
 const METRIC_LABELS = ["Продажі", "Ціна", "Виручка"];
 const ROWS_PER_SKU_BLOCK = 3;
+const META_COL_COUNT = HEADER_LABELS.length;
+const METRIC_LABEL_COL = META_COL_COUNT + 1;
 const RECOUNT_DAY_PURPLE_FILL_ARGB = "FF800080";
 /**
  * Продажі/виручка по днях і підсумки за період — та сама логіка, що в Excel-рядку SKU.
@@ -76,7 +79,7 @@ export async function buildSkuSalesExcelForSkus(skus, dateFrom, dateTo, getItem,
     const datesReport = enumerateSliceDates(dateFrom, dateTo);
     const dates = datesReport;
     const dateCount = dates.length;
-    const dataStartCol = 7;
+    const dataStartCol = METRIC_LABEL_COL + 1;
     const totalCol = dataStartCol + dateCount;
     const columnCount = totalCol;
     const workbook = new ExcelJS.Workbook();
@@ -85,7 +88,7 @@ export async function buildSkuSalesExcelForSkus(skus, dateFrom, dateTo, getItem,
     for (let i = 0; i < HEADER_LABELS.length; i++) {
         headerRow.getCell(i + 1).value = HEADER_LABELS[i];
     }
-    headerRow.getCell(6).value = "";
+    headerRow.getCell(METRIC_LABEL_COL).value = "";
     dates.forEach((d, index) => {
         headerRow.getCell(dataStartCol + index).value = formatExcelDateHeaderUk(d);
     });
@@ -109,10 +112,11 @@ export async function buildSkuSalesExcelForSkus(skus, dateFrom, dateTo, getItem,
         salesRow.getCell(2).value = sku.title;
         salesRow.getCell(3).value = sku.competitorTitle;
         salesRow.getCell(4).value = sku.producerName;
-        salesRow.getCell(5).value = sku.url;
-        salesRow.getCell(6).value = METRIC_LABELS[0];
-        priceRow.getCell(6).value = METRIC_LABELS[1];
-        revenueRow.getCell(6).value = METRIC_LABELS[2];
+        salesRow.getCell(5).value = sku.skugrTitle ?? "";
+        salesRow.getCell(6).value = sku.url;
+        salesRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[0];
+        priceRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[1];
+        revenueRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[2];
         for (let i = 0; i < dateCount; i++) {
             const col = dataStartCol + i;
             const salesCell = salesRow.getCell(col);
@@ -130,18 +134,14 @@ export async function buildSkuSalesExcelForSkus(skus, dateFrom, dateTo, getItem,
         salesRow.getCell(totalCol).value = totalSales;
         priceRow.getCell(totalCol).value = null;
         revenueRow.getCell(totalCol).value = totalRevenue;
-        sheet.mergeCells(startRow, 1, startRow + 2, 1);
-        sheet.mergeCells(startRow, 2, startRow + 2, 2);
-        sheet.mergeCells(startRow, 3, startRow + 2, 3);
-        sheet.mergeCells(startRow, 4, startRow + 2, 4);
-        sheet.mergeCells(startRow, 5, startRow + 2, 5);
-        for (const c of [1, 2, 3, 4, 5]) {
+        for (let c = 1; c <= META_COL_COUNT; c++) {
+            sheet.mergeCells(startRow, c, startRow + 2, c);
             setMergedMetaAlignment(salesRow.getCell(c));
         }
         for (let r = startRow; r <= startRow + 2; r++) {
             applyDataRowStyle(sheet, r, columnCount);
         }
-        applyRevenueRowBold(sheet, startRow + 2, 6, totalCol);
+        applyRevenueRowBold(sheet, startRow + 2, METRIC_LABEL_COL, totalCol);
         startRow += ROWS_PER_SKU_BLOCK;
         if (summaryMode === "perSku") {
             writeSummaryRow(sheet, startRow, summarySalesLabel, totalSales);

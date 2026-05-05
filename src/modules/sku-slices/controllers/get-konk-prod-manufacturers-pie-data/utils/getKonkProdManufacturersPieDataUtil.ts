@@ -16,6 +16,7 @@ import {
   sliceDataProjectForProductIdList,
   type SliceAggregateRowSingle,
 } from "../../../utils/sliceDataAggregationStages.js";
+import { resolveKonkProdSkus } from "../../../utils/resolveKonkProdSkus.js";
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
 import type { GetKonkProdManufacturersPieDataInput } from "../schemas/getKonkProdManufacturersPieDataSchema.js";
 
@@ -51,16 +52,30 @@ export async function getKonkProdManufacturersPieDataUtil(
   const dateTo = toSliceDate(input.dateTo);
   const warmupStart = sliceDateMinusDays(dateFrom, 1);
 
-  const skuDocs = await Sku.find({ konkName: input.konk })
-    .select("productId prodName")
-    .lean<SkuLean[]>();
-
+  const skugrIds = (input.skugrIds ?? []).filter((s) => s.length > 0);
   const productToManufacturer = new Map<string, string>();
-  for (const doc of skuDocs) {
-    const productId = (doc.productId ?? "").trim();
-    const prodName = (doc.prodName ?? "").trim();
-    if (!productId || !prodName) continue;
-    productToManufacturer.set(productId, prodName);
+  if (skugrIds.length > 0) {
+    const resolved = await resolveKonkProdSkus({
+      konk: input.konk,
+      skugrIds,
+    });
+    for (const r of resolved) {
+      const productId = (r.productId ?? "").trim();
+      const prodName = (r.prodName ?? "").trim();
+      if (!productId || !prodName) continue;
+      productToManufacturer.set(productId, prodName);
+    }
+  } else {
+    const skuDocs = await Sku.find({ konkName: input.konk })
+      .select("productId prodName")
+      .lean<SkuLean[]>();
+
+    for (const doc of skuDocs) {
+      const productId = (doc.productId ?? "").trim();
+      const prodName = (doc.prodName ?? "").trim();
+      if (!productId || !prodName) continue;
+      productToManufacturer.set(productId, prodName);
+    }
   }
 
   const productIds = [...productToManufacturer.keys()];

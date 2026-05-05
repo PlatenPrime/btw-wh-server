@@ -11,6 +11,7 @@ import {
 } from "../../btrade-slices/utils/btradeSliceAggregationStages.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "./aggregateDailySkuSliceMetricsForSkus.js";
+import { resolveKonkProdSkus } from "./resolveKonkProdSkus.js";
 import { enumerateReportingDates } from "./skugrReporting.js";
 
 export type KonkProdSkuChartRangeInput = {
@@ -18,6 +19,7 @@ export type KonkProdSkuChartRangeInput = {
   prod: string;
   dateFrom: Date;
   dateTo: Date;
+  skugrIds?: string[];
 };
 
 export type KonkProdSkuChartSeriesLoad =
@@ -45,9 +47,12 @@ type SkuLean = {
  * срезы SkuSlice. Btrade: артикулы из Art, у которых `prodName` (trim, без учёта регистра)
  * совпадает с query `prod`; по ним — BtradeSlice. Поле Sku.btradeAnalog не используется.
  *
- * Зарезервировано: если после trim `prod` строго равен `"all"`, конкурент — все SKU с
- * данным `konkName` (без фильтра по производителю); Btrade — все уникальные непустые
- * `artikul` из Art. Для Excel `konk`/`prod` это значение не обрабатывается особым образом.
+ * Если задан непустой `skugrIds`, конкурентский набор SKU собирается через
+ * `resolveKonkProdSkus` (фильтр по выбранным товарным группам, дедуп по `productId`,
+ * порядок групп — порядок присланного `skugrIds`); Btrade — артикулы из Art,
+ * у которых `prodName` совпадает с одним из `prodName` отрезолвленных SKU
+ * (case-insensitive по trim). Без skugrIds логика прежняя: режим `prod === "all"`
+ * — все SKU конкурента и все непустые `artikul` из Art.
  *
  * При очень большом числе артикулов при необходимости можно батчить
  * `sliceDataProjectForArtikulList` по чанкам и суммировать в памяти.
@@ -58,25 +63,42 @@ export async function loadKonkProdSkuChartSeries(
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
 
+  const skugrIds = (input.skugrIds ?? []).filter((s) => s.length > 0);
+  const hasSkugrFilter = skugrIds.length > 0;
   const isAllProd = input.prod.trim() === "all";
 
-  const skuDocs = await Sku.find(
-    isAllProd
-      ? { konkName: input.konk }
-      : { konkName: input.konk, prodName: input.prod },
-  )
-    .sort({ productId: 1 })
-    .select("konkName productId")
-    .lean<SkuLean[]>();
-
   const skus: Array<{ konkName: string; productId: string }> = [];
-  for (const doc of skuDocs) {
-    const pid = (doc.productId ?? "").trim();
-    if (!pid) continue;
-    skus.push({
-      konkName: doc.konkName,
-      productId: pid,
+  const prodNamesForBtrade = new Set<string>();
+
+  if (hasSkugrFilter) {
+    const resolved = await resolveKonkProdSkus({
+      konk: input.konk,
+      prod: input.prod,
+      skugrIds,
     });
+    for (const r of resolved) {
+      skus.push({ konkName: r.konkName, productId: r.productId });
+      const prodName = (r.prodName ?? "").trim();
+      if (prodName) prodNamesForBtrade.add(prodName.toLowerCase());
+    }
+  } else {
+    const skuDocs = await Sku.find(
+      isAllProd
+        ? { konkName: input.konk }
+        : { konkName: input.konk, prodName: input.prod },
+    )
+      .sort({ productId: 1 })
+      .select("konkName productId")
+      .lean<SkuLean[]>();
+
+    for (const doc of skuDocs) {
+      const pid = (doc.productId ?? "").trim();
+      if (!pid) continue;
+      skus.push({
+        konkName: doc.konkName,
+        productId: pid,
+      });
+    }
   }
 
   if (skus.length === 0) return { ok: false };
@@ -97,8 +119,22 @@ export async function loadKonkProdSkuChartSeries(
   const competitorSales = compMetrics.data.map((d) => d.sales);
   const competitorRevenue = compMetrics.data.map((d) => d.revenue);
 
-  const arts = await Art.find(
-    isAllProd
+  const artFilter = hasSkugrFilter
+    ? prodNamesForBtrade.size === 0
+      ? null
+      : {
+          $expr: {
+            $in: [
+              {
+                $toLower: {
+                  $trim: { input: { $ifNull: ["$prodName", ""] } },
+                },
+              },
+              [...prodNamesForBtrade],
+            ],
+          },
+        }
+    : isAllProd
       ? {
           $expr: {
             $gt: [
@@ -122,10 +158,9 @@ export async function loadKonkProdSkuChartSeries(
               input.prod.trim().toLowerCase(),
             ],
           },
-        },
-  )
-    .select("artikul")
-    .lean();
+        };
+
+  const arts = artFilter ? await Art.find(artFilter).select("artikul").lean() : [];
 
   const allowedArtikuls: string[] = [];
   const seenArt = new Set<string>();

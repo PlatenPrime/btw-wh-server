@@ -12,10 +12,13 @@ const HEADER_LABELS = [
     "Назва",
     "Конкурент",
     "Виробник",
+    "Товарна група",
     "Посилання",
 ];
 const METRIC_LABELS = ["Залишок", "Ціна"];
 const ROWS_PER_SKU_BLOCK = 2;
+const META_COL_COUNT = HEADER_LABELS.length;
+const METRIC_LABEL_COL = META_COL_COUNT + 1;
 export function formatDateHeader(d) {
     const y = d.getUTCFullYear();
     const m = String(d.getUTCMonth() + 1).padStart(2, "0");
@@ -155,7 +158,7 @@ export async function buildSkuSliceExcelForSkus(skus, dateFrom, dateTo, getItem,
     const reportOffset = datesFull.length - datesReport.length;
     const dates = datesReport;
     const dateCount = dates.length;
-    const dataStartCol = 7;
+    const dataStartCol = METRIC_LABEL_COL + 1;
     const diffCol = dataStartCol + dateCount;
     const diffPctCol = diffCol + 1;
     const columnCount = diffPctCol;
@@ -165,7 +168,7 @@ export async function buildSkuSliceExcelForSkus(skus, dateFrom, dateTo, getItem,
     for (let i = 0; i < HEADER_LABELS.length; i++) {
         headerRow.getCell(i + 1).value = HEADER_LABELS[i];
     }
-    headerRow.getCell(6).value = "";
+    headerRow.getCell(METRIC_LABEL_COL).value = "";
     dates.forEach((d, index) => {
         headerRow.getCell(dataStartCol + index).value = formatExcelDateHeaderUk(d);
     });
@@ -187,9 +190,10 @@ export async function buildSkuSliceExcelForSkus(skus, dateFrom, dateTo, getItem,
         stockRow.getCell(2).value = sku.title;
         stockRow.getCell(3).value = titles.competitorTitle;
         stockRow.getCell(4).value = titles.producerName;
-        stockRow.getCell(5).value = sku.url;
-        stockRow.getCell(6).value = METRIC_LABELS[0];
-        priceRow.getCell(6).value = METRIC_LABELS[1];
+        stockRow.getCell(5).value = sku.skugrTitle ?? "";
+        stockRow.getCell(6).value = sku.url;
+        stockRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[0];
+        priceRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[1];
         for (let i = 0; i < dateCount; i++) {
             const col = dataStartCol + i;
             const st = stocks[i];
@@ -197,12 +201,8 @@ export async function buildSkuSliceExcelForSkus(skus, dateFrom, dateTo, getItem,
             stockRow.getCell(col).value = st ?? null;
             priceRow.getCell(col).value = pr ?? null;
         }
-        sheet.mergeCells(startRow, 1, startRow + 1, 1);
-        sheet.mergeCells(startRow, 2, startRow + 1, 2);
-        sheet.mergeCells(startRow, 3, startRow + 1, 3);
-        sheet.mergeCells(startRow, 4, startRow + 1, 4);
-        sheet.mergeCells(startRow, 5, startRow + 1, 5);
-        for (const c of [1, 2, 3, 4, 5]) {
+        for (let c = 1; c <= META_COL_COUNT; c++) {
+            sheet.mergeCells(startRow, c, startRow + 1, c);
             setMergedMetaAlignment(stockRow.getCell(c));
         }
         applyRowDiffAndPct(stockRow, stocks, dataStartCol, diffCol, diffPctCol);

@@ -66,6 +66,7 @@ export async function getSkugrSalesExcelUtil(
     konkName: sku.konkName,
     competitorTitle,
     producerName,
+    skugrTitle: skugr.title,
   }));
 
   const { buffer } = await buildSkuSalesExcelForSkus(

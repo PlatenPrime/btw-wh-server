@@ -1,35 +1,23 @@
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
-import { Sku } from "../../../../skus/models/Sku.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import { aggregateSkuSlices, sliceDataProjectForProductIdList, } from "../../../utils/sliceDataAggregationStages.js";
 import { formatDateHeader, safeFilePart, } from "../../../utils/buildSkuSliceExcel.js";
+import { resolveKonkProdSkus } from "../../../utils/resolveKonkProdSkus.js";
 import { buildSkuSalesExcelForSkus, computeSkuSalesPeriodMetrics, } from "../../get-sku-sales-excel/utils/buildSkuSalesExcel.js";
 export async function getKonkSkuSalesExcelUtil(input) {
-    const skus = await Sku.find({
-        konkName: input.konk,
-        prodName: input.prod,
-    })
-        .sort({ productId: 1 })
-        .lean();
-    if (skus.length === 0)
-        return { ok: false };
-    const rowsBase = skus
-        .map((sku) => ({
-        title: sku.title,
-        url: sku.url,
-        productId: (sku.productId ?? "").trim(),
-        konkName: sku.konkName,
-        prodName: sku.prodName,
-    }))
-        .filter((row) => row.productId !== "");
-    if (rowsBase.length === 0)
+    const resolved = await resolveKonkProdSkus({
+        konk: input.konk,
+        prod: input.prod,
+        skugrIds: input.skugrIds,
+    });
+    if (resolved.length === 0)
         return { ok: false };
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
     const warmStart = sliceDateMinusDays(dateFrom, 1);
-    const allowedProductIds = rowsBase.map((r) => r.productId);
+    const allowedProductIds = resolved.map((r) => r.productId);
     const slices = await aggregateSkuSlices([
         {
             $match: {
@@ -52,13 +40,14 @@ export async function getKonkSkuSalesExcelUtil(input) {
     const recountDaysSet = new Set(recountDays);
     const competitorTitle = (konkDoc?.title ?? "").trim();
     const producerName = (prodDoc?.title ?? "").trim();
-    const rows = rowsBase.map((row) => ({
-        title: row.title,
-        url: row.url,
-        productId: row.productId,
-        konkName: row.konkName,
+    const rows = resolved.map((r) => ({
+        title: r.title,
+        url: r.url,
+        productId: r.productId,
+        konkName: r.konkName,
         competitorTitle,
         producerName,
+        skugrTitle: r.skugrTitle,
     }));
     const getSliceItem = (kn, pid, d) => {
         if (kn !== input.konk)

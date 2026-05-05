@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { dateStringSchema } from "./dateSchema.js";
+import { skugrIdsSchema } from "./skugrIdsSchema.js";
 
 export const konkProdRangeSchema = z
   .object({
@@ -7,6 +8,7 @@ export const konkProdRangeSchema = z
     prod: z.string().trim().min(1, "prod is required"),
     dateFrom: dateStringSchema,
     dateTo: dateStringSchema,
+    skugrIds: skugrIdsSchema,
   })
   .refine((data) => data.dateFrom.getTime() <= data.dateTo.getTime(), {
     message: "dateFrom must be before or equal to dateTo",

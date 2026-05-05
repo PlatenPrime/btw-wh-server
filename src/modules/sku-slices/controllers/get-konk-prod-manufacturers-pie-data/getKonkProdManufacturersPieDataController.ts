@@ -20,6 +20,7 @@ export const getKonkProdManufacturersPieDataController = async (
     konk: firstQuery(q, "konk"),
     dateFrom: firstQuery(q, "dateFrom"),
     dateTo: firstQuery(q, "dateTo"),
+    skugrIds: q.skugrIds,
   });
 
   if (!parseResult.success) {

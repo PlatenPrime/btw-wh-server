@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import ExcelJS from "exceljs";
+import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { formatExcelDateHeaderUk } from "../../../../../../lib/excel/formatExcelDateHeaderUk.js";
@@ -7,6 +8,7 @@ import { getKonkSkuSalesExcelUtil } from "../getKonkSkuSalesExcelUtil.js";
 describe("getKonkSkuSalesExcelUtil", () => {
     beforeEach(async () => {
         await Sku.deleteMany({});
+        await Skugr.deleteMany({});
         await SkuSlice.deleteMany({});
     });
     it("returns ok false when no skus for konk/prod", async () => {
@@ -140,7 +142,7 @@ describe("getKonkSkuSalesExcelUtil", () => {
         const wb = new ExcelJS.Workbook();
         await wb.xlsx.load(result.buffer);
         const ws = wb.getWorksheet("Продажі");
-        expect(ws?.getRow(1).getCell(7).value).toBe(formatExcelDateHeaderUk(d1));
+        expect(ws?.getRow(1).getCell(8).value).toBe(formatExcelDateHeaderUk(d1));
         expect(ws?.getRow(2).getCell(1).value).toBe("zzz-high-revenue");
         expect(ws?.getRow(5).getCell(1).value).toBe("aaa-many-sales");
     });
@@ -202,5 +204,80 @@ describe("getKonkSkuSalesExcelUtil", () => {
         const ws = wb.getWorksheet("Продажі");
         expect(ws?.getRow(2).getCell(1).value).toBe("aaa-low-sales");
         expect(ws?.getRow(5).getCell(1).value).toBe("zzz-high-sales");
+    });
+    it("filters skus by skugrIds and writes Skugr title into column 5", async () => {
+        const sA = await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "air-skugr-a",
+            title: "A",
+            url: "https://e.com/sa",
+        });
+        const sB = await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "air-skugr-b",
+            title: "B",
+            url: "https://e.com/sb",
+        });
+        await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "air-skugr-c",
+            title: "C",
+            url: "https://e.com/sc",
+        });
+        const g = await Skugr.create({
+            konkName: "air",
+            prodName: "gemar",
+            title: "Selected Group",
+            url: "https://e.com/g",
+            isSliced: true,
+            skus: [sA._id, sB._id],
+        });
+        const d1 = new Date("2026-06-01T00:00:00.000Z");
+        const d2 = new Date("2026-06-02T00:00:00.000Z");
+        await SkuSlice.insertMany([
+            {
+                konkName: "air",
+                date: d1,
+                data: {
+                    "air-skugr-a": { stock: 5, price: 3 },
+                    "air-skugr-b": { stock: 4, price: 4 },
+                    "air-skugr-c": { stock: 9, price: 1 },
+                },
+            },
+            {
+                konkName: "air",
+                date: d2,
+                data: {
+                    "air-skugr-a": { stock: 4, price: 3 },
+                    "air-skugr-b": { stock: 1, price: 4 },
+                    "air-skugr-c": { stock: 8, price: 1 },
+                },
+            },
+        ]);
+        const result = await getKonkSkuSalesExcelUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d2,
+            skugrIds: [g._id.toString()],
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(result.buffer);
+        const ws = wb.getWorksheet("Продажі");
+        expect(ws?.getRow(2).getCell(1).value).toBe("air-skugr-a");
+        expect(ws?.getRow(5).getCell(1).value).toBe("air-skugr-b");
+        expect(ws?.getRow(2).getCell(5).value).toBe("Selected Group");
+        let found = false;
+        ws?.eachRow((row) => {
+            if (row.getCell(1).value === "air-skugr-c")
+                found = true;
+        });
+        expect(found).toBe(false);
     });
 });

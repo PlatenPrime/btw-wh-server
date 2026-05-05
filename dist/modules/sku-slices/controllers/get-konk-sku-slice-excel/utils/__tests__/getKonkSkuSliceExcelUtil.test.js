@@ -1,10 +1,13 @@
+import ExcelJS from "exceljs";
 import { beforeEach, describe, expect, it } from "vitest";
+import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { getKonkSkuSliceExcelUtil } from "../getKonkSkuSliceExcelUtil.js";
 describe("getKonkSkuSliceExcelUtil", () => {
     beforeEach(async () => {
         await Sku.deleteMany({});
+        await Skugr.deleteMany({});
         await SkuSlice.deleteMany({});
     });
     it("returns ok false when no skus for konk prod", async () => {
@@ -53,5 +56,59 @@ describe("getKonkSkuSliceExcelUtil", () => {
             expect(r.fileName).toContain("air");
             expect(r.fileName).toContain("gemar");
         }
+    });
+    it("filters skus by skugrIds and writes Skugr title into column 5", async () => {
+        const sA = await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "air-slice-skugr-a",
+            title: "A",
+            url: "https://e.com/a",
+        });
+        await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "air-slice-skugr-b",
+            title: "B",
+            url: "https://e.com/b",
+        });
+        const g = await Skugr.create({
+            konkName: "air",
+            prodName: "gemar",
+            title: "Filtered Group",
+            url: "https://e.com/g",
+            isSliced: true,
+            skus: [sA._id],
+        });
+        const d = new Date("2026-03-15T00:00:00.000Z");
+        await SkuSlice.create({
+            konkName: "air",
+            date: d,
+            data: {
+                "air-slice-skugr-a": { stock: 4, price: 5 },
+                "air-slice-skugr-b": { stock: 6, price: 7 },
+            },
+        });
+        const r = await getKonkSkuSliceExcelUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d,
+            dateTo: d,
+            skugrIds: [g._id.toString()],
+        });
+        expect(r.ok).toBe(true);
+        if (!r.ok)
+            return;
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(r.buffer);
+        const ws = wb.getWorksheet("Срез");
+        expect(ws?.getRow(2).getCell(1).value).toBe("air-slice-skugr-a");
+        expect(ws?.getRow(2).getCell(5).value).toBe("Filtered Group");
+        let foundB = false;
+        ws?.eachRow((row) => {
+            if (row.getCell(1).value === "air-slice-skugr-b")
+                foundB = true;
+        });
+        expect(foundB).toBe(false);
     });
 });

@@ -14,6 +14,7 @@ export const getKonkProdManufacturersPieDataController = async (req, res) => {
         konk: firstQuery(q, "konk"),
         dateFrom: firstQuery(q, "dateFrom"),
         dateTo: firstQuery(q, "dateTo"),
+        skugrIds: q.skugrIds,
     });
     if (!parseResult.success) {
         res.status(400).json({

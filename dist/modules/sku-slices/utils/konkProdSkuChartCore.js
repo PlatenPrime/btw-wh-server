@@ -4,15 +4,19 @@ import { Sku } from "../../skus/models/Sku.js";
 import { aggregateBtradeSlices, sliceDataProjectForArtikulList, } from "../../btrade-slices/utils/btradeSliceAggregationStages.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "./aggregateDailySkuSliceMetricsForSkus.js";
+import { resolveKonkProdSkus } from "./resolveKonkProdSkus.js";
 import { enumerateReportingDates } from "./skugrReporting.js";
 /**
  * Конкурент: SKU с `konkName` + `prodName` из query (точное совпадение `prodName`),
  * срезы SkuSlice. Btrade: артикулы из Art, у которых `prodName` (trim, без учёта регистра)
  * совпадает с query `prod`; по ним — BtradeSlice. Поле Sku.btradeAnalog не используется.
  *
- * Зарезервировано: если после trim `prod` строго равен `"all"`, конкурент — все SKU с
- * данным `konkName` (без фильтра по производителю); Btrade — все уникальные непустые
- * `artikul` из Art. Для Excel `konk`/`prod` это значение не обрабатывается особым образом.
+ * Если задан непустой `skugrIds`, конкурентский набор SKU собирается через
+ * `resolveKonkProdSkus` (фильтр по выбранным товарным группам, дедуп по `productId`,
+ * порядок групп — порядок присланного `skugrIds`); Btrade — артикулы из Art,
+ * у которых `prodName` совпадает с одним из `prodName` отрезолвленных SKU
+ * (case-insensitive по trim). Без skugrIds логика прежняя: режим `prod === "all"`
+ * — все SKU конкурента и все непустые `artikul` из Art.
  *
  * При очень большом числе артикулов при необходимости можно батчить
  * `sliceDataProjectForArtikulList` по чанкам и суммировать в памяти.
@@ -20,22 +24,40 @@ import { enumerateReportingDates } from "./skugrReporting.js";
 export async function loadKonkProdSkuChartSeries(input) {
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
+    const skugrIds = (input.skugrIds ?? []).filter((s) => s.length > 0);
+    const hasSkugrFilter = skugrIds.length > 0;
     const isAllProd = input.prod.trim() === "all";
-    const skuDocs = await Sku.find(isAllProd
-        ? { konkName: input.konk }
-        : { konkName: input.konk, prodName: input.prod })
-        .sort({ productId: 1 })
-        .select("konkName productId")
-        .lean();
     const skus = [];
-    for (const doc of skuDocs) {
-        const pid = (doc.productId ?? "").trim();
-        if (!pid)
-            continue;
-        skus.push({
-            konkName: doc.konkName,
-            productId: pid,
+    const prodNamesForBtrade = new Set();
+    if (hasSkugrFilter) {
+        const resolved = await resolveKonkProdSkus({
+            konk: input.konk,
+            prod: input.prod,
+            skugrIds,
         });
+        for (const r of resolved) {
+            skus.push({ konkName: r.konkName, productId: r.productId });
+            const prodName = (r.prodName ?? "").trim();
+            if (prodName)
+                prodNamesForBtrade.add(prodName.toLowerCase());
+        }
+    }
+    else {
+        const skuDocs = await Sku.find(isAllProd
+            ? { konkName: input.konk }
+            : { konkName: input.konk, prodName: input.prod })
+            .sort({ productId: 1 })
+            .select("konkName productId")
+            .lean();
+        for (const doc of skuDocs) {
+            const pid = (doc.productId ?? "").trim();
+            if (!pid)
+                continue;
+            skus.push({
+                konkName: doc.konkName,
+                productId: pid,
+            });
+        }
     }
     if (skus.length === 0)
         return { ok: false };
@@ -50,33 +72,47 @@ export async function loadKonkProdSkuChartSeries(input) {
     const competitorStock = compMetrics.data.map((d) => d.stock);
     const competitorSales = compMetrics.data.map((d) => d.sales);
     const competitorRevenue = compMetrics.data.map((d) => d.revenue);
-    const arts = await Art.find(isAllProd
-        ? {
-            $expr: {
-                $gt: [
-                    {
-                        $strLenCP: {
-                            $trim: { input: { $ifNull: ["$artikul", ""] } },
+    const artFilter = hasSkugrFilter
+        ? prodNamesForBtrade.size === 0
+            ? null
+            : {
+                $expr: {
+                    $in: [
+                        {
+                            $toLower: {
+                                $trim: { input: { $ifNull: ["$prodName", ""] } },
+                            },
                         },
-                    },
-                    0,
-                ],
-            },
-        }
-        : {
-            $expr: {
-                $eq: [
-                    {
-                        $toLower: {
-                            $trim: { input: { $ifNull: ["$prodName", ""] } },
+                        [...prodNamesForBtrade],
+                    ],
+                },
+            }
+        : isAllProd
+            ? {
+                $expr: {
+                    $gt: [
+                        {
+                            $strLenCP: {
+                                $trim: { input: { $ifNull: ["$artikul", ""] } },
+                            },
                         },
-                    },
-                    input.prod.trim().toLowerCase(),
-                ],
-            },
-        })
-        .select("artikul")
-        .lean();
+                        0,
+                    ],
+                },
+            }
+            : {
+                $expr: {
+                    $eq: [
+                        {
+                            $toLower: {
+                                $trim: { input: { $ifNull: ["$prodName", ""] } },
+                            },
+                        },
+                        input.prod.trim().toLowerCase(),
+                    ],
+                },
+            };
+    const arts = artFilter ? await Art.find(artFilter).select("artikul").lean() : [];
     const allowedArtikuls = [];
     const seenArt = new Set();
     for (const a of arts) {

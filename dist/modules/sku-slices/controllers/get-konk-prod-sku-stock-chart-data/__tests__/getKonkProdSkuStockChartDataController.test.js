@@ -74,6 +74,85 @@ describe("getKonkProdSkuStockChartDataController", () => {
         expect(arg.prod).toBe("gemar");
         expect(arg.dateFrom.toISOString().slice(0, 10)).toBe("2026-03-01");
     });
+    it("400 when skugrIds contains invalid hex", async () => {
+        const req = {
+            query: {
+                konk: "air",
+                prod: "gemar",
+                dateFrom: "2026-03-01",
+                dateTo: "2026-03-02",
+                skugrIds: "not-a-hex",
+            },
+        };
+        await getKonkProdSkuStockChartDataController(req, res);
+        expect(responseStatus.code).toBe(400);
+    });
+    it("200 forwards skugrIds array to util", async () => {
+        vi.mocked(getKonkProdSkuStockChartDataUtil).mockResolvedValue({
+            ok: true,
+            data: {
+                days: [],
+                summary: {
+                    firstDayCompetitorStock: 0,
+                    lastDayCompetitorStock: 0,
+                    firstDayBtradeStock: 0,
+                    lastDayBtradeStock: 0,
+                    diffCompetitorStock: 0,
+                    diffBtradeStock: 0,
+                    diffCompetitorStockPct: null,
+                    diffBtradeStockPct: null,
+                },
+            },
+        });
+        const id1 = "a".repeat(24);
+        const id2 = "b".repeat(24);
+        const req = {
+            query: {
+                konk: "air",
+                prod: "gemar",
+                dateFrom: "2026-03-01",
+                dateTo: "2026-03-02",
+                skugrIds: [id1, id2],
+            },
+        };
+        await getKonkProdSkuStockChartDataController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const arg = vi.mocked(getKonkProdSkuStockChartDataUtil).mock.calls[0][0];
+        expect(arg.skugrIds).toEqual([id1, id2]);
+    });
+    it("200 forwards CSV skugrIds string to util", async () => {
+        vi.mocked(getKonkProdSkuStockChartDataUtil).mockResolvedValue({
+            ok: true,
+            data: {
+                days: [],
+                summary: {
+                    firstDayCompetitorStock: 0,
+                    lastDayCompetitorStock: 0,
+                    firstDayBtradeStock: 0,
+                    lastDayBtradeStock: 0,
+                    diffCompetitorStock: 0,
+                    diffBtradeStock: 0,
+                    diffCompetitorStockPct: null,
+                    diffBtradeStockPct: null,
+                },
+            },
+        });
+        const id1 = "a".repeat(24);
+        const id2 = "b".repeat(24);
+        const req = {
+            query: {
+                konk: "air",
+                prod: "gemar",
+                dateFrom: "2026-03-01",
+                dateTo: "2026-03-02",
+                skugrIds: `${id1},${id2}`,
+            },
+        };
+        await getKonkProdSkuStockChartDataController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const arg = vi.mocked(getKonkProdSkuStockChartDataUtil).mock.calls[0][0];
+        expect(arg.skugrIds).toEqual([id1, id2]);
+    });
     it("200 accepts prod=all and passes it to util", async () => {
         vi.mocked(getKonkProdSkuStockChartDataUtil).mockResolvedValue({
             ok: true,

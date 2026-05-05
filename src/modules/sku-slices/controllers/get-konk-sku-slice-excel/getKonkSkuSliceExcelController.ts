@@ -15,6 +15,7 @@ export const getKonkSkuStockSliceExcelController = async (
     prod: req.query.prod,
     dateFrom: req.query.dateFrom,
     dateTo: req.query.dateTo,
+    skugrIds: req.query.skugrIds,
   });
   if (!parseResult.success) {
     res.status(400).json({

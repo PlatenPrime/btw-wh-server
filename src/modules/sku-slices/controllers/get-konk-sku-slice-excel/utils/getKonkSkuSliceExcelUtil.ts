@@ -1,6 +1,5 @@
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
-import { Sku } from "../../../../skus/models/Sku.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
@@ -14,6 +13,7 @@ import {
   safeFilePart,
   type SkuSliceExcelSkuRow,
 } from "../../../utils/buildSkuSliceExcel.js";
+import { resolveKonkProdSkus } from "../../../utils/resolveKonkProdSkus.js";
 import type { GetKonkSkuSliceExcelInput } from "../schemas/getKonkSkuSliceExcelSchema.js";
 
 export type GetKonkSkuSliceExcelResult =
@@ -23,27 +23,22 @@ export type GetKonkSkuSliceExcelResult =
 export async function getKonkSkuSliceExcelUtil(
   input: GetKonkSkuSliceExcelInput
 ): Promise<GetKonkSkuSliceExcelResult> {
-  const skus = await Sku.find({
-    konkName: input.konk,
-    prodName: input.prod,
-  })
-    .sort({ productId: 1 })
-    .lean();
+  const resolved = await resolveKonkProdSkus({
+    konk: input.konk,
+    prod: input.prod,
+    skugrIds: input.skugrIds,
+  });
+  if (resolved.length === 0) return { ok: false };
 
-  if (skus.length === 0) return { ok: false };
-
-  const rows: SkuSliceExcelSkuRow[] = skus
-    .map((s) => ({
-      title: s.title,
-      url: s.url,
-      productId: (s.productId ?? "").trim(),
-      konkName: s.konkName,
-      prodName: s.prodName,
-      createdAt: s.createdAt,
-    }))
-    .filter((r) => r.productId !== "");
-
-  if (rows.length === 0) return { ok: false };
+  const rows: SkuSliceExcelSkuRow[] = resolved.map((r) => ({
+    title: r.title,
+    url: r.url,
+    productId: r.productId,
+    konkName: r.konkName,
+    prodName: r.prodName,
+    skugrTitle: r.skugrTitle,
+    createdAt: r.createdAt,
+  }));
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);

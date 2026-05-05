@@ -5,22 +5,39 @@ import { Sku } from "../../../../skus/models/Sku.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import { aggregateSkuSlices, sliceDataProjectForProductIdList, } from "../../../utils/sliceDataAggregationStages.js";
+import { resolveKonkProdSkus } from "../../../utils/resolveKonkProdSkus.js";
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
 const ALL_MANUFACTURERS_TITLE = "Всі виробники";
 export async function getKonkProdManufacturersPieDataUtil(input) {
     const dateFrom = toSliceDate(input.dateFrom);
     const dateTo = toSliceDate(input.dateTo);
     const warmupStart = sliceDateMinusDays(dateFrom, 1);
-    const skuDocs = await Sku.find({ konkName: input.konk })
-        .select("productId prodName")
-        .lean();
+    const skugrIds = (input.skugrIds ?? []).filter((s) => s.length > 0);
     const productToManufacturer = new Map();
-    for (const doc of skuDocs) {
-        const productId = (doc.productId ?? "").trim();
-        const prodName = (doc.prodName ?? "").trim();
-        if (!productId || !prodName)
-            continue;
-        productToManufacturer.set(productId, prodName);
+    if (skugrIds.length > 0) {
+        const resolved = await resolveKonkProdSkus({
+            konk: input.konk,
+            skugrIds,
+        });
+        for (const r of resolved) {
+            const productId = (r.productId ?? "").trim();
+            const prodName = (r.prodName ?? "").trim();
+            if (!productId || !prodName)
+                continue;
+            productToManufacturer.set(productId, prodName);
+        }
+    }
+    else {
+        const skuDocs = await Sku.find({ konkName: input.konk })
+            .select("productId prodName")
+            .lean();
+        for (const doc of skuDocs) {
+            const productId = (doc.productId ?? "").trim();
+            const prodName = (doc.prodName ?? "").trim();
+            if (!productId || !prodName)
+                continue;
+            productToManufacturer.set(productId, prodName);
+        }
     }
     const productIds = [...productToManufacturer.keys()];
     if (productIds.length === 0)
