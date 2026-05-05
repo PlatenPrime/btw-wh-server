@@ -81,6 +81,8 @@ describe("getKonkBtradeComparisonExcelController", () => {
                     artAbc: "A",
                     producerName: "Test Producer",
                     competitorTitle: "Test Konk",
+                    previousAnalogStock: null,
+                    previousBtradeStock: null,
                     items: [
                         {
                             date: new Date("2026-03-01T00:00:00.000Z"),

@@ -28,10 +28,12 @@ export function computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem, rec
     const reportOffset = datesFull.length - datesReport.length;
     const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) => getItem(sku.konkName, sku.productId, d));
     const forReport = coalesced.slice(reportOffset);
-    const stocks = forReport.map((c) => c.stock);
+    const stocksFull = coalesced.map((c) => c.stock);
     const prices = forReport.map((c) => c.price);
     const isRecountDayByDay = datesReport.map((date) => recountDays.has(toUtcDateKey(date)));
-    const salesByDay = computeSalesFromStockSequence(stocks).map((x, index) => applyRecountDayToSales(x.sales, datesReport[index], recountDays));
+    const salesByDay = computeSalesFromStockSequence(stocksFull)
+        .slice(reportOffset)
+        .map((x, index) => applyRecountDayToSales(x.sales, datesReport[index], recountDays));
     const revenueByDay = salesByDay.map((sales, i) => computeRevenueForDay(sales, prices[i] ?? null));
     const totalSales = salesByDay.reduce((acc, val) => acc + val, 0);
     const totalRevenue = revenueByDay.reduce((acc, val) => acc + val, 0);

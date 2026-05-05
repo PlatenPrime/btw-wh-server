@@ -46,6 +46,8 @@ export async function buildSalesComparisonExcel(analogs, options) {
                 artAbc: analog.artAbc,
                 producerName: analog.producerName,
                 competitorTitle: analog.competitorTitle,
+                previousAnalogStock: analog.previousAnalogStock,
+                previousBtradeStock: analog.previousBtradeStock,
                 recountDays,
             });
             sumAnalogSales += totals.totalAnalogSales;

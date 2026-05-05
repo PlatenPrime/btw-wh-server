@@ -47,11 +47,11 @@ export function setupSalesComparisonHeaderRow(params) {
  * колонка «Всього», 4 колонки дельт. Возвращает агрегаты для итога.
  */
 export function buildSalesComparisonExcelBlock(options) {
-    const { worksheet, startRow, dataStartCol, totalCol, diffSalesCol, diffSalesPctCol, diffRevenueCol, diffRevenuePctCol, columnCount, items, artikul, artNameUkr, artAbc, producerName, competitorTitle, recountDays = new Set(), } = options;
-    const analogStockByDay = items.map((i) => i.analogStock);
-    const btradeStockByDay = items.map((i) => i.btradeStock);
-    const analogSalesResults = computeSalesFromStockSequence(analogStockByDay);
-    const btradeSalesResults = computeSalesFromStockSequence(btradeStockByDay);
+    const { worksheet, startRow, dataStartCol, totalCol, diffSalesCol, diffSalesPctCol, diffRevenueCol, diffRevenuePctCol, columnCount, items, artikul, artNameUkr, artAbc, producerName, competitorTitle, previousAnalogStock = null, previousBtradeStock = null, recountDays = new Set(), } = options;
+    const analogStockByDay = [previousAnalogStock, ...items.map((i) => i.analogStock)];
+    const btradeStockByDay = [previousBtradeStock, ...items.map((i) => i.btradeStock)];
+    const analogSalesResults = computeSalesFromStockSequence(analogStockByDay).slice(1);
+    const btradeSalesResults = computeSalesFromStockSequence(btradeStockByDay).slice(1);
     let totalAnalogSales = 0;
     let totalAnalogRevenue = 0;
     let totalBtradeSales = 0;

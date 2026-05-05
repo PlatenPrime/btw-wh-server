@@ -272,4 +272,54 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
     expect(result.data.days[1]!.competitorRevenue).toBe(0);
     expect(result.data.days[1]!.btradeSales).toBe(3);
   });
+
+  it("uses warmup day before dateFrom for first day sales delta", async () => {
+    const artikul = "1102-1111";
+    await Analog.create({
+      konkName: "air",
+      prodName: "gemar",
+      artikul,
+      url: "https://example.com/warmup-delta",
+    });
+
+    const warm = new Date("2026-03-01T00:00:00.000Z");
+    const d1 = new Date("2026-03-02T00:00:00.000Z");
+    const d2 = new Date("2026-03-03T00:00:00.000Z");
+
+    await AnalogSlice.insertMany([
+      { konkName: "air", date: warm, data: { [artikul]: { stock: 10, price: 10 } } },
+      { konkName: "air", date: d1, data: { [artikul]: { stock: 7, price: 10 } } },
+      { konkName: "air", date: d2, data: { [artikul]: { stock: 6, price: 10 } } },
+    ]);
+    await BtradeSlice.insertMany([
+      { date: warm, data: { [artikul]: { quantity: 20, price: 8 } } },
+      { date: d1, data: { [artikul]: { quantity: 19, price: 8 } } },
+      { date: d2, data: { [artikul]: { quantity: 17, price: 8 } } },
+    ]);
+
+    const result = await getKonkBtradeSalesComparisonUtil({
+      konk: "air",
+      prod: "gemar",
+      dateFrom: d1,
+      dateTo: d2,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.data.days).toHaveLength(2);
+    expect(result.data.days[0]).toMatchObject({
+      date: "2026-03-02T00:00:00.000Z",
+      competitorSales: 3,
+      competitorRevenue: 30,
+      btradeSales: 1,
+      btradeRevenue: 8,
+    });
+    expect(result.data.days[1]).toMatchObject({
+      date: "2026-03-03T00:00:00.000Z",
+      competitorSales: 1,
+      competitorRevenue: 10,
+      btradeSales: 2,
+      btradeRevenue: 16,
+    });
+  });
 });

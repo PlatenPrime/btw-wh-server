@@ -83,14 +83,14 @@ export function computeSkuSalesPeriodMetrics(
     getItem(sku.konkName, sku.productId, d),
   );
   const forReport = coalesced.slice(reportOffset);
-  const stocks = forReport.map((c) => c.stock);
+  const stocksFull = coalesced.map((c) => c.stock);
   const prices = forReport.map((c) => c.price);
   const isRecountDayByDay = datesReport.map((date) =>
     recountDays.has(toUtcDateKey(date)),
   );
-  const salesByDay = computeSalesFromStockSequence(stocks).map((x, index) =>
-    applyRecountDayToSales(x.sales, datesReport[index]!, recountDays),
-  );
+  const salesByDay = computeSalesFromStockSequence(stocksFull)
+    .slice(reportOffset)
+    .map((x, index) => applyRecountDayToSales(x.sales, datesReport[index]!, recountDays));
   const revenueByDay = salesByDay.map((sales, i) =>
     computeRevenueForDay(sales, prices[i] ?? null)
   );

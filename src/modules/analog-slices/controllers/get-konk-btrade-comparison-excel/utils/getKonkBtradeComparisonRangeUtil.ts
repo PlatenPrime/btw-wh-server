@@ -11,6 +11,7 @@ import {
 } from "../../../models/AnalogSlice.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
+import { sliceDateMinusDays } from "../../../../sku-slices/utils/coalesceSkuSliceItemsForReporting.js";
 import type { GetKonkBtradeComparisonExcelInput } from "../schemas/getKonkBtradeComparisonExcelSchema.js";
 import type { AnalogBtradeCompareItem } from "../../get-analog-btrade-comparison-excel/utils/getAnalogBtradeComparisonRangeUtil.js";
 
@@ -45,6 +46,8 @@ export interface KonkAnalogInfo {
   artAbc: string | null;
   producerName: string | null;
   competitorTitle: string | null;
+  previousAnalogStock: number | null;
+  previousBtradeStock: number | null;
   items: AnalogBtradeCompareItem[];
 }
 
@@ -65,6 +68,7 @@ export async function getKonkBtradeComparisonRangeUtil(
 ): Promise<GetKonkBtradeComparisonRangeResult> {
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
 
   const analogDocs = await Analog.find({
     konkName: input.konk,
@@ -131,7 +135,7 @@ export async function getKonkBtradeComparisonRangeUtil(
 
   const analogSlices = await AnalogSlice.find({
     konkName: input.konk,
-    date: { $gte: dateFrom, $lte: dateTo },
+    date: { $gte: warmStart, $lte: dateTo },
   })
     .select("date data")
     .lean();
@@ -154,7 +158,7 @@ export async function getKonkBtradeComparisonRangeUtil(
   }
 
   const btradeSlices = await BtradeSlice.find({
-    date: { $gte: dateFrom, $lte: dateTo },
+    date: { $gte: warmStart, $lte: dateTo },
   })
     .select("date data")
     .lean();
@@ -198,6 +202,9 @@ export async function getKonkBtradeComparisonRangeUtil(
         analogByArtikulAndDate.get(analog.artikul) ?? new Map();
       const btradeByDate =
         btradeByArtikulAndDate.get(analog.artikul) ?? new Map();
+      const warmDateKey = warmStart.getTime();
+      const warmAnalogItem = analogByDate.get(warmDateKey);
+      const warmBtradeItem = btradeByDate.get(warmDateKey);
 
       const items: AnalogBtradeCompareItem[] = dateKeys.map((time) => {
         const date = new Date(time);
@@ -220,6 +227,8 @@ export async function getKonkBtradeComparisonRangeUtil(
         artAbc,
         producerName,
         competitorTitle,
+        previousAnalogStock: warmAnalogItem?.stock ?? null,
+        previousBtradeStock: warmBtradeItem?.quantity ?? null,
         items,
       };
     });

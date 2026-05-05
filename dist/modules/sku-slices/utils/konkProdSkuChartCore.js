@@ -6,6 +6,7 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "./aggregateDailySkuSliceMetricsForSkus.js";
 import { resolveKonkProdSkus } from "./resolveKonkProdSkus.js";
 import { enumerateReportingDates } from "./skugrReporting.js";
+import { sliceDateMinusDays } from "./coalesceSkuSliceItemsForReporting.js";
 /**
  * Конкурент: SKU с `konkName` + `prodName` из query (точное совпадение `prodName`),
  * срезы SkuSlice. Btrade: артикулы из Art, у которых `prodName` (trim, без учёта регистра)
@@ -125,11 +126,14 @@ export async function loadKonkProdSkuChartSeries(input) {
     const btradeStock = new Float64Array(dayCount);
     const btradeSales = new Float64Array(dayCount);
     const btradeRevenue = new Float64Array(dayCount);
+    const warmupStart = sliceDateMinusDays(dateFrom, 1);
+    const fullDates = enumerateReportingDates(warmupStart, dateTo);
+    const reportOffset = fullDates.length - dayCount;
     if (allowedArtikuls.length > 0) {
         const sliceRows = await aggregateBtradeSlices([
             {
                 $match: {
-                    date: { $gte: dateFrom, $lte: dateTo },
+                    date: { $gte: warmupStart, $lte: dateTo },
                 },
             },
             { $sort: { date: 1 } },
@@ -141,7 +145,7 @@ export async function loadKonkProdSkuChartSeries(input) {
             byDate.set(t, (row.data ?? {}));
         }
         for (const artikul of allowedArtikuls) {
-            const stocks = dates.map((d) => {
+            const stocksFull = fullDates.map((d) => {
                 const rec = byDate.get(toSliceDate(d).getTime());
                 const item = rec?.[artikul];
                 if (!item)
@@ -149,7 +153,7 @@ export async function loadKonkProdSkuChartSeries(input) {
                 const q = item.quantity;
                 return typeof q === "number" && Number.isFinite(q) ? q : null;
             });
-            const salesSeq = computeSalesFromStockSequence(stocks);
+            const salesSeq = computeSalesFromStockSequence(stocksFull).slice(reportOffset);
             for (let d = 0; d < dayCount; d++) {
                 const item = byDate.get(toSliceDate(dates[d]).getTime())?.[artikul];
                 const sales = salesSeq[d].sales;

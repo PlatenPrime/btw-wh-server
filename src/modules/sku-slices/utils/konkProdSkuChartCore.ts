@@ -13,6 +13,7 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "./aggregateDailySkuSliceMetricsForSkus.js";
 import { resolveKonkProdSkus } from "./resolveKonkProdSkus.js";
 import { enumerateReportingDates } from "./skugrReporting.js";
+import { sliceDateMinusDays } from "./coalesceSkuSliceItemsForReporting.js";
 
 export type KonkProdSkuChartRangeInput = {
   konk: string;
@@ -174,6 +175,9 @@ export async function loadKonkProdSkuChartSeries(
   const btradeStock = new Float64Array(dayCount);
   const btradeSales = new Float64Array(dayCount);
   const btradeRevenue = new Float64Array(dayCount);
+  const warmupStart = sliceDateMinusDays(dateFrom, 1);
+  const fullDates = enumerateReportingDates(warmupStart, dateTo);
+  const reportOffset = fullDates.length - dayCount;
 
   if (allowedArtikuls.length > 0) {
     const sliceRows = await aggregateBtradeSlices<{
@@ -182,7 +186,7 @@ export async function loadKonkProdSkuChartSeries(
     }>([
       {
         $match: {
-          date: { $gte: dateFrom, $lte: dateTo },
+          date: { $gte: warmupStart, $lte: dateTo },
         },
       },
       { $sort: { date: 1 } },
@@ -196,7 +200,7 @@ export async function loadKonkProdSkuChartSeries(
     }
 
     for (const artikul of allowedArtikuls) {
-      const stocks: (number | null)[] = dates.map((d) => {
+      const stocksFull: (number | null)[] = fullDates.map((d) => {
         const rec = byDate.get(toSliceDate(d).getTime());
         const item = rec?.[artikul];
         if (!item) return null;
@@ -204,7 +208,7 @@ export async function loadKonkProdSkuChartSeries(
         return typeof q === "number" && Number.isFinite(q) ? q : null;
       });
 
-      const salesSeq = computeSalesFromStockSequence(stocks);
+      const salesSeq = computeSalesFromStockSequence(stocksFull).slice(reportOffset);
 
       for (let d = 0; d < dayCount; d++) {
         const item = byDate.get(toSliceDate(dates[d]!).getTime())?.[artikul];

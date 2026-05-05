@@ -109,6 +109,8 @@ export interface BuildSalesComparisonExcelBlockOptions {
   artAbc?: string | null;
   producerName?: string | null;
   competitorTitle?: string | null;
+  previousAnalogStock?: number | null;
+  previousBtradeStock?: number | null;
   recountDays?: ReadonlySet<string>;
 }
 
@@ -135,14 +137,16 @@ export function buildSalesComparisonExcelBlock(
     artAbc,
     producerName,
     competitorTitle,
+    previousAnalogStock = null,
+    previousBtradeStock = null,
     recountDays = new Set(),
   } = options;
 
-  const analogStockByDay = items.map((i) => i.analogStock);
-  const btradeStockByDay = items.map((i) => i.btradeStock);
+  const analogStockByDay = [previousAnalogStock, ...items.map((i) => i.analogStock)];
+  const btradeStockByDay = [previousBtradeStock, ...items.map((i) => i.btradeStock)];
 
-  const analogSalesResults = computeSalesFromStockSequence(analogStockByDay);
-  const btradeSalesResults = computeSalesFromStockSequence(btradeStockByDay);
+  const analogSalesResults = computeSalesFromStockSequence(analogStockByDay).slice(1);
+  const btradeSalesResults = computeSalesFromStockSequence(btradeStockByDay).slice(1);
 
   let totalAnalogSales = 0;
   let totalAnalogRevenue = 0;

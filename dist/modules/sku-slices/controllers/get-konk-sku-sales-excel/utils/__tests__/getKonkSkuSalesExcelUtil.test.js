@@ -280,4 +280,44 @@ describe("getKonkSkuSalesExcelUtil", () => {
         });
         expect(found).toBe(false);
     });
+    it("uses day-before-range stock to compute first report day sales and revenue", async () => {
+        const warm = new Date("2026-07-10T00:00:00.000Z");
+        const d1 = new Date("2026-07-11T00:00:00.000Z");
+        await Sku.create({
+            konkName: "air",
+            prodName: "gemar",
+            productId: "air-first-day-delta",
+            title: "Warmup SKU",
+            url: "https://e.com/warmup",
+        });
+        await SkuSlice.insertMany([
+            {
+                konkName: "air",
+                date: warm,
+                data: { "air-first-day-delta": { stock: 10, price: 5 } },
+            },
+            {
+                konkName: "air",
+                date: d1,
+                data: { "air-first-day-delta": { stock: 7, price: 5 } },
+            },
+        ]);
+        const result = await getKonkSkuSalesExcelUtil({
+            konk: "air",
+            prod: "gemar",
+            dateFrom: d1,
+            dateTo: d1,
+        });
+        expect(result.ok).toBe(true);
+        if (!result.ok)
+            return;
+        const wb = new ExcelJS.Workbook();
+        await wb.xlsx.load(result.buffer);
+        const ws = wb.getWorksheet("Продажі");
+        const dataCol = 8;
+        expect(ws?.getRow(2).getCell(dataCol).value).toBe(3);
+        expect(ws?.getRow(4).getCell(dataCol).value).toBe(15);
+        expect(ws?.getRow(2).getCell(dataCol + 1).value).toBe(3);
+        expect(ws?.getRow(4).getCell(dataCol + 1).value).toBe(15);
+    });
 });

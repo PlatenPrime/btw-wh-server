@@ -18,10 +18,10 @@ export async function getKonkBtradeSalesComparisonUtil(input) {
     const dayBtradeSales = new Float64Array(dayCount);
     const dayBtradeRevenue = new Float64Array(dayCount);
     for (const analog of analogs) {
-        const analogStockByDay = analog.items.map((i) => i.analogStock);
-        const btradeStockByDay = analog.items.map((i) => i.btradeStock);
-        const analogSalesResults = computeSalesFromStockSequence(analogStockByDay);
-        const btradeSalesResults = computeSalesFromStockSequence(btradeStockByDay);
+        const analogStockByDay = [analog.previousAnalogStock, ...analog.items.map((i) => i.analogStock)];
+        const btradeStockByDay = [analog.previousBtradeStock, ...analog.items.map((i) => i.btradeStock)];
+        const analogSalesResults = computeSalesFromStockSequence(analogStockByDay).slice(1);
+        const btradeSalesResults = computeSalesFromStockSequence(btradeStockByDay).slice(1);
         for (let d = 0; d < dayCount; d++) {
             const dayDate = analog.items[d].date;
             const analogSales = applyRecountDayToSales(analogSalesResults[d].sales, dayDate, recountDays);

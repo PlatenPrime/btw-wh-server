@@ -14,6 +14,8 @@ describe("buildKonkBtradeComparisonExcel", () => {
                 artAbc: "A",
                 producerName: "Prod 1",
                 competitorTitle: "Konk 1",
+                previousAnalogStock: null,
+                previousBtradeStock: null,
                 items: [
                     {
                         date: date1,
@@ -38,6 +40,8 @@ describe("buildKonkBtradeComparisonExcel", () => {
                 artAbc: "B",
                 producerName: "Prod 2",
                 competitorTitle: "Konk 1",
+                previousAnalogStock: null,
+                previousBtradeStock: null,
                 items: [
                     {
                         date: date1,
