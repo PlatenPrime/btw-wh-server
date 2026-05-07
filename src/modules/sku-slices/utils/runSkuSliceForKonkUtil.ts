@@ -22,6 +22,45 @@ type SkugrLean = {
   skus?: Array<{ toString(): string }>;
 };
 
+async function fetchSkuStockWithRetry(
+  konkName: string,
+  productKey: string,
+  skuId: string
+) {
+  const delays = [1000, 3000, 5000];
+
+  let lastError: unknown = null;
+
+  for (let attempt = 1; attempt <= delays.length; attempt++) {
+    try {
+      return await getSkuStockDataUtil(skuId);
+    } catch (err) {
+      const e = err as Error & { code?: string };
+
+      if (e.code === UNSUPPORTED_KONK_CODE) {
+        throw e;
+      }
+
+      lastError = err;
+      const msg = err instanceof Error ? err.message : String(err);
+
+      console.warn(
+        `[SkuSlice ${konkName}] ${productKey}: попытка ${attempt}/${delays.length} завершилась с ошибкой: ${msg}`
+      );
+
+      if (attempt < delays.length) {
+        const waitMs = delays[attempt - 1]!;
+        console.warn(
+          `[SkuSlice ${konkName}] ${productKey}: повторная попытка через ${waitMs} мс`
+        );
+        await delay(waitMs);
+      }
+    }
+  }
+
+  throw lastError ?? new Error("Unknown error in fetchSkuStockWithRetry");
+}
+
 /**
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
  * с паузой 500–1500 мс (jitter) — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
@@ -64,7 +103,7 @@ export async function runSkuSliceForKonkUtil(
     );
 
     try {
-      const result = await getSkuStockDataUtil(skuId);
+      const result = await fetchSkuStockWithRetry(konkName, productKey, skuId);
       if (result) {
         const dataItem = { stock: result.stock, price: result.price };
         await SkuSlice.findOneAndUpdate(

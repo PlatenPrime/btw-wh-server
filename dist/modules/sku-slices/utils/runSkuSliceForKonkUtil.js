@@ -6,6 +6,30 @@ import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { SKU_SLICE_REQUEST_JITTER_MAX_MS, SKU_SLICE_REQUEST_JITTER_MIN_MS, } from "../constants/skuSliceRequestJitterMs.js";
+async function fetchSkuStockWithRetry(konkName, productKey, skuId) {
+    const delays = [1000, 3000, 5000];
+    let lastError = null;
+    for (let attempt = 1; attempt <= delays.length; attempt++) {
+        try {
+            return await getSkuStockDataUtil(skuId);
+        }
+        catch (err) {
+            const e = err;
+            if (e.code === UNSUPPORTED_KONK_CODE) {
+                throw e;
+            }
+            lastError = err;
+            const msg = err instanceof Error ? err.message : String(err);
+            console.warn(`[SkuSlice ${konkName}] ${productKey}: попытка ${attempt}/${delays.length} завершилась с ошибкой: ${msg}`);
+            if (attempt < delays.length) {
+                const waitMs = delays[attempt - 1];
+                console.warn(`[SkuSlice ${konkName}] ${productKey}: повторная попытка через ${waitMs} мс`);
+                await delay(waitMs);
+            }
+        }
+    }
+    throw lastError ?? new Error("Unknown error in fetchSkuStockWithRetry");
+}
 /**
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
  * с паузой 500–1500 мс (jitter) — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
@@ -28,7 +52,7 @@ export async function runSkuSliceForKonkUtil(konkName, date) {
         const productKey = sku.productId.trim();
         console.log(`[SkuSlice ${konkName}] анализируется SKU ${productKey} (${i + 1} из ${withPid.length})`);
         try {
-            const result = await getSkuStockDataUtil(skuId);
+            const result = await fetchSkuStockWithRetry(konkName, productKey, skuId);
             if (result) {
                 const dataItem = { stock: result.stock, price: result.price };
                 await SkuSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${productKey}`]: dataItem } });
