@@ -184,4 +184,24 @@ describe("getYuminGroupPagesProducts", () => {
 
     expect(result[0]!.imageUrl).toBe("https://yumi.market/o.webp");
   });
+
+  it("uses medium_image_url when large is missing", async () => {
+    vi.mocked(browserGet).mockResolvedValue(
+      JSON.stringify({
+        data: [
+          {
+            id: 7,
+            name: "Img Medium",
+            url_key: "img-medium",
+            base_image: { medium_image_url: "https://yumi.market/m.webp" },
+          },
+        ],
+        links: { next: null },
+      })
+    );
+
+    const result = await getYuminGroupPagesProducts({ groupUrl: GROUP_URL });
+
+    expect(result[0]!.imageUrl).toBe("https://yumi.market/m.webp");
+  });
 });

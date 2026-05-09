@@ -11,6 +11,7 @@ const yuminProductsPageSchema = z.object({
         base_image: z
             .object({
             large_image_url: z.string().optional(),
+            medium_image_url: z.string().optional(),
             original_image_url: z.string().optional(),
         })
             .nullable()
@@ -36,6 +37,10 @@ function pickImageUrl(baseImage) {
     const large = baseImage?.large_image_url?.trim();
     if (large) {
         return large;
+    }
+    const medium = baseImage?.medium_image_url?.trim();
+    if (medium) {
+        return medium;
     }
     const original = baseImage?.original_image_url?.trim();
     return original || null;
