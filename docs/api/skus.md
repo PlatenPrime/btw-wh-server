@@ -58,7 +58,7 @@
 
 **Запрос:** path-параметр `id` — MongoDB ObjectId.
 
-**Ответ 200:** `{ message: string, data: Sku }`.
+**Ответ 200:** `{ message: string, data: SkuWithSkugrs }`, где `SkuWithSkugrs` — поля документа `Sku` плюс поле `skugrs`: массив документов `Skugr` (lean), у которых в массиве `skus` встречается `_id` этого SKU; порядок групп — по возрастанию `_id`. Если SKU ни в одной группе не указан, `skugrs` — пустой массив.
 
 **Ошибки:** 400 (невалидный id), 401, 403, 404 (sku не найден), 500.
 
@@ -184,3 +184,5 @@ Body: `{ konkName?: string, prodName?: string, productId?: string, btradeAnalog?
 - `isInvalid`: boolean — выставляется еженедельным кроном по правилам срезов (см. модуль Skus)
 - `createdAt`: Date (ISO строка)
 - `updatedAt`: Date (ISO строка)
+
+**Ответ GET `/api/skus/id/:id`:** те же поля, что у `Sku`, и дополнительно `skugrs`: массив объектов группы (`Skugr`) с полями `_id`, `konkName`, `prodName`, `title`, `url`, `isSliced`, `skus`, `createdAt`, `updatedAt` (типы дат — как в JSON API).

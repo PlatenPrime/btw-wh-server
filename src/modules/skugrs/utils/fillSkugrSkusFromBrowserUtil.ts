@@ -1,4 +1,5 @@
 import mongoose, { type AnyBulkWriteOperation } from "mongoose";
+import { NEWSKU_PROD_NAME } from "../../skus/constants/newskuProdName.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { toCanonicalSkuProductId } from "../../skus/utils/toCanonicalSkuProductId.js";
 import { fetchGroupProductsByKonkName } from "../../browser/group-products/fetchGroupProductsByKonkName.js";
@@ -8,12 +9,21 @@ import { Skugr } from "../models/Skugr.js";
 
 const BULK_WRITE_CHUNK_SIZE = 500;
 
+type ExistingSkuByUrl = {
+  _id: mongoose.Types.ObjectId;
+  url: string;
+  productId: string;
+  prodName: string;
+};
+
 export type FillSkugrSkusFromBrowserStats = {
   fetched: number;
   dedupedByUrl: number;
   skippedAlreadyInGroup: number;
   skippedNoProductId: number;
   skippedProductIdConflict: number;
+  skippedNonNewskuManufacturer: number;
+  promotedFromNewsku: number;
   linkedExisting: number;
   created: number;
 };
@@ -22,6 +32,14 @@ export type FillSkugrSkusFromBrowserResult = {
   skugr: ISkugr;
   stats: FillSkugrSkusFromBrowserStats;
 };
+
+const emptyStatsTail = {
+  skippedProductIdConflict: 0,
+  skippedNonNewskuManufacturer: 0,
+  promotedFromNewsku: 0,
+  linkedExisting: 0,
+  created: 0,
+} as const;
 
 export async function fillSkugrSkusFromBrowserUtil(
   skugrId: string,
@@ -60,9 +78,7 @@ export async function fillSkugrSkusFromBrowserUtil(
         dedupedByUrl,
         skippedAlreadyInGroup: 0,
         skippedNoProductId,
-        skippedProductIdConflict: 0,
-        linkedExisting: 0,
-        created: 0,
+        ...emptyStatsTail,
       },
     };
   }
@@ -70,18 +86,22 @@ export async function fillSkugrSkusFromBrowserUtil(
   const urls = deduped.map((row) => row.url);
 
   const existingSkus = await Sku.find({ url: { $in: urls } })
-    .select("_id url productId")
-    .lean()
+    .select("_id url productId prodName")
+    .lean<ExistingSkuByUrl[]>()
     .exec();
 
-  const urlToSkuId = new Map<string, mongoose.Types.ObjectId>();
+  const urlToExisting = new Map<string, ExistingSkuByUrl>();
   for (const s of existingSkus) {
-    urlToSkuId.set(s.url, s._id as mongoose.Types.ObjectId);
+    urlToExisting.set(s.url, s);
   }
 
   const groupSkuIdSet = new Set(skugr.skus.map((id) => id.toString()));
+  const isNewskuGroup = skugr.prodName === NEWSKU_PROD_NAME;
 
   const linkIds: mongoose.Types.ObjectId[] = [];
+  const promoteFromNewskuIds = new Set<string>();
+  let skippedNonNewskuManufacturer = 0;
+
   const toInsert: Array<{
     konkName: string;
     prodName: string;
@@ -94,13 +114,20 @@ export async function fillSkugrSkusFromBrowserUtil(
   for (const row of deduped) {
     const rawPid = row.productId.trim();
     const canonicalPid = toCanonicalSkuProductId(skugr.konkName, rawPid);
-    const existingId = urlToSkuId.get(row.url);
-    if (existingId) {
-      if (groupSkuIdSet.has(existingId.toString())) {
+    const existing = urlToExisting.get(row.url);
+    if (existing) {
+      if (groupSkuIdSet.has(existing._id.toString())) {
         skippedAlreadyInGroup += 1;
-      } else {
-        linkIds.push(existingId);
+        continue;
       }
+      if (isNewskuGroup && existing.prodName !== NEWSKU_PROD_NAME) {
+        skippedNonNewskuManufacturer += 1;
+        continue;
+      }
+      if (!isNewskuGroup && existing.prodName === NEWSKU_PROD_NAME) {
+        promoteFromNewskuIds.add(existing._id.toString());
+      }
+      linkIds.push(existing._id);
     } else {
       toInsert.push({
         konkName: skugr.konkName,
@@ -111,6 +138,17 @@ export async function fillSkugrSkusFromBrowserUtil(
         imageUrl: row.imageUrl,
       });
     }
+  }
+
+  const promotedFromNewsku = promoteFromNewskuIds.size;
+  if (promoteFromNewskuIds.size > 0) {
+    const oidList = [...promoteFromNewskuIds].map(
+      (id) => new mongoose.Types.ObjectId(id),
+    );
+    await Sku.updateMany(
+      { _id: { $in: oidList }, prodName: NEWSKU_PROD_NAME },
+      { $set: { prodName: skugr.prodName } },
+    ).exec();
   }
 
   let skippedProductIdConflict = 0;
@@ -175,6 +213,8 @@ export async function fillSkugrSkusFromBrowserUtil(
       skippedAlreadyInGroup,
       skippedNoProductId,
       skippedProductIdConflict,
+      skippedNonNewskuManufacturer,
+      promotedFromNewsku,
       linkedExisting: linkIds.length,
       created: insertedIds.length,
     },

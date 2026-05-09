@@ -1,8 +1,17 @@
+import mongoose from "mongoose";
+import { NEWSKU_PROD_NAME } from "../../skus/constants/newskuProdName.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { toCanonicalSkuProductId } from "../../skus/utils/toCanonicalSkuProductId.js";
 import { fetchGroupProductsByKonkName } from "../../browser/group-products/fetchGroupProductsByKonkName.js";
 import { Skugr } from "../models/Skugr.js";
 const BULK_WRITE_CHUNK_SIZE = 500;
+const emptyStatsTail = {
+    skippedProductIdConflict: 0,
+    skippedNonNewskuManufacturer: 0,
+    promotedFromNewsku: 0,
+    linkedExisting: 0,
+    created: 0,
+};
 export async function fillSkugrSkusFromBrowserUtil(skugrId, options) {
     const skugr = await Skugr.findById(skugrId).exec();
     if (!skugr) {
@@ -33,35 +42,42 @@ export async function fillSkugrSkusFromBrowserUtil(skugrId, options) {
                 dedupedByUrl,
                 skippedAlreadyInGroup: 0,
                 skippedNoProductId,
-                skippedProductIdConflict: 0,
-                linkedExisting: 0,
-                created: 0,
+                ...emptyStatsTail,
             },
         };
     }
     const urls = deduped.map((row) => row.url);
     const existingSkus = await Sku.find({ url: { $in: urls } })
-        .select("_id url productId")
+        .select("_id url productId prodName")
         .lean()
         .exec();
-    const urlToSkuId = new Map();
+    const urlToExisting = new Map();
     for (const s of existingSkus) {
-        urlToSkuId.set(s.url, s._id);
+        urlToExisting.set(s.url, s);
     }
     const groupSkuIdSet = new Set(skugr.skus.map((id) => id.toString()));
+    const isNewskuGroup = skugr.prodName === NEWSKU_PROD_NAME;
     const linkIds = [];
+    const promoteFromNewskuIds = new Set();
+    let skippedNonNewskuManufacturer = 0;
     const toInsert = [];
     for (const row of deduped) {
         const rawPid = row.productId.trim();
         const canonicalPid = toCanonicalSkuProductId(skugr.konkName, rawPid);
-        const existingId = urlToSkuId.get(row.url);
-        if (existingId) {
-            if (groupSkuIdSet.has(existingId.toString())) {
+        const existing = urlToExisting.get(row.url);
+        if (existing) {
+            if (groupSkuIdSet.has(existing._id.toString())) {
                 skippedAlreadyInGroup += 1;
+                continue;
             }
-            else {
-                linkIds.push(existingId);
+            if (isNewskuGroup && existing.prodName !== NEWSKU_PROD_NAME) {
+                skippedNonNewskuManufacturer += 1;
+                continue;
             }
+            if (!isNewskuGroup && existing.prodName === NEWSKU_PROD_NAME) {
+                promoteFromNewskuIds.add(existing._id.toString());
+            }
+            linkIds.push(existing._id);
         }
         else {
             toInsert.push({
@@ -73,6 +89,11 @@ export async function fillSkugrSkusFromBrowserUtil(skugrId, options) {
                 imageUrl: row.imageUrl,
             });
         }
+    }
+    const promotedFromNewsku = promoteFromNewskuIds.size;
+    if (promoteFromNewskuIds.size > 0) {
+        const oidList = [...promoteFromNewskuIds].map((id) => new mongoose.Types.ObjectId(id));
+        await Sku.updateMany({ _id: { $in: oidList }, prodName: NEWSKU_PROD_NAME }, { $set: { prodName: skugr.prodName } }).exec();
     }
     let skippedProductIdConflict = 0;
     const uniqueToInsert = [];
@@ -128,6 +149,8 @@ export async function fillSkugrSkusFromBrowserUtil(skugrId, options) {
             skippedAlreadyInGroup,
             skippedNoProductId,
             skippedProductIdConflict,
+            skippedNonNewskuManufacturer,
+            promotedFromNewsku,
             linkedExisting: linkIds.length,
             created: insertedIds.length,
         },

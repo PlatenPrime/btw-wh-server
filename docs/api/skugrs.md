@@ -100,13 +100,17 @@
     "fetched": 0,
     "dedupedByUrl": 0,
     "skippedAlreadyInGroup": 0,
+    "skippedNoProductId": 0,
+    "skippedProductIdConflict": 0,
+    "skippedNonNewskuManufacturer": 0,
+    "promotedFromNewsku": 0,
     "linkedExisting": 0,
     "created": 0
   }
 }
 ```
 
-Поле `stats`: сколько позиций вернул парсер (`fetched`), сколько отброшено из‑за дубликата `url` в выдаче (`dedupedByUrl`), сколько URL уже были в группе (`skippedAlreadyInGroup`), сколько существующих SKU только добавлено в группу (`linkedExisting`), сколько создано новых документов SKU (`created`). У **новых** SKU при создании заполняются `title`, `url` и `imageUrl` из ответа парсера (у уже существующих SKU поля не меняются).
+Поле `stats`: сколько позиций вернул парсер (`fetched`); сколько отброшено из‑за дубликата `url` в выдаче (`dedupedByUrl`); сколько URL уже были в группе (`skippedAlreadyInGroup`); без идентификатора товара в выдаче (`skippedNoProductId`); конфликт по занятому другим URL `productId` (`skippedProductIdConflict`); для группы с производителем-заглушкой `newsku` — сколько существующих по URL SKU не добавлено, потому что у них уже другой `prodName` (`skippedNonNewskuManufacturer`); для группы с любым другим `prodName` — сколько существующих по URL SKU имели `prodName: "newsku"` и получили обновление на `prodName` текущей группы (`promotedFromNewsku`); сколько существующих SKU только добавлено в группу (`linkedExisting`); сколько создано новых документов SKU (`created`). У **новых** SKU при создании заполняются `title`, `url` и `imageUrl` из ответа парсера. У уже существующих SKU поля обычно не меняются, кроме случая промоута с `newsku` на `prodName` парсируемой группы (см. модуль Skugrs).
 
 **Ошибки:** 400 (валидация или неподдерживаемый `konkName`), 404 (группа не найдена), 401, 403, 500.
 

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { NEWSKU_PROD_NAME } from "../../../skus/constants/newskuProdName.js";
 import { Sku } from "../../../skus/models/Sku.js";
 import { Skugr } from "../../models/Skugr.js";
 import { fillSkugrSkusFromBrowserUtil } from "../fillSkugrSkusFromBrowserUtil.js";
@@ -168,5 +169,80 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
     expect(row!.title).toBe("Second");
     expect(row!.imageUrl).toBe("https://cdn.example/b.jpg");
     expect(row!.productId).toBe("yumi-777");
+  });
+
+  it("newsku group does not link sku that already has another prodName", async () => {
+    const existing = await Sku.create({
+      konkName: "yumi",
+      prodName: "acme",
+      productId: "yumi-501",
+      title: "Real brand",
+      url: "https://yumi.example/newbie",
+    });
+
+    const skugr = await Skugr.create({
+      konkName: "yumi",
+      prodName: NEWSKU_PROD_NAME,
+      title: "New only",
+      url: "https://yumi.example/new-page",
+      skus: [],
+    });
+
+    mockFetch.mockResolvedValue([
+      {
+        title: "Parsed",
+        url: "https://yumi.example/newbie",
+        imageUrl: "",
+        productId: "501",
+      },
+    ]);
+
+    const result = await fillSkugrSkusFromBrowserUtil(skugr._id.toString());
+    expect(result!.stats.skippedNonNewskuManufacturer).toBe(1);
+    expect(result!.stats.linkedExisting).toBe(0);
+    expect(result!.stats.promotedFromNewsku).toBe(0);
+
+    const refreshed = await Skugr.findById(skugr._id).lean();
+    expect(refreshed!.skus).toHaveLength(0);
+
+    const still = await Sku.findById(existing._id).lean();
+    expect(still!.prodName).toBe("acme");
+  });
+
+  it("non-newsku group promotes prodName from newsku and links", async () => {
+    const existing = await Sku.create({
+      konkName: "yumi",
+      prodName: NEWSKU_PROD_NAME,
+      productId: "yumi-502",
+      title: "From novelties",
+      url: "https://yumi.example/promote-me",
+    });
+
+    const skugr = await Skugr.create({
+      konkName: "yumi",
+      prodName: "acme",
+      title: "Real group",
+      url: "https://yumi.example/acme-group",
+      skus: [],
+    });
+
+    mockFetch.mockResolvedValue([
+      {
+        title: "Parsed",
+        url: "https://yumi.example/promote-me",
+        imageUrl: "",
+        productId: "502",
+      },
+    ]);
+
+    const result = await fillSkugrSkusFromBrowserUtil(skugr._id.toString());
+    expect(result!.stats.promotedFromNewsku).toBe(1);
+    expect(result!.stats.linkedExisting).toBe(1);
+
+    const promoted = await Sku.findById(existing._id).lean();
+    expect(promoted!.prodName).toBe("acme");
+
+    const refreshed = await Skugr.findById(skugr._id).lean();
+    expect(refreshed!.skus.map(String)).toContain(existing._id.toString());
   });
 });
