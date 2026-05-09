@@ -22,21 +22,21 @@ const router = Router();
 router.get(
   "/",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAllPalletGroups),
 );
 
 router.get(
   "/free-pallets",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getFreePallets),
 );
 
 router.get(
   "/:id",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getPalletGroupById),
 );
 

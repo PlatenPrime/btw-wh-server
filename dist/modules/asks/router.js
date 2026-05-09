@@ -18,13 +18,13 @@ router.get("/:id/pull", checkAuth, checkRoles([RoleType.USER]), asyncHandler(get
 // Получить ask по ID - доступно для всех авторизованных пользователей
 router.get("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAskById));
 // Зафиксировать снятие товара (pull) - доступно для ADMIN и PRIME
-router.patch("/:id/pull", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(pullAskById));
-// Завершить ask - доступно для ADMIN и PRIME
-router.patch("/:id/complete", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(completeAskById));
-// Отклонить ask - доступно для ADMIN и PRIME
-router.patch("/:id/reject", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(rejectAskById));
-// Обновить действия ask - доступно для ADMIN и PRIME
-router.patch("/:id/actions", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateAskActionsById));
+router.patch("/:id/pull", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(pullAskById));
+// Завершить ask - доступно для EDITOR и PRIME
+router.patch("/:id/complete", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(completeAskById));
+// Отклонить ask - доступно для EDITOR и PRIME
+router.patch("/:id/reject", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(rejectAskById));
+// Обновить действия ask - доступно для EDITOR и PRIME
+router.patch("/:id/actions", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(updateAskActionsById));
 // Удалить ask - доступно для ADMIN, PRIME и владельца ask
 router.delete("/:id", checkAuth, checkOwnership(async (req) => {
     const ask = await Ask.findById(req.params.id);

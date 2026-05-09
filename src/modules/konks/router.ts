@@ -16,19 +16,19 @@ const router = Router();
 router.get(
   "/",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAllKonksController)
 );
 router.get(
   "/id/:id",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkByIdController)
 );
 router.get(
   "/name/:name",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkByNameController)
 );
 router.post(

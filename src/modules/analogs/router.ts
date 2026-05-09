@@ -19,37 +19,37 @@ const router = Router();
 router.get(
   "/id/:id/stock",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogStockDataController)
 );
 router.get(
   "/id/:id",
-  // checkAuth,
-  // checkRoles([RoleType.USER]),
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogByIdController)
 );
 router.get(
   "/prod/:prodName",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogsByProdController)
 );
 router.get(
   "/konk/:konkName",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogsByKonkController)
 );
 router.get(
   "/artikul/:artikul",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogsByArtikulController)
 );
 router.get(
   "/",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogsController)
 );
 router.post(

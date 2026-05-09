@@ -54,21 +54,21 @@ router.get(
 router.post(
   "/",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(createPallet)
 );
 router.post(
   "/move-poses",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(movePalletPoses)
 );
 
-// PUT роуты - доступно для ADMIN и PRIME
+// PUT роуты - доступно для EDITOR и PRIME
 router.put(
   "/:id",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(updatePallet)
 );
 
@@ -82,13 +82,13 @@ router.delete(
 router.delete(
   "/:id/poses",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(deletePalletPoses)
 );
 router.delete(
   "/:id/empty-poses",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(deletePalletEmptyPoses)
 );
 

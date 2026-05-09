@@ -21,67 +21,67 @@ const router = Router();
 router.get(
   "/",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogSliceController)
 );
 router.get(
   "/analog/:analogId/range",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogSliceRangeController)
 );
 router.get(
   "/analog/:analogId/sales-range",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogSalesRangeController)
 );
 router.get(
   "/analog/:analogId/sales-by-date",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogSalesByDateController)
 );
 router.get(
   "/analog/:analogId/comparison-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogBtradeComparisonExcelController)
 );
 router.get(
   "/konk-btrade/sales-comparison",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkBtradeSalesComparisonController)
 );
 router.get(
   "/konk-btrade/stock-comparison",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkBtradeStockComparisonController)
 );
 router.get(
   "/konk-btrade/comparison-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkBtradeComparisonExcelController)
 );
 router.get(
   "/konk-btrade/sales-comparison-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkBtradeSalesComparisonExcelController)
 );
 router.get(
   "/analog/:analogId/sales-comparison-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogSalesComparisonExcelController)
 );
 router.get(
   "/analog/:analogId",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAnalogSliceByDateController)
 );
 

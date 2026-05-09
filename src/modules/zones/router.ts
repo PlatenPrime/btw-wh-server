@@ -21,7 +21,7 @@ router.post(
   "/",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(createZone)
+  asyncHandler(createZone),
 );
 
 // Получить все зоны с пагинацией и поиском - доступно только для ADMIN
@@ -29,7 +29,7 @@ router.get(
   "/",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllZones)
+  asyncHandler(getAllZones),
 );
 
 // Экспорт зон в Excel - доступно только для ADMIN
@@ -37,7 +37,7 @@ router.get(
   "/export",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(exportZonesToExcelController)
+  asyncHandler(exportZonesToExcelController),
 );
 
 // Получить зону по title - доступно только для ADMIN
@@ -45,7 +45,7 @@ router.get(
   "/title/:title",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getZoneByTitle)
+  asyncHandler(getZoneByTitle),
 );
 
 // Получить зоны по ID блока - доступно только для ADMIN
@@ -53,7 +53,7 @@ router.get(
   "/by-block/:blockId",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getZonesByBlockId)
+  asyncHandler(getZonesByBlockId),
 );
 
 // Получить зону по ID - доступно только для ADMIN
@@ -61,7 +61,7 @@ router.get(
   "/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getZoneById)
+  asyncHandler(getZoneById),
 );
 
 // Обновить зону - доступно только для ADMIN
@@ -69,7 +69,7 @@ router.put(
   "/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateZoneById)
+  asyncHandler(updateZoneById),
 );
 
 // Удалить зону - доступно только для PRIME
@@ -77,7 +77,7 @@ router.delete(
   "/:id",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteZoneById)
+  asyncHandler(deleteZoneById),
 );
 
 // Массовое создание/обновление зон (upsert) - доступно только для PRIME
@@ -85,7 +85,7 @@ router.post(
   "/upsert",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(upsertZones)
+  asyncHandler(upsertZones),
 );
 
 export default router;

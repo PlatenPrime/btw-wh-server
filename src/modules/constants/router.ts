@@ -16,19 +16,19 @@ const router = Router();
 router.get(
   "/",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAllConstantsController)
 );
 router.get(
   "/id/:id",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getConstantByIdController)
 );
 router.get(
   "/name/:name",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getConstantByNameController)
 );
 router.post(

@@ -11,9 +11,9 @@ router.get("/by-artikul/:artikul", checkAuth, checkRoles([RoleType.USER]), async
 router.get("/by-pallet/:palletId", checkAuth, checkRoles([RoleType.USER]), getPosesByPalletId);
 router.get("/by-row/:rowId", checkAuth, checkRoles([RoleType.USER]), getPosesByRowId);
 // POST routes - доступно для ADMIN и PRIME
-router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), createPos);
-router.post("/bulk", checkAuth, checkRoles([RoleType.ADMIN]), bulkCreatePoses);
-router.post("/populate-missing-data", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(populateMissingPosData));
+router.post("/", checkAuth, checkRoles([RoleType.EDITOR]), createPos);
+router.post("/bulk", checkAuth, checkRoles([RoleType.EDITOR]), bulkCreatePoses);
+router.post("/populate-missing-data", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(populateMissingPosData));
 router.post("/export-stocks", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(exportPosesStocksToExcel));
 // PUT routes - доступно для ADMIN и PRIME
 router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), updatePos);

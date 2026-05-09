@@ -16,35 +16,35 @@ router.post(
   "/",
   checkAuth,
   checkRoles([RoleType.USER]),
-  asyncHandler(createKaskController)
+  asyncHandler(createKaskController),
 );
 
 router.get(
   "/by-date",
   checkAuth,
   checkRoles([RoleType.USER]),
-  asyncHandler(getKasksByDate)
+  asyncHandler(getKasksByDate),
 );
 
 router.get(
   "/:id",
   checkAuth,
   checkRoles([RoleType.USER]),
-  asyncHandler(getKaskById)
+  asyncHandler(getKaskById),
 );
 
 router.patch(
   "/:id",
   checkAuth,
   checkRoles([RoleType.USER]),
-  asyncHandler(updateKaskById)
+  asyncHandler(updateKaskById),
 );
 
 router.delete(
   "/:id",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(deleteKaskById)
+  checkRoles([RoleType.PRIME]),
+  asyncHandler(deleteKaskById),
 );
 
 export default router;

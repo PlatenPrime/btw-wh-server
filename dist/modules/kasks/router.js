@@ -8,5 +8,5 @@ router.post("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(createKask
 router.get("/by-date", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKasksByDate));
 router.get("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKaskById));
 router.patch("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(updateKaskById));
-router.delete("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(deleteKaskById));
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deleteKaskById));
 export default router;

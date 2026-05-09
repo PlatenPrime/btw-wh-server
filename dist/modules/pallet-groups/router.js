@@ -5,9 +5,9 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { createPalletGroup, deletePalletGroup, getAllPalletGroups, getFreePallets, getPalletGroupById, recalculatePalletsSectors, reorderPalletGroups, resetPalletsSectors, setPallets, unlinkPallet, updatePalletGroup, } from "./controllers/index.js";
 const router = Router();
 // GET routes - available for all authenticated users
-router.get("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAllPalletGroups));
-router.get("/free-pallets", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getFreePallets));
-router.get("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getPalletGroupById));
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllPalletGroups));
+router.get("/free-pallets", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getFreePallets));
+router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getPalletGroupById));
 // POST routes - ADMIN only
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createPalletGroup));
 // PATCH / PUT routes - ADMIN only

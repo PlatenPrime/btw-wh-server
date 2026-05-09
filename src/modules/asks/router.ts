@@ -75,31 +75,31 @@ router.get(
 router.patch(
   "/:id/pull",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(pullAskById)
 );
 
-// Завершить ask - доступно для ADMIN и PRIME
+// Завершить ask - доступно для EDITOR и PRIME
 router.patch(
   "/:id/complete",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(completeAskById)
 );
 
-// Отклонить ask - доступно для ADMIN и PRIME
+// Отклонить ask - доступно для EDITOR и PRIME
 router.patch(
   "/:id/reject",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(rejectAskById)
 );
 
-// Обновить действия ask - доступно для ADMIN и PRIME
+// Обновить действия ask - доступно для EDITOR и PRIME
 router.patch(
   "/:id/actions",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(updateAskActionsById)
 );
 

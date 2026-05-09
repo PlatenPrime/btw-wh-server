@@ -43,12 +43,12 @@ router.get(
 );
 
 // POST routes - доступно для ADMIN и PRIME
-router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), createPos);
-router.post("/bulk", checkAuth, checkRoles([RoleType.ADMIN]), bulkCreatePoses);
+router.post("/", checkAuth, checkRoles([RoleType.EDITOR]), createPos);
+router.post("/bulk", checkAuth, checkRoles([RoleType.EDITOR]), bulkCreatePoses);
 router.post(
   "/populate-missing-data",
   checkAuth,
-  checkRoles([RoleType.ADMIN]),
+  checkRoles([RoleType.EDITOR]),
   asyncHandler(populateMissingPosData)
 );
 router.post(

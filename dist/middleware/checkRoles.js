@@ -3,7 +3,7 @@ import { hasRoleAccess, isValidRole, RoleType } from "../constants/roles.js";
  * Middleware для проверки прав доступа пользователя на основе ролей
  *
  * Проверяет, имеет ли пользователь необходимую роль для доступа к ресурсу.
- * Использует иерархию ролей: PRIME > ADMIN > USER
+ * Использует иерархию ролей: PRIME > ADMIN > EDITOR > USER
  *
  * ВАЖНО: Этот middleware должен использоваться ПОСЛЕ checkAuth middleware,
  * так как требует наличия req.user

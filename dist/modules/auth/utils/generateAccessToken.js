@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
  * Генерирует JWT токен доступа для пользователя
  *
  * @param id - ID пользователя
- * @param role - роль пользователя (USER, ADMIN, PRIME)
+ * @param role - роль пользователя (USER, EDITOR, ADMIN, PRIME)
  * @param expiresIn - время жизни токена (по умолчанию 24 часа)
  * @returns JWT токен
  *

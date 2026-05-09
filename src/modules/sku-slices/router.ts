@@ -12,13 +12,13 @@ import {
   getSkugrDailySummaryController,
   getSkugrSalesExcelController,
   getSkugrSliceExcelController,
-  getSkuSalesExcelController,
   getSkuSalesByDateController,
+  getSkuSalesExcelController,
   getSkuSalesRangeController,
   getSkuSliceByDateController,
   getSkuSliceController,
-  getSkuStockSliceExcelController,
   getSkuSliceRangeController,
+  getSkuStockSliceExcelController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -26,98 +26,98 @@ const router = Router();
 router.get(
   "/",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkuSliceController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuSliceController),
 );
 router.get(
   "/konk/excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getKonkSkuStockSliceExcelController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getKonkSkuStockSliceExcelController),
 );
 router.get(
   "/konk/sales-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getKonkSkuSalesExcelController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getKonkSkuSalesExcelController),
 );
 router.get(
   "/konk-prod/manufacturers-pie-data",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getKonkProdManufacturersPieDataController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getKonkProdManufacturersPieDataController),
 );
 router.get(
   "/konk-prod/skugr-groups-sales",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getKonkProdSkugrGroupsSalesController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getKonkProdSkugrGroupsSalesController),
 );
 router.get(
   "/konk-prod/stock-chart-data",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getKonkProdSkuStockChartDataController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getKonkProdSkuStockChartDataController),
 );
 router.get(
   "/konk-prod/sales-chart-data",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getKonkProdSkuSalesChartDataController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getKonkProdSkuSalesChartDataController),
 );
 router.get(
   "/skugr/:skugrId/daily-summary",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkugrDailySummaryController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkugrDailySummaryController),
 );
 router.get(
   "/skugr/:skugrId/slice-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkugrSliceExcelController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkugrSliceExcelController),
 );
 router.get(
   "/skugr/:skugrId/sales-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkugrSalesExcelController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkugrSalesExcelController),
 );
 router.get(
   "/sku/:skuId/range",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkuSliceRangeController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuSliceRangeController),
 );
 router.get(
   "/sku/:skuId/sales-range",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkuSalesRangeController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuSalesRangeController),
 );
 router.get(
   "/sku/:skuId/sales-by-date",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkuSalesByDateController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuSalesByDateController),
 );
 router.get(
   "/sku/:skuId/slice-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkuStockSliceExcelController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuStockSliceExcelController),
 );
 router.get(
   "/sku/:skuId/sales-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkuSalesExcelController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuSalesExcelController),
 );
 router.get(
   "/sku/:skuId",
   checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getSkuSliceByDateController)
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuSliceByDateController),
 );
 
 export default router;

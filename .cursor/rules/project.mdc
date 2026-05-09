@@ -142,7 +142,7 @@ modules/[module]/
 
 - JWT токены для сессий
 - bcryptjs для хеширования паролей
-- Роли пользователей (user, admin)
+- Роли пользователей (user, editor, admin, prime)
 - Защищенные роуты через middleware
 
 ### Валидация данных

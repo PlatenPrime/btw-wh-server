@@ -21,19 +21,19 @@ const router = Router();
 router.get(
   "/",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getAllSkusController)
 );
 router.get(
   "/konk/:konkName/new-since-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkNewSinceExcelController)
 );
 router.get(
   "/konk/:konkName/invalid-excel",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkInvalidExcelController)
 );
 router.delete(
@@ -51,13 +51,13 @@ router.delete(
 router.get(
   "/by-skugr/:skugrId",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkusBySkugrIdController)
 );
 router.get(
   "/id/:id",
   checkAuth,
-  checkRoles([RoleType.USER]),
+  checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkuByIdController)
 );
 router.post(

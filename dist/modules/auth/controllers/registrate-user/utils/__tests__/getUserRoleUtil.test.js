@@ -18,4 +18,9 @@ describe("getUserRoleUtil", () => {
         const role = await getUserRoleUtil("ADMIN");
         expect(role).toBe("ADMIN");
     });
+    it("возвращает EDITOR если роль есть в коллекции", async () => {
+        await Role.create({ value: "EDITOR", name: "Editor" });
+        const role = await getUserRoleUtil("EDITOR");
+        expect(role).toBe("EDITOR");
+    });
 });

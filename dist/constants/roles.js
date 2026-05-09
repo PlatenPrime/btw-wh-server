@@ -7,6 +7,8 @@ export var RoleType;
     RoleType["PRIME"] = "PRIME";
     /** Администратор с правами создания и удаления сущностей */
     RoleType["ADMIN"] = "ADMIN";
+    /** Редактор: расширенные права относительно USER, без полномочий ADMIN */
+    RoleType["EDITOR"] = "EDITOR";
     /** Обычный пользователь с ограниченными правами */
     RoleType["USER"] = "USER";
 })(RoleType || (RoleType = {}));
@@ -15,8 +17,9 @@ export var RoleType;
  * Используется для проверки прав доступа
  */
 export const ROLE_HIERARCHY = {
-    [RoleType.PRIME]: 3,
-    [RoleType.ADMIN]: 2,
+    [RoleType.PRIME]: 4,
+    [RoleType.ADMIN]: 3,
+    [RoleType.EDITOR]: 2,
     [RoleType.USER]: 1,
 };
 /**
