@@ -59,9 +59,9 @@ router.post(
 );
 
 // PUT routes - доступно для ADMIN и PRIME
-router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), updatePos);
+router.put("/:id", checkAuth, checkRoles([RoleType.EDITOR]), updatePos);
 
 // DELETE routes - доступно для ADMIN и PRIME
-router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), deletePos);
+router.delete("/:id", checkAuth, checkRoles([RoleType.EDITOR]), deletePos);
 
 export default router;
