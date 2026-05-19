@@ -16,7 +16,7 @@ router.post("/bulk", checkAuth, checkRoles([RoleType.EDITOR]), bulkCreatePoses);
 router.post("/populate-missing-data", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(populateMissingPosData));
 router.post("/export-stocks", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(exportPosesStocksToExcel));
 // PUT routes - доступно для ADMIN и PRIME
-router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), updatePos);
+router.put("/:id", checkAuth, checkRoles([RoleType.EDITOR]), updatePos);
 // DELETE routes - доступно для ADMIN и PRIME
-router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), deletePos);
+router.delete("/:id", checkAuth, checkRoles([RoleType.EDITOR]), deletePos);
 export default router;
