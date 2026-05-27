@@ -4,12 +4,12 @@ import { runCompensatingAnalogSlices } from "../utils/runCompensatingAnalogSlice
 import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
 
 /**
- * Компенсирующие срезы: 11:00 и 16:00 по Киеву — повторный опрос позиций с -1/-1
+ * Компенсирующие срезы: 09:10 и 16:10 по Киеву — повторный опрос позиций с -1/-1
  * в сегодняшних AnalogSlice и SkuSlice.
  */
 export function startCompensatingSlicesCron(): CronJob {
   const job = new CronJob(
-    "0 0 11,16 * * *",
+    "0 30 9,16 * * *",
     async () => {
       try {
         const sliceDate = toSliceDate(new Date());
@@ -40,7 +40,7 @@ export function startCompensatingSlicesCron(): CronJob {
   );
 
   console.log(
-    `[CRON CompensatingSlices] Started: 11:00 and 16:00 daily (Kiev time)`,
+    `[CRON CompensatingSlices] Started: 09:10 and 16:10 daily (Kiev time)`,
   );
   return job;
 }

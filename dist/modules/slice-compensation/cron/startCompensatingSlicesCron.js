@@ -3,11 +3,11 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import { runCompensatingAnalogSlices } from "../utils/runCompensatingAnalogSlices.js";
 import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
 /**
- * Компенсирующие срезы: 11:00 и 16:00 по Киеву — повторный опрос позиций с -1/-1
+ * Компенсирующие срезы: 09:10 и 16:10 по Киеву — повторный опрос позиций с -1/-1
  * в сегодняшних AnalogSlice и SkuSlice.
  */
 export function startCompensatingSlicesCron() {
-    const job = new CronJob("0 0 11,16 * * *", async () => {
+    const job = new CronJob("0 30 9,16 * * *", async () => {
         try {
             const sliceDate = toSliceDate(new Date());
             console.log(`[CRON CompensatingSlices] Starting for ${sliceDate.toISOString().slice(0, 10)}...`);
@@ -23,6 +23,6 @@ export function startCompensatingSlicesCron() {
             console.error(`[CRON CompensatingSlices] Error:`, error instanceof Error ? error.message : "Unknown error");
         }
     }, null, true, "Europe/Kiev");
-    console.log(`[CRON CompensatingSlices] Started: 11:00 and 16:00 daily (Kiev time)`);
+    console.log(`[CRON CompensatingSlices] Started: 09:10 and 16:10 daily (Kiev time)`);
     return job;
 }
