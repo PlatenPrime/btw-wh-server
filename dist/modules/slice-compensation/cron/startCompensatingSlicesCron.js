@@ -7,7 +7,7 @@ import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
  * в сегодняшних AnalogSlice и SkuSlice.
  */
 export function startCompensatingSlicesCron() {
-    const job = new CronJob("0 30 9,16 * * *", async () => {
+    const job = new CronJob("0 30 10 * * *", async () => {
         try {
             const sliceDate = toSliceDate(new Date());
             console.log(`[CRON CompensatingSlices] Starting for ${sliceDate.toISOString().slice(0, 10)}...`);
@@ -23,6 +23,6 @@ export function startCompensatingSlicesCron() {
             console.error(`[CRON CompensatingSlices] Error:`, error instanceof Error ? error.message : "Unknown error");
         }
     }, null, true, "Europe/Kiev");
-    console.log(`[CRON CompensatingSlices] Started: 09:10 and 16:10 daily (Kiev time)`);
+    console.log(`[CRON CompensatingSlices] Started: 10:30 daily (Kiev time)`);
     return job;
 }

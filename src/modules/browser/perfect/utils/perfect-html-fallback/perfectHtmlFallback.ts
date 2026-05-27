@@ -13,5 +13,8 @@ export function tryPerfectHtmlFallback(
   const packPrice = extractDisplayPriceFromProductHtml(html);
   if (packPrice === null) return null;
   const title = pageTitle.trim();
-  return toStockAndPrice(0, packPrice, title, html);
+  return {
+    ...toStockAndPrice(0, packPrice, title, html),
+    source: "html-oos",
+  };
 }

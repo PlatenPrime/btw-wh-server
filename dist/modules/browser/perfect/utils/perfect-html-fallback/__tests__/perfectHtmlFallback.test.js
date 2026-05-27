@@ -11,6 +11,7 @@ describe("tryPerfectHtmlFallback", () => {
             stock: 0,
             price: 6.62,
             title: "Кулька латексна, 50 шт.",
+            source: "html-oos",
         });
     });
     it("returns null when page looks in stock", () => {

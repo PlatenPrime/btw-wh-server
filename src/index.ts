@@ -28,7 +28,6 @@ import skugrsRoute from "./modules/skugrs/router.js";
 import skusRoute from "./modules/skus/router.js";
 import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
-
 dotenv.config();
 
 const app = express();

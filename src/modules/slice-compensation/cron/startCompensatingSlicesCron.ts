@@ -9,7 +9,7 @@ import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
  */
 export function startCompensatingSlicesCron(): CronJob {
   const job = new CronJob(
-    "0 30 9,16 * * *",
+    "0 30 10 * * *",
     async () => {
       try {
         const sliceDate = toSliceDate(new Date());
@@ -39,8 +39,6 @@ export function startCompensatingSlicesCron(): CronJob {
     "Europe/Kiev",
   );
 
-  console.log(
-    `[CRON CompensatingSlices] Started: 09:10 and 16:10 daily (Kiev time)`,
-  );
+  console.log(`[CRON CompensatingSlices] Started: 10:30 daily (Kiev time)`);
   return job;
 }
