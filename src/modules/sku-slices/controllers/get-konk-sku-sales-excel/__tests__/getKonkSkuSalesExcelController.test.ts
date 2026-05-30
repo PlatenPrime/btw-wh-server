@@ -198,4 +198,36 @@ describe("getKonkSkuSalesExcelController", () => {
     expect(ws?.getRow(2).getCell(1).value).toBe("zzz-high-sales");
     expect(ws?.getRow(5).getCell(1).value).toBe("aaa-low-sales");
   });
+
+  it("200 accepts prod=all and passes it to util", async () => {
+    await Sku.create({
+      konkName: "air",
+      prodName: "p1",
+      productId: "air-all-ctrl",
+      title: "A",
+      url: "https://e.com/a",
+    });
+    const d1 = new Date("2026-06-01T00:00:00.000Z");
+    const d2 = new Date("2026-06-02T00:00:00.000Z");
+    await SkuSlice.insertMany([
+      { konkName: "air", date: d1, data: { "air-all-ctrl": { stock: 4, price: 8 } } },
+      { konkName: "air", date: d2, data: { "air-all-ctrl": { stock: 1, price: 8 } } },
+    ]);
+
+    const req = {
+      query: {
+        konk: "air",
+        prod: "all",
+        dateFrom: "2026-06-01",
+        dateTo: "2026-06-02",
+      },
+    } as unknown as Request;
+
+    await getKonkSkuSalesExcelController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    expect(Buffer.isBuffer(responseBody as Buffer)).toBe(true);
+    const disposition = String(responseHeaders["Content-Disposition"]);
+    expect(disposition).toContain("_all_");
+  });
 });

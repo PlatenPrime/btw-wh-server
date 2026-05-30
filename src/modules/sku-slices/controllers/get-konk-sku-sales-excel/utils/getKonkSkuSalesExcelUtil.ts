@@ -1,5 +1,4 @@
 import { Konk } from "../../../../konks/models/Konk.js";
-import { Prod } from "../../../../prods/models/Prod.js";
 import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
@@ -11,6 +10,7 @@ import {
   formatDateHeader,
   safeFilePart,
 } from "../../../utils/buildSkuSliceExcel.js";
+import { loadProdDisplayTitlesByName } from "../../../utils/prodDisplayTitles.js";
 import { resolveKonkProdSkus } from "../../../utils/resolveKonkProdSkus.js";
 import type { GetKonkSkuSalesExcelInput } from "../schemas/getKonkSkuSalesExcelSchema.js";
 import {
@@ -57,22 +57,21 @@ export async function getKonkSkuSalesExcelUtil(
     );
   }
 
-  const [konkDoc, prodDoc] = await Promise.all([
+  const [konkDoc, prodTitleByName] = await Promise.all([
     Konk.findOne({ name: input.konk }).select("title recountDays").lean(),
-    Prod.findOne({ name: input.prod }).select("title").lean(),
+    loadProdDisplayTitlesByName(resolved.map((r) => r.prodName)),
   ]);
   const recountDays = (konkDoc?.recountDays ?? []).map(String);
   const recountDaysSet = new Set(recountDays);
 
   const competitorTitle = (konkDoc?.title ?? "").trim();
-  const producerName = (prodDoc?.title ?? "").trim();
   const rows: SkuSalesExcelSkuRow[] = resolved.map((r) => ({
     title: r.title,
     url: r.url,
     productId: r.productId,
     konkName: r.konkName,
     competitorTitle,
-    producerName,
+    producerName: prodTitleByName.get(r.prodName) ?? r.prodName,
     skugrTitle: r.skugrTitle,
   }));
 

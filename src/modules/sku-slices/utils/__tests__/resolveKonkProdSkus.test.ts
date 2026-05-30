@@ -184,4 +184,30 @@ describe("resolveKonkProdSkus", () => {
     });
     expect(rows).toEqual([]);
   });
+
+  it("with prod=all returns SKUs of any prodName sorted by productId", async () => {
+    await createSku("b", "prod-b");
+    await createSku("a", "prod-a");
+
+    const rows = await resolveKonkProdSkus({ konk: KONK, prod: "all" });
+    expect(rows.map((r) => r.productId)).toEqual(["a", "b"]);
+    expect(rows.map((r) => r.prodName).sort()).toEqual(["prod-a", "prod-b"]);
+  });
+
+  it("with prod=all and skugrIds includes SKUs from groups of different prodName", async () => {
+    const a = await createSku("a", "p1");
+    const b = await createSku("b", "p2");
+
+    const g1 = await createSkugr("G1", [a], "p1");
+    const g2 = await createSkugr("G2", [b], "p2");
+
+    const rows = await resolveKonkProdSkus({
+      konk: KONK,
+      prod: "all",
+      skugrIds: [g1.toString(), g2.toString()],
+    });
+    expect(rows.map((r) => r.productId)).toEqual(["a", "b"]);
+    expect(rows.find((r) => r.productId === "a")!.prodName).toBe("p1");
+    expect(rows.find((r) => r.productId === "b")!.prodName).toBe("p2");
+  });
 });

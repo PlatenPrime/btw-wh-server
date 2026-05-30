@@ -1,9 +1,9 @@
 import { Konk } from "../../../../konks/models/Konk.js";
-import { Prod } from "../../../../prods/models/Prod.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 import { aggregateSkuSlices, sliceDataProjectForProductIdList, } from "../../../utils/sliceDataAggregationStages.js";
 import { buildSkuSliceExcelForSkus, formatDateHeader, safeFilePart, } from "../../../utils/buildSkuSliceExcel.js";
+import { loadProdDisplayTitlesByName } from "../../../utils/prodDisplayTitles.js";
 import { resolveKonkProdSkus } from "../../../utils/resolveKonkProdSkus.js";
 export async function getKonkSkuSliceExcelUtil(input) {
     const resolved = await resolveKonkProdSkus({
@@ -13,12 +13,14 @@ export async function getKonkSkuSliceExcelUtil(input) {
     });
     if (resolved.length === 0)
         return { ok: false };
+    const prodTitleByName = await loadProdDisplayTitlesByName(resolved.map((r) => r.prodName));
     const rows = resolved.map((r) => ({
         title: r.title,
         url: r.url,
         productId: r.productId,
         konkName: r.konkName,
         prodName: r.prodName,
+        producerName: prodTitleByName.get(r.prodName) ?? r.prodName,
         skugrTitle: r.skugrTitle,
         createdAt: r.createdAt,
     }));
@@ -41,13 +43,12 @@ export async function getKonkSkuSliceExcelUtil(input) {
         const t = toSliceDate(sl.date).getTime();
         byDate.set(t, (sl.data ?? {}));
     }
-    const [konkDoc, prodDoc] = await Promise.all([
+    const [konkDoc] = await Promise.all([
         Konk.findOne({ name: input.konk }).select("title").lean(),
-        Prod.findOne({ name: input.prod }).select("title").lean(),
     ]);
     const titles = {
         competitorTitle: (konkDoc?.title ?? "").trim(),
-        producerName: (prodDoc?.title ?? "").trim(),
+        producerName: "",
     };
     const { buffer } = await buildSkuSliceExcelForSkus(rows, dateFrom, dateTo, (kn, pid, d) => {
         if (kn !== input.konk)

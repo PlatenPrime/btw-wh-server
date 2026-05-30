@@ -58,6 +58,8 @@ export type SkuSliceExcelSkuRow = {
   productId: string;
   konkName: string;
   prodName: string;
+  /** Заголовок виробника для колонки «Виробник»; якщо задано — має пріоритет над titles.producerName. */
+  producerName?: string;
   /** Заголовок Skugr для колонки «Товарна група»; пусто, если SKU не привязан. */
   skugrTitle?: string;
   /** Для підсвітки «новинки»: день `toSliceDate(createdAt)` у колонках дат. */
@@ -276,7 +278,7 @@ export async function buildSkuSliceExcelForSkus(
     stockRow.getCell(1).value = sku.productId;
     stockRow.getCell(2).value = sku.title;
     stockRow.getCell(3).value = titles.competitorTitle;
-    stockRow.getCell(4).value = titles.producerName;
+    stockRow.getCell(4).value = sku.producerName ?? titles.producerName;
     stockRow.getCell(5).value = sku.skugrTitle ?? "";
     stockRow.getCell(6).value = sku.url;
 

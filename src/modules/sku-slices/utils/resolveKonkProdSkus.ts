@@ -1,6 +1,7 @@
 import type { Types } from "mongoose";
 import { Skugr } from "../../skugrs/models/Skugr.js";
 import { Sku } from "../../skus/models/Sku.js";
+import { isAllProd } from "./prodDisplayTitles.js";
 
 /**
  * SKU выборка для konk-prod отчётов с опциональным фильтром по товарным группам.
@@ -52,9 +53,6 @@ type SkugrLean = {
   title: string;
   skus: Types.ObjectId[];
 };
-
-const isAllProd = (prod: string | undefined): boolean =>
-  typeof prod === "string" && prod.trim() === "all";
 
 export async function resolveKonkProdSkus(
   input: ResolveKonkProdSkusInput,

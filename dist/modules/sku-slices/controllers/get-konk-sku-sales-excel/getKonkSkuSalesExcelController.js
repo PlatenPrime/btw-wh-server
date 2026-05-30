@@ -2,7 +2,7 @@ import { getKonkSkuSalesExcelSchema } from "./schemas/getKonkSkuSalesExcelSchema
 import { getKonkSkuSalesExcelUtil } from "./utils/getKonkSkuSalesExcelUtil.js";
 /**
  * @desc    Excel продаж по всем SKU конкурента за период
- * @route   GET /api/sku-slices/konk/sales-excel?konk=&prod=&dateFrom=&dateTo=&sortBy=
+ * @route   GET /api/sku-slices/konk/sales-excel?konk=&prod=&dateFrom=&dateTo=&sortBy= (prod=all — всі виробники конкурента; з skugrIds — групи різних prodName)
  */
 export const getKonkSkuSalesExcelController = async (req, res) => {
     const parseResult = getKonkSkuSalesExcelSchema.safeParse({

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import ExcelJS from "exceljs";
+import { Prod } from "../../../../../prods/models/Prod.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../models/SkuSlice.js";
@@ -340,5 +341,91 @@ describe("getKonkSkuSalesExcelUtil", () => {
     expect(ws?.getRow(4).getCell(dataCol).value).toBe(15);
     expect(ws?.getRow(2).getCell(dataCol + 1).value).toBe(3);
     expect(ws?.getRow(4).getCell(dataCol + 1).value).toBe(15);
+  });
+
+  it("prod=all with skugrIds writes per-row producer titles and all in fileName", async () => {
+    await Prod.create({
+      name: "p1",
+      title: "Producer One",
+      imageUrl: "https://example.com/p1.png",
+    });
+    await Prod.create({
+      name: "p2",
+      title: "Producer Two",
+      imageUrl: "https://example.com/p2.png",
+    });
+
+    const sA = await Sku.create({
+      konkName: "air",
+      prodName: "p1",
+      productId: "air-all-p1",
+      title: "A",
+      url: "https://e.com/a",
+    });
+    const sB = await Sku.create({
+      konkName: "air",
+      prodName: "p2",
+      productId: "air-all-p2",
+      title: "B",
+      url: "https://e.com/b",
+    });
+
+    const g1 = await Skugr.create({
+      konkName: "air",
+      prodName: "p1",
+      title: "Group P1",
+      url: "https://e.com/g1",
+      isSliced: true,
+      skus: [sA._id],
+    });
+    const g2 = await Skugr.create({
+      konkName: "air",
+      prodName: "p2",
+      title: "Group P2",
+      url: "https://e.com/g2",
+      isSliced: true,
+      skus: [sB._id],
+    });
+
+    const d1 = new Date("2026-08-01T00:00:00.000Z");
+    const d2 = new Date("2026-08-02T00:00:00.000Z");
+    await SkuSlice.insertMany([
+      {
+        konkName: "air",
+        date: d1,
+        data: {
+          "air-all-p1": { stock: 5, price: 3 },
+          "air-all-p2": { stock: 4, price: 4 },
+        },
+      },
+      {
+        konkName: "air",
+        date: d2,
+        data: {
+          "air-all-p1": { stock: 4, price: 3 },
+          "air-all-p2": { stock: 1, price: 4 },
+        },
+      },
+    ]);
+
+    const result = await getKonkSkuSalesExcelUtil({
+      konk: "air",
+      prod: "all",
+      dateFrom: d1,
+      dateTo: d2,
+      skugrIds: [g1._id.toString(), g2._id.toString()],
+    });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.fileName).toContain("_all_");
+
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(result.buffer as unknown as ArrayBuffer);
+    const ws = wb.getWorksheet("Продажі");
+    expect(ws?.getRow(2).getCell(1).value).toBe("air-all-p1");
+    expect(ws?.getRow(2).getCell(4).value).toBe("Producer One");
+    expect(ws?.getRow(5).getCell(1).value).toBe("air-all-p2");
+    expect(ws?.getRow(5).getCell(4).value).toBe("Producer Two");
   });
 });

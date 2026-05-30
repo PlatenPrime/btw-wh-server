@@ -4,7 +4,7 @@ import { getKonkSkuSliceExcelUtil } from "./utils/getKonkSkuSliceExcelUtil.js";
 
 /**
  * @desc    Excel остатков по группе SKU (konk + prod) за период с итогом Підсумок
- * @route   GET /api/sku-slices/konk/excel?konk=&prod=&dateFrom=&dateTo=
+ * @route   GET /api/sku-slices/konk/excel?konk=&prod=&dateFrom=&dateTo= (prod=all — всі виробники конкурента; з skugrIds — групи різних prodName)
  */
 export const getKonkSkuStockSliceExcelController = async (
   req: Request,

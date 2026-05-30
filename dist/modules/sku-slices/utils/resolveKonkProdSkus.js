@@ -1,6 +1,6 @@
 import { Skugr } from "../../skugrs/models/Skugr.js";
 import { Sku } from "../../skus/models/Sku.js";
-const isAllProd = (prod) => typeof prod === "string" && prod.trim() === "all";
+import { isAllProd } from "./prodDisplayTitles.js";
 export async function resolveKonkProdSkus(input) {
     const skugrIds = (input.skugrIds ?? []).filter((id) => id.length > 0);
     return skugrIds.length > 0

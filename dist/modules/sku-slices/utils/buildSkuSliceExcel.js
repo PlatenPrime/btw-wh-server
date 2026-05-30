@@ -189,7 +189,7 @@ export async function buildSkuSliceExcelForSkus(skus, dateFrom, dateTo, getItem,
         stockRow.getCell(1).value = sku.productId;
         stockRow.getCell(2).value = sku.title;
         stockRow.getCell(3).value = titles.competitorTitle;
-        stockRow.getCell(4).value = titles.producerName;
+        stockRow.getCell(4).value = sku.producerName ?? titles.producerName;
         stockRow.getCell(5).value = sku.skugrTitle ?? "";
         stockRow.getCell(6).value = sku.url;
         stockRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[0];
