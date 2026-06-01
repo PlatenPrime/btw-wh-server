@@ -28,7 +28,7 @@ import skugrsRoute from "./modules/skugrs/router.js";
 import skusRoute from "./modules/skus/router.js";
 import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
-import { fetchSharikProductRestsMap } from "./modules/btrade-slices/sharik/fetchSharikProductRestsMap.js";
+import { logServerEgressGeo } from "./utils/server-egress-geo/logServerEgressGeo.js";
 dotenv.config();
 
 const app = express();
@@ -92,6 +92,7 @@ async function start() {
 
     app.listen(PORT, () => {
       console.log(`Server started on port ${PORT}`);
+      void logServerEgressGeo("startup");
     });
   } catch (error) {
     console.log(error);

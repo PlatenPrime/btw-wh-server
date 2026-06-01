@@ -1,11 +1,21 @@
 import { getServerEgressGeo } from "./getServerEgressGeo.js";
 
+const DISABLED_VALUES = new Set(["0", "false", "no", "off"]);
+
 export function isServerEgressGeoLogEnabled(): boolean {
-  return process.env.SERVER_EGRESS_GEO_LOG === "1";
+  const raw = process.env.SERVER_EGRESS_GEO_LOG?.trim().toLowerCase();
+  if (!raw) {
+    return true;
+  }
+  if (DISABLED_VALUES.has(raw)) {
+    return false;
+  }
+  return true;
 }
 
 /**
  * Запрашивает geo по egress IP и пишет в console (Railway logs).
+ * По умолчанию включено; отключение: SERVER_EGRESS_GEO_LOG=0|false|no|off.
  * Не бросает — сбой geo не должен ломать бизнес-операцию.
  */
 export async function logServerEgressGeo(context: string): Promise<void> {
@@ -17,7 +27,7 @@ export async function logServerEgressGeo(context: string): Promise<void> {
     const geo = await getServerEgressGeo();
 
     if (geo) {
-      console.log(`[ServerEgressGeo] ${context}`, geo);
+      console.log(`[ServerEgressGeo] ${context} ${JSON.stringify(geo)}`);
       return;
     }
 
