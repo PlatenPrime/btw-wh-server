@@ -100,7 +100,3 @@ async function start() {
 
 start();
 
-
-fetchSharikProductRestsMap("1302-0065").then((map) => {
-  console.log(map);
-});

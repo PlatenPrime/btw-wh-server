@@ -1,9 +1,19 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Row } from "../../../../models/Row.js";
 import { createRowUtil } from "../createRowUtil.js";
+import { logServerEgressGeo } from "../../../../../../utils/server-egress-geo/logServerEgressGeo.js";
+vi.mock("../../../../../../utils/server-egress-geo/logServerEgressGeo.js", () => ({
+    logServerEgressGeo: vi.fn().mockResolvedValue(undefined),
+}));
+const mockedLogServerEgressGeo = vi.mocked(logServerEgressGeo);
 describe("createRowUtil", () => {
     beforeEach(async () => {
+        vi.clearAllMocks();
         // collections cleared in global setup
+    });
+    it("вызывает logServerEgressGeo при создании", async () => {
+        await createRowUtil({ title: "Egress Log Row" });
+        expect(mockedLogServerEgressGeo).toHaveBeenCalledWith("createRow");
     });
     it("создаёт Row и возвращает сохранённый документ", async () => {
         const result = await createRowUtil({ title: "Test Row A" });
