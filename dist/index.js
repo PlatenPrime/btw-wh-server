@@ -27,6 +27,7 @@ import skugrsRoute from "./modules/skugrs/router.js";
 import skusRoute from "./modules/skus/router.js";
 import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
+import { fetchSharikProductRestsMap } from "./modules/btrade-slices/sharik/fetchSharikProductRestsMap.js";
 dotenv.config();
 const app = express();
 // Middleware
@@ -85,3 +86,6 @@ async function start() {
     }
 }
 start();
+fetchSharikProductRestsMap("1302-0065").then((map) => {
+    console.log(map);
+});

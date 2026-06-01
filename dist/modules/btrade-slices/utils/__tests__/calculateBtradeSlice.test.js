@@ -1,57 +1,85 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { calculateBtradeSlice } from "../calculateBtradeSlice.js";
-vi.mock("../../../browser/sharik/utils/getSharikStockData.js", () => ({
-    getSharikStockData: vi.fn(),
+vi.mock("../../sharik/fetchSharikProductRestsMap.js", () => ({
+    fetchSharikProductRestsMap: vi.fn(),
+}));
+vi.mock("../calculateBtradeSliceViaSearch.js", () => ({
+    fetchMissingBtradeSliceItemsViaSearch: vi.fn(),
 }));
 vi.mock("../../models/BtradeSlice.js", () => ({
     BtradeSlice: {
         findOneAndUpdate: vi.fn(),
     },
 }));
-vi.mock("../getUniqueArtikulsFromAnalogsUtil.js", () => ({
-    getUniqueArtikulsFromAnalogsUtil: vi.fn(),
+vi.mock("../getUniqueArtikulsFromArtsUtil.js", () => ({
+    getUniqueArtikulsFromArtsUtil: vi.fn(),
 }));
-import { getSharikStockData } from "../../../browser/sharik/utils/getSharikStockData.js";
+import { fetchSharikProductRestsMap } from "../../sharik/fetchSharikProductRestsMap.js";
+import { fetchMissingBtradeSliceItemsViaSearch } from "../calculateBtradeSliceViaSearch.js";
 import { BtradeSlice } from "../../models/BtradeSlice.js";
-import { getUniqueArtikulsFromAnalogsUtil } from "../getUniqueArtikulsFromAnalogsUtil.js";
+import { getUniqueArtikulsFromArtsUtil } from "../getUniqueArtikulsFromArtsUtil.js";
 describe("calculateBtradeSlice", () => {
     const mockSliceDate = new Date("2025-03-01T00:00:00.000Z");
     beforeEach(() => {
         vi.useFakeTimers();
         vi.setSystemTime(mockSliceDate);
-        vi.mocked(getUniqueArtikulsFromAnalogsUtil).mockResolvedValue(["ART-1", "ART-2"]);
-        vi.mocked(getSharikStockData)
-            .mockResolvedValueOnce({ nameukr: "T1", price: 100, quantity: 5 })
-            .mockResolvedValueOnce({ nameukr: "T2", price: 200, quantity: 10 });
+        vi.mocked(getUniqueArtikulsFromArtsUtil).mockResolvedValue([
+            "ART-1",
+            "ART-2",
+        ]);
+        vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(new Map([
+            ["ART-1", { quantity: 5, price: 100 }],
+            ["ART-2", { quantity: 10, price: 200 }],
+        ]));
+        vi.mocked(fetchMissingBtradeSliceItemsViaSearch).mockResolvedValue({});
         vi.mocked(BtradeSlice.findOneAndUpdate).mockResolvedValue({});
     });
     afterEach(() => {
         vi.useRealTimers();
         vi.clearAllMocks();
     });
-    it("creates slice document first with empty data then fills data per artikul", async () => {
-        const resultPromise = calculateBtradeSlice();
-        await vi.runAllTimersAsync();
-        const result = await resultPromise;
+    it("saves all artikuls from product_rests in a single DB update", async () => {
+        const result = await calculateBtradeSlice();
         expect(result).toEqual({ saved: true, count: 2 });
-        expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledTimes(3);
-        const calls = vi.mocked(BtradeSlice.findOneAndUpdate).mock.calls;
-        expect(calls[0][0]).toEqual({ date: mockSliceDate });
-        expect(calls[0][1]).toEqual({
-            $setOnInsert: { date: mockSliceDate, data: {} },
-        });
-        expect(calls[0][2]).toEqual({ upsert: true });
-        expect(calls[1][1]).toEqual({
-            $set: { "data.ART-1": { price: 100, quantity: 5 } },
-        });
-        expect(calls[2][1]).toEqual({
-            $set: { "data.ART-2": { price: 200, quantity: 10 } },
-        });
+        expect(fetchSharikProductRestsMap).toHaveBeenCalledTimes(1);
+        expect(fetchMissingBtradeSliceItemsViaSearch).not.toHaveBeenCalled();
+        expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
+        expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith({ date: mockSliceDate }, {
+            $set: {
+                date: mockSliceDate,
+                data: {
+                    "ART-1": { price: 100, quantity: 5 },
+                    "ART-2": { price: 200, quantity: 10 },
+                },
+            },
+        }, { upsert: true });
     });
-    it("when no artikuls only initial upsert is called", async () => {
-        vi.mocked(getUniqueArtikulsFromAnalogsUtil).mockResolvedValue([]);
+    it("uses search fallback for artikuls missing on product_rests page", async () => {
+        vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(new Map([["ART-1", { quantity: 5, price: 100 }]]));
+        vi.mocked(fetchMissingBtradeSliceItemsViaSearch).mockResolvedValue({
+            "ART-2": { price: 200, quantity: 10 },
+        });
+        const result = await calculateBtradeSlice();
+        expect(result).toEqual({ saved: true, count: 2 });
+        expect(fetchMissingBtradeSliceItemsViaSearch).toHaveBeenCalledWith([
+            "ART-2",
+        ]);
+        expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith({ date: mockSliceDate }, {
+            $set: {
+                date: mockSliceDate,
+                data: {
+                    "ART-1": { price: 100, quantity: 5 },
+                    "ART-2": { price: 200, quantity: 10 },
+                },
+            },
+        }, { upsert: true });
+    });
+    it("when no artikuls only upserts empty data", async () => {
+        vi.mocked(getUniqueArtikulsFromArtsUtil).mockResolvedValue([]);
+        vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(new Map());
         const result = await calculateBtradeSlice();
         expect(result).toEqual({ saved: true, count: 0 });
-        expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
+        expect(fetchMissingBtradeSliceItemsViaSearch).not.toHaveBeenCalled();
+        expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith({ date: mockSliceDate }, { $set: { date: mockSliceDate, data: {} } }, { upsert: true });
     });
 });

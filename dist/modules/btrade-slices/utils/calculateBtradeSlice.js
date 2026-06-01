@@ -1,39 +1,34 @@
-import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
-import { delay } from "../../../utils/delay.js";
-import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
+import { fetchSharikProductRestsMap } from "../sharik/fetchSharikProductRestsMap.js";
 import { BtradeSlice } from "../models/BtradeSlice.js";
+import { fetchMissingBtradeSliceItemsViaSearch } from "./calculateBtradeSliceViaSearch.js";
 import { getUniqueArtikulsFromArtsUtil } from "./getUniqueArtikulsFromArtsUtil.js";
-const JITTER_MIN_MS = 200;
-const JITTER_MAX_MS = 1000;
 /**
- * Собирает ежедневный срез цен и остатков Btrade (Sharik) по артикулам из arts:
- * сначала создаёт документ среза с пустым data, затем по мере обработки каждого артикула
- * (с jitter-паузой 200–1000 мс) добавляет запись в data.
- * Ошибка по одному артикулу не прерывает обработку остальных.
+ * Собирает ежедневный срез цен и остатков Btrade (Sharik):
+ * один запрос product_rests, затем fallback search для пропущенных артикулов,
+ * одна запись data в MongoDB.
  */
 export async function calculateBtradeSlice() {
     const sliceDate = toSliceDate(new Date());
     const artikuls = await getUniqueArtikulsFromArtsUtil();
-    await BtradeSlice.findOneAndUpdate({ date: sliceDate }, { $setOnInsert: { date: sliceDate, data: {} } }, { upsert: true });
-    let count = 0;
-    for (let i = 0; i < artikuls.length; i++) {
-        const artikul = artikuls[i];
-        console.log(`анализируется артикул ${i + 1} из ${artikuls.length} ${artikul} Btrade`);
-        try {
-            const result = await getSharikStockData(artikul);
-            if (result) {
-                await BtradeSlice.findOneAndUpdate({ date: sliceDate }, { $set: { [`data.${artikul}`]: { price: result.price, quantity: result.quantity } } });
-                count += 1;
-            }
-        }
-        catch (err) {
-            const msg = err instanceof Error ? err.message : String(err);
-            console.error(`[BtradeSlice] ${artikul}: ${msg}`);
-        }
-        if (i < artikuls.length - 1) {
-            await delay(jitterMs(JITTER_MIN_MS, JITTER_MAX_MS));
+    console.log(`[BtradeSlice] Загрузка product_rests, артикулов в arts: ${artikuls.length}`);
+    const productRestsMap = await fetchSharikProductRestsMap();
+    const data = {};
+    for (const artikul of artikuls) {
+        const row = productRestsMap.get(artikul);
+        if (row) {
+            data[artikul] = { price: row.price, quantity: row.quantity };
         }
     }
-    return { saved: true, count };
+    const fromProductRests = Object.keys(data).length;
+    const missingArtikuls = artikuls.filter((artikul) => !(artikul in data));
+    if (missingArtikuls.length > 0) {
+        console.log(`[BtradeSlice] Fallback search для ${missingArtikuls.length} артикулов`);
+        const fromSearch = await fetchMissingBtradeSliceItemsViaSearch(missingArtikuls);
+        Object.assign(data, fromSearch);
+    }
+    const fromSearchCount = Object.keys(data).length - fromProductRests;
+    await BtradeSlice.findOneAndUpdate({ date: sliceDate }, { $set: { date: sliceDate, data } }, { upsert: true });
+    console.log(`[BtradeSlice] Готово: product_rests=${fromProductRests}, search fallback=${fromSearchCount}, всего=${Object.keys(data).length}`);
+    return { saved: true, count: Object.keys(data).length };
 }
