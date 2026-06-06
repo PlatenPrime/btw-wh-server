@@ -7,7 +7,7 @@ vi.mock("../sendMessageToTGChat.js", () => ({
 
 // Mock constants
 vi.mock("../../../constants/telegram", () => ({
-  BTW_CHAT_ID: "-1002121224059",
+  getBtwChatId: () => "-1002121224059",
 }));
 
 // Import function after mocking

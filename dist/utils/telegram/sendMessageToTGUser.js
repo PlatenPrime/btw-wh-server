@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BTW_TOKEN } from "../../constants/telegram.js";
+import { getBtwToken } from "../../constants/telegram.js";
 export const sendMessageToTGUser = async (message, userId) => {
     if (!message?.trim()) {
         throw new Error("Message cannot be empty");
@@ -8,7 +8,7 @@ export const sendMessageToTGUser = async (message, userId) => {
         throw new Error("User ID cannot be empty");
     }
     try {
-        const response = await axios.post(`https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`, {
+        const response = await axios.post(`https://api.telegram.org/bot${getBtwToken()}/sendMessage`, {
             chat_id: userId,
             text: message,
             parse_mode: "HTML",

@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { BTW_TOKEN } from "../../constants/telegram.js";
+import { getBtwToken } from "../../constants/telegram.js";
 import { TelegramMessageResponse } from "./types.js";
 
 interface SendMessageToTGChatProps {
@@ -20,7 +20,7 @@ export const sendMessageToTGChat = async ({
 
   try {
     const response: AxiosResponse<TelegramMessageResponse> = await axios.post(
-      `https://api.telegram.org/bot${BTW_TOKEN}/sendMessage`,
+      `https://api.telegram.org/bot${getBtwToken()}/sendMessage`,
       {
         chat_id: chatId,
         text: message,

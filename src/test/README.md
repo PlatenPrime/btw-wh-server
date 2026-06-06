@@ -26,7 +26,7 @@
 - **MongoDB Memory Server** — in-memory база для изоляции данных.
 - **Supertest** — для HTTP-интеграционных тестов.
 - **Zod** — для валидации входных данных.
-- **.env.test** — переменные окружения для тестов.
+- **.env.test** — переменные окружения для тестов (включая `BTW_TOKEN`, `BTW_CHAT_ID`, `KASA_CHAT_ID`, `BTW_DEFS_CHAT_ID`, `BTW_PLATEN_ID`; при отсутствии в файле подставляются mock-значения в `setup.ts`).
 - **Express** — для интеграционных тестов роутеров.
 - **Вспомогательные утилиты** — `src/test/utils/testHelpers.ts` (JWT, заголовки, моки Express, генерация данных).
 

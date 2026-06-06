@@ -1,9 +1,14 @@
-const btw1 = "8161980779:";
-const btw2 = "AAEc-wMjQy7H2g_";
-const btw3 = "7whhK4ws13bhCrrVvlzA";
-export const BTW_TOKEN = btw1 + btw2 + btw3;
-export const BTW_CHAT_ID = "-1002121224059";
+const getRequiredEnv = (name) => {
+    const value = process.env[name]?.trim();
+    if (!value) {
+        console.error(`Missing required environment variable: ${name}`);
+        throw new Error(`Telegram configuration error: ${name} is not set`);
+    }
+    return value;
+};
+export const getBtwToken = () => getRequiredEnv("BTW_TOKEN");
+export const getBtwChatId = () => getRequiredEnv("BTW_CHAT_ID");
 /** Чат кассы для уведомлений о kask */
-export const KASA_CHAT_ID = "@kassabtw";
-export const BTW_DEFS_CHAT_ID = "-1003183753234";
-export const BTW_PLATEN_ID = "555196992";
+export const getKasaChatId = () => getRequiredEnv("KASA_CHAT_ID");
+export const getBtwDefsChatId = () => getRequiredEnv("BTW_DEFS_CHAT_ID");
+export const getBtwPlatenId = () => getRequiredEnv("BTW_PLATEN_ID");

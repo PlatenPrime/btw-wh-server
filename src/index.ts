@@ -1,5 +1,6 @@
+import "./loadEnv.js";
+
 import cors from "cors";
-import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 
@@ -29,7 +30,6 @@ import skusRoute from "./modules/skus/router.js";
 import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
 import { logServerEgressGeo } from "./utils/server-egress-geo/logServerEgressGeo.js";
-dotenv.config();
 
 const app = express();
 

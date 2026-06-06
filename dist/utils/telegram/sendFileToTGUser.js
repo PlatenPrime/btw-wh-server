@@ -1,7 +1,7 @@
 import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
-import { BTW_TOKEN } from "../../constants/telegram.js";
+import { getBtwToken } from "../../constants/telegram.js";
 export const sendFileToTGUser = async (filePath, userId) => {
     if (!filePath?.trim()) {
         throw new Error("File path cannot be empty");
@@ -17,7 +17,7 @@ export const sendFileToTGUser = async (filePath, userId) => {
         const formData = new FormData();
         formData.append("chat_id", userId);
         formData.append("document", fs.createReadStream(filePath));
-        const response = await axios.post(`https://api.telegram.org/bot${BTW_TOKEN}/sendDocument`, formData, {
+        const response = await axios.post(`https://api.telegram.org/bot${getBtwToken()}/sendDocument`, formData, {
             headers: {
                 ...formData.getHeaders(),
             },

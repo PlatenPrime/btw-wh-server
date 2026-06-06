@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import FormData from "form-data";
 import fs from "fs";
-import { BTW_TOKEN } from "../../constants/telegram.js";
+import { getBtwToken } from "../../constants/telegram.js";
 import { TelegramDocumentResponse } from "./types.js";
 
 export const sendFileToTGUser = async (
@@ -26,7 +26,7 @@ export const sendFileToTGUser = async (
     formData.append("document", fs.createReadStream(filePath));
 
     const response: AxiosResponse<TelegramDocumentResponse> = await axios.post(
-      `https://api.telegram.org/bot${BTW_TOKEN}/sendDocument`,
+      `https://api.telegram.org/bot${getBtwToken()}/sendDocument`,
       formData,
       {
         headers: {

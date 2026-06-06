@@ -26,7 +26,7 @@ vi.mock("../../utils/telegram/sendMessageToPlaten.js", () => ({
 
 // Mock constants
 vi.mock("../../constants/telegram.js", () => ({
-  BTW_PLATEN_ID: "555196992",
+  getBtwPlatenId: () => "555196992",
 }));
 
 // Import after mocking

@@ -2,7 +2,7 @@ import { CronJob } from "cron";
 import fs from "fs/promises";
 import { exportCollectionsToJson } from "./utils/exportCollectionsToJson.js";
 import { sendFileToTGUser } from "../utils/telegram/sendFileToTGUser.js";
-import { BTW_PLATEN_ID } from "../constants/telegram.js";
+import { getBtwPlatenId } from "../constants/telegram.js";
 import { sendMessageToPlaten } from "../utils/telegram/sendMessageToPlaten.js";
 
 /**
@@ -21,7 +21,7 @@ export function startCollectionsBackupCron(): CronJob {
         backupFilePath = await exportCollectionsToJson();
 
         // Отправляем файл в телеграм
-        await sendFileToTGUser(backupFilePath, BTW_PLATEN_ID);
+        await sendFileToTGUser(backupFilePath, getBtwPlatenId());
 
         console.log(`[CRON Backup] Backup completed and sent successfully`);
 

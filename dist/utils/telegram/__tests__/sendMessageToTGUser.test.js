@@ -10,7 +10,7 @@ const consoleSpy = {
 };
 // Mock constants
 vi.mock("../../../constants/telegram", () => ({
-    BTW_TOKEN: "mock-token",
+    getBtwToken: () => "mock-token",
 }));
 // Import function after mocking
 import { sendMessageToTGUser } from "../sendMessageToTGUser.js";
