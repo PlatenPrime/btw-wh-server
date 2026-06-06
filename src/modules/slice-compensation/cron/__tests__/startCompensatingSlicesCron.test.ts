@@ -11,10 +11,17 @@ vi.mock("../../utils/runCompensatingAnalogSlices.js", () => ({
 vi.mock("../../utils/runCompensatingSkuSlices.js", () => ({
   runCompensatingSkuSlices: vi.fn(),
 }));
+vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", () => ({
+  sendCronAnalyticsReport: vi.fn(),
+}));
+vi.mock("../../../../cron/analytics-notifications/formatCompensatingSlicesReport.js", () => ({
+  formatCompensatingSlicesReport: vi.fn(() => "compensating report"),
+}));
 
 import { runCompensatingAnalogSlices } from "../../utils/runCompensatingAnalogSlices.js";
 import { runCompensatingSkuSlices } from "../../utils/runCompensatingSkuSlices.js";
 import { startCompensatingSlicesCron } from "../startCompensatingSlicesCron.js";
+import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 
 describe("startCompensatingSlicesCron", () => {
   let cronCallback: (() => Promise<void>) | null = null;
@@ -39,13 +46,14 @@ describe("startCompensatingSlicesCron", () => {
       refetched: 2,
       updated: 1,
     });
+    vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
   });
 
-  it("creates CronJob at 11:00 and 16:00 Kiev", () => {
+  it("creates CronJob at 10:30 Kiev", () => {
     startCompensatingSlicesCron();
 
     expect(mockedCronJob).toHaveBeenCalledWith(
-      "0 0 11,16 * * *",
+      "0 30 10 * * *",
       expect.any(Function),
       null,
       true,
@@ -67,5 +75,6 @@ describe("startCompensatingSlicesCron", () => {
     expect(analogDate).toBeInstanceOf(Date);
     expect(skuDate).toBeInstanceOf(Date);
     expect(analogDate.getTime()).toBe(skuDate.getTime());
+    expect(sendCronAnalyticsReport).toHaveBeenCalledWith("compensating report");
   });
 });

@@ -5,6 +5,7 @@ const ENV_KEYS = [
   "BTW_CHAT_ID",
   "KASA_CHAT_ID",
   "BTW_DEFS_CHAT_ID",
+  "BTW_ANALITICS_CHAT_ID",
   "BTW_PLATEN_ID",
 ] as const;
 
@@ -86,6 +87,22 @@ describe("telegram constants", () => {
 
     expect(() => getBtwPlatenId()).toThrow(
       "Telegram configuration error: BTW_PLATEN_ID is not set"
+    );
+  });
+
+  it("getBtwAnalyticsChatId returns trimmed value", async () => {
+    process.env.BTW_ANALITICS_CHAT_ID = "  -100555444333  ";
+
+    const { getBtwAnalyticsChatId } = await import("../telegram.js");
+
+    expect(getBtwAnalyticsChatId()).toBe("-100555444333");
+  });
+
+  it("getBtwAnalyticsChatId throws when env is missing", async () => {
+    const { getBtwAnalyticsChatId } = await import("../telegram.js");
+
+    expect(() => getBtwAnalyticsChatId()).toThrow(
+      "Telegram configuration error: BTW_ANALITICS_CHAT_ID is not set"
     );
   });
 });

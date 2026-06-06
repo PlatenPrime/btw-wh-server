@@ -20,6 +20,15 @@ vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
     getExcludedCompetitorSet: vi.fn(),
     normalizeCompetitorName: vi.fn((value) => value.trim().toLowerCase()),
 }));
+vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", () => ({
+    sendCronAnalyticsReport: vi.fn(),
+}));
+vi.mock("../../../../cron/analytics-notifications/formatAnalogSlicesReport.js", () => ({
+    formatAnalogSlicesReport: vi.fn(() => "analog report"),
+}));
+vi.mock("../../../../cron/analytics-notifications/formatCronReports.js", () => ({
+    formatCronErrorReport: vi.fn(() => "analog error"),
+}));
 import { calculateAirSlice } from "../../utils/calculateAirSlice.js";
 import { calculateBalunSlice } from "../../utils/calculateBalunSlice.js";
 import { calculateSharteSlice } from "../../utils/calculateSharteSlice.js";
@@ -27,6 +36,15 @@ import { calculateYumiSlice } from "../../utils/calculateYumiSlice.js";
 import { calculateYuminSlice } from "../../utils/calculateYuminSlice.js";
 import { startAnalogSlicesCron } from "../startAnalogSlicesCron.js";
 import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
+import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
+import { formatAnalogSlicesReport } from "../../../../cron/analytics-notifications/formatAnalogSlicesReport.js";
+const sliceResult = {
+    saved: true,
+    count: 1,
+    total: 1,
+    invalid: 0,
+    errors: 0,
+};
 describe("startAnalogSlicesCron", () => {
     let cronCallback = null;
     const mockedCronJob = vi.mocked(CronJob);
@@ -42,11 +60,12 @@ describe("startAnalogSlicesCron", () => {
             return mockCronInstance;
         });
         vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set());
-        vi.mocked(calculateAirSlice).mockResolvedValue({ saved: true, count: 1 });
-        vi.mocked(calculateBalunSlice).mockResolvedValue({ saved: true, count: 2 });
-        vi.mocked(calculateSharteSlice).mockResolvedValue({ saved: true, count: 3 });
-        vi.mocked(calculateYumiSlice).mockResolvedValue({ saved: true, count: 4 });
-        vi.mocked(calculateYuminSlice).mockResolvedValue({ saved: true, count: 5 });
+        vi.mocked(calculateAirSlice).mockResolvedValue({ ...sliceResult, count: 1 });
+        vi.mocked(calculateBalunSlice).mockResolvedValue({ ...sliceResult, count: 2 });
+        vi.mocked(calculateSharteSlice).mockResolvedValue({ ...sliceResult, count: 3 });
+        vi.mocked(calculateYumiSlice).mockResolvedValue({ ...sliceResult, count: 4 });
+        vi.mocked(calculateYuminSlice).mockResolvedValue({ ...sliceResult, count: 5 });
+        vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
     });
     it("creates CronJob with expected schedule", () => {
         startAnalogSlicesCron();
@@ -64,5 +83,7 @@ describe("startAnalogSlicesCron", () => {
         expect(calculateYuminSlice).toHaveBeenCalledTimes(1);
         expect(calculateBalunSlice).not.toHaveBeenCalled();
         expect(calculateYumiSlice).not.toHaveBeenCalled();
+        expect(formatAnalogSlicesReport).toHaveBeenCalled();
+        expect(sendCronAnalyticsReport).toHaveBeenCalledWith("analog report");
     });
 });

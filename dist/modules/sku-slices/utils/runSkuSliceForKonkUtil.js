@@ -30,10 +30,6 @@ async function fetchSkuStockWithRetry(konkName, productKey, skuId) {
     }
     throw lastError ?? new Error("Unknown error in fetchSkuStockWithRetry");
 }
-/**
- * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
- * с паузой 500–1500 мс (jitter) — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
- */
 export async function runSkuSliceForKonkUtil(konkName, date) {
     const sliceDate = toSliceDate(date);
     const skugrs = (await Skugr.find({ konkName, isSliced: true })
@@ -45,7 +41,11 @@ export async function runSkuSliceForKonkUtil(konkName, date) {
         .lean());
     await SkuSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $setOnInsert: { konkName, date: sliceDate, data: {} } }, { upsert: true });
     let count = 0;
+    let invalid = 0;
+    let errors = 0;
+    const total = skus.length;
     const withPid = skus.filter((s) => (s.productId ?? "").trim() !== "");
+    invalid += total - withPid.length;
     for (let i = 0; i < withPid.length; i++) {
         const sku = withPid[i];
         const skuId = sku._id.toString();
@@ -58,13 +58,18 @@ export async function runSkuSliceForKonkUtil(konkName, date) {
                 await SkuSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${productKey}`]: dataItem } });
                 count += 1;
             }
+            else {
+                invalid += 1;
+            }
         }
         catch (err) {
             const e = err;
             if (e.code === UNSUPPORTED_KONK_CODE) {
                 console.warn(`[SkuSlice ${konkName}] неподдерживаемый конкурент для stock, срез прерван`);
+                errors += withPid.length - i;
                 break;
             }
+            errors += 1;
             const msg = err instanceof Error ? err.message : String(err);
             console.error(`[SkuSlice ${konkName}] ${productKey}: ${msg}`);
         }
@@ -72,5 +77,5 @@ export async function runSkuSliceForKonkUtil(konkName, date) {
             await delay(jitterMs(SKU_SLICE_REQUEST_JITTER_MIN_MS, SKU_SLICE_REQUEST_JITTER_MAX_MS));
         }
     }
-    return { saved: true, count };
+    return { saved: true, count, total, invalid, errors };
 }

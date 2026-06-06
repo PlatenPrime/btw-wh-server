@@ -1,4 +1,7 @@
 import { CronJob } from "cron";
+import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
+import { formatFillSkugrSkusReport } from "../../../cron/analytics-notifications/formatFillSkugrSkusReport.js";
+import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { summarizeBrowserError } from "../../browser/utils/browserRequest.js";
 import { Skugr } from "../models/Skugr.js";
 import { fillSkugrSkusFromBrowserUtil } from "../utils/fillSkugrSkusFromBrowserUtil.js";
@@ -19,6 +22,9 @@ export function startFillSkugrSkusCron(): CronJob {
 
         if (skugrs.length === 0) {
           console.log("[CRON SkugrRefill] No groups found. Skipping.");
+          await sendCronAnalyticsReport(
+            formatFillSkugrSkusReport({ successCount: 0, errorCount: 0, total: 0 })
+          );
           return;
         }
 
@@ -52,9 +58,19 @@ export function startFillSkugrSkusCron(): CronJob {
         console.log(
           `[CRON SkugrRefill] Finished: success=${successCount}, errors=${errorCount}, total=${skugrs.length}.`
         );
+        await sendCronAnalyticsReport(
+          formatFillSkugrSkusReport({
+            successCount,
+            errorCount,
+            total: skugrs.length,
+          })
+        );
       } catch (error) {
         const details = summarizeBrowserError(error);
         console.error("[CRON SkugrRefill] Fatal error:", details);
+        await sendCronAnalyticsReport(
+          formatCronErrorReport("Skugr refill", error)
+        );
       }
     },
     null,

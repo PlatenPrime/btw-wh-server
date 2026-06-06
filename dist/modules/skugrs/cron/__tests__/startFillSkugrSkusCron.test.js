@@ -12,9 +12,16 @@ vi.mock("../../utils/fillSkugrSkusFromBrowserUtil.js", () => ({
 vi.mock("../../../browser/utils/browserRequest.js", () => ({
     summarizeBrowserError: vi.fn((error) => error),
 }));
+vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", () => ({
+    sendCronAnalyticsReport: vi.fn(),
+}));
+vi.mock("../../../../cron/analytics-notifications/formatFillSkugrSkusReport.js", () => ({
+    formatFillSkugrSkusReport: vi.fn(() => "skugr report"),
+}));
 import { Skugr } from "../../models/Skugr.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../utils/fillSkugrSkusFromBrowserUtil.js";
 import { startFillSkugrSkusCron } from "../startFillSkugrSkusCron.js";
+import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 describe("startFillSkugrSkusCron", () => {
     let cronCallback = null;
     const mockedCronJob = vi.mocked(CronJob);
@@ -33,6 +40,7 @@ describe("startFillSkugrSkusCron", () => {
         const lean = vi.fn().mockReturnValue({ exec });
         const select = vi.fn().mockReturnValue({ lean });
         vi.mocked(Skugr.find).mockReturnValue({ select });
+        vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
     });
     it("creates CronJob with expected schedule and timezone", () => {
         startFillSkugrSkusCron();
@@ -63,5 +71,6 @@ describe("startFillSkugrSkusCron", () => {
         expect(fillSkugrSkusFromBrowserUtil).toHaveBeenNthCalledWith(1, "g1");
         expect(fillSkugrSkusFromBrowserUtil).toHaveBeenNthCalledWith(2, "g2");
         expect(fillSkugrSkusFromBrowserUtil).toHaveBeenNthCalledWith(3, "g3");
+        expect(sendCronAnalyticsReport).toHaveBeenCalledWith("skugr report");
     });
 });

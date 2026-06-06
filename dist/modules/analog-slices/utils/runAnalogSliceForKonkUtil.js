@@ -19,12 +19,16 @@ export async function runAnalogSliceForKonkUtil(konkName, date) {
         .lean();
     await AnalogSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $setOnInsert: { konkName, date: sliceDate, data: {} } }, { upsert: true });
     let count = 0;
+    let invalid = 0;
+    let errors = 0;
+    const total = analogs.length;
     for (let i = 0; i < analogs.length; i++) {
         const analog = analogs[i];
         const analogId = analog._id.toString();
         const artikulKey = analog.artikul?.trim();
         if (!artikulKey) {
             console.warn(`[AnalogSlice ${konkName}] пропущен аналог ${analogId}: отсутствует artikul`);
+            invalid += 1;
             continue;
         }
         console.log(`анализируется аналог ${artikulKey} конкурента ${konkName}`);
@@ -39,8 +43,12 @@ export async function runAnalogSliceForKonkUtil(konkName, date) {
                 await AnalogSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${artikulKey}`]: dataItem } });
                 count += 1;
             }
+            else {
+                invalid += 1;
+            }
         }
         catch (err) {
+            errors += 1;
             const msg = err instanceof Error ? err.message : String(err);
             console.error(`[AnalogSlice ${konkName}] ${artikulKey}: ${msg}`);
         }
@@ -48,5 +56,5 @@ export async function runAnalogSliceForKonkUtil(konkName, date) {
             await delay(DELAY_MS);
         }
     }
-    return { saved: true, count };
+    return { saved: true, count, total, invalid, errors };
 }

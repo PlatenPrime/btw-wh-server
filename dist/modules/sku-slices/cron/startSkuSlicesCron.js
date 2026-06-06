@@ -1,4 +1,7 @@
 import { CronJob } from "cron";
+import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
+import { formatSkuSlicesReport } from "../../../cron/analytics-notifications/formatSkuSlicesReport.js";
+import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { toNextKyivSliceDate } from "../../../utils/sliceDate.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { runSkuSliceForKonkUtil } from "../utils/runSkuSliceForKonkUtil.js";
@@ -34,13 +37,21 @@ export function startSkuSlicesCron() {
             }
             const results = await Promise.all(konkNames.map(async (k) => {
                 const r = await runSkuSliceForKonkUtil(k, toNextKyivSliceDate(new Date()));
-                return { k, count: r.count };
+                return {
+                    konkName: k,
+                    count: r.count,
+                    errors: r.errors,
+                    invalid: r.invalid,
+                    total: r.total,
+                };
             }));
-            const summary = results.map((r) => `${r.k}=${r.count}`).join(" ");
+            const summary = results.map((r) => `${r.konkName}=${r.count}`).join(" ");
             console.log(`[CRON SkuSlices] Done: ${summary}`);
+            await sendCronAnalyticsReport(formatSkuSlicesReport(results, excludedFromData));
         }
         catch (error) {
             console.error(`[CRON SkuSlices] Error:`, error instanceof Error ? error.message : "Unknown error");
+            await sendCronAnalyticsReport(formatCronErrorReport("SKU slices", error));
         }
     }, null, true, "Europe/Kiev");
     console.log(`[CRON SkuSlices] Started: daily at 20:00 (Kiev time)`);

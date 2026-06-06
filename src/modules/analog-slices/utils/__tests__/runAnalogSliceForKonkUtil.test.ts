@@ -62,7 +62,13 @@ describe("runAnalogSliceForKonkUtil", () => {
       const result = await resultPromise;
       vi.useRealTimers();
 
-      expect(result).toEqual({ saved: true, count: 2 });
+      expect(result).toEqual({
+        saved: true,
+        count: 2,
+        total: 2,
+        invalid: 0,
+        errors: 0,
+      });
 
       expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(3);
       const calls = vi.mocked(AnalogSlice.findOneAndUpdate).mock.calls;
@@ -95,7 +101,13 @@ describe("runAnalogSliceForKonkUtil", () => {
 
     const result = await runAnalogSliceForKonkUtil("balun", new Date("2025-03-02T00:00:00.000Z"));
 
-    expect(result).toEqual({ saved: true, count: 0 });
+    expect(result).toEqual({
+      saved: true,
+      count: 0,
+      total: 0,
+      invalid: 0,
+      errors: 0,
+    });
     expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
     expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledWith(
       { konkName: "balun", date: toSliceDate(new Date("2025-03-02T00:00:00.000Z")) },
@@ -115,7 +127,13 @@ describe("runAnalogSliceForKonkUtil", () => {
 
     const result = await runAnalogSliceForKonkUtil("air", new Date("2025-03-01"));
 
-    expect(result).toEqual({ saved: true, count: 0 });
+    expect(result).toEqual({
+      saved: true,
+      count: 0,
+      total: 1,
+      invalid: 1,
+      errors: 0,
+    });
     expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
   });
 });

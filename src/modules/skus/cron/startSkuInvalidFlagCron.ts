@@ -1,4 +1,7 @@
 import { CronJob } from "cron";
+import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
+import { formatSkuInvalidFlagReport } from "../../../cron/analytics-notifications/formatSkuInvalidFlagReport.js";
+import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { runSkuInvalidFlagSync } from "../utils/runSkuInvalidFlagSync.js";
 
 /**
@@ -13,8 +16,12 @@ export function startSkuInvalidFlagCron(): CronJob {
         console.log(
           `[CRON SkuInvalid] Done: updatedSku=${r.updated}, konkCount=${r.konkCount}.`,
         );
+        await sendCronAnalyticsReport(formatSkuInvalidFlagReport(r));
       } catch (error) {
         console.error("[CRON SkuInvalid] Error:", error);
+        await sendCronAnalyticsReport(
+          formatCronErrorReport("Sku invalid flag sync", error)
+        );
       }
     },
     null,

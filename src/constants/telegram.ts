@@ -17,3 +17,7 @@ export const getKasaChatId = (): string => getRequiredEnv("KASA_CHAT_ID");
 export const getBtwDefsChatId = (): string => getRequiredEnv("BTW_DEFS_CHAT_ID");
 
 export const getBtwPlatenId = (): string => getRequiredEnv("BTW_PLATEN_ID");
+
+/** Чат аналитики для сводок по cron-процессам */
+export const getBtwAnalyticsChatId = (): string =>
+  getRequiredEnv("BTW_ANALITICS_CHAT_ID");

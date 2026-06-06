@@ -1,5 +1,10 @@
 import { CronJob } from "cron";
+import {
+  formatFillPosNameukrErrorReport,
+  formatFillPosNameukrReport,
+} from "./analytics-notifications/formatCronReports.js";
 import { fillPosNameukrFromArtsUtil } from "./utils/fillPosNameukrFromArtsUtil.js";
+import { sendMessageToPlaten } from "../utils/telegram/sendMessageToPlaten.js";
 
 /**
  * Запускает cron job для заполнения поля nameukr у позиций из справочника артикулов.
@@ -17,10 +22,28 @@ export function startFillPosNameukrFromArtsCron(): CronJob {
         console.log(
           `[CRON Fill nameukr] Completed: updated ${result.updatedCount} poses, skipped ${result.skippedArtikulsCount} artikuls without Art nameukr`
         );
+        try {
+          await sendMessageToPlaten(formatFillPosNameukrReport(result));
+        } catch (notificationError) {
+          const msg =
+            notificationError instanceof Error
+              ? notificationError.message
+              : String(notificationError);
+          console.error(`[CRON Fill nameukr] Telegram notification failed:`, msg);
+        }
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";
         console.error(`[CRON Fill nameukr] Error:`, errorMessage);
+        try {
+          await sendMessageToPlaten(formatFillPosNameukrErrorReport(error));
+        } catch (notificationError) {
+          const msg =
+            notificationError instanceof Error
+              ? notificationError.message
+              : String(notificationError);
+          console.error(`[CRON Fill nameukr] Telegram notification failed:`, msg);
+        }
       }
     },
     null,

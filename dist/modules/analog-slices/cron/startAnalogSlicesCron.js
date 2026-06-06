@@ -1,4 +1,7 @@
 import { CronJob } from "cron";
+import { formatAnalogSlicesReport } from "../../../cron/analytics-notifications/formatAnalogSlicesReport.js";
+import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
+import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { calculateAirSlice } from "../utils/calculateAirSlice.js";
 import { calculateBalunSlice } from "../utils/calculateBalunSlice.js";
 import { calculateSharteSlice } from "../utils/calculateSharteSlice.js";
@@ -31,13 +34,25 @@ export function startAnalogSlicesCron() {
                 console.log(`[CRON AnalogSlices] Excluded competitors: ${excludedList.join(", ")}`);
             }
             const results = await Promise.all(enabledTasks.map((task) => task.run()));
-            const summary = enabledTasks
-                .map((task, index) => `${task.konkName}=${results[index]?.count ?? 0}`)
+            const competitors = enabledTasks.map((task, index) => {
+                const r = results[index];
+                return {
+                    konkName: task.konkName,
+                    count: r.count,
+                    errors: r.errors,
+                    invalid: r.invalid,
+                    total: r.total,
+                };
+            });
+            const summary = competitors
+                .map((c) => `${c.konkName}=${c.count}`)
                 .join(" ");
             console.log(`[CRON AnalogSlices] Done: ${summary || "no competitors to process"}`);
+            await sendCronAnalyticsReport(formatAnalogSlicesReport(competitors, excludedList));
         }
         catch (error) {
             console.error(`[CRON AnalogSlices] Error:`, error instanceof Error ? error.message : "Unknown error");
+            await sendCronAnalyticsReport(formatCronErrorReport("Analog slices", error));
         }
     }, null, true, "Europe/Kiev");
     console.log(`[CRON AnalogSlices] Started: daily at 04:00 (Kiev time)`);

@@ -13,6 +13,14 @@ function delay(ms: number): Promise<void> {
 
 type AnalogLean = { _id: { toString(): string }; artikul?: string };
 
+export type AnalogSliceKonkResult = {
+  saved: boolean;
+  count: number;
+  total: number;
+  invalid: number;
+  errors: number;
+};
+
 /**
  * Собирает срез по всем аналогам конкурента: сначала создаёт документ среза с пустым data,
  * затем по мере обработки каждого аналога (с паузой 5 сек) добавляет запись в data.
@@ -21,7 +29,7 @@ type AnalogLean = { _id: { toString(): string }; artikul?: string };
 export async function runAnalogSliceForKonkUtil(
   konkName: string,
   date: Date
-): Promise<{ saved: boolean; count: number }> {
+): Promise<AnalogSliceKonkResult> {
   const sliceDate = toSliceDate(date);
   const analogs = await Analog.find({ konkName })
     .select("_id artikul")
@@ -34,6 +42,10 @@ export async function runAnalogSliceForKonkUtil(
   );
 
   let count = 0;
+  let invalid = 0;
+  let errors = 0;
+  const total = analogs.length;
+
   for (let i = 0; i < analogs.length; i++) {
     const analog = analogs[i];
     const analogId = analog._id.toString();
@@ -41,6 +53,7 @@ export async function runAnalogSliceForKonkUtil(
 
     if (!artikulKey) {
       console.warn(`[AnalogSlice ${konkName}] пропущен аналог ${analogId}: отсутствует artikul`);
+      invalid += 1;
       continue;
     }
 
@@ -59,8 +72,11 @@ export async function runAnalogSliceForKonkUtil(
           { $set: { [`data.${artikulKey}`]: dataItem } }
         );
         count += 1;
+      } else {
+        invalid += 1;
       }
     } catch (err) {
+      errors += 1;
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`[AnalogSlice ${konkName}] ${artikulKey}: ${msg}`);
     }
@@ -69,5 +85,5 @@ export async function runAnalogSliceForKonkUtil(
     }
   }
 
-  return { saved: true, count };
+  return { saved: true, count, total, invalid, errors };
 }

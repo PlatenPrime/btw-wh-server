@@ -4,8 +4,15 @@ vi.mock("cron");
 vi.mock("../../utils/runSkuInvalidFlagSync.js", () => ({
     runSkuInvalidFlagSync: vi.fn(),
 }));
+vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", () => ({
+    sendCronAnalyticsReport: vi.fn(),
+}));
+vi.mock("../../../../cron/analytics-notifications/formatSkuInvalidFlagReport.js", () => ({
+    formatSkuInvalidFlagReport: vi.fn(() => "invalid report"),
+}));
 import { runSkuInvalidFlagSync } from "../../utils/runSkuInvalidFlagSync.js";
 import { startSkuInvalidFlagCron } from "../startSkuInvalidFlagCron.js";
+import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 describe("startSkuInvalidFlagCron", () => {
     let cronCallback = null;
     const mockedCronJob = vi.mocked(CronJob);
@@ -24,6 +31,7 @@ describe("startSkuInvalidFlagCron", () => {
             updated: 3,
             konkCount: 1,
         });
+        vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
     });
     it("schedules weekly Monday 03:00 Kyiv", () => {
         startSkuInvalidFlagCron();
@@ -36,5 +44,6 @@ describe("startSkuInvalidFlagCron", () => {
             await cronCallback();
         expect(runSkuInvalidFlagSync).toHaveBeenCalledTimes(1);
         expect(vi.mocked(runSkuInvalidFlagSync).mock.calls[0][0]).toBeInstanceOf(Date);
+        expect(sendCronAnalyticsReport).toHaveBeenCalledWith("invalid report");
     });
 });

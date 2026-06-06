@@ -1,4 +1,7 @@
 import { CronJob } from "cron";
+import { formatCompensatingSlicesReport } from "../../../cron/analytics-notifications/formatCompensatingSlicesReport.js";
+import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
+import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { runCompensatingAnalogSlices } from "../utils/runCompensatingAnalogSlices.js";
 import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
@@ -27,10 +30,20 @@ export function startCompensatingSlicesCron(): CronJob {
           `[CRON CompensatingSlices] Sku: refetched=${sku.refetched} updated=${sku.updated}`,
         );
         console.log(`[CRON CompensatingSlices] Done`);
+        await sendCronAnalyticsReport(
+          formatCompensatingSlicesReport({
+            sliceDateLabel: sliceDate.toISOString().slice(0, 10),
+            analog,
+            sku,
+          })
+        );
       } catch (error) {
         console.error(
           `[CRON CompensatingSlices] Error:`,
           error instanceof Error ? error.message : "Unknown error",
+        );
+        await sendCronAnalyticsReport(
+          formatCronErrorReport("Compensating slices", error)
         );
       }
     },

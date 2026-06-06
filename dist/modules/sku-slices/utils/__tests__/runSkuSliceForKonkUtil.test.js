@@ -58,7 +58,13 @@ describe("runSkuSliceForKonkUtil", () => {
         await vi.runAllTimersAsync();
         const result = await resultPromise;
         vi.useRealTimers();
-        expect(result).toEqual({ saved: true, count: 2 });
+        expect(result).toEqual({
+            saved: true,
+            count: 2,
+            total: 2,
+            invalid: 0,
+            errors: 0,
+        });
         expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(3);
         expect(Skugr.find).toHaveBeenCalledWith({ konkName: "air", isSliced: true });
         expect(Sku.find).toHaveBeenCalledWith({
@@ -92,7 +98,13 @@ describe("runSkuSliceForKonkUtil", () => {
         await vi.runAllTimersAsync();
         const result = await resultPromise;
         vi.useRealTimers();
-        expect(result.count).toBe(1);
+        expect(result).toEqual({
+            saved: true,
+            count: 1,
+            total: 2,
+            invalid: 1,
+            errors: 0,
+        });
     });
     it("uses deduplicated sku ids from sliced groups", async () => {
         vi.mocked(Skugr.find).mockReturnValue({
@@ -129,7 +141,13 @@ describe("runSkuSliceForKonkUtil", () => {
             }),
         });
         const result = await runSkuSliceForKonkUtil("air", new Date("2025-03-01T12:00:00.000Z"));
-        expect(result).toEqual({ saved: true, count: 0 });
+        expect(result).toEqual({
+            saved: true,
+            count: 0,
+            total: 0,
+            invalid: 0,
+            errors: 0,
+        });
         expect(getSkuStockDataUtil).not.toHaveBeenCalled();
         expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
         expect(Sku.find).toHaveBeenCalledWith({

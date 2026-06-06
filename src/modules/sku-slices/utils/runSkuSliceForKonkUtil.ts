@@ -65,10 +65,18 @@ async function fetchSkuStockWithRetry(
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
  * с паузой 500–1500 мс (jitter) — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
  */
+export type SkuSliceKonkResult = {
+  saved: boolean;
+  count: number;
+  total: number;
+  invalid: number;
+  errors: number;
+};
+
 export async function runSkuSliceForKonkUtil(
   konkName: string,
   date: Date
-): Promise<{ saved: boolean; count: number }> {
+): Promise<SkuSliceKonkResult> {
   const sliceDate = toSliceDate(date);
   const skugrs = (await Skugr.find({ konkName, isSliced: true })
     .select("skus")
@@ -91,7 +99,11 @@ export async function runSkuSliceForKonkUtil(
   );
 
   let count = 0;
+  let invalid = 0;
+  let errors = 0;
+  const total = skus.length;
   const withPid = skus.filter((s) => (s.productId ?? "").trim() !== "");
+  invalid += total - withPid.length;
 
   for (let i = 0; i < withPid.length; i++) {
     const sku = withPid[i]!;
@@ -111,6 +123,8 @@ export async function runSkuSliceForKonkUtil(
           { $set: { [`data.${productKey}`]: dataItem } }
         );
         count += 1;
+      } else {
+        invalid += 1;
       }
     } catch (err) {
       const e = err as Error & { code?: string };
@@ -118,8 +132,10 @@ export async function runSkuSliceForKonkUtil(
         console.warn(
           `[SkuSlice ${konkName}] неподдерживаемый конкурент для stock, срез прерван`
         );
+        errors += withPid.length - i;
         break;
       }
+      errors += 1;
       const msg = err instanceof Error ? err.message : String(err);
       console.error(`[SkuSlice ${konkName}] ${productKey}: ${msg}`);
     }
@@ -131,5 +147,5 @@ export async function runSkuSliceForKonkUtil(
     }
   }
 
-  return { saved: true, count };
+  return { saved: true, count, total, invalid, errors };
 }

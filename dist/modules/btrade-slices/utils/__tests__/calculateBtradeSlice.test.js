@@ -40,7 +40,14 @@ describe("calculateBtradeSlice", () => {
     });
     it("saves all artikuls from product_rests in a single DB update", async () => {
         const result = await calculateBtradeSlice();
-        expect(result).toEqual({ saved: true, count: 2 });
+        expect(result).toEqual({
+            saved: true,
+            count: 2,
+            totalArtikuls: 2,
+            missing: 0,
+            fromProductRests: 2,
+            fromSearch: 0,
+        });
         expect(fetchSharikProductRestsMap).toHaveBeenCalledTimes(1);
         expect(fetchMissingBtradeSliceItemsViaSearch).not.toHaveBeenCalled();
         expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
@@ -60,7 +67,14 @@ describe("calculateBtradeSlice", () => {
             "ART-2": { price: 200, quantity: 10 },
         });
         const result = await calculateBtradeSlice();
-        expect(result).toEqual({ saved: true, count: 2 });
+        expect(result).toEqual({
+            saved: true,
+            count: 2,
+            totalArtikuls: 2,
+            missing: 0,
+            fromProductRests: 2,
+            fromSearch: 0,
+        });
         expect(fetchMissingBtradeSliceItemsViaSearch).toHaveBeenCalledWith([
             "ART-2",
         ]);
@@ -78,7 +92,14 @@ describe("calculateBtradeSlice", () => {
         vi.mocked(getUniqueArtikulsFromArtsUtil).mockResolvedValue([]);
         vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(new Map());
         const result = await calculateBtradeSlice();
-        expect(result).toEqual({ saved: true, count: 0 });
+        expect(result).toEqual({
+            saved: true,
+            count: 0,
+            totalArtikuls: 0,
+            missing: 0,
+            fromProductRests: 0,
+            fromSearch: 0,
+        });
         expect(fetchMissingBtradeSliceItemsViaSearch).not.toHaveBeenCalled();
         expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith({ date: mockSliceDate }, { $set: { date: mockSliceDate, data: {} } }, { upsert: true });
     });

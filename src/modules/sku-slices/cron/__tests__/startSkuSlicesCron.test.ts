@@ -14,11 +14,18 @@ vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
   getExcludedCompetitorSet: vi.fn(),
   normalizeCompetitorName: vi.fn((value: string) => value.trim().toLowerCase()),
 }));
+vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", () => ({
+  sendCronAnalyticsReport: vi.fn(),
+}));
+vi.mock("../../../../cron/analytics-notifications/formatSkuSlicesReport.js", () => ({
+  formatSkuSlicesReport: vi.fn(() => "sku report"),
+}));
 
 import { Sku } from "../../../skus/models/Sku.js";
 import { runSkuSliceForKonkUtil } from "../../utils/runSkuSliceForKonkUtil.js";
 import { startSkuSlicesCron } from "../startSkuSlicesCron.js";
 import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
+import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 
 describe("startSkuSlicesCron", () => {
   let cronCallback: (() => Promise<void>) | null = null;
@@ -39,7 +46,14 @@ describe("startSkuSlicesCron", () => {
 
     vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set());
     vi.mocked(Sku.distinct).mockResolvedValue(["air", " Air ", "balun", "", "yumi"] as never);
-    vi.mocked(runSkuSliceForKonkUtil).mockResolvedValue({ saved: true, count: 1 });
+    vi.mocked(runSkuSliceForKonkUtil).mockResolvedValue({
+      saved: true,
+      count: 1,
+      total: 1,
+      invalid: 0,
+      errors: 0,
+    });
+    vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
   });
 
   it("creates CronJob with expected schedule", () => {
@@ -78,6 +92,7 @@ describe("startSkuSlicesCron", () => {
       );
       const d1 = vi.mocked(runSkuSliceForKonkUtil).mock.calls[0]![1];
       expect(d1.toISOString()).toBe("2026-04-03T00:00:00.000Z");
+      expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku report");
     } finally {
       vi.useRealTimers();
     }

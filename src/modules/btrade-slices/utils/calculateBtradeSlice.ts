@@ -13,9 +13,14 @@ import { getUniqueArtikulsFromArtsUtil } from "./getUniqueArtikulsFromArtsUtil.j
 export async function calculateBtradeSlice(): Promise<{
   saved: boolean;
   count: number;
+  totalArtikuls: number;
+  missing: number;
+  fromProductRests: number;
+  fromSearch: number;
 }> {
   const sliceDate = toSliceDate(new Date());
   const artikuls = await getUniqueArtikulsFromArtsUtil();
+  const totalArtikuls = artikuls.length;
 
   console.log(
     `[BtradeSlice] Загрузка product_rests, артикулов в arts: ${artikuls.length}`
@@ -45,6 +50,8 @@ export async function calculateBtradeSlice(): Promise<{
   }
 
   const fromSearchCount = Object.keys(data).length - fromProductRests;
+  const count = Object.keys(data).length;
+  const missing = totalArtikuls - count;
 
   await BtradeSlice.findOneAndUpdate(
     { date: sliceDate },
@@ -53,8 +60,15 @@ export async function calculateBtradeSlice(): Promise<{
   );
 
   console.log(
-    `[BtradeSlice] Готово: product_rests=${fromProductRests}, search fallback=${fromSearchCount}, всего=${Object.keys(data).length}`
+    `[BtradeSlice] Готово: product_rests=${fromProductRests}, search fallback=${fromSearchCount}, всего=${count}`
   );
 
-  return { saved: true, count: Object.keys(data).length };
+  return {
+    saved: true,
+    count,
+    totalArtikuls,
+    missing,
+    fromProductRests,
+    fromSearch: fromSearchCount,
+  };
 }
