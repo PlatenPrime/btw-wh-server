@@ -1,5 +1,6 @@
 import { Analog } from "../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
+import { isInvalidSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { AnalogSlice } from "../models/AnalogSlice.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 export { toSliceDate } from "../../../utils/sliceDate.js";
@@ -34,17 +35,21 @@ export async function runAnalogSliceForKonkUtil(konkName, date) {
         console.log(`анализируется аналог ${artikulKey} конкурента ${konkName}`);
         try {
             const result = await getAnalogStockDataUtil(analogId);
-            if (result) {
-                const dataItem = {
-                    stock: result.stock,
-                    price: result.price,
-                    artikul: artikulKey,
-                };
-                await AnalogSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${artikulKey}`]: dataItem } });
-                count += 1;
+            if (result == null) {
+                invalid += 1;
+                continue;
+            }
+            const dataItem = {
+                stock: result.stock,
+                price: result.price,
+                artikul: artikulKey,
+            };
+            await AnalogSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${artikulKey}`]: dataItem } });
+            if (isInvalidSliceStockResult(result)) {
+                invalid += 1;
             }
             else {
-                invalid += 1;
+                count += 1;
             }
         }
         catch (err) {

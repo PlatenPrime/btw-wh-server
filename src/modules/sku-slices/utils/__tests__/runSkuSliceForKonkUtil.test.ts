@@ -193,4 +193,60 @@ describe("runSkuSliceForKonkUtil", () => {
       _id: { $in: [] },
     });
   });
+
+  it("writes -1/-1 to data but counts as invalid not success", async () => {
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([
+          { _id: { toString: () => "id1" }, productId: "air-1" },
+        ]),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: -1, price: -1 });
+
+    const result = await runSkuSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01T12:00:00.000Z")
+    );
+
+    expect(result).toEqual({
+      saved: true,
+      count: 0,
+      total: 1,
+      invalid: 1,
+      errors: 0,
+    });
+    expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(2);
+    expect(SkuSlice.findOneAndUpdate).toHaveBeenNthCalledWith(
+      2,
+      { konkName: "air", date: sliceDate },
+      { $set: { "data.air-1": { stock: -1, price: -1 } } }
+    );
+  });
+
+  it("writes partial -1 price to data but counts as invalid", async () => {
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([
+          { _id: { toString: () => "id1" }, productId: "air-1" },
+        ]),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 10, price: -1 });
+
+    const result = await runSkuSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01T12:00:00.000Z")
+    );
+
+    expect(result).toEqual({
+      saved: true,
+      count: 0,
+      total: 1,
+      invalid: 1,
+      errors: 0,
+    });
+  });
 });

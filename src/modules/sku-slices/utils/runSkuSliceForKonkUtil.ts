@@ -4,6 +4,7 @@ import {
   getSkuStockDataUtil,
   UNSUPPORTED_KONK_CODE,
 } from "../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
+import { isInvalidSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
@@ -116,15 +117,21 @@ export async function runSkuSliceForKonkUtil(
 
     try {
       const result = await fetchSkuStockWithRetry(konkName, productKey, skuId);
-      if (result) {
-        const dataItem = { stock: result.stock, price: result.price };
-        await SkuSlice.findOneAndUpdate(
-          { konkName, date: sliceDate },
-          { $set: { [`data.${productKey}`]: dataItem } }
-        );
-        count += 1;
-      } else {
+      if (result == null) {
         invalid += 1;
+        continue;
+      }
+
+      const dataItem = { stock: result.stock, price: result.price };
+      await SkuSlice.findOneAndUpdate(
+        { konkName, date: sliceDate },
+        { $set: { [`data.${productKey}`]: dataItem } }
+      );
+
+      if (isInvalidSliceStockResult(result)) {
+        invalid += 1;
+      } else {
+        count += 1;
       }
     } catch (err) {
       const e = err as Error & { code?: string };

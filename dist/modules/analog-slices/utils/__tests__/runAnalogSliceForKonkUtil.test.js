@@ -110,4 +110,44 @@ describe("runAnalogSliceForKonkUtil", () => {
         });
         expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
     });
+    it("writes -1/-1 to data but counts as invalid not success", async () => {
+        vi.mocked(Analog.find).mockReturnValue({
+            select: vi.fn().mockReturnValue({
+                lean: vi.fn().mockResolvedValue([{ _id: { toString: () => "id1" }, artikul: "ART-001" }]),
+            }),
+        });
+        vi.mocked(getAnalogStockDataUtil).mockReset();
+        vi.mocked(getAnalogStockDataUtil).mockResolvedValue({ stock: -1, price: -1 });
+        const result = await runAnalogSliceForKonkUtil("air", new Date("2025-03-01"));
+        expect(result).toEqual({
+            saved: true,
+            count: 0,
+            total: 1,
+            invalid: 1,
+            errors: 0,
+        });
+        expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(2);
+        expect(AnalogSlice.findOneAndUpdate).toHaveBeenNthCalledWith(2, { konkName: "air", date: toSliceDate(new Date("2025-03-01")) }, {
+            $set: {
+                "data.ART-001": { stock: -1, price: -1, artikul: "ART-001" },
+            },
+        });
+    });
+    it("writes partial -1 price to data but counts as invalid", async () => {
+        vi.mocked(Analog.find).mockReturnValue({
+            select: vi.fn().mockReturnValue({
+                lean: vi.fn().mockResolvedValue([{ _id: { toString: () => "id1" }, artikul: "ART-001" }]),
+            }),
+        });
+        vi.mocked(getAnalogStockDataUtil).mockReset();
+        vi.mocked(getAnalogStockDataUtil).mockResolvedValue({ stock: 10, price: -1 });
+        const result = await runAnalogSliceForKonkUtil("air", new Date("2025-03-01"));
+        expect(result).toEqual({
+            saved: true,
+            count: 0,
+            total: 1,
+            invalid: 1,
+            errors: 0,
+        });
+    });
 });
