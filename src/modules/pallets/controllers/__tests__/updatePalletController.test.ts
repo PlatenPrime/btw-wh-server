@@ -25,13 +25,13 @@ describe("updatePalletController", () => {
   });
 
   it("200: обновляет паллету", async () => {
-    const pallet = await createTestPallet({ title: "Old-Pallet", sector: "A" });
+    const pallet = await createTestPallet({ title: "Old-Pallet", sector: 101 });
 
     const req = {
       params: { id: String(pallet._id) },
       body: {
         title: "New-Pallet",
-        sector: "B",
+        sector: 202,
       },
     } as unknown as Request;
 
@@ -39,7 +39,7 @@ describe("updatePalletController", () => {
 
     expect(responseStatus.code).toBe(200);
     expect(responseJson.title).toBe("New-Pallet");
-    expect(responseJson.sector).toBe("B");
+    expect(responseJson.sector).toBe(202);
   });
 
   it("404: если паллета не найдена", async () => {

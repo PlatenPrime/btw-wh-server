@@ -1,13 +1,19 @@
 import cors from "cors";
 import express from "express";
 
+import analogSlicesRoute from "../../modules/analog-slices/router.js";
+import analogsRoute from "../../modules/analogs/router.js";
 import artsRoute from "../../modules/arts/router.js";
 import asksRoute from "../../modules/asks/router.js";
 import kasksRoute from "../../modules/kasks/router.js";
 import authRoute from "../../modules/auth/router.js";
 import blocksRoute from "../../modules/blocks/router.js";
+import browserRoute from "../../modules/browser/router.js";
+import btradeSlicesRoute from "../../modules/btrade-slices/router.js";
 import constantsRoute from "../../modules/constants/router.js";
 import defsRoute from "../../modules/defs/router.js";
+import delsRoute from "../../modules/dels/router.js";
+import konksRoute from "../../modules/konks/router.js";
 import prodsRoute from "../../modules/prods/router.js";
 import palletGroupsRoute from "../../modules/pallet-groups/router.js";
 import palletsRoute from "../../modules/pallets/router.js";
@@ -17,6 +23,7 @@ import segsRoute from "../../modules/segs/router.js";
 import skugrsRoute from "../../modules/skugrs/router.js";
 import skuSlicesRoute from "../../modules/sku-slices/router.js";
 import skusRoute from "../../modules/skus/router.js";
+import variantsRoute from "../../modules/variants/router.js";
 import zonesRoute from "../../modules/zones/router.js";
 
 const app = express();
@@ -25,10 +32,14 @@ app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 
 app.use("/api/auth", authRoute);
+app.use("/api/analog-slices", analogSlicesRoute);
+app.use("/api/analogs", analogsRoute);
 app.use("/api/arts", artsRoute);
 app.use("/api/asks", asksRoute);
 app.use("/api/kasks", kasksRoute);
 app.use("/api/blocks", blocksRoute);
+app.use("/api/browser", browserRoute);
+app.use("/api/btrade-slices", btradeSlicesRoute);
 app.use("/api/constants", constantsRoute);
 app.use("/api/segs", segsRoute);
 app.use("/api/rows", rowsRoute);
@@ -36,10 +47,13 @@ app.use("/api/pallets", palletsRoute);
 app.use("/api/pallet-groups", palletGroupsRoute);
 app.use("/api/poses", posesRoute);
 app.use("/api/defs", defsRoute);
+app.use("/api/dels", delsRoute);
+app.use("/api/konks", konksRoute);
 app.use("/api/prods", prodsRoute);
 app.use("/api/skus", skusRoute);
 app.use("/api/sku-slices", skuSlicesRoute);
 app.use("/api/skugrs", skugrsRoute);
+app.use("/api/variants", variantsRoute);
 app.use("/api/zones", zonesRoute);
 
 // Error handler must be after all routes

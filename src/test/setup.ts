@@ -19,6 +19,7 @@ import "../modules/dels/models/Del.js";
 import "../modules/konks/models/Konk.js";
 import "../modules/prods/models/Prod.js";
 import "../modules/pallets/models/Pallet.js";
+import "../modules/pallet-groups/models/PalletGroup.js";
 import "../modules/poses/models/Pos.js";
 import "../modules/rows/models/Row.js";
 import "../modules/segs/models/Seg.js";

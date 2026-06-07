@@ -4,7 +4,7 @@ import type { IAnalogSliceDataItem } from "../../../models/AnalogSlice.js";
 import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
-} from "../../common/salesComparisonUtils.js";
+} from "../../../../slices/utils/salesComparisonUtils.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
 import type { GetAnalogSalesByDateInput } from "../schemas/getAnalogSalesByDateSchema.js";
 

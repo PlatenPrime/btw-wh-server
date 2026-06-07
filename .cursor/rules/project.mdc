@@ -13,23 +13,87 @@
 
 ## Архитектура проекта
 
-### Структура модулей
+### Типы модулей
 
-Каждый модуль (`arts`, `asks`, `auth`, `pallets`, `poses`, `rows`) имеет стандартную структуру:
+#### 1. Стандартный HTTP-модуль (эталон: `constants`)
 
 ```
-modules/[module]/
-├── controllers/     # Бизнес-логика и обработка запросов
-├── models/         # Mongoose схемы и интерфейсы
-├── router.ts       # Express роуты
-└── utils/          # Утилиты модуля (опционально)
+modules/<name>/
+├── router.ts
+├── models/
+│   ├── <Entity>.ts
+│   └── __tests__/<Entity>.model.test.ts
+├── controllers/
+│   ├── index.ts
+│   └── <action-kebab>/
+│       ├── <action>Controller.ts
+│       ├── schemas/<action>Schema.ts
+│       ├── utils/<action>Util.ts
+│       └── utils/__tests__/<action>Util.test.ts
+├── utils/                    # общее внутри модуля (2+ endpoint)
+│   └── __tests__/
+└── cron/                     # опционально
+    └── __tests__/
 ```
+
+#### 2. Reporting-модуль (`sku-slices`, `analog-slices`)
+
+Дополнительно: `controllers/common/`, `utils/`, `constants/`.
+
+#### 3. Cron-only модуль (`slice-compensation`)
+
+Только `cron/` + `utils/` + `__tests__/`. Без `router.ts` и `controllers/`.
+
+#### 4. Shared domain-модуль (`slices`)
+
+Только `config/` + `utils/` + `__tests__/`. Без HTTP.
+
+#### 5. Browser/scraper-модуль (`browser`)
+
+Организация по конкуренту (`air/`, `sharik/`, …), общие утилиты в `browser/utils/`.
+
+### Именование
+
+- Папка action: `kebab-case` (`get-ask-by-id/`)
+- Controller: `<action>Controller.ts`, export `<action>Controller`
+- Util: `<action>Util.ts`
+- Schema: `<action>Schema.ts`
+- Test: co-located `__tests__/<name>.test.ts`
+
+### Контроллер
+
+- Только: Zod `safeParse` → вызов `*Util` → `res.status().json()`
+- `try/catch` + 500 для CRUD-модулей
+- JSON: `{ message, data }` / `{ message, errors }`
+
+### Router
+
+- `asyncHandler(controller)` на каждом route
+- `checkAuth` + `checkRoles` до handler
+
+### Декомпозиция и вынос кода
+
+| Сигнал | Действие |
+|--------|----------|
+| Функция > ~100 строк | Разбить на named helpers или отдельный util |
+| Near-duplicate pipeline/block | Extract shared builder + параметры |
+| Orchestration + formatting + DB | Разделить: `fetch*`, `transform*`, `build*Response` |
+| Helper > 15 строк, используется повторно | Вынести в util-файл |
+
+| Уровень | Путь |
+|---------|------|
+| 1 endpoint | `controllers/<action>/utils/` |
+| 2+ endpoint в модуле | `modules/<name>/utils/` |
+| 2+ модулей одного домена | `modules/slices/` |
+| 2+ доменов / инфраструктура | `src/utils/` или `src/lib/` |
+
+**Запрещено:** импорт из `controllers/common/` другого модуля — выносить в `modules/slices/` или `src/lib/`.
 
 ### Основные принципы
 
 - **Модульная архитектура**: каждый модуль самодостаточен
-- **REST API**: стандартные HTTP методы (GET, POST, PUT, DELETE)
-- **MVC паттерн**: разделение на модели, контроллеры и роуты
+- **REST API**: стандартные HTTP методы (GET, POST, PUT, PATCH, DELETE)
+- **Слои**: router → controller → util → model (без `services/`)
 - **Middleware подход**: использование express middleware
 
 ## Стиль кода

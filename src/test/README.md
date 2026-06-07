@@ -73,7 +73,11 @@ src/modules/arts/__tests__/
 - Используют Supertest и express-приложение, подключенное к in-memory MongoDB.
 - Проверяется корректность HTTP-ответов, статусы, структура данных, сообщения об ошибках.
 - Для тестирования внешних API (например, парсинг HTML) используются моки axios.
-- Пример: `src/modules/arts/__tests__/router.integration.test.ts`.
+- Пример: `src/modules/blocks/__tests__/router.integration.test.ts` (см. также `kasks`, `constants`, `zones`).
+
+## Прогресс рефакторинга
+
+Трекинг шагов: [`docs/refactoring-progress.md`](../../docs/refactoring-progress.md)
 
 ## Валидация и обработка ошибок
 
@@ -91,9 +95,8 @@ src/modules/arts/__tests__/
 
 ## Покрытие и требования
 
-- Покрытие кода анализируется через `npx vitest run --coverage`.
-- Минимальное рекомендуемое покрытие: **80%** для бизнес-логики и контроллеров.
-- В CI рекомендуется запускать все тесты и проверять покрытие.
+- Покрытие кода: `npm run test:coverage`
+- Минимальное покрытие для `src/modules/**`: **80%** lines/functions/statements, **70%** branches (см. `vitest.config.ts`)
 
 ## Типичные ошибки и FAQ
 

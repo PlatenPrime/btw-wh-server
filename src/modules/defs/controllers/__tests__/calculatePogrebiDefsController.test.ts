@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { calculatePogrebiDefsController } from "../calculate-pogrebi-defs/calculatePogrebiDefsController.js";
 
 vi.mock("../../utils/calculationStatus.js", () => ({
-  resetCalculationStatus: vi.fn(),
+  getCalculationStatus: vi.fn(),
 }));
 
 vi.mock("../calculate-pogrebi-defs/utils/calculateAndSavePogrebiDefsUtil.js", () => ({
@@ -11,16 +11,29 @@ vi.mock("../calculate-pogrebi-defs/utils/calculateAndSavePogrebiDefsUtil.js", ()
 }));
 
 import { calculateAndSavePogrebiDefsUtil } from "../calculate-pogrebi-defs/utils/calculateAndSavePogrebiDefsUtil.js";
-import { resetCalculationStatus } from "../../utils/calculationStatus.js";
+import { getCalculationStatus } from "../../utils/calculationStatus.js";
 
-const mockedCalculateAndSavePogrebiDefsUtil = vi.mocked(calculateAndSavePogrebiDefsUtil);
-const mockedResetCalculationStatus = vi.mocked(resetCalculationStatus);
+const mockedCalculateAndSavePogrebiDefsUtil = vi.mocked(
+  calculateAndSavePogrebiDefsUtil
+);
+const mockedGetCalculationStatus = vi.mocked(getCalculationStatus);
+
+const idleStatus = {
+  isRunning: false,
+  progress: 0,
+  estimatedTimeRemaining: 0,
+  startedAt: null,
+  lastUpdate: null,
+  currentStep: undefined,
+  totalItems: undefined,
+  processedItems: undefined,
+};
 
 describe("calculatePogrebiDefsController", () => {
   let mockReq: Partial<Request>;
   let mockRes: Partial<Response>;
-  let mockJson: any;
-  let mockStatus: any;
+  let mockJson: ReturnType<typeof vi.fn>;
+  let mockStatus: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockJson = vi.fn().mockReturnThis();
@@ -33,9 +46,31 @@ describe("calculatePogrebiDefsController", () => {
     };
 
     vi.clearAllMocks();
+    mockedGetCalculationStatus.mockReturnValue(idleStatus);
   });
 
-  it("должен успешно выполнять расчет и возвращать результат", async () => {
+  it("409 when calculation is already running", async () => {
+    mockedGetCalculationStatus.mockReturnValue({
+      ...idleStatus,
+      isRunning: true,
+      progress: 50,
+    });
+
+    await calculatePogrebiDefsController(
+      mockReq as Request,
+      mockRes as Response
+    );
+
+    expect(mockedCalculateAndSavePogrebiDefsUtil).not.toHaveBeenCalled();
+    expect(mockStatus).toHaveBeenCalledWith(409);
+    expect(mockJson).toHaveBeenCalledWith({
+      success: false,
+      message: "Розрахунок вже виконується",
+      error: "Calculation is already in progress",
+    });
+  });
+
+  it("201 on successful calculation", async () => {
     const mockSavedDef = {
       _id: "test-id",
       result: {
@@ -54,18 +89,15 @@ describe("calculatePogrebiDefsController", () => {
       totalLimitDefs: 0,
     };
 
-    mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef as any);
+    mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef as never);
 
     await calculatePogrebiDefsController(
       mockReq as Request,
       mockRes as Response
     );
 
-    // Проверяем последовательность вызовов
-    expect(mockedResetCalculationStatus).toHaveBeenCalledTimes(1);
+    expect(mockedGetCalculationStatus).toHaveBeenCalledTimes(1);
     expect(mockedCalculateAndSavePogrebiDefsUtil).toHaveBeenCalledTimes(1);
-
-    // Проверяем ответ
     expect(mockStatus).toHaveBeenCalledWith(201);
     expect(mockJson).toHaveBeenCalledWith({
       success: true,
@@ -79,7 +111,7 @@ describe("calculatePogrebiDefsController", () => {
     });
   });
 
-  it("должен обрабатывать ошибки", async () => {
+  it("500 when calculation throws", async () => {
     const error = new Error("Calculation failed");
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -90,10 +122,6 @@ describe("calculatePogrebiDefsController", () => {
       mockRes as Response
     );
 
-    // Проверяем, что отслеживание было сброшено
-    expect(mockedResetCalculationStatus).toHaveBeenCalledTimes(1);
-
-    // Проверяем обработку ошибки
     expect(consoleSpy).toHaveBeenCalledWith(
       "Error in calculatePogrebiDefsController:",
       error
@@ -108,7 +136,7 @@ describe("calculatePogrebiDefsController", () => {
     consoleSpy.mockRestore();
   });
 
-  it("должен обрабатывать ошибки без message", async () => {
+  it("500 with Unknown error for non-Error rejection", async () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     mockedCalculateAndSavePogrebiDefsUtil.mockRejectedValue("String error");
@@ -128,7 +156,7 @@ describe("calculatePogrebiDefsController", () => {
     consoleSpy.mockRestore();
   });
 
-  it("должен возвращать правильную структуру данных при успехе", async () => {
+  it("returns aggregated totals on success", async () => {
     const mockSavedDef = {
       _id: "test-id",
       result: {
@@ -155,7 +183,7 @@ describe("calculatePogrebiDefsController", () => {
       totalLimitDefs: 1,
     };
 
-    mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef as any);
+    mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef as never);
 
     await calculatePogrebiDefsController(
       mockReq as Request,
@@ -174,7 +202,7 @@ describe("calculatePogrebiDefsController", () => {
     });
   });
 
-  it("должен корректно обрабатывать пустой результат", async () => {
+  it("handles empty result", async () => {
     const mockSavedDef = {
       _id: "test-id",
       result: {},
@@ -184,7 +212,7 @@ describe("calculatePogrebiDefsController", () => {
       totalLimitDefs: 0,
     };
 
-    mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef as any);
+    mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef as never);
 
     await calculatePogrebiDefsController(
       mockReq as Request,

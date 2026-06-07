@@ -51,7 +51,7 @@ describe("updateAnalogByIdController", () => {
   it("404 when analog not found", async () => {
     const req = {
       params: { id: "000000000000000000000000" },
-      body: { title: "New" },
+      body: { nameukr: "New" },
     } as unknown as Request;
     await updateAnalogByIdController(req, res);
     expect(responseStatus.code).toBe(404);
@@ -62,14 +62,14 @@ describe("updateAnalogByIdController", () => {
       konkName: "k",
       prodName: "p",
       url: "https://x.com",
-      title: "Old",
+      nameukr: "Old",
     });
     const req = {
       params: { id: analog._id.toString() },
-      body: { title: "New title" },
+      body: { nameukr: "New name" },
     } as unknown as Request;
     await updateAnalogByIdController(req, res);
     expect(responseStatus.code).toBe(200);
-    expect((responseJson.data as { title: string }).title).toBe("New title");
+    expect((responseJson.data as { nameukr: string }).nameukr).toBe("New name");
   });
 });

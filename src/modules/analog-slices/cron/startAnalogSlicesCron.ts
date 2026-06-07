@@ -2,11 +2,10 @@ import { CronJob } from "cron";
 import { formatAnalogSlicesReport } from "../../../cron/analytics-notifications/formatAnalogSlicesReport.js";
 import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
 import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
-import { calculateAirSlice } from "../utils/calculateAirSlice.js";
-import { calculateBalunSlice } from "../utils/calculateBalunSlice.js";
-import { calculateSharteSlice } from "../utils/calculateSharteSlice.js";
-import { calculateYumiSlice } from "../utils/calculateYumiSlice.js";
-import { calculateYuminSlice } from "../utils/calculateYuminSlice.js";
+import {
+  ANALOG_SLICE_KONK_NAMES,
+  calculateAnalogSlice,
+} from "../utils/calculateAnalogSlice.js";
 import {
   getExcludedCompetitorSet,
   normalizeCompetitorName,
@@ -21,26 +20,16 @@ export function startAnalogSlicesCron(): CronJob {
     "0 0 4 * * *",
     async () => {
       try {
-        const tasks = [
-          { konkName: "air", run: calculateAirSlice },
-          { konkName: "balun", run: calculateBalunSlice },
-          { konkName: "sharte", run: calculateSharteSlice },
-          { konkName: "yumi", run: calculateYumiSlice },
-          { konkName: "yumin", run: calculateYuminSlice },
-        ] as const;
-
         const excluded = getExcludedCompetitorSet("analogSlices");
-        const excludedList = tasks
-          .map((task) => task.konkName)
-          .filter((name) => excluded.has(normalizeCompetitorName(name)));
-        const enabledTasks = tasks.filter(
-          (task) => !excluded.has(normalizeCompetitorName(task.konkName))
+        const excludedList = ANALOG_SLICE_KONK_NAMES.filter((name) =>
+          excluded.has(normalizeCompetitorName(name))
+        );
+        const enabledKonkNames = ANALOG_SLICE_KONK_NAMES.filter(
+          (name) => !excluded.has(normalizeCompetitorName(name))
         );
 
         console.log(
-          `[CRON AnalogSlices] Starting for: ${enabledTasks
-            .map((task) => task.konkName)
-            .join(", ") || "none"}`
+          `[CRON AnalogSlices] Starting for: ${enabledKonkNames.join(", ") || "none"}`
         );
         if (excludedList.length > 0) {
           console.log(
@@ -48,11 +37,13 @@ export function startAnalogSlicesCron(): CronJob {
           );
         }
 
-        const results = await Promise.all(enabledTasks.map((task) => task.run()));
-        const competitors = enabledTasks.map((task, index) => {
+        const results = await Promise.all(
+          enabledKonkNames.map((konkName) => calculateAnalogSlice(konkName))
+        );
+        const competitors = enabledKonkNames.map((konkName, index) => {
           const r = results[index]!;
           return {
-            konkName: task.konkName,
+            konkName,
             count: r.count,
             errors: r.errors,
             invalid: r.invalid,

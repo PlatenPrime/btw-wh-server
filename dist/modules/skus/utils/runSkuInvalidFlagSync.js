@@ -1,3 +1,4 @@
+import { isFullMinusOneStockPrice } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { SkuSlice } from "../../sku-slices/models/SkuSlice.js";
 import { sliceDateMinusDays } from "../../sku-slices/utils/coalesceSkuSliceItemsForReporting.js";
@@ -36,7 +37,7 @@ export async function runSkuInvalidFlagSync(referenceDate = new Date()) {
                     if (!rec)
                         return false;
                     const it = rec[pid];
-                    return it != null && it.stock === -1 && it.price === -1;
+                    return (it != null && isFullMinusOneStockPrice(it.stock, it.price));
                 });
             }
             bulkOps.push({

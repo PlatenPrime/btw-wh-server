@@ -11,7 +11,7 @@ describe("populatePalletDataUtil", () => {
         const pallet = await createTestPallet({
             row: { _id: row._id, title: row.title },
             title: "Test Pallet",
-            sector: "A",
+            sector: 1,
             isDef: false,
         });
         const pos = await createTestPos({

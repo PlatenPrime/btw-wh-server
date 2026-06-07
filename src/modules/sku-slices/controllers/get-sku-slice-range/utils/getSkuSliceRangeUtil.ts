@@ -1,5 +1,8 @@
 import { Sku } from "../../../../skus/models/Sku.js";
-import type { ISkuSliceDataItem } from "../../../models/SkuSlice.js";
+import {
+  mapSliceDocsToRangeItems,
+  type SliceRangeItem,
+} from "../../../../slices/utils/mapSliceDocsToRangeItems.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import {
   aggregateSkuSlices,
@@ -7,7 +10,7 @@ import {
 } from "../../../utils/sliceDataAggregationStages.js";
 import type { GetSkuSliceRangeInput } from "../schemas/getSkuSliceRangeSchema.js";
 
-export type SkuSliceRangeItem = { date: string; stock: number; price: number };
+export type SkuSliceRangeItem = SliceRangeItem;
 
 export type GetSkuSliceRangeResult =
   | { ok: true; data: SkuSliceRangeItem[] }
@@ -37,17 +40,5 @@ export async function getSkuSliceRangeUtil(
     sliceDataProjectForSingleProductId(productKey),
   ]);
 
-  const data: SkuSliceRangeItem[] = [];
-  for (const doc of docs) {
-    const dataRecord = (doc.data ?? {}) as Record<string, ISkuSliceDataItem>;
-    const item = dataRecord[productKey];
-    if (!item) continue;
-    data.push({
-      date: doc.date.toISOString(),
-      stock: item.stock,
-      price: item.price,
-    });
-  }
-
-  return { ok: true, data };
+  return { ok: true, data: mapSliceDocsToRangeItems(docs, productKey) };
 }

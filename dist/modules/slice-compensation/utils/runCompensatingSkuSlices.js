@@ -3,6 +3,7 @@ import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE, } from "../../skus/controll
 import { SkuSlice } from "../../sku-slices/models/SkuSlice.js";
 import { getExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
 import { buildCompensatingDataKeyQueue, runCompensatingSliceRefetchLoop, } from "./compensatingSliceRunner.js";
+import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { shouldRefetchSkuSliceItem } from "./shouldRefetchSkuSliceItem.js";
 /**
  * Повторный опрос позиций SkuSlice за sliceDate: -1/-1 или цена не конечное неотрицательное число.
@@ -28,7 +29,7 @@ export async function runCompensatingSkuSlices(sliceDate) {
             if (!result)
                 return { refetched: 0, updated: 0 };
             let updated = 0;
-            if (!(result.stock === -1 && result.price === -1)) {
+            if (!isFullMinusOneSliceStockResult(result)) {
                 const dataItem = { stock: result.stock, price: result.price };
                 await SkuSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${productKey}`]: dataItem } });
                 updated = 1;

@@ -1,4 +1,5 @@
 import { Sku } from "../../../../skus/models/Sku.js";
+import { mapSliceDocsToRangeItems, } from "../../../../slices/utils/mapSliceDocsToRangeItems.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { aggregateSkuSlices, sliceDataProjectForSingleProductId, } from "../../../utils/sliceDataAggregationStages.js";
 export async function getSkuSliceRangeUtil(input) {
@@ -20,17 +21,5 @@ export async function getSkuSliceRangeUtil(input) {
         { $sort: { date: 1 } },
         sliceDataProjectForSingleProductId(productKey),
     ]);
-    const data = [];
-    for (const doc of docs) {
-        const dataRecord = (doc.data ?? {});
-        const item = dataRecord[productKey];
-        if (!item)
-            continue;
-        data.push({
-            date: doc.date.toISOString(),
-            stock: item.stock,
-            price: item.price,
-        });
-    }
-    return { ok: true, data };
+    return { ok: true, data: mapSliceDocsToRangeItems(docs, productKey) };
 }

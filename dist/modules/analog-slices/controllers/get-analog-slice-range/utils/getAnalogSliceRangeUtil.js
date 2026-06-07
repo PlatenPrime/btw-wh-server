@@ -1,6 +1,7 @@
 import { Analog } from "../../../../analogs/models/Analog.js";
+import { mapSliceDocsToRangeItems, } from "../../../../slices/utils/mapSliceDocsToRangeItems.js";
 import { AnalogSlice } from "../../../models/AnalogSlice.js";
-import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
+import { toSliceDate } from "../../../../../utils/sliceDate.js";
 /**
  * Возвращает массив данных среза по аналогу за период дат (для графиков).
  * Каждый элемент: { date: ISO string, stock, price }. Сортировка по date по возрастанию.
@@ -25,17 +26,5 @@ export async function getAnalogSliceRangeUtil(input) {
         .select("date data")
         .sort({ date: 1 })
         .lean();
-    const data = [];
-    for (const doc of docs) {
-        const dataRecord = (doc.data ?? {});
-        const item = dataRecord[artikulKey];
-        if (!item)
-            continue;
-        data.push({
-            date: doc.date.toISOString(),
-            stock: item.stock,
-            price: item.price,
-        });
-    }
-    return { ok: true, data };
+    return { ok: true, data: mapSliceDocsToRangeItems(docs, artikulKey) };
 }

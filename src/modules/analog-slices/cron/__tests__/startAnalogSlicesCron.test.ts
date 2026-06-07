@@ -2,20 +2,9 @@ import { CronJob } from "cron";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("cron");
-vi.mock("../../utils/calculateAirSlice.js", () => ({
-  calculateAirSlice: vi.fn(),
-}));
-vi.mock("../../utils/calculateBalunSlice.js", () => ({
-  calculateBalunSlice: vi.fn(),
-}));
-vi.mock("../../utils/calculateSharteSlice.js", () => ({
-  calculateSharteSlice: vi.fn(),
-}));
-vi.mock("../../utils/calculateYumiSlice.js", () => ({
-  calculateYumiSlice: vi.fn(),
-}));
-vi.mock("../../utils/calculateYuminSlice.js", () => ({
-  calculateYuminSlice: vi.fn(),
+vi.mock("../../utils/calculateAnalogSlice.js", () => ({
+  ANALOG_SLICE_KONK_NAMES: ["air", "balun", "sharte", "yumi", "yumin"],
+  calculateAnalogSlice: vi.fn(),
 }));
 vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
   getExcludedCompetitorSet: vi.fn(),
@@ -31,11 +20,7 @@ vi.mock("../../../../cron/analytics-notifications/formatCronReports.js", () => (
   formatCronErrorReport: vi.fn(() => "analog error"),
 }));
 
-import { calculateAirSlice } from "../../utils/calculateAirSlice.js";
-import { calculateBalunSlice } from "../../utils/calculateBalunSlice.js";
-import { calculateSharteSlice } from "../../utils/calculateSharteSlice.js";
-import { calculateYumiSlice } from "../../utils/calculateYumiSlice.js";
-import { calculateYuminSlice } from "../../utils/calculateYuminSlice.js";
+import { calculateAnalogSlice } from "../../utils/calculateAnalogSlice.js";
 import { startAnalogSlicesCron } from "../startAnalogSlicesCron.js";
 import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
 import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
@@ -67,11 +52,19 @@ describe("startAnalogSlicesCron", () => {
     });
 
     vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set());
-    vi.mocked(calculateAirSlice).mockResolvedValue({ ...sliceResult, count: 1 });
-    vi.mocked(calculateBalunSlice).mockResolvedValue({ ...sliceResult, count: 2 });
-    vi.mocked(calculateSharteSlice).mockResolvedValue({ ...sliceResult, count: 3 });
-    vi.mocked(calculateYumiSlice).mockResolvedValue({ ...sliceResult, count: 4 });
-    vi.mocked(calculateYuminSlice).mockResolvedValue({ ...sliceResult, count: 5 });
+    vi.mocked(calculateAnalogSlice).mockImplementation(async (konkName) => ({
+      ...sliceResult,
+      count:
+        konkName === "air"
+          ? 1
+          : konkName === "balun"
+            ? 2
+            : konkName === "sharte"
+              ? 3
+              : konkName === "yumi"
+                ? 4
+                : 5,
+    }));
     vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
   });
 
@@ -96,11 +89,12 @@ describe("startAnalogSlicesCron", () => {
       await cronCallback();
     }
 
-    expect(calculateAirSlice).toHaveBeenCalledTimes(1);
-    expect(calculateSharteSlice).toHaveBeenCalledTimes(1);
-    expect(calculateYuminSlice).toHaveBeenCalledTimes(1);
-    expect(calculateBalunSlice).not.toHaveBeenCalled();
-    expect(calculateYumiSlice).not.toHaveBeenCalled();
+    expect(calculateAnalogSlice).toHaveBeenCalledTimes(3);
+    expect(calculateAnalogSlice).toHaveBeenCalledWith("air");
+    expect(calculateAnalogSlice).toHaveBeenCalledWith("sharte");
+    expect(calculateAnalogSlice).toHaveBeenCalledWith("yumin");
+    expect(calculateAnalogSlice).not.toHaveBeenCalledWith("balun");
+    expect(calculateAnalogSlice).not.toHaveBeenCalledWith("yumi");
     expect(formatAnalogSlicesReport).toHaveBeenCalled();
     expect(sendCronAnalyticsReport).toHaveBeenCalledWith("analog report");
   });

@@ -2,12 +2,10 @@ import { Analog } from "../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { isInvalidSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { AnalogSlice } from "../models/AnalogSlice.js";
+import { delay } from "../../../utils/delay.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 export { toSliceDate } from "../../../utils/sliceDate.js";
 const DELAY_MS = 1000;
-function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}
 /**
  * Собирает срез по всем аналогам конкурента: сначала создаёт документ среза с пустым data,
  * затем по мере обработки каждого аналога (с паузой 5 сек) добавляет запись в data.

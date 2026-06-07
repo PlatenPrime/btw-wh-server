@@ -2,7 +2,7 @@ import {
   applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
-} from "../../analog-slices/controllers/common/salesComparisonUtils.js";
+} from "../../slices/utils/salesComparisonUtils.js";
 import { Konk } from "../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import {

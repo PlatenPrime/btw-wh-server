@@ -1,4 +1,4 @@
-import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../slices/utils/salesComparisonUtils.js";
 import { Art } from "../../arts/models/Art.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { aggregateBtradeSlices, sliceDataProjectForArtikulList, } from "../../btrade-slices/utils/btradeSliceAggregationStages.js";

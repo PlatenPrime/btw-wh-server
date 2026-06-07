@@ -14,13 +14,21 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
+      include: ["src/modules/**"],
       exclude: [
         "node_modules/",
         "dist/",
         "src/test/",
         "**/*.d.ts",
         "**/*.config.*",
+        "**/__tests__/**",
       ],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        statements: 80,
+        branches: 70,
+      },
     },
   },
   resolve: {

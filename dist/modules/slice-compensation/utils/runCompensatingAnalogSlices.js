@@ -3,6 +3,7 @@ import { getAnalogStockDataUtil } from "../../analogs/controllers/get-analog-sto
 import { AnalogSlice } from "../../analog-slices/models/AnalogSlice.js";
 import { getExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
 import { buildCompensatingDataKeyQueue, runCompensatingSliceRefetchLoop, } from "./compensatingSliceRunner.js";
+import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { isFullMinusOneSliceItem } from "./isFullMinusOneSliceItem.js";
 /**
  * Повторный опрос позиций AnalogSlice за sliceDate с data entry stock/price оба -1.
@@ -28,7 +29,7 @@ export async function runCompensatingAnalogSlices(sliceDate) {
             if (!result)
                 return { refetched: 0, updated: 0 };
             let updated = 0;
-            if (!(result.stock === -1 && result.price === -1)) {
+            if (!isFullMinusOneSliceStockResult(result)) {
                 const dataItem = {
                     stock: result.stock,
                     price: result.price,

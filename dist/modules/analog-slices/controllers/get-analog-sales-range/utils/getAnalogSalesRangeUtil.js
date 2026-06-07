@@ -1,6 +1,6 @@
 import { Analog } from "../../../../analogs/models/Analog.js";
 import { AnalogSlice } from "../../../models/AnalogSlice.js";
-import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../common/salesComparisonUtils.js";
+import { computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../slices/utils/salesComparisonUtils.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
 /**
  * Возвращает массив продаж и выручки по аналогу за период дат (для графиков).

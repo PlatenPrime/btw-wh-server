@@ -174,7 +174,6 @@ describe("checkAndCompleteAsksUtil", () => {
         expect(updatedAsk?.status).toBe("completed");
     });
     it("не отправляет уведомления если у asker нет telegram", async () => {
-        const { sendCompleteAskMesUtil } = await import("../../../complete-ask-by-id/utils/sendCompleteAskMesUtil.js");
         const solver = await createTestUser({ username: `solver-${Date.now()}` });
         const asker = await createTestUser({ username: `asker-${Date.now()}`, telegram: undefined });
         const ask = await createTestAsk({
@@ -192,8 +191,7 @@ describe("checkAndCompleteAsksUtil", () => {
         });
         vi.clearAllMocks();
         await checkAndCompleteAsksUtil([ask]);
-        // Утилита не должна быть вызвана если нет telegram
-        expect(sendCompleteAskMesUtil).not.toHaveBeenCalled();
+        expect(mockSendCompleteAskMesUtil).not.toHaveBeenCalled();
     });
     it("проверяет транзакционную целостность", async () => {
         const solver = await createTestUser({ username: `solver-${Date.now()}` });

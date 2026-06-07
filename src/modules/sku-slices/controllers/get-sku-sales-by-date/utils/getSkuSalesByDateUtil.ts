@@ -12,7 +12,7 @@ import {
   applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
-} from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+} from "../../../../slices/utils/salesComparisonUtils.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
 import type { GetSkuSalesByDateInput } from "../schemas/getSkuSalesByDateSchema.js";

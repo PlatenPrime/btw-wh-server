@@ -6,6 +6,7 @@ import {
   buildCompensatingDataKeyQueue,
   runCompensatingSliceRefetchLoop,
 } from "./compensatingSliceRunner.js";
+import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { isFullMinusOneSliceItem } from "./isFullMinusOneSliceItem.js";
 
 type AnalogSliceLean = {
@@ -48,7 +49,7 @@ export async function runCompensatingAnalogSlices(
       const result = await getAnalogStockDataUtil(analog._id.toString());
       if (!result) return { refetched: 0, updated: 0 };
       let updated = 0;
-      if (!(result.stock === -1 && result.price === -1)) {
+      if (!isFullMinusOneSliceStockResult(result)) {
         const dataItem: Record<string, unknown> = {
           stock: result.stock,
           price: result.price,

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
+import "../../../../../../test/setup.js";
 import { PalletGroup } from "../../../../models/PalletGroup.js";
 import { reorderPalletGroupsUtil } from "../reorderPalletGroupsUtil.js";
 describe("reorderPalletGroupsUtil", () => {

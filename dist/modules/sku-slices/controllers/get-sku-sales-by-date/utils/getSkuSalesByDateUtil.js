@@ -1,7 +1,7 @@
 import { Sku } from "../../../../skus/models/Sku.js";
 import { aggregateSkuSlices, sliceDataProjectForSingleProductId, } from "../../../utils/sliceDataAggregationStages.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
-import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../slices/utils/salesComparisonUtils.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { enumerateReportingDates } from "../../../utils/skugrReporting.js";
 import { Konk } from "../../../../konks/models/Konk.js";

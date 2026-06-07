@@ -1,7 +1,8 @@
 import ExcelJS from "exceljs";
 import { applyDataRowStyle, applyHeaderStyle, } from "../../../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../../../lib/excel/formatExcelDateHeaderUk.js";
-import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, toUtcDateKey, } from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, toUtcDateKey, } from "../../../../slices/utils/salesComparisonUtils.js";
+import { enumerateSliceDates } from "../../../../slices/utils/enumerateSliceDates.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "../../../utils/coalesceSkuSliceItemsForReporting.js";
 const HEADER_LABELS = [
     "Ідентифікатор товару",
@@ -45,15 +46,6 @@ export function computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem, rec
         totalSales,
         totalRevenue,
     };
-}
-function enumerateSliceDates(from, to) {
-    const out = [];
-    const cursor = new Date(from);
-    while (cursor.getTime() <= to.getTime()) {
-        out.push(new Date(cursor));
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
-    }
-    return out;
 }
 function setMergedMetaAlignment(cell) {
     const prev = cell.alignment ?? {};

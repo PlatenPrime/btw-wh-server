@@ -10,7 +10,7 @@ import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
   toUtcDateKey,
-} from "./salesComparisonUtils.js";
+} from "../../../slices/utils/salesComparisonUtils.js";
 
 const DELIVERY_DAY_RED = "FFFF0000";
 const RECOUNT_DAY_PURPLE_FILL = "FF800080";

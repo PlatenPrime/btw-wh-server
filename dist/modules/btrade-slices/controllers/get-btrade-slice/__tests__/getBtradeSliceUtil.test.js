@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import "../../../../../test/setup.js";
 import { BtradeSlice } from "../../../models/BtradeSlice.js";
 import { getBtradeSliceUtil } from "../utils/getBtradeSliceUtil.js";
 describe("getBtradeSliceUtil", () => {

@@ -49,14 +49,14 @@ describe("Pallet Model - Schema Validation Only", () => {
             expect(Array.isArray(pallet.poses)).toBe(true);
             expect(pallet.poses).toHaveLength(0);
         });
-        it("should allow missing sector", async () => {
+        it("should default sector to 0 when missing", async () => {
             const row = createTestRow();
             const pallet = await Pallet.create({
                 title: "NoSector",
                 row,
                 rowData: { _id: row._id, title: row.title },
             });
-            expect(pallet.sector).toBeUndefined();
+            expect(pallet.sector).toBe(0);
         });
         it("should default isDef to false", async () => {
             const row = createTestRow();

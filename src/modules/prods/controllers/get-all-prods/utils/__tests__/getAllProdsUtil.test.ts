@@ -28,20 +28,20 @@ describe("getAllProdsUtil", () => {
     expect(result[0]).toHaveProperty("updatedAt");
   });
 
-  it("returns multiple prods sorted by createdAt desc", async () => {
-    await Prod.create({
-      name: "first",
-      title: "First",
-      imageUrl: "https://f.com/1.png",
-    });
+  it("returns multiple prods sorted by title asc", async () => {
     await Prod.create({
       name: "second",
       title: "Second",
       imageUrl: "https://s.com/1.png",
     });
+    await Prod.create({
+      name: "first",
+      title: "First",
+      imageUrl: "https://f.com/1.png",
+    });
     const result = await getAllProdsUtil();
     expect(result).toHaveLength(2);
-    expect(result[0].name).toBe("second");
-    expect(result[1].name).toBe("first");
+    expect(result[0].name).toBe("first");
+    expect(result[1].name).toBe("second");
   });
 });

@@ -1,10 +1,13 @@
 import { Analog } from "../../../../analogs/models/Analog.js";
+import {
+  mapSliceDocsToRangeItems,
+  type SliceRangeItem,
+} from "../../../../slices/utils/mapSliceDocsToRangeItems.js";
 import { AnalogSlice } from "../../../models/AnalogSlice.js";
-import type { IAnalogSliceDataItem } from "../../../models/AnalogSlice.js";
-import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
+import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { GetAnalogSliceRangeInput } from "../schemas/getAnalogSliceRangeSchema.js";
 
-export type SliceRangeItem = { date: string; stock: number; price: number };
+export type { SliceRangeItem };
 
 export type GetAnalogSliceRangeResult =
   | { ok: true; data: SliceRangeItem[] }
@@ -39,16 +42,5 @@ export async function getAnalogSliceRangeUtil(
     .sort({ date: 1 })
     .lean();
 
-  const data: SliceRangeItem[] = [];
-  for (const doc of docs) {
-    const dataRecord = (doc.data ?? {}) as Record<string, IAnalogSliceDataItem>;
-    const item = dataRecord[artikulKey];
-    if (!item) continue;
-    data.push({
-      date: doc.date.toISOString(),
-      stock: item.stock,
-      price: item.price,
-    });
-  }
-  return { ok: true, data };
+  return { ok: true, data: mapSliceDocsToRangeItems(docs, artikulKey) };
 }

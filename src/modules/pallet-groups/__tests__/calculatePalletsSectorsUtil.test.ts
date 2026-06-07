@@ -1,26 +1,19 @@
 import mongoose from "mongoose";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import "../../../test/setup.js";
 import { IPallet, Pallet } from "../../pallets/models/Pallet.js";
 import { IPos, Pos } from "../../poses/models/Pos.js";
 import { IPalletGroup, PalletGroup } from "../models/PalletGroup.js";
 import { calculatePalletsSectorsUtil } from "../utils/calculatePalletsSectorsUtil.js";
 
 describe("calculatePalletsSectorsUtil", () => {
-  beforeAll(async () => {
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect("mongodb://127.0.0.1:27017/btw-wh-server-test");
-    }
-  });
-
-  afterAll(async () => {
-    await mongoose.connection.close();
-  });
-
-  it("should assign sectors based on group order and pallet index", async () => {
+  beforeEach(async () => {
     await Pos.deleteMany({});
     await Pallet.deleteMany({});
     await PalletGroup.deleteMany({});
+  });
 
+  it("should assign sectors based on group order and pallet index", async () => {
     const palletA = await Pallet.create({
       title: "Pallet A",
       row: new mongoose.Types.ObjectId(),

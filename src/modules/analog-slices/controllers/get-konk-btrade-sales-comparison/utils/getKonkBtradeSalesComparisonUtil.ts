@@ -3,7 +3,7 @@ import {
   applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
-} from "../../common/salesComparisonUtils.js";
+} from "../../../../slices/utils/salesComparisonUtils.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import type { GetKonkBtradeSalesComparisonInput } from "../schemas/getKonkBtradeSalesComparisonSchema.js";
 

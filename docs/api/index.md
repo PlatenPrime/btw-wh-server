@@ -204,4 +204,4 @@ Authorization: Bearer <token>
 - [API Skugrs](skugrs.md)
 - [API Sku Slices](sku-slices.md)
 
-Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — analog-slices, analogs, auth, arts, asks, kasks, blocks, segs, zones, rows, pallets, pallet-groups, poses, defs, dels, konks, prods, skus, skugrs, comps, palgrs.
+Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — analog-slices, analogs, auth, arts, asks, kasks, blocks, segs, zones, rows, pallets, [pallet-groups](../modules/pallet-groups.md), poses, defs, dels, konks, prods, skus, skugrs, sku-slices, [browser](../modules/browser.md), [btrade-slices](../modules/btrade-slices.md), [slices](../modules/slices.md), [slice-compensation](../modules/slice-compensation.md), variants, constants.

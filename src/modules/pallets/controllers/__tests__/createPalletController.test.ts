@@ -34,7 +34,7 @@ describe("createPalletController", () => {
           _id: String(row._id),
           title: row.title,
         },
-        sector: "A",
+        sector: 101,
         isDef: false,
       },
     } as unknown as Request;
@@ -44,7 +44,7 @@ describe("createPalletController", () => {
     expect(responseStatus.code).toBe(201);
     expect(responseJson._id).toBeDefined();
     expect(responseJson.title).toBe("Pallet-1-1");
-    expect(responseJson.sector).toBe("A");
+    expect(responseJson.sector).toBe(101);
   });
 
   it("400: ошибка валидации при отсутствии title", async () => {

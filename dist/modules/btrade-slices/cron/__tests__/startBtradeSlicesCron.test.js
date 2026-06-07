@@ -53,4 +53,13 @@ describe("startBtradeSlicesCron", () => {
         expect(calculateBtradeSlice).toHaveBeenCalledTimes(1);
         expect(sendCronAnalyticsReport).toHaveBeenCalledWith("btrade report");
     });
+    it("sends error report when slice calculation fails", async () => {
+        vi.mocked(calculateBtradeSlice).mockRejectedValue(new Error("slice failed"));
+        startBtradeSlicesCron();
+        expect(cronCallback).toBeDefined();
+        if (cronCallback) {
+            await cronCallback();
+        }
+        expect(sendCronAnalyticsReport).toHaveBeenCalledWith("btrade error");
+    });
 });

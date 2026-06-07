@@ -1,44 +1,41 @@
-import request from "supertest";
-import mongoose from "mongoose";
-import { describe, beforeAll, afterAll, it, expect } from "vitest";
-import { Pallet } from "../../../../pallets/models/Pallet.js";
+import { beforeEach, describe, expect, it } from "vitest";
+import "../../../../../test/setup.js";
 import { PalletGroup } from "../../../models/PalletGroup.js";
-import app from "../../../../../test/utils/testApp.js";
-describe("GET /api/pallet-groups", () => {
-    beforeAll(async () => {
-        if (mongoose.connection.readyState === 0) {
-            await mongoose.connect("mongodb://127.0.0.1:27017/btw-wh-server-test");
-        }
-        await Pallet.deleteMany({});
-        await PalletGroup.deleteMany({});
-        const pallet = await Pallet.create({
-            title: "P1",
-            row: new mongoose.Types.ObjectId(),
-            rowData: { _id: new mongoose.Types.ObjectId(), title: "Row 1" },
-            poses: [],
-            isDef: false,
-            sector: 0,
-        });
-        await PalletGroup.create({
-            title: "Group 1",
-            order: 1,
-            pallets: [pallet._id],
-        });
+import { getAllPalletGroupsController } from "../getAllPalletGroupsController.js";
+describe("getAllPalletGroupsController", () => {
+    let res;
+    let responseJson;
+    let responseStatus;
+    beforeEach(() => {
+        responseJson = {};
+        responseStatus = {};
+        res = {
+            status(code) {
+                responseStatus.code = code;
+                return this;
+            },
+            json(data) {
+                responseJson = data;
+                return this;
+            },
+        };
     });
-    afterAll(async () => {
-        await mongoose.connection.close();
+    it("200: returns all groups sorted by order", async () => {
+        await PalletGroup.create({ title: "Group B", order: 2, pallets: [] });
+        await PalletGroup.create({ title: "Group A", order: 1, pallets: [] });
+        const req = {};
+        await getAllPalletGroupsController(req, res);
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.message).toBe("Pallet groups fetched successfully");
+        const data = responseJson.data;
+        expect(data).toHaveLength(2);
+        expect(data[0].title).toBe("Group A");
+        expect(data[1].title).toBe("Group B");
     });
-    it("returns pallet groups with pallets as PalletShortDto[]", async () => {
-        const response = await request(app).get("/api/pallet-groups").expect(200);
-        expect(response.body).toHaveProperty("data");
-        const [group] = response.body.data;
-        expect(group).toHaveProperty("pallets");
-        expect(Array.isArray(group.pallets)).toBe(true);
-        const [pallet] = group.pallets;
-        expect(pallet).toHaveProperty("id");
-        expect(pallet).toHaveProperty("title");
-        expect(pallet).toHaveProperty("sector");
-        expect(pallet).toHaveProperty("isDef");
-        expect(pallet).toHaveProperty("isEmpty");
+    it("200: returns empty array when no groups exist", async () => {
+        const req = {};
+        await getAllPalletGroupsController(req, res);
+        expect(responseStatus.code).toBe(200);
+        expect(responseJson.data).toEqual([]);
     });
 });

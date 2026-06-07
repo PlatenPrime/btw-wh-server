@@ -1,6 +1,7 @@
 import ExcelJS from "exceljs";
 import { applyDataRowStyle, applyHeaderStyle, } from "../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
+import { enumerateSliceDates } from "../../slices/utils/enumerateSliceDates.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { coalesceSkuSliceItemsAlongDates, sliceDateMinusDays, } from "./coalesceSkuSliceItemsForReporting.js";
 /** Заливка комірки «Залишок»: день створення SKU (календар Kyiv). */
@@ -24,15 +25,6 @@ export function formatDateHeader(d) {
     const m = String(d.getUTCMonth() + 1).padStart(2, "0");
     const day = String(d.getUTCDate()).padStart(2, "0");
     return `${y}-${m}-${day}`;
-}
-function enumerateSliceDates(from, to) {
-    const out = [];
-    const cursor = new Date(from);
-    while (cursor.getTime() <= to.getTime()) {
-        out.push(new Date(cursor));
-        cursor.setUTCDate(cursor.getUTCDate() + 1);
-    }
-    return out;
 }
 export function safeFilePart(s) {
     return s.replace(/[^a-zA-Z0-9_-]/g, "_");

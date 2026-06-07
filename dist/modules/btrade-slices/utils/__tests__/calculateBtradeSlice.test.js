@@ -72,8 +72,8 @@ describe("calculateBtradeSlice", () => {
             count: 2,
             totalArtikuls: 2,
             missing: 0,
-            fromProductRests: 2,
-            fromSearch: 0,
+            fromProductRests: 1,
+            fromSearch: 1,
         });
         expect(fetchMissingBtradeSliceItemsViaSearch).toHaveBeenCalledWith([
             "ART-2",

@@ -15,7 +15,7 @@ export const getZonesByBlockIdUtil = async ({
   const segs = await Seg.find({ block: objectId }).exec();
   
   // Собрать все zoneId из всех сегментов
-  const zoneIds = segs.flatMap((seg) => seg.zones);
+  const zoneIds = segs.flatMap((seg) => seg.zones.map((zone) => zone._id));
   
   // Получить все зоны этих сегментов
   const zones = await Zone.find({

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import "../../../../test/setup.js";
 import { Analog } from "../../../analogs/models/Analog.js";
 import { getUniqueArtikulsFromAnalogsUtil } from "../getUniqueArtikulsFromAnalogsUtil.js";
 

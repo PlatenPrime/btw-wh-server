@@ -1,6 +1,6 @@
 import { applyDataRowStyle, applyHeaderStyle, } from "../../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
-import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, toUtcDateKey, } from "./salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, toUtcDateKey, } from "../../../slices/utils/salesComparisonUtils.js";
 const DELIVERY_DAY_RED = "FFFF0000";
 const RECOUNT_DAY_PURPLE_FILL = "FF800080";
 /**

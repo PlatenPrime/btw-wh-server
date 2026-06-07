@@ -4,6 +4,7 @@ import {
   applyHeaderStyle,
 } from "../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
+import { enumerateSliceDates } from "../../slices/utils/enumerateSliceDates.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import type { ISkuSliceDataItem } from "../models/SkuSlice.js";
 import {
@@ -36,16 +37,6 @@ export function formatDateHeader(d: Date): string {
   const m = String(d.getUTCMonth() + 1).padStart(2, "0");
   const day = String(d.getUTCDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
-}
-
-function enumerateSliceDates(from: Date, to: Date): Date[] {
-  const out: Date[] = [];
-  const cursor = new Date(from);
-  while (cursor.getTime() <= to.getTime()) {
-    out.push(new Date(cursor));
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-  return out;
 }
 
 export function safeFilePart(s: string): string {

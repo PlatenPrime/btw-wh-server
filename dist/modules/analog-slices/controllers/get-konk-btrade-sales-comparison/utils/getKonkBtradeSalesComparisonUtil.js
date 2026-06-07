@@ -1,5 +1,5 @@
 import { getKonkBtradeComparisonRangeUtil } from "../../get-konk-btrade-comparison-excel/utils/getKonkBtradeComparisonRangeUtil.js";
-import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, } from "../../common/salesComparisonUtils.js";
+import { applyRecountDayToSales, computeRevenueForDay, computeSalesFromStockSequence, } from "../../../../slices/utils/salesComparisonUtils.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 export async function getKonkBtradeSalesComparisonUtil(input) {
     const rangeResult = await getKonkBtradeComparisonRangeUtil(input);

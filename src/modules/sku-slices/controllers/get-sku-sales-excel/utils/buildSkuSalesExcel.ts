@@ -10,7 +10,8 @@ import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
   toUtcDateKey,
-} from "../../../../analog-slices/controllers/common/salesComparisonUtils.js";
+} from "../../../../slices/utils/salesComparisonUtils.js";
+import { enumerateSliceDates } from "../../../../slices/utils/enumerateSliceDates.js";
 import {
   coalesceSkuSliceItemsAlongDates,
   sliceDateMinusDays,
@@ -104,16 +105,6 @@ export function computeSkuSalesPeriodMetrics(
     totalSales,
     totalRevenue,
   };
-}
-
-function enumerateSliceDates(from: Date, to: Date): Date[] {
-  const out: Date[] = [];
-  const cursor = new Date(from);
-  while (cursor.getTime() <= to.getTime()) {
-    out.push(new Date(cursor));
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
-  }
-  return out;
 }
 
 function setMergedMetaAlignment(cell: ExcelJS.Cell): void {
