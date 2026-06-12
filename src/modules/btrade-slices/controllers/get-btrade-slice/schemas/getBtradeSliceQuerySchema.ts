@@ -1,16 +1,22 @@
 import { z } from "zod";
-
-const dateStringSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, "date must be YYYY-MM-DD")
-  .transform((s) => {
-    const d = new Date(s + "T00:00:00.000Z");
-    if (Number.isNaN(d.getTime())) throw new Error("Invalid date");
-    return d;
-  });
+import { dateStringSchema } from "../../../../sku-slices/controllers/common/schemas/dateSchema.js";
 
 export const getBtradeSliceQuerySchema = z.object({
   date: dateStringSchema,
+  isInvalid: z
+    .enum(["true", "false"])
+    .optional()
+    .transform((val) => (val === undefined ? undefined : val === "true")),
+  page: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : 1))
+    .refine((val) => val > 0, "Page must be positive"),
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : 10))
+    .refine((val) => val > 0 && val <= 100, "Limit must be between 1 and 100"),
 });
 
 export type GetBtradeSliceQuery = z.infer<typeof getBtradeSliceQuerySchema>;

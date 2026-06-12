@@ -9,7 +9,7 @@ export const sendCreateAskMesUtil = async ({
   message: string;
   askerData: IUser;
 }) => {
-  if (askerData.role !== RoleType.PRIME && process.env.NODE_ENV !== "test") {
+  if (askerData.role === RoleType.USER && process.env.NODE_ENV !== "test") {
     try {
       await sendMessageToBTWChat(message);
     } catch (error) {

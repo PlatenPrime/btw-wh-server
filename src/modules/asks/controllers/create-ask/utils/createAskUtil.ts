@@ -5,30 +5,24 @@ import {
   buildAskEvent,
   mapUserToAskUserData,
 } from "../../../utils/askEventsUtil.js";
+import { CreateAskData } from "../schemas/createAskSchema.js";
 
-type CreateAskInput = {
-  artikul: string;
-  nameukr?: string;
-  quant?: number;
-  com?: string;
-  sklad?: string;
-  zone?: string;
+type CreateAskUtilParams = {
   askerData: IUser;
+  data: CreateAskData;
   actions: string[];
   session: ClientSession;
 };
 
 export const createAskUtil = async ({
-  artikul,
-  nameukr,
-  quant,
-  com,
-  sklad,
-  zone,
   askerData,
+  data,
   actions,
   session,
-}: CreateAskInput): Promise<IAsk> => {
+}: CreateAskUtilParams): Promise<IAsk> => {
+  const { artikul, nameukr, com, zone } = data;
+  const quant = data.quant ?? 0;
+  const sklad = data.sklad || "pogrebi";
   const mappedAskerData = mapUserToAskUserData(askerData);
   const createEvent = buildAskEvent({
     eventName: "create",
@@ -39,7 +33,7 @@ export const createAskUtil = async ({
     nameukr,
     quant,
     com,
-    sklad: sklad || "pogrebi",
+    sklad,
     zone,
     asker: mappedAskerData._id,
     askerData: mappedAskerData,

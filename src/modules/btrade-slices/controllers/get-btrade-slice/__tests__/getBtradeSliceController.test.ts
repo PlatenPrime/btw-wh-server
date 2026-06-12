@@ -38,8 +38,23 @@ describe("getBtradeSliceController", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Btrade slice retrieved successfully");
     expect(
-      (responseJson.data as { data: Record<string, unknown> }).data,
-    ).toEqual({ "ART-1": { price: 100, quantity: 5 } });
+      (responseJson.data as { items: Array<Record<string, unknown>> }).items
+    ).toEqual([
+      {
+        artikul: "ART-1",
+        quantity: 5,
+        price: 100,
+        art: null,
+      },
+    ]);
+    expect(responseJson.pagination).toMatchObject({
+      page: 1,
+      limit: 10,
+      total: 1,
+      totalPages: 1,
+      hasNext: false,
+      hasPrev: false,
+    });
   });
 
   it("400: validation error for invalid date format", async () => {

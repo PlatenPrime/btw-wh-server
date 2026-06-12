@@ -1,4 +1,5 @@
-export const getCreateAskMessageUtil = ({ askerData, artikul, nameukr, quant, com }) => {
+export const getCreateAskMessageUtil = ({ askerData, data, }) => {
+    const { artikul, nameukr, quant, com } = data;
     return `🆕 Новий запит
 
   👤 ${askerData.fullname}

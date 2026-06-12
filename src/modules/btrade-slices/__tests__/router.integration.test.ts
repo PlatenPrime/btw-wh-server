@@ -67,8 +67,21 @@ describe("Btrade slices router integration", () => {
         .expect(200);
 
       expect(response.body.message).toBe("Btrade slice retrieved successfully");
-      expect(response.body.data.data).toEqual({
-        "ART-1": { price: 100, quantity: 5 },
+      expect(response.body.data.items).toEqual([
+        {
+          artikul: "ART-1",
+          quantity: 5,
+          price: 100,
+          art: null,
+        },
+      ]);
+      expect(response.body.pagination).toMatchObject({
+        page: 1,
+        limit: 10,
+        total: 1,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
       });
     });
   });

@@ -1,7 +1,7 @@
 import { RoleType } from "../../../../../constants/roles.js";
 import { sendMessageToBTWChat } from "../../../../../utils/telegram/sendMessageToBTWChat.js";
 export const sendCreateAskMesUtil = async ({ message, askerData, }) => {
-    if (askerData.role !== RoleType.PRIME && process.env.NODE_ENV !== "test") {
+    if (askerData.role === RoleType.USER && process.env.NODE_ENV !== "test") {
         try {
             await sendMessageToBTWChat(message);
         }

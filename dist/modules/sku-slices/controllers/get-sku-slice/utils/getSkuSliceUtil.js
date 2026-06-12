@@ -1,37 +1,7 @@
+import { invalidSliceEntryMongoCondition } from "../../../../slices/utils/invalidSliceEntryMongoCondition.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
-const BSON_NUMBER_TYPES = ["double", "int", "long", "decimal"];
-/**
- * Критерий «невалидной» позиции для фильтра GET /api/sku-slices (isInvalid=true).
- * Держать в sync с isInvalidSkuSliceDataItem в slice-compensation.
- */
-function invalidSliceEntryCondition(variableRoot) {
-    const stock = variableRoot === "e" ? "$$e.v.stock" : "$entries.v.stock";
-    const price = variableRoot === "e" ? "$$e.v.price" : "$entries.v.price";
-    const invalidPrice = {
-        $or: [
-            { $not: [{ $in: [{ $type: price }, [...BSON_NUMBER_TYPES]] }] },
-            { $lt: [price, 0] },
-            {
-                $and: [
-                    { $in: [{ $type: price }, [...BSON_NUMBER_TYPES]] },
-                    { $not: [{ $eq: [price, price] }] },
-                ],
-            },
-            { $eq: [price, { $literal: Infinity }] },
-            { $eq: [price, { $literal: -Infinity }] },
-        ],
-    };
-    return {
-        $or: [
-            {
-                $and: [{ $eq: [stock, -1] }, { $eq: [price, -1] }],
-            },
-            invalidPrice,
-        ],
-    };
-}
 const dataEntriesArray = {
     $objectToArray: { $ifNull: ["$data", {}] },
 };
@@ -91,7 +61,7 @@ function buildInvalidSlicePagePipeline(konkName, sliceDate, skip, limit) {
                                     $filter: {
                                         input: dataEntriesArray,
                                         as: "e",
-                                        cond: invalidSliceEntryCondition("e"),
+                                        cond: invalidSliceEntryMongoCondition("e", "stock"),
                                     },
                                 },
                             },
@@ -105,7 +75,11 @@ function buildInvalidSlicePagePipeline(konkName, sliceDate, skip, limit) {
                         },
                     },
                     { $unwind: "$entries" },
-                    { $match: { $expr: invalidSliceEntryCondition("entries") } },
+                    {
+                        $match: {
+                            $expr: invalidSliceEntryMongoCondition("entries", "stock"),
+                        },
+                    },
                     { $sort: { "entries.k": 1 } },
                     { $skip: skip },
                     { $limit: limit },

@@ -12,11 +12,13 @@ describe("createAskUtil", () => {
         await session.withTransaction(async () => {
             const asker = await createTestUser({ fullname: "Creator One" });
             const result = await createAskUtil({
-                artikul: "ART-001",
-                nameukr: "Папір А4",
-                quant: 3,
-                com: "терміново",
                 askerData: asker,
+                data: {
+                    artikul: "ART-001",
+                    nameukr: "Папір А4",
+                    quant: 3,
+                    com: "терміново",
+                },
                 actions: ["2025-01-01 12:00 Creator One: створив запит"],
                 session,
             });
@@ -45,12 +47,14 @@ describe("createAskUtil", () => {
         await session.withTransaction(async () => {
             const asker = await createTestUser({ fullname: "Creator Two" });
             const result = await createAskUtil({
-                artikul: "ART-002",
-                nameukr: "Товар з зоною",
-                quant: 5,
-                com: "з зоною",
-                zone: "Зона Б",
                 askerData: asker,
+                data: {
+                    artikul: "ART-002",
+                    nameukr: "Товар з зоною",
+                    quant: 5,
+                    com: "з зоною",
+                    zone: "Зона Б",
+                },
                 actions: ["2025-01-01 12:00 Creator Two: створив запит"],
                 session,
             });

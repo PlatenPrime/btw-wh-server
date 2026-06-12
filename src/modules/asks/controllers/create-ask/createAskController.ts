@@ -41,19 +41,12 @@ export const createAskController = async (req: Request, res: Response) => {
 
       const actions = getCreateAskActionsUtil({
         askerData,
-        nameukr: parseResult.data.nameukr || "",
-        quant: parseResult.data.quant || 0,
-        com: parseResult.data.com || "",
+        data: parseResult.data,
       });
 
       createdAsk = await createAskUtil({
-        artikul: parseResult.data.artikul,
-        nameukr: parseResult.data.nameukr,
-        quant: parseResult.data.quant || 0,
-        com: parseResult.data.com,
-        sklad: parseResult.data.sklad,
-        zone: parseResult.data.zone,
         askerData,
+        data: parseResult.data,
         actions,
         session,
       });
@@ -63,10 +56,7 @@ export const createAskController = async (req: Request, res: Response) => {
 
     const message = getCreateAskMessageUtil({
       askerData,
-      artikul: parseResult.data.artikul,
-      nameukr: parseResult.data.nameukr || "",
-      quant: parseResult.data.quant || 0,
-      com: parseResult.data.com || "",
+      data: parseResult.data,
     });
     await sendCreateAskMesUtil({ message, askerData });
   } catch (error) {

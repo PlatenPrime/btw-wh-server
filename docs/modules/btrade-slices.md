@@ -48,6 +48,6 @@ Seed-артикул для URL bulk-страницы задаётся через
 
 Модуль предоставляет только чтение:
 
-- **GET `/api/btrade-slices`** — срез на дату (query `date`).
+- **GET `/api/btrade-slices`** — постраничный срез на дату (`date`, `page`, `limit`, опционально `isInvalid` для фильтра «битых» позиций в `data`). Строки обогащаются документом **Art** по `artikul`; контракт ответа согласован с листингом `GET /api/sku-slices` (items + pagination), с полем остатка `quantity` вместо `stock`.
 
 Подробности — в [API документации](../api/btrade-slices.md) и [матрице доступа](../api/access-matrix.md).

@@ -1,6 +1,9 @@
 import { Ask } from "../../../models/Ask.js";
 import { buildAskEvent, mapUserToAskUserData, } from "../../../utils/askEventsUtil.js";
-export const createAskUtil = async ({ artikul, nameukr, quant, com, sklad, zone, askerData, actions, session, }) => {
+export const createAskUtil = async ({ askerData, data, actions, session, }) => {
+    const { artikul, nameukr, com, zone } = data;
+    const quant = data.quant ?? 0;
+    const sklad = data.sklad || "pogrebi";
     const mappedAskerData = mapUserToAskUserData(askerData);
     const createEvent = buildAskEvent({
         eventName: "create",
@@ -11,7 +14,7 @@ export const createAskUtil = async ({ artikul, nameukr, quant, com, sklad, zone,
         nameukr,
         quant,
         com,
-        sklad: sklad || "pogrebi",
+        sklad,
         zone,
         asker: mappedAskerData._id,
         askerData: mappedAskerData,

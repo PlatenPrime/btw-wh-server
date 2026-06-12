@@ -14,3 +14,4 @@ export const createAskSchema = z.object({
 });
 
 export type CreateAskInput = z.infer<typeof createAskSchema>;
+export type CreateAskData = Omit<CreateAskInput, "askerId">;

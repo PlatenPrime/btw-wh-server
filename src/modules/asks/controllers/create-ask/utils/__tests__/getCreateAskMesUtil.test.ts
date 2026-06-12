@@ -8,10 +8,12 @@ describe("getCreateAskMessageUtil", () => {
         _id: "507f1f77bcf86cd799439011" as any,
         fullname: "Test User",
       } as any,
-      artikul: "ART-001",
-      nameukr: "Папір А4",
-      quant: 2,
-      com: "примітка",
+      data: {
+        artikul: "ART-001",
+        nameukr: "Папір А4",
+        quant: 2,
+        com: "примітка",
+      },
     });
 
     expect(message).toContain("🆕 Новий запит");
@@ -28,10 +30,12 @@ describe("getCreateAskMessageUtil", () => {
         _id: "507f1f77bcf86cd799439011" as any,
         fullname: "Test User",
       } as any,
-      artikul: "ART-001",
-      nameukr: "",
-      quant: 0 as any,
-      com: "",
+      data: {
+        artikul: "ART-001",
+        nameukr: "",
+        quant: 0,
+        com: "",
+      },
     });
 
     expect(message).toContain("📝 —");

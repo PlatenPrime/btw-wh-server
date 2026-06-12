@@ -10,9 +10,12 @@ describe("getCreateAskActionsUtil", () => {
     it("возвращает одно действие с корректными данными", () => {
         const actionList = getCreateAskActionsUtil({
             askerData: { _id: "1", fullname: "Test User" },
-            nameukr: "Папір А4",
-            quant: 5,
-            com: "терміново",
+            data: {
+                artikul: "ART-001",
+                nameukr: "Папір А4",
+                quant: 5,
+                com: "терміново",
+            },
         });
         expect(actionList).toHaveLength(1);
         const action = actionList[0];

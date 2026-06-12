@@ -1,16 +1,19 @@
 import { getCurrentFormattedDateTime } from "../../../../../utils/getCurrentFormattedDateTime.js";
 import { IUser } from "../../../../auth/models/User.js";
+import { CreateAskData } from "../schemas/createAskSchema.js";
 
 interface GetCreateAskActionsInput {
   askerData: IUser;
-  nameukr: string;
-  quant: number;
-  com: string;
+  data: CreateAskData;
 }
 
-export const getCreateAskActionsUtil = (
-    {askerData, nameukr, quant, com}: GetCreateAskActionsInput
-): string[] => {
+export const getCreateAskActionsUtil = ({
+  askerData,
+  data,
+}: GetCreateAskActionsInput): string[] => {
+  const nameukr = data.nameukr ?? "";
+  const quant = data.quant ?? 0;
+  const com = data.com ?? "";
   const time = getCurrentFormattedDateTime();
   return [
     `${time} ${askerData?.fullname ?? ""}: необхідно ${nameukr}

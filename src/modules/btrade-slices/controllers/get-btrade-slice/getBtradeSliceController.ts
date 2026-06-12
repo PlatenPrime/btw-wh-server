@@ -3,8 +3,8 @@ import { getBtradeSliceQuerySchema } from "./schemas/getBtradeSliceQuerySchema.j
 import { getBtradeSliceUtil } from "./utils/getBtradeSliceUtil.js";
 
 /**
- * @desc    Получить срез Btrade по date
- * @route   GET /api/btrade-slices?date=2025-03-01
+ * @desc    Срез Btrade по дате (пагинация, строки с маппингом на Art)
+ * @route   GET /api/btrade-slices?date=&page=&limit=&isInvalid=
  */
 export const getBtradeSliceController = async (
   req: Request,
@@ -25,8 +25,11 @@ export const getBtradeSliceController = async (
     return;
   }
 
+  const { items, pagination, date } = result;
+
   res.status(200).json({
     message: "Btrade slice retrieved successfully",
-    data: result,
+    data: { date, items },
+    pagination,
   });
 };

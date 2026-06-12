@@ -1,17 +1,12 @@
-import { isFullMinusOneStockPrice } from "../../slices/utils/isInvalidSliceStockResult.js";
+import { isInvalidSliceStockPriceItem } from "../../slices/utils/isInvalidSliceStockPriceItem.js";
 
 /**
- * Позиция в SkuSlice.data считается «невалидной» для компенсации: полный -1/-1
- * или цена не конечное неотрицательное число.
- * Держать в sync с Mongo-выражением в getSkuSliceUtil (invalidSliceEntryCondition).
+ * Позиция в SkuSlice.data считается «невалидной» для компенсации.
+ * @see isInvalidSliceStockPriceItem
  */
 export function isInvalidSkuSliceDataItem(
   stock: unknown,
   price: unknown
 ): boolean {
-  if (isFullMinusOneStockPrice(stock, price)) return true;
-  if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
-    return true;
-  }
-  return false;
+  return isInvalidSliceStockPriceItem(stock, price);
 }
