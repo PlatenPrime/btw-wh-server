@@ -1,8 +1,10 @@
 import { toSliceDate } from "../../../utils/sliceDate.js";
+import { isInvalidSliceStockPriceItem } from "../../slices/utils/isInvalidSliceStockPriceItem.js";
 import { fetchSharikProductRestsMap } from "../sharik/fetchSharikProductRestsMap.js";
 import { BtradeSlice } from "../models/BtradeSlice.js";
 import { fetchMissingBtradeSliceItemsViaSearch } from "./calculateBtradeSliceViaSearch.js";
 import { getUniqueArtikulsFromArtsUtil } from "./getUniqueArtikulsFromArtsUtil.js";
+const MISSING_SLICE_SENTINEL = { price: -1, quantity: -1 };
 /**
  * Собирает ежедневный срез цен и остатков Btrade (Sharik):
  * один запрос product_rests, затем fallback search для пропущенных артикулов,
@@ -29,10 +31,23 @@ export async function calculateBtradeSlice() {
         Object.assign(data, fromSearch);
     }
     const fromSearchCount = Object.keys(data).length - fromProductRests;
-    const count = Object.keys(data).length;
-    const missing = totalArtikuls - count;
+    const stillMissingArtikuls = artikuls.filter((artikul) => !(artikul in data));
+    for (const artikul of stillMissingArtikuls) {
+        data[artikul] = MISSING_SLICE_SENTINEL;
+    }
+    let count = 0;
+    let missing = 0;
+    for (const artikul of artikuls) {
+        const item = data[artikul];
+        if (isInvalidSliceStockPriceItem(item.quantity, item.price)) {
+            missing += 1;
+        }
+        else {
+            count += 1;
+        }
+    }
     await BtradeSlice.findOneAndUpdate({ date: sliceDate }, { $set: { date: sliceDate, data } }, { upsert: true });
-    console.log(`[BtradeSlice] Готово: product_rests=${fromProductRests}, search fallback=${fromSearchCount}, всего=${count}`);
+    console.log(`[BtradeSlice] Готово: product_rests=${fromProductRests}, search fallback=${fromSearchCount}, valid=${count}, missing=${missing}`);
     return {
         saved: true,
         count,

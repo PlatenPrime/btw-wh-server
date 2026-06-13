@@ -111,6 +111,40 @@ describe("calculateBtradeSlice", () => {
     );
   });
 
+  it("writes -1/-1 sentinel when search fallback finds nothing for missing artikul", async () => {
+    vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(
+      new Map([["ART-1", { quantity: 5, price: 100 }]])
+    );
+    vi.mocked(fetchMissingBtradeSliceItemsViaSearch).mockResolvedValue({});
+
+    const result = await calculateBtradeSlice();
+
+    expect(result).toEqual({
+      saved: true,
+      count: 1,
+      totalArtikuls: 2,
+      missing: 1,
+      fromProductRests: 1,
+      fromSearch: 0,
+    });
+    expect(fetchMissingBtradeSliceItemsViaSearch).toHaveBeenCalledWith([
+      "ART-2",
+    ]);
+    expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith(
+      { date: mockSliceDate },
+      {
+        $set: {
+          date: mockSliceDate,
+          data: {
+            "ART-1": { price: 100, quantity: 5 },
+            "ART-2": { price: -1, quantity: -1 },
+          },
+        },
+      },
+      { upsert: true }
+    );
+  });
+
   it("when no artikuls only upserts empty data", async () => {
     vi.mocked(getUniqueArtikulsFromArtsUtil).mockResolvedValue([]);
     vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(new Map());
