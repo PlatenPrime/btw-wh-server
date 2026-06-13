@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Интерфейс для информации о существующей заявке
@@ -101,8 +102,8 @@ const defSchema = new Schema<IDef>(
  * Def Mongoose model
  * @see IDef
  */
-export const Def: Model<IDef> = mongoose.model<IDef>(
+export const Def: Model<IDef> = getOrCreateModel<IDef>(
   "Def",
   defSchema,
-  "defs" // Указываем имя коллекции как "defs"
+  "defs",
 );

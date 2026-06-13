@@ -1,5 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
-
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 export interface IRole extends Document {
   _id: Types.ObjectId;
   value: string;
@@ -11,6 +11,6 @@ const RoleSchema: Schema<IRole> = new Schema({
   name: { type: String },
 });
 
-const Role: Model<IRole> = mongoose.model<IRole>("Role", RoleSchema);
+const Role: Model<IRole> = getOrCreateModel<IRole>("Role", RoleSchema);
 
 export default Role;

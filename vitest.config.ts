@@ -38,6 +38,8 @@ export default defineConfig({
           include: [
             "src/__tests__/**/*.test.ts",
             "src/config/__tests__/**/*.test.ts",
+            "src/test/__tests__/**/*.test.ts",
+            "src/utils/__tests__/**/*.test.ts",
           ],
           setupFiles: ["./src/test/setup-env.ts"],
         },
@@ -55,8 +57,11 @@ export default defineConfig({
             ".cache",
             "src/__tests__/**",
             "src/config/__tests__/**",
+            "src/test/__tests__/**",
+            "src/utils/__tests__/**",
           ],
           setupFiles: ["./src/test/setup.ts"],
+          globalTeardown: "./src/test/globalTeardown.ts",
           pool: "forks",
           poolOptions: {
             forks: {

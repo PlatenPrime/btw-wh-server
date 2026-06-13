@@ -1,5 +1,6 @@
 // models/Row.ts
-import { model, Schema, Types } from "mongoose";
+import { Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 /**
  * Row schema
  */
@@ -11,4 +12,4 @@ const rowSchema = new Schema({
  * Row Mongoose model
  * @see IRow
  */
-export const Row = model("Row", rowSchema);
+export const Row = getOrCreateModel("Row", rowSchema);

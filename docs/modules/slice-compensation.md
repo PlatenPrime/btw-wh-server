@@ -20,7 +20,7 @@
 - **analog-slices / sku-slices** — целевые коллекции `AnalogSlice`, `SkuSlice` на `sliceDate = toSliceDate(new Date())`.
 - **analogs / skus** — lookup сущностей и stock-утилиты (которые вызывают **browser**).
 - **slices** — конфиг исключений и семантика `-1`.
-- **sku-slices** — jitter между запросами (`skuSliceRequestJitterMs`).
+- **sku-reporting** — jitter между запросами (`skuSliceRequestJitterMs`).
 
 ## Концепции и принятые решения
 

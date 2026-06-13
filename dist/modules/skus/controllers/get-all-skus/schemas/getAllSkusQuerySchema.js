@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { dateStringSchema } from "../../../../sku-slices/controllers/common/schemas/dateSchema.js";
+import { dateStringSchema } from "../../../../sku-reporting/schemas/dateSchema.js";
 export const getAllSkusQuerySchema = z.object({
     konkName: z.string().optional(),
     prodName: z.string().optional(),

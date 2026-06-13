@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 // Схема для btradeStock
 const btradeStockSchema = new Schema({
     value: { type: Number, required: true },
@@ -27,4 +28,4 @@ const artSchema = new Schema({
  * Art Mongoose model
  * @see IArt
  */
-export const Art = mongoose.model("Art", artSchema);
+export const Art = getOrCreateModel("Art", artSchema);

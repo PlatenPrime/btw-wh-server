@@ -11,7 +11,7 @@ import {
 } from "../../../models/AnalogSlice.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
-import { sliceDateMinusDays } from "../../../../sku-slices/utils/coalesceSkuSliceItemsForReporting.js";
+import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
 import type { GetKonkBtradeComparisonExcelInput } from "../schemas/getKonkBtradeComparisonExcelSchema.js";
 import type { AnalogBtradeCompareItem } from "../../get-analog-btrade-comparison-excel/utils/getAnalogBtradeComparisonRangeUtil.js";
 

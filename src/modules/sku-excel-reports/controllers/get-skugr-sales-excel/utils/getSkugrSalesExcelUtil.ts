@@ -1,0 +1,88 @@
+import { Konk } from "../../../../konks/models/Konk.js";
+import { Prod } from "../../../../prods/models/Prod.js";
+import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
+import {
+  aggregateSkuSlices,
+  type SliceAggregateRowWithKonk,
+  sliceDataProjectForProductIdList,
+} from "../../../../sku-slices/utils/sliceDataAggregationStages.js";
+import {
+  formatDateHeader,
+  safeFilePart,
+} from "../../../../sku-reporting/utils/buildSkuSliceExcel.js";
+import {
+  buildSliceMapsByKonk,
+  getSliceItem,
+  loadSkugrWithOrderedSkus,
+  uniqueKonkNamesFromSkus,
+} from "../../../../sku-reporting/utils/skugrReporting.js";
+import {
+  buildSkuSalesExcelForSkus,
+  type SkuSalesExcelSkuRow,
+} from "../../get-sku-sales-excel/utils/buildSkuSalesExcel.js";
+import type { GetSkugrSalesExcelInput } from "../schemas/getSkugrSalesExcelSchema.js";
+
+export type GetSkugrSalesExcelResult =
+  | { ok: true; buffer: Buffer; fileName: string }
+  | { ok: false };
+
+export async function getSkugrSalesExcelUtil(
+  input: GetSkugrSalesExcelInput,
+): Promise<GetSkugrSalesExcelResult> {
+  const loaded = await loadSkugrWithOrderedSkus(input.skugrId);
+  if (!loaded) return { ok: false };
+  const { skugr, skus } = loaded;
+  if (skus.length === 0) return { ok: false };
+
+  const dateFrom = toSliceDate(input.dateFrom);
+  const dateTo = toSliceDate(input.dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
+
+  const allowedProductIds = [...new Set(skus.map((s) => s.productId))];
+  const slices = await aggregateSkuSlices<SliceAggregateRowWithKonk>([
+    {
+      $match: {
+        konkName: { $in: uniqueKonkNamesFromSkus(skus) },
+        date: { $gte: warmStart, $lte: dateTo },
+      },
+    },
+    sliceDataProjectForProductIdList(allowedProductIds),
+  ]);
+
+  const maps = buildSliceMapsByKonk(slices);
+
+  const [konkDoc, prodDoc] = await Promise.all([
+    Konk.findOne({ name: skugr.konkName }).select("title recountDays").lean(),
+    Prod.findOne({ name: skugr.prodName }).select("title").lean(),
+  ]);
+
+  const competitorTitle = (konkDoc?.title ?? "").trim();
+  const producerName = (prodDoc?.title ?? "").trim();
+  const rows: SkuSalesExcelSkuRow[] = skus.map((sku) => ({
+    title: sku.title,
+    url: sku.url,
+    productId: sku.productId,
+    konkName: sku.konkName,
+    competitorTitle,
+    producerName,
+    skugrTitle: skugr.title,
+  }));
+
+  const { buffer } = await buildSkuSalesExcelForSkus(
+    rows,
+    dateFrom,
+    dateTo,
+    (kn, pid, d) => getSliceItem(maps, kn, pid, d),
+    {
+      summaryMode: "bottomOnly",
+      summarySalesLabel: "Загальні продажі, шт",
+      summaryRevenueLabel: "Загальна виручка, грн",
+      recountDays: (konkDoc?.recountDays ?? []).map(String),
+    },
+  );
+
+  const idPart = safeFilePart(skugr._id.toString());
+  const fileName = `sku_sales_skugr_${idPart}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;
+  return { ok: true, buffer, fileName };
+}

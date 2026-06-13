@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const varGroupSchema = new Schema({
     id: { type: String, required: true },
     title: { type: String, required: true },
@@ -11,4 +12,4 @@ const variantSchema = new Schema({
     varGroup: { type: varGroupSchema, required: false },
     imageUrl: { type: String, required: true },
 }, { timestamps: true });
-export const Variant = mongoose.model("Variant", variantSchema, "variants");
+export const Variant = getOrCreateModel("Variant", variantSchema, "variants");

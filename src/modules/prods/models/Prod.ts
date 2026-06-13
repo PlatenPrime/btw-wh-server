@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Интерфейс документа производителя
@@ -25,8 +26,8 @@ const prodSchema = new Schema<IProd>(
  * Prod Mongoose model
  * @see IProd
  */
-export const Prod: Model<IProd> = mongoose.model<IProd>(
+export const Prod: Model<IProd> = getOrCreateModel<IProd>(
   "Prod",
   prodSchema,
-  "prods"
+  "prods",
 );

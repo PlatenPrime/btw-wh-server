@@ -1,8 +1,8 @@
 import { isFullMinusOneStockPrice } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { SkuSlice } from "../../sku-slices/models/SkuSlice.js";
-import { sliceDateMinusDays } from "../../sku-slices/utils/coalesceSkuSliceItemsForReporting.js";
-import { enumerateReportingDates } from "../../sku-slices/utils/skugrReporting.js";
+import { sliceDateMinusDays } from "../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
+import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
 import { Sku } from "../models/Sku.js";
 /**
  * Окно: 7 последовательных UTC-ключей среза, заканчиваясь вчерашним днём относительно `referenceDate`

@@ -13,7 +13,7 @@ vi.mock("../../../skugrs/models/Skugr.js", () => ({
   },
 }));
 vi.mock(
-  "../../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js",
+  "../../../skus/utils/getSkuStockDataUtil.js",
   () => ({
     getSkuStockDataUtil: vi.fn(),
     UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
@@ -27,7 +27,7 @@ vi.mock("../../models/SkuSlice.js", () => ({
 
 import { Sku } from "../../../skus/models/Sku.js";
 import { Skugr } from "../../../skugrs/models/Skugr.js";
-import { getSkuStockDataUtil } from "../../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
+import { getSkuStockDataUtil } from "../../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../models/SkuSlice.js";
 
 describe("runSkuSliceForKonkUtil", () => {

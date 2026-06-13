@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const UserSchema = new Schema({
     username: { type: String, required: true, unique: true },
     fullname: { type: String, required: true },
@@ -7,5 +8,5 @@ const UserSchema = new Schema({
     telegram: { type: String },
     photo: { type: String },
 }, { timestamps: true });
-const User = mongoose.model("User", UserSchema);
+const User = getOrCreateModel("User", UserSchema);
 export default User;

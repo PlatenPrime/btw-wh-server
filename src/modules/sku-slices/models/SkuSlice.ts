@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 export interface ISkuSliceDataItem {
   stock: number;
@@ -31,8 +32,8 @@ const skuSliceSchema = new Schema<ISkuSlice>(
 
 skuSliceSchema.index({ konkName: 1, date: 1 }, { unique: true });
 
-export const SkuSlice: Model<ISkuSlice> = mongoose.model<ISkuSlice>(
+export const SkuSlice: Model<ISkuSlice> = getOrCreateModel<ISkuSlice>(
   "SkuSlice",
   skuSliceSchema,
-  "sku_slices"
+  "sku_slices",
 );

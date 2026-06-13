@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const delArtikulsSchema = new Schema({}, {
     _id: false,
     strict: false,
@@ -24,4 +25,4 @@ const delSchema = new Schema({
  * Del Mongoose model
  * @see IDel
  */
-export const Del = mongoose.model("Del", delSchema, "dels");
+export const Del = getOrCreateModel("Del", delSchema, "dels");

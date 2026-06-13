@@ -1,4 +1,5 @@
-import { Document, model, Schema, Types } from "mongoose";
+import { Document, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Block subdocument interface for Seg
@@ -76,4 +77,4 @@ export { segSchema };
  * Seg Mongoose model
  * @see ISeg
  */
-export const Seg = model<ISeg>("Seg", segSchema);
+export const Seg = getOrCreateModel<ISeg>("Seg", segSchema);

@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 // Схема для результата расчета дефицитов
 const deficitCalculationResultSchema = new Schema({}, {
     _id: false,
@@ -30,5 +31,4 @@ const defSchema = new Schema({
  * Def Mongoose model
  * @see IDef
  */
-export const Def = mongoose.model("Def", defSchema, "defs" // Указываем имя коллекции как "defs"
-);
+export const Def = getOrCreateModel("Def", defSchema, "defs");

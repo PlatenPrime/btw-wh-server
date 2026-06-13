@@ -2,7 +2,7 @@ import { Sku } from "../../skus/models/Sku.js";
 import {
   getSkuStockDataUtil,
   UNSUPPORTED_KONK_CODE,
-} from "../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
+} from "../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../sku-slices/models/SkuSlice.js";
 import { getExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
 import {

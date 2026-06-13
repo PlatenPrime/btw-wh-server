@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 // Схема для Block
 const blockSchema = new Schema({
     title: {
@@ -19,4 +20,4 @@ blockSchema.index({ order: 1 }); // Для сортировки по order
  * Block Mongoose model
  * @see IBlock
  */
-export const Block = mongoose.model("Block", blockSchema);
+export const Block = getOrCreateModel("Block", blockSchema);

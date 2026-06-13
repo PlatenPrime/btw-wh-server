@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const constantSchema = new Schema({
     name: { type: String, required: true, unique: true },
     title: { type: String, required: true },
@@ -21,4 +22,4 @@ const constantSchema = new Schema({
  * Constant Mongoose model
  * @see IConstant
  */
-export const Constant = mongoose.model("Constant", constantSchema, "constants");
+export const Constant = getOrCreateModel("Constant", constantSchema, "constants");

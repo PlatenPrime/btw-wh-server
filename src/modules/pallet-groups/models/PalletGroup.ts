@@ -1,4 +1,5 @@
-import { Document, model, Schema, Types } from "mongoose";
+import { Document, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Pallet group document interface.
@@ -47,7 +48,7 @@ const palletGroupSchema = new Schema<IPalletGroup>(
  * PalletGroup Mongoose model.
  * @see IPalletGroup
  */
-export const PalletGroup = model<IPalletGroup>(
+export const PalletGroup = getOrCreateModel<IPalletGroup>(
   "PalletGroup",
   palletGroupSchema,
 );

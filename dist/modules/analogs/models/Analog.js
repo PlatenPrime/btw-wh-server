@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const analogSchema = new Schema({
     konkName: { type: String, required: true },
     prodName: { type: String, required: true },
@@ -10,4 +11,4 @@ const analogSchema = new Schema({
  * Analog Mongoose model
  * @see IAnalog
  */
-export const Analog = mongoose.model("Analog", analogSchema, "analogs");
+export const Analog = getOrCreateModel("Analog", analogSchema, "analogs");

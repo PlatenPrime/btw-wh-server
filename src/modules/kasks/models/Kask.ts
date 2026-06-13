@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import { Document, Model, Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Запрос доставить товар к кассе (kasa + asks).
@@ -26,4 +27,4 @@ const kaskSchema = new Schema<IKask>(
   { timestamps: true }
 );
 
-export const Kask: Model<IKask> = mongoose.model<IKask>("Kask", kaskSchema);
+export const Kask: Model<IKask> = getOrCreateModel<IKask>("Kask", kaskSchema);

@@ -11,7 +11,8 @@
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "test:mongod:repair": "node --import tsx src/test/scripts/repairMongodBinary.ts"
   },
   "keywords": [],
   "author": "",

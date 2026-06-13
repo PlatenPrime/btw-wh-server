@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 // Интерфейс для btradeStock
 export interface IBtradeStock {
@@ -8,7 +9,7 @@ export interface IBtradeStock {
 
 // Интерфейс для Art
 export interface IArt extends Document {
-  _id: mongoose.Types.ObjectId;
+  _id: Types.ObjectId;
   artikul: string;
   prodName?: string;
   nameukr?: string;
@@ -58,4 +59,4 @@ const artSchema = new Schema<IArt>(
  * Art Mongoose model
  * @see IArt
  */
-export const Art: Model<IArt> = mongoose.model<IArt>("Art", artSchema);
+export const Art: Model<IArt> = getOrCreateModel<IArt>("Art", artSchema);

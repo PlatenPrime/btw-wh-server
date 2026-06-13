@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const konkSchema = new Schema({
     name: { type: String, required: true, unique: true },
     title: { type: String, required: true },
@@ -10,4 +11,4 @@ const konkSchema = new Schema({
  * Konk Mongoose model
  * @see IKonk
  */
-export const Konk = mongoose.model("Konk", konkSchema, "konks");
+export const Konk = getOrCreateModel("Konk", konkSchema, "konks");

@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 // Схема для Zone
 const zoneSchema = new Schema({
     title: {
@@ -41,4 +42,4 @@ const zoneSchema = new Schema({
  * Zone Mongoose model
  * @see IZone
  */
-export const Zone = mongoose.model("Zone", zoneSchema);
+export const Zone = getOrCreateModel("Zone", zoneSchema);

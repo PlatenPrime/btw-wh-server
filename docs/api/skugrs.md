@@ -219,4 +219,4 @@
 
 ## Отчёты и графики по составу группы (`skus`)
 
-Дневные агрегаты и Excel по остаткам/продажам для списка SKU группы (`skugr.skus`) отдаются модулем **sku-slices** (роль USER): см. [API срезов SKU](sku-slices.md) — маршруты `/api/sku-slices/skugr/:skugrId/daily-summary`, `.../slice-excel`, `.../sales-excel` с query `dateFrom` и `dateTo`.
+Дневные агрегаты и Excel по остаткам/продажам для списка SKU группы (`skugr.skus`) — модули **sku-sales-reports** и **sku-excel-reports** (роль ADMIN): см. [sku-sales-reports](sku-sales-reports.md), [sku-excel-reports](sku-excel-reports.md) и [миграцию](sku-api-migration.md).

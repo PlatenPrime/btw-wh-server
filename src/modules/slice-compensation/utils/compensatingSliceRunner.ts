@@ -3,7 +3,7 @@ import { jitterMs } from "../../../utils/jitterMs.js";
 import {
   SKU_SLICE_REQUEST_JITTER_MAX_MS,
   SKU_SLICE_REQUEST_JITTER_MIN_MS,
-} from "../../sku-slices/constants/skuSliceRequestJitterMs.js";
+} from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
 
 export type CompensatingSliceDoc = {

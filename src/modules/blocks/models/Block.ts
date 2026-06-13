@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 // Интерфейс для Block
 export interface IBlock extends Document {
@@ -35,5 +36,5 @@ blockSchema.index({ order: 1 }); // Для сортировки по order
  * Block Mongoose model
  * @see IBlock
  */
-export const Block: Model<IBlock> = mongoose.model<IBlock>("Block", blockSchema);
+export const Block: Model<IBlock> = getOrCreateModel<IBlock>("Block", blockSchema);
 

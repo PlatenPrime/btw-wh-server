@@ -1,4 +1,5 @@
-import { model, Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const palletGroupSchema = new Schema({
     title: {
         type: String,
@@ -25,4 +26,4 @@ const palletGroupSchema = new Schema({
  * PalletGroup Mongoose model.
  * @see IPalletGroup
  */
-export const PalletGroup = model("PalletGroup", palletGroupSchema);
+export const PalletGroup = getOrCreateModel("PalletGroup", palletGroupSchema);

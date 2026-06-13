@@ -44,7 +44,9 @@
 **Потребители:**
 
 - `analog-slices` — range-маппинг, sales comparison, exclusions;
-- `sku-slices` — Excel, chart-data, exclusions, enumerate dates;
+- `sku-slices` — cron, сырые read API, `sliceDataAggregationStages`;
+- `sku-reporting` — shared utils/schemas для reporting-модулей;
+- `sku-excel-reports`, `sku-sales-reports`, `sku-chart-reports` — HTTP-отчёты;
 - `slice-compensation` — exclusions и семантика `-1`;
 - `skus` — `runSkuInvalidFlagSync` использует правила invalid.
 

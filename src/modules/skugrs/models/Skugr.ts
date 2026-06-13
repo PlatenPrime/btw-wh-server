@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Группа товаров конкурента: конкурент + производитель + набор SKU (документов Sku).
@@ -35,7 +36,7 @@ const skugrSchema = new Schema<ISkugr>(
 
 skugrSchema.index({ konkName: 1, prodName: 1 });
 
-export const Skugr: Model<ISkugr> = mongoose.model<ISkugr>(
+export const Skugr: Model<ISkugr> = getOrCreateModel<ISkugr>(
   "Skugr",
   skugrSchema,
   "skugrs",

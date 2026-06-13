@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 export interface IVarGroup {
   id: string;
@@ -37,9 +38,9 @@ const variantSchema = new Schema<IVariant>(
   { timestamps: true }
 );
 
-export const Variant: Model<IVariant> = mongoose.model<IVariant>(
+export const Variant: Model<IVariant> = getOrCreateModel<IVariant>(
   "Variant",
   variantSchema,
-  "variants"
+  "variants",
 );
 

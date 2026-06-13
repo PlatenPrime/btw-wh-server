@@ -1,5 +1,6 @@
 // models/Row.ts
-import { Document, Model, model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Row document interface
@@ -27,4 +28,4 @@ const rowSchema = new Schema<IRow>(
  * Row Mongoose model
  * @see IRow
  */
-export const Row: Model<IRow> = model<IRow>("Row", rowSchema);
+export const Row: Model<IRow> = getOrCreateModel<IRow>("Row", rowSchema);

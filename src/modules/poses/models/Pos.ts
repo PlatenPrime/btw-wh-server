@@ -1,5 +1,6 @@
 // models/Pos.ts
-import { Document, model, Schema, Types } from "mongoose";
+import { Document, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Pallet subdocument interface for Pos
@@ -88,4 +89,4 @@ const posSchema = new Schema<IPos>(
  * Pos Mongoose model
  * @see IPos
  */
-export const Pos = model<IPos>("Pos", posSchema);
+export const Pos = getOrCreateModel<IPos>("Pos", posSchema);

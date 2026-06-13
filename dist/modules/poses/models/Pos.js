@@ -1,5 +1,6 @@
 // models/Pos.ts
-import { model, Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const palletSubdocumentSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
@@ -33,4 +34,4 @@ const posSchema = new Schema({
  * Pos Mongoose model
  * @see IPos
  */
-export const Pos = model("Pos", posSchema);
+export const Pos = getOrCreateModel("Pos", posSchema);

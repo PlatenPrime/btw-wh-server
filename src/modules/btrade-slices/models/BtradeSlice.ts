@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 export interface IBtradeSliceDataItem {
   price: number;
@@ -27,8 +28,8 @@ const btradeSliceSchema = new Schema<IBtradeSlice>(
   { timestamps: true }
 );
 
-export const BtradeSlice: Model<IBtradeSlice> = mongoose.model<IBtradeSlice>(
+export const BtradeSlice: Model<IBtradeSlice> = getOrCreateModel<IBtradeSlice>(
   "BtradeSlice",
   btradeSliceSchema,
-  "btrade_slices"
+  "btrade_slices",
 );

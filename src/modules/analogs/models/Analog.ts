@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Интерфейс документа аналога (аналог артикула у конкурента)
@@ -29,8 +30,8 @@ const analogSchema = new Schema<IAnalog>(
  * Analog Mongoose model
  * @see IAnalog
  */
-export const Analog: Model<IAnalog> = mongoose.model<IAnalog>(
+export const Analog: Model<IAnalog> = getOrCreateModel<IAnalog>(
   "Analog",
   analogSchema,
-  "analogs"
+  "analogs",
 );

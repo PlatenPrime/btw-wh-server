@@ -4,8 +4,6 @@ export { deleteSkuByIdController } from "./delete-sku-by-id/deleteSkuByIdControl
 export { deleteSkusNotInAnySkugrController } from "./delete-skus-not-in-any-skugr/deleteSkusNotInAnySkugrController.js";
 export { fixIncorrectSkuDataController } from "./fix-incorrect-sku-data/fixIncorrectSkuDataController.js";
 export { getAllSkusController } from "./get-all-skus/getAllSkusController.js";
-export { getKonkInvalidExcelController } from "./get-konk-invalid-excel/getKonkInvalidExcelController.js";
-export { getKonkNewSinceExcelController } from "./get-konk-new-since-excel/getKonkNewSinceExcelController.js";
 export { getSkusBySkugrIdController } from "./get-skus-by-skugr-id/getSkusBySkugrIdController.js";
 export { getSkuByIdController } from "./get-sku-by-id/getSkuByIdController.js";
 export { updateSkuByIdController } from "./update-sku-by-id/updateSkuByIdController.js";

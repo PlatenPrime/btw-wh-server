@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const skuSchema = new Schema({
     konkName: { type: String, required: true },
     prodName: { type: String, required: true },
@@ -14,4 +15,4 @@ skuSchema.index({ konkName: 1, isInvalid: 1 });
  * Sku Mongoose model
  * @see ISku
  */
-export const Sku = mongoose.model("Sku", skuSchema, "skus");
+export const Sku = getOrCreateModel("Sku", skuSchema, "skus");

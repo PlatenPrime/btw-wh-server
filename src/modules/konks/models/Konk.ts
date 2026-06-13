@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Интерфейс документа конкурента
@@ -29,8 +30,8 @@ const konkSchema = new Schema<IKonk>(
  * Konk Mongoose model
  * @see IKonk
  */
-export const Konk: Model<IKonk> = mongoose.model<IKonk>(
+export const Konk: Model<IKonk> = getOrCreateModel<IKonk>(
   "Konk",
   konkSchema,
-  "konks"
+  "konks",
 );

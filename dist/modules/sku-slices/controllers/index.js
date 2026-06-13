@@ -1,16 +1,3 @@
 export { getSkuSliceController } from "./get-sku-slice/getSkuSliceController.js";
 export { getSkuSliceByDateController } from "./get-sku-slice-by-date/getSkuSliceByDateController.js";
 export { getSkuSliceRangeController } from "./get-sku-slice-range/getSkuSliceRangeController.js";
-export { getSkuSalesByDateController } from "./get-sku-sales-by-date/getSkuSalesByDateController.js";
-export { getSkuSalesRangeController } from "./get-sku-sales-range/getSkuSalesRangeController.js";
-export { getSkuStockSliceExcelController } from "./get-sku-slice-excel/getSkuSliceExcelController.js";
-export { getKonkSkuStockSliceExcelController } from "./get-konk-sku-slice-excel/getKonkSkuSliceExcelController.js";
-export { getSkuSalesExcelController } from "./get-sku-sales-excel/getSkuSalesExcelController.js";
-export { getKonkSkuSalesExcelController } from "./get-konk-sku-sales-excel/getKonkSkuSalesExcelController.js";
-export { getKonkProdSkuSalesChartDataController } from "./get-konk-prod-sku-sales-chart-data/getKonkProdSkuSalesChartDataController.js";
-export { getKonkProdSkuStockChartDataController } from "./get-konk-prod-sku-stock-chart-data/getKonkProdSkuStockChartDataController.js";
-export { getKonkProdManufacturersPieDataController } from "./get-konk-prod-manufacturers-pie-data/getKonkProdManufacturersPieDataController.js";
-export { getKonkProdSkugrGroupsSalesController } from "./get-konk-prod-skugr-groups-sales/getKonkProdSkugrGroupsSalesController.js";
-export { getSkugrDailySummaryController } from "./get-skugr-daily-summary/getSkugrDailySummaryController.js";
-export { getSkugrSliceExcelController } from "./get-skugr-slice-excel/getSkugrSliceExcelController.js";
-export { getSkugrSalesExcelController } from "./get-skugr-sales-excel/getSkugrSalesExcelController.js";

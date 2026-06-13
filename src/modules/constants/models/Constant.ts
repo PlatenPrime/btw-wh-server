@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Интерфейс документа константы (пользовательская коллекция ключ-значение)
@@ -36,8 +37,8 @@ const constantSchema = new Schema<IConstant>(
  * Constant Mongoose model
  * @see IConstant
  */
-export const Constant: Model<IConstant> = mongoose.model<IConstant>(
+export const Constant: Model<IConstant> = getOrCreateModel<IConstant>(
   "Constant",
   constantSchema,
-  "constants"
+  "constants",
 );

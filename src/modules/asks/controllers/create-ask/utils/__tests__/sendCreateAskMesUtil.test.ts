@@ -1,30 +1,32 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RoleType } from "../../../../../../constants/roles.js";
 
-// Mock sendMessageToBTWChat
 vi.mock("../../../../../../utils/telegram/sendMessageToBTWChat.js", () => ({
   sendMessageToBTWChat: vi.fn(),
 }));
 
-// Mock console.error
-const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+const consoleErrorSpy = vi
+  .spyOn(console, "error")
+  .mockImplementation(() => {});
 
-// Import after mocking
 import { sendMessageToBTWChat } from "../../../../../../utils/telegram/sendMessageToBTWChat.js";
 import { sendCreateAskMesUtil } from "../sendCreateAskMesUtil.js";
 
 const mockSendMessageToBTWChat = vi.mocked(sendMessageToBTWChat);
 
 describe("sendCreateAskMesUtil", () => {
+  const originalNodeEnv = process.env.NODE_ENV;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    // Сохраняем оригинальное значение NODE_ENV
-    process.env.NODE_ENV = process.env.NODE_ENV || "test";
   });
 
-  it("отправляет сообщение для не-PRIME пользователей", async () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
+  afterEach(() => {
+    process.env.NODE_ENV = originalNodeEnv;
+  });
+
+  it("отправляет сообщение для USER", async () => {
+    process.env.NODE_ENV = "development";
     mockSendMessageToBTWChat.mockResolvedValueOnce(undefined);
 
     const askerData = {
@@ -40,13 +42,10 @@ describe("sendCreateAskMesUtil", () => {
     });
 
     expect(mockSendMessageToBTWChat).toHaveBeenCalledWith("Test message");
-    process.env.NODE_ENV = originalEnv;
   });
 
-  it("отправляет сообщение для ADMIN пользователей", async () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
-    mockSendMessageToBTWChat.mockResolvedValueOnce(undefined);
+  it("не отправляет сообщение для ADMIN", async () => {
+    process.env.NODE_ENV = "development";
 
     const askerData = {
       _id: "user1" as any,
@@ -60,11 +59,12 @@ describe("sendCreateAskMesUtil", () => {
       askerData,
     });
 
-    expect(mockSendMessageToBTWChat).toHaveBeenCalledWith("Test message");
-    process.env.NODE_ENV = originalEnv;
+    expect(mockSendMessageToBTWChat).not.toHaveBeenCalled();
   });
 
-  it("пропускает отправку для PRIME пользователей", async () => {
+  it("не отправляет сообщение для PRIME", async () => {
+    process.env.NODE_ENV = "development";
+
     const askerData = {
       _id: "user1" as any,
       fullname: "Test Prime",
@@ -95,13 +95,11 @@ describe("sendCreateAskMesUtil", () => {
       askerData,
     });
 
-    // В тестовом окружении не должно быть вызова
     expect(mockSendMessageToBTWChat).not.toHaveBeenCalled();
   });
 
   it("обрабатывает ошибки при отправке", async () => {
-    const originalEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = "production";
+    process.env.NODE_ENV = "development";
     const error = new Error("Telegram API error");
     mockSendMessageToBTWChat.mockRejectedValueOnce(error);
 
@@ -112,7 +110,6 @@ describe("sendCreateAskMesUtil", () => {
       telegram: "123456",
     } as any;
 
-    // Не должно выбрасывать ошибку, только логировать
     await expect(
       sendCreateAskMesUtil({
         message: "Test message",
@@ -124,10 +121,9 @@ describe("sendCreateAskMesUtil", () => {
       "Failed to send Telegram notification:",
       error
     );
-    process.env.NODE_ENV = originalEnv;
   });
 
-  it("отправляет сообщение в production окружении для не-PRIME", async () => {
+  it("отправляет сообщение в production для USER", async () => {
     process.env.NODE_ENV = "production";
     mockSendMessageToBTWChat.mockResolvedValueOnce(undefined);
 

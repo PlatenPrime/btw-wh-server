@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 export const validAskStatuses = [
     "new",
     "processing",
@@ -60,4 +61,4 @@ const askSchema = new Schema({
     pullBox: { type: Number, default: 0 },
     events: { type: [askEventSchema], default: [] },
 }, { timestamps: true });
-export const Ask = mongoose.model("Ask", askSchema);
+export const Ask = getOrCreateModel("Ask", askSchema);

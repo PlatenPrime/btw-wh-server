@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const btradeSliceSchema = new Schema({
     date: { type: Date, required: true, unique: true },
     data: {
@@ -6,4 +7,4 @@ const btradeSliceSchema = new Schema({
         default: {},
     },
 }, { timestamps: true });
-export const BtradeSlice = mongoose.model("BtradeSlice", btradeSliceSchema, "btrade_slices");
+export const BtradeSlice = getOrCreateModel("BtradeSlice", btradeSliceSchema, "btrade_slices");

@@ -1,4 +1,5 @@
-import { model, Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const blockSubdocumentSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
@@ -31,4 +32,4 @@ export { segSchema };
  * Seg Mongoose model
  * @see ISeg
  */
-export const Seg = model("Seg", segSchema);
+export const Seg = getOrCreateModel("Seg", segSchema);

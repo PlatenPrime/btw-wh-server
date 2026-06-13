@@ -6,19 +6,6 @@ describe("sku-slices controllers index", () => {
             "getSkuSliceController",
             "getSkuSliceByDateController",
             "getSkuSliceRangeController",
-            "getSkuSalesByDateController",
-            "getSkuSalesRangeController",
-            "getSkuStockSliceExcelController",
-            "getKonkSkuStockSliceExcelController",
-            "getSkuSalesExcelController",
-            "getKonkSkuSalesExcelController",
-            "getKonkProdSkuSalesChartDataController",
-            "getKonkProdSkuStockChartDataController",
-            "getKonkProdManufacturersPieDataController",
-            "getKonkProdSkugrGroupsSalesController",
-            "getSkugrDailySummaryController",
-            "getSkugrSliceExcelController",
-            "getSkugrSalesExcelController",
         ];
         for (const name of expected) {
             expect(typeof controllers[name]).toBe("function");

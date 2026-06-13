@@ -11,7 +11,7 @@ vi.mock("../../../skugrs/models/Skugr.js", () => ({
         find: vi.fn(),
     },
 }));
-vi.mock("../../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js", () => ({
+vi.mock("../../../skus/utils/getSkuStockDataUtil.js", () => ({
     getSkuStockDataUtil: vi.fn(),
     UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
 }));
@@ -22,7 +22,7 @@ vi.mock("../../models/SkuSlice.js", () => ({
 }));
 import { Sku } from "../../../skus/models/Sku.js";
 import { Skugr } from "../../../skugrs/models/Skugr.js";
-import { getSkuStockDataUtil } from "../../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
+import { getSkuStockDataUtil } from "../../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../models/SkuSlice.js";
 describe("runSkuSliceForKonkUtil", () => {
     const sliceDate = toSliceDate(new Date("2025-03-01T12:00:00.000Z"));

@@ -70,7 +70,7 @@
 
 Подробности: [API Skugrs](../api/skugrs.md).
 
-Отчёты по составу группы (`skus`) за период — в модуле [SKU Slices](sku-slices.md): JSON для графиков и Excel остатков/продаж по `skugrId` описаны в [API sku-slices](../api/sku-slices.md).
+Отчёты по составу группы (`skus`) за период — в модулях [SKU Sales Reports](sku-sales-reports.md) и [SKU Excel Reports](sku-excel-reports.md): JSON `daily-summary`, Excel остатков/продаж по `skugrId` описаны в [API sku-sales-reports](../api/sku-sales-reports.md) и [API sku-excel-reports](../api/sku-excel-reports.md).
 
 ## Формат данных в ответах API
 

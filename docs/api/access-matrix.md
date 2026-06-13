@@ -329,8 +329,6 @@
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
 | GET | `/` | JWT | ≥ ADMIN |
-| GET | `/konk/:konkName/new-since-excel` | JWT | ≥ ADMIN |
-| GET | `/konk/:konkName/invalid-excel` | JWT | ≥ ADMIN |
 | DELETE | `/konk/:konkName/invalid` | JWT | ≥ PRIME |
 | DELETE | `/not-in-any-skugr` | JWT | ≥ PRIME |
 | GET | `/by-skugr/:skugrId` | JWT | ≥ ADMIN |
@@ -363,21 +361,44 @@
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
 | GET | `/` | JWT | ≥ ADMIN |
-| GET | `/konk/excel` | JWT | ≥ ADMIN |
-| GET | `/konk/sales-excel` | JWT | ≥ ADMIN |
-| GET | `/konk-prod/manufacturers-pie-data` | JWT | ≥ ADMIN |
-| GET | `/konk-prod/skugr-groups-sales` | JWT | ≥ ADMIN |
-| GET | `/konk-prod/stock-chart-data` | JWT | ≥ ADMIN |
-| GET | `/konk-prod/sales-chart-data` | JWT | ≥ ADMIN |
-| GET | `/skugr/:skugrId/daily-summary` | JWT | ≥ ADMIN |
-| GET | `/skugr/:skugrId/slice-excel` | JWT | ≥ ADMIN |
-| GET | `/skugr/:skugrId/sales-excel` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId/range` | JWT | ≥ ADMIN |
-| GET | `/sku/:skuId/sales-range` | JWT | ≥ ADMIN |
-| GET | `/sku/:skuId/sales-by-date` | JWT | ≥ ADMIN |
-| GET | `/sku/:skuId/slice-excel` | JWT | ≥ ADMIN |
-| GET | `/sku/:skuId/sales-excel` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId` | JWT | ≥ ADMIN |
+
+---
+
+## `/api/sku-excel-reports`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| GET | `/catalog/new-since` | JWT | ≥ ADMIN |
+| GET | `/catalog/invalid` | JWT | ≥ ADMIN |
+| GET | `/konk/stock` | JWT | ≥ ADMIN |
+| GET | `/konk/sales` | JWT | ≥ ADMIN |
+| GET | `/skugr/:skugrId/stock` | JWT | ≥ ADMIN |
+| GET | `/skugr/:skugrId/sales` | JWT | ≥ ADMIN |
+| GET | `/sku/:skuId/stock` | JWT | ≥ ADMIN |
+| GET | `/sku/:skuId/sales` | JWT | ≥ ADMIN |
+
+---
+
+## `/api/sku-sales-reports`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| GET | `/konk-prod/skugr-groups-sales` | JWT | ≥ ADMIN |
+| GET | `/skugr/:skugrId/daily-summary` | JWT | ≥ ADMIN |
+| GET | `/sku/:skuId/by-date` | JWT | ≥ ADMIN |
+| GET | `/sku/:skuId/range` | JWT | ≥ ADMIN |
+
+---
+
+## `/api/sku-chart-reports`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| GET | `/konk-prod/manufacturers-pie` | JWT | ≥ ADMIN |
+| GET | `/konk-prod/stock` | JWT | ≥ ADMIN |
+| GET | `/konk-prod/sales` | JWT | ≥ ADMIN |
 
 ---
 

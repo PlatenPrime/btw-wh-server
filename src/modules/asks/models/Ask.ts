@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 import { IUser } from "../../auth/models/User.js";
 
 export type AskUserData = Pick<
@@ -132,4 +133,4 @@ const askSchema = new Schema<IAsk>(
   { timestamps: true }
 );
 
-export const Ask: Model<IAsk> = mongoose.model<IAsk>("Ask", askSchema);
+export const Ask: Model<IAsk> = getOrCreateModel<IAsk>("Ask", askSchema);

@@ -1,14 +1,15 @@
-import mongoose, { Document, Model, Schema } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 // Интерфейс для связи зоны с сегментом
 interface IZoneSeg {
-  id: mongoose.Types.ObjectId;
+  id: Types.ObjectId;
   title?: string; // Опционально для кеширования
 }
 
 // Интерфейс для Zone
 export interface IZone extends Document {
-  _id: mongoose.Types.ObjectId;
+  _id: Types.ObjectId;
   title: string; // "42-5-2" (row-rack-shelf)
   bar: number; // 420502 (for Code-128 barcode)
   sector: number; // 0 (default, calculated later by separate service)
@@ -65,4 +66,4 @@ const zoneSchema = new Schema<IZone>(
  * Zone Mongoose model
  * @see IZone
  */
-export const Zone: Model<IZone> = mongoose.model<IZone>("Zone", zoneSchema);
+export const Zone: Model<IZone> = getOrCreateModel<IZone>("Zone", zoneSchema);

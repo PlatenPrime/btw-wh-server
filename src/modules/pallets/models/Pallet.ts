@@ -1,5 +1,6 @@
 // models/Pallet.ts
-import { Document, model, Schema, Types } from "mongoose";
+import { Document, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Row subdocument interface for Pallet
@@ -73,4 +74,4 @@ export { palletSchema };
  * Pallet Mongoose model
  * @see IPallet
  */
-export const Pallet = model<IPallet>("Pallet", palletSchema);
+export const Pallet = getOrCreateModel<IPallet>("Pallet", palletSchema);

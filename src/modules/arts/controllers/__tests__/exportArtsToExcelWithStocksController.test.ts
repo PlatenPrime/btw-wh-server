@@ -151,6 +151,9 @@ describe("exportArtsToExcelWithStocksController", () => {
   });
 
   it("500: ошибка сервера при получении артикулов", async () => {
+    const originalEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "development";
+
     const error = new Error("Database error");
     vi.mocked(getArtsForExportExtendedUtil).mockRejectedValue(error);
 
@@ -161,6 +164,8 @@ describe("exportArtsToExcelWithStocksController", () => {
     expect(responseStatus.code).toBe(500);
     expect(responseBody.message).toBe("Server error");
     expect(responseBody.error).toBeDefined();
+
+    process.env.NODE_ENV = originalEnv;
   });
 
   it("500: ошибка сервера при получении запасов", async () => {

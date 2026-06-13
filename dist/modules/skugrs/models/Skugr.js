@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const skugrSchema = new Schema({
     konkName: { type: String, required: true },
     prodName: { type: String, required: true },
@@ -14,4 +15,4 @@ const skugrSchema = new Schema({
     ],
 }, { timestamps: true });
 skugrSchema.index({ konkName: 1, prodName: 1 });
-export const Skugr = mongoose.model("Skugr", skugrSchema, "skugrs");
+export const Skugr = getOrCreateModel("Skugr", skugrSchema, "skugrs");

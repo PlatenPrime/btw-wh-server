@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Интерфейс документа SKU конкурента
@@ -39,4 +40,4 @@ skuSchema.index({ konkName: 1, isInvalid: 1 });
  * Sku Mongoose model
  * @see ISku
  */
-export const Sku: Model<ISku> = mongoose.model<ISku>("Sku", skuSchema, "skus");
+export const Sku: Model<ISku> = getOrCreateModel<ISku>("Sku", skuSchema, "skus");

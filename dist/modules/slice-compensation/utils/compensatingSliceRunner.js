@@ -1,6 +1,6 @@
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
-import { SKU_SLICE_REQUEST_JITTER_MAX_MS, SKU_SLICE_REQUEST_JITTER_MIN_MS, } from "../../sku-slices/constants/skuSliceRequestJitterMs.js";
+import { SKU_SLICE_REQUEST_JITTER_MAX_MS, SKU_SLICE_REQUEST_JITTER_MIN_MS, } from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
 export function buildCompensatingDataKeyQueue(docs, excluded, shouldInclude) {
     const queue = [];

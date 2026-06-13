@@ -5,7 +5,7 @@ import { BtradeSlice, } from "../../../../btrade-slices/models/BtradeSlice.js";
 import { AnalogSlice, } from "../../../models/AnalogSlice.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
-import { sliceDateMinusDays } from "../../../../sku-slices/utils/coalesceSkuSliceItemsForReporting.js";
+import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
 /**
  * Extracts the numeric part from the beginning of ABC value (e.g. "101B" → 101).
  * Returns 0 if no leading digits.

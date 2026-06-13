@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const kaskSchema = new Schema({
     artikul: { type: String, required: true },
     nameukr: { type: String, required: true },
@@ -6,4 +7,4 @@ const kaskSchema = new Schema({
     zone: { type: String, required: true },
     com: { type: String, required: false },
 }, { timestamps: true });
-export const Kask = mongoose.model("Kask", kaskSchema);
+export const Kask = getOrCreateModel("Kask", kaskSchema);

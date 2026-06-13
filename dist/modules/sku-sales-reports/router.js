@@ -1,0 +1,11 @@
+import { Router } from "express";
+import { RoleType } from "../../constants/roles.js";
+import { checkAuth, checkRoles } from "../../middleware/index.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import { getKonkProdSkugrGroupsSalesController, getSkugrDailySummaryController, getSkuSalesByDateController, getSkuSalesRangeController, } from "./controllers/index.js";
+const router = Router();
+router.get("/konk-prod/skugr-groups-sales", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getKonkProdSkugrGroupsSalesController));
+router.get("/skugr/:skugrId/daily-summary", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getSkugrDailySummaryController));
+router.get("/sku/:skuId/by-date", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getSkuSalesByDateController));
+router.get("/sku/:skuId/range", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getSkuSalesRangeController));
+export default router;

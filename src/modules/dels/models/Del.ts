@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
  * Объект артикулов поставки: ключ — артикул (как в Art, Def, Pos), значение — объект с количеством и опциональным названием (nameukr).
@@ -68,4 +69,4 @@ const delSchema = new Schema<IDel>(
  * Del Mongoose model
  * @see IDel
  */
-export const Del: Model<IDel> = mongoose.model<IDel>("Del", delSchema, "dels");
+export const Del: Model<IDel> = getOrCreateModel<IDel>("Del", delSchema, "dels");

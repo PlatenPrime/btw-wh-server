@@ -1,63 +1,17 @@
 import "./setup-env.js";
-import { MongoMemoryReplSet } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
-// Import models to register schemas
-import "../modules/analog-slices/models/AnalogSlice.js";
-import "../modules/analogs/models/Analog.js";
-import "../modules/variants/models/Variant.js";
-import "../modules/arts/models/Art.js";
-import "../modules/btrade-slices/models/BtradeSlice.js";
-import "../modules/asks/models/Ask.js";
-import "../modules/kasks/models/Kask.js";
-import "../modules/auth/models/User.js";
-import "../modules/blocks/models/Block.js";
-import "../modules/constants/models/Constant.js";
-import "../modules/defs/models/Def.js";
-import "../modules/dels/models/Del.js";
-import "../modules/konks/models/Konk.js";
-import "../modules/prods/models/Prod.js";
-import "../modules/pallets/models/Pallet.js";
-import "../modules/pallet-groups/models/PalletGroup.js";
-import "../modules/poses/models/Pos.js";
-import "../modules/rows/models/Row.js";
-import "../modules/segs/models/Seg.js";
-import "../modules/skugrs/models/Skugr.js";
-import "../modules/skus/models/Sku.js";
-import "../modules/sku-slices/models/SkuSlice.js";
-import "../modules/zones/models/Zone.js";
-let mongoServer;
+import { afterEach, beforeAll, beforeEach } from "vitest";
+import { connectTestMongo } from "./connectTestMongo.js";
+const MONGO_HOOK_TIMEOUT_MS = 120_000;
 beforeAll(async () => {
-    try {
-        // Start MongoDB Memory Server as a replica set for transactions
-        mongoServer = await MongoMemoryReplSet.create({
-            replSet: { count: 1 },
-        });
-        const mongoUri = mongoServer.getUri();
-        // Connect to the in-memory replica set
-        await mongoose.connect(mongoUri);
-        console.log("Connected to MongoDB Memory Server (replica set) for tests");
-    }
-    catch (error) {
-        console.error("Failed to start MongoDB Memory Server (replica set):", error);
-        throw error;
-    }
-}, 30000);
-afterAll(async () => {
-    try {
-        if (mongoose.connection.readyState !== 0) {
-            await mongoose.connection.close();
-        }
-        if (mongoServer) {
-            await mongoServer.stop();
-            console.log("Disconnected from MongoDB Memory Server (replica set)");
-        }
-    }
-    catch (error) {
-        console.error("Error closing MongoDB Memory Server (replica set):", error);
-    }
-});
+    await connectTestMongo();
+    await import("./registerModels.js");
+}, MONGO_HOOK_TIMEOUT_MS);
 beforeEach(async () => {
+    await connectTestMongo();
+    if (mongoose.connection.readyState === 0) {
+        return;
+    }
     // Clear all collections before each test
     const collections = mongoose.connection.collections;
     for (const key in collections) {

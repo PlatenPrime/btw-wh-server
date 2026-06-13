@@ -5,7 +5,7 @@ vi.mock("../../../../utils/delay.js", () => ({
 vi.mock("../../../skus/models/Sku.js", () => ({
     Sku: { findOne: vi.fn() },
 }));
-vi.mock("../../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js", () => ({
+vi.mock("../../../skus/utils/getSkuStockDataUtil.js", () => ({
     getSkuStockDataUtil: vi.fn(),
     UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
 }));
@@ -17,7 +17,7 @@ vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
     normalizeCompetitorName: vi.fn((v) => v.trim().toLowerCase()),
 }));
 import { Sku } from "../../../skus/models/Sku.js";
-import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE, } from "../../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
+import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE, } from "../../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../../sku-slices/models/SkuSlice.js";
 import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
 import { runCompensatingSkuSlices } from "../runCompensatingSkuSlices.js";

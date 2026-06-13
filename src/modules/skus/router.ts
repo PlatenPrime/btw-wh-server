@@ -9,8 +9,6 @@ import {
   deleteSkusNotInAnySkugrController,
   fixIncorrectSkuDataController,
   getAllSkusController,
-  getKonkInvalidExcelController,
-  getKonkNewSinceExcelController,
   getSkusBySkugrIdController,
   getSkuByIdController,
   updateSkuByIdController,
@@ -23,18 +21,6 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getAllSkusController)
-);
-router.get(
-  "/konk/:konkName/new-since-excel",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkNewSinceExcelController)
-);
-router.get(
-  "/konk/:konkName/invalid-excel",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkInvalidExcelController)
 );
 router.delete(
   "/konk/:konkName/invalid",

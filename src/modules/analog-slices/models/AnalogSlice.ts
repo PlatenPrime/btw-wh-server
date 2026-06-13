@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 export interface IAnalogSliceDataItem {
   stock: number;
@@ -33,8 +34,8 @@ const analogSliceSchema = new Schema<IAnalogSlice>(
 
 analogSliceSchema.index({ konkName: 1, date: 1 }, { unique: true });
 
-export const AnalogSlice: Model<IAnalogSlice> = mongoose.model<IAnalogSlice>(
+export const AnalogSlice: Model<IAnalogSlice> = getOrCreateModel<IAnalogSlice>(
   "AnalogSlice",
   analogSliceSchema,
-  "analog_slices"
+  "analog_slices",
 );

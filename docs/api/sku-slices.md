@@ -1,43 +1,22 @@
 # API срезов SKU (Sku Slices)
 
-Эндпоинты чтения ежедневных срезов остатков и цен по SKU конкурентов. Для большинства маршрутов данные Btrade не используются; исключение — **konk-prod chart data** (сравнение агрегата SKU с Btrade по производителю или, при `prod=all`, по всему конкуренту и всем артикулам из Art). Доступ: checkAuth + checkRoles(USER), кроме случаев, если в коде роутера указано иное.
+Сырые ежедневные срезы остатков и цен по SKU конкурентов. Отчёты (продажи, Excel, графики) — в модулях [sku-sales-reports](sku-sales-reports.md), [sku-excel-reports](sku-excel-reports.md), [sku-chart-reports](sku-chart-reports.md). Миграция путей: [sku-api-migration](sku-api-migration.md).
 
-Для **графиков konk-prod** (`*-chart-data` и **skugr-groups-sales**), **daily-summary по skugr**, **Excel продаж/остатков** и **JSON продаж по диапазону/дате** значения `-1` в остатке и цене в ряду дат перед расчётом заменяются на последнее валидное значение слева (см. модуль [sku-slices](../modules/sku-slices.md)); документы в коллекции срезов не изменяются. Листинг `GET /api/sku-slices` и сырые ряды без этой нормализации — по правилам конкретного маршрута.
-
-Для маршрутов продаж, которые опираются на конкурента (`sku/*/sales*`, `konk/sales-excel`, `skugr/*sales*`, `konk-prod/sales-chart-data`, `konk-prod/skugr-groups-sales`), дополнительно применяется календарь дней переучёта из `Konk.recountDays`: для даты из этого списка продажи и выручка конкурента считаются равными `0`, день остаётся в периоде и участвует в агрегатах как обычный календарный день.
-
-## Общие правила валидации
-
-- Во всех запросах, где есть пара `dateFrom` и `dateTo` в query, требуется **`dateFrom` ≤ `dateTo`**; иначе **400** (ошибка валидации).
-- Параметры пути **`skuId`** и **`skugrId`** — строка валидного MongoDB ObjectId; иначе **400**.
-- Для маршрутов с query-параметрами **`konk`** и **`prod`**: значения **trim** по краям, после trim непустые; иначе **400**.
-
-### Опциональный фильтр `skugrIds` для konk-prod отчётов
-
-Пять маршрутов поддерживают опциональный query-параметр **`skugrIds`** — список идентификаторов товарных групп Skugr, которыми сужается выборка SKU конкурента: `GET /api/sku-slices/konk/excel`, `GET /api/sku-slices/konk/sales-excel`, `GET /api/sku-slices/konk-prod/stock-chart-data`, `GET /api/sku-slices/konk-prod/sales-chart-data`, `GET /api/sku-slices/konk-prod/manufacturers-pie-data`. Маршрут `GET /api/sku-slices/konk-prod/skugr-groups-sales` фильтр не принимает.
-
-- **Формат:** массив hex-ObjectId длиной 24 символа. Допустимы оба представления: повторяющиеся ключи (`?skugrIds=a&skugrIds=b`) и CSV-строка (`?skugrIds=a,b`); внутри значения trim по краям, пустые элементы игнорируются. Дубли убираются. Любой невалидный hex — **400**.
-- **Поведение без параметра / при пустом списке:** выборка SKU и расчёты идут как раньше (по `konkName` и, если применимо, `prodName`).
-- **Поведение с непустым списком:** Skugr фильтруются по `konkName` (всегда) и `prodName` (если задан, кроме режима `prod=all`). Группы упорядочиваются в порядке присланного `skugrIds`. Внутри группы сохраняется порядок `skugr.skus`. SKU, не найденные ни в одной из выбранных групп, в отчёт не попадают; SKU другого `prodName` (если `prod` фиксирован) внутри выбранной группы отсеиваются. Если ни одна Skugr не подошла под `konk`/`prod` — **404**, как и в случае «нет SKU».
-- **Дедупликация по `productId`:** SKU попадает в отчёт ровно один раз — побеждает первое вхождение по порядку выбранных групп; именно эта группа становится «товарной группой» SKU в Excel-колонке «Товарна група».
-
-Во всех XLSX этого модуля, где по горизонтали идут **календарные дни** периода, текст заголовка колонки дня — **название дня недели по-украински, запятая, пробел и дата `YYYY-MM-DD`** (тот же UTC-день, что используется в расчётах срезов). Имена файлов по-прежнему содержат даты только в виде `YYYY-MM-DD`.
-
-Во всех Excel-выгрузках модуля колонки метаданных идут в порядке: **Ідентифікатор товару, Назва, Конкурент, Виробник, Товарна група, Посилання**. Колонка «Товарна група» содержит заголовок Skugr, привязанной к SKU (для `konk/*` Excel — первая группа из присланных `skugrIds`, либо первая Skugr пары `konk`/`prod` по `_id`, в которой встречается SKU; для `skugr/*` Excel — заголовок самой группы; пусто, если SKU ни в одной группе). Метка метрики (Залишок/Ціна/Продажі/Виручка) переехала в седьмую колонку, ряд дат начинается с восьмой.
+Доступ: checkAuth + checkRoles(ADMIN).
 
 ## Эндпоинты
 
 ### GET `/api/sku-slices`
 
-Срез по конкуренту и дате: постраничная выдача записей из поля `data` документа среза. Каждая запись сопоставляется с документом **Sku** по `productId` (ключ в `data` среза совпадает с `Sku.productId`). Порядок строк на всех страницах — лексикографическая сортировка по `productId`.
+Срез по конкуренту и дате: постраничная выдача записей из поля `data` документа среза. Каждая запись сопоставляется с документом **Sku** по `productId`.
 
 **Query:**
 
 - `konkName` (string, обязательно)
 - `date` (string, YYYY-MM-DD, обязательно)
-- `page` (string в query, опционально) — номер страницы, по умолчанию `1`, после разбора целое число > 0
-- `limit` (string в query, опционально) — размер страницы, по умолчанию `10`, после разбора целое от 1 до 100 включительно (как у `GET /api/skus`)
-- `isInvalid` (string в query, опционально) — только `"true"` или `"false"`. При **`isInvalid=true`** в `items` попадают только позиции, которые по тем же правилам, что и компенсирующие срезы, считаются нуждающимися в повторном опросе: полный `-1` в остатке и цене или цена не является конечным неотрицательным числом. Если параметр не передан или **`false`**, выдаётся весь `data` (как раньше).
+- `page` (string, опционально) — по умолчанию `1`
+- `limit` (string, опционально) — по умолчанию `10`, максимум `100`
+- `isInvalid` (string, опционально) — `"true"` / `"false"`; при `true` только позиции для компенсирующих срезов
 
 **Ответ 200:**
 
@@ -46,267 +25,44 @@
   message: string,
   data: {
     konkName: string,
-    date: Date (ISO в JSON),
+    date: Date (ISO),
     items: Array<{
       productId: string,
       stock: number,
       price: number,
-      sku: Sku | null   // lean-документ из коллекции skus или null, если SKU с таким productId нет
+      sku: Sku | null
     }>
   },
-  pagination: {
-    page: number,
-    limit: number,
-    total: number,       // число ключей в data среза; при isInvalid=true — только число «невалидных» позиций (см. query isInvalid)
-    totalPages: number,
-    hasNext: boolean,
-    hasPrev: boolean
-  }
+  pagination: { page, limit, total, totalPages, hasNext, hasPrev }
 }
 ```
 
-**Ошибки:** 400 (невалидные query, в т.ч. `page`/`limit`), 401, 403, 404 (срез не найден), 500.
+**Ошибки:** 400, 401, 403, 404, 500.
 
 ---
 
 ### GET `/api/sku-slices/sku/:skuId`
 
-Одна точка остатка и цены по SKU на дату.
+Одна точка остатка и цены по SKU на дату (значения из БД, без нормализации для отчётов).
 
-**Path:** `skuId` — валидный ObjectId (см. раздел «Общие правила валидации»).
+**Path:** `skuId` — валидный ObjectId.
 
 **Query:** `date` (YYYY-MM-DD, обязательно).
 
 **Ответ 200:** `{ message: string, data: { stock: number, price: number } }`.
 
-**Ошибки:** 400, 401, 403, 404 (SKU не найден, нет `productId` или нет записи в срезе), 500.
+**Ошибки:** 400, 401, 403, 404, 500.
 
 ---
 
 ### GET `/api/sku-slices/sku/:skuId/range`
 
-Массив точек среза по SKU за период (включительно по границам). Только даты, где есть срез и запись для `productId` этого SKU.
+Массив точек среза по SKU за период (сырые значения из документов среза).
 
 **Path:** `skuId` — валидный ObjectId.
 
 **Query:** `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
 
-**Ответ 200:** `{ message: string, data: Array<{ date: string (ISO), stock: number, price: number }> }` — сортировка по дате по возрастанию.
-
-**Ошибки:** 400, 401, 403, 404 (SKU не найден или нет `productId`), 500.
-
----
-
-### GET `/api/sku-slices/sku/:skuId/sales-by-date`
-
-Продажи и выручка по SKU на одну дату (логика как у analog-slices: разница остатка с предыдущим днём, выручка = продажи × цена, признак дня поставки).
-
-**Path:** `skuId` — валидный ObjectId.
-
-**Query:** `date` (YYYY-MM-DD, обязательно).
-
-**Ответ 200:** `{ message: string, data: { sales: number, revenue: number, price: number, isDeliveryDay: boolean } }`.
-
-Для даты из `Konk.recountDays` поля `sales` и `revenue` возвращаются как `0`.
+**Ответ 200:** `{ message: string, data: Array<{ date: string (ISO), stock: number, price: number }> }`.
 
 **Ошибки:** 400, 401, 403, 404, 500.
-
----
-
-### GET `/api/sku-slices/sku/:skuId/sales-range`
-
-Продажи и выручка по SKU за период; формат элементов как в analog sales-range.
-
-**Path:** `skuId` — валидный ObjectId.
-
-**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
-
-**Ответ 200:** `{ message: string, data: Array<{ date: string (ISO), sales, revenue, price, isDeliveryDay }> }`.
-
-Для дат из `Konk.recountDays` в элементах массива поля `sales` и `revenue` равны `0`.
-
-**Ошибки:** 400, 401, 403, 404, 500.
-
----
-
-### GET `/api/sku-slices/sku/:skuId/slice-excel`
-
-Excel-файл остатков по одному SKU за период: украинские заголовки колонок метаданных (Назва, Посилання, Ідентифікатор товару, Конкурент, Виробник), колонки по датам, а также `Різниця` и `Різниця, %` для каждой строки метрики. В блоке SKU только две строки данных — `Залишок` и `Ціна` (строка `Виручка` отсутствует). Без данных Btrade.
-
-**Path:** `skuId` — валидный ObjectId.
-
-**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
-
-**Ответ 200:** тело — бинарный XLSX. Заголовки: `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `Content-Disposition: attachment; filename="sku_slice_<productId>_<dateFrom>_<dateTo>.xlsx"` (в имени файла недопустимые символы заменены).
-
-**Ошибки:** 400, 401, 403, 404, 500.
-
----
-
-### GET `/api/sku-slices/sku/:skuId/sales-excel`
-
-Excel-файл продаж по одному SKU конкурента за период. В блоке SKU три строки метрик: `Продажі`, `Ціна`, `Виручка`. После блока добавляется компактная секция итогов по этому товару:
-- `Продажі конкурента (всього), шт`
-- `Виручка конкурента (всього), грн`
-
-Для дат из `Konk.recountDays` ячейка `Продажі` содержит `0` и подсвечивается фиолетовой заливкой.
-
-Файл не содержит сравнения с Btrade.
-
-**Path:** `skuId` — валидный ObjectId.
-
-**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
-
-**Ответ 200:** бинарный XLSX. Заголовки: `Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`, `Content-Disposition: attachment; filename="sku_sales_<productId>_<dateFrom>_<dateTo>.xlsx"`.
-
-**Ошибки:** 400, 401, 403, 404, 500.
-
----
-
-### GET `/api/sku-slices/konk/excel`
-
-Excel остатков по SKU конкурента за период; сортировка по `productId`. В обычном режиме — все SKU с заданными `konkName` и `prodName`; при **`prod=all`** (строго после trim) — все SKU с данным `konkName` и непустым `productId` (без фильтра по производителю). SKU без непустого `productId` в выгрузку не попадают; если после отбора строк нет — 404.
-
-Формат блока SKU такой же, как в `/sku/:skuId/slice-excel`: только строки `Залишок` и `Ціна` (без `Виручка`), с колонками `Різниця` и `Різниця, %`. В колонке «Виробник» — `Prod.title` по `Sku.prodName` каждой строки (fallback — `prodName`). В колонке «Товарна група» — заголовок первой Skugr пары `konk`/`prod` по `_id`, в `skugr.skus` которой встречается SKU; если SKU ни в одной такой группе — пусто. При указанном `skugrIds` колонка содержит первую группу из присланного списка, в которой встречается SKU.
-
-После всех товарных блоков добавляется итоговая строка `Підсумок`:
-- в колонке `Різниця` — сумма разниц по всем SKU;
-- в колонке `Різниця, %` — доля этой суммы от суммарного остатка на первую дату (в процентах).
-
-**Query:** `konk`, `prod` (string, обязательно, trim и непустые после trim; **`prod=all`** — все производители конкурента, см. выше), `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`. Опционально `skugrIds` — список ObjectId товарных групп (см. раздел «Опциональный фильтр `skugrIds`»).
-
-**Ответ 200:** бинарный XLSX; имя файла вида `sku_slice_konk_<konk>_<prod>_<dateFrom>_<dateTo>.xlsx` с нормализацией символов в имени (при `prod=all` в имени сегмент `all`).
-
-**Ошибки:** 400, 401, 403, 404 (нет подходящих SKU / нет строк с `productId`; при `prod=all` — нет SKU с `productId` у этого конкурента), 500.
-
----
-
-### GET `/api/sku-slices/konk/sales-excel`
-
-Excel-файл продаж по SKU конкурента за период. В обычном режиме — все SKU с заданными `konkName` и `prodName`; при **`prod=all`** (строго после trim) — все SKU с данным `konkName` и непустым `productId` (без фильтра по производителю). Для каждого SKU строится блок из трех строк: `Продажі`, `Ціна`, `Виручка`.
-
-Внизу листа добавляется общий итог по всем товарам выборки:
-- `Загальні продажі, шт`
-- `Загальна виручка, грн`
-
-Для дат из `Konk.recountDays` в каждом блоке SKU ячейки строки `Продажі` имеют значение `0` и фиолетовую заливку.
-
-Файл не содержит сравнения с Btrade.
-
-В колонке «Виробник» — `Prod.title` по `Sku.prodName` каждой строки (fallback — `prodName`). В колонке «Товарна група» — заголовок первой Skugr пары `konk`/`prod` по `_id`, в `skugr.skus` которой встречается SKU; пусто, если SKU ни в одной такой группе. При указанном `skugrIds` колонка содержит первую группу из присланного списка, в которой встречается SKU.
-
-**Query:** `konk`, `prod` (string, обязательно, trim и непустые после trim; **`prod=all`** — все производители конкурента, см. выше), `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`. Опционально **`sortBy`**: строка `sales` — блоки SKU упорядочены по **убыванию** суммарных продаж за период отчёта; строка `revenue` — по **убыванию** суммарной выручки за тот же период (метрики те же, что в ячейках отчёта). Без `sortBy` или при пустой строке — порядок блоков по возрастанию **`productId`** (как при сортировке выборки из БД). Иное значение `sortBy` — **400**. Опционально `skugrIds` — список ObjectId товарных групп (см. раздел «Опциональный фильтр `skugrIds`»).
-
-**Ответ 200:** бинарный XLSX; имя файла вида `sku_sales_konk_<konk>_<prod>_<dateFrom>_<dateTo>.xlsx` с нормализацией символов в имени (при `prod=all` в имени сегмент `all`).
-
-**Ошибки:** 400, 401, 403, 404 (нет подходящих SKU / нет строк с `productId`; при `prod=all` — нет SKU с `productId` у этого конкурента), 500.
-
----
-
-### GET `/api/sku-slices/konk-prod/stock-chart-data`
-
-JSON для графика **остатков** (обычный режим): конкурент — сумма по всем SKU с **`konkName` и `prodName`, точно совпадающими** с query `konk` и `prod` после trim (регистр и полное совпадение строк важны); учитываются только SKU с непустым `productId`, данные остатков из `SkuSlice`. Btrade — сумма `quantity` по **всем артикулам**, у которых в справочнике **Art** поле `prodName` после trim совпадает с query `prod` **без учёта регистра** (в запросе к БД то же условие). Поле `Sku.btradeAnalog` в расчёте **не участвует**. Для каждого такого артикула берётся ряд из `BtradeSlice`; по артикулам суммируется остаток и (для sales-эндпоинта) продажи/выручка. Один элемент `days` на **каждый** календарный день периода (UTC-день, как у `daily-summary`). Форма `data` совпадает по полям с ответом `GET /api/analog-slices/konk-btrade/stock-comparison`: `days[]` с `date` (ISO string), `competitorStock`, `btradeStock`; `summary` — первый/последний день и дельты по обеим сериям.
-
-**Режим `prod=all`:** если после trim `prod` **строго** равен строке `all` (другой регистр, например `ALL`, не считается этим режимом), конкурент — сумма по **всем** SKU с данным `konkName` и непустым `productId` (без фильтра по производителю); Btrade — сумма по **всем** уникальным непустым `artikul` из коллекции **Art** (без фильтра по `prodName`). Правила нормализации `-1` и расчёта рядов те же.
-
-**Режим `skugrIds`:** если непустой список передан, конкурентский набор SKU собирается из выбранных Skugr (см. раздел «Опциональный фильтр `skugrIds`»). Btrade в этом режиме — артикулы из **Art**, у которых `prodName` (trim, без учёта регистра) совпадает с одним из `prodName` отрезолвленных SKU. Когда `skugrIds` задан вместе с `prod=all`, фильтрация по производителю в выборке SKU не применяется, и Btrade суммирует артикулы по `prodName` всех SKU из выбранных групп.
-
-**Query:** `konk`, `prod` (string, обязательно, trim и непустые после trim), `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`. Опционально `skugrIds` (см. раздел «Опциональный фильтр `skugrIds`»).
-
-**Ответ 200:** `{ message: string, data: { days: [...], summary: { firstDayCompetitorStock, lastDayCompetitorStock, firstDayBtradeStock, lastDayBtradeStock, diffCompetitorStock, diffBtradeStock, diffCompetitorStockPct, diffBtradeStockPct } } }` — числа в summary как у analog; проценты могут быть `null`.
-
-**Ошибки:** 400, 401, 403, 404 (нет ни одного SKU с `productId` для данного `konk` в обычном режиме — для пары `konk`/`prod`; в режиме `prod=all` — нет SKU с `productId` у этого конкурента), 500.
-
-**Примечание:** в обычном режиме, если ни у одного **Art** нет `prodName`, совпадающего с query `prod`, серия Btrade в `days` — нули (в т.ч. при наличии строк в `BtradeSlice` по артикулам без подходящего Art); ответ остаётся 200.
-
-**Примечание:** значение `prod=all` для Excel (`konk/excel`, `konk/sales-excel`) означает только отбор SKU конкурента (и при `skugrIds` — групп разных производителей); данные Btrade в Excel не используются.
-
----
-
-### GET `/api/sku-slices/konk-prod/sales-chart-data`
-
-JSON для графика **продаж и выручки**: та же выборка SKU и тот же набор артикулов Btrade, что у `stock-chart-data` (включая поведение режимов `prod=all` и `skugrIds`). Продажи и выручка считаются по тем же правилам, что у analog-slices и `skugr/daily-summary` (изменение остатка между соседними днями периода, выручка × цена дня), затем суммируются по SKU (конкурент) и по уникальным артикулам (Btrade). Форма `data` как у `GET /api/analog-slices/konk-btrade/sales-comparison`: `days[]` — `date`, `competitorSales`, `competitorRevenue`, `btradeSales`, `btradeRevenue`; `summary` — итоги и дельты Btrade минус конкурент, проценты.
-
-**Query:** как у `konk-prod/stock-chart-data` (включая опциональный `skugrIds`).
-
-**Ответ 200:** `{ message: string, data: { days: [...], summary: { totalCompetitorSales, totalBtradeSales, totalCompetitorRevenue, totalBtradeRevenue, diffSalesPcs, diffRevenueUah, diffSalesPct, diffRevenuePct } } }`.
-
-**Ошибки:** 400, 401, 403, 404 — как у `stock-chart-data`, 500.
-
----
-
-### GET `/api/sku-slices/konk-prod/manufacturers-pie-data`
-
-JSON для секторной диаграммы конкурента по производителям. Данные SKU берутся по `konk` за период, далее продажи (шт.) и выручка (грн) агрегируются по `Sku.prodName`.
-
-Продажи и выручка считаются по тем же правилам, что и в `konk-prod/sales-chart-data`: ряд по дням нормализуется (значения `-1`/пропуски не ломают расчет, используется последнее валидное значение слева), продажи определяются как изменение остатков между соседними днями, выручка — `sales * price`.
-
-При непустом `skugrIds` множество SKU сужается до тех, что входят в выбранные товарные группы конкурента (`konkName` группы должен совпадать с `konk`; фильтр по `prodName` в этом маршруте не применяется, поэтому в pie могут попасть несколько производителей в зависимости от состава групп). Дедупликация по `productId` работает так же, как в общем разделе про `skugrIds`.
-
-**Query:** `konk` (string, обязательно, trim и непустой после trim), `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`. Опционально `skugrIds` (см. раздел «Опциональный фильтр `skugrIds`»).
-
-**Ответ 200:** `{ message: string, data: { [prodName: string]: { title: string, salesPcs: number, salesUah: number } }, all: { title: string, salesPcs: number, salesUah: number } }`. В `data` только производители (`prodName` как ключ); для каждого `title` берется из `Prod.title` при `Prod.name === prodName`, иначе fallback `title = prodName`. Поле **`all`** на одном уровне с `data`: `title` всегда «Всі виробники»; `salesPcs` и `salesUah` — суммы по всем производителям за период (выручка по производителям округлена до копеек перед суммированием, итог `all.salesUah` нормализуется до копеек).
-
-Для дат из `Konk.recountDays` продажи и выручка по конкуренту зануляются до агрегации по производителям, поэтому такие дни не добавляют вклад в `salesPcs`/`salesUah`.
-
-**Ошибки:** 400, 401, 403, 404 (нет SKU/данных для расчета в указанном диапазоне), 500.
-
----
-
-### GET `/api/sku-slices/konk-prod/skugr-groups-sales`
-
-JSON для **диаграммы продаж по товарным группам** (документы **Skugr**): выбираются все группы, у которых **`skugr.konkName` и `skugr.prodName` после trim точно совпадают** с query `konk` и `prod` (как отбор пары конкурент + производитель в Excel по `konk`/`prod`). Для каждой группы считаются **итоги за весь период**: сумма продаж в штуках и сумма выручки в гривнах по тем же правилам, что **`GET /api/sku-slices/skugr/:skugrId/daily-summary`** (прогрев предыдущего календарного дня, нормализация `-1`, продажи из изменения остатка между соседними днями, выручка по цене дня); учитываются только SKU из `skugr.skus` с непустым `productId` после trim. Данные **Btrade не используются**.
-
-**Query:** `konk`, `prod` (string, обязательно, trim и непустые после trim), `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`. Режим `prod=all` для этого маршрута **не поддерживается**.
-
-**Ответ 200:** `{ message: string, data: Array<{ skugrId: string, title: string, salesPcs: number, salesUah: number }>, all: { title: string, salesPcs: number, salesUah: number } }` — `skugrId` — строковый hex `_id` группы; `title` — поле `Skugr.title`; `salesPcs` / `salesUah` — суммы за период по группе (выручка после суммирования по дням округляется до копеек). Элементы `data` отсортированы по `title` по возрастанию, при равенстве — по `skugrId`. Если в группе нет SKU с `productId` для отчёта или не удалось построить ряд метрик, в массиве всё равно присутствует строка с **`salesPcs: 0`**, **`salesUah: 0`**. Поле `all` находится на одном уровне с `data`: `title` всегда «Всі групи», `salesPcs` / `salesUah` считаются по **всем SKU пары `konk` + `prod`** (из коллекции `skus`, с непустым `productId` после trim и дедупликацией по `productId`), а не как сумма строк `data`; `all.salesUah` после суммирования нормализуется до копеек. Поэтому при пересечении SKU между группами сумма значений в `data` может отличаться от `all`.
-
-**Ошибки:** 400, 401, 403, 404 (в коллекции **skugrs** нет документов с данной парой `konkName`/`prodName`), 500.
-
----
-
-### GET `/api/sku-slices/skugr/:skugrId/daily-summary`
-
-Дневные **агрегаты по товарной группе** (Skugr): список SKU берётся из `skugr.skus` (только записи с непустым `productId`). Конкурент и производитель в query не передаются — для выборки срезов используются фактические `konkName` и `productId` каждого SKU.
-
-По каждому календарному дню диапазона (включительно): сумма остатков по всем SKU группы; сумма продаж (шт.) и сумма выручки (грн) — продажи считаются по той же логике, что у одного SKU (последовательность остатков по дням и цена дня), затем суммируются по SKU.
-
-**Path:** `skugrId` — валидный ObjectId.
-
-**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
-
-**Ответ 200:** `{ message: string, data: Array<{ date: string (ISO), stock: number, sales: number, revenue: number }> }` — по одному элементу на каждый день периода, по возрастанию даты.
-
-**Ошибки:** 400, 401, 403, 404 (группа не найдена или нет ни одного SKU с `productId` в `skugr.skus`), 500.
-
----
-
-### GET `/api/sku-slices/skugr/:skugrId/slice-excel`
-
-Excel остатков по SKU из **товарной группы** (`skugr.skus`) за период. Порядок строк соответствует порядку `skugr.skus`. Подписи конкурента и производителя в шапке — из справочников по `skugr.konkName` и `skugr.prodName`; значения в ячейках дат читаются по `konkName` каждого SKU.
-
-Формат как у `/konk/excel`: строки `Залишок` и `Ціна`, колонки `Різниця` / `Різниця, %`, в конце строка `Підсумок`.
-
-**Path:** `skugrId` — валидный ObjectId.
-
-**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
-
-**Ответ 200:** бинарный XLSX; имя файла вида `sku_slice_skugr_<skugrId>_<dateFrom>_<dateTo>.xlsx` (в идентификаторе и датах недопустимые символы нормализуются).
-
-**Ошибки:** 400, 401, 403, 404 (нет skugr / нет строк с `productId`), 500.
-
----
-
-### GET `/api/sku-slices/skugr/:skugrId/sales-excel`
-
-Excel продаж по SKU из товарной группы за период. Логика блоков и итогов как у `/konk/sales-excel`: для каждого SKU три строки метрик, внизу листа `Загальні продажі, шт` и `Загальна виручка, грн`.
-
-Для дат из `Konk.recountDays` в строках `Продажі` по SKU устанавливается `0` и фиолетовая заливка.
-
-**Path:** `skugrId` — валидный ObjectId.
-
-**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
-
-**Ответ 200:** бинарный XLSX; имя файла вида `sku_sales_skugr_<skugrId>_<dateFrom>_<dateTo>.xlsx`.
-
-**Ошибки:** 400, 401, 403, 404 (нет skugr / нет строк с `productId`), 500.

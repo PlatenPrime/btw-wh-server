@@ -6,7 +6,6 @@ import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
 import { Sku } from "../../skus/models/Sku.js";
-import { Skugr } from "../../skugrs/models/Skugr.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
@@ -23,7 +22,6 @@ const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
 describe("Sku-slices router integration", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await Skugr.deleteMany({});
     await SkuSlice.deleteMany({});
   });
 
@@ -41,18 +39,6 @@ describe("Sku-slices router integration", () => {
         .set(createAuthHeader(RoleType.USER))
         .query({ konkName: "air", date: "2026-06-01" })
         .expect(403);
-    });
-
-    it("GET /api/sku-slices/konk-prod/sales-chart-data returns 401 without token", async () => {
-      await request(app)
-        .get("/api/sku-slices/konk-prod/sales-chart-data")
-        .query({
-          konk: "k",
-          prod: "p",
-          dateFrom: "2026-06-01",
-          dateTo: "2026-06-01",
-        })
-        .expect(401);
     });
   });
 
@@ -127,73 +113,6 @@ describe("Sku-slices router integration", () => {
       const data = response.body.data as { stock: number; price: number };
       expect(data.stock).toBe(4);
       expect(data.price).toBe(6);
-    });
-  });
-
-  describe("GET /api/sku-slices/skugr/:skugrId/daily-summary", () => {
-    it("404 when skugr not found", async () => {
-      await request(app)
-        .get("/api/sku-slices/skugr/507f1f77bcf86cd799439011/daily-summary")
-        .set(createAuthHeader())
-        .query({ dateFrom: "2026-06-01", dateTo: "2026-06-01" })
-        .expect(404);
-    });
-  });
-
-  describe("GET /api/sku-slices/skugr/:skugrId/slice-excel", () => {
-    it("200 sends excel for valid skugr", async () => {
-      const sku = await Sku.create({
-        konkName: "rg-k",
-        prodName: "p",
-        productId: "rg-k-1",
-        title: "Item",
-        url: "https://e.com/rg",
-      });
-      const skugr = await Skugr.create({
-        konkName: "rg-k",
-        prodName: "p",
-        title: "Grp",
-        url: "https://e.com/g",
-        isSliced: true,
-        skus: [sku._id],
-      });
-      await SkuSlice.create({
-        konkName: "rg-k",
-        date: new Date("2026-06-03T00:00:00.000Z"),
-        data: { "rg-k-1": { stock: 1, price: 2 } },
-      });
-
-      const response = await request(app)
-        .get(`/api/sku-slices/skugr/${skugr._id.toString()}/slice-excel`)
-        .set(createAuthHeader())
-        .query({ dateFrom: "2026-06-03", dateTo: "2026-06-03" })
-        .buffer(true)
-        .parse((res, callback) => {
-          const chunks: Buffer[] = [];
-          res.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-          res.on("end", () => callback(null, Buffer.concat(chunks)));
-        })
-        .expect(200);
-
-      expect(response.headers["content-type"]).toContain(
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      );
-      expect(Buffer.isBuffer(response.body)).toBe(true);
-      expect((response.body as Buffer).length).toBeGreaterThan(0);
-    });
-  });
-
-  describe("GET /api/sku-slices/konk-prod/manufacturers-pie-data", () => {
-    it("400 when dateFrom after dateTo", async () => {
-      await request(app)
-        .get("/api/sku-slices/konk-prod/manufacturers-pie-data")
-        .set(createAuthHeader())
-        .query({
-          konk: "k",
-          dateFrom: "2026-06-10",
-          dateTo: "2026-06-01",
-        })
-        .expect(400);
     });
   });
 });

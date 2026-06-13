@@ -3,22 +3,9 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
-  getKonkProdManufacturersPieDataController,
-  getKonkProdSkugrGroupsSalesController,
-  getKonkProdSkuSalesChartDataController,
-  getKonkProdSkuStockChartDataController,
-  getKonkSkuSalesExcelController,
-  getKonkSkuStockSliceExcelController,
-  getSkugrDailySummaryController,
-  getSkugrSalesExcelController,
-  getSkugrSliceExcelController,
-  getSkuSalesByDateController,
-  getSkuSalesExcelController,
-  getSkuSalesRangeController,
   getSkuSliceByDateController,
   getSkuSliceController,
   getSkuSliceRangeController,
-  getSkuStockSliceExcelController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -30,88 +17,10 @@ router.get(
   asyncHandler(getSkuSliceController),
 );
 router.get(
-  "/konk/excel",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkSkuStockSliceExcelController),
-);
-router.get(
-  "/konk/sales-excel",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkSkuSalesExcelController),
-);
-router.get(
-  "/konk-prod/manufacturers-pie-data",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkProdManufacturersPieDataController),
-);
-router.get(
-  "/konk-prod/skugr-groups-sales",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkProdSkugrGroupsSalesController),
-);
-router.get(
-  "/konk-prod/stock-chart-data",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkProdSkuStockChartDataController),
-);
-router.get(
-  "/konk-prod/sales-chart-data",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkProdSkuSalesChartDataController),
-);
-router.get(
-  "/skugr/:skugrId/daily-summary",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkugrDailySummaryController),
-);
-router.get(
-  "/skugr/:skugrId/slice-excel",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkugrSliceExcelController),
-);
-router.get(
-  "/skugr/:skugrId/sales-excel",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkugrSalesExcelController),
-);
-router.get(
   "/sku/:skuId/range",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkuSliceRangeController),
-);
-router.get(
-  "/sku/:skuId/sales-range",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkuSalesRangeController),
-);
-router.get(
-  "/sku/:skuId/sales-by-date",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkuSalesByDateController),
-);
-router.get(
-  "/sku/:skuId/slice-excel",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkuStockSliceExcelController),
-);
-router.get(
-  "/sku/:skuId/sales-excel",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkuSalesExcelController),
 );
 router.get(
   "/sku/:skuId",

@@ -3,7 +3,7 @@ import { Skugr } from "../../skugrs/models/Skugr.js";
 import {
   getSkuStockDataUtil,
   UNSUPPORTED_KONK_CODE,
-} from "../../skus/controllers/get-sku-stock/utils/getSkuStockDataUtil.js";
+} from "../../skus/utils/getSkuStockDataUtil.js";
 import { isInvalidSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 import { delay } from "../../../utils/delay.js";
@@ -12,7 +12,7 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import {
   SKU_SLICE_REQUEST_JITTER_MAX_MS,
   SKU_SLICE_REQUEST_JITTER_MIN_MS,
-} from "../constants/skuSliceRequestJitterMs.js";
+} from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 
 type SkuLean = {
   _id: { toString(): string };

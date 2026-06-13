@@ -1,4 +1,5 @@
-import mongoose, { Document, Model, Schema, Types } from "mongoose";
+import { Document, Model, Schema, Types } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 export interface IUser extends Document {
   _id: Types.ObjectId;
@@ -24,5 +25,5 @@ const UserSchema: Schema<IUser> = new Schema(
   { timestamps: true }
 );
 
-const User: Model<IUser> = mongoose.model<IUser>("User", UserSchema);
+const User: Model<IUser> = getOrCreateModel<IUser>("User", UserSchema);
 export default User;

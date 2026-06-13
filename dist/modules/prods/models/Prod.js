@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+import { Schema } from "mongoose";
+import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 const prodSchema = new Schema({
     name: { type: String, required: true, unique: true },
     title: { type: String, required: true },
@@ -8,4 +9,4 @@ const prodSchema = new Schema({
  * Prod Mongoose model
  * @see IProd
  */
-export const Prod = mongoose.model("Prod", prodSchema, "prods");
+export const Prod = getOrCreateModel("Prod", prodSchema, "prods");
