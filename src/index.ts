@@ -1,8 +1,10 @@
-import "./loadEnv.js";
+import "./config/loadEnv.js";
 
 import cors from "cors";
 import express from "express";
 import mongoose from "mongoose";
+
+import { getMongoUri } from "./config/getMongoUri.js";
 
 import { startCronOperations } from "./cron/startCronOperations.js";
 import analogSlicesRoute from "./modules/analog-slices/router.js";
@@ -78,15 +80,10 @@ app.use(function (err: any, req: any, res: any, next: any) {
 
 // Constants
 const PORT = process.env.PORT || 3232;
-const DB_USER = process.env.DB_USER;
-const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB_NAME = process.env.DB_NAME;
 
 async function start() {
   try {
-    await mongoose.connect(
-      `mongodb+srv://${DB_USER}:${DB_PASSWORD}@cluster0.b6qtdz4.mongodb.net/${DB_NAME}?retryWrites=true&w=majority`,
-    );
+    await mongoose.connect(getMongoUri());
 
     startCronOperations();
 

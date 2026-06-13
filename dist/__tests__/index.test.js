@@ -6,7 +6,7 @@ const mockListen = vi.hoisted(() => vi.fn((_port, callback) => {
     process.nextTick(() => callback?.());
     return { close: vi.fn() };
 }));
-vi.mock("../loadEnv.js", () => ({}));
+vi.mock("../config/loadEnv.js", () => ({}));
 vi.mock("mongoose", async (importOriginal) => {
     const actual = await importOriginal();
     return {
@@ -46,6 +46,9 @@ describe("index bootstrap", () => {
         await import("../index.js");
         await vi.waitFor(() => {
             expect(mockConnect).toHaveBeenCalledOnce();
+        }, { timeout: 30000 });
+        await vi.waitFor(() => {
+            expect(mockLogServerEgressGeo).toHaveBeenCalledWith("startup");
         }, { timeout: 30000 });
     }, 60000);
     it("connects to MongoDB, starts cron jobs, and listens on PORT", () => {

@@ -1,4 +1,5 @@
-import dotenv from "dotenv";
+import "./setup-env.js";
+
 import { MongoMemoryReplSet } from "mongodb-memory-server";
 import mongoose from "mongoose";
 import { afterAll, afterEach, beforeAll, beforeEach } from "vitest";
@@ -28,21 +29,7 @@ import "../modules/skus/models/Sku.js";
 import "../modules/sku-slices/models/SkuSlice.js";
 import "../modules/zones/models/Zone.js";
 
-// Load environment variables
-dotenv.config({ path: ".env.test" });
-
-// Set JWT_SECRET for tests if not already set
-if (!process.env.JWT_SECRET) {
-  process.env.JWT_SECRET = "test-jwt-secret-key-for-testing-only";
-}
-
-process.env.BTW_TOKEN ??= "mock-token";
-process.env.BTW_CHAT_ID ??= "-1002121224059";
-process.env.KASA_CHAT_ID ??= "@kassabtw";
-process.env.BTW_DEFS_CHAT_ID ??= "-1003183753234";
-process.env.BTW_PLATEN_ID ??= "555196992";
-
-let mongoServer: MongoMemoryReplSet;
+let mongoServer: MongoMemoryReplSet | undefined;
 
 beforeAll(async () => {
   try {
@@ -66,9 +53,13 @@ beforeAll(async () => {
 
 afterAll(async () => {
   try {
-    await mongoose.connection.close();
-    await mongoServer.stop();
-    console.log("Disconnected from MongoDB Memory Server (replica set)");
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.connection.close();
+    }
+    if (mongoServer) {
+      await mongoServer.stop();
+      console.log("Disconnected from MongoDB Memory Server (replica set)");
+    }
   } catch (error) {
     console.error("Error closing MongoDB Memory Server (replica set):", error);
   }

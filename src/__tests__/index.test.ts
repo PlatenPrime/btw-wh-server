@@ -12,7 +12,7 @@ const mockListen = vi.hoisted(() =>
   })
 );
 
-vi.mock("../loadEnv.js", () => ({}));
+vi.mock("../config/loadEnv.js", () => ({}));
 
 vi.mock("mongoose", async (importOriginal) => {
   const actual = await importOriginal<typeof import("mongoose")>();
@@ -65,6 +65,13 @@ describe("index bootstrap", () => {
     await vi.waitFor(
       () => {
         expect(mockConnect).toHaveBeenCalledOnce();
+      },
+      { timeout: 30000 }
+    );
+
+    await vi.waitFor(
+      () => {
+        expect(mockLogServerEgressGeo).toHaveBeenCalledWith("startup");
       },
       { timeout: 30000 }
     );
