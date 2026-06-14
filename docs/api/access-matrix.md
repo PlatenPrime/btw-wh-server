@@ -320,7 +320,35 @@
 
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
+| GET | `/artikul/:artikul/range` | JWT | ≥ ADMIN |
 | GET | `/` | JWT | ≥ ADMIN |
+
+---
+
+## `/api/art-sales-reports`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| GET | `/artikul/:artikul/by-date` | JWT | ≥ ADMIN |
+| GET | `/artikul/:artikul/range` | JWT | ≥ ADMIN |
+
+---
+
+## `/api/art-chart-reports`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| GET | `/artikul/:artikul/stock` | JWT | ≥ ADMIN |
+| GET | `/artikul/:artikul/sales` | JWT | ≥ ADMIN |
+
+---
+
+## `/api/art-excel-reports`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| GET | `/artikul/:artikul/stock` | JWT | ≥ ADMIN |
+| GET | `/artikul/:artikul/sales` | JWT | ≥ ADMIN |
 
 ---
 

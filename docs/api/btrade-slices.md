@@ -45,3 +45,17 @@
 ```
 
 **Ошибки:** 400 (невалидные query, в т.ч. `page`/`limit`), 401, 403, 404 (срез не найден), 500.
+
+---
+
+### GET `/api/btrade-slices/artikul/:artikul/range`
+
+Сырой срез Btrade по одному артикулу за период (без coalesce и расчёта продаж).
+
+**Path:** `artikul` — строка артикула из каталога `Art`.
+
+**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD), `dateFrom` ≤ `dateTo`.
+
+**Ответ 200:** `{ message: string, data: Array<{ date: string, quantity: number, price: number }> }`. В массив попадают только даты, по которым есть запись для артикула в `BtradeSlice`.
+
+**Ошибки:** 400, 401, 403, 404 (артикул не найден в `Art`), 500.

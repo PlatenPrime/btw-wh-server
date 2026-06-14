@@ -71,4 +71,23 @@ describe("Btrade slices router integration", () => {
             });
         });
     });
+    describe("GET /api/btrade-slices/artikul/:artikul/range", () => {
+        it("200 returns raw range for artikul", async () => {
+            const { Art } = await import("../../arts/models/Art.js");
+            await Art.create({ artikul: "ART-RNG", zone: "A" });
+            const d1 = new Date("2026-03-01T00:00:00.000Z");
+            await BtradeSlice.create({
+                date: d1,
+                data: { "ART-RNG": { quantity: 4, price: 99 } },
+            });
+            const response = await request(app)
+                .get("/api/btrade-slices/artikul/ART-RNG/range")
+                .set(createAuthHeader(RoleType.ADMIN))
+                .query({ dateFrom: "2026-03-01", dateTo: "2026-03-01" })
+                .expect(200);
+            expect(response.body.data).toEqual([
+                { date: d1.toISOString(), quantity: 4, price: 99 },
+            ]);
+        });
+    });
 });

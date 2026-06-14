@@ -4,7 +4,7 @@
 
 Модуль `btrade-slices` хранит ежедневные срезы остатков и цен **собственного каталога Btrade** (sharik.ua). Один документ среза соответствует календарному дню и содержит объект `data`, в котором ключи — артикулы (`artikul`) из коллекции `Art`, значения — `{ price, quantity }`.
 
-Срезы используются для внутренней аналитики Btrade и для сравнения с конкурентами в модуле `sku-slices` (графики и Excel «конкурент vs Btrade»).
+Срезы используются для внутренней аналитики Btrade, для сравнения с конкурентами в модуле `sku-slices` (графики и Excel «конкурент vs Btrade»), а также для отчётности по странице артикула в модулях [art-sales-reports](art-sales-reports.md), [art-chart-reports](art-chart-reports.md), [art-excel-reports](art-excel-reports.md); общая логика — [art-reporting](art-reporting.md).
 
 ## Сущности модуля
 
@@ -50,5 +50,6 @@ Seed-артикул для URL bulk-страницы задаётся через
 Модуль предоставляет только чтение:
 
 - **GET `/api/btrade-slices`** — постраничный срез на дату (`date`, `page`, `limit`, опционально `isInvalid` для фильтра «битых» позиций в `data`). Строки обогащаются документом **Art** по `artikul`; контракт ответа согласован с листингом `GET /api/sku-slices` (items + pagination), с полем остатка `quantity` вместо `stock`.
+- **GET `/api/btrade-slices/artikul/:artikul/range`** — сырой ряд `quantity`/`price` по артикулу за период (без нормализации для продаж).
 
 Подробности — в [API документации](../api/btrade-slices.md) и [матрице доступа](../api/access-matrix.md).
