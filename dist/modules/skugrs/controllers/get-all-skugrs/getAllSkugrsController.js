@@ -1,6 +1,7 @@
 import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { getAllSkugrsQuerySchema } from "./schemas/getAllSkugrsQuerySchema.js";
 import { getAllSkugrsUtil } from "./utils/getAllSkugrsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить группы товаров конкурента с фильтрами и пагинацией
  * @route   GET /api/skugrs
@@ -23,7 +24,7 @@ export const getAllSkugrsController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching skugrs:", error);
+        logModuleError("skugrs", error, "Error fetching skugrs:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

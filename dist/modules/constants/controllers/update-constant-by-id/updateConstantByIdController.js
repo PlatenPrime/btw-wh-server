@@ -1,5 +1,6 @@
 import { updateConstantByIdSchema } from "./schemas/updateConstantByIdSchema.js";
 import { updateConstantByIdUtil } from "./utils/updateConstantByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить константу по id (указанные в body поля)
  * @route   PATCH /api/constants/id/:id
@@ -37,7 +38,7 @@ export const updateConstantByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating constant:", error);
+        logModuleError("constants", error, "Error updating constant:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

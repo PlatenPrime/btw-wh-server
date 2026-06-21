@@ -1,5 +1,6 @@
 import { getProdByIdSchema } from "./schemas/getProdByIdSchema.js";
 import { getProdByIdUtil } from "./utils/getProdByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить производителя по id
  * @route   GET /api/prods/id/:id
@@ -26,7 +27,7 @@ export const getProdByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching prod by id:", error);
+        logModuleError("prods", error, "Error fetching prod by id:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

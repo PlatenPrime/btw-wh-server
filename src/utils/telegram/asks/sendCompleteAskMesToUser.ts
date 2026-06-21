@@ -1,5 +1,6 @@
 import { IAsk } from "../../../modules/asks/models/Ask.js";
 import { sendMessageToTGUser } from "../sendMessageToTGUser.js";
+import { logModuleError } from "../../../logging/logModuleError.js";
 
 export const sendCompleteAskMesToUser = async (ask: IAsk, solverName: string) => {
 
@@ -17,10 +18,7 @@ export const sendCompleteAskMesToUser = async (ask: IAsk, solverName: string) =>
 
         await sendMessageToTGUser(message, ask.askerData.telegram);
         } catch (telegramError) {
-            console.error(
-                "Failed to send Telegram notification:",
-                telegramError
-            );
+            logModuleError("telegram", telegramError, "Failed to send Telegram notification:");
         }
         
     }

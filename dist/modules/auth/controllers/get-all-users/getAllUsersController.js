@@ -1,4 +1,5 @@
 import { getAllUsersUtil } from "./utils/getAllUsersUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getAllUsersController = async (_req, res) => {
     try {
         const users = await getAllUsersUtil();
@@ -6,7 +7,7 @@ export const getAllUsersController = async (_req, res) => {
     }
     catch (error) {
         if (!res.headersSent) {
-            console.error(error);
+            logModuleError("auth", error, "operation failed");
             res.status(500).json({ message: "Error fetching users", error });
         }
     }

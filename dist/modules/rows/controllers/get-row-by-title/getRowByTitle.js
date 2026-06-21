@@ -1,5 +1,6 @@
 import { getRowByTitleSchema } from "./schemas/getRowByTitleSchema.js";
 import { getRowByTitleUtil } from "./utils/getRowByTitleUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getRowByTitle = async (req, res) => {
     const { title } = req.params;
     try {
@@ -28,7 +29,7 @@ export const getRowByTitle = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching row:", error);
+        logModuleError("rows", error, "Error fetching row:");
         if (!res.headersSent) {
             res.status(500).json({ message: "Server error", error });
         }

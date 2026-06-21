@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { updateRowSchema } from "./schemas/updateRowSchema.js";
 import { updateRowUtil } from "./utils/updateRowUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const updateRow = async (req: Request, res: Response) => {
   try {
@@ -29,7 +30,7 @@ export const updateRow = async (req: Request, res: Response) => {
 
     res.status(200).json(updatedRow);
   } catch (error) {
-    console.error("Error updating row:", error);
+    logModuleError("rows", error, "Error updating row:");
     if (!res.headersSent) {
       res.status(500).json({ message: "Server error", error });
     }

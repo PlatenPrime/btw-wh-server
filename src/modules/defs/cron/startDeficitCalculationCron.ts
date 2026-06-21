@@ -1,5 +1,8 @@
 import { CronJob } from "cron";
+import { createLogger } from "../../../logging/createLogger.js";
 import { calculateAndSavePogrebiDefsUtil } from "../controllers/calculate-pogrebi-defs/utils/calculateAndSavePogrebiDefsUtil.js";
+
+const log = createLogger({ module: "defs", job: "cron" });
 
 /**
  * Запускает cron job для автоматического расчета дефицитов
@@ -10,14 +13,11 @@ export function startDeficitCalculationCron(): CronJob {
     "0 0 8-17 * * 1-5", // будни 09:00-17:00
     async () => {
       try {
-        console.log(`[CRON] Calculating deficits...`);
+        log.info("calculating deficits");
         const result = await calculateAndSavePogrebiDefsUtil();
-        console.log(`[CRON] Completed: ${result.total} deficits found`);
+        log.info({ total: result.total }, "deficit calculation completed");
       } catch (error) {
-        console.error(
-          `[CRON] Error:`,
-          error instanceof Error ? error.message : "Unknown error"
-        );
+        log.error({ err: error }, "deficit calculation cron failed");
       }
     },
     null,
@@ -25,6 +25,9 @@ export function startDeficitCalculationCron(): CronJob {
     "Europe/Kiev"
   );
 
-  console.log(`[CRON Defs] Started: weekdays 09:00-17:00 (Kiev time)`);
+  log.info(
+    { schedule: "0 0 8-17 * * 1-5", timezone: "Europe/Kiev" },
+    "cron started"
+  );
   return job;
 }

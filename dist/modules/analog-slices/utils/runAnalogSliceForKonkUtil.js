@@ -2,6 +2,7 @@ import { Analog } from "../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { isInvalidSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { AnalogSlice } from "../models/AnalogSlice.js";
+import { createLogger } from "../../../logging/createLogger.js";
 import { delay } from "../../../utils/delay.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 export { toSliceDate } from "../../../utils/sliceDate.js";
@@ -12,6 +13,7 @@ const DELAY_MS = 1000;
  * Ошибка по одному аналогу не прерывает обработку остальных.
  */
 export async function runAnalogSliceForKonkUtil(konkName, date) {
+    const log = createLogger({ module: "analog-slices", konkName });
     const sliceDate = toSliceDate(date);
     const analogs = await Analog.find({ konkName })
         .select("_id artikul")
@@ -26,11 +28,11 @@ export async function runAnalogSliceForKonkUtil(konkName, date) {
         const analogId = analog._id.toString();
         const artikulKey = analog.artikul?.trim();
         if (!artikulKey) {
-            console.warn(`[AnalogSlice ${konkName}] пропущен аналог ${analogId}: отсутствует artikul`);
+            log.warn({ analogId }, "analog skipped: missing artikul");
             invalid += 1;
             continue;
         }
-        console.log(`анализируется аналог ${artikulKey} конкурента ${konkName}`);
+        log.debug({ artikulKey, konkName }, "processing analog for slice");
         try {
             const result = await getAnalogStockDataUtil(analogId);
             if (result == null) {
@@ -53,7 +55,7 @@ export async function runAnalogSliceForKonkUtil(konkName, date) {
         catch (err) {
             errors += 1;
             const msg = err instanceof Error ? err.message : String(err);
-            console.error(`[AnalogSlice ${konkName}] ${artikulKey}: ${msg}`);
+            log.error({ artikulKey, err: msg }, "analog slice item failed");
         }
         if (i < analogs.length - 1) {
             await delay(DELAY_MS);

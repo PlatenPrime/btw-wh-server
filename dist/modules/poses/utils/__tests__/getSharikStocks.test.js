@@ -1,4 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+const { logModuleError, logModuleInfo, logModuleWarn } = vi.hoisted(() => ({
+    logModuleError: vi.fn(),
+    logModuleInfo: vi.fn(),
+    logModuleWarn: vi.fn(),
+}));
+vi.mock("../../../../logging/logModuleError.js", () => ({
+    logModuleError,
+    logModuleInfo,
+    logModuleWarn,
+}));
 import { getSharikStockData } from "../../../browser/sharik/utils/getSharikStockData.js";
 import { getSharikStocks } from "../../../poses/utils/getSharikStocks.js";
 // Мокаем getSharikStockData
@@ -135,7 +145,6 @@ describe("getSharikStocks", () => {
         expect(result.ART003.difQuant).toBe(0); // 20 - 20
     });
     it("должна логировать прогресс каждые 10 артикулов", async () => {
-        const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => { });
         // Создаем 25 артикулов для проверки логирования
         const mockStocks = {};
         for (let i = 1; i <= 25; i++) {
@@ -155,11 +164,19 @@ describe("getSharikStocks", () => {
         await vi.runAllTimersAsync();
         await resultPromise;
         // Проверяем что логировался прогресс
-        expect(consoleSpy).toHaveBeenCalledWith("Начинаем получение данных Sharik для 25 артикулов");
-        expect(consoleSpy).toHaveBeenCalledWith("Обработано 10 из 25 артикулов");
-        expect(consoleSpy).toHaveBeenCalledWith("Обработано 20 из 25 артикулов");
-        expect(consoleSpy).toHaveBeenCalledWith("Обработано 25 из 25 артикулов");
-        consoleSpy.mockRestore();
+        expect(logModuleInfo).toHaveBeenCalledWith("poses", "sharik stocks fetch started", { artikulCount: 25 });
+        expect(logModuleInfo).toHaveBeenCalledWith("poses", "sharik stocks fetch progress", {
+            processed: 10,
+            totalItems: 25,
+        });
+        expect(logModuleInfo).toHaveBeenCalledWith("poses", "sharik stocks fetch progress", {
+            processed: 20,
+            totalItems: 25,
+        });
+        expect(logModuleInfo).toHaveBeenCalledWith("poses", "sharik stocks fetch progress", {
+            processed: 25,
+            totalItems: 25,
+        });
     });
     it("должна обрабатывать смешанные сценарии (успех, null, ошибка)", async () => {
         const mockStocks = {

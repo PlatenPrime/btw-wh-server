@@ -1,5 +1,6 @@
 import { Pos } from "../models/Pos.js";
 import { mergePoses } from "./mergePoses.js";
+import { logModuleError } from "../../../logging/logModuleError.js";
 /**
 
  * @returns Объект с объединенными позициями по артикулам
@@ -18,7 +19,7 @@ export async function getPogrebiDefStocks() {
         return stocks;
     }
     catch (error) {
-        console.error(`Ошибка при получении отслеживаемых позиций склада pogrebi:`, error);
+        logModuleError("poses", error, "Ошибка при получении отслеживаемых позиций склада pogrebi:");
         throw error;
     }
 }

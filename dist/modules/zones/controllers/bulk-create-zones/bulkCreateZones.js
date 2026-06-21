@@ -1,5 +1,6 @@
 import { bulkCreateZonesSchema } from "./schemas/bulkCreateZonesSchema.js";
 import { bulkCreateZonesUtil } from "./utils/bulkCreateZonesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const upsertZones = async (req, res) => {
     try {
         // Валидация входных данных
@@ -20,7 +21,7 @@ export const upsertZones = async (req, res) => {
         res.status(200).json({ message: "Upsert completed", result });
     }
     catch (error) {
-        console.error("Upsert error:", error);
+        logModuleError("zones", error, "Upsert error:");
         if (!res.headersSent) {
             res.status(500).json({ message: "Server error", error });
         }

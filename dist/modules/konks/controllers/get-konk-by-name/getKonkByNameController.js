@@ -1,5 +1,6 @@
 import { getKonkByNameSchema } from "./schemas/getKonkByNameSchema.js";
 import { getKonkByNameUtil } from "./utils/getKonkByNameUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить конкурента по name
  * @route   GET /api/konks/name/:name
@@ -26,7 +27,7 @@ export const getKonkByNameController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching konk by name:", error);
+        logModuleError("konks", error, "Error fetching konk by name:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

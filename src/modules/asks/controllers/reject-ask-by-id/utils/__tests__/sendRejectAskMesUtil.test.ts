@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const { logModuleError } = vi.hoisted(() => ({
+  logModuleError: vi.fn(),
+}));
+
 // Mock sendMessageToTGUser
 vi.mock("../../../../../../utils/telegram/sendMessageToTGUser.js", () => ({
   sendMessageToTGUser: vi.fn(),
 }));
 
-// Mock console.error
-const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+vi.mock("../../../../../../logging/logModuleError.js", () => ({
+  logModuleError,
+}));
 
 // Import after mocking
 import { sendMessageToTGUser } from "../../../../../../utils/telegram/sendMessageToTGUser.js";
@@ -45,9 +50,10 @@ describe("sendRejectAskMesUtil", () => {
       })
     ).resolves.not.toThrow();
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Failed to send Telegram notification:",
-      error
+    expect(logModuleError).toHaveBeenCalledWith(
+      "asks",
+      error,
+      "Failed to send Telegram notification:"
     );
   });
 
@@ -62,9 +68,10 @@ describe("sendRejectAskMesUtil", () => {
       })
     ).resolves.not.toThrow();
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Failed to send Telegram notification:",
-      error
+    expect(logModuleError).toHaveBeenCalledWith(
+      "asks",
+      error,
+      "Failed to send Telegram notification:"
     );
   });
 

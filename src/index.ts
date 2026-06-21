@@ -7,6 +7,13 @@ import mongoose from "mongoose";
 import { getMongoUri } from "./config/getMongoUri.js";
 
 import { startCronOperations } from "./cron/startCronOperations.js";
+import { createLogger } from "./logging/createLogger.js";
+import { createErrorLogger } from "./logging/errorLogger.js";
+import {
+  createHttpLogger,
+  createSlowRequestLogger,
+} from "./logging/httpLogger.js";
+import { registerProcessHandlers } from "./logging/registerProcessHandlers.js";
 import analogSlicesRoute from "./modules/analog-slices/router.js";
 import analogsRoute from "./modules/analogs/router.js";
 import artChartReportsRoute from "./modules/art-chart-reports/router.js";
@@ -39,12 +46,14 @@ import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
 import { logServerEgressGeo } from "./utils/server-egress-geo/logServerEgressGeo.js";
 
+const bootLog = createLogger({ module: "server" });
+registerProcessHandlers(bootLog);
+
 const app = express();
 
-// Middleware
-
 app.use(cors());
-
+app.use(createHttpLogger());
+app.use(createSlowRequestLogger());
 app.use(express.json({ limit: "20mb" }));
 
 app.use("/api/analog-slices", analogSlicesRoute);
@@ -78,33 +87,33 @@ app.use("/api/poses", posesRoute);
 app.use("/api/defs", defsRoute);
 app.use("/api/zones", zonesRoute);
 
-// Error handler must be after all routes
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use(function (err: any, req: any, res: any, next: any) {
-  if (err instanceof SyntaxError && "body" in err) {
-    return res.status(400).json({ message: "Invalid or empty data" });
-  }
-  res.status(400).json({
-    message: err.message || "Something went wrong",
-    stack: err.stack || null,
-  });
-});
+app.use(createErrorLogger());
 
-// Constants
 const PORT = process.env.PORT || 3232;
 
 async function start() {
   try {
+    mongoose.connection.on("connected", () => {
+      bootLog.info("mongodb connected");
+    });
+    mongoose.connection.on("error", (err) => {
+      bootLog.error({ err }, "mongodb connection error");
+    });
+    mongoose.connection.on("disconnected", () => {
+      bootLog.warn("mongodb disconnected");
+    });
+
     await mongoose.connect(getMongoUri());
 
     startCronOperations();
 
     app.listen(PORT, () => {
-      console.log(`Server started on port ${PORT}`);
+      bootLog.info({ port: PORT }, "server started");
       void logServerEgressGeo("startup");
     });
   } catch (error) {
-    console.log(error);
+    bootLog.fatal({ err: error }, "server failed to start");
+    process.exit(1);
   }
 }
 

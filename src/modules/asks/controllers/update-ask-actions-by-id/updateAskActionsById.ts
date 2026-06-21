@@ -4,6 +4,7 @@ import User from "../../../auth/models/User.js";
 import { Ask } from "../../models/Ask.js";
 import { updateAskActionsByIdSchema } from "./schemas/updateAskActionsByIdSchema.js";
 import { updateAskActionsUtil } from "./utils/updateAskActionsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const updateAskActionsById = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -48,7 +49,7 @@ export const updateAskActionsById = async (req: Request, res: Response) => {
 
     res.status(200).json(updatedAsk);
   } catch (error) {
-    console.error("Error updating ask actions:", error);
+    logModuleError("asks", error, "Error updating ask actions:");
     if (!res.headersSent) {
       if (error instanceof Error && error.message === "Ask not found") {
         res.status(404).json({ message: "Ask not found" });

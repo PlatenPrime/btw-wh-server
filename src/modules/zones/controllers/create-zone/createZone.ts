@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createZoneSchema } from "./schemas/createZoneSchema.js";
 import { checkZoneDuplicatesUtil } from "./utils/checkZoneDuplicatesUtil.js";
 import { createZoneUtil } from "./utils/createZoneUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const createZone = async (req: Request, res: Response) => {
   try {
@@ -41,7 +42,7 @@ export const createZone = async (req: Request, res: Response) => {
       data: zone,
     });
   } catch (error) {
-    console.error("Error creating zone:", error);
+    logModuleError("zones", error, "Error creating zone:");
 
     // Обработка ошибок MongoDB
     if (error instanceof Error && error.name === "MongoServerError") {

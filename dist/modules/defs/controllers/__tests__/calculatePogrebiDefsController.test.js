@@ -1,4 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+const { logModuleError } = vi.hoisted(() => ({
+    logModuleError: vi.fn(),
+}));
+vi.mock("../../../../logging/logModuleError.js", () => ({
+    logModuleError,
+}));
 import { calculatePogrebiDefsController } from "../calculate-pogrebi-defs/calculatePogrebiDefsController.js";
 vi.mock("../../utils/calculationStatus.js", () => ({
     getCalculationStatus: vi.fn(),
@@ -87,29 +93,26 @@ describe("calculatePogrebiDefsController", () => {
     });
     it("500 when calculation throws", async () => {
         const error = new Error("Calculation failed");
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
         mockedCalculateAndSavePogrebiDefsUtil.mockRejectedValue(error);
         await calculatePogrebiDefsController(mockReq, mockRes);
-        expect(consoleSpy).toHaveBeenCalledWith("Error in calculatePogrebiDefsController:", error);
+        expect(logModuleError).toHaveBeenCalledWith("defs", error, "Error in calculatePogrebiDefsController:");
         expect(mockStatus).toHaveBeenCalledWith(500);
         expect(mockJson).toHaveBeenCalledWith({
             success: false,
             message: "Failed to calculate and save deficits",
             error: "Calculation failed",
         });
-        consoleSpy.mockRestore();
     });
     it("500 with Unknown error for non-Error rejection", async () => {
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
         mockedCalculateAndSavePogrebiDefsUtil.mockRejectedValue("String error");
         await calculatePogrebiDefsController(mockReq, mockRes);
+        expect(logModuleError).toHaveBeenCalledWith("defs", "String error", "Error in calculatePogrebiDefsController:");
         expect(mockStatus).toHaveBeenCalledWith(500);
         expect(mockJson).toHaveBeenCalledWith({
             success: false,
             message: "Failed to calculate and save deficits",
             error: "Unknown error",
         });
-        consoleSpy.mockRestore();
     });
     it("returns aggregated totals on success", async () => {
         const mockSavedDef = {

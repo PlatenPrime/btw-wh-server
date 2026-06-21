@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteAnalogByIdSchema } from "./schemas/deleteAnalogByIdSchema.js";
 import { deleteAnalogByIdUtil } from "./utils/deleteAnalogByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Удалить аналог по id
@@ -29,7 +30,7 @@ export const deleteAnalogByIdController = async (
 
     res.status(200).json({ message: "Analog deleted successfully" });
   } catch (error) {
-    console.error("Error deleting analog:", error);
+    logModuleError("analogs", error, "Error deleting analog:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

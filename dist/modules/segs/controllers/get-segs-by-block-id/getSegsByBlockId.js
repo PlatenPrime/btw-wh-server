@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Seg } from "../../models/Seg.js";
 import { getSegsByBlockIdSchema } from "./schemas/getSegsByBlockIdSchema.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getSegsByBlockId = async (req, res) => {
     try {
         const { blockId } = req.params;
@@ -24,7 +25,7 @@ export const getSegsByBlockId = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("getSegsByBlockId error:", error);
+        logModuleError("segs", error, "getSegsByBlockId error:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

@@ -1,4 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const { logModuleError, logModuleInfo } = vi.hoisted(() => ({
+  logModuleError: vi.fn(),
+  logModuleInfo: vi.fn(),
+}));
+
+vi.mock("../../logging/logModuleError.js", () => ({
+  logModuleError,
+  logModuleInfo,
+}));
+
 import {
   getMsUntilKyivMorningSend,
   isKyivNightHours,
@@ -157,13 +168,15 @@ describe("sendAnalyticsChatNotificationDeferred", () => {
   it("swallows send errors without throwing", async () => {
     vi.setSystemTime(kyivLocalToUtc(2025, 6, 6, 10, 0));
     vi.mocked(sendMessageToAnalyticsChat).mockRejectedValue(new Error("TG fail"));
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     await expect(
       sendAnalyticsChatNotificationDeferred("fail report")
     ).resolves.toBeUndefined();
 
-    expect(consoleSpy).toHaveBeenCalled();
-    consoleSpy.mockRestore();
+    expect(logModuleError).toHaveBeenCalledWith(
+      "kyivNightNotificationDelay",
+      expect.any(Error),
+      "analytics notification failed"
+    );
   });
 });

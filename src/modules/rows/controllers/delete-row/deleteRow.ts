@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { deleteRowSchema } from "./schemas/deleteRowSchema.js";
 import { deleteRowUtil } from "./utils/deleteRowUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const deleteRow = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -32,7 +33,7 @@ export const deleteRow = async (req: Request, res: Response) => {
 
     res.status(200).json({ message: "Row and related pallets and positions deleted" });
   } catch (error) {
-    console.error("Error deleting row:", error);
+    logModuleError("rows", error, "Error deleting row:");
     if (!res.headersSent) {
       res.status(500).json({ message: "Server error", error });
     }

@@ -1,4 +1,5 @@
 import { getAllDelsUtil } from "./utils/getAllDelsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить список поставок (без artikuls)
  * @route   GET /api/dels
@@ -12,7 +13,7 @@ export const getAllDelsController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching dels:", error);
+        logModuleError("dels", error, "Error fetching dels:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

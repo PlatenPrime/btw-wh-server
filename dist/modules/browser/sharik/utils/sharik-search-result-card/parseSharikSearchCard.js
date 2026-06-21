@@ -1,3 +1,4 @@
+import { logModuleWarn } from "../../../../../logging/logModuleError.js";
 /**
  * Парсит элемент товара с сайта sharik.ua (карточка в результатах поиска).
  */
@@ -6,7 +7,7 @@ export function parseSharikSearchCard(artikul, artElement) {
     const priceRaw = artElement.find(".one-item-price").text().trim();
     const quantityRaw = artElement.find(".one-item-quantity").text().trim();
     if (!nameukr || !priceRaw || !quantityRaw) {
-        console.warn("Incomplete product data:", {
+        logModuleWarn("browser", "Incomplete product data:", {
             artikul,
             nameukr,
             priceRaw,
@@ -18,12 +19,12 @@ export function parseSharikSearchCard(artikul, artElement) {
     const price = parseFloat(priceStr);
     const quantityMatch = quantityRaw.match(/\d+/);
     if (!quantityMatch) {
-        console.warn("Invalid quantity format:", { artikul, quantityRaw });
+        logModuleWarn("browser", "Invalid quantity format:", { artikul, quantityRaw });
         return undefined;
     }
     const quantity = parseInt(quantityMatch[0], 10);
     if (isNaN(price)) {
-        console.warn("Invalid price format:", { artikul, priceStr, quantityRaw });
+        logModuleWarn("browser", "Invalid price format:", { artikul, priceStr, quantityRaw });
         return undefined;
     }
     return { nameukr, price, quantity };

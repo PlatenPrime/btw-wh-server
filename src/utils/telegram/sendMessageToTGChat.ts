@@ -1,6 +1,7 @@
 import axios, { AxiosResponse } from "axios";
 import { getBtwToken } from "../../constants/telegram.js";
 import { TelegramMessageResponse } from "./types.js";
+import { logModuleDebug, logModuleError } from "../../logging/logModuleError.js";
 
 interface SendMessageToTGChatProps {
   message: string;
@@ -31,11 +32,14 @@ export const sendMessageToTGChat = async ({
       throw new Error(`Telegram API error: ${response.data}`);
     }
 
-    console.log("Message sent to chat:", response.data);
+    logModuleDebug("telegram", "message sent to chat", {
+      chatId,
+      messageId: response.data.result.message_id,
+    });
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error occurred";
-    console.error("Error sending message to chat:", errorMessage);
+    logModuleError("telegram", error, "Error sending message to chat:");
     throw new Error(`Failed to send message to chat: ${errorMessage}`);
   }
 };

@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { updateSegSchema } from "./schemas/updateSegSchema.js";
 import { updateSegUtil } from "./utils/updateSegUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const updateSeg = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -48,7 +49,7 @@ export const updateSeg = async (req, res) => {
                 res.status(400).json({ message: error.message });
             }
             else {
-                console.error("updateSeg error:", error);
+                logModuleError("segs", error, "updateSeg error:");
                 res.status(500).json({
                     message: "Server error",
                     error: error instanceof Error ? error.message : error,

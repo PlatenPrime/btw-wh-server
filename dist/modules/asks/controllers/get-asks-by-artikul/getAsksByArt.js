@@ -1,6 +1,7 @@
 import { getAsksByArtikulSchema } from "./schemas/getAsksByArtikulSchema.js";
 import { getAsksByArtikulUtil } from "./utils/getAsksByArtikulUtil.js";
 import { getAsksStatisticsUtil } from "../get-asks-by-date/utils/getAsksStatisticsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getAsksByArt = async (req, res) => {
     try {
         const { artikul } = req.query;
@@ -23,7 +24,7 @@ export const getAsksByArt = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching asks by artikul:", error);
+        logModuleError("asks", error, "Error fetching asks by artikul:");
         res.status(500).json({
             message: "Server error while fetching asks by artikul",
             error: error instanceof Error ? error.message : "Unknown error",

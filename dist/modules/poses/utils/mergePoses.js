@@ -1,3 +1,4 @@
+import { logModuleError, logModuleInfo } from "../../../logging/logModuleError.js";
 /**
  * Объединяет позиции по артикулу, суммируя количество и коробки
  * @param poses - Массив позиций для объединения
@@ -30,13 +31,19 @@ export function mergePoses(poses) {
         });
         const endTime = performance.now();
         const executionTime = endTime - startTime;
-        console.log(`mergePoses выполнена за ${executionTime.toFixed(2)}ms. Обработано ${poses.length} позиций, объединено в ${Object.keys(mergedPoses).length} уникальных артикулов.`);
+        logModuleInfo("poses", "merge poses completed", {
+            executionTimeMs: Number(executionTime.toFixed(2)),
+            poseCount: poses.length,
+            uniqueArtikulCount: Object.keys(mergedPoses).length,
+        });
         return mergedPoses;
     }
     catch (error) {
         const endTime = performance.now();
         const executionTime = endTime - startTime;
-        console.error(`Ошибка при объединении позиций (выполнение заняло ${executionTime.toFixed(2)}ms):`, error);
+        logModuleError("poses", error, "failed to merge poses", {
+            executionTimeMs: Number(executionTime.toFixed(2)),
+        });
         throw new Error("Не удалось объединить позиции");
     }
 }

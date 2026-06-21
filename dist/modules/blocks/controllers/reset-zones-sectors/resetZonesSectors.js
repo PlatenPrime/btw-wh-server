@@ -1,4 +1,5 @@
 import { Zone } from "../../../zones/models/Zone.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const resetZonesSectors = async (req, res) => {
     try {
         // Установить sector = 0 у всех зон через bulkWrite
@@ -12,7 +13,7 @@ export const resetZonesSectors = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error resetting zones sectors:", error);
+        logModuleError("blocks", error, "Error resetting zones sectors:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

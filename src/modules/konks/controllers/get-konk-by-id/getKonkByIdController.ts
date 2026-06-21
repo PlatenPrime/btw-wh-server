@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getKonkByIdSchema } from "./schemas/getKonkByIdSchema.js";
 import { getKonkByIdUtil } from "./utils/getKonkByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить конкурента по id
@@ -32,7 +33,7 @@ export const getKonkByIdController = async (
       data: konk,
     });
   } catch (error) {
-    console.error("Error fetching konk by id:", error);
+    logModuleError("konks", error, "Error fetching konk by id:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

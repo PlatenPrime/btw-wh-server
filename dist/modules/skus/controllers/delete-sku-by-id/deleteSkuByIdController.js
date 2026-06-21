@@ -1,5 +1,6 @@
 import { deleteSkuByIdSchema } from "./schemas/deleteSkuByIdSchema.js";
 import { deleteSkuByIdUtil } from "./utils/deleteSkuByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Удалить sku по id
  * @route   DELETE /api/skus/id/:id
@@ -26,7 +27,7 @@ export const deleteSkuByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error deleting sku:", error);
+        logModuleError("skus", error, "Error deleting sku:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

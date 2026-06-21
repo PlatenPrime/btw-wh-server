@@ -1,6 +1,7 @@
 import { createBlockSchema } from "./schemas/createBlockSchema.js";
 import { checkBlockDuplicatesUtil } from "./utils/checkBlockDuplicatesUtil.js";
 import { createBlockUtil } from "./utils/createBlockUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const createBlock = async (req, res) => {
     try {
         // Валидация входных данных
@@ -30,7 +31,7 @@ export const createBlock = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error creating block:", error);
+        logModuleError("blocks", error, "Error creating block:");
         // Обработка ошибок MongoDB
         if (error instanceof Error && error.name === "MongoServerError") {
             const mongoError = error;

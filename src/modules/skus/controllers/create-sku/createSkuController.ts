@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createSkuSchema } from "./schemas/createSkuSchema.js";
 import { createSkuUtil } from "./utils/createSkuUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Создать sku конкурента
@@ -27,7 +28,7 @@ export const createSkuController = async (
       data: sku,
     });
   } catch (error) {
-    console.error("Error creating sku:", error);
+    logModuleError("skus", error, "Error creating sku:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

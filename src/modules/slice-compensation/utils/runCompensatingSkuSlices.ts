@@ -11,6 +11,7 @@ import {
 } from "./compensatingSliceRunner.js";
 import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { shouldRefetchSkuSliceItem } from "./shouldRefetchSkuSliceItem.js";
+import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.js";
 
 type SkuSliceLean = {
   konkName: string;
@@ -44,9 +45,7 @@ export async function runCompensatingSkuSlices(
         .select("_id")
         .lean()) as SkuIdLean | null;
       if (!sku) {
-        console.warn(
-          `[CompensatingSkuSlices] нет SKU ${productKey} у ${konkName}, пропуск`
-        );
+        logModuleWarn("slice-compensation", "[CompensatingSkuSlices] нет SKU ${productKey} у ${konkName}, пропуск");
         return { refetched: 0, updated: 0 };
       }
       const result = await getSkuStockDataUtil(sku._id.toString());
@@ -64,15 +63,18 @@ export async function runCompensatingSkuSlices(
     } catch (err) {
       const e = err as Error & { code?: string };
       if (e.code === UNSUPPORTED_KONK_CODE) {
-        console.warn(
-          `[CompensatingSkuSlices] неподдерживаемый конкурент, пропуск ${konkName} ${productKey}`
-        );
+        logModuleWarn("slice-compensation", "unsupported konk, skipping refetch", {
+          konkName,
+          productKey,
+        });
         return { refetched: 0, updated: 0 };
       }
       const msg = err instanceof Error ? err.message : String(err);
-      console.error(
-        `[CompensatingSkuSlices] ${konkName} ${productKey}: ${msg}`
-      );
+      logModuleError("slice-compensation", err, "compensating sku slice refetch failed", {
+        konkName,
+        productKey,
+        message: msg,
+      });
       return { refetched: 0, updated: 0 };
     }
   });

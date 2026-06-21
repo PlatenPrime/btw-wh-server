@@ -1,9 +1,11 @@
 import { CronJob } from "cron";
 import fs from "fs/promises";
+import { createLogger } from "../logging/createLogger.js";
 import { exportCollectionsToJson } from "./utils/exportCollectionsToJson.js";
 import { sendFileToTGUser } from "../utils/telegram/sendFileToTGUser.js";
 import { getBtwPlatenId } from "../constants/telegram.js";
 import { sendMessageToPlaten } from "../utils/telegram/sendMessageToPlaten.js";
+const log = createLogger({ module: "backup", job: "cron" });
 /**
  * Запускает cron job для ежедневного бэкапа коллекций
  * Каждый день в 06:00 по киевскому времени
@@ -13,42 +15,37 @@ export function startCollectionsBackupCron() {
     async () => {
         let backupFilePath = null;
         try {
-            console.log(`[CRON Backup] Starting collections backup...`);
-            // Экспортируем коллекции в JSON файл
+            log.info("starting collections backup");
             backupFilePath = await exportCollectionsToJson();
-            // Отправляем файл в телеграм
             await sendFileToTGUser(backupFilePath, getBtwPlatenId());
-            console.log(`[CRON Backup] Backup completed and sent successfully`);
-            // Удаляем временный файл после успешной отправки
+            log.info("backup completed and sent successfully");
             try {
                 await fs.unlink(backupFilePath);
-                console.log(`[CRON Backup] Temporary file deleted: ${backupFilePath}`);
+                log.info({ backupFilePath }, "temporary backup file deleted");
             }
             catch (deleteError) {
-                console.warn(`[CRON Backup] Failed to delete temporary file: ${backupFilePath}`, deleteError);
+                log.warn({ err: deleteError, backupFilePath }, "failed to delete temporary backup file");
             }
         }
         catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Unknown error";
-            console.error(`[CRON Backup] Error:`, errorMessage);
-            // Отправляем уведомление об ошибке в телеграм
+            log.error({ err: error }, "collections backup failed");
             try {
+                const errorMessage = error instanceof Error ? error.message : "Unknown error";
                 await sendMessageToPlaten(`❌ Помилка під час створення бэкапу колекцій:\n${errorMessage}`);
             }
             catch (notificationError) {
-                console.error(`[CRON Backup] Failed to send error notification:`, notificationError);
+                log.error({ err: notificationError }, "failed to send backup error notification");
             }
-            // Удаляем файл при ошибке, если он был создан
             if (backupFilePath) {
                 try {
                     await fs.unlink(backupFilePath);
                 }
-                catch (deleteError) {
+                catch {
                     // Игнорируем ошибку удаления при ошибке бэкапа
                 }
             }
         }
     }, null, true, "Europe/Kiev");
-    console.log(`[CRON Backup] Started: daily at 06:00 (Kiev time)`);
+    log.info({ schedule: "0 0 6 * * *", timezone: "Europe/Kiev" }, "cron started");
     return job;
 }

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { getCalculationStatus } from "../../utils/calculationStatus.js";
 import { calculateAndSavePogrebiDefsUtil } from "./utils/calculateAndSavePogrebiDefsUtil.js";
 import { calculatePogrebiDefsSchema } from "./schemas/calculatePogrebiDefsSchema.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Выполнить расчет дефицитов и сохранить результат в БД
@@ -49,7 +50,7 @@ export const calculatePogrebiDefsController = async (
     });
     return;
   } catch (error) {
-    console.error("Error in calculatePogrebiDefsController:", error);
+    logModuleError("defs", error, "Error in calculatePogrebiDefsController:");
     if (!res.headersSent) {
       res.status(500).json({
         success: false,

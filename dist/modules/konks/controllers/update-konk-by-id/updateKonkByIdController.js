@@ -1,5 +1,6 @@
 import { updateKonkByIdSchema } from "./schemas/updateKonkByIdSchema.js";
 import { updateKonkByIdUtil } from "./utils/updateKonkByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить конкурента по id (указанные в body поля)
  * @route   PATCH /api/konks/id/:id
@@ -41,7 +42,7 @@ export const updateKonkByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating konk:", error);
+        logModuleError("konks", error, "Error updating konk:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteZoneByIdSchema } from "./schemas/deleteZoneByIdSchema.js";
 import { deleteZoneByIdUtil } from "./utils/deleteZoneByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const deleteZoneById = async (req: Request, res: Response) => {
   try {
@@ -30,7 +31,7 @@ export const deleteZoneById = async (req: Request, res: Response) => {
       data: deletedZone,
     });
   } catch (error) {
-    console.error("Error deleting zone:", error);
+    logModuleError("zones", error, "Error deleting zone:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RoleType } from "../../../../../../constants/roles.js";
+const { logModuleError } = vi.hoisted(() => ({
+    logModuleError: vi.fn(),
+}));
 vi.mock("../../../../../../utils/telegram/sendMessageToBTWChat.js", () => ({
     sendMessageToBTWChat: vi.fn(),
 }));
-const consoleErrorSpy = vi
-    .spyOn(console, "error")
-    .mockImplementation(() => { });
+vi.mock("../../../../../../logging/logModuleError.js", () => ({
+    logModuleError,
+}));
 import { sendMessageToBTWChat } from "../../../../../../utils/telegram/sendMessageToBTWChat.js";
 import { sendCreateAskMesUtil } from "../sendCreateAskMesUtil.js";
 const mockSendMessageToBTWChat = vi.mocked(sendMessageToBTWChat);
@@ -88,7 +91,7 @@ describe("sendCreateAskMesUtil", () => {
             message: "Test message",
             askerData,
         })).resolves.not.toThrow();
-        expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to send Telegram notification:", error);
+        expect(logModuleError).toHaveBeenCalledWith("asks", error, "Failed to send Telegram notification:");
     });
     it("отправляет сообщение в production для USER", async () => {
         process.env.NODE_ENV = "production";

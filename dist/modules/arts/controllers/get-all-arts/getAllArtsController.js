@@ -1,5 +1,6 @@
 import { getAllArtsQuerySchema } from "./schemas/getAllArtsSchema.js";
 import { getAllArtsUtil } from "./utils/getAllArtsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getAllArtsController = async (req, res) => {
     try {
         // Валидация параметров запроса
@@ -25,7 +26,7 @@ export const getAllArtsController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching arts:", error);
+        logModuleError("arts", error, "Error fetching arts:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

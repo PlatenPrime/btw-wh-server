@@ -1,6 +1,7 @@
 import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { clearSkugrSkusSchema } from "./schemas/clearSkugrSkusSchema.js";
 import { clearSkugrSkusUtil } from "./utils/clearSkugrSkusUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Очистить массив skus у товарной группы (документы Sku не удаляются)
  * @route   POST /api/skugrs/id/:id/clear-skus
@@ -26,7 +27,7 @@ export const clearSkugrSkusController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error clearing skugr skus:", error);
+        logModuleError("skugrs", error, "Error clearing skugr skus:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

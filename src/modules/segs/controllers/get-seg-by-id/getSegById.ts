@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getSegByIdSchema } from "./schemas/getSegByIdSchema.js";
 import { getSegByIdUtil } from "./utils/getSegByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getSegById = async (req: Request, res: Response) => {
   try {
@@ -35,7 +36,7 @@ export const getSegById = async (req: Request, res: Response) => {
       data: segObj,
     });
   } catch (error: any) {
-    console.error("getSegById error:", error);
+    logModuleError("segs", error, "getSegById error:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

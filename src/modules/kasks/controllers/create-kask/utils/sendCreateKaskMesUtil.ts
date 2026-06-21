@@ -1,5 +1,6 @@
 import { RoleType } from "../../../../../constants/roles.js";
 import { sendMessageToKasaChat } from "../../../../../utils/telegram/sendMessageToKasaChat.js";
+import { logModuleError } from "../../../../../logging/logModuleError.js";
 
 /**
  * Отправка в чат кассы (@kassabtw); PRIME и test — без отправки.
@@ -18,6 +19,6 @@ export const sendCreateKaskMesUtil = async ({
   try {
     await sendMessageToKasaChat(message);
   } catch (error) {
-    console.error("Failed to send Telegram notification (kask):", error);
+    logModuleError("kasks", error, "Failed to send Telegram notification (kask):");
   }
 };

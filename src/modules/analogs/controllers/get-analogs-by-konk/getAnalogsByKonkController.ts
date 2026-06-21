@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAnalogsByKonkSchema } from "./schemas/getAnalogsByKonkSchema.js";
 import { getAnalogsByKonkUtil } from "./utils/getAnalogsByKonkUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить аналоги по konkName
@@ -31,7 +32,7 @@ export const getAnalogsByKonkController = async (
       pagination: result.pagination,
     });
   } catch (error) {
-    console.error("Error fetching analogs by konk:", error);
+    logModuleError("analogs", error, "Error fetching analogs by konk:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

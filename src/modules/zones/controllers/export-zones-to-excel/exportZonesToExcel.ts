@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { formatZonesForExcelUtil } from "./utils/formatZonesForExcelUtil.js";
 import { generateExcelUtil } from "./utils/generateExcelUtil.js";
 import { getZonesForExportUtil } from "./utils/getZonesForExportUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const exportZonesToExcelController = async (
   req: Request,
@@ -34,7 +35,7 @@ export const exportZonesToExcelController = async (
     // Отправляем файл
     res.status(200).send(buffer);
   } catch (error) {
-    console.error("Error exporting zones to Excel:", error);
+    logModuleError("zones", error, "Error exporting zones to Excel:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

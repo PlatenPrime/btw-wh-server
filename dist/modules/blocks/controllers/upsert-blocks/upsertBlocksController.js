@@ -1,5 +1,6 @@
 import { upsertBlocksSchema } from "./schemas/upsertBlocksSchema.js";
 import { upsertBlocksUtil } from "./utils/upsertBlocksUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const upsertBlocksController = async (req, res) => {
     try {
         const parseResult = upsertBlocksSchema.safeParse(req.body);
@@ -18,7 +19,7 @@ export const upsertBlocksController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("upsertBlocksController error:", error);
+        logModuleError("blocks", error, "upsertBlocksController error:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

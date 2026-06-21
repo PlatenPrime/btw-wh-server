@@ -1,5 +1,6 @@
 import { getAllZonesQuerySchema } from "../../schemas/zoneSchema.js";
 import { getAllZonesUtil } from "./utils/getAllZonesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getAllZones = async (req, res) => {
     try {
         // Валидация параметров запроса
@@ -26,7 +27,7 @@ export const getAllZones = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching zones:", error);
+        logModuleError("zones", error, "Error fetching zones:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

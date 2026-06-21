@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { updateProdByIdSchema } from "./schemas/updateProdByIdSchema.js";
 import { updateProdByIdUtil } from "./utils/updateProdByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Обновить производителя по id (указанные в body поля)
@@ -38,7 +39,7 @@ export const updateProdByIdController = async (
       data: prod,
     });
   } catch (error) {
-    console.error("Error updating prod:", error);
+    logModuleError("prods", error, "Error updating prod:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

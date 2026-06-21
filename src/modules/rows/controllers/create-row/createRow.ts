@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createRowSchema } from "./schemas/createRowSchema.js";
 import { createRowUtil } from "./utils/createRowUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const createRow = async (req: Request, res: Response) => {
   try {
@@ -20,7 +21,7 @@ export const createRow = async (req: Request, res: Response) => {
 
     res.status(201).json(createdRow);
   } catch (error) {
-    console.error("Error creating row:", error);
+    logModuleError("rows", error, "Error creating row:");
     if (!res.headersSent) {
       res.status(500).json({ message: "Server error", error });
     }

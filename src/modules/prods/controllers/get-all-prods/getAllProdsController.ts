@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getAllProdsUtil } from "./utils/getAllProdsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить всех производителей
@@ -16,7 +17,7 @@ export const getAllProdsController = async (
       data: list,
     });
   } catch (error) {
-    console.error("Error fetching prods:", error);
+    logModuleError("prods", error, "Error fetching prods:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

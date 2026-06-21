@@ -1,6 +1,7 @@
 import { getKonkBtradeComparisonRangeUtil } from "../get-konk-btrade-comparison-excel/utils/getKonkBtradeComparisonRangeUtil.js";
 import { getKonkBtradeSalesComparisonExcelSchema } from "./schemas/getKonkBtradeSalesComparisonExcelSchema.js";
 import { buildSalesComparisonExcel } from "./utils/buildSalesComparisonExcel.js";
+import { logModuleWarn } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Экспорт сравнения продаж по группе аналогов (конкурент + Btrade) в Excel за период
  * @route   GET /api/analog-slices/konk-btrade/sales-comparison-excel?konk=...&prod=...&dateFrom=...&dateTo=...
@@ -17,9 +18,9 @@ export const getKonkBtradeSalesComparisonExcelController = async (req, res) => {
     });
     if (!parseResult.success) {
         const errors = parseResult.error.flatten();
-        console.error("[getKonkBtradeSalesComparisonExcel] Validation failed:", {
+        logModuleWarn("analog-slices", "konk btrade sales comparison excel validation failed", {
             query: req.query,
-            errors: errors.fieldErrors,
+            fieldErrors: errors.fieldErrors,
             formErrors: errors.formErrors,
         });
         res.status(400).json({

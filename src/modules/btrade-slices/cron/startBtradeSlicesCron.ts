@@ -2,7 +2,10 @@ import { CronJob } from "cron";
 import { formatBtradeSliceReport } from "../../../cron/analytics-notifications/formatBtradeSliceReport.js";
 import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
 import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
+import { createLogger } from "../../../logging/createLogger.js";
 import { calculateBtradeSlice } from "../utils/calculateBtradeSlice.js";
+
+const log = createLogger({ module: "btrade-slices", job: "cron" });
 
 /**
  * Запускает cron для ежедневного среза Btrade (Sharik).
@@ -13,15 +16,12 @@ export function startBtradeSlicesCron(): CronJob {
     "0 0 0 * * *",
     async () => {
       try {
-        console.log(`[CRON BtradeSlices] Starting...`);
+        log.info("starting btrade slice");
         const result = await calculateBtradeSlice();
-        console.log(`[CRON BtradeSlices] Done: ${result.count} items`);
+        log.info({ count: result.count }, "btrade slice completed");
         await sendCronAnalyticsReport(formatBtradeSliceReport(result));
       } catch (error) {
-        console.error(
-          `[CRON BtradeSlices] Error:`,
-          error instanceof Error ? error.message : "Unknown error"
-        );
+        log.error({ err: error }, "btrade slice cron failed");
         await sendCronAnalyticsReport(
           formatCronErrorReport("Btrade slice", error)
         );
@@ -32,6 +32,6 @@ export function startBtradeSlicesCron(): CronJob {
     "Europe/Kiev"
   );
 
-  console.log(`[CRON BtradeSlices] Started: daily at 00:00 (Europe/Kiev)`);
+  log.info({ schedule: "0 0 0 * * *", timezone: "Europe/Kiev" }, "cron started");
   return job;
 }

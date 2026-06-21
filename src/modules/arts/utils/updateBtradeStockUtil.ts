@@ -1,5 +1,6 @@
 import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { Art, IArt } from "../models/Art.js";
+import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.js";
 
 type UpdateBtradeStockUtilInput = {
   artikul: string;
@@ -18,7 +19,7 @@ export const updateBtradeStockUtil = async ({
     const sharikData = await getSharikStockData(artikul);
 
     if (!sharikData) {
-      console.warn(`Товар с артикулом ${artikul} не найден на sharik.ua`);
+      logModuleWarn("arts", "product not found on sharik.ua", { artikul });
       return null;
     }
 
@@ -41,10 +42,7 @@ export const updateBtradeStockUtil = async ({
 
     return updatedArt;
   } catch (error) {
-    console.error(
-      `Ошибка при обновлении btradeStock для артикула ${artikul}:`,
-      error
-    );
+    logModuleError("arts", error, "failed to update btrade stock", { artikul });
     throw error;
   }
 };

@@ -1,4 +1,5 @@
 import { getAllBlocksUtil } from "./utils/getAllBlocksUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getAllBlocks = async (req, res) => {
     try {
         const blocks = await getAllBlocksUtil();
@@ -9,7 +10,7 @@ export const getAllBlocks = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching all blocks:", error);
+        logModuleError("blocks", error, "Error fetching all blocks:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

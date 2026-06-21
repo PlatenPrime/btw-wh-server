@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getZonesBySegIdSchema } from "./schemas/getZonesBySegIdSchema.js";
 import { getZonesBySegIdUtil } from "./utils/getZonesBySegIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getZonesBySegId = async (req: Request, res: Response) => {
   try {
@@ -24,7 +25,7 @@ export const getZonesBySegId = async (req: Request, res: Response) => {
       data: zones.map((zone) => zone.toObject()),
     });
   } catch (error: any) {
-    console.error("getZonesBySegId error:", error);
+    logModuleError("segs", error, "getZonesBySegId error:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

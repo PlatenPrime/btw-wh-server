@@ -14,9 +14,20 @@ vi.mock("mongoose", async (importOriginal) => {
         default: {
             ...actual.default,
             connect: mockConnect,
+            connection: {
+                ...actual.default.connection,
+                on: vi.fn(),
+            },
         },
     };
 });
+vi.mock("../logging/registerProcessHandlers.js", () => ({
+    registerProcessHandlers: vi.fn(),
+}));
+vi.mock("../logging/httpLogger.js", () => ({
+    createHttpLogger: () => (_req, _res, next) => next(),
+    createSlowRequestLogger: () => (_req, _res, next) => next(),
+}));
 vi.mock("../cron/startCronOperations.js", () => ({
     startCronOperations: mockStartCronOperations,
 }));

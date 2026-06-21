@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAnalogsByProdSchema } from "./schemas/getAnalogsByProdSchema.js";
 import { getAnalogsByProdUtil } from "./utils/getAnalogsByProdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить аналоги по prodName
@@ -31,7 +32,7 @@ export const getAnalogsByProdController = async (
       pagination: result.pagination,
     });
   } catch (error) {
-    console.error("Error fetching analogs by prod:", error);
+    logModuleError("analogs", error, "Error fetching analogs by prod:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

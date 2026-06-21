@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createVariantSchema } from "./schemas/createVariantSchema.js";
 import { createVariantUtil } from "./utils/createVariantUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 function isDuplicateUrlError(
   err: unknown
@@ -39,7 +40,7 @@ export const createVariantController = async (
       data: variant,
     });
   } catch (error) {
-    console.error("Error creating variant:", error);
+    logModuleError("variants", error, "Error creating variant:");
     if (res.headersSent) return;
 
     if (isDuplicateUrlError(error)) {

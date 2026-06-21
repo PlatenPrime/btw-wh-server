@@ -73,17 +73,9 @@ import { Seg } from "../../../modules/segs/models/Seg.js";
 import User from "../../../modules/auth/models/User.js";
 import Role from "../../../modules/auth/models/Role.js";
 
-// Mock console methods
-const consoleSpy = {
-  log: vi.spyOn(console, "log"),
-  error: vi.spyOn(console, "error"),
-};
-
 describe("exportCollectionsToJson", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    consoleSpy.log.mockClear();
-    consoleSpy.error.mockClear();
 
     // Mock lean() and exec() chain
     const mockQuery = {

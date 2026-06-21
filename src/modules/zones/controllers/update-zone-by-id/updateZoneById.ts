@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { updateZoneSchema } from "./schemas/updateZoneByIdSchema.js";
 import { checkZoneDuplicatesUpdateUtil } from "./utils/checkZoneDuplicatesUpdateUtil.js";
 import { updateZoneByIdUtil } from "./utils/updateZoneByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const updateZoneById = async (req: Request, res: Response) => {
   try {
@@ -74,7 +75,7 @@ export const updateZoneById = async (req: Request, res: Response) => {
       data: updatedZone,
     });
   } catch (error) {
-    console.error("Error updating zone:", error);
+    logModuleError("zones", error, "Error updating zone:");
 
     // Обработка ошибок MongoDB
     if (error instanceof Error && error.name === "MongoServerError") {

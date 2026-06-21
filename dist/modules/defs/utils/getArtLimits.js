@@ -1,4 +1,5 @@
 import { Art } from "../../arts/models/Art.js";
+import { logModuleError } from "../../../logging/logModuleError.js";
 /**
  * Получает лимиты для артикулов из модели Art
  * @param artikuls - Массив артикулов
@@ -21,7 +22,7 @@ export async function getArtLimits(artikuls) {
         return limits;
     }
     catch (error) {
-        console.error("Помилка при отриманні лімітів з моделі Art:", error);
+        logModuleError("defs", error, "Помилка при отриманні лімітів з моделі Art:");
         return {};
     }
 }

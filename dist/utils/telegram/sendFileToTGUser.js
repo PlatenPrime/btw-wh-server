@@ -2,6 +2,7 @@ import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
 import { getBtwToken } from "../../constants/telegram.js";
+import { logModuleDebug, logModuleError } from "../../logging/logModuleError.js";
 export const sendFileToTGUser = async (filePath, userId) => {
     if (!filePath?.trim()) {
         throw new Error("File path cannot be empty");
@@ -25,11 +26,15 @@ export const sendFileToTGUser = async (filePath, userId) => {
         if (!response.data.ok) {
             throw new Error(`Telegram API error: ${response.data}`);
         }
-        console.log("Файл успішно відправлено користувачу:", response.data);
+        logModuleDebug("telegram", "file sent to user", {
+            userId,
+            filePath,
+            messageId: response.data.result.message_id,
+        });
     }
     catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-        console.error("Помилка відправки файла користувачу:", errorMessage);
+        logModuleError("telegram", error, "Помилка відправки файла користувачу:");
         throw new Error(`Не вдалося відправити файл користувачу: ${errorMessage}`);
     }
 };

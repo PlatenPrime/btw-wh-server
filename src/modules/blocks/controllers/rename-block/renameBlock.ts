@@ -4,6 +4,7 @@ import { renameBlockSchema } from "./schemas/renameBlockSchema.js";
 import { renameBlockUtil } from "./utils/renameBlockUtil.js";
 import { checkBlockDuplicatesUpdateUtil } from "../update-block/utils/checkBlockDuplicatesUpdateUtil.js";
 import { getBlockByIdUtil } from "../get-block-by-id/utils/getBlockByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const renameBlock = async (req: Request, res: Response) => {
   try {
@@ -67,7 +68,7 @@ export const renameBlock = async (req: Request, res: Response) => {
       data: renamedBlock,
     });
   } catch (error) {
-    console.error("Error renaming block:", error);
+    logModuleError("blocks", error, "Error renaming block:");
 
     // Обработка ошибок MongoDB
     if (error instanceof Error && error.name === "MongoServerError") {

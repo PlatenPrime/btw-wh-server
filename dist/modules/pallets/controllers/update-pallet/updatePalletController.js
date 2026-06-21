@@ -3,6 +3,7 @@ import { Row } from "../../../rows/models/Row.js";
 import { updatePalletSchema } from "./schemas/updatePalletSchema.js";
 import { updatePalletUtil } from "./utils/updatePalletUtil.js";
 import { updatePosesPalletDataUtil } from "./utils/updatePosesPalletDataUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const updatePalletController = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -62,7 +63,7 @@ export const updatePalletController = async (req, res) => {
                 res.status(404).json({ message: "Row not found" });
             }
             else {
-                console.error("updatePalletController error:", error);
+                logModuleError("pallets", error, "updatePalletController error:");
                 res.status(500).json({
                     message: "Server error",
                     error: error instanceof Error ? error.message : error,

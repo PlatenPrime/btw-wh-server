@@ -1,5 +1,6 @@
 import { updateKaskBodySchema, updateKaskByIdParamsSchema, } from "./schemas/updateKaskByIdSchema.js";
 import { updateKaskUtil } from "./utils/updateKaskUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const updateKaskById = async (req, res) => {
     try {
         const paramsResult = updateKaskByIdParamsSchema.safeParse(req.params);
@@ -29,7 +30,7 @@ export const updateKaskById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating kask:", error);
+        logModuleError("kasks", error, "Error updating kask:");
         res.status(500).json({
             message: "Server error while updating kask",
             error: error instanceof Error ? error.message : "Unknown error",

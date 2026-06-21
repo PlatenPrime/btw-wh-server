@@ -1,5 +1,6 @@
 import { getCalculationStatus } from "../../utils/calculationStatus.js";
 import { getCalculationStatusSchema } from "./schemas/getCalculationStatusSchema.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить текущий статус расчета дефицитов
  * @route   GET /api/defs/calculation-status
@@ -24,7 +25,7 @@ export const getCalculationStatusController = async (req, res) => {
         return;
     }
     catch (error) {
-        console.error("Error in getCalculationStatusController:", error);
+        logModuleError("defs", error, "Error in getCalculationStatusController:");
         if (!res.headersSent) {
             res.status(500).json({
                 success: false,

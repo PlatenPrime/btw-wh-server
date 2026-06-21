@@ -3,6 +3,7 @@ import User from "../../../auth/models/User.js";
 import { Ask } from "../../models/Ask.js";
 import { pullAskByIdSchema } from "./schemas/pullAskByIdSchema.js";
 import { pullAskUtil } from "./utils/pullAskUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const pullAskById = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -42,7 +43,7 @@ export const pullAskById = async (req, res) => {
         res.status(200).json(updatedAsk);
     }
     catch (error) {
-        console.error("Error pulling ask:", error);
+        logModuleError("asks", error, "Error pulling ask:");
         if (!res.headersSent) {
             if (error instanceof Error && error.message === "Ask not found") {
                 res.status(404).json({ message: "Ask not found" });

@@ -1,6 +1,7 @@
 import { Del } from "../../models/Del.js";
 import { updateDelArtikulsSchema } from "./schemas/updateDelArtikulsSchema.js";
 import { updateDelArtikulsByDelIdUtil } from "./utils/updateDelArtikulsByDelIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Запуск фонового обновления всех артикулов поставки (sharik.ua)
  * @route   POST /api/dels/:id/artikuls/update-all
@@ -22,14 +23,14 @@ export const updateDelArtikulsByDelIdController = async (req, res) => {
             return;
         }
         updateDelArtikulsByDelIdUtil(parseResult.data.id).catch((error) => {
-            console.error("Error in background updateDelArtikulsByDelId:", error);
+            logModuleError("dels", error, "Error in background updateDelArtikulsByDelId:");
         });
         res.status(202).json({
             message: "Del artikuls update process started",
         });
     }
     catch (error) {
-        console.error("Error starting del artikuls update:", error);
+        logModuleError("dels", error, "Error starting del artikuls update:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

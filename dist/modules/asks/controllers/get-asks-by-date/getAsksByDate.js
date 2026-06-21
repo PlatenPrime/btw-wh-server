@@ -1,6 +1,7 @@
 import { getAsksByDateSchema } from "./schemas/getAsksByDateSchema.js";
 import { getAsksByDateUtil } from "./utils/getAsksByDateUtil.js";
 import { getAsksStatisticsUtil } from "./utils/getAsksStatisticsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getAsksByDate = async (req, res) => {
     try {
         const { date } = req.query;
@@ -23,7 +24,7 @@ export const getAsksByDate = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching asks by date:", error);
+        logModuleError("asks", error, "Error fetching asks by date:");
         res.status(500).json({
             message: "Server error while fetching asks by date",
             error: error instanceof Error ? error.message : "Unknown error",

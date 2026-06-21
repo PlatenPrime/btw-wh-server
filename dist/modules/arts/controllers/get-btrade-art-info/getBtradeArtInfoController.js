@@ -1,5 +1,6 @@
 import { getBtradeArtInfoSchema } from "./schemas/getBtradeArtInfoSchema.js";
 import { fetchBtradeDataUtil } from "./utils/fetchBtradeDataUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getBtradeArtInfoController = async (req, res) => {
     try {
         const { artikul } = req.params;
@@ -28,7 +29,7 @@ export const getBtradeArtInfoController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching data from sharik.ua:", error);
+        logModuleError("arts", error, "Error fetching data from sharik.ua:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Failed to fetch data from sharik.ua",

@@ -1,5 +1,6 @@
 import { getSkugrByIdSchema } from "./schemas/getSkugrByIdSchema.js";
 import { getSkugrByIdUtil } from "./utils/getSkugrByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить группу товаров конкурента по id (метаданные без поля skus)
  * @route   GET /api/skugrs/id/:id
@@ -25,7 +26,7 @@ export const getSkugrByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching skugr by id:", error);
+        logModuleError("skugrs", error, "Error fetching skugr by id:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

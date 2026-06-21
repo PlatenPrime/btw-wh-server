@@ -1,5 +1,9 @@
 import axios, { type AxiosInstance, isAxiosError } from "axios";
 
+import { createLogger } from "../../../logging/createLogger.js";
+
+const browserLog = createLogger({ module: "browser" });
+
 /** Лимит ожидания одного HTTP GET (один URL / одна «страница»). На весь обход N страниц — до N × этого значения в худшем случае. */
 const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
 
@@ -107,5 +111,5 @@ export function summarizeBrowserError(err: unknown): string {
 }
 
 export function logBrowserError(context: string, err: unknown): void {
-  console.error(`${context} ${summarizeBrowserError(err)}`);
+  browserLog.error({ context, details: summarizeBrowserError(err) }, "browser fetch failed");
 }

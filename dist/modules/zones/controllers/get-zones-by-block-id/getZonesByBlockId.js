@@ -1,5 +1,6 @@
 import { getZonesByBlockIdSchema } from "./schemas/getZonesByBlockIdSchema.js";
 import { getZonesByBlockIdUtil } from "./utils/getZonesByBlockIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getZonesByBlockId = async (req, res) => {
     try {
         const { blockId } = req.params;
@@ -19,7 +20,7 @@ export const getZonesByBlockId = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching zones by block ID:", error);
+        logModuleError("zones", error, "Error fetching zones by block ID:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

@@ -1,5 +1,6 @@
 import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { Art } from "../models/Art.js";
+import { logModuleError, logModuleInfo, logModuleWarn } from "../../../logging/logModuleError.js";
 /**
  * Обновляет btradeStock для всех артикулов данными с sharik.ua
  * Использует очередность с задержкой 100ms между запросами
@@ -12,7 +13,7 @@ export const updateAllBtradeStocksUtil = async () => {
         const arts = await Art.find().select("artikul").lean();
         const artikuls = arts.map((art) => art.artikul);
         const totalItems = artikuls.length;
-        console.log(`Начало обновления btradeStock для ${totalItems} артикулов`);
+        logModuleInfo("arts", "btrade stock update started", { totalItems });
         const result = {
             total: totalItems,
             updated: 0,
@@ -26,7 +27,7 @@ export const updateAllBtradeStocksUtil = async () => {
                 // Получаем данные с sharik.ua
                 const sharikData = await getSharikStockData(artikul);
                 if (!sharikData) {
-                    console.warn(`Товар с артикулом ${artikul} не найден на sharik.ua`);
+                    logModuleWarn("arts", "product not found on sharik.ua", { artikul });
                     result.notFound++;
                     continue;
                 }
@@ -42,7 +43,7 @@ export const updateAllBtradeStocksUtil = async () => {
                 result.updated++;
             }
             catch (error) {
-                console.error(`Ошибка при обновлении btradeStock для артикула ${artikul}:`, error);
+                logModuleError("arts", error, "failed to update btrade stock", { artikul });
                 result.errors++;
             }
             // Добавляем задержку между запросами (кроме последнего)
@@ -51,16 +52,25 @@ export const updateAllBtradeStocksUtil = async () => {
             }
             // Логируем прогресс каждые 10 артикулов
             if ((i + 1) % 10 === 0 || i === artikuls.length - 1) {
-                console.log(`Обработано ${i + 1} из ${artikuls.length} артикулов. Обновлено: ${result.updated}, Ошибок: ${result.errors}, Не найдено: ${result.notFound}`);
+                logModuleInfo("arts", "btrade stock update progress", {
+                    processed: i + 1,
+                    totalItems: artikuls.length,
+                    updated: result.updated,
+                    errors: result.errors,
+                    notFound: result.notFound,
+                });
             }
         }
         const endTime = performance.now();
         const duration = Math.round((endTime - startTime) / 1000);
-        console.log(`Обновление btradeStock для ${totalItems} артикулов завершено за ${duration} секунд`);
+        logModuleInfo("arts", "btrade stock update completed", {
+            totalItems,
+            durationSec: duration,
+        });
         return result;
     }
     catch (error) {
-        console.error("Ошибка в updateAllBtradeStocksUtil:", error);
+        logModuleError("arts", error, "updateAllBtradeStocksUtil failed");
         throw error;
     }
 };

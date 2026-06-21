@@ -5,6 +5,7 @@ import { createAskUtil } from "./utils/createAskUtil.js";
 import { getCreateAskActionsUtil } from "./utils/getCreateAskActionsUtil.js";
 import { getCreateAskMessageUtil } from "./utils/getCreateAskMesUtil.js";
 import { sendCreateAskMesUtil } from "./utils/sendCreateAskMesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const createAskController = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -51,7 +52,7 @@ export const createAskController = async (req, res) => {
         await sendCreateAskMesUtil({ message, askerData });
     }
     catch (error) {
-        console.error("Error creating ask:", error);
+        logModuleError("asks", error, "Error creating ask:");
         if (!res.headersSent) {
             if (error instanceof Error && error.message === "User not found") {
                 res.status(404).json({ message: "User not found" });

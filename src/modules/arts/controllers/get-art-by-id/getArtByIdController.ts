@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getArtByIdSchema } from "./schemas/getArtByIdSchema.js";
 import { getArtByIdUtil } from "./utils/getArtByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getArtByIdController = async (req: Request, res: Response) => {
   try {
@@ -33,7 +34,7 @@ export const getArtByIdController = async (req: Request, res: Response) => {
       data: art,
     });
   } catch (error) {
-    console.error("Error fetching art by ID:", error);
+    logModuleError("arts", error, "Error fetching art by ID:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

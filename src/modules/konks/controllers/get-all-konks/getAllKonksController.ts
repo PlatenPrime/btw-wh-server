@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getAllKonksUtil } from "./utils/getAllKonksUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить всех конкурентов
@@ -16,7 +17,7 @@ export const getAllKonksController = async (
       data: list,
     });
   } catch (error) {
-    console.error("Error fetching konks:", error);
+    logModuleError("konks", error, "Error fetching konks:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

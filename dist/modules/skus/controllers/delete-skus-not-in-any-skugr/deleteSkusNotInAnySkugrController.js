@@ -1,5 +1,6 @@
 import { deleteSkusNotInAnySkugrQuerySchema } from "./schemas/deleteSkusNotInAnySkugrQuerySchema.js";
 import { deleteSkusNotInAnySkugrUtil } from "./utils/deleteSkusNotInAnySkugrUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Удалить все Sku, не входящие ни в одну товарную группу (опционально сузить query)
  * @route   DELETE /api/skus/not-in-any-skugr
@@ -21,7 +22,7 @@ export const deleteSkusNotInAnySkugrController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error deleting skus not in any skugr:", error);
+        logModuleError("skus", error, "Error deleting skus not in any skugr:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

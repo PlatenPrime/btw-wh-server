@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const mockLogModuleError = vi.hoisted(() => vi.fn());
+
+vi.mock("../../logging/logModuleError.js", () => ({
+  logModuleError: mockLogModuleError,
+}));
+
 const ENV_KEYS = [
   "BTW_TOKEN",
   "BTW_CHAT_ID",
@@ -12,11 +18,10 @@ const ENV_KEYS = [
 describe("telegram constants", () => {
   const originalEnv: Partial<Record<(typeof ENV_KEYS)[number], string | undefined>> =
     {};
-  const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
   beforeEach(() => {
     vi.resetModules();
-    consoleErrorSpy.mockClear();
+    mockLogModuleError.mockClear();
 
     for (const key of ENV_KEYS) {
       originalEnv[key] = process.env[key];
@@ -48,8 +53,11 @@ describe("telegram constants", () => {
     expect(() => getBtwToken()).toThrow(
       "Telegram configuration error: BTW_TOKEN is not set"
     );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Missing required environment variable: BTW_TOKEN"
+    expect(mockLogModuleError).toHaveBeenCalledWith(
+      "constants",
+      expect.any(Error),
+      "telegram env missing",
+      { envName: "BTW_TOKEN" }
     );
   });
 
@@ -69,8 +77,11 @@ describe("telegram constants", () => {
     expect(() => getKasaChatId()).toThrow(
       "Telegram configuration error: KASA_CHAT_ID is not set"
     );
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      "Missing required environment variable: KASA_CHAT_ID"
+    expect(mockLogModuleError).toHaveBeenCalledWith(
+      "constants",
+      expect.any(Error),
+      "telegram env missing",
+      { envName: "KASA_CHAT_ID" }
     );
   });
 

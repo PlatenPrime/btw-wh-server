@@ -1,5 +1,6 @@
 import { fixIncorrectSkuDataSchema } from "./schemas/fixIncorrectSkuDataSchema.js";
 import { fixIncorrectSkuDataUtil } from "./utils/fixIncorrectSkuDataUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Массово исправить поля у SKU, попавших под filter
  * @route   POST /api/skus/fix-incorrect-sku-data
@@ -24,7 +25,7 @@ export const fixIncorrectSkuDataController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fixing sku data:", error);
+        logModuleError("skus", error, "Error fixing sku data:");
         if (error instanceof Error && error.name === "MongoServerError") {
             const mongoError = error;
             if (mongoError.code === 11000) {

@@ -1,5 +1,6 @@
 import { createProdSchema } from "./schemas/createProdSchema.js";
 import { createProdUtil } from "./utils/createProdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Создать производителя
  * @route   POST /api/prods
@@ -25,7 +26,7 @@ export const createProdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error creating prod:", error);
+        logModuleError("prods", error, "Error creating prod:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

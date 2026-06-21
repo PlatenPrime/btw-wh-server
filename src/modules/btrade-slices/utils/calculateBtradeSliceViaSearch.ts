@@ -5,6 +5,7 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import { BtradeSlice } from "../models/BtradeSlice.js";
 import type { IBtradeSliceDataItem } from "../models/BtradeSlice.js";
 import { getUniqueArtikulsFromArtsUtil } from "./getUniqueArtikulsFromArtsUtil.js";
+import { logModuleDebug, logModuleError } from "../../../logging/logModuleError.js";
 
 const JITTER_MIN_MS = 200;
 const JITTER_MAX_MS = 1000;
@@ -29,9 +30,11 @@ export async function calculateBtradeSliceViaSearch(): Promise<{
   let count = 0;
   for (let i = 0; i < artikuls.length; i++) {
     const artikul = artikuls[i];
-    console.log(
-      `анализируется артикул ${i + 1} из ${artikuls.length} ${artikul} Btrade (search)`
-    );
+    logModuleDebug("btrade-slices", "btrade slice search processing artikul", {
+      index: i + 1,
+      total: artikuls.length,
+      artikul,
+    });
     try {
       const result = await getSharikStockData(artikul);
       if (result) {
@@ -49,8 +52,7 @@ export async function calculateBtradeSliceViaSearch(): Promise<{
         count += 1;
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[BtradeSlice/search] ${artikul}: ${msg}`);
+      logModuleError("btrade-slices", err, "btrade slice search failed", { artikul });
     }
     if (i < artikuls.length - 1) {
       await delay(jitterMs(JITTER_MIN_MS, JITTER_MAX_MS));
@@ -70,9 +72,11 @@ export async function fetchMissingBtradeSliceItemsViaSearch(
 
   for (let i = 0; i < missingArtikuls.length; i++) {
     const artikul = missingArtikuls[i];
-    console.log(
-      `fallback search: артикул ${i + 1} из ${missingArtikuls.length} ${artikul} Btrade`
-    );
+    logModuleDebug("btrade-slices", "btrade slice search fallback artikul", {
+      index: i + 1,
+      total: missingArtikuls.length,
+      artikul,
+    });
     try {
       const result = await getSharikStockData(artikul);
       if (result) {
@@ -82,8 +86,9 @@ export async function fetchMissingBtradeSliceItemsViaSearch(
         };
       }
     } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[BtradeSlice/search fallback] ${artikul}: ${msg}`);
+      logModuleError("btrade-slices", err, "btrade slice search fallback failed", {
+        artikul,
+      });
     }
     if (i < missingArtikuls.length - 1) {
       await delay(jitterMs(JITTER_MIN_MS, JITTER_MAX_MS));

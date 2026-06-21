@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { enrichDefsWithAsksUtil } from "./utils/enrichDefsWithAsksUtil.js";
 import { getLatestDefUtil } from "./utils/getLatestDefUtil.js";
 import { getLatestDefsSchema } from "./schemas/getLatestDefsSchema.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить последнюю актуальную запись о дефицитах с информацией о существующих заявках
@@ -50,7 +51,7 @@ export const getLatestDefsController = async (
     });
     return;
   } catch (error) {
-    console.error("Error in getLatestDefsController:", error);
+    logModuleError("defs", error, "Error in getLatestDefsController:");
     if (!res.headersSent) {
       res.status(500).json({
         success: false,

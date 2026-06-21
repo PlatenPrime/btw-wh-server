@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { calculateZonesSectorsUtil } from "../../utils/calculateZonesSectorsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const recalculateZonesSectors = async (req: Request, res: Response) => {
   try {
@@ -13,7 +14,7 @@ export const recalculateZonesSectors = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Error recalculating zones sectors:", error);
+    logModuleError("blocks", error, "Error recalculating zones sectors:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

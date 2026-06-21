@@ -1,6 +1,7 @@
 import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { updateSkugrByIdSchema } from "./schemas/updateSkugrByIdSchema.js";
 import { updateSkugrByIdUtil } from "./utils/updateSkugrByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить поля skugr (konkName, prodName, title, url, isSliced)
  * @route   PATCH /api/skugrs/id/:id
@@ -33,7 +34,7 @@ export const updateSkugrByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating skugr:", error);
+        logModuleError("skugrs", error, "Error updating skugr:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

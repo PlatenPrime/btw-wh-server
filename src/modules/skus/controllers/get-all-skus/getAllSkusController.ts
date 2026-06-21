@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAllSkusQuerySchema } from "./schemas/getAllSkusQuerySchema.js";
 import { getAllSkusUtil } from "./utils/getAllSkusUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить sku с пагинацией и фильтрами
@@ -28,7 +29,7 @@ export const getAllSkusController = async (
       pagination: result.pagination,
     });
   } catch (error) {
-    console.error("Error fetching skus:", error);
+    logModuleError("skus", error, "Error fetching skus:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

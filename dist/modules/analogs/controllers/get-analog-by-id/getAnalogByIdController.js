@@ -1,5 +1,6 @@
 import { getAnalogByIdSchema } from "./schemas/getAnalogByIdSchema.js";
 import { getAnalogByIdUtil } from "./utils/getAnalogByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить аналог по id с полями konk и prod
  * @route   GET /api/analogs/id/:id
@@ -26,7 +27,7 @@ export const getAnalogByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching analog by id:", error);
+        logModuleError("analogs", error, "Error fetching analog by id:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

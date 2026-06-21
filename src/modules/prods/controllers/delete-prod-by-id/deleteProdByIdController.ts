@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteProdByIdSchema } from "./schemas/deleteProdByIdSchema.js";
 import { deleteProdByIdUtil } from "./utils/deleteProdByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Удалить производителя по id
@@ -32,7 +33,7 @@ export const deleteProdByIdController = async (
       message: "Prod deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting prod:", error);
+    logModuleError("prods", error, "Error deleting prod:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

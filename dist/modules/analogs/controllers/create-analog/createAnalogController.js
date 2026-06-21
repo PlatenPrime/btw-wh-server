@@ -1,5 +1,6 @@
 import { createAnalogSchema } from "./schemas/createAnalogSchema.js";
 import { createAnalogUtil } from "./utils/createAnalogUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 function isDuplicateUrlError(err) {
     return (typeof err === "object" &&
         err !== null &&
@@ -28,7 +29,7 @@ export const createAnalogController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error creating analog:", error);
+        logModuleError("analogs", error, "Error creating analog:");
         if (res.headersSent)
             return;
         if (isDuplicateUrlError(error)) {

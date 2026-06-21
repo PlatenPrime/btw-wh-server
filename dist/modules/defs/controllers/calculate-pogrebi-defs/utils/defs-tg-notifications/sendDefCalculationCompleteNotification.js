@@ -1,4 +1,5 @@
 import { sendMessageToDefsChat } from "../../../../../../utils/telegram/sendMessageToDefsChat.js";
+import { logModuleError } from "../../../../../../logging/logModuleError.js";
 // Функция для разбивки массива на чанки
 const chunkArray = (array, chunkSize) => {
     const chunks = [];
@@ -84,7 +85,7 @@ export const sendDefCalculationCompleteNotification = async (result) => {
         }
     }
     catch (error) {
-        console.error("Failed to send completion notification to Defs Chat:", error);
+        logModuleError("defs", error, "Failed to send completion notification to Defs Chat:");
         // Не викидаємо помилку, щоб не переривати основний процес
     }
 };

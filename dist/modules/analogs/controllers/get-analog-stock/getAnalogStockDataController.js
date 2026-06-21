@@ -1,3 +1,4 @@
+import { logModuleError } from "../../../../logging/logModuleError.js";
 import { getAnalogByIdSchema } from "../get-analog-by-id/schemas/getAnalogByIdSchema.js";
 import { getAnalogStockDataUtil, UNSUPPORTED_KONK_CODE, } from "./utils/getAnalogStockDataUtil.js";
 /**
@@ -45,7 +46,7 @@ export const getAnalogStockDataController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching analog stock:", error);
+        logModuleError("analogs", error, "Error fetching analog stock:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

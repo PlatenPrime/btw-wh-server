@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteSkugrByIdSchema } from "./schemas/deleteSkugrByIdSchema.js";
 import { deleteSkugrByIdUtil } from "./utils/deleteSkugrByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Удалить группу товаров конкурента по id
@@ -30,7 +31,7 @@ export const deleteSkugrByIdController = async (
       message: "Skugr deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting skugr:", error);
+    logModuleError("skugrs", error, "Error deleting skugr:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

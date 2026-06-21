@@ -5,6 +5,10 @@ declare global {
   namespace Express {
     interface Request {
       /**
+       * Correlation id из pino-http (x-request-id).
+       */
+      id?: string;
+      /**
        * Данные пользователя из JWT токена
        */
       user?: {

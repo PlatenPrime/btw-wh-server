@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { updateAllBtradeStocksUtil } from "../../utils/updateAllBtradeStocksUtil.js";
 import { updateAllBtradeStocksSchema } from "./schemas/updateAllBtradeStocksSchema.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Обновить btradeStock для всех артикулов
@@ -24,7 +25,7 @@ export const updateAllBtradeStocksController = async (
 
     // Запускаем обновление btradeStock для всех артикулов в фоне
     updateAllBtradeStocksUtil().catch((error) => {
-      console.error("Error in background updateAllBtradeStocks:", error);
+      logModuleError("arts", error, "Error in background updateAllBtradeStocks:");
     });
 
     // Сразу возвращаем ответ клиенту
@@ -32,7 +33,7 @@ export const updateAllBtradeStocksController = async (
       message: "BtradeStock update process started",
     });
   } catch (error) {
-    console.error("Error starting btradeStock update:", error);
+    logModuleError("arts", error, "Error starting btradeStock update:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

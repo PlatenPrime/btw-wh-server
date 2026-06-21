@@ -1,5 +1,6 @@
 import { updateArtLimitSchema } from "./schemas/updateArtLimitSchema.js";
 import { updateArtLimitUtil } from "./utils/updateArtLimitUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const updateArtLimitController = async (req, res) => {
     try {
         const { id } = req.params;
@@ -27,7 +28,7 @@ export const updateArtLimitController = async (req, res) => {
         res.status(200).json(updatedArt);
     }
     catch (error) {
-        console.error("Error updating art limit:", error);
+        logModuleError("arts", error, "Error updating art limit:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

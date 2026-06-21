@@ -1,5 +1,6 @@
 import { getAnalogsByKonkSchema } from "./schemas/getAnalogsByKonkSchema.js";
 import { getAnalogsByKonkUtil } from "./utils/getAnalogsByKonkUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить аналоги по konkName
  * @route   GET /api/analogs/konk/:konkName
@@ -25,7 +26,7 @@ export const getAnalogsByKonkController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching analogs by konk:", error);
+        logModuleError("analogs", error, "Error fetching analogs by konk:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

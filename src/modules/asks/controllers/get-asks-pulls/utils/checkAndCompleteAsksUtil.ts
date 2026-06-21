@@ -5,6 +5,7 @@ import { completeAskUtil } from "../../complete-ask-by-id/utils/completeAskUtil.
 import { getCompleteAskMesUtil } from "../../complete-ask-by-id/utils/getCompleteAskMesUtil.js";
 import { sendCompleteAskMesUtil } from "../../complete-ask-by-id/utils/sendCompleteAskMesUtil.js";
 import { getRemainingQuantityUtil } from "../../get-ask-pull/utils/getRemainingQuantityUtil.js";
+import { logModuleError } from "../../../../../logging/logModuleError.js";
 
 /**
  * Проверяет asks на готовность к завершению и автоматически завершает их
@@ -114,12 +115,9 @@ export const checkAndCompleteAsksUtil = async (
       }
     } catch (error) {
       // Логируем ошибку, но продолжаем обработку остальных asks
-      console.error(
-        `Error completing ask ${(
-          ask._id as mongoose.Types.ObjectId
-        ).toString()}:`,
-        error instanceof Error ? error.message : error
-      );
+      logModuleError("asks", error, "failed to auto-complete ask", {
+        askId: (ask._id as mongoose.Types.ObjectId).toString(),
+      });
     }
   }
 

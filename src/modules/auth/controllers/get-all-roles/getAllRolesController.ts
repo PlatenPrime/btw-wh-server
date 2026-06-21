@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getAllRolesUtil } from "./utils/getAllRolesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getAllRolesController = async (
   _req: Request,
@@ -10,7 +11,7 @@ export const getAllRolesController = async (
     res.status(200).json(roles);
   } catch (error) {
     if (!res.headersSent) {
-      console.error(error);
+      logModuleError("auth", error, "operation failed");
       res.status(500).json({ message: "Error fetching roles", error });
     }
   }

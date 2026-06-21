@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { getPalletByIdSchema } from "./schemas/getPalletByIdSchema.js";
 import { getPalletUtil } from "./utils/getPalletUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getPalletByIdController = async (
   req: Request,
@@ -39,7 +40,7 @@ export const getPalletByIdController = async (
       data: palletObj,
     });
   } catch (error: any) {
-    console.error("getPalletByIdController error:", error);
+    logModuleError("pallets", error, "getPalletByIdController error:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

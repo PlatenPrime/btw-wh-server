@@ -1,5 +1,6 @@
 import { getAskByIdSchema } from "./schemas/getAskByIdSchema.js";
 import { getAskUtil } from "./utils/getAskUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getAskById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -28,7 +29,7 @@ export const getAskById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching ask by ID:", error);
+        logModuleError("asks", error, "Error fetching ask by ID:");
         res.status(500).json({
             message: "Server error while fetching ask",
             error: error instanceof Error ? error.message : "Unknown error",

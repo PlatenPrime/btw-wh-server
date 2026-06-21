@@ -1,6 +1,7 @@
 import { formatArtsForExcelUtil } from "./utils/formatArtsForExcelUtil.js";
 import { generateExcelUtil } from "./utils/generateExcelUtil.js";
 import { getArtsForExportUtil } from "./utils/getArtsForExportUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Экспортировать все артикулы в Excel файл
  * @route   GET /api/arts/export
@@ -30,7 +31,7 @@ export const exportArtsToExcelController = async (req, res) => {
         res.status(200).send(buffer);
     }
     catch (error) {
-        console.error("Error exporting arts to Excel:", error);
+        logModuleError("arts", error, "Error exporting arts to Excel:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

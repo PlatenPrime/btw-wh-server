@@ -2,129 +2,111 @@ import { CronJob } from "cron";
 import fs from "fs/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-// Mock cron
+const mockLogger = vi.hoisted(() => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  fatal: vi.fn(),
+  debug: vi.fn(),
+}));
+
 vi.mock("cron");
-const mockedCronJob = vi.mocked(CronJob);
-
-// Mock fs
-vi.mock("fs/promises");
-const mockedFs = vi.mocked(fs);
-
-// Mock exportCollectionsToJson
 vi.mock("../utils/exportCollectionsToJson.js", () => ({
   exportCollectionsToJson: vi.fn(),
 }));
-
-// Mock telegram functions
 vi.mock("../../utils/telegram/sendFileToTGUser.js", () => ({
   sendFileToTGUser: vi.fn(),
 }));
-
 vi.mock("../../utils/telegram/sendMessageToPlaten.js", () => ({
   sendMessageToPlaten: vi.fn(),
 }));
-
-// Mock constants
 vi.mock("../../constants/telegram.js", () => ({
   getBtwPlatenId: () => "555196992",
 }));
+vi.mock("../../logging/createLogger.js", () => ({
+  createLogger: () => mockLogger,
+}));
+vi.mock("fs/promises");
 
-// Import after mocking
+const mockedCronJob = vi.mocked(CronJob);
+const mockedFs = vi.mocked(fs);
+
 import { sendFileToTGUser } from "../../utils/telegram/sendFileToTGUser.js";
 import { sendMessageToPlaten } from "../../utils/telegram/sendMessageToPlaten.js";
 import { startCollectionsBackupCron } from "../startCollectionsBackupCron.js";
 import { exportCollectionsToJson } from "../utils/exportCollectionsToJson.js";
 
-// Mock console methods
-const consoleSpy = {
-  log: vi.spyOn(console, "log"),
-  error: vi.spyOn(console, "error"),
-  warn: vi.spyOn(console, "warn"),
-};
-
 describe("startCollectionsBackupCron", () => {
-  let mockCronJobInstance: any;
+  let mockCronJobInstance: { start: ReturnType<typeof vi.fn>; stop: ReturnType<typeof vi.fn> };
   let cronCallback: (() => Promise<void>) | null = null;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    consoleSpy.log.mockClear();
-    consoleSpy.error.mockClear();
-    consoleSpy.warn.mockClear();
+    cronCallback = null;
 
-    // Создаем mock экземпляр CronJob
     mockCronJobInstance = {
       start: vi.fn(),
       stop: vi.fn(),
     };
 
-    // Мокируем конструктор CronJob
-    mockedCronJob.mockImplementation((...args: any[]) => {
-      // Первый аргумент - cron pattern
-      // Второй аргумент - callback функция
+    mockedCronJob.mockImplementation((...args: unknown[]) => {
       if (args[1] && typeof args[1] === "function") {
-        cronCallback = args[1];
+        cronCallback = args[1] as () => Promise<void>;
       }
-      return mockCronJobInstance as any;
+      return mockCronJobInstance as never;
     });
   });
 
   it("должен создать CronJob с правильным расписанием и таймзоной", () => {
     const job = startCollectionsBackupCron();
 
-    // Проверяем что CronJob был создан
     expect(mockedCronJob).toHaveBeenCalledWith(
-      "0 0 6 * * *", // расписание
-      expect.any(Function), // callback
-      null, // onComplete
-      true, // start
-      "Europe/Kiev" // timezone
+      "0 0 6 * * *",
+      expect.any(Function),
+      null,
+      true,
+      "Europe/Kiev"
     );
 
     expect(job).toBe(mockCronJobInstance);
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      "[CRON Backup] Started: daily at 06:00 (Kiev time)"
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      { schedule: "0 0 6 * * *", timezone: "Europe/Kiev" },
+      "cron started"
     );
   });
 
   it("должен успешно выполнить бэкап и отправить файл", async () => {
     const mockFilePath = "/path/to/backup.json";
 
-    (exportCollectionsToJson as any).mockResolvedValue(mockFilePath);
-    (sendFileToTGUser as any).mockResolvedValue(undefined);
+    vi.mocked(exportCollectionsToJson).mockResolvedValue(mockFilePath);
+    vi.mocked(sendFileToTGUser).mockResolvedValue(undefined);
     mockedFs.unlink.mockResolvedValue(undefined);
 
     startCollectionsBackupCron();
 
-    // Вызываем callback функцию
     expect(cronCallback).toBeDefined();
     if (cronCallback) {
       await cronCallback();
     }
 
-    // Проверяем последовательность вызовов
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      "[CRON Backup] Starting collections backup..."
-    );
+    expect(mockLogger.info).toHaveBeenCalledWith("starting collections backup");
     expect(exportCollectionsToJson).toHaveBeenCalled();
-    expect(sendFileToTGUser).toHaveBeenCalledWith(
-      mockFilePath,
-      "555196992"
-    );
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      "[CRON Backup] Backup completed and sent successfully"
+    expect(sendFileToTGUser).toHaveBeenCalledWith(mockFilePath, "555196992");
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      "backup completed and sent successfully"
     );
     expect(mockedFs.unlink).toHaveBeenCalledWith(mockFilePath);
-    expect(consoleSpy.log).toHaveBeenCalledWith(
-      `[CRON Backup] Temporary file deleted: ${mockFilePath}`
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      { backupFilePath: mockFilePath },
+      "temporary backup file deleted"
     );
   });
 
   it("должен обработать ошибку при экспорте и отправить уведомление", async () => {
     const exportError = new Error("Export failed");
 
-    (exportCollectionsToJson as any).mockRejectedValue(exportError);
-    (sendMessageToPlaten as any).mockResolvedValue(undefined);
+    vi.mocked(exportCollectionsToJson).mockRejectedValue(exportError);
+    vi.mocked(sendMessageToPlaten).mockResolvedValue(undefined);
 
     startCollectionsBackupCron();
 
@@ -133,10 +115,9 @@ describe("startCollectionsBackupCron", () => {
       await cronCallback();
     }
 
-    expect(exportCollectionsToJson).toHaveBeenCalled();
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      "[CRON Backup] Error:",
-      "Export failed"
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      { err: exportError },
+      "collections backup failed"
     );
     expect(sendMessageToPlaten).toHaveBeenCalledWith(
       "❌ Помилка під час створення бэкапу колекцій:\nExport failed"
@@ -148,9 +129,9 @@ describe("startCollectionsBackupCron", () => {
     const mockFilePath = "/path/to/backup.json";
     const sendError = new Error("Send failed");
 
-    (exportCollectionsToJson as any).mockResolvedValue(mockFilePath);
-    (sendFileToTGUser as any).mockRejectedValue(sendError);
-    (sendMessageToPlaten as any).mockResolvedValue(undefined);
+    vi.mocked(exportCollectionsToJson).mockResolvedValue(mockFilePath);
+    vi.mocked(sendFileToTGUser).mockRejectedValue(sendError);
+    vi.mocked(sendMessageToPlaten).mockResolvedValue(undefined);
     mockedFs.unlink.mockResolvedValue(undefined);
 
     startCollectionsBackupCron();
@@ -160,36 +141,13 @@ describe("startCollectionsBackupCron", () => {
       await cronCallback();
     }
 
-    expect(exportCollectionsToJson).toHaveBeenCalled();
-    expect(sendFileToTGUser).toHaveBeenCalled();
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      "[CRON Backup] Error:",
-      "Send failed"
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      { err: sendError },
+      "collections backup failed"
     );
     expect(sendMessageToPlaten).toHaveBeenCalledWith(
       "❌ Помилка під час створення бэкапу колекцій:\nSend failed"
     );
-    // Файл должен быть удален при ошибке
-    expect(mockedFs.unlink).toHaveBeenCalledWith(mockFilePath);
-  });
-
-  it("должен удалить файл при ошибке если он был создан", async () => {
-    const mockFilePath = "/path/to/backup.json";
-    const sendError = new Error("Send failed");
-
-    (exportCollectionsToJson as any).mockResolvedValue(mockFilePath);
-    (sendFileToTGUser as any).mockRejectedValue(sendError);
-    (sendMessageToPlaten as any).mockResolvedValue(undefined);
-    mockedFs.unlink.mockResolvedValue(undefined);
-
-    startCollectionsBackupCron();
-
-    expect(cronCallback).toBeDefined();
-    if (cronCallback) {
-      await cronCallback();
-    }
-
-    // Файл должен быть удален даже при ошибке отправки
     expect(mockedFs.unlink).toHaveBeenCalledWith(mockFilePath);
   });
 
@@ -197,8 +155,8 @@ describe("startCollectionsBackupCron", () => {
     const mockFilePath = "/path/to/backup.json";
     const deleteError = new Error("Delete failed");
 
-    (exportCollectionsToJson as any).mockResolvedValue(mockFilePath);
-    (sendFileToTGUser as any).mockResolvedValue(undefined);
+    vi.mocked(exportCollectionsToJson).mockResolvedValue(mockFilePath);
+    vi.mocked(sendFileToTGUser).mockResolvedValue(undefined);
     mockedFs.unlink.mockRejectedValue(deleteError);
 
     startCollectionsBackupCron();
@@ -208,10 +166,9 @@ describe("startCollectionsBackupCron", () => {
       await cronCallback();
     }
 
-    expect(mockedFs.unlink).toHaveBeenCalledWith(mockFilePath);
-    expect(consoleSpy.warn).toHaveBeenCalledWith(
-      `[CRON Backup] Failed to delete temporary file: ${mockFilePath}`,
-      deleteError
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      { err: deleteError, backupFilePath: mockFilePath },
+      "failed to delete temporary backup file"
     );
   });
 
@@ -219,8 +176,8 @@ describe("startCollectionsBackupCron", () => {
     const exportError = new Error("Export failed");
     const notificationError = new Error("Notification failed");
 
-    (exportCollectionsToJson as any).mockRejectedValue(exportError);
-    (sendMessageToPlaten as any).mockRejectedValue(notificationError);
+    vi.mocked(exportCollectionsToJson).mockRejectedValue(exportError);
+    vi.mocked(sendMessageToPlaten).mockRejectedValue(notificationError);
 
     startCollectionsBackupCron();
 
@@ -229,13 +186,9 @@ describe("startCollectionsBackupCron", () => {
       await cronCallback();
     }
 
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      "[CRON Backup] Error:",
-      "Export failed"
-    );
-    expect(consoleSpy.error).toHaveBeenCalledWith(
-      "[CRON Backup] Failed to send error notification:",
-      notificationError
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      { err: notificationError },
+      "failed to send backup error notification"
     );
   });
 });

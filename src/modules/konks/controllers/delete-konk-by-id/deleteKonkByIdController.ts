@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteKonkByIdSchema } from "./schemas/deleteKonkByIdSchema.js";
 import { deleteKonkByIdUtil } from "./utils/deleteKonkByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Удалить конкурента по id
@@ -32,7 +33,7 @@ export const deleteKonkByIdController = async (
       message: "Konk deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting konk:", error);
+    logModuleError("konks", error, "Error deleting konk:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

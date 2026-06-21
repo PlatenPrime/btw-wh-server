@@ -5,6 +5,7 @@ import { getExcludedCompetitorSet } from "../../slices/config/excludedCompetitor
 import { buildCompensatingDataKeyQueue, runCompensatingSliceRefetchLoop, } from "./compensatingSliceRunner.js";
 import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { isFullMinusOneSliceItem } from "./isFullMinusOneSliceItem.js";
+import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.js";
 /**
  * Повторный опрос позиций AnalogSlice за sliceDate с data entry stock/price оба -1.
  * При ответе, где уже не оба -1, перезаписывает ключ в том же документе.
@@ -22,7 +23,7 @@ export async function runCompensatingAnalogSlices(sliceDate) {
                 .select("_id")
                 .lean());
             if (!analog) {
-                console.warn(`[CompensatingAnalogSlices] нет аналога ${artikulKey} у ${konkName}, пропуск`);
+                logModuleWarn("slice-compensation", "[CompensatingAnalogSlices] нет аналога ${artikulKey} у ${konkName}, пропуск");
                 return { refetched: 0, updated: 0 };
             }
             const result = await getAnalogStockDataUtil(analog._id.toString());
@@ -42,7 +43,11 @@ export async function runCompensatingAnalogSlices(sliceDate) {
         }
         catch (err) {
             const msg = err instanceof Error ? err.message : String(err);
-            console.error(`[CompensatingAnalogSlices] ${konkName} ${artikulKey}: ${msg}`);
+            logModuleError("slice-compensation", err, "compensating analog slice refetch failed", {
+                konkName,
+                artikulKey,
+                message: msg,
+            });
             return { refetched: 0, updated: 0 };
         }
     });

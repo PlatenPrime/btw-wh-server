@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createProdSchema } from "./schemas/createProdSchema.js";
 import { createProdUtil } from "./utils/createProdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Создать производителя
@@ -31,7 +32,7 @@ export const createProdController = async (
       data: prod,
     });
   } catch (error) {
-    console.error("Error creating prod:", error);
+    logModuleError("prods", error, "Error creating prod:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

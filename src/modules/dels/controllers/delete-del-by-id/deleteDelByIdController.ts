@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteDelByIdSchema } from "./schemas/deleteDelByIdSchema.js";
 import { deleteDelByIdUtil } from "./utils/deleteDelByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Удалить поставку по id
@@ -32,7 +33,7 @@ export const deleteDelByIdController = async (
       message: "Del deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting del:", error);
+    logModuleError("dels", error, "Error deleting del:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getAllConstantsUtil } from "./utils/getAllConstantsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить все константы
@@ -16,7 +17,7 @@ export const getAllConstantsController = async (
       data: list,
     });
   } catch (error) {
-    console.error("Error fetching constants:", error);
+    logModuleError("constants", error, "Error fetching constants:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

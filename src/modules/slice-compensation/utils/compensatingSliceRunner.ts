@@ -5,6 +5,7 @@ import {
   SKU_SLICE_REQUEST_JITTER_MIN_MS,
 } from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
+import { logModuleDebug } from "../../../logging/logModuleError.js";
 
 export type CompensatingSliceDoc = {
   konkName: string;
@@ -54,7 +55,12 @@ export async function runCompensatingSliceRefetchLoop(
   let refetched = 0;
   let updated = 0;
   for (let i = 0; i < queue.length; i++) {
-    console.log(`[CompensatingSliceRefetchLoop] Processing item ${i + 1} of ${queue.length}`);
+    logModuleDebug("slice-compensation", "compensating slice refetch item", {
+      index: i + 1,
+      total: queue.length,
+      konkName: queue[i]!.konkName,
+      dataKey: queue[i]!.dataKey,
+    });
     const stats = await processItem(queue[i]!);
     refetched += stats.refetched;
     updated += stats.updated;

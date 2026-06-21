@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getZoneByTitleSchema } from "./schemas/getZoneByTitleSchema.js";
 import { getZoneByTitleUtil } from "./utils/getZoneByTitleUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getZoneByTitle = async (req: Request, res: Response) => {
   try {
@@ -31,7 +32,7 @@ export const getZoneByTitle = async (req: Request, res: Response) => {
       data: zone,
     });
   } catch (error) {
-    console.error("Error fetching zone by title:", error);
+    logModuleError("zones", error, "Error fetching zone by title:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteSkugrWithSkusSchema } from "./schemas/deleteSkugrWithSkusSchema.js";
 import { deleteSkugrWithSkusUtil } from "./utils/deleteSkugrWithSkusUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Удалить товарную группу и документы Sku из её skus; id убрать из других групп
@@ -36,7 +37,7 @@ export const deleteSkugrWithSkusController = async (
       },
     });
   } catch (error) {
-    console.error("Error deleting skugr with skus:", error);
+    logModuleError("skugrs", error, "Error deleting skugr with skus:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

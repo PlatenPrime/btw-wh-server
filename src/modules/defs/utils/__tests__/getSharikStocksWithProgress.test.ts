@@ -1,4 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const { logModuleError, logModuleInfo, logModuleWarn } = vi.hoisted(() => ({
+  logModuleError: vi.fn(),
+  logModuleInfo: vi.fn(),
+  logModuleWarn: vi.fn(),
+}));
+
+vi.mock("../../../../logging/logModuleError.js", () => ({
+  logModuleError,
+  logModuleInfo,
+  logModuleWarn,
+}));
+
 import { IMergedPosesResult } from "../../../poses/utils/mergePoses.js";
 import { getSharikStocksWithProgress } from "../getSharikStocksWithProgress.js";
 
@@ -132,8 +145,6 @@ describe("getSharikStocksWithProgress", () => {
       ART001: 20,
     };
 
-    const consoleSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-
     // Мокаем getSharikData выбрасывающий ошибку
     mockedGetSharikStockData.mockRejectedValueOnce(new Error("Network error"));
 
@@ -154,12 +165,11 @@ describe("getSharikStocksWithProgress", () => {
       },
     });
 
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "Помилка при отриманні даних Sharik для артикула ART001:",
-      expect.any(Error)
+    expect(logModuleWarn).toHaveBeenCalledWith(
+      "defs",
+      "failed to fetch sharik stock for artikul",
+      { artikul: "ART001", err: expect.any(Error) }
     );
-
-    consoleSpy.mockRestore();
   });
 
   it("должна обрабатывать пустой объект stocks", async () => {
@@ -187,8 +197,6 @@ describe("getSharikStocksWithProgress", () => {
         boxes: 1,
       };
     }
-
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
     // Мокаем getSharikData для всех артикулов
     mockedGetSharikStockData.mockResolvedValue({
@@ -228,12 +236,23 @@ describe("getSharikStocksWithProgress", () => {
     );
 
     // Проверяем логи
-    expect(consoleSpy).toHaveBeenCalledWith("Початок обробки 12 артикулів");
-    expect(consoleSpy).toHaveBeenCalledWith("Оброблено 5 з 12 артикулів");
-    expect(consoleSpy).toHaveBeenCalledWith("Оброблено 10 з 12 артикулів");
-    expect(consoleSpy).toHaveBeenCalledWith("Оброблено 12 з 12 артикулів");
-
-    consoleSpy.mockRestore();
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "defs",
+      "sharik stocks processing started",
+      { totalItems: 12 }
+    );
+    expect(logModuleInfo).toHaveBeenCalledWith("defs", "sharik stocks progress", {
+      processed: 5,
+      totalItems: 12,
+    });
+    expect(logModuleInfo).toHaveBeenCalledWith("defs", "sharik stocks progress", {
+      processed: 10,
+      totalItems: 12,
+    });
+    expect(logModuleInfo).toHaveBeenCalledWith("defs", "sharik stocks progress", {
+      processed: 12,
+      totalItems: 12,
+    });
   });
 
   it("должна правильно рассчитывать difQuant для разных сценариев", async () => {
@@ -317,28 +336,31 @@ describe("getSharikStocksWithProgress", () => {
       quantity: 15,
     });
 
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
     const resultPromise = getSharikStocksWithProgress(mockStocks);
 
     await vi.runAllTimersAsync();
 
     await resultPromise;
 
-    expect(consoleSpy).toHaveBeenCalledWith("Початок обробки 1 артикулів");
-    expect(consoleSpy).toHaveBeenCalledWith(
-      expect.stringMatching(/Обробка 1 артикулів завершена за \d+ секунд/)
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "defs",
+      "sharik stocks processing started",
+      { totalItems: 1 }
     );
-
-    consoleSpy.mockRestore();
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "defs",
+      "sharik stocks processing completed",
+      expect.objectContaining({
+        totalItems: 1,
+        durationSec: expect.any(Number),
+      })
+    );
   });
 
   it("должна выбрасывать ошибку при критической ошибке", async () => {
     const mockStocks: IMergedPosesResult = {
       ART001: { nameukr: "Товар 1", quant: 10, boxes: 1 },
     };
-
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     // Мокаем критическую ошибку на уровне try-catch в функции
     mockedGetSharikStockData.mockRejectedValue(new Error("Critical error"));
@@ -360,7 +382,5 @@ describe("getSharikStocksWithProgress", () => {
         limit: undefined,
       },
     });
-
-    consoleSpy.mockRestore();
   });
 });

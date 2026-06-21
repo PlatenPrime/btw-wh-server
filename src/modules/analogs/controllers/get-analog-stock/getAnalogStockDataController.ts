@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 import { getAnalogByIdSchema } from "../get-analog-by-id/schemas/getAnalogByIdSchema.js";
 import {
   getAnalogStockDataUtil,
@@ -55,7 +56,7 @@ export const getAnalogStockDataController = async (
       data,
     });
   } catch (error) {
-    console.error("Error fetching analog stock:", error);
+    logModuleError("analogs", error, "Error fetching analog stock:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

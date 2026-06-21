@@ -1,5 +1,6 @@
 import { updateDelArtikulSchema } from "./schemas/updateDelArtikulSchema.js";
 import { updateDelArtikulByDelIdUtil } from "./utils/updateDelArtikulByDelIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить значение указанного артикула в поставке (данные с sharik.ua)
  * @route   PATCH /api/dels/:id/artikuls/:artikul
@@ -31,7 +32,7 @@ export const updateDelArtikulByDelIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating del artikul:", error);
+        logModuleError("dels", error, "Error updating del artikul:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

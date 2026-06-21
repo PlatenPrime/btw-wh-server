@@ -1,3 +1,4 @@
+import { logModuleError } from "../../../../logging/logModuleError.js";
 import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { createSkugrSchema } from "./schemas/createSkugrSchema.js";
 import { InvalidSkuReferencesError, createSkugrUtil, } from "./utils/createSkugrUtil.js";
@@ -26,7 +27,7 @@ export const createSkugrController = async (req, res) => {
             res.status(400).json({ message: error.message });
             return;
         }
-        console.error("Error creating skugr:", error);
+        logModuleError("skugrs", error, "Error creating skugr:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

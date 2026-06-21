@@ -1,5 +1,6 @@
 import { deleteVariantByIdSchema } from "./schemas/deleteVariantByIdSchema.js";
 import { deleteVariantByIdUtil } from "./utils/deleteVariantByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Удалить вариант по id
  * @route   DELETE /api/variants/id/:id
@@ -23,7 +24,7 @@ export const deleteVariantByIdController = async (req, res) => {
         res.status(200).json({ message: "Variant deleted successfully" });
     }
     catch (error) {
-        console.error("Error deleting variant:", error);
+        logModuleError("variants", error, "Error deleting variant:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

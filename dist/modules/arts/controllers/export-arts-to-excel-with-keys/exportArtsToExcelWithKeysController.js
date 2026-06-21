@@ -1,6 +1,7 @@
 import { formatArtsForExcelWithKeysUtil } from "./utils/formatArtsForExcelWithKeysUtil.js";
 import { generateExcelWithKeysUtil } from "./utils/generateExcelWithKeysUtil.js";
 import { getArtsForExportWithKeysUtil } from "./utils/getArtsForExportWithKeysUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Экспортировать все артикулы в key-based Excel файл
  * @route   GET /api/arts/export-keys
@@ -24,7 +25,7 @@ export const exportArtsToExcelWithKeysController = async (req, res) => {
         res.status(200).send(buffer);
     }
     catch (error) {
-        console.error("Error exporting arts to key-based Excel:", error);
+        logModuleError("arts", error, "Error exporting arts to key-based Excel:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

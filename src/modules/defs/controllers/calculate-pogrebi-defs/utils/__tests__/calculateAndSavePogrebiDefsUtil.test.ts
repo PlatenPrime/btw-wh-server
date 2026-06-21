@@ -1,4 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const { logModuleError } = vi.hoisted(() => ({
+  logModuleError: vi.fn(),
+}));
+
+vi.mock("../../../../../../logging/logModuleError.js", () => ({
+  logModuleError,
+}));
+
 import { calculateAndSavePogrebiDefsUtil } from "../calculateAndSavePogrebiDefsUtil.js";
 
 // Мокаем зависимости
@@ -183,7 +192,6 @@ describe("calculateAndSavePogrebiDefsUtil", () => {
 
   it("должна обрабатывать ошибки и завершать отслеживание", async () => {
     const error = new Error("Database connection failed");
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     (getPogrebiDefStocks as any).mockRejectedValue(error);
 
@@ -194,12 +202,11 @@ describe("calculateAndSavePogrebiDefsUtil", () => {
     expect(sendDefCalculationStartNotification).toHaveBeenCalledTimes(1);
     expect(finishCalculationTracking).toHaveBeenCalledTimes(1);
     expect(sendDefCalculationErrorNotification).toHaveBeenCalledWith(error);
-    expect(consoleSpy).toHaveBeenCalledWith(
-      "Помилка в calculateAndSavePogrebiDefs:",
-      error
+    expect(logModuleError).toHaveBeenCalledWith(
+      "defs",
+      error,
+      "Помилка в calculateAndSavePogrebiDefs:"
     );
-
-    consoleSpy.mockRestore();
   });
 
   it("должна обрабатывать ошибки без message", async () => {

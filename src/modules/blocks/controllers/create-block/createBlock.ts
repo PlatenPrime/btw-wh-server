@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createBlockSchema } from "./schemas/createBlockSchema.js";
 import { checkBlockDuplicatesUtil } from "./utils/checkBlockDuplicatesUtil.js";
 import { createBlockUtil } from "./utils/createBlockUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const createBlock = async (req: Request, res: Response) => {
   try {
@@ -36,7 +37,7 @@ export const createBlock = async (req: Request, res: Response) => {
       data: block,
     });
   } catch (error) {
-    console.error("Error creating block:", error);
+    logModuleError("blocks", error, "Error creating block:");
 
     // Обработка ошибок MongoDB
     if (error instanceof Error && error.name === "MongoServerError") {

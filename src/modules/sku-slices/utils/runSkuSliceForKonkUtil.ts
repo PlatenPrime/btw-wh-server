@@ -6,6 +6,7 @@ import {
 } from "../../skus/utils/getSkuStockDataUtil.js";
 import { isInvalidSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { SkuSlice } from "../models/SkuSlice.js";
+import { createLogger } from "../../../logging/createLogger.js";
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
@@ -28,6 +29,7 @@ async function fetchSkuStockWithRetry(
   productKey: string,
   skuId: string
 ) {
+  const log = createLogger({ module: "sku-slices", konkName });
   const delays = [1000, 3000, 5000];
 
   let lastError: unknown = null;
@@ -45,15 +47,14 @@ async function fetchSkuStockWithRetry(
       lastError = err;
       const msg = err instanceof Error ? err.message : String(err);
 
-      console.warn(
-        `[SkuSlice ${konkName}] ${productKey}: попытка ${attempt}/${delays.length} завершилась с ошибкой: ${msg}`
+      log.warn(
+        { productKey, attempt, maxAttempts: delays.length, err: msg },
+        "sku stock fetch attempt failed"
       );
 
       if (attempt < delays.length) {
         const waitMs = delays[attempt - 1]!;
-        console.warn(
-          `[SkuSlice ${konkName}] ${productKey}: повторная попытка через ${waitMs} мс`
-        );
+        log.warn({ productKey, waitMs }, "sku stock fetch retry scheduled");
         await delay(waitMs);
       }
     }
@@ -78,6 +79,7 @@ export async function runSkuSliceForKonkUtil(
   konkName: string,
   date: Date
 ): Promise<SkuSliceKonkResult> {
+  const log = createLogger({ module: "sku-slices", konkName });
   const sliceDate = toSliceDate(date);
   const skugrs = (await Skugr.find({ konkName, isSliced: true })
     .select("skus")
@@ -111,8 +113,9 @@ export async function runSkuSliceForKonkUtil(
     const skuId = sku._id.toString();
     const productKey = sku.productId!.trim();
 
-    console.log(
-      `[SkuSlice ${konkName}] анализируется SKU ${productKey} (${i + 1} из ${withPid.length})`
+    log.debug(
+      { productKey, index: i + 1, total: withPid.length },
+      "processing sku for slice"
     );
 
     try {
@@ -136,15 +139,13 @@ export async function runSkuSliceForKonkUtil(
     } catch (err) {
       const e = err as Error & { code?: string };
       if (e.code === UNSUPPORTED_KONK_CODE) {
-        console.warn(
-          `[SkuSlice ${konkName}] неподдерживаемый конкурент для stock, срез прерван`
-        );
+        log.warn("unsupported konk for stock fetch, slice aborted");
         errors += withPid.length - i;
         break;
       }
       errors += 1;
       const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[SkuSlice ${konkName}] ${productKey}: ${msg}`);
+      log.error({ productKey, err: msg }, "sku slice item failed");
     }
 
     if (i < withPid.length - 1) {

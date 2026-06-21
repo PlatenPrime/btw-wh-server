@@ -1,4 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+const { logModuleError } = vi.hoisted(() => ({
+    logModuleError: vi.fn(),
+}));
+vi.mock("../../../../logging/logModuleError.js", () => ({
+    logModuleError,
+}));
 import { getArtLimits } from "../getArtLimits.js";
 // Мокаем модель Art
 vi.mock("../../../arts/models/Art.js", () => ({
@@ -51,11 +57,9 @@ describe("getArtLimits", () => {
             }),
         });
         Art.find = mockFind;
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
         const result = await getArtLimits(["ART001"]);
         expect(result).toEqual({});
-        expect(consoleSpy).toHaveBeenCalledWith("Помилка при отриманні лімітів з моделі Art:", expect.any(Error));
-        consoleSpy.mockRestore();
+        expect(logModuleError).toHaveBeenCalledWith("defs", expect.any(Error), "Помилка при отриманні лімітів з моделі Art:");
     });
     it("должна фильтровать артикулы с undefined лимитами", async () => {
         const mockArts = [

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { updateSegSchema } from "./schemas/updateSegSchema.js";
 import { updateSegUtil } from "./utils/updateSegUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const updateSeg = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -55,7 +56,7 @@ export const updateSeg = async (req: Request, res: Response) => {
       } else if (error instanceof Error && error.message.includes("zones")) {
         res.status(400).json({ message: error.message });
       } else {
-        console.error("updateSeg error:", error);
+        logModuleError("segs", error, "updateSeg error:");
         res.status(500).json({
           message: "Server error",
           error: error instanceof Error ? error.message : error,

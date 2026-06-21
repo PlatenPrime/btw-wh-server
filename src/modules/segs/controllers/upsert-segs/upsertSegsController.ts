@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { upsertSegsSchema } from "./schemas/upsertSegsSchema.js";
 import { upsertSegsUtil } from "./utils/upsertSegsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const upsertSegsController = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -31,7 +32,7 @@ export const upsertSegsController = async (req: Request, res: Response) => {
       data: result!,
     });
   } catch (error) {
-    console.error("upsertSegsController error:", error);
+    logModuleError("segs", error, "upsertSegsController error:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

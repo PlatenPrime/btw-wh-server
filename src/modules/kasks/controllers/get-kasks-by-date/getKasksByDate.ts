@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getKasksByDateSchema } from "./schemas/getKasksByDateSchema.js";
 import { getKasksByDateUtil } from "./utils/getKasksByDateUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getKasksByDate = async (
   req: Request,
@@ -24,7 +25,7 @@ export const getKasksByDate = async (
       count: kasks.length,
     });
   } catch (error) {
-    console.error("Error fetching kasks by date:", error);
+    logModuleError("kasks", error, "Error fetching kasks by date:");
     res.status(500).json({
       message: "Server error while fetching kasks by date",
       error: error instanceof Error ? error.message : "Unknown error",

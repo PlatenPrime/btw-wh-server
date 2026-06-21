@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { getKonkBtradeComparisonExcelSchema } from "./schemas/getKonkBtradeComparisonExcelSchema.js";
 import { getKonkBtradeComparisonRangeUtil } from "./utils/getKonkBtradeComparisonRangeUtil.js";
 import { buildKonkBtradeComparisonExcel } from "./utils/buildKonkBtradeComparisonExcel.js";
+import { logModuleWarn } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Экспорт сравнительных срезов по группе аналогов (конкурент + производитель) и Btrade в Excel за период дат
@@ -23,9 +24,9 @@ export const getKonkBtradeComparisonExcelController = async (
 
   if (!parseResult.success) {
     const errors = parseResult.error.flatten();
-    console.error("[getKonkBtradeComparisonExcel] Validation failed:", {
+    logModuleWarn("analog-slices", "konk btrade comparison excel validation failed", {
       query: req.query,
-      errors: errors.fieldErrors,
+      fieldErrors: errors.fieldErrors,
       formErrors: errors.formErrors,
     });
     res.status(400).json({

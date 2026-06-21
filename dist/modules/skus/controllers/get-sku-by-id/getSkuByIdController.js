@@ -1,5 +1,6 @@
 import { getSkuByIdSchema } from "./schemas/getSkuByIdSchema.js";
 import { getSkuByIdUtil } from "./utils/getSkuByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить sku по id
  * @route   GET /api/skus/id/:id
@@ -26,7 +27,7 @@ export const getSkuByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching sku by id:", error);
+        logModuleError("skus", error, "Error fetching sku by id:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

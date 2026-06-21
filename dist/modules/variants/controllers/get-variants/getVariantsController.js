@@ -1,5 +1,6 @@
 import { getVariantsQuerySchema } from "./schemas/getVariantsQuerySchema.js";
 import { getVariantsUtil } from "./utils/getVariantsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить варианты с пагинацией и фильтрами
  * @route   GET /api/variants
@@ -22,7 +23,7 @@ export const getVariantsController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching variants:", error);
+        logModuleError("variants", error, "Error fetching variants:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

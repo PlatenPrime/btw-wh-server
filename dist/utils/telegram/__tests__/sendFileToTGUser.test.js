@@ -2,6 +2,10 @@ import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+const { logModuleDebug, logModuleError } = vi.hoisted(() => ({
+    logModuleDebug: vi.fn(),
+    logModuleError: vi.fn(),
+}));
 // Mock axios
 vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
@@ -13,11 +17,10 @@ vi.mock("form-data", () => {
     const MockFormData = vi.fn();
     return { default: MockFormData };
 });
-// Mock console methods
-const consoleSpy = {
-    log: vi.spyOn(console, "log"),
-    error: vi.spyOn(console, "error"),
-};
+vi.mock("../../../logging/logModuleError.js", () => ({
+    logModuleDebug,
+    logModuleError,
+}));
 // Mock constants
 vi.mock("../../../constants/telegram", () => ({
     getBtwToken: () => "mock-token",
@@ -27,8 +30,6 @@ import { sendFileToTGUser } from "../sendFileToTGUser.js";
 describe("sendFileToTGUser", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        consoleSpy.log.mockClear();
-        consoleSpy.error.mockClear();
     });
     afterEach(() => {
         vi.restoreAllMocks();
@@ -82,7 +83,11 @@ describe("sendFileToTGUser", () => {
                 "content-type": "multipart/form-data",
             },
         });
-        expect(consoleSpy.log).toHaveBeenCalledWith("Файл успішно відправлено користувачу:", mockSuccessResponse);
+        expect(logModuleDebug).toHaveBeenCalledWith("telegram", "file sent to user", {
+            userId: "123456789",
+            filePath: "/path/to/file.txt",
+            messageId: 124,
+        });
     });
     it("should throw error for empty filePath", async () => {
         await expect(sendFileToTGUser("", "123456789")).rejects.toThrow("File path cannot be empty");

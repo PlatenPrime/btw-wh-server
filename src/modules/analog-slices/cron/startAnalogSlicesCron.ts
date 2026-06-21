@@ -2,6 +2,7 @@ import { CronJob } from "cron";
 import { formatAnalogSlicesReport } from "../../../cron/analytics-notifications/formatAnalogSlicesReport.js";
 import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
 import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
+import { createLogger } from "../../../logging/createLogger.js";
 import {
   ANALOG_SLICE_KONK_NAMES,
   calculateAnalogSlice,
@@ -10,6 +11,8 @@ import {
   getExcludedCompetitorSet,
   normalizeCompetitorName,
 } from "../../slices/config/excludedCompetitors.js";
+
+const log = createLogger({ module: "analog-slices", job: "cron" });
 
 /**
  * Запускает cron для ежедневных срезов аналогов (air, balun, sharte, yumi, yumin).
@@ -28,13 +31,9 @@ export function startAnalogSlicesCron(): CronJob {
           (name) => !excluded.has(normalizeCompetitorName(name))
         );
 
-        console.log(
-          `[CRON AnalogSlices] Starting for: ${enabledKonkNames.join(", ") || "none"}`
-        );
+        log.info({ enabledKonkNames }, "starting analog slices");
         if (excludedList.length > 0) {
-          console.log(
-            `[CRON AnalogSlices] Excluded competitors: ${excludedList.join(", ")}`
-          );
+          log.info({ excludedList }, "excluded competitors");
         }
 
         const results = await Promise.all(
@@ -50,21 +49,13 @@ export function startAnalogSlicesCron(): CronJob {
             total: r.total,
           };
         });
-        const summary = competitors
-          .map((c) => `${c.konkName}=${c.count}`)
-          .join(" ");
-        console.log(
-          `[CRON AnalogSlices] Done: ${summary || "no competitors to process"}`
-        );
+        log.info({ competitors }, "analog slices completed");
 
         await sendCronAnalyticsReport(
           formatAnalogSlicesReport(competitors, excludedList)
         );
       } catch (error) {
-        console.error(
-          `[CRON AnalogSlices] Error:`,
-          error instanceof Error ? error.message : "Unknown error"
-        );
+        log.error({ err: error }, "analog slices cron failed");
         await sendCronAnalyticsReport(
           formatCronErrorReport("Analog slices", error)
         );
@@ -75,6 +66,6 @@ export function startAnalogSlicesCron(): CronJob {
     "Europe/Kiev"
   );
 
-  console.log(`[CRON AnalogSlices] Started: daily at 04:00 (Kiev time)`);
+  log.info({ schedule: "0 0 4 * * *", timezone: "Europe/Kiev" }, "cron started");
   return job;
 }

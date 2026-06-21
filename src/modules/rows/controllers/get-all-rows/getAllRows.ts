@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { getAllRowsUtil } from "./utils/getAllRowsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getAllRows = async (req: Request, res: Response) => {
   try {
@@ -12,7 +13,7 @@ export const getAllRows = async (req: Request, res: Response) => {
 
     res.status(200).json(rows);
   } catch (error) {
-    console.error("Error fetching rows:", error);
+    logModuleError("rows", error, "Error fetching rows:");
     if (!res.headersSent) {
       res.status(500).json({ message: "Server error", error });
     }

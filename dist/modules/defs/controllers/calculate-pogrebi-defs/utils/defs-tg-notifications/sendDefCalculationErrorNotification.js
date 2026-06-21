@@ -1,4 +1,5 @@
 import { sendMessageToDefsChat } from "../../../../../../utils/telegram/sendMessageToDefsChat.js";
+import { logModuleError } from "../../../../../../logging/logModuleError.js";
 export const sendDefCalculationErrorNotification = async (error) => {
     try {
         const errorMessage = `❌ <b>Помилка при розрахунку дефіцитів</b>\n\n` +
@@ -6,7 +7,7 @@ export const sendDefCalculationErrorNotification = async (error) => {
         await sendMessageToDefsChat(errorMessage);
     }
     catch (telegramError) {
-        console.error("Failed to send error notification to Defs Chat:", telegramError);
+        logModuleError("defs", telegramError, "Failed to send error notification to Defs Chat:");
         // Не викидаємо помилку, щоб не переривати основний процес
     }
 };

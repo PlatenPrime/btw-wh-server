@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getBtwToken } from "../../constants/telegram.js";
+import { logModuleDebug, logModuleError } from "../../logging/logModuleError.js";
 export const sendMessageToTGUser = async (message, userId) => {
     if (!message?.trim()) {
         throw new Error("Message cannot be empty");
@@ -16,11 +17,14 @@ export const sendMessageToTGUser = async (message, userId) => {
         if (!response.data.ok) {
             throw new Error(`Telegram API error: ${response.data}`);
         }
-        console.log("Message sent to user:", response.data);
+        logModuleDebug("telegram", "message sent to user", {
+            userId,
+            messageId: response.data.result.message_id,
+        });
     }
     catch (error) {
         const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-        console.error("Error sending message to user:", errorMessage);
+        logModuleError("telegram", error, "Error sending message to user:");
         throw new Error(`Failed to send message to user: ${errorMessage}`);
     }
 };

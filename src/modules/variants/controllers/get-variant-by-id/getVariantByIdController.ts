@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getVariantByIdSchema } from "./schemas/getVariantByIdSchema.js";
 import { getVariantByIdUtil } from "./utils/getVariantByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить вариант по id
@@ -33,7 +34,7 @@ export const getVariantByIdController = async (
       data: result,
     });
   } catch (error) {
-    console.error("Error fetching variant by id:", error);
+    logModuleError("variants", error, "Error fetching variant by id:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

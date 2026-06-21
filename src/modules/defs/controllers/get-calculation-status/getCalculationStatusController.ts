@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getCalculationStatus } from "../../utils/calculationStatus.js";
 import { getCalculationStatusSchema } from "./schemas/getCalculationStatusSchema.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить текущий статус расчета дефицитов
@@ -30,7 +31,7 @@ export const getCalculationStatusController = async (
     });
     return;
   } catch (error) {
-    console.error("Error in getCalculationStatusController:", error);
+    logModuleError("defs", error, "Error in getCalculationStatusController:");
     if (!res.headersSent) {
       res.status(500).json({
         success: false,

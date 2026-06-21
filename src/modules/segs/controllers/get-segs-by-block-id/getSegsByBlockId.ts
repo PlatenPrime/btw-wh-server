@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { Seg } from "../../models/Seg.js";
 import { getSegsByBlockIdSchema } from "./schemas/getSegsByBlockIdSchema.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getSegsByBlockId = async (req: Request, res: Response) => {
   try {
@@ -28,7 +29,7 @@ export const getSegsByBlockId = async (req: Request, res: Response) => {
       data: segs.map((seg) => seg.toObject()),
     });
   } catch (error: any) {
-    console.error("getSegsByBlockId error:", error);
+    logModuleError("segs", error, "getSegsByBlockId error:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { deleteAskByIdSchema } from "./schemas/deleteAskByIdSchema.js";
 import { deleteAskUtil } from "./utils/deleteAskUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const deleteAskById = async (
   req: Request,
@@ -40,7 +41,7 @@ export const deleteAskById = async (
       data: { id, artikul: ask.artikul },
     });
   } catch (error) {
-    console.error("Error deleting ask by ID:", error);
+    logModuleError("asks", error, "Error deleting ask by ID:");
     if (!res.headersSent) {
       if (error instanceof Error && error.message === "Ask not found") {
         res.status(404).json({ message: "Ask not found" });

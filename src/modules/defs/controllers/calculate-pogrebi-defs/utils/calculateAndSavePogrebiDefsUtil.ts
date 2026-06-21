@@ -13,6 +13,7 @@ import { getSharikStocksWithProgress } from "../../../utils/getSharikStocksWithP
 import { sendDefCalculationCompleteNotification } from "./defs-tg-notifications/sendDefCalculationCompleteNotification.js";
 import { sendDefCalculationErrorNotification } from "./defs-tg-notifications/sendDefCalculationErrorNotification.js";
 import { sendDefCalculationStartNotification } from "./defs-tg-notifications/sendDefCalculationStartNotification.js";
+import { logModuleError } from "../../../../../logging/logModuleError.js";
 
 /**
  * Выполняет расчет дефицитов и сохраняет результат в базу данных
@@ -84,7 +85,7 @@ export async function calculateAndSavePogrebiDefsUtil(): Promise<IDef> {
 
     return savedDef;
   } catch (error) {
-    console.error("Помилка в calculateAndSavePogrebiDefs:", error);
+    logModuleError("defs", error, "Помилка в calculateAndSavePogrebiDefs:");
 
     // Завершаем отслеживание при ошибке
     finishCalculationTracking();

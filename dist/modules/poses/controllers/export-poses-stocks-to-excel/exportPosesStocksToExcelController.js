@@ -2,6 +2,7 @@ import { z } from "zod";
 import { formatPosesStocksForExcelUtil } from "./utils/formatPosesStocksForExcelUtil.js";
 import { generateExcelUtil } from "./utils/generateExcelUtil.js";
 import { getPosesStocksForExportUtil } from "./utils/getPosesStocksForExportUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 const exportBodySchema = z
     .object({
     sklad: z.enum(["merezhi", "pogrebi"]).optional(),
@@ -40,7 +41,7 @@ export const exportPosesStocksToExcelController = async (req, res) => {
         res.status(200).send(buffer);
     }
     catch (error) {
-        console.error("Error exporting poses stocks to Excel:", error);
+        logModuleError("poses", error, "Error exporting poses stocks to Excel:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

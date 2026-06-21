@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createAnalogSchema } from "./schemas/createAnalogSchema.js";
 import { createAnalogUtil } from "./utils/createAnalogUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 function isDuplicateUrlError(err: unknown): err is { code: number; keyPattern?: { url?: number } } {
   return (
@@ -37,7 +38,7 @@ export const createAnalogController = async (
       data: analog,
     });
   } catch (error) {
-    console.error("Error creating analog:", error);
+    logModuleError("analogs", error, "Error creating analog:");
     if (res.headersSent) return;
     if (isDuplicateUrlError(error)) {
       res.status(409).json({ message: "Analog with this url already exists" });

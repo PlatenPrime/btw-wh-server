@@ -1,5 +1,6 @@
 import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { updateCalculationProgress } from "./calculationStatus.js";
+import { logModuleError, logModuleInfo, logModuleWarn } from "../../../logging/logModuleError.js";
 /**
  * Расширяет объекты массива stocks данными с сайта sharik.ua с отслеживанием прогресса
  * @param stocks - Объект с объединенными позициями по артикулам
@@ -12,7 +13,7 @@ export async function getSharikStocksWithProgress(stocks, limits = {}) {
         const extendedStocks = {};
         const artikuls = Object.keys(stocks);
         const totalItems = artikuls.length;
-        console.log(`Початок обробки ${totalItems} артикулів`);
+        logModuleInfo("defs", "sharik stocks processing started", { totalItems });
         // Обрабатываем каждый артикул последовательно с задержкой
         for (let i = 0; i < artikuls.length; i++) {
             const artikul = artikuls[i];
@@ -41,7 +42,10 @@ export async function getSharikStocksWithProgress(stocks, limits = {}) {
                 }
             }
             catch (error) {
-                console.warn(`Помилка при отриманні даних Sharik для артикула ${artikul}:`, error);
+                logModuleWarn("defs", "failed to fetch sharik stock for artikul", {
+                    artikul,
+                    err: error,
+                });
                 // В разі помилки встановлюємо нульові значення
                 extendedStocks[artikul] = {
                     ...stocks[artikul],
@@ -57,16 +61,22 @@ export async function getSharikStocksWithProgress(stocks, limits = {}) {
             // Оновлюємо прогресс кожні 5 артикулів або на останньому елементі
             if ((i + 1) % 5 === 0 || i === artikuls.length - 1) {
                 updateCalculationProgress(i + 1, totalItems, `Обробка даних Sharik: ${i + 1} з ${totalItems} артикулів`);
-                console.log(`Оброблено ${i + 1} з ${totalItems} артикулів`);
+                logModuleInfo("defs", "sharik stocks progress", {
+                    processed: i + 1,
+                    totalItems,
+                });
             }
         }
         const endTime = performance.now();
         const duration = Math.round((endTime - startTime) / 1000);
-        console.log(`Обробка ${totalItems} артикулів завершена за ${duration} секунд`);
+        logModuleInfo("defs", "sharik stocks processing completed", {
+            totalItems,
+            durationSec: duration,
+        });
         return extendedStocks;
     }
     catch (error) {
-        console.error("Помилка в getSharikStocksWithProgress:", error);
+        logModuleError("defs", error, "Помилка в getSharikStocksWithProgress:");
         throw error;
     }
 }

@@ -1,5 +1,6 @@
 import { updateBtradeStockSchema } from "./schemas/updateBtradeStockSchema.js";
 import { updateBtradeStockUtil } from "../../utils/updateBtradeStockUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить btradeStock для одного артикула
  * @route   PATCH /api/arts/:artikul/btrade-stock
@@ -33,7 +34,7 @@ export const updateBtradeStockController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating btradeStock:", error);
+        logModuleError("arts", error, "Error updating btradeStock:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

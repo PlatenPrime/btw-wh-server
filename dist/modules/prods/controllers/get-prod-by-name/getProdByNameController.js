@@ -1,5 +1,6 @@
 import { getProdByNameSchema } from "./schemas/getProdByNameSchema.js";
 import { getProdByNameUtil } from "./utils/getProdByNameUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить производителя по name
  * @route   GET /api/prods/name/:name
@@ -26,7 +27,7 @@ export const getProdByNameController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching prod by name:", error);
+        logModuleError("prods", error, "Error fetching prod by name:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

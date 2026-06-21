@@ -1,5 +1,6 @@
 import { Pos } from "../models/Pos.js";
 import { mergePoses } from "./mergePoses.js";
+import { logModuleError } from "../../../logging/logModuleError.js";
 /**
  * Получает и объединяет позиции склада с ненулевым количеством
  * @param sklad - Название склада (по умолчанию "pogrebi")
@@ -17,7 +18,7 @@ export async function getSkladStocks(sklad = "pogrebi") {
         return stocks;
     }
     catch (error) {
-        console.error(`Ошибка при получении позиций склада ${sklad}:`, error);
+        logModuleError("poses", error, "failed to fetch sklad stocks", { sklad });
         throw error;
     }
 }

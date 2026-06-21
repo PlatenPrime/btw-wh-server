@@ -1,6 +1,20 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { AxiosError, type InternalAxiosRequestConfig } from "axios";
-import { formatBrowserFetchError } from "../browserRequest.js";
+import {
+  formatBrowserFetchError,
+  logBrowserError,
+} from "../browserRequest.js";
+
+const mockError = vi.hoisted(() => vi.fn());
+
+vi.mock("../../../../logging/createLogger.js", () => ({
+  createLogger: () => ({
+    error: mockError,
+    info: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+  }),
+}));
 
 function axCfg(url: string): InternalAxiosRequestConfig {
   return { url } as InternalAxiosRequestConfig;
@@ -53,5 +67,16 @@ describe("formatBrowserFetchError", () => {
     const formatted = formatBrowserFetchError("https://a", new Error(longMessage));
     expect(formatted.endsWith("... [truncated]")).toBe(true);
     expect(formatted.length).toBeLessThan(300);
+  });
+});
+
+describe("logBrowserError", () => {
+  it("пишет structured error", () => {
+    mockError.mockClear();
+    logBrowserError("[ctx]", new Error("plain failure"));
+    expect(mockError).toHaveBeenCalledWith(
+      { context: "[ctx]", details: "plain failure" },
+      "browser fetch failed"
+    );
   });
 });

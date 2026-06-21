@@ -1,5 +1,6 @@
 import { getArtSchema } from "./schemas/getArtSchema.js";
 import { getArtUtil } from "./utils/getArtUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getArtController = async (req, res) => {
     try {
         const { artikul } = req.params;
@@ -28,7 +29,7 @@ export const getArtController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching art by artikul:", error);
+        logModuleError("arts", error, "Error fetching art by artikul:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

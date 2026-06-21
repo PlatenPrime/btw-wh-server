@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { checkAndCompleteAsksUtil } from "./utils/checkAndCompleteAsksUtil.js";
 import { getAsksPullsUtil } from "./utils/getAsksPullsUtil.js";
+import { logModuleError, logModuleInfo } from "../../../../logging/logModuleError.js";
 
 export const getAsksPullsController = async (
   req: Request,
@@ -21,18 +22,18 @@ export const getAsksPullsController = async (
       try {
         const completedAskIds = await checkAndCompleteAsksUtil(processingAsks);
         if (completedAskIds.length > 0) {
-          console.log(
-            `Automatically completed ${completedAskIds.length} asks:`,
-            completedAskIds
-          );
+          logModuleInfo("asks", "asks auto-completed in background", {
+            count: completedAskIds.length,
+            askIds: completedAskIds,
+          });
         }
       } catch (error) {
         // Логируем ошибку, но не прерываем выполнение
-        console.error("Error completing asks in background:", error);
+        logModuleError("asks", error, "Error completing asks in background:");
       }
     });
   } catch (error) {
-    console.error("Error fetching asks pulls:", error);
+    logModuleError("asks", error, "Error fetching asks pulls:");
     res.status(500).json({
       message: "Server error while fetching asks pulls",
       error: error instanceof Error ? error.message : "Unknown error",

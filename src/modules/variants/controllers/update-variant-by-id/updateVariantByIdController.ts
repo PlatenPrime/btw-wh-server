@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { updateVariantByIdSchema } from "./schemas/updateVariantByIdSchema.js";
 import { updateVariantByIdUtil } from "./utils/updateVariantByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Обновить вариант по id
@@ -38,7 +39,7 @@ export const updateVariantByIdController = async (
       data: variant,
     });
   } catch (error) {
-    console.error("Error updating variant:", error);
+    logModuleError("variants", error, "Error updating variant:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { updateArtByIdSchema } from "./schemas/updateArtByIdSchema.js";
 import { updateArtByIdUtil } from "./utils/updateArtByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const updateArtByIdController = async (
   req: Request,
@@ -37,7 +38,7 @@ export const updateArtByIdController = async (
 
     res.status(200).json(updatedArt);
   } catch (error) {
-    console.error("Error updating art by id:", error);
+    logModuleError("arts", error, "Error updating art by id:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

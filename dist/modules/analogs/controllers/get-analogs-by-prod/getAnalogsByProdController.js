@@ -1,5 +1,6 @@
 import { getAnalogsByProdSchema } from "./schemas/getAnalogsByProdSchema.js";
 import { getAnalogsByProdUtil } from "./utils/getAnalogsByProdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить аналоги по prodName
  * @route   GET /api/analogs/prod/:prodName
@@ -25,7 +26,7 @@ export const getAnalogsByProdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching analogs by prod:", error);
+        logModuleError("analogs", error, "Error fetching analogs by prod:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

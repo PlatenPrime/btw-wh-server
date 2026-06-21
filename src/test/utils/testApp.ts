@@ -1,6 +1,8 @@
 import cors from "cors";
 import express from "express";
 
+import { createErrorLogger } from "../../logging/errorLogger.js";
+
 import analogSlicesRoute from "../../modules/analog-slices/router.js";
 import analogsRoute from "../../modules/analogs/router.js";
 import artChartReportsRoute from "../../modules/art-chart-reports/router.js";
@@ -68,17 +70,6 @@ app.use("/api/skugrs", skugrsRoute);
 app.use("/api/variants", variantsRoute);
 app.use("/api/zones", zonesRoute);
 
-// Error handler must be after all routes
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-app.use(function (err: any, req: any, res: any, next: any) {
-  if (err instanceof SyntaxError && "body" in err) {
-    return res.status(400).json({ message: "Invalid or empty data" });
-  }
-
-  return res.status(400).json({
-    message: err.message || "Something went wrong",
-    stack: err.stack || null,
-  });
-});
+app.use(createErrorLogger());
 
 export default app;

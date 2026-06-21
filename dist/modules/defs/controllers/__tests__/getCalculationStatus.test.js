@@ -1,4 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+const { logModuleError } = vi.hoisted(() => ({
+    logModuleError: vi.fn(),
+}));
+vi.mock("../../../../logging/logModuleError.js", () => ({
+    logModuleError,
+}));
 import { getCalculationStatus, resetCalculationStatus, } from "../../utils/calculationStatus.js";
 import { getCalculationStatusController } from "../get-calculation-status/getCalculationStatusController.js";
 // Мокаем calculationStatus
@@ -110,20 +116,18 @@ describe("getCalculationStatusController", () => {
     });
     it("должен обрабатывать ошибки и возвращать 500", async () => {
         // Мокаем getCalculationStatus чтобы он выбрасывал ошибку
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
         // Создаем ошибку
         vi.mocked(getCalculationStatus).mockImplementation(() => {
             throw new Error("Test error");
         });
         await getCalculationStatusController(mockReq, mockRes);
-        expect(consoleSpy).toHaveBeenCalledWith("Error in getCalculationStatusController:", expect.any(Error));
+        expect(logModuleError).toHaveBeenCalledWith("defs", expect.any(Error), "Error in getCalculationStatusController:");
         expect(mockStatus).toHaveBeenCalledWith(500);
         expect(mockJson).toHaveBeenCalledWith({
             success: false,
             message: "Failed to get calculation status",
             error: "Test error",
         });
-        consoleSpy.mockRestore();
     });
     it("должен обрабатывать ошибки без сообщения", async () => {
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });

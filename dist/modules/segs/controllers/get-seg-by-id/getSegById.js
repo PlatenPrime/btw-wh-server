@@ -1,5 +1,6 @@
 import { getSegByIdSchema } from "./schemas/getSegByIdSchema.js";
 import { getSegByIdUtil } from "./utils/getSegByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getSegById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -29,7 +30,7 @@ export const getSegById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("getSegById error:", error);
+        logModuleError("segs", error, "getSegById error:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

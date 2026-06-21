@@ -1,4 +1,5 @@
 import { Seg } from "../../models/Seg.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getAllSegs = async (req, res) => {
     try {
         const segs = await Seg.find({}).sort({ order: 1 }).exec();
@@ -9,7 +10,7 @@ export const getAllSegs = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("getAllSegs error:", error);
+        logModuleError("segs", error, "getAllSegs error:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

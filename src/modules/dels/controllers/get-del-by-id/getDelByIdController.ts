@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getDelByIdSchema } from "./schemas/getDelByIdSchema.js";
 import { getDelByIdUtil } from "./utils/getDelByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить поставку по id (полный документ)
@@ -32,7 +33,7 @@ export const getDelByIdController = async (
       data: del,
     });
   } catch (error) {
-    console.error("Error fetching del by id:", error);
+    logModuleError("dels", error, "Error fetching del by id:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

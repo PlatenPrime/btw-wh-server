@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { createLogger } from "../../logging/createLogger.js";
 import { Art } from "../../modules/arts/models/Art.js";
 import { Row } from "../../modules/rows/models/Row.js";
 import { Pallet } from "../../modules/pallets/models/Pallet.js";
@@ -9,6 +10,8 @@ import { Block } from "../../modules/blocks/models/Block.js";
 import { Seg } from "../../modules/segs/models/Seg.js";
 import User from "../../modules/auth/models/User.js";
 import Role from "../../modules/auth/models/Role.js";
+
+const log = createLogger({ module: "backup" });
 
 interface CollectionsBackup {
   arts: unknown[];
@@ -50,55 +53,55 @@ export const exportCollectionsToJson = async (): Promise<string> => {
       Art.find().lean().exec().then(data => {
         backupData.arts = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting arts:", err);
+        log.error({ err, collection: "arts" }, "backup export collection failed");
         backupData.arts = [];
       }),
       Row.find().lean().exec().then(data => {
         backupData.rows = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting rows:", err);
+        log.error({ err, collection: "rows" }, "backup export collection failed");
         backupData.rows = [];
       }),
       Pallet.find().lean().exec().then(data => {
         backupData.pallets = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting pallets:", err);
+        log.error({ err, collection: "pallets" }, "backup export collection failed");
         backupData.pallets = [];
       }),
       Pos.find().lean().exec().then(data => {
         backupData.poses = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting poses:", err);
+        log.error({ err, collection: "poses" }, "backup export collection failed");
         backupData.poses = [];
       }),
       Zone.find().lean().exec().then(data => {
         backupData.zones = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting zones:", err);
+        log.error({ err, collection: "zones" }, "backup export collection failed");
         backupData.zones = [];
       }),
       Block.find().lean().exec().then(data => {
         backupData.blocks = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting blocks:", err);
+        log.error({ err, collection: "blocks" }, "backup export collection failed");
         backupData.blocks = [];
       }),
       Seg.find().lean().exec().then(data => {
         backupData.segs = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting segs:", err);
+        log.error({ err, collection: "segs" }, "backup export collection failed");
         backupData.segs = [];
       }),
       User.find().lean().exec().then(data => {
         backupData.users = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting users:", err);
+        log.error({ err, collection: "users" }, "backup export collection failed");
         backupData.users = [];
       }),
       Role.find().lean().exec().then(data => {
         backupData.roles = data;
       }).catch(err => {
-        console.error("[BACKUP] Error exporting roles:", err);
+        log.error({ err, collection: "roles" }, "backup export collection failed");
         backupData.roles = [];
       }),
     ];
@@ -123,12 +126,12 @@ export const exportCollectionsToJson = async (): Promise<string> => {
     // Сохраняем JSON файл
     await fs.writeFile(filePath, JSON.stringify(backupData, null, 2), "utf-8");
 
-    console.log(`[BACKUP] Collections exported to ${filePath}`);
+    log.info({ filePath }, "collections exported");
     return filePath;
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error occurred";
-    console.error("[BACKUP] Fatal error during export:", errorMessage);
+    log.error({ err: error }, "backup export fatal error");
     throw new Error(`Failed to export collections: ${errorMessage}`);
   }
 };

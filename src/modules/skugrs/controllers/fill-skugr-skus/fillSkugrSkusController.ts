@@ -4,6 +4,7 @@ import { summarizeBrowserError } from "../../../browser/utils/browserRequest.js"
 import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../utils/fillSkugrSkusFromBrowserUtil.js";
 import { fillSkugrSkusSchema } from "./schemas/fillSkugrSkusSchema.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Заполнить состав skugr SKU из парсера страниц группы (browser)
@@ -49,7 +50,7 @@ export const fillSkugrSkusController = async (
       return;
     }
     const details = summarizeBrowserError(error);
-    console.error("Error filling skugr skus from browser:", details);
+    logModuleError("skugrs", details, "Error filling skugr skus from browser:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

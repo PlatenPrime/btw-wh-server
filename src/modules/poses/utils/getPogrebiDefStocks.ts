@@ -1,5 +1,6 @@
 import { Pos } from "../models/Pos.js";
 import { type IMergedPosesResult, mergePoses } from "./mergePoses.js";
+import { logModuleError } from "../../../logging/logModuleError.js";
 
 /**
 
@@ -23,10 +24,7 @@ export async function getPogrebiDefStocks() {
 
     return stocks;
   } catch (error) {
-    console.error(
-      `Ошибка при получении отслеживаемых позиций склада pogrebi:`,
-      error
-    );
+    logModuleError("poses", error, "Ошибка при получении отслеживаемых позиций склада pogrebi:");
     throw error;
   }
 }

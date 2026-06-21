@@ -1,5 +1,6 @@
 import { deleteArtsWithoutLatestMarkerSchema } from "./schemas/deleteArtsWithoutLatestMarkerSchema.js";
 import { deleteArtsWithoutLatestMarkerUtil } from "./utils/deleteArtsWithoutLatestMarkerUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Удалить все артикулы без последнего актуального маркера
  * @route   DELETE /api/arts/without-latest-marker
@@ -27,7 +28,7 @@ export const deleteArtsWithoutLatestMarkerController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error deleting arts without latest marker:", error);
+        logModuleError("arts", error, "Error deleting arts without latest marker:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

@@ -2,6 +2,7 @@ import { Kask } from "../../models/Kask.js";
 import { createKaskSchema } from "./schemas/createKaskSchema.js";
 import { getCreateKaskMessageUtil } from "./utils/getCreateKaskMesUtil.js";
 import { sendCreateKaskMesUtil } from "./utils/sendCreateKaskMesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const createKaskController = async (req, res) => {
     try {
         const parseResult = createKaskSchema.safeParse(req.body);
@@ -31,7 +32,7 @@ export const createKaskController = async (req, res) => {
         await sendCreateKaskMesUtil({ message, role: req.user?.role });
     }
     catch (error) {
-        console.error("Error creating kask:", error);
+        logModuleError("kasks", error, "Error creating kask:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error while creating kask",

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { movePalletPosesSchema } from "./schemas/movePalletPosesSchema.js";
 import { movePalletPosesUtil } from "./utils/movePalletPosesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const movePalletPosesController = async (
   req: Request,
@@ -61,7 +62,7 @@ export const movePalletPosesController = async (
       ) {
         res.status(400).json({ message: error.message });
       } else {
-        console.error("movePalletPosesController error:", error);
+        logModuleError("pallets", error, "movePalletPosesController error:");
         res.status(500).json({
           message: "Server error",
           error: error instanceof Error ? error.message : error,

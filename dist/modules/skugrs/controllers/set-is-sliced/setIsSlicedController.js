@@ -1,4 +1,5 @@
 import { setIsSlicedUtil } from "./utils/setIsSlicedUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Единоразово проставить isSliced=true для старых skugr без поля isSliced
  * @route   POST /api/skugrs/set-is-sliced
@@ -15,7 +16,7 @@ export const setIsSlicedController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error setting isSliced for skugrs:", error);
+        logModuleError("skugrs", error, "Error setting isSliced for skugrs:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

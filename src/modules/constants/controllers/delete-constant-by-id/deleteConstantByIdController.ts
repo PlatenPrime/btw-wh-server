@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteConstantByIdSchema } from "./schemas/deleteConstantByIdSchema.js";
 import { deleteConstantByIdUtil } from "./utils/deleteConstantByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Удалить константу по id
@@ -32,7 +33,7 @@ export const deleteConstantByIdController = async (
       message: "Constant deleted successfully",
     });
   } catch (error) {
-    console.error("Error deleting constant:", error);
+    logModuleError("constants", error, "Error deleting constant:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

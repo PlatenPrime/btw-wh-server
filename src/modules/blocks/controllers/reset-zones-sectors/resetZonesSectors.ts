@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Zone } from "../../../zones/models/Zone.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const resetZonesSectors = async (req: Request, res: Response) => {
   try {
@@ -14,7 +15,7 @@ export const resetZonesSectors = async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Error resetting zones sectors:", error);
+    logModuleError("blocks", error, "Error resetting zones sectors:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

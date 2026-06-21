@@ -1,5 +1,6 @@
 import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { Art } from "../models/Art.js";
+import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.js";
 /**
  * Обновляет btradeStock для одного артикула данными с sharik.ua
  * @param artikul - артикул товара
@@ -10,7 +11,7 @@ export const updateBtradeStockUtil = async ({ artikul, }) => {
         // Получаем данные с sharik.ua
         const sharikData = await getSharikStockData(artikul);
         if (!sharikData) {
-            console.warn(`Товар с артикулом ${artikul} не найден на sharik.ua`);
+            logModuleWarn("arts", "product not found on sharik.ua", { artikul });
             return null;
         }
         // Обновляем btradeStock в базе данных
@@ -27,7 +28,7 @@ export const updateBtradeStockUtil = async ({ artikul, }) => {
         return updatedArt;
     }
     catch (error) {
-        console.error(`Ошибка при обновлении btradeStock для артикула ${artikul}:`, error);
+        logModuleError("arts", error, "failed to update btrade stock", { artikul });
         throw error;
     }
 };

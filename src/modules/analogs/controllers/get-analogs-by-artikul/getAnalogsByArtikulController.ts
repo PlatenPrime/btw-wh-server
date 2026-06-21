@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAnalogsByArtikulSchema } from "./schemas/getAnalogsByArtikulSchema.js";
 import { getAnalogsByArtikulUtil } from "./utils/getAnalogsByArtikulUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить аналоги по artikul
@@ -28,7 +29,7 @@ export const getAnalogsByArtikulController = async (
       data: analogs,
     });
   } catch (error) {
-    console.error("Error fetching analogs by artikul:", error);
+    logModuleError("analogs", error, "Error fetching analogs by artikul:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

@@ -1,7 +1,10 @@
+import { logModuleError } from "../logging/logModuleError.js";
 const getRequiredEnv = (name: string): string => {
   const value = process.env[name]?.trim();
   if (!value) {
-    console.error(`Missing required environment variable: ${name}`);
+    logModuleError("constants", new Error(`Missing env: ${name}`), "telegram env missing", {
+      envName: name,
+    });
     throw new Error(`Telegram configuration error: ${name} is not set`);
   }
   return value;

@@ -1,4 +1,5 @@
 import { sendMessageToDefsChat } from "../../../../../../utils/telegram/sendMessageToDefsChat.js";
+import { logModuleError } from "../../../../../../logging/logModuleError.js";
 import {
   IDeficitCalculationResult,
   IDeficitItem,
@@ -127,10 +128,7 @@ export const sendDefCalculationCompleteNotification = async (
       await sendMessageToDefsChat(summaryMessage);
     }
   } catch (error) {
-    console.error(
-      "Failed to send completion notification to Defs Chat:",
-      error
-    );
+    logModuleError("defs", error, "Failed to send completion notification to Defs Chat:");
     // Не викидаємо помилку, щоб не переривати основний процес
   }
 };

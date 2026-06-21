@@ -1,5 +1,6 @@
 import { updateSkuByIdSchema } from "./schemas/updateSkuByIdSchema.js";
 import { updateSkuByIdUtil } from "./utils/updateSkuByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить sku по id (указанные в body поля)
  * @route   PATCH /api/skus/id/:id
@@ -35,7 +36,7 @@ export const updateSkuByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating sku:", error);
+        logModuleError("skus", error, "Error updating sku:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

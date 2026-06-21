@@ -1,5 +1,6 @@
 import { getKaskByIdSchema } from "./schemas/getKaskByIdSchema.js";
 import { getKaskUtil } from "./utils/getKaskUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getKaskById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -27,7 +28,7 @@ export const getKaskById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching kask by ID:", error);
+        logModuleError("kasks", error, "Error fetching kask by ID:");
         res.status(500).json({
             message: "Server error while fetching kask",
             error: error instanceof Error ? error.message : "Unknown error",

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAskPullSchema } from "./schemas/getAskPullSchema.js";
 import { getAskPullUtil } from "./utils/getAskPullUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getAskPullController = async (
   req: Request,
@@ -36,7 +37,7 @@ export const getAskPullController = async (
       data: result,
     });
   } catch (error) {
-    console.error("Error fetching ask pull positions:", error);
+    logModuleError("asks", error, "Error fetching ask pull positions:");
     res.status(500).json({
       message: "Server error while fetching ask pull positions",
       error: error instanceof Error ? error.message : "Unknown error",

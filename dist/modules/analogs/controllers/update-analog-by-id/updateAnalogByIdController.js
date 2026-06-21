@@ -1,5 +1,6 @@
 import { updateAnalogByIdSchema } from "./schemas/updateAnalogByIdSchema.js";
 import { updateAnalogByIdUtil } from "./utils/updateAnalogByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить аналог по id
  * @route   PATCH /api/analogs/id/:id
@@ -30,7 +31,7 @@ export const updateAnalogByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating analog:", error);
+        logModuleError("analogs", error, "Error updating analog:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

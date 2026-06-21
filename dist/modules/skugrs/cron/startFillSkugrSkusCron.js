@@ -2,9 +2,11 @@ import { CronJob } from "cron";
 import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
 import { formatFillSkugrSkusReport } from "../../../cron/analytics-notifications/formatFillSkugrSkusReport.js";
 import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
+import { createLogger } from "../../../logging/createLogger.js";
 import { summarizeBrowserError } from "../../browser/utils/browserRequest.js";
 import { Skugr } from "../models/Skugr.js";
 import { fillSkugrSkusFromBrowserUtil } from "../utils/fillSkugrSkusFromBrowserUtil.js";
+const log = createLogger({ module: "skugrs", job: "cron" });
 /**
  * Еженедельно в воскресенье в 22:00 по Киеву:
  * последовательно перезаполняет SKU для всех skugr-групп.
@@ -13,9 +15,9 @@ export function startFillSkugrSkusCron() {
     const job = new CronJob("0 0 22 * * 0", async () => {
         try {
             const skugrs = await Skugr.find().select("_id").lean().exec();
-            console.log(`[CRON SkugrRefill] Starting weekly refill for ${skugrs.length} groups...`);
+            log.info({ groupCount: skugrs.length }, "starting skugr refill");
             if (skugrs.length === 0) {
-                console.log("[CRON SkugrRefill] No groups found. Skipping.");
+                log.info("no skugr groups found, skipping");
                 await sendCronAnalyticsReport(formatFillSkugrSkusReport({ successCount: 0, errorCount: 0, total: 0 }));
                 return;
             }
@@ -26,19 +28,28 @@ export function startFillSkugrSkusCron() {
                 try {
                     const result = await fillSkugrSkusFromBrowserUtil(skugrId);
                     if (!result) {
-                        console.warn(`[CRON SkugrRefill] Group ${skugrId} not found during refill (${index + 1}/${skugrs.length}).`);
+                        log.warn({ skugrId, index: index + 1, total: skugrs.length }, "skugr group not found during refill");
                         continue;
                     }
                     successCount += 1;
-                    console.log(`[CRON SkugrRefill] Done ${index + 1}/${skugrs.length}: ${skugrId} (created=${result.stats.created}, linked=${result.stats.linkedExisting}, skippedConflict=${result.stats.skippedProductIdConflict}).`);
+                    log.info({
+                        skugrId,
+                        index: index + 1,
+                        total: skugrs.length,
+                        stats: result.stats,
+                    }, "skugr refill group completed");
                 }
                 catch (error) {
                     errorCount += 1;
-                    const details = summarizeBrowserError(error);
-                    console.error(`[CRON SkugrRefill] Error ${index + 1}/${skugrs.length} for ${skugrId}:`, details);
+                    log.error({
+                        skugrId,
+                        index: index + 1,
+                        total: skugrs.length,
+                        details: summarizeBrowserError(error),
+                    }, "skugr refill group failed");
                 }
             }
-            console.log(`[CRON SkugrRefill] Finished: success=${successCount}, errors=${errorCount}, total=${skugrs.length}.`);
+            log.info({ successCount, errorCount, total: skugrs.length }, "skugr refill finished");
             await sendCronAnalyticsReport(formatFillSkugrSkusReport({
                 successCount,
                 errorCount,
@@ -46,11 +57,10 @@ export function startFillSkugrSkusCron() {
             }));
         }
         catch (error) {
-            const details = summarizeBrowserError(error);
-            console.error("[CRON SkugrRefill] Fatal error:", details);
+            log.error({ err: error, details: summarizeBrowserError(error) }, "skugr refill fatal error");
             await sendCronAnalyticsReport(formatCronErrorReport("Skugr refill", error));
         }
     }, null, true, "Europe/Kyiv");
-    console.log("[CRON SkugrRefill] Started: weekly on Sunday at 22:00 (Kyiv time)");
+    log.info({ schedule: "0 0 22 * * 0", timezone: "Europe/Kyiv" }, "cron started");
     return job;
 }

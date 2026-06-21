@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteBlockByIdSchema } from "./schemas/deleteBlockByIdSchema.js";
 import { deleteBlockByIdUtil } from "./utils/deleteBlockByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const deleteBlock = async (req: Request, res: Response) => {
   try {
@@ -30,7 +31,7 @@ export const deleteBlock = async (req: Request, res: Response) => {
       data: deletedBlock,
     });
   } catch (error) {
-    console.error("Error deleting block:", error);
+    logModuleError("blocks", error, "Error deleting block:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

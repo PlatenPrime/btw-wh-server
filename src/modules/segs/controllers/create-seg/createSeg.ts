@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Block } from "../../../blocks/models/Block.js";
 import { createSegSchema } from "./schemas/createSegSchema.js";
 import { createSegUtil } from "./utils/createSegUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const createSeg = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -48,7 +49,7 @@ export const createSeg = async (req: Request, res: Response) => {
       } else if (error instanceof Error && error.message.includes("zones")) {
         res.status(400).json({ message: error.message });
       } else {
-        console.error("createSeg error:", error);
+        logModuleError("segs", error, "createSeg error:");
         res.status(500).json({
           message: "Server error",
           error: error instanceof Error ? error.message : error,

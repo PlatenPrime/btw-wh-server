@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAnalogsQuerySchema } from "./schemas/getAnalogsQuerySchema.js";
 import { getAnalogsUtil } from "./utils/getAnalogsUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Получить аналоги с пагинацией и фильтрами
@@ -28,7 +29,7 @@ export const getAnalogsController = async (
       pagination: result.pagination,
     });
   } catch (error) {
-    console.error("Error fetching analogs:", error);
+    logModuleError("analogs", error, "Error fetching analogs:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

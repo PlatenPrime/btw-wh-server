@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { deleteRowSchema } from "./schemas/deleteRowSchema.js";
 import { deleteRowUtil } from "./utils/deleteRowUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const deleteRow = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -25,7 +26,7 @@ export const deleteRow = async (req, res) => {
         res.status(200).json({ message: "Row and related pallets and positions deleted" });
     }
     catch (error) {
-        console.error("Error deleting row:", error);
+        logModuleError("rows", error, "Error deleting row:");
         if (!res.headersSent) {
             res.status(500).json({ message: "Server error", error });
         }

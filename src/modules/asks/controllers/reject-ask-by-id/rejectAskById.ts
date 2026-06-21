@@ -6,6 +6,7 @@ import { rejectAskByIdSchema } from "./schemas/rejectAskByIdSchema.js";
 import { getRejectAskMesUtil } from "./utils/getRejectAskMesUtil.js";
 import { rejectAskUtil } from "./utils/rejectAskUtil.js";
 import { sendRejectAskMesUtil } from "./utils/sendRejectAskMesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const rejectAskById = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -60,7 +61,7 @@ export const rejectAskById = async (req: Request, res: Response) => {
       });
     }
   } catch (error) {
-    console.error("Error rejecting ask:", error);
+    logModuleError("asks", error, "Error rejecting ask:");
     if (!res.headersSent) {
       if (error instanceof Error && error.message === "Ask not found") {
         res.status(404).json({ message: "Ask not found" });

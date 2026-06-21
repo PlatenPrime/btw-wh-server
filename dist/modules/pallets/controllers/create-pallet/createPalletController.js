@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Row } from "../../../rows/models/Row.js";
 import { createPalletSchema } from "./schemas/createPalletSchema.js";
 import { createPalletUtil } from "./utils/createPalletUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const createPalletController = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -39,7 +40,7 @@ export const createPalletController = async (req, res) => {
                 res.status(404).json({ message: "Row not found" });
             }
             else {
-                console.error("createPalletController error:", error);
+                logModuleError("pallets", error, "createPalletController error:");
                 res.status(500).json({
                     message: "Server error",
                     error: error instanceof Error ? error.message : error,

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { Seg } from "../../models/Seg.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getAllSegs = async (req: Request, res: Response) => {
   try {
@@ -11,7 +12,7 @@ export const getAllSegs = async (req: Request, res: Response) => {
       data: segs.map((seg) => seg.toObject()),
     });
   } catch (error: any) {
-    console.error("getAllSegs error:", error);
+    logModuleError("segs", error, "getAllSegs error:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

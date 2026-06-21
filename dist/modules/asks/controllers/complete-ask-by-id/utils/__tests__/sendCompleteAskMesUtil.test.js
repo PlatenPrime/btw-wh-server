@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+const { logModuleError } = vi.hoisted(() => ({
+    logModuleError: vi.fn(),
+}));
 // Mock sendMessageToTGUser
 vi.mock("../../../../../../utils/telegram/sendMessageToTGUser.js", () => ({
     sendMessageToTGUser: vi.fn(),
 }));
-// Mock console.error
-const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => { });
+vi.mock("../../../../../../logging/logModuleError.js", () => ({
+    logModuleError,
+}));
 // Import after mocking
 import { sendMessageToTGUser } from "../../../../../../utils/telegram/sendMessageToTGUser.js";
 import { sendCompleteAskMesUtil } from "../sendCompleteAskMesUtil.js";
@@ -29,7 +33,7 @@ describe("sendCompleteAskMesUtil", () => {
             message: "Ваша заявка завершена",
             telegramChatId: "123456789",
         })).resolves.not.toThrow();
-        expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to send Telegram notification:", error);
+        expect(logModuleError).toHaveBeenCalledWith("asks", error, "Failed to send Telegram notification:");
     });
     it("обрабатывает различные типы ошибок", async () => {
         const error = "String error";
@@ -38,7 +42,7 @@ describe("sendCompleteAskMesUtil", () => {
             message: "Test message",
             telegramChatId: "123456789",
         })).resolves.not.toThrow();
-        expect(consoleErrorSpy).toHaveBeenCalledWith("Failed to send Telegram notification:", error);
+        expect(logModuleError).toHaveBeenCalledWith("asks", error, "Failed to send Telegram notification:");
     });
     it("отправляет сообщение с корректным форматом", async () => {
         mockSendMessageToTGUser.mockResolvedValueOnce(undefined);

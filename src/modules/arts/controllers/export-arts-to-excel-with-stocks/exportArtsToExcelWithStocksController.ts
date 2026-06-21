@@ -3,6 +3,7 @@ import { formatArtsForExcelExtendedUtil } from "./utils/formatArtsForExcelExtend
 import { generateExcelExtendedUtil } from "./utils/generateExcelExtendedUtil.js";
 import { getArtsForExportExtendedUtil } from "./utils/getArtsForExportExtendedUtil.js";
 import { getPosesQuantByArtikulUtil } from "./utils/getPosesQuantByArtikulUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Экспортировать все артикулы в Excel файл с данными о запасах и витрине
@@ -44,7 +45,7 @@ export const exportArtsToExcelWithStocksController = async (
     // Отправляем файл
     res.status(200).send(buffer);
   } catch (error) {
-    console.error("Error exporting arts to Excel with stocks:", error);
+    logModuleError("arts", error, "Error exporting arts to Excel with stocks:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

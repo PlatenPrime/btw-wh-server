@@ -1,5 +1,6 @@
 import { getRowByIdSchema } from "./schemas/getRowByIdSchema.js";
 import { getRowByIdUtil } from "./utils/getRowByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getRowById = async (req, res) => {
     const { id } = req.params;
     try {
@@ -28,7 +29,7 @@ export const getRowById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching row:", error);
+        logModuleError("rows", error, "Error fetching row:");
         if (!res.headersSent) {
             res.status(500).json({ message: "Server error", error });
         }

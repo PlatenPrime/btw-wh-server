@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { updateBlockSchema } from "./schemas/updateBlockSchema.js";
 import { updateBlockUtil } from "./utils/updateBlockUtil.js";
 import { checkBlockDuplicatesUpdateUtil } from "./utils/checkBlockDuplicatesUpdateUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const updateBlock = async (req, res) => {
     try {
         const { id } = req.params;
@@ -58,7 +59,7 @@ export const updateBlock = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating block:", error);
+        logModuleError("blocks", error, "Error updating block:");
         // Обработка ошибок MongoDB
         if (error instanceof Error && error.name === "MongoServerError") {
             const mongoError = error;

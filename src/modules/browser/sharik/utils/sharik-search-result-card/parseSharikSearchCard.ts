@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import type { SharikProductInfo } from "../sharik-product-types/sharikProductInfo.js";
+import { logModuleError, logModuleWarn } from "../../../../../logging/logModuleError.js";
 
 /**
  * Парсит элемент товара с сайта sharik.ua (карточка в результатах поиска).
@@ -13,7 +14,7 @@ export function parseSharikSearchCard(
   const quantityRaw = artElement.find(".one-item-quantity").text().trim();
 
   if (!nameukr || !priceRaw || !quantityRaw) {
-    console.warn("Incomplete product data:", {
+    logModuleWarn("browser", "Incomplete product data:", {
       artikul,
       nameukr,
       priceRaw,
@@ -27,13 +28,13 @@ export function parseSharikSearchCard(
 
   const quantityMatch = quantityRaw.match(/\d+/);
   if (!quantityMatch) {
-    console.warn("Invalid quantity format:", { artikul, quantityRaw });
+    logModuleWarn("browser", "Invalid quantity format:", { artikul, quantityRaw });
     return undefined;
   }
   const quantity = parseInt(quantityMatch[0], 10);
 
   if (isNaN(price)) {
-    console.warn("Invalid price format:", { artikul, priceStr, quantityRaw });
+    logModuleWarn("browser", "Invalid price format:", { artikul, priceStr, quantityRaw });
     return undefined;
   }
 

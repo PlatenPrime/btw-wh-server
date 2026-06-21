@@ -1,5 +1,6 @@
 import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { IMergedPosesResult } from "./mergePoses.js";
+import { logModuleError, logModuleInfo, logModuleWarn } from "../../../logging/logModuleError.js";
 
 /**
  * Интерфейс для расширенной позиции с данными Sharik
@@ -36,9 +37,9 @@ export async function getSharikStocks(
     const extendedStocks: ISharikStocksResult = {};
     const artikuls = Object.keys(stocks);
 
-    console.log(
-      `Начинаем получение данных Sharik для ${artikuls.length} артикулов`
-    );
+    logModuleInfo("poses", "sharik stocks fetch started", {
+      artikulCount: artikuls.length,
+    });
 
     // Обрабатываем каждый артикул последовательно с задержкой
     for (let i = 0; i < artikuls.length; i++) {
@@ -69,10 +70,10 @@ export async function getSharikStocks(
           };
         }
       } catch (error) {
-        console.warn(
-          `Ошибка при получении данных Sharik для артикула ${artikul}:`,
-          error
-        );
+        logModuleWarn("poses", "failed to fetch sharik stock for artikul", {
+          artikul,
+          err: error,
+        });
 
         // В случае ошибки устанавливаем нулевые значения
         extendedStocks[artikul] = {
@@ -90,29 +91,29 @@ export async function getSharikStocks(
 
       // Логируем прогресс каждые 10 артикулов
       if ((i + 1) % 10 === 0 || i === artikuls.length - 1) {
-        console.log(`Обработано ${i + 1} из ${artikuls.length} артикулов`);
+        logModuleInfo("poses", "sharik stocks fetch progress", {
+          processed: i + 1,
+          totalItems: artikuls.length,
+        });
       }
     }
 
     const endTime = performance.now();
     const executionTime = endTime - startTime;
 
-    console.log(
-      `getSharikStocks выполнена за ${executionTime.toFixed(2)}ms. ` +
-        `Обработано ${artikuls.length} артикулов.`
-    );
+    logModuleInfo("poses", "sharik stocks fetch completed", {
+      artikulCount: artikuls.length,
+      executionTimeMs: Number(executionTime.toFixed(2)),
+    });
 
     return extendedStocks;
   } catch (error) {
     const endTime = performance.now();
     const executionTime = endTime - startTime;
 
-    console.error(
-      `Ошибка при получении данных Sharik (выполнение заняло ${executionTime.toFixed(
-        2
-      )}ms):`,
-      error
-    );
+    logModuleError("poses", error, "failed to fetch sharik stocks", {
+      executionTimeMs: Number(executionTime.toFixed(2)),
+    });
     throw new Error("Не удалось получить данные Sharik");
   }
 }

@@ -1,5 +1,6 @@
 import { getZoneByTitleSchema } from "./schemas/getZoneByTitleSchema.js";
 import { getZoneByTitleUtil } from "./utils/getZoneByTitleUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getZoneByTitle = async (req, res) => {
     try {
         const { title } = req.params;
@@ -26,7 +27,7 @@ export const getZoneByTitle = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching zone by title:", error);
+        logModuleError("zones", error, "Error fetching zone by title:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

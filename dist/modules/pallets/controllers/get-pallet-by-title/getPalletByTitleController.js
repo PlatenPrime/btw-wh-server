@@ -1,5 +1,6 @@
 import { getPalletByTitleSchema } from "./schemas/getPalletByTitleSchema.js";
 import { getPalletByTitleUtil } from "./utils/getPalletByTitleUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getPalletByTitleController = async (req, res) => {
     try {
         const { title } = req.params;
@@ -29,7 +30,7 @@ export const getPalletByTitleController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("getPalletByTitleController error:", error);
+        logModuleError("pallets", error, "getPalletByTitleController error:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

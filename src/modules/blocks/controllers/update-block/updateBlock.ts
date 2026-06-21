@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { updateBlockSchema } from "./schemas/updateBlockSchema.js";
 import { updateBlockUtil } from "./utils/updateBlockUtil.js";
 import { checkBlockDuplicatesUpdateUtil } from "./utils/checkBlockDuplicatesUpdateUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const updateBlock = async (req: Request, res: Response) => {
   try {
@@ -68,7 +69,7 @@ export const updateBlock = async (req: Request, res: Response) => {
       data: updatedBlock,
     });
   } catch (error) {
-    console.error("Error updating block:", error);
+    logModuleError("blocks", error, "Error updating block:");
 
     // Обработка ошибок MongoDB
     if (error instanceof Error && error.name === "MongoServerError") {

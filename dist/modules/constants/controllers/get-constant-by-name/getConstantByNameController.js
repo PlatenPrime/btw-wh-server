@@ -1,5 +1,6 @@
 import { getConstantByNameSchema } from "./schemas/getConstantByNameSchema.js";
 import { getConstantByNameUtil } from "./utils/getConstantByNameUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить константу по name
  * @route   GET /api/constants/name/:name
@@ -26,7 +27,7 @@ export const getConstantByNameController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching constant by name:", error);
+        logModuleError("constants", error, "Error fetching constant by name:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

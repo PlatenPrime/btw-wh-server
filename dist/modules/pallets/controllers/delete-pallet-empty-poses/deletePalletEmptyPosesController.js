@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { deletePalletEmptyPosesSchema } from "./schemas/deletePalletEmptyPosesSchema.js";
 import { deletePalletEmptyPosesUtil } from "./utils/deletePalletEmptyPosesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const deletePalletEmptyPosesController = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -41,7 +42,7 @@ export const deletePalletEmptyPosesController = async (req, res) => {
                 res.status(404).json({ message: "Pallet not found" });
             }
             else {
-                console.error("deletePalletEmptyPosesController error:", error);
+                logModuleError("pallets", error, "deletePalletEmptyPosesController error:");
                 res.status(500).json({
                     message: "Server error",
                     error: error instanceof Error ? error.message : error,

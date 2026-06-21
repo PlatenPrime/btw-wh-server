@@ -1,5 +1,6 @@
 import { updateDelTitleSchema } from "./schemas/updateDelTitleSchema.js";
 import { updateDelTitleByIdUtil } from "./utils/updateDelTitleByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить название поставки
  * @route   PATCH /api/dels/:id/title
@@ -37,7 +38,7 @@ export const updateDelTitleByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error updating del title:", error);
+        logModuleError("dels", error, "Error updating del title:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

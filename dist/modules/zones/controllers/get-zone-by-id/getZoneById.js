@@ -1,5 +1,6 @@
 import { getZoneByIdSchema } from "./schemas/getZoneByIdSchema.js";
 import { getZoneByIdUtil } from "./utils/getZoneByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getZoneById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -28,7 +29,7 @@ export const getZoneById = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching zone by ID:", error);
+        logModuleError("zones", error, "Error fetching zone by ID:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

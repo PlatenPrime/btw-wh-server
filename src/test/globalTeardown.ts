@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { logModuleError } from "../logging/logModuleError.js";
 import { testMongoGlobalState } from "./testMongoState.js";
 
 export default async function globalTeardown(): Promise<void> {
@@ -7,7 +8,7 @@ export default async function globalTeardown(): Promise<void> {
       await mongoose.connection.close();
     }
   } catch (error) {
-    console.error("Error closing mongoose in globalTeardown:", error);
+    logModuleError("test", error, "failed to close mongoose in globalTeardown");
   }
 
   try {
@@ -16,7 +17,11 @@ export default async function globalTeardown(): Promise<void> {
       testMongoGlobalState.mongoMemoryReplSet = undefined;
     }
   } catch (error) {
-    console.error("Error stopping MongoMemoryReplSet in globalTeardown:", error);
+    logModuleError(
+      "test",
+      error,
+      "failed to stop MongoMemoryReplSet in globalTeardown"
+    );
   }
 
   testMongoGlobalState.mongoConnectPromise = undefined;

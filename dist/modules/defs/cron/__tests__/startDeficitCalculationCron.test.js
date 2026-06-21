@@ -2,7 +2,17 @@ import { CronJob } from "cron";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as calcUtil from "../../controllers/calculate-pogrebi-defs/utils/calculateAndSavePogrebiDefsUtil.js";
 import { startDeficitCalculationCron } from "../startDeficitCalculationCron.js";
+const mockLogger = vi.hoisted(() => ({
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    fatal: vi.fn(),
+    debug: vi.fn(),
+}));
 vi.mock("cron");
+vi.mock("../../../../logging/createLogger.js", () => ({
+    createLogger: () => mockLogger,
+}));
 describe("startDeficitCalculationCron", () => {
     let cronCallback = null;
     const mockedCronJob = vi.mocked(CronJob);
@@ -28,26 +38,21 @@ describe("startDeficitCalculationCron", () => {
         expect(mockedCronJob).toHaveBeenCalledWith("0 0 8-17 * * 1-5", expect.any(Function), null, true, "Europe/Kiev");
     });
     it("runs deficit calculation on cron tick", async () => {
-        const logSpy = vi.spyOn(console, "log").mockImplementation(() => { });
         startDeficitCalculationCron();
         expect(cronCallback).toBeDefined();
         if (cronCallback) {
             await cronCallback();
         }
         expect(calcUtil.calculateAndSavePogrebiDefsUtil).toHaveBeenCalledTimes(1);
-        expect(logSpy).toHaveBeenCalledWith("[CRON] Calculating deficits...");
-        expect(logSpy).toHaveBeenCalledWith("[CRON] Completed: 5 deficits found");
-        logSpy.mockRestore();
+        expect(mockLogger.info).toHaveBeenCalledWith("calculating deficits");
+        expect(mockLogger.info).toHaveBeenCalledWith({ total: 5 }, "deficit calculation completed");
     });
     it("logs error when calculation fails", async () => {
         vi.spyOn(calcUtil, "calculateAndSavePogrebiDefsUtil").mockRejectedValue(new Error("calc failed"));
-        const errorSpy = vi.spyOn(console, "error").mockImplementation(() => { });
-        vi.spyOn(console, "log").mockImplementation(() => { });
         startDeficitCalculationCron();
         if (cronCallback) {
             await cronCallback();
         }
-        expect(errorSpy).toHaveBeenCalledWith("[CRON] Error:", "calc failed");
-        errorSpy.mockRestore();
+        expect(mockLogger.error).toHaveBeenCalledWith({ err: expect.any(Error) }, "deficit calculation cron failed");
     });
 });

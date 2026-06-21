@@ -5,6 +5,7 @@ import { completeAskByIdSchema } from "./schemas/completeAskByIdSchema.js";
 import { completeAskUtil } from "./utils/completeAskUtil.js";
 import { getCompleteAskMesUtil } from "./utils/getCompleteAskMesUtil.js";
 import { sendCompleteAskMesUtil } from "./utils/sendCompleteAskMesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const completeAskById = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -51,7 +52,7 @@ export const completeAskById = async (req, res) => {
         }
     }
     catch (error) {
-        console.error("Error completing ask:", error);
+        logModuleError("asks", error, "Error completing ask:");
         if (!res.headersSent) {
             if (error instanceof Error && error.message === "Ask not found") {
                 res.status(404).json({ message: "Ask not found" });

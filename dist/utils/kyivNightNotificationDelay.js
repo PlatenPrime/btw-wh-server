@@ -1,4 +1,5 @@
 import { sendMessageToAnalyticsChat } from "./telegram/sendMessageToAnalyticsChat.js";
+import { logModuleError, logModuleInfo } from "../logging/logModuleError.js";
 const KYIV_TIMEZONE = "Europe/Kiev";
 const MORNING_HOUR = 6;
 const NIGHT_START_HOUR = 20;
@@ -57,8 +58,7 @@ async function sendAnalyticsChatNotificationSafe(message) {
         await sendMessageToAnalyticsChat(message);
     }
     catch (error) {
-        const msg = error instanceof Error ? error.message : String(error);
-        console.error("[Analytics notification] Failed to send:", msg);
+        logModuleError("kyivNightNotificationDelay", error, "analytics notification failed");
     }
 }
 /**
@@ -71,7 +71,9 @@ export async function sendAnalyticsChatNotificationDeferred(message, finishedAt 
         await sendAnalyticsChatNotificationSafe(message);
         return;
     }
-    console.log(`[Analytics notification] Night delay: sending in ${Math.round(delayMs / 60000)} min`);
+    logModuleInfo("kyivNightNotificationDelay", "analytics notification night delay", {
+        delayMin: Math.round(delayMs / 60000),
+    });
     setTimeout(() => {
         void sendAnalyticsChatNotificationSafe(message);
     }, delayMs);

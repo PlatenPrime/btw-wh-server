@@ -1,4 +1,5 @@
 import { IPos } from "../models/Pos.js";
+import { logModuleError, logModuleInfo } from "../../../logging/logModuleError.js";
 
 /**
  * Интерфейс для объединенной позиции
@@ -53,25 +54,20 @@ export function mergePoses(poses: IPos[]): IMergedPosesResult {
     const endTime = performance.now();
     const executionTime = endTime - startTime;
 
-    console.log(
-      `mergePoses выполнена за ${executionTime.toFixed(2)}ms. Обработано ${
-        poses.length
-      } позиций, объединено в ${
-        Object.keys(mergedPoses).length
-      } уникальных артикулов.`
-    );
+    logModuleInfo("poses", "merge poses completed", {
+      executionTimeMs: Number(executionTime.toFixed(2)),
+      poseCount: poses.length,
+      uniqueArtikulCount: Object.keys(mergedPoses).length,
+    });
 
     return mergedPoses;
   } catch (error) {
     const endTime = performance.now();
     const executionTime = endTime - startTime;
 
-    console.error(
-      `Ошибка при объединении позиций (выполнение заняло ${executionTime.toFixed(
-        2
-      )}ms):`,
-      error
-    );
+    logModuleError("poses", error, "failed to merge poses", {
+      executionTimeMs: Number(executionTime.toFixed(2)),
+    });
     throw new Error("Не удалось объединить позиции");
   }
 }

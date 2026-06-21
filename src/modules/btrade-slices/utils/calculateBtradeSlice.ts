@@ -5,6 +5,7 @@ import { BtradeSlice } from "../models/BtradeSlice.js";
 import type { IBtradeSliceDataItem } from "../models/BtradeSlice.js";
 import { fetchMissingBtradeSliceItemsViaSearch } from "./calculateBtradeSliceViaSearch.js";
 import { getUniqueArtikulsFromArtsUtil } from "./getUniqueArtikulsFromArtsUtil.js";
+import { logModuleInfo } from "../../../logging/logModuleError.js";
 
 const MISSING_SLICE_SENTINEL: IBtradeSliceDataItem = { price: -1, quantity: -1 };
 
@@ -25,9 +26,9 @@ export async function calculateBtradeSlice(): Promise<{
   const artikuls = await getUniqueArtikulsFromArtsUtil();
   const totalArtikuls = artikuls.length;
 
-  console.log(
-    `[BtradeSlice] Загрузка product_rests, артикулов в arts: ${artikuls.length}`
-  );
+  logModuleInfo("btrade-slices", "btrade slice product_rests load started", {
+    artikulCount: artikuls.length,
+  });
 
   const productRestsMap = await fetchSharikProductRestsMap();
 
@@ -43,9 +44,9 @@ export async function calculateBtradeSlice(): Promise<{
   const missingArtikuls = artikuls.filter((artikul) => !(artikul in data));
 
   if (missingArtikuls.length > 0) {
-    console.log(
-      `[BtradeSlice] Fallback search для ${missingArtikuls.length} артикулов`
-    );
+    logModuleInfo("btrade-slices", "btrade slice search fallback started", {
+      missingCount: missingArtikuls.length,
+    });
     const fromSearch = await fetchMissingBtradeSliceItemsViaSearch(
       missingArtikuls
     );
@@ -76,9 +77,12 @@ export async function calculateBtradeSlice(): Promise<{
     { upsert: true }
   );
 
-  console.log(
-    `[BtradeSlice] Готово: product_rests=${fromProductRests}, search fallback=${fromSearchCount}, valid=${count}, missing=${missing}`
-  );
+  logModuleInfo("btrade-slices", "btrade slice completed", {
+    fromProductRests,
+    fromSearch: fromSearchCount,
+    valid: count,
+    missing,
+  });
 
   return {
     saved: true,

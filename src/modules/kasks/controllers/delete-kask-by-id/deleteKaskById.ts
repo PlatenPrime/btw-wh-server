@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { deleteKaskByIdSchema } from "./schemas/deleteKaskByIdSchema.js";
 import { deleteKaskUtil } from "./utils/deleteKaskUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const deleteKaskById = async (
   req: Request,
@@ -28,7 +29,7 @@ export const deleteKaskById = async (
       data: { id, artikul: kask.artikul },
     });
   } catch (error) {
-    console.error("Error deleting kask:", error);
+    logModuleError("kasks", error, "Error deleting kask:");
     res.status(500).json({
       message: "Server error while deleting kask",
       error: error instanceof Error ? error.message : "Unknown error",

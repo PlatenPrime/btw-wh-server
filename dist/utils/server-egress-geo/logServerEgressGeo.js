@@ -1,4 +1,6 @@
 import { getServerEgressGeo } from "./getServerEgressGeo.js";
+import { createLogger } from "../../logging/createLogger.js";
+const log = createLogger({ module: "server-egress-geo" });
 const DISABLED_VALUES = new Set(["0", "false", "no", "off"]);
 export function isServerEgressGeoLogEnabled() {
     const raw = process.env.SERVER_EGRESS_GEO_LOG?.trim().toLowerCase();
@@ -11,7 +13,7 @@ export function isServerEgressGeoLogEnabled() {
     return true;
 }
 /**
- * Запрашивает geo по egress IP и пишет в console (Railway logs).
+ * Запрашивает geo по egress IP и пишет в structured log (Railway logs).
  * По умолчанию включено; отключение: SERVER_EGRESS_GEO_LOG=0|false|no|off.
  * Не бросает — сбой geo не должен ломать бизнес-операцию.
  */
@@ -22,13 +24,13 @@ export async function logServerEgressGeo(context) {
     try {
         const geo = await getServerEgressGeo();
         if (geo) {
-            console.log(`[ServerEgressGeo] ${context} ${JSON.stringify(geo)}`);
+            log.info({ context, geo }, "server egress geo");
             return;
         }
-        console.warn(`[ServerEgressGeo] ${context} failed: no geo data`);
+        log.warn({ context }, "server egress geo unavailable");
     }
     catch (error) {
         const message = error instanceof Error ? error.message : "unknown error";
-        console.warn(`[ServerEgressGeo] ${context} failed: ${message}`);
+        log.warn({ context, err: message }, "server egress geo failed");
     }
 }

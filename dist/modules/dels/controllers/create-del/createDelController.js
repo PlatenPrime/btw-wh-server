@@ -1,5 +1,6 @@
 import { createDelSchema } from "./schemas/createDelSchema.js";
 import { createDelUtil } from "./utils/createDelUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Создать поставку
  * @route   POST /api/dels
@@ -31,7 +32,7 @@ export const createDelController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error creating del:", error);
+        logModuleError("dels", error, "Error creating del:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

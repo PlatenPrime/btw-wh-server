@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { getZoneByIdSchema } from "./schemas/getZoneByIdSchema.js";
 import { getZoneByIdUtil } from "./utils/getZoneByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getZoneById = async (req: Request, res: Response) => {
   try {
@@ -34,7 +35,7 @@ export const getZoneById = async (req: Request, res: Response) => {
       data: zone,
     });
   } catch (error) {
-    console.error("Error fetching zone by ID:", error);
+    logModuleError("zones", error, "Error fetching zone by ID:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

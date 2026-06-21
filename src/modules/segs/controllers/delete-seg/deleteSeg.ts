@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
 import { deleteSegUtil } from "./utils/deleteSegUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 const deleteSegSchema = z.object({
   id: z.string().refine(
@@ -51,7 +52,7 @@ export const deleteSeg = async (req: Request, res: Response) => {
       if (error instanceof Error && error.message === "Segment not found") {
         res.status(404).json({ message: "Segment not found" });
       } else {
-        console.error("deleteSeg error:", error);
+        logModuleError("segs", error, "deleteSeg error:");
         res.status(500).json({
           message: "Server error",
           error: error instanceof Error ? error.message : error,

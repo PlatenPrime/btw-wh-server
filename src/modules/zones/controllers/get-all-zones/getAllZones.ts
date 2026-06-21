@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getAllZonesQuerySchema } from "../../schemas/zoneSchema.js";
 import { getAllZonesUtil } from "./utils/getAllZonesUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 interface GetAllZonesRequest extends Request<{}, {}, {}, any> {}
 
@@ -32,7 +33,7 @@ export const getAllZones = async (req: GetAllZonesRequest, res: Response) => {
       pagination: result.pagination,
     });
   } catch (error) {
-    console.error("Error fetching zones:", error);
+    logModuleError("zones", error, "Error fetching zones:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

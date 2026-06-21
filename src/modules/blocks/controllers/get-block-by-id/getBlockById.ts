@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getBlockByIdSchema } from "./schemas/getBlockByIdSchema.js";
 import { getBlockByIdUtil } from "./utils/getBlockByIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getBlockById = async (req: Request, res: Response) => {
   try {
@@ -33,7 +34,7 @@ export const getBlockById = async (req: Request, res: Response) => {
       data: block,
     });
   } catch (error) {
-    console.error("Error fetching block by ID:", error);
+    logModuleError("blocks", error, "Error fetching block by ID:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

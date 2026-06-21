@@ -1,5 +1,6 @@
 import { createConstantSchema } from "./schemas/createConstantSchema.js";
 import { createConstantUtil } from "./utils/createConstantUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Создать константу
  * @route   POST /api/constants
@@ -25,7 +26,7 @@ export const createConstantController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error creating constant:", error);
+        logModuleError("constants", error, "Error creating constant:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

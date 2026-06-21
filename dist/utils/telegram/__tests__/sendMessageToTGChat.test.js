@@ -1,13 +1,16 @@
 import axios from "axios";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+const { logModuleDebug, logModuleError } = vi.hoisted(() => ({
+    logModuleDebug: vi.fn(),
+    logModuleError: vi.fn(),
+}));
 // Mock axios
 vi.mock("axios");
 const mockedAxios = vi.mocked(axios, true);
-// Mock console methods
-const consoleSpy = {
-    log: vi.spyOn(console, "log"),
-    error: vi.spyOn(console, "error"),
-};
+vi.mock("../../../logging/logModuleError.js", () => ({
+    logModuleDebug,
+    logModuleError,
+}));
 // Mock constants
 vi.mock("../../../constants/telegram", () => ({
     getBtwToken: () => "mock-token",
@@ -17,8 +20,6 @@ import { sendMessageToTGChat } from "../sendMessageToTGChat.js";
 describe("sendMessageToTGChat", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        consoleSpy.log.mockClear();
-        consoleSpy.error.mockClear();
     });
     afterEach(() => {
         vi.restoreAllMocks();
@@ -54,7 +55,10 @@ describe("sendMessageToTGChat", () => {
             chat_id: "-1002121224059",
             text: "Test message",
         });
-        expect(consoleSpy.log).toHaveBeenCalledWith("Message sent to chat:", mockSuccessResponse);
+        expect(logModuleDebug).toHaveBeenCalledWith("telegram", "message sent to chat", {
+            chatId: "-1002121224059",
+            messageId: 125,
+        });
     });
     it("should throw error for empty message", async () => {
         await expect(sendMessageToTGChat({ message: "", chatId: "-1002121224059" })).rejects.toThrow("Message cannot be empty");

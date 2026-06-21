@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { getArtsByZoneSchema } from "./schemas/getArtsByZoneSchema.js";
 import { getArtsByZoneUtil } from "./utils/getArtsByZoneUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const getArtsByZoneController = async (
   req: Request,
@@ -26,7 +27,7 @@ export const getArtsByZoneController = async (
       total: arts.length,
     });
   } catch (error) {
-    console.error("Error fetching arts by zone:", error);
+    logModuleError("arts", error, "Error fetching arts by zone:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

@@ -1,5 +1,6 @@
 import { createVariantSchema } from "./schemas/createVariantSchema.js";
 import { createVariantUtil } from "./utils/createVariantUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 function isDuplicateUrlError(err) {
     return (typeof err === "object" &&
         err !== null &&
@@ -28,7 +29,7 @@ export const createVariantController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error creating variant:", error);
+        logModuleError("variants", error, "Error creating variant:");
         if (res.headersSent)
             return;
         if (isDuplicateUrlError(error)) {

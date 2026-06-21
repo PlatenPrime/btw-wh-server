@@ -1,4 +1,5 @@
 import { sendMessageToTGUser } from "../../../../../utils/telegram/sendMessageToTGUser.js";
+import { logModuleError } from "../../../../../logging/logModuleError.js";
 
 interface SendRejectAskMesUtilInput {
   message: string;
@@ -12,7 +13,7 @@ export const sendRejectAskMesUtil = async ({
   try {
     await sendMessageToTGUser(message, telegramChatId);
   } catch (error) {
-    console.error("Failed to send Telegram notification:", error);
+    logModuleError("asks", error, "Failed to send Telegram notification:");
   }
 };
 

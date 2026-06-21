@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { Pallet } from "../../models/Pallet.js";
 import { deletePalletSchema } from "./schemas/deletePalletSchema.js";
 import { deletePalletUtil } from "./utils/deletePalletUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const deletePalletController = async (
   req: Request,
@@ -37,7 +38,7 @@ export const deletePalletController = async (
       if (error instanceof Error && error.message === "Pallet not found") {
         res.status(404).json({ message: "Pallet not found" });
       } else {
-        console.error("deletePalletController error:", error);
+        logModuleError("pallets", error, "deletePalletController error:");
         res.status(500).json({
           message: "Server error",
           error: error instanceof Error ? error.message : error,

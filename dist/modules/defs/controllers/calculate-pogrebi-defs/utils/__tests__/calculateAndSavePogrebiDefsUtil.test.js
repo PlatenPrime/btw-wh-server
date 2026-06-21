@@ -1,4 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+const { logModuleError } = vi.hoisted(() => ({
+    logModuleError: vi.fn(),
+}));
+vi.mock("../../../../../../logging/logModuleError.js", () => ({
+    logModuleError,
+}));
 import { calculateAndSavePogrebiDefsUtil } from "../calculateAndSavePogrebiDefsUtil.js";
 // Мокаем зависимости
 vi.mock("../../../../../poses/utils/getPogrebiDefStocks.js", () => ({
@@ -148,14 +154,12 @@ describe("calculateAndSavePogrebiDefsUtil", () => {
     });
     it("должна обрабатывать ошибки и завершать отслеживание", async () => {
         const error = new Error("Database connection failed");
-        const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });
         getPogrebiDefStocks.mockRejectedValue(error);
         await expect(calculateAndSavePogrebiDefsUtil()).rejects.toThrow("Не вдалося розрахувати і зберегти дефіцити: Database connection failed");
         expect(sendDefCalculationStartNotification).toHaveBeenCalledTimes(1);
         expect(finishCalculationTracking).toHaveBeenCalledTimes(1);
         expect(sendDefCalculationErrorNotification).toHaveBeenCalledWith(error);
-        expect(consoleSpy).toHaveBeenCalledWith("Помилка в calculateAndSavePogrebiDefs:", error);
-        consoleSpy.mockRestore();
+        expect(logModuleError).toHaveBeenCalledWith("defs", error, "Помилка в calculateAndSavePogrebiDefs:");
     });
     it("должна обрабатывать ошибки без message", async () => {
         const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => { });

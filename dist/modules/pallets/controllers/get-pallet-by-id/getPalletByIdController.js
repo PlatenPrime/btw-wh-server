@@ -1,5 +1,6 @@
 import { getPalletByIdSchema } from "./schemas/getPalletByIdSchema.js";
 import { getPalletUtil } from "./utils/getPalletUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 export const getPalletByIdController = async (req, res) => {
     try {
         const { id } = req.params;
@@ -29,7 +30,7 @@ export const getPalletByIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("getPalletByIdController error:", error);
+        logModuleError("pallets", error, "getPalletByIdController error:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

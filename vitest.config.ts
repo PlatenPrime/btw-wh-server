@@ -38,6 +38,7 @@ export default defineConfig({
           include: [
             "src/__tests__/**/*.test.ts",
             "src/config/__tests__/**/*.test.ts",
+            "src/logging/__tests__/**/*.test.ts",
             "src/test/__tests__/**/*.test.ts",
             "src/utils/__tests__/**/*.test.ts",
           ],
@@ -57,6 +58,7 @@ export default defineConfig({
             ".cache",
             "src/__tests__/**",
             "src/config/__tests__/**",
+            "src/logging/__tests__/**",
             "src/test/__tests__/**",
             "src/utils/__tests__/**",
           ],

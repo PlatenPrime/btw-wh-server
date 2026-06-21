@@ -1,6 +1,7 @@
 import { getAllSkusQuerySchema } from "../get-all-skus/schemas/getAllSkusQuerySchema.js";
 import { getSkusBySkugrIdParamsSchema } from "./schemas/getSkusBySkugrIdParamsSchema.js";
 import { getSkusBySkugrIdUtil } from "./utils/getSkusBySkugrIdUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Получить SKU группы по id skugr с пагинацией и фильтрами
  * @route   GET /api/skus/by-skugr/:skugrId
@@ -35,7 +36,7 @@ export const getSkusBySkugrIdController = async (req, res) => {
         });
     }
     catch (error) {
-        console.error("Error fetching skus by skugr id:", error);
+        logModuleError("skus", error, "Error fetching skus by skugr id:");
         if (!res.headersSent) {
             res.status(500).json({
                 message: "Server error",

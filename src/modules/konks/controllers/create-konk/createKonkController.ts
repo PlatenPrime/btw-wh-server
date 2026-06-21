@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createKonkSchema } from "./schemas/createKonkSchema.js";
 import { createKonkUtil } from "./utils/createKonkUtil.js";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Создать конкурента
@@ -33,7 +34,7 @@ export const createKonkController = async (
       data: konk,
     });
   } catch (error) {
-    console.error("Error creating konk:", error);
+    logModuleError("konks", error, "Error creating konk:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",
