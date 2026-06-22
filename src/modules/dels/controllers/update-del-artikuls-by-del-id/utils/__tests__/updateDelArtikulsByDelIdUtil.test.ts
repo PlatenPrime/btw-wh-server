@@ -17,12 +17,12 @@ describe("updateDelArtikulsByDelIdUtil", () => {
     ).rejects.toThrow("Del not found");
   });
 
-  it("updates all artikuls from sharik and returns stats", async () => {
+  it("updates stock for all artikuls from sharik and preserves quant", async () => {
     const del = await Del.create({
       title: "Del",
       prodName: "prod1",
       prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
-      artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
+      artikuls: { A1: { quant: 3 }, A2: { quant: 7 } },
     });
     vi.mocked(getSharikStockData)
       .mockResolvedValueOnce({ nameukr: "Name1", price: 0, quantity: 10 })
@@ -37,18 +37,21 @@ describe("updateDelArtikulsByDelIdUtil", () => {
     const found = await Del.findById(del._id);
     const a = found?.artikuls as Record<
       string,
-      { quantity: number; nameukr?: string }
+      { quant: number; stock: number; nameukr?: string }
     >;
-    expect(a["A1"]).toEqual({ quantity: 10, nameukr: "Name1" });
-    expect(a["A2"]).toEqual({ quantity: 20, nameukr: "Name2" });
+    expect(a["A1"]).toEqual({ quant: 3, stock: 10, nameukr: "Name1" });
+    expect(a["A2"]).toEqual({ quant: 7, stock: 20, nameukr: "Name2" });
   });
 
-  it("counts notFound when sharik returns null for one", async () => {
+  it("counts notFound when sharik returns null and keeps previous stock", async () => {
     const del = await Del.create({
       title: "Del",
       prodName: "prod1",
       prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
-      artikuls: { A1: { quantity: 0 }, A2: { quantity: 0 } },
+      artikuls: {
+        A1: { quant: 1, stock: 5 },
+        A2: { quant: 2, stock: 8 },
+      },
     });
     vi.mocked(getSharikStockData)
       .mockResolvedValueOnce({ nameukr: "", price: 0, quantity: 10 })
@@ -57,5 +60,12 @@ describe("updateDelArtikulsByDelIdUtil", () => {
     expect(result.total).toBe(2);
     expect(result.updated).toBe(1);
     expect(result.notFound).toBe(1);
+    const found = await Del.findById(del._id);
+    const a = found?.artikuls as Record<
+      string,
+      { quant: number; stock?: number }
+    >;
+    expect(a["A1"].stock).toBe(10);
+    expect(a["A2"].stock).toBe(8);
   });
 });

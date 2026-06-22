@@ -38,7 +38,7 @@ describe("updateDelArtikulsByDelIdController", () => {
       title: "Del",
       prodName: "prod1",
       prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
-      artikuls: { A1: { quantity: 0 } },
+      artikuls: { A1: { quant: 0 } },
     });
     const req = { params: { id: del._id.toString() } } as unknown as Request;
     await updateDelArtikulsByDelIdController(req, res);

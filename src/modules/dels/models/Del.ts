@@ -2,13 +2,19 @@ import { Document, Model, Schema, Types } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 
 /**
- * Объект артикулов поставки: ключ — артикул (как в Art, Def, Pos), значение — объект с количеством и опциональным названием (nameukr).
+ * Значение артикула в поставке: quant — количество в поставке, stock — остаток с sharik.ua (опционально до sync).
+ */
+export interface IDelArtikulValue {
+  quant: number;
+  stock?: number;
+  nameukr?: string;
+}
+
+/**
+ * Объект артикулов поставки: ключ — артикул (как в Art, Def, Pos), значение — quant, stock и опциональное nameukr.
  */
 export interface IDelArtikuls {
-  [artikul: string]: {
-    quantity: number;
-    nameukr?: string;
-  };
+  [artikul: string]: IDelArtikulValue;
 }
 
 /**

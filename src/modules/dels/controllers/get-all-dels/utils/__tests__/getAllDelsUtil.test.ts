@@ -17,7 +17,7 @@ describe("getAllDelsUtil", () => {
       title: "Поставка 1",
       prodName: "prod1",
       prod: { title: "Producer 1", imageUrl: "https://example.com/p1.png" },
-      artikuls: { "ART-1": { quantity: 10 } },
+      artikuls: { "ART-1": { quant: 10 } },
     });
     const result = await getAllDelsUtil();
     expect(result).toHaveLength(1);

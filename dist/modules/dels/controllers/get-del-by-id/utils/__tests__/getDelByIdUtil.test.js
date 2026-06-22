@@ -15,8 +15,8 @@ describe("getDelByIdUtil", () => {
             prodName: "prod1",
             prod: { title: "Producer One", imageUrl: "https://example.com/prod1.png" },
             artikuls: {
-                "ART-1": { quantity: 5 },
-                "ART-2": { quantity: 10, nameukr: "Товар" },
+                "ART-1": { quant: 5 },
+                "ART-2": { quant: 10, nameukr: "Товар" },
             },
         });
         const result = await getDelByIdUtil(del._id.toString());
@@ -28,7 +28,7 @@ describe("getDelByIdUtil", () => {
             imageUrl: "https://example.com/prod1.png",
         });
         const artikuls = result?.artikuls ?? {};
-        expect(artikuls["ART-1"]).toEqual({ quantity: 5 });
-        expect(artikuls["ART-2"]).toEqual({ quantity: 10, nameukr: "Товар" });
+        expect(artikuls["ART-1"]).toEqual({ quant: 5 });
+        expect(artikuls["ART-2"]).toEqual({ quant: 10, nameukr: "Товар" });
     });
 });

@@ -20,7 +20,7 @@ describe("createDelUtil", () => {
     const result = await createDelUtil({
       title: "New delivery",
       prodName: "acme",
-      artikuls: {},
+      artikuls: [],
     });
     if ("error" in result) throw new Error("Expected del, got error");
     expect(result._id).toBeDefined();
@@ -41,7 +41,7 @@ describe("createDelUtil", () => {
     });
   });
 
-  it("creates del with title, prodName and artikuls and fills nameukr from arts", async () => {
+  it("creates del with artikuls array and fills quant and nameukr from arts", async () => {
     await Prod.create({
       name: "acme",
       title: "Acme",
@@ -54,15 +54,19 @@ describe("createDelUtil", () => {
     const result = await createDelUtil({
       title: "With artikuls",
       prodName: "acme",
-      artikuls: { A1: 1, A2: 2 },
+      artikuls: [
+        { artikul: "A1", quantity: 1 },
+        { artikul: "A2", quantity: 2 },
+      ],
     });
     if ("error" in result) throw new Error("Expected del, got error");
     const artikuls = result.artikuls as Record<
       string,
-      { quantity: number; nameukr?: string }
+      { quant: number; stock?: number; nameukr?: string }
     >;
-    expect(artikuls["A1"]).toEqual({ quantity: 1, nameukr: "Товар A1" });
-    expect(artikuls["A2"]).toEqual({ quantity: 2 });
+    expect(artikuls["A1"]).toEqual({ quant: 1, nameukr: "Товар A1" });
+    expect(artikuls["A1"]).not.toHaveProperty("stock");
+    expect(artikuls["A2"]).toEqual({ quant: 2 });
     expect(result.prod).toMatchObject({
       title: "Acme",
       imageUrl: "https://example.com/acme.png",
@@ -73,7 +77,7 @@ describe("createDelUtil", () => {
     const result = await createDelUtil({
       title: "New delivery",
       prodName: "nonexistent",
-      artikuls: {},
+      artikuls: [],
     });
     expect("error" in result).toBe(true);
     if (!("error" in result)) return;

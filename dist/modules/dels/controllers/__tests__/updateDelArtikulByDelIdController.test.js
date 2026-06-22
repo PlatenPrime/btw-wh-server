@@ -29,7 +29,7 @@ describe("updateDelArtikulByDelIdController", () => {
             title: "Del",
             prodName: "prod1",
             prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
-            artikuls: { "ART-1": { quantity: 0 } },
+            artikuls: { "ART-1": { quant: 5 } },
         });
         vi.mocked(getSharikStockData).mockResolvedValue(null);
         const req = {
@@ -38,12 +38,12 @@ describe("updateDelArtikulByDelIdController", () => {
         await updateDelArtikulByDelIdController(req, res);
         expect(responseStatus.code).toBe(404);
     });
-    it("200 updates and returns del", async () => {
+    it("200 updates stock and returns del preserving quant", async () => {
         const del = await Del.create({
             title: "Del",
             prodName: "prod1",
             prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
-            artikuls: { "ART-1": { quantity: 0 } },
+            artikuls: { "ART-1": { quant: 5 } },
         });
         vi.mocked(getSharikStockData).mockResolvedValue({
             nameukr: "Товар",
@@ -57,6 +57,10 @@ describe("updateDelArtikulByDelIdController", () => {
         expect(responseStatus.code).toBe(200);
         const data = responseJson.data;
         const artikuls = data?.toObject?.()?.artikuls ?? data?.artikuls ?? {};
-        expect(artikuls["ART-1"]).toEqual({ quantity: 15, nameukr: "Товар" });
+        expect(artikuls["ART-1"]).toEqual({
+            quant: 5,
+            stock: 15,
+            nameukr: "Товар",
+        });
     });
 });

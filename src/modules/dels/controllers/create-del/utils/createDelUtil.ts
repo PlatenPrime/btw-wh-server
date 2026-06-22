@@ -4,16 +4,21 @@ import { Prod } from "../../../../prods/models/Prod.js";
 
 const PROD_NOT_FOUND = "PROD_NOT_FOUND" as const;
 
+type CreateDelArtikulInput = {
+  artikul: string;
+  quantity: number;
+};
+
 type CreateDelUtilInput = {
   title: string;
   prodName: string;
-  artikuls: Record<string, number>;
+  artikuls: CreateDelArtikulInput[];
 };
 
 export type CreateDelUtilResult = IDel | { error: typeof PROD_NOT_FOUND };
 
 /**
- * Собирает объект artikuls для поставки: для каждого артикула подставляет nameukr из коллекции arts (если найден).
+ * Собирает объект artikuls для поставки: quant из quantity клиента, nameukr из коллекции arts (если найден).
  */
 export const createDelUtil = async (
   input: CreateDelUtilInput
@@ -23,8 +28,8 @@ export const createDelUtil = async (
     return { error: PROD_NOT_FOUND };
   }
 
-  const rawArtikuls = input.artikuls ?? {};
-  const artikulKeys = Object.keys(rawArtikuls);
+  const rawArtikuls = input.artikuls ?? [];
+  const artikulKeys = rawArtikuls.map((item) => item.artikul);
   const artikulsToSave: IDelArtikuls = {};
 
   if (artikulKeys.length > 0) {
@@ -35,13 +40,12 @@ export const createDelUtil = async (
       arts.map((a) => [a.artikul, a.nameukr] as const)
     );
 
-    for (const artikul of artikulKeys) {
-      const quantity = rawArtikuls[artikul];
+    for (const { artikul, quantity } of rawArtikuls) {
       const nameukr = nameukrByArtikul.get(artikul);
       artikulsToSave[artikul] =
         nameukr !== undefined && nameukr !== ""
-          ? { quantity, nameukr }
-          : { quantity };
+          ? { quant: quantity, nameukr }
+          : { quant: quantity };
     }
   }
 

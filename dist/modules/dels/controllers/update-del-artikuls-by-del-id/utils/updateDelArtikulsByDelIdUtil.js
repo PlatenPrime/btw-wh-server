@@ -1,7 +1,12 @@
 import { getSharikStockData } from "../../../../browser/sharik/utils/getSharikStockData.js";
 import { Del } from "../../../models/Del.js";
+const isDelArtikulValue = (v) => !!v &&
+    typeof v === "object" &&
+    "quant" in v &&
+    typeof v.quant === "number";
 /**
- * Обновляет значения всех артикулов поставки данными с sharik.ua.
+ * Обновляет stock всех артикулов поставки данными с sharik.ua.
+ * quant и существующий stock (при ошибке/notFound) сохраняются.
  * Вызывать в фоне; между запросами к sharik — задержка 100ms.
  */
 export const updateDelArtikulsByDelIdUtil = async (delId) => {
@@ -10,13 +15,7 @@ export const updateDelArtikulsByDelIdUtil = async (delId) => {
         throw new Error("Del not found");
     }
     const raw = del.artikuls;
-    const artikulKeys = Object.keys(raw).filter((k) => {
-        const v = raw[k];
-        return (v &&
-            typeof v === "object" &&
-            "quantity" in v &&
-            typeof v.quantity === "number");
-    });
+    const artikulKeys = Object.keys(raw).filter((k) => isDelArtikulValue(raw[k]));
     const result = {
         total: artikulKeys.length,
         updated: 0,
@@ -26,10 +25,11 @@ export const updateDelArtikulsByDelIdUtil = async (delId) => {
     const artikulsObj = {};
     for (const k of artikulKeys) {
         const v = raw[k];
-        artikulsObj[k] = { quantity: v.quantity, nameukr: v.nameukr };
+        artikulsObj[k] = { quant: v.quant, stock: v.stock, nameukr: v.nameukr };
     }
     for (let i = 0; i < artikulKeys.length; i++) {
         const artikul = artikulKeys[i];
+        const previous = artikulsObj[artikul];
         try {
             const sharikData = await getSharikStockData(artikul);
             if (!sharikData) {
@@ -37,7 +37,8 @@ export const updateDelArtikulsByDelIdUtil = async (delId) => {
                 continue;
             }
             artikulsObj[artikul] = {
-                quantity: sharikData.quantity,
+                quant: previous.quant,
+                stock: sharikData.quantity,
                 nameukr: sharikData.nameukr ?? "",
             };
             result.updated++;

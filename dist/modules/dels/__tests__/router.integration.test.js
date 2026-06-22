@@ -42,7 +42,7 @@ describe("Dels router integration", () => {
             const del = await Del.create({
                 title: "Del A",
                 prodName: "acme",
-                artikuls: { "ART-1": { quantity: 5 } },
+                artikuls: { "ART-1": { quant: 5 } },
             });
             const response = await request(app)
                 .get(`/api/dels/id/${del._id.toString()}`)
@@ -64,7 +64,7 @@ describe("Dels router integration", () => {
             const response = await request(app)
                 .post("/api/dels")
                 .set(createAuthHeader(RoleType.ADMIN))
-                .send({ title: "New Del", prodName: "acme", artikuls: {} })
+                .send({ title: "New Del", prodName: "acme", artikuls: [] })
                 .expect(201);
             expect(response.body.data.title).toBe("New Del");
             expect(await Del.countDocuments()).toBe(1);

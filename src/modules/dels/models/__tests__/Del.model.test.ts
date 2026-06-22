@@ -39,8 +39,8 @@ describe("Del Model", () => {
         title: "Поставка с артикулами",
         prodName: "prod1",
         artikuls: {
-          "ART-001": { quantity: 10 },
-          "ART-002": { quantity: 5, nameukr: "Товар" },
+          "ART-001": { quant: 10 },
+          "ART-002": { quant: 5, stock: 100, nameukr: "Товар" },
         },
       };
       const del = new Del(delData);
@@ -49,11 +49,15 @@ describe("Del Model", () => {
       expect(saved.prodName).toBe("prod1");
       const artikulsObj = saved.toObject().artikuls as Record<
         string,
-        { quantity: number; nameukr?: string }
+        { quant: number; stock?: number; nameukr?: string }
       >;
       expect(artikulsObj).toBeDefined();
-      expect(artikulsObj["ART-001"]).toEqual({ quantity: 10 });
-      expect(artikulsObj["ART-002"]).toEqual({ quantity: 5, nameukr: "Товар" });
+      expect(artikulsObj["ART-001"]).toEqual({ quant: 10 });
+      expect(artikulsObj["ART-002"]).toEqual({
+        quant: 5,
+        stock: 100,
+        nameukr: "Товар",
+      });
     });
 
     it("should have timestamps", async () => {

@@ -18,7 +18,7 @@ export const createDelController = async (req, res) => {
         const result = await createDelUtil({
             title: parseResult.data.title,
             prodName: parseResult.data.prodName,
-            artikuls: parseResult.data.artikuls ?? {},
+            artikuls: parseResult.data.artikuls,
         });
         if ("error" in result) {
             res.status(400).json({

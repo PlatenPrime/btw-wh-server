@@ -2,6 +2,8 @@
 
 Модуль поставок. Список и получение по id — USER; создание, обновление заголовка и артикулов — ADMIN; удаление — PRIME.
 
+Изменения формата артикулов (quant/stock): [заметка для фронтенда](../frontend/dels-quant-stock.md).
+
 ## Эндпоинты
 
 ### GET `/api/dels`
@@ -38,7 +40,7 @@
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос body:** `title` (string, обязательно), `prodName` (string, обязательно; должен существовать в справочнике производителей как `Prod.name`), `artikuls` (объект «артикул → число», опционально, по умолчанию {}).
+**Запрос body:** `title` (string, обязательно), `prodName` (string, обязательно; должен существовать в справочнике производителей как `Prod.name`), `artikuls` (массив `{ artikul: string, quantity: number }`, опционально, по умолчанию `[]`; `artikul` уникален в массиве). Поле `quantity` в запросе сохраняется как `quant` в документе.
 
 **Ответ 201:** `{ message: string, data: Del }`.
 
@@ -76,7 +78,7 @@
 
 ### PATCH `/api/dels/:id/artikuls/:artikul`
 
-Обновление одного артикула в поставке (данные с sharik.ua).
+Обновление `stock` одного артикула в поставке (данные с sharik.ua). `quant` не меняется; для нового артикула `quant = 0`.
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
@@ -90,7 +92,7 @@
 
 ### POST `/api/dels/:id/artikuls/update-all`
 
-Запуск фонового обновления всех артикулов поставки (sharik.ua).
+Запуск фонового обновления `stock` всех артикулов поставки (sharik.ua).
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
@@ -106,6 +108,6 @@
 - `title`: string
 - `prodName`: string (соответствует `Prod.name`, производитель поставки)
 - `prod`: объект (опционально; у старых документов может отсутствовать): `{ title: string, imageUrl: string }` — данные производителя из справочника Prod
-- `artikuls`: объект, ключ — артикул (string), значение — `{ quantity: number, nameukr?: string }`
+- `artikuls`: объект, ключ — артикул (string), значение — `{ quant: number, stock?: number, nameukr?: string }`
 - `createdAt`: Date (ISO строка)
 - `updatedAt`: Date (ISO строка)

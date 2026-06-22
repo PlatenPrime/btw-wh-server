@@ -30,7 +30,7 @@ describe("getAllDelsController", () => {
       title: "Delivery 1",
       prodName: "prod1",
       prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
-      artikuls: { "ART-1": { quantity: 5 } },
+      artikuls: { "ART-1": { quant: 5 } },
     });
     const req = {} as Request;
     await getAllDelsController(req, res);

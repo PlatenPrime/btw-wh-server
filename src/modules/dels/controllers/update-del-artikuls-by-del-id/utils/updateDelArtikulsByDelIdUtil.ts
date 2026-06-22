@@ -1,5 +1,5 @@
 import { getSharikStockData } from "../../../../browser/sharik/utils/getSharikStockData.js";
-import { Del, IDel, IDelArtikuls } from "../../../models/Del.js";
+import { Del, IDelArtikulValue, IDelArtikuls } from "../../../models/Del.js";
 
 export type UpdateDelArtikulsByDelIdResult = {
   total: number;
@@ -8,8 +8,15 @@ export type UpdateDelArtikulsByDelIdResult = {
   notFound: number;
 };
 
+const isDelArtikulValue = (v: unknown): v is IDelArtikulValue =>
+  !!v &&
+  typeof v === "object" &&
+  "quant" in v &&
+  typeof (v as { quant: unknown }).quant === "number";
+
 /**
- * Обновляет значения всех артикулов поставки данными с sharik.ua.
+ * Обновляет stock всех артикулов поставки данными с sharik.ua.
+ * quant и существующий stock (при ошибке/notFound) сохраняются.
  * Вызывать в фоне; между запросами к sharik — задержка 100ms.
  */
 export const updateDelArtikulsByDelIdUtil = async (
@@ -21,15 +28,7 @@ export const updateDelArtikulsByDelIdUtil = async (
   }
 
   const raw = del.artikuls as Record<string, unknown>;
-  const artikulKeys = Object.keys(raw).filter((k) => {
-    const v = raw[k];
-    return (
-      v &&
-      typeof v === "object" &&
-      "quantity" in v &&
-      typeof (v as { quantity: unknown }).quantity === "number"
-    );
-  });
+  const artikulKeys = Object.keys(raw).filter((k) => isDelArtikulValue(raw[k]));
   const result: UpdateDelArtikulsByDelIdResult = {
     total: artikulKeys.length,
     updated: 0,
@@ -39,12 +38,13 @@ export const updateDelArtikulsByDelIdUtil = async (
 
   const artikulsObj: IDelArtikuls = {};
   for (const k of artikulKeys) {
-    const v = raw[k] as { quantity: number; nameukr?: string };
-    artikulsObj[k] = { quantity: v.quantity, nameukr: v.nameukr };
+    const v = raw[k] as IDelArtikulValue;
+    artikulsObj[k] = { quant: v.quant, stock: v.stock, nameukr: v.nameukr };
   }
 
   for (let i = 0; i < artikulKeys.length; i++) {
     const artikul = artikulKeys[i];
+    const previous = artikulsObj[artikul];
     try {
       const sharikData = await getSharikStockData(artikul);
       if (!sharikData) {
@@ -52,7 +52,8 @@ export const updateDelArtikulsByDelIdUtil = async (
         continue;
       }
       artikulsObj[artikul] = {
-        quantity: sharikData.quantity,
+        quant: previous.quant,
+        stock: sharikData.quantity,
         nameukr: sharikData.nameukr ?? "",
       };
       result.updated++;

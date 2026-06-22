@@ -40,7 +40,11 @@ describe("createDelController", () => {
     });
     it("201 creates del and returns data", async () => {
         const req = {
-            body: { title: "New", prodName: "acme", artikuls: { "ART-1": 10 } },
+            body: {
+                title: "New",
+                prodName: "acme",
+                artikuls: [{ artikul: "ART-1", quantity: 10 }],
+            },
         };
         await createDelController(req, res);
         expect(responseStatus.code).toBe(201);
