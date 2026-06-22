@@ -4,11 +4,16 @@ import { getLogFormat } from "./getLogFormat.js";
 import { getLogLevel } from "./getLogLevel.js";
 import { REDACT_PATHS } from "./redact.js";
 
-function buildLoggerOptions(): pino.LoggerOptions {
+export function buildLoggerOptions(): pino.LoggerOptions {
   return {
     level: getLogLevel(),
     redact: [...REDACT_PATHS],
     timestamp: pino.stdTimeFunctions.isoTime,
+    formatters: {
+      level(label) {
+        return { level: label };
+      },
+    },
   };
 }
 

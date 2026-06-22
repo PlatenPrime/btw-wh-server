@@ -86,15 +86,41 @@ export async function browserGet(url) {
         throw new Error(formatBrowserFetchError(url, err), { cause: err });
     }
 }
-export function summarizeBrowserError(err) {
+export function resolveAxiosError(err) {
     if (isAxiosError(err)) {
-        const requestUrl = err.config?.url?.trim();
+        return err;
+    }
+    if (err instanceof Error && isAxiosError(err.cause)) {
+        return err.cause;
+    }
+    return undefined;
+}
+export function getBrowserFetchLogLevel(err) {
+    const axiosErr = resolveAxiosError(err);
+    const status = axiosErr?.response?.status;
+    if (status !== undefined && status >= 400 && status < 500) {
+        return "warn";
+    }
+    return "error";
+}
+export function summarizeBrowserError(err) {
+    const axiosErr = resolveAxiosError(err);
+    if (axiosErr) {
+        const requestUrl = axiosErr.config?.url?.trim();
         if (requestUrl) {
-            return formatBrowserFetchError(requestUrl, err);
+            return formatBrowserFetchError(requestUrl, axiosErr);
         }
     }
     return formatUnknownError(err);
 }
 export function logBrowserError(context, err) {
-    browserLog.error({ context, details: summarizeBrowserError(err) }, "browser fetch failed");
+    const axiosErr = resolveAxiosError(err);
+    const httpStatus = axiosErr?.response?.status;
+    const level = getBrowserFetchLogLevel(err);
+    const payload = {
+        context,
+        details: summarizeBrowserError(err),
+        ...(httpStatus !== undefined && { httpStatus }),
+    };
+    browserLog[level](payload, "browser fetch failed");
 }

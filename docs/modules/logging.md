@@ -22,8 +22,21 @@
 
 - `index.ts` подключает HTTP/slow/error middleware и process handlers
 - Cron-джобы и утилиты срезов создают child logger с `module` + `job`
-- Browser-модуль логирует внешние HTTP-ошибки через child `module: browser`
+- Browser-модуль логирует внешние HTTP-ошибки через child `module: browser` и `logBrowserError`
 - Telegram-уведомления cron остаются отдельным каналом (алерты, не логи)
+
+## Railway
+
+Root logger сериализует `level` как строку (`error`, `warn`, `info`, …), а не число Pino — иначе Railway structured logs подставляют `severity: info` для stdout.
+
+## Browser fetch
+
+`logBrowserError` пишет `browser fetch failed` с полями `context`, `details`, при HTTP-ответе — `httpStatus`.
+
+- **warn** — клиентские 4xx (404 товара, ожидаемый негативный исход после fallback)
+- **error** — 5xx, таймаут, сеть, нераспознанная ошибка
+
+Ошибки из `browserGet` приходят как `Error` с `cause: AxiosError`; уровень определяется по `cause`.
 
 ## Env
 
