@@ -6,11 +6,11 @@ const log = createLogger({ module: "defs", job: "cron" });
 
 /**
  * Запускает cron job для автоматического расчета дефицитов
- * По будням каждый час с 09:00 до 17:00 по киевскому времени
+ * По будням каждые 30 минут с 09:00 до 17:30 по киевскому времени
  */
 export function startDeficitCalculationCron(): CronJob {
   const job = new CronJob(
-    "0 0 8-17 * * 1-5", // будни 09:00-17:00
+    "0 0,30 9-17 * * 1-5", // будни 09:00-17:30 каждые 30 мин
     async () => {
       try {
         log.info("calculating deficits");
@@ -22,11 +22,11 @@ export function startDeficitCalculationCron(): CronJob {
     },
     null,
     true,
-    "Europe/Kiev"
+    "Europe/Kiev" 
   );
 
   log.info(
-    { schedule: "0 0 8-17 * * 1-5", timezone: "Europe/Kiev" },
+    { schedule: "0 0,30 9-17 * * 1-5", timezone: "Europe/Kiev" },
     "cron started"
   );
   return job;

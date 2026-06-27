@@ -35,7 +35,7 @@ describe("startDeficitCalculationCron", () => {
     });
     it("creates CronJob with expected schedule and timezone", () => {
         startDeficitCalculationCron();
-        expect(mockedCronJob).toHaveBeenCalledWith("0 0 8-17 * * 1-5", expect.any(Function), null, true, "Europe/Kiev");
+        expect(mockedCronJob).toHaveBeenCalledWith("0 0,30 9-17 * * 1-5", expect.any(Function), null, true, "Europe/Kiev");
     });
     it("runs deficit calculation on cron tick", async () => {
         startDeficitCalculationCron();

@@ -8,11 +8,11 @@ import { runSkuInvalidFlagSync } from "../utils/runSkuInvalidFlagSync.js";
 const log = createLogger({ module: "skus", job: "cron" });
 
 /**
- * Еженедельно в понедельник 03:00 по Киеву: пересчёт Sku.isInvalid по 7 дням срезов (-1/-1).
+ * Еженедельно в воскресенье 14:00 по Киеву: пересчёт Sku.isInvalid по 7 дням срезов (-1/-1).
  */
 export function startSkuInvalidFlagCron(): CronJob {
   const job = new CronJob(
-    "0 0 3 * * 1",
+    "0 0 14 * * 0",
     async () => {
       try {
         const r = await runSkuInvalidFlagSync(new Date());
@@ -34,7 +34,7 @@ export function startSkuInvalidFlagCron(): CronJob {
   );
 
   log.info(
-    { schedule: "0 0 3 * * 1", timezone: "Europe/Kyiv" },
+    { schedule: "0 0 14 * * 0", timezone: "Europe/Kyiv" },
     "cron started"
   );
   return job;

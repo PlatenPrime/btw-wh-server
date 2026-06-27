@@ -33,9 +33,9 @@ describe("startSkuInvalidFlagCron", () => {
         });
         vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
     });
-    it("schedules weekly Monday 03:00 Kyiv", () => {
+    it("schedules weekly Sunday 14:00 Kyiv", () => {
         startSkuInvalidFlagCron();
-        expect(mockedCronJob).toHaveBeenCalledWith("0 0 3 * * 1", expect.any(Function), null, true, "Europe/Kyiv");
+        expect(mockedCronJob).toHaveBeenCalledWith("0 0 14 * * 0", expect.any(Function), null, true, "Europe/Kyiv");
     });
     it("runs runSkuInvalidFlagSync on tick", async () => {
         startSkuInvalidFlagCron();

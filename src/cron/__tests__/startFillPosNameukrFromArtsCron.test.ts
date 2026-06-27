@@ -45,7 +45,7 @@ describe("startFillPosNameukrFromArtsCron", () => {
     startFillPosNameukrFromArtsCron();
 
     expect(mockedCronJob).toHaveBeenCalledWith(
-      "0 30 8 * * 1",
+      "0 30 6 * * *",
       expect.any(Function),
       null,
       true,

@@ -11,11 +11,11 @@ const log = createLogger({ module: "fill-pos-nameukr", job: "cron" });
 
 /**
  * Запускает cron job для заполнения поля nameukr у позиций из справочника артикулов.
- * Каждый понедельник в 08:30 по киевскому времени.
+ * Каждый день в 06:30 по киевскому времени.
  */
 export function startFillPosNameukrFromArtsCron(): CronJob {
   const job = new CronJob(
-    "0 30 8 * * 1",
+    "0 30 6 * * *",
     async () => {
       try {
         log.info("starting fill pos nameukr from arts");
@@ -54,6 +54,6 @@ export function startFillPosNameukrFromArtsCron(): CronJob {
     "Europe/Kiev"
   );
 
-  log.info({ schedule: "0 30 8 * * 1", timezone: "Europe/Kiev" }, "cron started");
+  log.info({ schedule: "0 30 6 * * *", timezone: "Europe/Kiev" }, "cron started");
   return job;
 }

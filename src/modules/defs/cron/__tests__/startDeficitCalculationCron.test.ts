@@ -44,7 +44,7 @@ describe("startDeficitCalculationCron", () => {
     startDeficitCalculationCron();
 
     expect(mockedCronJob).toHaveBeenCalledWith(
-      "0 0 8-17 * * 1-5",
+      "0 0,30 9-17 * * 1-5",
       expect.any(Function),
       null,
       true,

@@ -36,7 +36,7 @@ describe("startFillPosNameukrFromArtsCron", () => {
     });
     it("creates CronJob with expected schedule", () => {
         startFillPosNameukrFromArtsCron();
-        expect(mockedCronJob).toHaveBeenCalledWith("0 30 8 * * 1", expect.any(Function), null, true, "Europe/Kiev");
+        expect(mockedCronJob).toHaveBeenCalledWith("0 30 6 * * *", expect.any(Function), null, true, "Europe/Kiev");
     });
     it("sends success notification to Platen", async () => {
         startFillPosNameukrFromArtsCron();
