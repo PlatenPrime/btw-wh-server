@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import type { BrowserCheerio } from "../../../utils/cheerioTypes.js";
 import { decodeHtmlEntities } from "../../../utils/decode-html-entities/decodeHtmlEntities.js";
 import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
@@ -18,7 +19,7 @@ export type SharteGroupPageProduct = {
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
 
 function extractImageUrl(
-  $img: cheerio.Cheerio,
+  $img: BrowserCheerio,
   baseUrl: string,
 ): string | null {
   const src = $img.attr("src")?.trim();
@@ -46,7 +47,7 @@ function extractImageUrl(
 }
 
 function pickProductHref(
-  $card: cheerio.Cheerio,
+  $card: BrowserCheerio,
   currentPageUrl: string,
 ): string | null {
   const pictureHref = $card.find("a.picture").first().attr("href")?.trim();
@@ -66,7 +67,7 @@ function pickProductHref(
 }
 
 function parseProductsFromPage(
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   currentPageUrl: string,
 ): Map<string, SharteGroupPageProduct> {
   const result = new Map<string, SharteGroupPageProduct>();
@@ -105,7 +106,7 @@ function parseProductsFromPage(
 }
 
 function getNextPageUrl(
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   currentPageUrl: string,
 ): string | null {
   const nextFromPagination = $(".bx-pagination li.bx-pag-next a")

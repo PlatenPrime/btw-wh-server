@@ -8,8 +8,8 @@ import { runCompensatingAnalogSlices } from "../utils/runCompensatingAnalogSlice
 import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
 const log = createLogger({ module: "slice-compensation", job: "cron" });
 /**
- * Компенсирующие срезы: 09:10 и 16:10 по Киеву — повторный опрос позиций с -1/-1
- * в сегодняшних AnalogSlice и SkuSlice.
+ * Компенсирующие срезы: ежедневно в 10:30 Europe/Kiev — повторный опрос позиций
+ * с недостоверными данными в сегодняшних AnalogSlice и SkuSlice.
  */
 export function startCompensatingSlicesCron() {
     const job = new CronJob("0 30 10 * * *", async () => {

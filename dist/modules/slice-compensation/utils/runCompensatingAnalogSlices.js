@@ -10,9 +10,13 @@ import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.j
  * Повторный опрос позиций AnalogSlice за sliceDate с data entry stock/price оба -1.
  * При ответе, где уже не оба -1, перезаписывает ключ в том же документе.
  */
-export async function runCompensatingAnalogSlices(sliceDate) {
+export async function runCompensatingAnalogSlices(sliceDate, options) {
     const excluded = getExcludedCompetitorSet("analogSlices");
-    const docs = (await AnalogSlice.find({ date: sliceDate })
+    const filter = { date: sliceDate };
+    if (options?.konkName) {
+        filter.konkName = options.konkName;
+    }
+    const docs = (await AnalogSlice.find(filter)
         .select("konkName data")
         .lean());
     const queue = buildCompensatingDataKeyQueue(docs, excluded, isFullMinusOneSliceItem);

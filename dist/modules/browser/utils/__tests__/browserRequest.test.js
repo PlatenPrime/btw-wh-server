@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AxiosError } from "axios";
-import { formatBrowserFetchError, getBrowserFetchLogLevel, logBrowserError, resolveAxiosError, } from "../browserRequest.js";
+import { browserGet, formatBrowserFetchError, getBrowserFetchLogLevel, logBrowserError, resolveAxiosError, } from "../browserRequest.js";
 const mockError = vi.hoisted(() => vi.fn());
 const mockWarn = vi.hoisted(() => vi.fn());
 vi.mock("../../../../logging/createLogger.js", () => ({
@@ -24,6 +24,13 @@ function axiosHttpError(url, status, statusText = "Error") {
     };
     return new AxiosError(`Request failed with status code ${status}`, "ERR_BAD_RESPONSE", axCfg(url), undefined, response);
 }
+describe("browserGet proxy options", () => {
+    it("бросает до запроса при невалидном proxyUrl", async () => {
+        await expect(browserGet("https://example.com/page", {
+            proxyUrl: "socks5://user:pass@10.0.0.1:50101",
+        })).rejects.toThrow(/Invalid browser HTTP proxy URL/);
+    });
+});
 describe("formatBrowserFetchError", () => {
     it("форматирует таймаут Axios", () => {
         const url = "https://yumi.market/api/products?x=1";

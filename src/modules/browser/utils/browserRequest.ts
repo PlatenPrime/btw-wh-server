@@ -1,6 +1,12 @@
-import axios, { AxiosError, type AxiosInstance, isAxiosError } from "axios";
+import axios, {
+  AxiosError,
+  type AxiosInstance,
+  type AxiosProxyConfig,
+  isAxiosError,
+} from "axios";
 
 import { createLogger } from "../../../logging/createLogger.js";
+import { parseHttpProxyUrl } from "./parse-http-proxy-url/parseHttpProxyUrl.js";
 
 const browserLog = createLogger({ module: "browser" });
 
@@ -25,6 +31,11 @@ const BROWSER_HEADERS = {
 
 let browserAxiosInstance: AxiosInstance | null = null;
 const MAX_BROWSER_ERROR_MESSAGE_LENGTH = 240;
+
+export type BrowserGetOptions = {
+  /** HTTP(S) proxy URL (`http://user:pass@host:port`). Без него — прямой egress, env HTTP_PROXY игнорируется. */
+  proxyUrl?: string;
+};
 
 function truncateMessage(message: string): string {
   const trimmed = message.trim();
@@ -52,6 +63,8 @@ export function getBrowserAxios(): AxiosInstance {
       timeout: BROWSER_REQUEST_TIMEOUT_MS,
       responseType: "text",
       transformResponse: [(data: unknown) => data],
+      // Не подхватывать системные HTTP(S)_PROXY — proxy только через browserGet options.
+      proxy: false,
     });
   }
   return browserAxiosInstance;
@@ -85,16 +98,32 @@ export function formatBrowserFetchError(url: string, err: unknown): string {
 /**
  * Выполняет GET-запрос к URL с браузерными заголовками.
  * @param url — полный URL
+ * @param options.proxyUrl — опциональный HTTP(S) proxy (например air)
  * @returns data ответа (тип задаётся вызывающим)
  * @throws Error с коротким message; исходная ошибка в `cause`, если поддерживается средой
  */
-export async function browserGet<T = unknown>(url: string): Promise<T> {
+export async function browserGet<T = unknown>(
+  url: string,
+  options?: BrowserGetOptions
+): Promise<T> {
   const client = getBrowserAxios();
+  const proxyUrl = options?.proxyUrl?.trim();
+
+  let proxy: false | AxiosProxyConfig = false;
+  if (proxyUrl) {
+    const parsed = parseHttpProxyUrl(proxyUrl);
+    if (!parsed) {
+      throw new Error(`Invalid browser HTTP proxy URL: ${proxyUrl}`);
+    }
+    proxy = parsed;
+  }
+
   try {
     const response = await client.get<T>(url, {
       timeout: BROWSER_REQUEST_TIMEOUT_MS,
+      proxy,
     });
-    return response.data as T;
+    return response.data as unknown as T;
   } catch (err) {
     throw new Error(formatBrowserFetchError(url, err), { cause: err });
   }

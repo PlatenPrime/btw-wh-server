@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import type { BrowserCheerio } from "../../../utils/cheerioTypes.js";
 import { decodeHtmlEntities } from "../../../utils/decode-html-entities/decodeHtmlEntities.js";
 import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import { extractProductId } from "../../utils/perfect-product-page-extract/perfectProductPageExtract.js";
@@ -11,7 +12,7 @@ export type PerfectGroupPageProduct = {
 };
 
 function pickImageUrl(
-  $img: cheerio.Cheerio,
+  $img: BrowserCheerio,
   currentPageUrl: string
 ): string | null {
   const full =
@@ -30,7 +31,7 @@ function pickImageUrl(
  * `article.product-miniature.js-product-miniature`.
  */
 export function parsePerfectGroupListingProducts(
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   currentPageUrl: string
 ): Map<string, PerfectGroupPageProduct> {
   const result = new Map<string, PerfectGroupPageProduct>();

@@ -156,4 +156,26 @@ describe("runCompensatingAnalogSlices", () => {
     expect(getAnalogStockDataUtil).toHaveBeenCalledTimes(2);
     expect(vi.mocked(delay)).toHaveBeenCalledTimes(1);
   });
+
+  it("filters find by konkName when options.konkName is set", async () => {
+    mockFindLean([]);
+
+    const r = await runCompensatingAnalogSlices(sliceDate, {
+      konkName: "balun",
+    });
+
+    expect(r).toEqual({ refetched: 0, updated: 0 });
+    expect(AnalogSlice.find).toHaveBeenCalledWith({
+      date: sliceDate,
+      konkName: "balun",
+    });
+  });
+
+  it("finds all docs when options.konkName is omitted", async () => {
+    mockFindLean([]);
+
+    await runCompensatingAnalogSlices(sliceDate);
+
+    expect(AnalogSlice.find).toHaveBeenCalledWith({ date: sliceDate });
+  });
 });

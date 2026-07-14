@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 
-export function parseStockFromDom($: cheerio.Root): number {
+export function parseStockFromDom($: cheerio.CheerioAPI): number {
   const statusElement = $('[data-qaid="product_status_sticky_panel"]').first();
 
   if (statusElement.length > 0) {

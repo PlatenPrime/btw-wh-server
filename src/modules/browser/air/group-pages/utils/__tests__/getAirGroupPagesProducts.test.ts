@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getAirGroupPagesProducts } from "../getAirGroupPagesProducts.js";
 import { browserGet } from "../../../../utils/browserRequest.js";
 import { sleep } from "../../../../utils/sleep.js";
@@ -49,9 +49,20 @@ function airPageHtml(opts: {
 }
 
 describe("getAirGroupPagesProducts", () => {
+  const originalProxy = process.env.AIR_HTTP_PROXY_URL;
+
   beforeEach(() => {
     vi.mocked(browserGet).mockReset();
     vi.mocked(sleep).mockResolvedValue(undefined);
+    delete process.env.AIR_HTTP_PROXY_URL;
+  });
+
+  afterEach(() => {
+    if (originalProxy === undefined) {
+      delete process.env.AIR_HTTP_PROXY_URL;
+    } else {
+      process.env.AIR_HTTP_PROXY_URL = originalProxy;
+    }
   });
 
   it("parses products across two pages", async () => {
@@ -184,5 +195,27 @@ describe("getAirGroupPagesProducts", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]?.imageUrl).toBe(real);
+  });
+
+  it("passes AIR_HTTP_PROXY_URL into browserGet", async () => {
+    process.env.AIR_HTTP_PROXY_URL =
+      "http://user:secret@77.47.252.164:50100";
+    const html = airPageHtml({
+      cards: [
+        airProductCard({
+          pid: "1",
+          productPath: "/ua/product/a",
+          imageUrl: "https://air.example.test/a.jpg",
+          title: "A",
+        }),
+      ],
+    });
+    vi.mocked(browserGet).mockResolvedValue(html);
+
+    await getAirGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 1 });
+
+    expect(browserGet).toHaveBeenCalledWith(GROUP_URL, {
+      proxyUrl: "http://user:secret@77.47.252.164:50100",
+    });
   });
 });

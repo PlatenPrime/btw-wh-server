@@ -147,7 +147,7 @@ flowchart TB
 | analog-slices | [`src/modules/analog-slices/`](src/modules/analog-slices/) | `/api/analog-slices` | [API](docs/api/analog-slices.md) · [концепция](docs/modules/analog-slices.md) |
 | btrade-slices | [`src/modules/btrade-slices/`](src/modules/btrade-slices/) | `/api/btrade-slices` | [API](docs/api/btrade-slices.md) · [концепция](docs/modules/btrade-slices.md) |
 | slices | [`src/modules/slices/`](src/modules/slices/) | — | [концепция](docs/modules/slices.md) — shared-утилиты (без HTTP) |
-| slice-compensation | [`src/modules/slice-compensation/`](src/modules/slice-compensation/) | — | [концепция](docs/modules/slice-compensation.md) — cron-only |
+| slice-compensation | [`src/modules/slice-compensation/`](src/modules/slice-compensation/) | `/api/slice-compensation` | [API](docs/api/slice-compensation.md) · [концепция](docs/modules/slice-compensation.md) · [фронт](docs/frontend/manual-compensating-slice.md) |
 
 ### Система
 
@@ -186,7 +186,7 @@ Telegram-отчёты: [`src/cron/analytics-notifications/`](src/cron/analytics-
 |-----|--------|-----------|
 | Стандартный HTTP | `constants` | `router.ts` → `controllers/` → `models/` |
 | Reporting | `sku-slices`, `analog-slices` | + `controllers/common/`, Excel-утилиты |
-| Cron-only | `slice-compensation` | только `cron/` + `utils/` |
+| Cron + thin HTTP | `slice-compensation` | `cron/` + `utils/` + один POST |
 | Shared domain | `slices` | только `config/` + `utils/` |
 | Browser/scraper | `browser` | по конкуренту + общие `utils/` |
 

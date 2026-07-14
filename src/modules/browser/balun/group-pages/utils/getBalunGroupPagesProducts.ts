@@ -20,7 +20,7 @@ export type BalunGroupPageProduct = {
 };
 
 function parseProductsFromPage(
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   currentPageUrl: string
 ): Map<string, BalunGroupPageProduct> {
   return parsePromUaGroupListingProducts($, currentPageUrl);

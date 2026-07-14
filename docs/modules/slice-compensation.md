@@ -4,7 +4,7 @@
 
 Модуль `slice-compensation` выполняет **повторный опрос** позиций в сегодняшних документах `AnalogSlice` и `SkuSlice`, где первичный скрапинг вернул недостоверные данные. Новые документы срезов не создаются — обновляются отдельные ключи в поле `data` существующего документа на текущую дату.
 
-Тип модуля: **cron-only** — только `cron/` + `utils/`, без `router.ts` и `controllers/`.
+Тип модуля: **cron + thin HTTP** — ежедневный cron и один ADMIN POST для внеочередного запуска по одному конкуренту.
 
 ## Что компенсируется
 
@@ -30,14 +30,24 @@
 
 ### Параллельность и последовательность
 
-В одном cron-tick analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов).
+В одном cron-tick (и в ручном запуске) analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов).
+
+### Фильтр по конкуренту
+
+Утилиты принимают опциональный `konkName`: cron вызывает без фильтра (все документы дня), HTTP — только выбранный конкурент. Исключения из `excludedCompetitors` по-прежнему дают пустую очередь.
+
+### Ручной запуск и lock
+
+Внеочередной POST держит in-memory lock на нормализованный `konkName`: повторный запуск того же конкурента, пока первый не завершился, получает отказ. Разные конкуренты могут идти параллельно. Полный пересбор среза (`run*SliceForKonkUtil`) этим эндпоинтом не выполняется.
 
 ### Ключевые файлы
 
 - [`cron/startCompensatingSlicesCron.ts`](../../src/modules/slice-compensation/cron/startCompensatingSlicesCron.ts) — планировщик;
 - [`utils/compensatingSliceRunner.ts`](../../src/modules/slice-compensation/utils/compensatingSliceRunner.ts) — построение очереди и цикл refetch;
 - [`utils/runCompensatingAnalogSlices.ts`](../../src/modules/slice-compensation/utils/runCompensatingAnalogSlices.ts);
-- [`utils/runCompensatingSkuSlices.ts`](../../src/modules/slice-compensation/utils/runCompensatingSkuSlices.ts).
+- [`utils/runCompensatingSkuSlices.ts`](../../src/modules/slice-compensation/utils/runCompensatingSkuSlices.ts);
+- [`utils/runCompensatingSlicesForKonk.ts`](../../src/modules/slice-compensation/utils/runCompensatingSlicesForKonk.ts) — оркестратор ручного запуска;
+- [`controllers/run-compensating-slice/`](../../src/modules/slice-compensation/controllers/run-compensating-slice/) — HTTP.
 
 ## Cron
 
@@ -55,4 +65,4 @@
 
 ## HTTP
 
-Отсутствует. Модуль не экспонирует API.
+`POST /api/slice-compensation/run` — внеочередная компенсация по `konkName` за сегодняшний `sliceDate` (analog + sku). Контракт: [`docs/api/slice-compensation.md`](../api/slice-compensation.md). Гайд для UI: [`docs/frontend/manual-compensating-slice.md`](../frontend/manual-compensating-slice.md).

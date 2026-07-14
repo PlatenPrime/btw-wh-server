@@ -40,9 +40,9 @@ modules/<name>/
 
 Дополнительно: `controllers/common/`, `utils/`, `constants/`.
 
-#### 3. Cron-only модуль (`slice-compensation`)
+#### 3. Cron + thin HTTP (`slice-compensation`)
 
-Только `cron/` + `utils/` + `__tests__/`. Без `router.ts` и `controllers/`.
+В основном `cron/` + `utils/`; допускается тонкий `router.ts` / `controllers/` для ручного триггера (без полноценного CRUD).
 
 #### 4. Shared domain-модуль (`slices`)
 

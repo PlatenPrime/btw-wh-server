@@ -25,7 +25,7 @@ export function mergeSearchParamsFromSource(
  * Следующая страница из `<link rel="next" href="...">` (как у air / balun / yumi).
  */
 export function getNextPageUrlFromLinkRelNext(
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   currentPageUrl: string,
   resolveUrl: ResolveListingHref
 ): string | null {
@@ -40,10 +40,10 @@ export type CrawlHtmlGroupListingPagesOptions<T> = {
   startUrl: string;
   maxPages: number;
   parseProductsFromPage: (
-    $: cheerio.Root,
+    $: cheerio.CheerioAPI,
     pageUrl: string
   ) => Map<string, T>;
-  getNextPageUrl: ($: cheerio.Root, pageUrl: string) => string | null;
+  getNextPageUrl: ($: cheerio.CheerioAPI, pageUrl: string) => string | null;
   /** Прервать обход, если парсер вернул пустую страницу (air, sharte). */
   stopOnEmptyPage?: boolean;
   /**
@@ -51,6 +51,8 @@ export type CrawlHtmlGroupListingPagesOptions<T> = {
    * Можно передать фиксированное число мс или функцию-генератор (jitter).
    */
   delayBeforeNextMs?: number | (() => number);
+  /** Подмена GET HTML (например air через HTTP-прокси). По умолчанию — browserGet. */
+  fetchPageHtml?: (url: string) => Promise<string>;
 };
 
 /**
@@ -66,6 +68,7 @@ export async function crawlHtmlGroupListingPages<T>(
     getNextPageUrl,
     stopOnEmptyPage = false,
     delayBeforeNextMs = 0,
+    fetchPageHtml = (url) => browserGet<string>(url),
   } = options;
 
   const visited = new Set<string>();
@@ -84,7 +87,7 @@ export async function crawlHtmlGroupListingPages<T>(
     }
     visited.add(currentUrl);
 
-    const html = await browserGet<string>(currentUrl);
+    const html = await fetchPageHtml(currentUrl);
     const $ = cheerio.load(html);
 
     const pageProducts = parseProductsFromPage($, currentUrl);

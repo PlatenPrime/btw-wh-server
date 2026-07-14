@@ -1,5 +1,6 @@
-import axios, { isAxiosError } from "axios";
+import axios, { isAxiosError, } from "axios";
 import { createLogger } from "../../../logging/createLogger.js";
+import { parseHttpProxyUrl } from "./parse-http-proxy-url/parseHttpProxyUrl.js";
 const browserLog = createLogger({ module: "browser" });
 /** Лимит ожидания одного HTTP GET (один URL / одна «страница»). На весь обход N страниц — до N × этого значения в худшем случае. */
 const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
@@ -42,6 +43,8 @@ export function getBrowserAxios() {
             timeout: BROWSER_REQUEST_TIMEOUT_MS,
             responseType: "text",
             transformResponse: [(data) => data],
+            // Не подхватывать системные HTTP(S)_PROXY — proxy только через browserGet options.
+            proxy: false,
         });
     }
     return browserAxiosInstance;
@@ -71,14 +74,25 @@ export function formatBrowserFetchError(url, err) {
 /**
  * Выполняет GET-запрос к URL с браузерными заголовками.
  * @param url — полный URL
+ * @param options.proxyUrl — опциональный HTTP(S) proxy (например air)
  * @returns data ответа (тип задаётся вызывающим)
  * @throws Error с коротким message; исходная ошибка в `cause`, если поддерживается средой
  */
-export async function browserGet(url) {
+export async function browserGet(url, options) {
     const client = getBrowserAxios();
+    const proxyUrl = options?.proxyUrl?.trim();
+    let proxy = false;
+    if (proxyUrl) {
+        const parsed = parseHttpProxyUrl(proxyUrl);
+        if (!parsed) {
+            throw new Error(`Invalid browser HTTP proxy URL: ${proxyUrl}`);
+        }
+        proxy = parsed;
+    }
     try {
         const response = await client.get(url, {
             timeout: BROWSER_REQUEST_TIMEOUT_MS,
+            proxy,
         });
         return response.data;
     }

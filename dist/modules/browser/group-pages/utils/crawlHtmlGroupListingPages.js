@@ -28,7 +28,7 @@ export function getNextPageUrlFromLinkRelNext($, currentPageUrl, resolveUrl) {
  * Общий цикл: visited, maxPages, browserGet + cheerio, merge в Map, переход по next URL.
  */
 export async function crawlHtmlGroupListingPages(options) {
-    const { startUrl, maxPages, parseProductsFromPage, getNextPageUrl, stopOnEmptyPage = false, delayBeforeNextMs = 0, } = options;
+    const { startUrl, maxPages, parseProductsFromPage, getNextPageUrl, stopOnEmptyPage = false, delayBeforeNextMs = 0, fetchPageHtml = (url) => browserGet(url), } = options;
     const visited = new Set();
     const products = new Map();
     let currentUrl = startUrl;
@@ -41,7 +41,7 @@ export async function crawlHtmlGroupListingPages(options) {
             break;
         }
         visited.add(currentUrl);
-        const html = await browserGet(currentUrl);
+        const html = await fetchPageHtml(currentUrl);
         const $ = cheerio.load(html);
         const pageProducts = parseProductsFromPage($, currentUrl);
         if (stopOnEmptyPage && pageProducts.size === 0) {

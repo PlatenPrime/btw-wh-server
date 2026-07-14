@@ -14,7 +14,7 @@ export type PromUaGroupPageProduct = {
  * без наличия — карточка `product-block` с телефонами вместо кнопки.
  */
 export function parsePromUaGroupListingProducts(
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   currentPageUrl: string
 ): Map<string, PromUaGroupPageProduct> {
   const result = new Map<string, PromUaGroupPageProduct>();

@@ -1,4 +1,4 @@
-import * as cheerio from "cheerio";
+import type { BrowserCheerio } from "../../../utils/cheerioTypes.js";
 import type { SharikProductInfo } from "../sharik-product-types/sharikProductInfo.js";
 import { logModuleError, logModuleWarn } from "../../../../../logging/logModuleError.js";
 
@@ -7,7 +7,7 @@ import { logModuleError, logModuleWarn } from "../../../../../logging/logModuleE
  */
 export function parseSharikSearchCard(
   artikul: string,
-  artElement: cheerio.Cheerio
+  artElement: BrowserCheerio
 ): SharikProductInfo | undefined {
   const nameukr = artElement.find(".one-item-tit").text().trim();
   const priceRaw = artElement.find(".one-item-price").text().trim();

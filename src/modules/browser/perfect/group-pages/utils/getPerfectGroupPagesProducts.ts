@@ -1,3 +1,4 @@
+import type { CheerioAPI } from "cheerio";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import {
   crawlHtmlGroupListingPages,
@@ -17,7 +18,7 @@ import {
 export type { PerfectGroupPageProduct };
 
 function parseProductsFromPage(
-  $: cheerio.Root,
+  $: CheerioAPI,
   currentPageUrl: string,
 ): Map<string, PerfectGroupPageProduct> {
   return parsePerfectGroupListingProducts($, currentPageUrl);

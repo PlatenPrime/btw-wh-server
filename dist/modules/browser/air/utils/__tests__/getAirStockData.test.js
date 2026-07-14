@@ -1,10 +1,20 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getAirStockData } from "../getAirStockData.js";
 import { browserGet } from "../../../utils/browserRequest.js";
 vi.mock("../../../utils/browserRequest.js");
 describe("getAirStockData", () => {
+    const originalProxy = process.env.AIR_HTTP_PROXY_URL;
     beforeEach(() => {
         vi.mocked(browserGet).mockReset();
+        delete process.env.AIR_HTTP_PROXY_URL;
+    });
+    afterEach(() => {
+        if (originalProxy === undefined) {
+            delete process.env.AIR_HTTP_PROXY_URL;
+        }
+        else {
+            process.env.AIR_HTTP_PROXY_URL = originalProxy;
+        }
     });
     describe("Валидация входных данных", () => {
         it("должен выбрасывать ошибку при пустой ссылке", async () => {
@@ -32,7 +42,7 @@ describe("getAirStockData", () => {
             vi.mocked(browserGet).mockResolvedValue(mockHtml);
             const result = await getAirStockData("https://example.com/product/123");
             expect(result).toEqual({ stock: 6600, price: 2.08 });
-            expect(browserGet).toHaveBeenCalledWith("https://example.com/product/123");
+            expect(browserGet).toHaveBeenCalledWith("https://example.com/product/123", { proxyUrl: undefined });
         });
         it("должен правильно обрабатывать цену с запятой и пробелами", async () => {
             const mockHtml = `
@@ -86,6 +96,29 @@ describe("getAirStockData", () => {
             vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
             const result = await getAirStockData("https://example.com/product/1");
             expect(result).toEqual({ stock: -1, price: -1 });
+        });
+    });
+    describe("HTTP proxy", () => {
+        const original = process.env.AIR_HTTP_PROXY_URL;
+        afterEach(() => {
+            if (original === undefined) {
+                delete process.env.AIR_HTTP_PROXY_URL;
+            }
+            else {
+                process.env.AIR_HTTP_PROXY_URL = original;
+            }
+        });
+        it("передаёт AIR_HTTP_PROXY_URL в browserGet", async () => {
+            process.env.AIR_HTTP_PROXY_URL =
+                "http://user:secret@77.47.252.164:50100";
+            vi.mocked(browserGet).mockResolvedValue(`
+        <input type="hidden" id="max-product-quantity" value="1" name="max_quantity">
+        <div class="us-price-actual">1 грн.</div>
+      `);
+            await getAirStockData("https://example.com/product/1");
+            expect(browserGet).toHaveBeenCalledWith("https://example.com/product/1", {
+                proxyUrl: "http://user:secret@77.47.252.164:50100",
+            });
         });
     });
 });

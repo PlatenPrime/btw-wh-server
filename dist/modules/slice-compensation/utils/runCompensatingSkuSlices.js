@@ -10,9 +10,13 @@ import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.j
  * Повторный опрос позиций SkuSlice за sliceDate: -1/-1 или цена не конечное неотрицательное число.
  * Если ответ опроса не в режиме полного -1/-1, перезаписывает ключ в том же документе.
  */
-export async function runCompensatingSkuSlices(sliceDate) {
+export async function runCompensatingSkuSlices(sliceDate, options) {
     const excluded = getExcludedCompetitorSet("skuSlices");
-    const docs = (await SkuSlice.find({ date: sliceDate })
+    const filter = { date: sliceDate };
+    if (options?.konkName) {
+        filter.konkName = options.konkName;
+    }
+    const docs = (await SkuSlice.find(filter)
         .select("konkName data")
         .lean());
     const queue = buildCompensatingDataKeyQueue(docs, excluded, shouldRefetchSkuSliceItem);

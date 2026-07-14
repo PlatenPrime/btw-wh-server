@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import type { BrowserCheerio } from "../../../utils/cheerioTypes.js";
 import { decodeHtmlEntities } from "../../../utils/decode-html-entities/decodeHtmlEntities.js";
 import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import {
@@ -6,6 +7,8 @@ import {
   getNextPageUrlFromLinkRelNext,
 } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
+import { browserGet } from "../../../utils/browserRequest.js";
+import { getAirHttpProxyUrl } from "../../utils/getAirHttpProxyUrl.js";
 import {
   getAirGroupPagesProductsSchema,
   type GetAirGroupPagesProductsInput,
@@ -20,7 +23,7 @@ export type AirGroupPageProduct = {
 
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
 
-function pickProductCards($: cheerio.Root): cheerio.Cheerio {
+function pickProductCards($: cheerio.CheerioAPI): BrowserCheerio {
   const fromGrid = $(".us-category-products div.product-layout[data-pid]");
   if (fromGrid.length > 0) {
     return fromGrid;
@@ -28,7 +31,7 @@ function pickProductCards($: cheerio.Root): cheerio.Cheerio {
   return $("#content div.product-layout[data-pid]");
 }
 
-function extractImageUrl($img: cheerio.Cheerio, baseUrl: string): string | null {
+function extractImageUrl($img: BrowserCheerio, baseUrl: string): string | null {
   const src = $img.attr("src")?.trim();
   const dataSrcset = $img.attr("data-srcset")?.trim();
 
@@ -54,7 +57,7 @@ function extractImageUrl($img: cheerio.Cheerio, baseUrl: string): string | null 
 }
 
 function parseProductsFromPage(
-  $: cheerio.Root,
+  $: cheerio.CheerioAPI,
   currentPageUrl: string
 ): Map<string, AirGroupPageProduct> {
   const result = new Map<string, AirGroupPageProduct>();
@@ -111,5 +114,7 @@ export async function getAirGroupPagesProducts(
       getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
     stopOnEmptyPage: true,
     delayBeforeNextMs: getGroupPagesThrottleDelayMs,
+    fetchPageHtml: (url) =>
+      browserGet<string>(url, { proxyUrl: getAirHttpProxyUrl() }),
   });
 }

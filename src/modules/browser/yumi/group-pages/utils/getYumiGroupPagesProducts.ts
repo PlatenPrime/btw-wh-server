@@ -1,3 +1,4 @@
+import type { CheerioAPI } from "cheerio";
 import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import {
@@ -18,7 +19,7 @@ export type YumiGroupPageProduct = {
 };
 
 function parseProductsFromPage(
-  $: cheerio.Root,
+  $: CheerioAPI,
   currentPageUrl: string,
 ): Map<string, YumiGroupPageProduct> {
   return parsePromUaGroupListingProducts($, currentPageUrl);

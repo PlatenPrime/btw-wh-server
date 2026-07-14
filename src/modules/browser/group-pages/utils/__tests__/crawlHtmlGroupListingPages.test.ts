@@ -296,4 +296,25 @@ describe("crawlHtmlGroupListingPages", () => {
     expect(sleep).toHaveBeenCalledTimes(1);
     expect(sleep).toHaveBeenCalledWith(123);
   });
+
+  it("uses fetchPageHtml instead of browserGet when provided", async () => {
+    const html = htmlWithNext('<div id="p1">a</div>');
+    const fetchPageHtml = vi.fn(async () => html);
+
+    const result = await crawlHtmlGroupListingPages({
+      startUrl: START,
+      maxPages: 10,
+      parseProductsFromPage: ($) => {
+        const m = new Map<string, { id: string }>();
+        if ($("#p1").length) m.set("1", { id: "1" });
+        return m;
+      },
+      getNextPageUrl: () => null,
+      fetchPageHtml,
+    });
+
+    expect(result).toEqual([{ id: "1" }]);
+    expect(fetchPageHtml).toHaveBeenCalledWith(START);
+    expect(browserGet).not.toHaveBeenCalled();
+  });
 });

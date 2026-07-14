@@ -17,15 +17,25 @@ type AnalogSliceLean = {
 
 type AnalogIdLean = { _id: { toString(): string } };
 
+export type RunCompensatingSlicesOptions = {
+  /** Если задан — только документ этого konk (ожидается уже нормализованное имя). */
+  konkName?: string;
+};
+
 /**
  * Повторный опрос позиций AnalogSlice за sliceDate с data entry stock/price оба -1.
  * При ответе, где уже не оба -1, перезаписывает ключ в том же документе.
  */
 export async function runCompensatingAnalogSlices(
-  sliceDate: Date
+  sliceDate: Date,
+  options?: RunCompensatingSlicesOptions
 ): Promise<{ refetched: number; updated: number }> {
   const excluded = getExcludedCompetitorSet("analogSlices");
-  const docs = (await AnalogSlice.find({ date: sliceDate })
+  const filter: { date: Date; konkName?: string } = { date: sliceDate };
+  if (options?.konkName) {
+    filter.konkName = options.konkName;
+  }
+  const docs = (await AnalogSlice.find(filter)
     .select("konkName data")
     .lean()) as AnalogSliceLean[];
 

@@ -113,4 +113,18 @@ describe("runCompensatingSkuSlices", () => {
         const r = await runCompensatingSkuSlices(sliceDate);
         expect(r).toEqual({ refetched: 0, updated: 0 });
     });
+    it("filters find by konkName when options.konkName is set", async () => {
+        mockFindLean([]);
+        const r = await runCompensatingSkuSlices(sliceDate, { konkName: "air" });
+        expect(r).toEqual({ refetched: 0, updated: 0 });
+        expect(SkuSlice.find).toHaveBeenCalledWith({
+            date: sliceDate,
+            konkName: "air",
+        });
+    });
+    it("finds all docs when options.konkName is omitted", async () => {
+        mockFindLean([]);
+        await runCompensatingSkuSlices(sliceDate);
+        expect(SkuSlice.find).toHaveBeenCalledWith({ date: sliceDate });
+    });
 });

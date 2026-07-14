@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 import { parseStrippedDecimal } from "../../../utils/parse-stripped-decimal/parseStrippedDecimal.js";
 
-export function parsePriceFromDom($: cheerio.Root): number | null {
+export function parsePriceFromDom($: cheerio.CheerioAPI): number | null {
   const wholesaleElements = $('[data-qaid="wholesale_price"]');
   const wholesalePrices: number[] = [];
 

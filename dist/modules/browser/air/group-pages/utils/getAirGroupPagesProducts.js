@@ -2,6 +2,8 @@ import { decodeHtmlEntities } from "../../../utils/decode-html-entities/decodeHt
 import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 import { crawlHtmlGroupListingPages, getNextPageUrlFromLinkRelNext, } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
+import { browserGet } from "../../../utils/browserRequest.js";
+import { getAirHttpProxyUrl } from "../../utils/getAirHttpProxyUrl.js";
 import { getAirGroupPagesProductsSchema, } from "./getAirGroupPagesProductsSchema.js";
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
 function pickProductCards($) {
@@ -72,5 +74,6 @@ export async function getAirGroupPagesProducts(input) {
         getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
         stopOnEmptyPage: true,
         delayBeforeNextMs: getGroupPagesThrottleDelayMs,
+        fetchPageHtml: (url) => browserGet(url, { proxyUrl: getAirHttpProxyUrl() }),
     });
 }

@@ -20,15 +20,25 @@ type SkuSliceLean = {
 
 type SkuIdLean = { _id: { toString(): string } };
 
+export type RunCompensatingSkuSlicesOptions = {
+  /** Если задан — только документ этого konk (ожидается уже нормализованное имя). */
+  konkName?: string;
+};
+
 /**
  * Повторный опрос позиций SkuSlice за sliceDate: -1/-1 или цена не конечное неотрицательное число.
  * Если ответ опроса не в режиме полного -1/-1, перезаписывает ключ в том же документе.
  */
 export async function runCompensatingSkuSlices(
-  sliceDate: Date
+  sliceDate: Date,
+  options?: RunCompensatingSkuSlicesOptions
 ): Promise<{ refetched: number; updated: number }> {
   const excluded = getExcludedCompetitorSet("skuSlices");
-  const docs = (await SkuSlice.find({ date: sliceDate })
+  const filter: { date: Date; konkName?: string } = { date: sliceDate };
+  if (options?.konkName) {
+    filter.konkName = options.konkName;
+  }
+  const docs = (await SkuSlice.find(filter)
     .select("konkName data")
     .lean()) as SkuSliceLean[];
 
