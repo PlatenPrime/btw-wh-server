@@ -22,6 +22,18 @@ vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
   normalizeCompetitorName: vi.fn((v: string) => v.trim().toLowerCase()),
 }));
 
+const { logModuleInfo, logModuleWarn } = vi.hoisted(() => ({
+  logModuleInfo: vi.fn(),
+  logModuleWarn: vi.fn(),
+}));
+
+vi.mock("../../../../logging/logModuleError.js", () => ({
+  logModuleInfo,
+  logModuleWarn,
+  logModuleError: vi.fn(),
+  logModuleDebug: vi.fn(),
+}));
+
 import { Sku } from "../../../skus/models/Sku.js";
 import {
   getSkuStockDataUtil,
@@ -85,6 +97,18 @@ describe("runCompensatingSkuSlices", () => {
 
     expect(r).toEqual({ refetched: 1, updated: 0 });
     expect(SkuSlice.findOneAndUpdate).not.toHaveBeenCalled();
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating sku refetch result",
+      {
+        konkName: "air",
+        productKey: "P1",
+        kind: "sku",
+        stock: -1,
+        price: -1,
+        updated: false,
+      }
+    );
   });
 
   it("updates when fetch returns non-full-minus", async () => {
@@ -100,6 +124,51 @@ describe("runCompensatingSkuSlices", () => {
     expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledWith(
       { konkName: "air", date: sliceDate },
       { $set: { "data.P1": { stock: 5, price: -1 } } }
+    );
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating sku refetch result",
+      {
+        konkName: "air",
+        productKey: "P1",
+        kind: "sku",
+        stock: 5,
+        price: -1,
+        updated: true,
+      }
+    );
+  });
+
+  it("logs empty when stock util returns null", async () => {
+    mockFindLean([
+      { konkName: "air", data: { P1: { stock: -1, price: -1 } } },
+    ]);
+    mockSkuFindOne("sid1");
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue(null);
+
+    const r = await runCompensatingSkuSlices(sliceDate);
+
+    expect(r).toEqual({ refetched: 0, updated: 0 });
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating sku refetch empty",
+      { konkName: "air", productKey: "P1", kind: "sku" }
+    );
+  });
+
+  it("logs warn when sku entity is missing", async () => {
+    mockFindLean([
+      { konkName: "air", data: { P1: { stock: -1, price: -1 } } },
+    ]);
+    mockSkuFindOne(null);
+
+    const r = await runCompensatingSkuSlices(sliceDate);
+
+    expect(r).toEqual({ refetched: 0, updated: 0 });
+    expect(logModuleWarn).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating sku: entity not found, skip",
+      { konkName: "air", productKey: "P1" }
     );
   });
 

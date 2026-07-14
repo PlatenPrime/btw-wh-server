@@ -6,7 +6,7 @@ const NEGATIVE_OUTCOME = { stock: -1, price: -1 };
  * Получает данные о количестве и цене товара со страницы товара сайта air по ссылке.
  * При отсутствии товара в наличии (элемент #max-product-quantity отсутствует в разметке) возвращает stock: 0 при валидной цене.
  * При скидке цена берётся из .us-price-new, если .us-price-actual пуст.
- * HTTP-запросы идут через `AIR_HTTP_PROXY_URL`, если задан.
+ * HTTP-прокси: `getAirHttpProxyUrl()` (`AIR_HTTP_PROXY_URL` при `AIR_HTTP_PROXY_ENABLED`).
  * @param link — URL страницы товара
  * @returns Promise с объектом { stock, price }; при негативном исходе — { stock: -1, price: -1 }
  * @throws Error при пустом/не-строковом link

@@ -5,7 +5,7 @@ import { getExcludedCompetitorSet } from "../../slices/config/excludedCompetitor
 import { buildCompensatingDataKeyQueue, runCompensatingSliceRefetchLoop, } from "./compensatingSliceRunner.js";
 import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { shouldRefetchSkuSliceItem } from "./shouldRefetchSkuSliceItem.js";
-import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.js";
+import { logModuleError, logModuleInfo, logModuleWarn, } from "../../../logging/logModuleError.js";
 /**
  * Повторный опрос позиций SkuSlice за sliceDate: -1/-1 или цена не конечное неотрицательное число.
  * Если ответ опроса не в режиме полного -1/-1, перезаписывает ключ в том же документе.
@@ -27,18 +27,32 @@ export async function runCompensatingSkuSlices(sliceDate, options) {
                 .select("_id")
                 .lean());
             if (!sku) {
-                logModuleWarn("slice-compensation", "[CompensatingSkuSlices] нет SKU ${productKey} у ${konkName}, пропуск");
+                logModuleWarn("slice-compensation", "compensating sku: entity not found, skip", { konkName, productKey });
                 return { refetched: 0, updated: 0 };
             }
             const result = await getSkuStockDataUtil(sku._id.toString());
-            if (!result)
+            if (!result) {
+                logModuleInfo("slice-compensation", "compensating sku refetch empty", {
+                    konkName,
+                    productKey,
+                    kind: "sku",
+                });
                 return { refetched: 0, updated: 0 };
+            }
             let updated = 0;
             if (!isFullMinusOneSliceStockResult(result)) {
                 const dataItem = { stock: result.stock, price: result.price };
                 await SkuSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $set: { [`data.${productKey}`]: dataItem } });
                 updated = 1;
             }
+            logModuleInfo("slice-compensation", "compensating sku refetch result", {
+                konkName,
+                productKey,
+                kind: "sku",
+                stock: result.stock,
+                price: result.price,
+                updated: updated === 1,
+            });
             return { refetched: 1, updated };
         }
         catch (err) {

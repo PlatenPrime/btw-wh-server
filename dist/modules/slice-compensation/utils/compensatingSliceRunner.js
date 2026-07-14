@@ -2,7 +2,7 @@ import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
 import { SKU_SLICE_REQUEST_JITTER_MAX_MS, SKU_SLICE_REQUEST_JITTER_MIN_MS, } from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
-import { logModuleDebug } from "../../../logging/logModuleError.js";
+import { logModuleInfo } from "../../../logging/logModuleError.js";
 export function buildCompensatingDataKeyQueue(docs, excluded, shouldInclude) {
     const queue = [];
     for (const doc of docs) {
@@ -25,13 +25,22 @@ export async function runCompensatingSliceRefetchLoop(queue, processItem, jitter
     let refetched = 0;
     let updated = 0;
     for (let i = 0; i < queue.length; i++) {
-        logModuleDebug("slice-compensation", "compensating slice refetch item", {
+        const work = queue[i];
+        logModuleInfo("slice-compensation", "compensating slice refetch item start", {
             index: i + 1,
             total: queue.length,
-            konkName: queue[i].konkName,
-            dataKey: queue[i].dataKey,
+            konkName: work.konkName,
+            dataKey: work.dataKey,
         });
-        const stats = await processItem(queue[i]);
+        const stats = await processItem(work);
+        logModuleInfo("slice-compensation", "compensating slice refetch item done", {
+            index: i + 1,
+            total: queue.length,
+            konkName: work.konkName,
+            dataKey: work.dataKey,
+            refetched: stats.refetched,
+            updated: stats.updated,
+        });
         refetched += stats.refetched;
         updated += stats.updated;
         if (i < queue.length - 1) {

@@ -19,6 +19,18 @@ vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
   normalizeCompetitorName: vi.fn((v: string) => v.trim().toLowerCase()),
 }));
 
+const { logModuleInfo, logModuleWarn } = vi.hoisted(() => ({
+  logModuleInfo: vi.fn(),
+  logModuleWarn: vi.fn(),
+}));
+
+vi.mock("../../../../logging/logModuleError.js", () => ({
+  logModuleInfo,
+  logModuleWarn,
+  logModuleError: vi.fn(),
+  logModuleDebug: vi.fn(),
+}));
+
 import { Analog } from "../../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { AnalogSlice } from "../../../analog-slices/models/AnalogSlice.js";
@@ -89,6 +101,18 @@ describe("runCompensatingAnalogSlices", () => {
 
     expect(r).toEqual({ refetched: 1, updated: 0 });
     expect(AnalogSlice.findOneAndUpdate).not.toHaveBeenCalled();
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating analog refetch result",
+      {
+        konkName: "sharte",
+        artikulKey: "ART1",
+        kind: "analog",
+        stock: -1,
+        price: -1,
+        updated: false,
+      }
+    );
   });
 
   it("updates slice when fetch returns live values", async () => {
@@ -114,6 +138,57 @@ describe("runCompensatingAnalogSlices", () => {
           "data.ART1": { stock: 3, price: 99, artikul: "ART1" },
         },
       }
+    );
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating analog refetch result",
+      {
+        konkName: "sharte",
+        artikulKey: "ART1",
+        kind: "analog",
+        stock: 3,
+        price: 99,
+        updated: true,
+      }
+    );
+  });
+
+  it("logs warn and skips when analog entity is missing", async () => {
+    mockFindLean([
+      {
+        konkName: "sharte",
+        data: { ART1: { stock: -1, price: -1 } },
+      },
+    ]);
+    mockAnalogFindOne(null);
+
+    const r = await runCompensatingAnalogSlices(sliceDate);
+
+    expect(r).toEqual({ refetched: 0, updated: 0 });
+    expect(logModuleWarn).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating analog: entity not found, skip",
+      { konkName: "sharte", artikulKey: "ART1" }
+    );
+  });
+
+  it("logs empty when stock util returns null", async () => {
+    mockFindLean([
+      {
+        konkName: "sharte",
+        data: { ART1: { stock: -1, price: -1 } },
+      },
+    ]);
+    mockAnalogFindOne("aid1");
+    vi.mocked(getAnalogStockDataUtil).mockResolvedValue(null);
+
+    const r = await runCompensatingAnalogSlices(sliceDate);
+
+    expect(r).toEqual({ refetched: 0, updated: 0 });
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating analog refetch empty",
+      { konkName: "sharte", artikulKey: "ART1", kind: "analog" }
     );
   });
 

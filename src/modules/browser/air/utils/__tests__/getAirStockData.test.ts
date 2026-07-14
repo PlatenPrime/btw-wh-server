@@ -152,7 +152,7 @@ describe("getAirStockData", () => {
       }
     });
 
-    it("передаёт AIR_HTTP_PROXY_URL в browserGet", async () => {
+    it("не передаёт proxyUrl пока AIR_HTTP_PROXY_ENABLED=false", async () => {
       process.env.AIR_HTTP_PROXY_URL =
         "http://user:secret@77.47.252.164:50100";
       vi.mocked(browserGet).mockResolvedValue(`
@@ -163,7 +163,7 @@ describe("getAirStockData", () => {
       await getAirStockData("https://example.com/product/1");
 
       expect(browserGet).toHaveBeenCalledWith("https://example.com/product/1", {
-        proxyUrl: "http://user:secret@77.47.252.164:50100",
+        proxyUrl: undefined,
       });
     });
   });

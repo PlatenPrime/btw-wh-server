@@ -7,6 +7,17 @@ vi.mock("../../../../utils/jitterMs.js", () => ({
   jitterMs: vi.fn(() => 100),
 }));
 
+const { logModuleInfo } = vi.hoisted(() => ({
+  logModuleInfo: vi.fn(),
+}));
+
+vi.mock("../../../../logging/logModuleError.js", () => ({
+  logModuleInfo,
+  logModuleDebug: vi.fn(),
+  logModuleWarn: vi.fn(),
+  logModuleError: vi.fn(),
+}));
+
 import { delay } from "../../../../utils/delay.js";
 import { jitterMs } from "../../../../utils/jitterMs.js";
 import {
@@ -106,6 +117,40 @@ describe("runCompensatingSliceRefetchLoop", () => {
     expect(processItem).toHaveBeenCalledTimes(2);
     expect(processItem).toHaveBeenNthCalledWith(1, queue[0]);
     expect(processItem).toHaveBeenNthCalledWith(2, queue[1]);
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating slice refetch item start",
+      {
+        index: 1,
+        total: 2,
+        konkName: "air",
+        dataKey: "P1",
+      }
+    );
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating slice refetch item done",
+      {
+        index: 1,
+        total: 2,
+        konkName: "air",
+        dataKey: "P1",
+        refetched: 1,
+        updated: 0,
+      }
+    );
+    expect(logModuleInfo).toHaveBeenCalledWith(
+      "slice-compensation",
+      "compensating slice refetch item done",
+      {
+        index: 2,
+        total: 2,
+        konkName: "air",
+        dataKey: "P2",
+        refetched: 1,
+        updated: 1,
+      }
+    );
   });
 
   it("delays between items but not after the last", async () => {

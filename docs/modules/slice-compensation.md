@@ -30,7 +30,7 @@
 
 ### Параллельность и последовательность
 
-В одном cron-tick (и в ручном запуске) analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов).
+В одном cron-tick (и в ручном запуске) analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов). По каждой позиции в лог пишется start/done цикла и результат refetch (`stock`, `price`, `updated`) — одинаково для cron и ручного запуска.
 
 ### Фильтр по конкуренту
 
@@ -40,6 +40,8 @@
 
 Внеочередной POST держит in-memory lock на нормализованный `konkName`: повторный запуск того же конкурента, пока первый не завершился, получает отказ. Разные конкуренты могут идти параллельно. Полный пересбор среза (`run*SliceForKonkUtil`) этим эндпоинтом не выполняется.
 
+Для локального/отладочного прогона без HTTP/JWT есть `runManualCompensatingSlice`: тот же lock и оркестратор, результат пишется в лог модуля. Обычно вызывается разово после `mongoose.connect` в bootstrap.
+
 ### Ключевые файлы
 
 - [`cron/startCompensatingSlicesCron.ts`](../../src/modules/slice-compensation/cron/startCompensatingSlicesCron.ts) — планировщик;
@@ -47,6 +49,7 @@
 - [`utils/runCompensatingAnalogSlices.ts`](../../src/modules/slice-compensation/utils/runCompensatingAnalogSlices.ts);
 - [`utils/runCompensatingSkuSlices.ts`](../../src/modules/slice-compensation/utils/runCompensatingSkuSlices.ts);
 - [`utils/runCompensatingSlicesForKonk.ts`](../../src/modules/slice-compensation/utils/runCompensatingSlicesForKonk.ts) — оркестратор ручного запуска;
+- [`utils/runManualCompensatingSlice.ts`](../../src/modules/slice-compensation/utils/runManualCompensatingSlice.ts) — локальный boot-прогон с lock и логом;
 - [`controllers/run-compensating-slice/`](../../src/modules/slice-compensation/controllers/run-compensating-slice/) — HTTP.
 
 ## Cron

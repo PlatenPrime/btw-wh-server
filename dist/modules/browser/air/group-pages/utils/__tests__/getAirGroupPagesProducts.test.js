@@ -164,7 +164,7 @@ describe("getAirGroupPagesProducts", () => {
         expect(result).toHaveLength(1);
         expect(result[0]?.imageUrl).toBe(real);
     });
-    it("passes AIR_HTTP_PROXY_URL into browserGet", async () => {
+    it("does not pass proxyUrl while AIR_HTTP_PROXY_ENABLED=false", async () => {
         process.env.AIR_HTTP_PROXY_URL =
             "http://user:secret@77.47.252.164:50100";
         const html = airPageHtml({
@@ -180,7 +180,7 @@ describe("getAirGroupPagesProducts", () => {
         vi.mocked(browserGet).mockResolvedValue(html);
         await getAirGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 1 });
         expect(browserGet).toHaveBeenCalledWith(GROUP_URL, {
-            proxyUrl: "http://user:secret@77.47.252.164:50100",
+            proxyUrl: undefined,
         });
     });
 });

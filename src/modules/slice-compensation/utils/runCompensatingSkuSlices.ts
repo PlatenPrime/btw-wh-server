@@ -11,7 +11,11 @@ import {
 } from "./compensatingSliceRunner.js";
 import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { shouldRefetchSkuSliceItem } from "./shouldRefetchSkuSliceItem.js";
-import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.js";
+import {
+  logModuleError,
+  logModuleInfo,
+  logModuleWarn,
+} from "../../../logging/logModuleError.js";
 
 type SkuSliceLean = {
   konkName: string;
@@ -55,11 +59,22 @@ export async function runCompensatingSkuSlices(
         .select("_id")
         .lean()) as SkuIdLean | null;
       if (!sku) {
-        logModuleWarn("slice-compensation", "[CompensatingSkuSlices] нет SKU ${productKey} у ${konkName}, пропуск");
+        logModuleWarn(
+          "slice-compensation",
+          "compensating sku: entity not found, skip",
+          { konkName, productKey }
+        );
         return { refetched: 0, updated: 0 };
       }
       const result = await getSkuStockDataUtil(sku._id.toString());
-      if (!result) return { refetched: 0, updated: 0 };
+      if (!result) {
+        logModuleInfo("slice-compensation", "compensating sku refetch empty", {
+          konkName,
+          productKey,
+          kind: "sku",
+        });
+        return { refetched: 0, updated: 0 };
+      }
       let updated = 0;
       if (!isFullMinusOneSliceStockResult(result)) {
         const dataItem = { stock: result.stock, price: result.price };
@@ -69,6 +84,14 @@ export async function runCompensatingSkuSlices(
         );
         updated = 1;
       }
+      logModuleInfo("slice-compensation", "compensating sku refetch result", {
+        konkName,
+        productKey,
+        kind: "sku",
+        stock: result.stock,
+        price: result.price,
+        updated: updated === 1,
+      });
       return { refetched: 1, updated };
     } catch (err) {
       const e = err as Error & { code?: string };

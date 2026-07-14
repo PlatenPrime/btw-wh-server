@@ -8,7 +8,11 @@ import {
 } from "./compensatingSliceRunner.js";
 import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { isFullMinusOneSliceItem } from "./isFullMinusOneSliceItem.js";
-import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.js";
+import {
+  logModuleError,
+  logModuleInfo,
+  logModuleWarn,
+} from "../../../logging/logModuleError.js";
 
 type AnalogSliceLean = {
   konkName: string;
@@ -52,11 +56,22 @@ export async function runCompensatingAnalogSlices(
         .select("_id")
         .lean()) as AnalogIdLean | null;
       if (!analog) {
-        logModuleWarn("slice-compensation", "[CompensatingAnalogSlices] нет аналога ${artikulKey} у ${konkName}, пропуск");
+        logModuleWarn(
+          "slice-compensation",
+          "compensating analog: entity not found, skip",
+          { konkName, artikulKey }
+        );
         return { refetched: 0, updated: 0 };
       }
       const result = await getAnalogStockDataUtil(analog._id.toString());
-      if (!result) return { refetched: 0, updated: 0 };
+      if (!result) {
+        logModuleInfo("slice-compensation", "compensating analog refetch empty", {
+          konkName,
+          artikulKey,
+          kind: "analog",
+        });
+        return { refetched: 0, updated: 0 };
+      }
       let updated = 0;
       if (!isFullMinusOneSliceStockResult(result)) {
         const dataItem: Record<string, unknown> = {
@@ -70,6 +85,14 @@ export async function runCompensatingAnalogSlices(
         );
         updated = 1;
       }
+      logModuleInfo("slice-compensation", "compensating analog refetch result", {
+        konkName,
+        artikulKey,
+        kind: "analog",
+        stock: result.stock,
+        price: result.price,
+        updated: updated === 1,
+      });
       return { refetched: 1, updated };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
