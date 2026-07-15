@@ -35,7 +35,20 @@
 
 ### Общий HTTP-клиент
 
-[`browserRequest.ts`](../../src/modules/browser/utils/browserRequest.ts) — singleton axios с browser-like заголовками и таймаутом 30 с. Все конкурентные парсеры используют его для единообразия.
+[`browserRequest.ts`](../../src/modules/browser/utils/browserRequest.ts) — singleton axios с browser-like заголовками и таймаутом 30 с. Текущие конкурентные парсеры вызывают его напрямую.
+
+### Dual-transport (`http` | `playwright`)
+
+Для конкурентов, которым нужен рендер JS или headless Chromium, общая точка входа — [`fetchPageHtml`](../../src/modules/browser/utils/fetchPageHtml.ts):
+
+- транспорт `http` — axios (`browserGet`);
+- транспорт `playwright` — headless Chromium (`page.goto` → HTML), lazy singleton, лимит параллелизма.
+
+Приоритет выбора транспорта: явный параметр вызова → карта env `BROWSER_TRANSPORT_BY_KONK` по `konkName` → `http`. Формат карты: пары `konk:transport` через запятую (например `air:playwright,balun:http`). Невалидные значения игнорируются с предупреждением в лог. Лимит параллельных Playwright-страниц — `BROWSER_PLAYWRIGHT_CONCURRENCY` (по умолчанию 2).
+
+На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают.
+
+Существующие `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
 
 ### Сентинельные значения
 
@@ -48,7 +61,8 @@
 - разбор HTML-сущностей, относительных ссылок;
 - безопасный парсинг JSON из атрибутов;
 - извлечение чисел из «грязных» строк (`parseStrippedDecimal`);
-- `sleep`, merge cookies, resolve href.
+- `sleep`, merge cookies, resolve href;
+- dual-transport: `resolveBrowserTransport`, `fetchPageHtml`, `playwrightGet`.
 
 ### Group pages (обход листингов)
 

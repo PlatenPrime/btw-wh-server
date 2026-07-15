@@ -11,7 +11,7 @@ import { parseHttpProxyUrl } from "./parse-http-proxy-url/parseHttpProxyUrl.js";
 const browserLog = createLogger({ module: "browser" });
 
 /** Лимит ожидания одного HTTP GET (один URL / одна «страница»). На весь обход N страниц — до N × этого значения в худшем случае. */
-const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
+export const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
 
 const BROWSER_HEADERS = {
   "User-Agent":

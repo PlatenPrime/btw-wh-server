@@ -3,7 +3,7 @@ import { createLogger } from "../../../logging/createLogger.js";
 import { parseHttpProxyUrl } from "./parse-http-proxy-url/parseHttpProxyUrl.js";
 const browserLog = createLogger({ module: "browser" });
 /** Лимит ожидания одного HTTP GET (один URL / одна «страница»). На весь обход N страниц — до N × этого значения в худшем случае. */
-const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
+export const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
 const BROWSER_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
     Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
