@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Konk } from "../../models/Konk.js";
 import { updateKonkByIdController } from "../update-konk-by-id/updateKonkByIdController.js";
 
@@ -10,6 +12,7 @@ describe("updateKonkByIdController", () => {
 
   beforeEach(async () => {
     await Konk.deleteMany({});
+    await Event.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -74,5 +77,25 @@ describe("updateKonkByIdController", () => {
     await updateKonkByIdController(req, res);
     expect(responseStatus.code).toBe(200);
     expect((responseJson.data as { recountDays: string[] }).recountDays).toEqual([]);
+  });
+
+  it("200 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `konk-update-event-${Date.now()}` });
+    const konk = await Konk.create({
+      name: "x",
+      title: "Old",
+      url: "https://x.com",
+      imageUrl: "https://x.com/1.png",
+    });
+    const req = {
+      params: { id: konk._id.toString() },
+      body: { title: "New Title" },
+      user: { id: user._id.toString(), role: "ADMIN" },
+    } as unknown as Request;
+    await updateKonkByIdController(req, res);
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "konks" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });

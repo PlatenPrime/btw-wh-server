@@ -1,6 +1,7 @@
 import { updateKaskBodySchema, updateKaskByIdParamsSchema, } from "./schemas/updateKaskByIdSchema.js";
 import { updateKaskUtil } from "./utils/updateKaskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const updateKaskById = async (req, res) => {
     try {
         const paramsResult = updateKaskByIdParamsSchema.safeParse(req.params);
@@ -23,6 +24,13 @@ export const updateKaskById = async (req, res) => {
         if (!kask) {
             res.status(404).json({ message: "Kask not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "kasks",
+                description: `Оновлено касовий запит на артикул ${kask.artikul} (id: ${paramsResult.data.id})`,
+            });
         }
         res.status(200).json({
             message: "Kask updated successfully",

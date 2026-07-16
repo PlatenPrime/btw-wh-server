@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Sku } from "../../models/Sku.js";
 import { fixIncorrectSkuDataController } from "../fix-incorrect-sku-data/fixIncorrectSkuDataController.js";
 
@@ -10,6 +12,7 @@ describe("fixIncorrectSkuDataController", () => {
 
   beforeEach(async () => {
     await Sku.deleteMany({});
+    await Event.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -54,5 +57,31 @@ describe("fixIncorrectSkuDataController", () => {
     expect(responseStatus.code).toBe(200);
     const data = responseJson.data as { modifiedCount: number };
     expect(data.modifiedCount).toBe(1);
+  });
+
+  it("200 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `sku-fix-event-${Date.now()}` });
+    await Sku.create({
+      konkName: "k-fix-event",
+      prodName: "p1",
+      productId: "k-fix-event-1",
+      title: "Before",
+      url: "https://k-fix-event.com/1",
+    });
+
+    const req = {
+      body: {
+        filter: { konkName: "k-fix-event" },
+        updates: { title: "After" },
+      },
+      user: { id: user._id.toString(), role: "ADMIN" },
+    } as unknown as Request;
+
+    await fixIncorrectSkuDataController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "skus" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });

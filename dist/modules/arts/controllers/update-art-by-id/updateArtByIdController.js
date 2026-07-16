@@ -1,6 +1,7 @@
 import { updateArtByIdSchema } from "./schemas/updateArtByIdSchema.js";
 import { updateArtByIdUtil } from "./utils/updateArtByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const updateArtByIdController = async (req, res) => {
     try {
         const { id } = req.params;
@@ -24,6 +25,13 @@ export const updateArtByIdController = async (req, res) => {
                 message: "Art not found",
             });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "arts",
+                description: `Оновлено артикул ${updatedArt.artikul} (id: ${updatedArt._id})`,
+            });
         }
         res.status(200).json(updatedArt);
     }

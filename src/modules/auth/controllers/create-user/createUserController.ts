@@ -5,6 +5,7 @@ import { checkUserExistsUtil } from "../registrate-user/utils/checkUserExistsUti
 import { getUserRoleUtil } from "../registrate-user/utils/getUserRoleUtil.js";
 import { createUserUtil } from "../registrate-user/utils/createUserUtil.js";
 import { getUserWithoutPasswordUtil } from "../../utils/getUserWithoutPasswordUtil.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 export const createUserController = async (
   req: Request,
@@ -59,6 +60,14 @@ export const createUserController = async (
         session,
       });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "auth",
+        description: `Створено користувача ${createdUser.username} (роль: ${createdUser.role})`,
+      });
+    }
 
     const userWithoutPassword = getUserWithoutPasswordUtil(createdUser);
     res.status(201).json({ user: userWithoutPassword });

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { Block } from "../../../blocks/models/Block.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { createSegSchema } from "./schemas/createSegSchema.js";
 import { createSegUtil } from "./utils/createSegUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -37,6 +38,14 @@ export const createSeg = async (req: Request, res: Response) => {
         session,
       });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "segs",
+        description: `Створено сегмент у блоці ${blockData.title} (порядок: ${order}, зон: ${zones.length})`,
+      });
+    }
 
     res.status(201).json({
       message: "Segment created successfully",

@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Pallet } from "../../../../pallets/models/Pallet.js";
 import { PalletGroup } from "../../../models/PalletGroup.js";
 import { recalculatePalletsSectorsController } from "../recalculatePalletsSectorsController.js";
@@ -58,5 +59,32 @@ describe("recalculatePalletsSectorsController", () => {
 
     const updated = await Pallet.findById(pallet._id).lean();
     expect(updated?.sector).toBe(101);
+  });
+
+  it("200: creates audit event when req.user is present", async () => {
+    const rowId = new mongoose.Types.ObjectId();
+    const pallet = await Pallet.create({
+      title: "P-Event",
+      row: rowId,
+      rowData: { _id: rowId, title: "Row 1" },
+      poses: [],
+      isDef: false,
+      sector: 0,
+    });
+    await PalletGroup.create({
+      title: "Group Event",
+      order: 1,
+      pallets: [pallet._id],
+    });
+    const user = await createTestUser({
+      username: `recalc-sectors-event-${Date.now()}`,
+    });
+
+    const req = { user: { id: user._id.toString(), role: "ADMIN" } } as unknown as Request;
+    await recalculatePalletsSectorsController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "pallet-groups" });
+    expect(events).toHaveLength(1);
   });
 });

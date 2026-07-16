@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 import { Row } from "../../../rows/models/Row.js";
 import { createPosSchema } from "./schemas/createPosSchema.js";
@@ -43,6 +44,13 @@ export const createPosController = async (req, res) => {
             pallet.poses.push(createdPos._id);
             await pallet.save({ session });
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "poses",
+                description: `Створено позицію ${createdPos.artikul} (${createdPos.quant} шт, ${createdPos.boxes} ящ) на паллеті ${createdPos.palletTitle}, ряд ${createdPos.rowTitle}`,
+            });
+        }
         // 3. HTTP ответ
         res.status(201).json(createdPos);
     }

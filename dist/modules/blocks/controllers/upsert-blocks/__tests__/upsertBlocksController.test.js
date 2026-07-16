@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Block } from "../../../models/Block.js";
 import { upsertBlocksController } from "../upsertBlocksController.js";
 describe("upsertBlocksController", () => {
@@ -34,6 +35,22 @@ describe("upsertBlocksController", () => {
         const blocks = await Block.find({}).sort({ order: 1 }).lean().exec();
         expect(blocks[0].title).toBe("Block A");
         expect(blocks[1].title).toBe("Block B");
+    });
+    it("200: creates audit event when req.user is present", async () => {
+        const user = await createTestUser({
+            username: `upsert-blocks-event-${Date.now()}`,
+        });
+        const req = {
+            user: { id: user._id.toString(), role: "PRIME" },
+            body: [
+                { title: "Event Block A", order: 1 },
+                { title: "Event Block B", order: 2 },
+            ],
+        };
+        await upsertBlocksController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "blocks" });
+        expect(events).toHaveLength(1);
     });
     it("400: validation error for invalid payload", async () => {
         const req = {

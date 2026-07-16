@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { createZoneSchema } from "./schemas/createZoneSchema.js";
 import { checkZoneDuplicatesUtil } from "./utils/checkZoneDuplicatesUtil.js";
 import { createZoneUtil } from "./utils/createZoneUtil.js";
@@ -36,6 +37,14 @@ export const createZone = async (req: Request, res: Response) => {
 
     // Создание новой зоны
     const zone = await createZoneUtil(zoneData);
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "zones",
+        description: `Створено зону ${zone.title} (бар: ${zone.bar})`,
+      });
+    }
 
     res.status(201).json({
       message: "Zone created successfully",

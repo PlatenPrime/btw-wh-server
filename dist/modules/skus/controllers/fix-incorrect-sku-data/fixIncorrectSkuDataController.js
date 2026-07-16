@@ -1,6 +1,7 @@
 import { fixIncorrectSkuDataSchema } from "./schemas/fixIncorrectSkuDataSchema.js";
 import { fixIncorrectSkuDataUtil } from "./utils/fixIncorrectSkuDataUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Массово исправить поля у SKU, попавших под filter
  * @route   POST /api/skus/fix-incorrect-sku-data
@@ -16,6 +17,13 @@ export const fixIncorrectSkuDataController = async (req, res) => {
             return;
         }
         const result = await fixIncorrectSkuDataUtil(parseResult.data);
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "skus",
+                description: `Масово виправлено дані sku: знайдено ${result.matchedCount}, змінено ${result.modifiedCount} шт.`,
+            });
+        }
         res.status(200).json({
             message: "Sku data fixed successfully",
             data: {

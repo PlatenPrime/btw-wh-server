@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Block } from "../../../models/Block.js";
 import { Seg } from "../../../../segs/models/Seg.js";
 import { updateBlock } from "../updateBlock.js";
@@ -40,6 +41,26 @@ describe("updateBlockController", () => {
     expect(responseJson.message).toBe("Block updated successfully");
     expect(responseJson.data.title).toBe("Updated Block");
     expect(responseJson.data.order).toBe(3);
+  });
+
+  it("200: creates audit event when req.user is present", async () => {
+    const block = await Block.create({ title: "Block Event", order: 1, segs: [] });
+    const user = await createTestUser({
+      username: `update-block-event-${Date.now()}`,
+    });
+
+    const req = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      params: { id: block._id.toString() },
+      body: { title: "Updated Block Event" },
+    } as unknown as Request;
+
+    await updateBlock(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "blocks" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("Updated Block Event");
   });
 
   it("400: invalid block ID format", async () => {

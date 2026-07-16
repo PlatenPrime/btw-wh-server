@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Row } from "../../../rows/models/Row.js";
 import { createPalletSchema } from "./schemas/createPalletSchema.js";
 import { createPalletUtil } from "./utils/createPalletUtil.js";
@@ -39,6 +40,14 @@ export const createPalletController = async (req: Request, res: Response) => {
         session,
       });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "pallets",
+        description: `Створено паллету ${createdPallet.title} у ряду ${rowData.title}${sector !== undefined ? `, сектор ${sector}` : ""}`,
+      });
+    }
 
     res.status(201).json(createdPallet);
   } catch (error: any) {

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { deleteAskByIdSchema } from "./schemas/deleteAskByIdSchema.js";
 import { deleteAskUtil } from "./utils/deleteAskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 export const deleteAskById = async (
   req: Request,
@@ -35,6 +36,14 @@ export const deleteAskById = async (
         throw new Error("Ask not found");
       }
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "asks",
+        description: `Видалено заявку на артикул ${ask.artikul} (id: ${id})`,
+      });
+    }
 
     res.status(200).json({
       message: "Ask deleted successfully",

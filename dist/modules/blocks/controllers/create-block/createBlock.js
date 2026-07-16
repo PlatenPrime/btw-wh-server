@@ -1,3 +1,4 @@
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { createBlockSchema } from "./schemas/createBlockSchema.js";
 import { checkBlockDuplicatesUtil } from "./utils/checkBlockDuplicatesUtil.js";
 import { createBlockUtil } from "./utils/createBlockUtil.js";
@@ -25,6 +26,13 @@ export const createBlock = async (req, res) => {
         }
         // Создание нового блока
         const block = await createBlockUtil(blockData);
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "blocks",
+                description: `Створено блок ${block.title}`,
+            });
+        }
         res.status(201).json({
             message: "Block created successfully",
             data: block,

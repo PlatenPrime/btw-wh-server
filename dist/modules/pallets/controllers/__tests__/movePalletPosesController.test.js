@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
 import { createTestRow, createTestPallet, createTestPos } from "../../../../test/utils/testHelpers.js";
+import { Event } from "../../../events/models/Event.js";
 import { movePalletPosesController } from "../move-pallet-poses/movePalletPosesController.js";
 describe("movePalletPosesController", () => {
     let res;
@@ -65,6 +67,54 @@ describe("movePalletPosesController", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.message).toBe("Poses moved successfully");
         expect(responseJson.targetPallet).toBeDefined();
+    });
+    it("200: создаёт audit event, если есть req.user", async () => {
+        const row1 = await createTestRow({ title: "Row 1 Event" });
+        const row2 = await createTestRow({ title: "Row 2 Event" });
+        const sourcePallet = await createTestPallet({
+            title: "Source-Pallet-Event",
+            row: row1._id,
+            rowData: { _id: row1._id, title: row1.title },
+            poses: [],
+        });
+        const targetPallet = await createTestPallet({
+            title: "Target-Pallet-Event",
+            row: row2._id,
+            rowData: { _id: row2._id, title: row2.title },
+            poses: [],
+        });
+        const pos = await createTestPos({
+            pallet: sourcePallet._id,
+            palletData: {
+                _id: sourcePallet._id,
+                title: sourcePallet.title,
+                sector: sourcePallet.sector,
+                isDef: sourcePallet.isDef,
+            },
+            palletTitle: sourcePallet.title,
+            row: row1._id,
+            rowData: { _id: row1._id, title: row1.title },
+            rowTitle: row1.title,
+        });
+        const PalletModel = mongoose.model("Pallet");
+        await PalletModel.findByIdAndUpdate(sourcePallet._id, {
+            $set: { poses: [pos._id] },
+        });
+        const user = await createTestUser({
+            username: `move-pallet-poses-event-${Date.now()}`,
+        });
+        const req = {
+            user: { id: user._id.toString(), role: "EDITOR" },
+            body: {
+                sourcePalletId: String(sourcePallet._id),
+                targetPalletId: String(targetPallet._id),
+            },
+        };
+        await movePalletPosesController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "pallets" });
+        expect(events).toHaveLength(1);
+        expect(events[0].description).toContain("Target-Pallet-Event");
     });
     it("400: если source и target ID одинаковые", async () => {
         const pallet = await createTestPallet();

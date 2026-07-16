@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { exportPosesStocksToExcelController } from "../exportPosesStocksToExcelController.js";
 import { formatPosesStocksForExcelUtil } from "../utils/formatPosesStocksForExcelUtil.js";
 import { generateExcelUtil } from "../utils/generateExcelUtil.js";
@@ -15,7 +17,8 @@ describe("exportPosesStocksToExcelController", () => {
   let responseHeaders: Record<string, string | number>;
   let responseBody: unknown;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await Event.deleteMany({});
     responseStatus = {};
     responseHeaders = {};
     responseBody = null;
@@ -84,6 +87,40 @@ describe("exportPosesStocksToExcelController", () => {
       `attachment; filename="${mockFileName}"`
     );
     expect(responseBody).toBe(mockBuffer);
+  });
+
+  it("200: creates audit event when req.user is present", async () => {
+    const user = await createTestUser({
+      username: `export-event-${Date.now()}`,
+    });
+    const mockPoses = [
+      { artikul: "ART-001", nameukr: "Товар", quant: 5, sklad: "merezhi" },
+    ];
+    const mockBuffer = Buffer.from("mock-excel");
+    const mockFileName = "poses_stocks_merezhi_2026-06-07.xlsx";
+
+    vi.mocked(getPosesStocksForExportUtil).mockResolvedValue(mockPoses);
+    vi.mocked(formatPosesStocksForExcelUtil).mockReturnValue([]);
+    vi.mocked(generateExcelUtil).mockResolvedValue({
+      buffer: mockBuffer,
+      fileName: mockFileName,
+    });
+
+    const req = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      body: { sklad: "merezhi" },
+    } as unknown as Request;
+
+    await exportPosesStocksToExcelController(
+      req as Parameters<typeof exportPosesStocksToExcelController>[0],
+      res
+    );
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "poses" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("Експортовано залишки");
+    expect(events[0].description).toContain("склад=merezhi");
   });
 
   it("400: invalid request body", async () => {

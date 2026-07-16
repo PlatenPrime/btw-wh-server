@@ -1,6 +1,7 @@
 import { deleteKonkByIdSchema } from "./schemas/deleteKonkByIdSchema.js";
 import { deleteKonkByIdUtil } from "./utils/deleteKonkByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Удалить конкурента по id
  * @route   DELETE /api/konks/id/:id
@@ -21,6 +22,13 @@ export const deleteKonkByIdController = async (req, res) => {
         if (!konk) {
             res.status(404).json({ message: "Konk not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "konks",
+                description: `Видалено конкурента ${konk.name} (id: ${konk._id})`,
+            });
         }
         res.status(200).json({
             message: "Konk deleted successfully",

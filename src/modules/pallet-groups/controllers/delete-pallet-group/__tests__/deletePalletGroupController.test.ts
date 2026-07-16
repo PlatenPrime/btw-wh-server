@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Pallet } from "../../../../pallets/models/Pallet.js";
 import { PalletGroup } from "../../../models/PalletGroup.js";
 import { deletePalletGroupController } from "../deletePalletGroupController.js";
@@ -68,6 +69,30 @@ describe("deletePalletGroupController", () => {
     expect(remaining).toHaveLength(1);
     expect(remaining[0].title).toBe("Group B");
     expect(remaining[0].order).toBe(1);
+  });
+
+  it("200: creates audit event when req.user is present", async () => {
+    const pallet = await createPallet("P-Event");
+    const group = await PalletGroup.create({
+      title: "Group Event",
+      order: 1,
+      pallets: [pallet._id],
+    });
+    const user = await createTestUser({
+      username: `delete-pallet-group-event-${Date.now()}`,
+    });
+
+    const req = {
+      user: { id: user._id.toString(), role: "PRIME" },
+      params: { id: group._id.toString() },
+    } as unknown as Request;
+
+    await deletePalletGroupController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "pallet-groups" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("Group Event");
   });
 
   it("400: invalid id format", async () => {

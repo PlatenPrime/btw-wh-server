@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Del } from "../../models/Del.js";
 import { Prod } from "../../../prods/models/Prod.js";
 import { updateDelTitleByIdController } from "../update-del-title-by-id/updateDelTitleByIdController.js";
@@ -10,6 +12,7 @@ describe("updateDelTitleByIdController", () => {
     beforeEach(async () => {
         await Del.deleteMany({});
         await Prod.deleteMany({});
+        await Event.deleteMany({});
         await Prod.create({
             name: "acme",
             title: "Acme",
@@ -75,5 +78,24 @@ describe("updateDelTitleByIdController", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.message).toBe("Del title updated successfully");
         expect(responseJson.data.title).toBe("New title");
+    });
+    it("200 creates audit event when req.user is present", async () => {
+        const user = await createTestUser({ username: `del-title-event-${Date.now()}` });
+        const del = await Del.create({
+            title: "Old title",
+            prodName: "acme",
+            artikuls: {},
+        });
+        const req = {
+            user: { id: String(user._id), role: "ADMIN" },
+            params: { id: del._id.toString() },
+            body: { title: "Audited title", prodName: "acme" },
+        };
+        await updateDelTitleByIdController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "dels" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(String(user._id));
+        expect(events[0].description).toBe(`Оновлено назву поставки на "Audited title" (виробник: acme, id: ${del._id})`);
     });
 });

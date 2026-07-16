@@ -5,6 +5,7 @@ vi.mock("../reject-ask-by-id/utils/sendRejectAskMesUtil.js", () => ({
 }));
 import { rejectAskById } from "../reject-ask-by-id/rejectAskById.js";
 import { createTestAsk, createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 describe("rejectAskById", () => {
     let res;
     let responseJson;
@@ -35,6 +36,23 @@ describe("rejectAskById", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.status).toBe("rejected");
         expect(responseJson.solverData.fullname).toBe("Solver");
+    });
+    it("200: создаёт audit-событие, когда есть req.user", async () => {
+        const asker = await createTestUser({ telegram: "321", username: `asker-${Date.now()}-${Math.random()}` });
+        const ask = await createTestAsk({ artikul: "ART-REJECT", asker: asker._id, askerData: { _id: asker._id, fullname: asker.fullname, telegram: asker.telegram, photo: asker.photo } });
+        const solver = await createTestUser({ fullname: "Solver", username: `solver-${Date.now()}-${Math.random()}` });
+        const actor = await createTestUser({ fullname: "Actor", username: `actor-${Date.now()}-${Math.random()}` });
+        const req = {
+            user: { id: String(actor._id), role: "editor" },
+            params: { id: String(ask._id) },
+            body: { solverId: String(solver._id) },
+        };
+        await rejectAskById(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "asks" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(String(actor._id));
+        expect(events[0].description).toBe("Відхилено заявку на артикул ART-REJECT (виконавець: Solver)");
     });
     it("404: ask не найден", async () => {
         const solver = await createTestUser();

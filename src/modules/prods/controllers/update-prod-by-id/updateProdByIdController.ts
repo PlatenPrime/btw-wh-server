@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { updateProdByIdSchema } from "./schemas/updateProdByIdSchema.js";
 import { updateProdByIdUtil } from "./utils/updateProdByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Обновить производителя по id (указанные в body поля)
@@ -32,6 +33,14 @@ export const updateProdByIdController = async (
     if (!prod) {
       res.status(404).json({ message: "Prod not found" });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "prods",
+        description: `Оновлено виробника ${prod.name} (id: ${prod._id})`,
+      });
     }
 
     res.status(200).json({

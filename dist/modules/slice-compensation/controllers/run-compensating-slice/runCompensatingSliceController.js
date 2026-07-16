@@ -1,4 +1,5 @@
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { releaseCompensatingRun, tryAcquireCompensatingRun, } from "../../utils/compensatingRunStatus.js";
 import { runCompensatingSlicesForKonk } from "../../utils/runCompensatingSlicesForKonk.js";
 import { runCompensatingSliceSchema } from "./schemas/runCompensatingSliceSchema.js";
@@ -25,6 +26,13 @@ export async function runCompensatingSliceController(req, res) {
     }
     try {
         const result = await runCompensatingSlicesForKonk(konkName);
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "slice-compensation",
+                description: `Запущено позачерговий компенсуючий забір слайсів для конкурента ${result.konkName}`,
+            });
+        }
         res.status(200).json({
             message: "Compensating slice completed",
             data: {

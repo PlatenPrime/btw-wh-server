@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { updateSegSchema } from "./schemas/updateSegSchema.js";
 import { updateSegUtil } from "./utils/updateSegUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -35,6 +36,13 @@ export const updateSeg = async (req, res) => {
                 throw new Error("Segment not found");
             }
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "segs",
+                description: `Оновлено сегмент (id: ${id}) у блоці ${updatedSeg.blockData.title}, зон: ${updatedSeg.zones.length}`,
+            });
+        }
         res.status(200).json({
             message: "Segment updated successfully",
             data: updatedSeg.toObject(),

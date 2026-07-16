@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { updateRowSchema } from "./schemas/updateRowSchema.js";
 import { updateRowUtil } from "./utils/updateRowUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -26,6 +27,14 @@ export const updateRow = async (req: Request, res: Response) => {
     if (!updatedRow) {
       res.status(404).json({ message: "Row not found" });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "rows",
+        description: `Оновлено ряд (id: ${parseResult.data.id}) новою назвою ${updatedRow.title}`,
+      });
     }
 
     res.status(200).json(updatedRow);

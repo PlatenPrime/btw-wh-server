@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { deleteBlockByIdSchema } from "./schemas/deleteBlockByIdSchema.js";
 import { deleteBlockByIdUtil } from "./utils/deleteBlockByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -24,6 +25,14 @@ export const deleteBlock = async (req: Request, res: Response) => {
         message: "Block not found",
       });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "blocks",
+        description: `Видалено блок ${deletedBlock.title}`,
+      });
     }
 
     res.status(200).json({

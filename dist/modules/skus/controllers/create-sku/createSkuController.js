@@ -1,6 +1,7 @@
 import { createSkuSchema } from "./schemas/createSkuSchema.js";
 import { createSkuUtil } from "./utils/createSkuUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Создать sku конкурента
  * @route   POST /api/skus
@@ -16,6 +17,13 @@ export const createSkuController = async (req, res) => {
             return;
         }
         const sku = await createSkuUtil(parseResult.data);
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "skus",
+                description: `Створено sku "${sku.title}" (id: ${sku._id}, артикул аналога: ${sku.btradeAnalog}) для конкурента ${sku.konkName}`,
+            });
+        }
         res.status(201).json({
             message: "Sku created successfully",
             data: sku,

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Row } from "../../../rows/models/Row.js";
 import { Pallet } from "../../models/Pallet.js";
 import { updatePalletSchema } from "./schemas/updatePalletSchema.js";
@@ -67,6 +68,14 @@ export const updatePalletController = async (
         session,
       });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "pallets",
+        description: `Оновлено паллету ${updatedPallet.title} (id: ${id})`,
+      });
+    }
 
     res.status(200).json(updatedPallet);
   } catch (error: any) {

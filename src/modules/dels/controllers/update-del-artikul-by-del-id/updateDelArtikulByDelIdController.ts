@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { updateDelArtikulSchema } from "./schemas/updateDelArtikulSchema.js";
 import { updateDelArtikulByDelIdUtil } from "./utils/updateDelArtikulByDelIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Обновить значение указанного артикула в поставке (данные с sharik.ua)
@@ -32,6 +33,14 @@ export const updateDelArtikulByDelIdController = async (
           "Del not found or product not found on sharik.ua for this artikul",
       });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "dels",
+        description: `Оновлено артикул ${parseResult.data.artikul} у поставці "${del.title}" (id: ${parseResult.data.id})`,
+      });
     }
 
     res.status(200).json({

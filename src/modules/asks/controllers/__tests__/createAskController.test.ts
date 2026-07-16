@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { createAskController } from "../create-ask/createAskController.js";
 
 describe("createAskController", () => {
@@ -70,6 +71,51 @@ describe("createAskController", () => {
     expect(responseJson.zone).toBe("Зона А");
     expect(responseJson.status).toBe("new");
     expect(responseJson._id).toBeDefined();
+  });
+
+  it("201: создаёт audit-событие, когда есть req.user", async () => {
+    const user = await createTestUser({ fullname: "Asker" });
+
+    const req = {
+      user: { id: String(user._id), role: "user" },
+      body: {
+        artikul: "ART-EVENT",
+        nameukr: "Найменування",
+        quant: 3,
+        com: "комент",
+        askerId: String(user._id),
+      },
+    } as unknown as Request;
+
+    await createAskController(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "asks" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(String(user._id));
+    expect(events[0].description).toBe(
+      "Створено заявку на артикул ART-EVENT (3 шт.)"
+    );
+  });
+
+  it("201: не создаёт audit-событие без req.user", async () => {
+    const user = await createTestUser({ fullname: "Asker" });
+
+    const req = {
+      body: {
+        artikul: "ART-NO-USER",
+        nameukr: "Найменування",
+        quant: 1,
+        com: "",
+        askerId: String(user._id),
+      },
+    } as unknown as Request;
+
+    await createAskController(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "asks" });
+    expect(events).toHaveLength(0);
   });
 
   it("400: ошибка валидации при отсутствии artikul", async () => {

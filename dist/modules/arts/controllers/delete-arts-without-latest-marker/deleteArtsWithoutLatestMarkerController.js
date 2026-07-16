@@ -1,6 +1,7 @@
 import { deleteArtsWithoutLatestMarkerSchema } from "./schemas/deleteArtsWithoutLatestMarkerSchema.js";
 import { deleteArtsWithoutLatestMarkerUtil } from "./utils/deleteArtsWithoutLatestMarkerUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Удалить все артикулы без последнего актуального маркера
  * @route   DELETE /api/arts/without-latest-marker
@@ -19,6 +20,13 @@ export const deleteArtsWithoutLatestMarkerController = async (req, res) => {
         }
         // Удаляем артикулы без последнего маркера
         const result = await deleteArtsWithoutLatestMarkerUtil();
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "arts",
+                description: `Видалено артикули без актуального маркера (маркер: ${result.latestMarker}): ${result.deletedCount} шт.`,
+            });
+        }
         res.status(200).json({
             message: "Arts without latest marker deleted successfully",
             result: {

@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Zone } from "../../models/Zone.js";
 import { createZone } from "../create-zone/createZone.js";
 
@@ -38,6 +40,23 @@ describe("createZoneController", () => {
 
     // Cleanup
     await Zone.deleteOne({ _id: responseJson.data._id });
+  });
+
+  it("201: создаёт audit event, если есть req.user", async () => {
+    const user = await createTestUser({
+      username: `create-zone-event-${Date.now()}`,
+    });
+    const req = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      body: { title: "60-10", bar: 60100, sector: 0 },
+    } as unknown as Request;
+
+    await createZone(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "zones" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("60-10");
   });
 
   it("400: ошибка валидации при отсутствии title", async () => {

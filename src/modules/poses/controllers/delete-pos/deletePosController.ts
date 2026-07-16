@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 import { IPos, Pos } from "../../models/Pos.js";
 import { deletePosUtil } from "./utils/deletePosUtil.js";
@@ -14,10 +15,11 @@ export const deletePosController = async (req: Request, res: Response) => {
   }
 
   const session = await mongoose.startSession();
+  let deletedPos: IPos | null = null;
   try {
     // 2. Оркестрация в транзакции
     await session.withTransaction(async () => {
-      const deletedPos = await deletePosUtil({ posId: id, session });
+      deletedPos = await deletePosUtil({ posId: id, session });
 
       // Удаляем позицию из паллета
       const pallet = await Pallet.findById(deletedPos.pallet._id).session(
@@ -30,6 +32,15 @@ export const deletePosController = async (req: Request, res: Response) => {
         await pallet.save({ session });
       }
     });
+
+    const deletedPosData = deletedPos as IPos | null;
+    if (req.user?.id && deletedPosData) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "poses",
+        description: `Видалено позицію ${deletedPosData.artikul} (${deletedPosData.quant} шт, ${deletedPosData.boxes} ящ) з паллети ${deletedPosData.palletTitle}`,
+      });
+    }
 
     // 3. HTTP ответ
     res.status(200).json({ message: "Position deleted successfully" });

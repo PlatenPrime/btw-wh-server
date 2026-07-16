@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
 import { createMockRequest, createMockResponse, createTestPos, } from "../../../../test/utils/testHelpers.js";
+import { Event } from "../../../events/models/Event.js";
 import { Pos } from "../../models/Pos.js";
 import { updatePos } from "../index.js";
 describe("updatePos Controller", () => {
@@ -26,6 +28,26 @@ describe("updatePos Controller", () => {
         expect(res.body.boxes).toBe(9);
         expect(res.body.sklad).toBe("pogrebi");
         expect(res.body.comment).toBe("new comment");
+    });
+    it("should create an audit event when req.user is present", async () => {
+        const user = await createTestUser({
+            username: `update-pos-event-${Date.now()}`,
+        });
+        const req = createMockRequest({
+            user: { id: user._id.toString(), role: "ADMIN" },
+            params: { id: pos._id.toString() },
+            body: {
+                artikul: "UPDATED-EVENT",
+                quant: 5,
+                boxes: 1,
+            },
+        });
+        const res = createMockResponse();
+        await updatePos(req, res);
+        expect(res.body.artikul).toBe("UPDATED-EVENT");
+        const events = await Event.find({ department: "poses" });
+        expect(events).toHaveLength(1);
+        expect(events[0].description).toContain("UPDATED-EVENT");
     });
     it("should return 404 if pos not found", async () => {
         const req = createMockRequest({

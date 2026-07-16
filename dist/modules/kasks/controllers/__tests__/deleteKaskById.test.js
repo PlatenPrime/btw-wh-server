@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Kask } from "../../models/Kask.js";
 import { deleteKaskById } from "../delete-kask-by-id/deleteKaskById.js";
 describe("deleteKaskById", () => {
@@ -7,6 +9,7 @@ describe("deleteKaskById", () => {
     let responseStatus;
     beforeEach(async () => {
         await Kask.deleteMany({});
+        await Event.deleteMany({});
         responseJson = {};
         responseStatus = {};
         res = {
@@ -48,5 +51,23 @@ describe("deleteKaskById", () => {
         expect(responseJson.data.artikul).toBe("5555-5555");
         const found = await Kask.findById(kask._id);
         expect(found).toBeNull();
+    });
+    it("200 creates audit event when req.user is present", async () => {
+        const user = await createTestUser({ username: `kask-del-event-${Date.now()}` });
+        const kask = await Kask.create({
+            artikul: "8888-8888",
+            nameukr: "To delete",
+            zone: "A1",
+        });
+        const req = {
+            user: { id: String(user._id), role: "PRIME" },
+            params: { id: String(kask._id) },
+        };
+        await deleteKaskById(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "kasks" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(String(user._id));
+        expect(events[0].description).toBe("Видалено касовий запит на артикул 8888-8888 (id: " + kask._id + ")");
     });
 });

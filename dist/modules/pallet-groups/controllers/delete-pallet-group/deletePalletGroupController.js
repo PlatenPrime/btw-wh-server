@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 import { PalletGroup } from "../../models/PalletGroup.js";
 export const deletePalletGroupController = async (req, res) => {
@@ -33,6 +34,13 @@ export const deletePalletGroupController = async (req, res) => {
         }
         await session.commitTransaction();
         session.endSession();
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "pallet-groups",
+                description: `Видалено групу паллет ${group.title} (звільнено паллет: ${palletIds.length})`,
+            });
+        }
         return res.status(200).json({
             message: "Pallet group deleted successfully",
         });

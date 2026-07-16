@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Pallet } from "../../../../pallets/models/Pallet.js";
 import { resetPalletsSectorsController } from "../resetPalletsSectorsController.js";
 describe("resetPalletsSectorsController", () => {
@@ -40,5 +41,15 @@ describe("resetPalletsSectorsController", () => {
         const pallet = await Pallet.findOne({ title: "P1" }).lean();
         expect(pallet?.sector).toBe(0);
         expect(pallet?.palgr).toBeUndefined();
+    });
+    it("200: creates audit event when req.user is present", async () => {
+        const user = await createTestUser({
+            username: `reset-sectors-event-${Date.now()}`,
+        });
+        const req = { user: { id: user._id.toString(), role: "ADMIN" } };
+        await resetPalletsSectorsController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "pallet-groups" });
+        expect(events).toHaveLength(1);
     });
 });

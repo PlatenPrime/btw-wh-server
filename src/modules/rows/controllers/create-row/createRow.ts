@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { createRowSchema } from "./schemas/createRowSchema.js";
 import { createRowUtil } from "./utils/createRowUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -18,6 +19,14 @@ export const createRow = async (req: Request, res: Response) => {
     }
 
     const createdRow = await createRowUtil({ title: parseResult.data.title });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "rows",
+        description: `Створено ряд ${createdRow.title}`,
+      });
+    }
 
     res.status(201).json(createdRow);
   } catch (error) {

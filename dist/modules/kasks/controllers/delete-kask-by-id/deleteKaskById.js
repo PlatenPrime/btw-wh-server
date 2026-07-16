@@ -1,6 +1,7 @@
 import { deleteKaskByIdSchema } from "./schemas/deleteKaskByIdSchema.js";
 import { deleteKaskUtil } from "./utils/deleteKaskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const deleteKaskById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -16,6 +17,13 @@ export const deleteKaskById = async (req, res) => {
         if (!kask) {
             res.status(404).json({ message: "Kask not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "kasks",
+                description: `Видалено касовий запит на артикул ${kask.artikul} (id: ${id})`,
+            });
         }
         res.status(200).json({
             message: "Kask deleted successfully",

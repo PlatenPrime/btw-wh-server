@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { upsertSegsSchema } from "./schemas/upsertSegsSchema.js";
 import { upsertSegsUtil } from "./utils/upsertSegsUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -26,6 +27,14 @@ export const upsertSegsController = async (req: Request, res: Response) => {
         session,
       });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "segs",
+        description: `Масовий upsert сегментів: обробено ${result!.processedSegs.length} з ${payload.length} переданих`,
+      });
+    }
 
     res.status(200).json({
       message: "Segments upsert completed",

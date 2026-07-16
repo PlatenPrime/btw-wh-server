@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
+import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { deleteConstantByIdSchema } from "./schemas/deleteConstantByIdSchema.js";
 import { deleteConstantByIdUtil } from "./utils/deleteConstantByIdUtil.js";
-import { logModuleError } from "../../../../logging/logModuleError.js";
 
 /**
  * @desc    Удалить константу по id
@@ -27,6 +28,14 @@ export const deleteConstantByIdController = async (
     if (!constant) {
       res.status(404).json({ message: "Constant not found" });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "constants",
+        description: `Видалено константу id=${constant._id}, name=${constant.name}, title=${constant.title}`,
+      });
     }
 
     res.status(200).json({

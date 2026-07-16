@@ -1,6 +1,7 @@
+import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { updateConstantByIdSchema } from "./schemas/updateConstantByIdSchema.js";
 import { updateConstantByIdUtil } from "./utils/updateConstantByIdUtil.js";
-import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Обновить константу по id (указанные в body поля)
  * @route   PATCH /api/constants/id/:id
@@ -31,6 +32,13 @@ export const updateConstantByIdController = async (req, res) => {
         if (!constant) {
             res.status(404).json({ message: "Constant not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "constants",
+                description: `Оновлено константу id=${constant._id}, name=${constant.name}, title=${constant.title}`,
+            });
         }
         res.status(200).json({
             message: "Constant updated successfully",

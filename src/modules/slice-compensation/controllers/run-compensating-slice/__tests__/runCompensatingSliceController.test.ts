@@ -19,6 +19,8 @@ import {
 } from "../../../utils/compensatingRunStatus.js";
 import { runCompensatingSlicesForKonk } from "../../../utils/runCompensatingSlicesForKonk.js";
 import { runCompensatingSliceController } from "../runCompensatingSliceController.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 
 describe("runCompensatingSliceController", () => {
   let mockReq: Partial<Request>;
@@ -118,5 +120,47 @@ describe("runCompensatingSliceController", () => {
     });
     expect(logModuleError).toHaveBeenCalled();
     expect(tryAcquireCompensatingRun("air")).toBe(true);
+  });
+
+  it("200 создаёт audit-событие когда req.user присутствует", async () => {
+    const actor = await createTestUser({ username: `actor-${Date.now()}` });
+    vi.mocked(runCompensatingSlicesForKonk).mockResolvedValue({
+      konkName: "air",
+      sliceDate: new Date("2026-07-14T00:00:00.000Z"),
+      analog: { refetched: 3, updated: 2 },
+      sku: { refetched: 1, updated: 1 },
+    });
+    mockReq.user = { id: actor._id.toString(), role: "ADMIN" };
+    mockReq.body = { konkName: "air" };
+
+    await runCompensatingSliceController(
+      mockReq as Request,
+      mockRes as Response
+    );
+
+    expect(mockStatus).toHaveBeenCalledWith(200);
+    const events = await Event.find({ department: "slice-compensation" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(actor._id.toString());
+    expect(events[0].description).toContain("air");
+  });
+
+  it("200 не создаёт audit-событие без req.user", async () => {
+    vi.mocked(runCompensatingSlicesForKonk).mockResolvedValue({
+      konkName: "air",
+      sliceDate: new Date("2026-07-14T00:00:00.000Z"),
+      analog: { refetched: 3, updated: 2 },
+      sku: { refetched: 1, updated: 1 },
+    });
+    mockReq.body = { konkName: "air" };
+
+    await runCompensatingSliceController(
+      mockReq as Request,
+      mockRes as Response
+    );
+
+    expect(mockStatus).toHaveBeenCalledWith(200);
+    const events = await Event.find({ department: "slice-compensation" });
+    expect(events).toHaveLength(0);
   });
 });

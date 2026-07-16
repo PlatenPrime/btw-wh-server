@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { upsertBlocksSchema } from "./schemas/upsertBlocksSchema.js";
 import { upsertBlocksUtil } from "./utils/upsertBlocksUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -16,6 +17,14 @@ export const upsertBlocksController = async (req: Request, res: Response) => {
 
     const payload = parseResult.data;
     const result = await upsertBlocksUtil({ blocks: payload });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "blocks",
+        description: `Масовий upsert блоків: додано ${result.bulkResult.upsertedCount}, оновлено ${result.bulkResult.modifiedCount} з ${payload.length} переданих`,
+      });
+    }
 
     res.status(200).json({
       message: "Blocks upsert completed",

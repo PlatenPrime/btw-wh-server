@@ -3,6 +3,7 @@ import { getCalculationStatus } from "../../utils/calculationStatus.js";
 import { calculateAndSavePogrebiDefsUtil } from "./utils/calculateAndSavePogrebiDefsUtil.js";
 import { calculatePogrebiDefsSchema } from "./schemas/calculatePogrebiDefsSchema.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Выполнить расчет дефицитов и сохранить результат в БД
@@ -37,6 +38,14 @@ export const calculatePogrebiDefsController = async (
 
     // Выполняем расчет дефицитов и сохраняем в БД
     const savedDef = await calculateAndSavePogrebiDefsUtil();
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "defs",
+        description: `Виконано розрахунок дефіцитів: всього ${savedDef.total}, критичних ${savedDef.totalCriticalDefs}, лімітних ${savedDef.totalLimitDefs}`,
+      });
+    }
 
     res.status(201).json({
       success: true,

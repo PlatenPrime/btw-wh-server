@@ -1,11 +1,13 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
 import {
   createMockRequest,
   createMockResponse,
   createTestPallet,
   createTestRow,
 } from "../../../../test/utils/testHelpers.js";
+import { Event } from "../../../events/models/Event.js";
 import { Pos } from "../../models/Pos.js";
 import { createPos } from "../index.js";
 
@@ -108,6 +110,27 @@ describe("createPos Controller", () => {
     await createPos(req as any, res as any);
     expect(res.statusCode).toBe(500);
     expect(res.body.error).toBe("Failed to create position");
+  });
+
+  it("should create an audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `pos-event-${Date.now()}` });
+    const req = createMockRequest({
+      user: { id: user._id.toString(), role: "ADMIN" },
+      body: {
+        palletId: pallet._id.toString(),
+        rowId: row._id.toString(),
+        artikul: "ART-EVENT",
+        quant: 5,
+        boxes: 2,
+      },
+    });
+    const res = createMockResponse();
+    await createPos(req as any, res as any);
+    expect(res.statusCode).toBe(201);
+    const events = await Event.find({ department: "poses" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
+    expect(events[0].description).toContain("ART-EVENT");
   });
 
   it("should create a pos with isDef field in palletData", async () => {

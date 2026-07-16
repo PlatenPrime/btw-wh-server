@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Block } from "../../../models/Block.js";
 import { renameBlock } from "../renameBlock.js";
 
@@ -38,6 +39,26 @@ describe("renameBlockController", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Block renamed successfully");
     expect(responseJson.data.title).toBe("New Name");
+  });
+
+  it("200: creates audit event when req.user is present", async () => {
+    const block = await Block.create({ title: "Old Name Event", order: 1, segs: [] });
+    const user = await createTestUser({
+      username: `rename-block-event-${Date.now()}`,
+    });
+
+    const req = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      params: { id: block._id.toString() },
+      body: { title: "New Name Event" },
+    } as unknown as Request;
+
+    await renameBlock(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "blocks" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("New Name Event");
   });
 
   it("400: invalid block ID format", async () => {

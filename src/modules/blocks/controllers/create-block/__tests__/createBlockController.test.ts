@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Block } from "../../../models/Block.js";
 import { createBlock } from "../createBlock.js";
 
@@ -34,6 +35,23 @@ describe("createBlockController", () => {
     expect(responseJson.data.title).toBe("New Block");
     expect(responseJson.data.order).toBe(1);
     expect(responseJson.data._id).toBeDefined();
+  });
+
+  it("201: creates audit event when req.user is present", async () => {
+    const user = await createTestUser({
+      username: `create-block-event-${Date.now()}`,
+    });
+    const req = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      body: { title: "Event Block" },
+    } as unknown as Request;
+
+    await createBlock(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "blocks" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("Event Block");
   });
 
   it("400: validation error when title is missing", async () => {

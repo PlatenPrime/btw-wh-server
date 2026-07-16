@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Analog } from "../../models/Analog.js";
 import { updateAnalogByIdController } from "../update-analog-by-id/updateAnalogByIdController.js";
 
@@ -10,6 +12,7 @@ describe("updateAnalogByIdController", () => {
 
   beforeEach(async () => {
     await Analog.deleteMany({});
+    await Event.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -71,5 +74,25 @@ describe("updateAnalogByIdController", () => {
     await updateAnalogByIdController(req, res);
     expect(responseStatus.code).toBe(200);
     expect((responseJson.data as { nameukr: string }).nameukr).toBe("New name");
+  });
+
+  it("200 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `analog-update-event-${Date.now()}` });
+    const analog = await Analog.create({
+      konkName: "k",
+      prodName: "p",
+      url: "https://x.com",
+      nameukr: "Old",
+    });
+    const req = {
+      params: { id: analog._id.toString() },
+      body: { nameukr: "New name" },
+      user: { id: user._id.toString(), role: "ADMIN" },
+    } as unknown as Request;
+    await updateAnalogByIdController(req, res);
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "analogs" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });

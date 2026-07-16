@@ -2,6 +2,7 @@ import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { updateSkugrByIdSchema } from "./schemas/updateSkugrByIdSchema.js";
 import { updateSkugrByIdUtil } from "./utils/updateSkugrByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Обновить поля skugr (konkName, prodName, title, url, isSliced)
  * @route   PATCH /api/skugrs/id/:id
@@ -27,6 +28,13 @@ export const updateSkugrByIdController = async (req, res) => {
         if (!skugr) {
             res.status(404).json({ message: "Skugr not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "skugrs",
+                description: `Оновлено товарну групу "${skugr.title}" (id: ${skugr._id})`,
+            });
         }
         res.status(200).json({
             message: "Skugr updated successfully",

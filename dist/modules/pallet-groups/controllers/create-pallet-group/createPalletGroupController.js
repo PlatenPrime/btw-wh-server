@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { createPalletGroupSchema } from "./schemas/createPalletGroupSchema.js";
 import { createPalletGroupUtil } from "./utils/createPalletGroupUtil.js";
 export const createPalletGroupController = async (req, res) => {
@@ -20,6 +21,13 @@ export const createPalletGroupController = async (req, res) => {
         });
         await session.commitTransaction();
         session.endSession();
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "pallet-groups",
+                description: `Створено групу паллет ${group.title} (порядок: ${group.order})`,
+            });
+        }
         return res.status(201).json({
             message: "Pallet group created successfully",
             data: {

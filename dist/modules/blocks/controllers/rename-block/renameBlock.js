@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { renameBlockSchema } from "./schemas/renameBlockSchema.js";
 import { renameBlockUtil } from "./utils/renameBlockUtil.js";
 import { checkBlockDuplicatesUpdateUtil } from "../update-block/utils/checkBlockDuplicatesUpdateUtil.js";
@@ -51,6 +52,13 @@ export const renameBlock = async (req, res) => {
                 message: "Block not found",
             });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "blocks",
+                description: `Перейменовано блок ${existingBlock.title} на ${renamedBlock.title}`,
+            });
         }
         res.status(200).json({
             message: "Block renamed successfully",

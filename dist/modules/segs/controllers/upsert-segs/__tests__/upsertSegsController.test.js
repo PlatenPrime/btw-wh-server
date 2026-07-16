@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../../test/setup.js";
 import { Block } from "../../../../blocks/models/Block.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Zone } from "../../../../zones/models/Zone.js";
 import { Seg } from "../../../models/Seg.js";
 import { upsertSegsController } from "../upsertSegsController.js";
@@ -51,6 +53,27 @@ describe("upsertSegsController", () => {
         const createdSeg = await Seg.findOne({ block: block._id }).exec();
         expect(createdSeg).not.toBeNull();
         expect(createdSeg?.zones).toHaveLength(2);
+    });
+    it("200: creates audit event when req.user is present", async () => {
+        const block = await Block.create({ title: `Block-${Date.now()}-event`, order: 1, segs: [] });
+        const zoneA = await createZone();
+        const user = await createTestUser({
+            username: `upsert-segs-event-${Date.now()}`,
+        });
+        mockRequest = {
+            user: { id: user._id.toString(), role: "ADMIN" },
+            body: [
+                {
+                    blockId: block._id.toString(),
+                    order: 1,
+                    zones: [zoneA._id.toString()],
+                },
+            ],
+        };
+        await upsertSegsController(mockRequest, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "segs" });
+        expect(events).toHaveLength(1);
     });
     it("400: validation error for empty payload", async () => {
         mockRequest = { body: [] };

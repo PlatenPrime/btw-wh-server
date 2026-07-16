@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Kask } from "../../models/Kask.js";
 import { createKaskController } from "../create-kask/createKaskController.js";
 
@@ -16,6 +18,7 @@ describe("createKaskController", () => {
 
   beforeEach(async () => {
     await Kask.deleteMany({});
+    await Event.deleteMany({});
     vi.mocked(sendCreateKaskMesUtil).mockReset();
     responseJson = {};
     responseStatus = {};
@@ -71,6 +74,29 @@ describe("createKaskController", () => {
     expect(responseJson.com).toBe("Терміново");
     expect(await Kask.countDocuments()).toBe(1);
     expect(sendCreateKaskMesUtil).toHaveBeenCalledOnce();
+  });
+
+  it("201 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `kask-event-${Date.now()}` });
+    const req = {
+      body: {
+        artikul: "1111-2222",
+        nameukr: "Аудит",
+        zone: "A2",
+        quant: 4,
+      },
+      user: { id: String(user._id), role: "USER" },
+    } as unknown as Request;
+
+    await createKaskController(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "kasks" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(String(user._id));
+    expect(events[0].description).toBe(
+      "Створено касовий запит на артикул 1111-2222 (4 шт.)"
+    );
   });
 
   it("201 creates kask without optional fields", async () => {

@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 import { Pos } from "../../../poses/models/Pos.js";
 import { Row } from "../../models/Row.js";
@@ -36,6 +38,24 @@ describe("deleteRowController", () => {
 
     const deleted = await Row.findById(row._id);
     expect(deleted).toBeNull();
+  });
+
+  it("200: создаёт audit event, если есть req.user", async () => {
+    const row = await Row.create({ title: "To Delete Event" });
+    const user = await createTestUser({
+      username: `delete-row-event-${Date.now()}`,
+    });
+    const req = {
+      user: { id: user._id.toString(), role: "PRIME" },
+      params: { id: row._id.toString() },
+    } as unknown as Request;
+
+    await deleteRow(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "rows" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("To Delete Event");
   });
 
   it("404: когда ряд не найден", async () => {

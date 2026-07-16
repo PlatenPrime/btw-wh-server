@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
 import {
   createMockRequest,
   createMockResponse,
@@ -7,6 +8,7 @@ import {
   createTestPos,
   createTestRow,
 } from "../../../../test/utils/testHelpers.js";
+import { Event } from "../../../events/models/Event.js";
 import { Pos } from "../../models/Pos.js";
 import { deletePos } from "../index.js";
 
@@ -31,6 +33,22 @@ describe("deletePos Controller", () => {
     const res = createMockResponse();
     await deletePos(req as any, res as any);
     expect(res.body.message).toBe("Position deleted successfully");
+  });
+
+  it("should create an audit event when req.user is present", async () => {
+    const user = await createTestUser({
+      username: `delete-pos-event-${Date.now()}`,
+    });
+    const req = createMockRequest({
+      user: { id: user._id.toString(), role: "ADMIN" },
+      params: { id: pos._id.toString() },
+    });
+    const res = createMockResponse();
+    await deletePos(req as any, res as any);
+    expect(res.body.message).toBe("Position deleted successfully");
+    const events = await Event.find({ department: "poses" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain(pos.artikul);
   });
 
   it("should return 404 if pos not found", async () => {

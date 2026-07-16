@@ -8,6 +8,7 @@ vi.mock("../complete-ask-by-id/utils/sendCompleteAskMesUtil.js", () => ({
 
 import { completeAskById } from "../complete-ask-by-id/completeAskById.js";
 import { createTestAsk, createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 
 describe("completeAskById", () => {
   let res: Response;
@@ -44,6 +45,29 @@ describe("completeAskById", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.status).toBe("completed");
     expect(responseJson.solverData.fullname).toBe("Solver");
+  });
+
+  it("200: создаёт audit-событие, когда есть req.user", async () => {
+    const asker = await createTestUser({ telegram: "123", username: `asker-${Date.now()}-${Math.random()}` });
+    const ask = await createTestAsk({ artikul: "ART-COMPLETE", asker: asker._id, askerData: { _id: asker._id, fullname: asker.fullname, telegram: asker.telegram, photo: asker.photo } });
+    const solver = await createTestUser({ fullname: "Solver", username: `solver-${Date.now()}-${Math.random()}` });
+    const actor = await createTestUser({ fullname: "Actor", username: `actor-${Date.now()}-${Math.random()}` });
+
+    const req = {
+      user: { id: String(actor._id), role: "editor" },
+      params: { id: String(ask._id) },
+      body: { solverId: String(solver._id) },
+    } as unknown as Request;
+
+    await completeAskById(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "asks" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(String(actor._id));
+    expect(events[0].description).toBe(
+      "Завершено заявку на артикул ART-COMPLETE (виконавець: Solver)"
+    );
   });
 
   it("404: ask не найден", async () => {

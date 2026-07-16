@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { bulkCreateZonesSchema } from "./schemas/bulkCreateZonesSchema.js";
 import { bulkCreateZonesUtil } from "./utils/bulkCreateZonesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -23,6 +24,14 @@ export const upsertZones = async (req: Request, res: Response) => {
     }
 
     const result = await bulkCreateZonesUtil({ zones });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "zones",
+        description: `Масовий upsert зон: додано ${result.upsertedCount}, оновлено ${result.modifiedCount} з ${zones.length} переданих`,
+      });
+    }
 
     res.status(200).json({ message: "Upsert completed", result });
   } catch (error) {

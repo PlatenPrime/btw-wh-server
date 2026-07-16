@@ -6,6 +6,7 @@ import { completeAskUtil } from "./utils/completeAskUtil.js";
 import { getCompleteAskMesUtil } from "./utils/getCompleteAskMesUtil.js";
 import { sendCompleteAskMesUtil } from "./utils/sendCompleteAskMesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const completeAskById = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -38,6 +39,13 @@ export const completeAskById = async (req, res) => {
                 session,
             });
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "asks",
+                description: `Завершено заявку на артикул ${existingAsk.artikul} (виконавець: ${solver.fullname})`,
+            });
+        }
         res.status(200).json(updatedAsk);
         // Отправка уведомления создателю запроса о выполнении
         if (existingAsk?.askerData?.telegram) {

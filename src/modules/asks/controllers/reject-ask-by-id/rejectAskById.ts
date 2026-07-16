@@ -7,6 +7,7 @@ import { getRejectAskMesUtil } from "./utils/getRejectAskMesUtil.js";
 import { rejectAskUtil } from "./utils/rejectAskUtil.js";
 import { sendRejectAskMesUtil } from "./utils/sendRejectAskMesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 export const rejectAskById = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -46,6 +47,14 @@ export const rejectAskById = async (req: Request, res: Response) => {
         session,
       });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "asks",
+        description: `Відхилено заявку на артикул ${existingAsk.artikul} (виконавець: ${solver.fullname})`,
+      });
+    }
 
     res.status(200).json(updatedAsk);
 

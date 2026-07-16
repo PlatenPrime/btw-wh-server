@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { Skugr } from "../../../models/Skugr.js";
 import { deleteSkugrWithSkusController } from "../deleteSkugrWithSkusController.js";
@@ -12,6 +14,7 @@ describe("deleteSkugrWithSkusController", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
+    await Event.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -60,5 +63,34 @@ describe("deleteSkugrWithSkusController", () => {
     );
     expect(await Skugr.findById(g._id)).toBeNull();
     expect(await Sku.findById(sku._id)).toBeNull();
+  });
+
+  it("200 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `skugr-with-skus-event-${Date.now()}` });
+    const sku = await Sku.create({
+      konkName: "kdw2",
+      prodName: "pdw",
+      productId: "kdw2-1",
+      title: "S",
+      url: "https://kdw2.com/1",
+    });
+    const g = await Skugr.create({
+      konkName: "kdw2",
+      prodName: "pdw",
+      title: "G",
+      url: "https://kdw2.com/g",
+      skus: [sku._id],
+    });
+
+    const req = {
+      params: { id: g._id.toString() },
+      user: { id: user._id.toString(), role: "PRIME" },
+    } as unknown as Request;
+    await deleteSkugrWithSkusController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "skugrs" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });

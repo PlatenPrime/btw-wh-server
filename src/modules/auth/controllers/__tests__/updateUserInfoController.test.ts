@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { hashPasswordUtil } from "../../utils/hashPasswordUtil.js";
 import { updateUserInfoController } from "../update-user-info/updateUserInfoController.js";
 
@@ -140,6 +141,47 @@ describe("updateUserInfoController", () => {
 
     expect(responseStatus.code).toBe(409);
     expect(responseJson.message).toMatch(/username|існує|уже/i);
+  });
+
+  it("200: создаёт audit-событие когда req.user присутствует", async () => {
+    const actor = await createTestUser({ username: `actor-${Date.now()}` });
+    const user = await createTestUser({
+      username: `testuser-${Date.now()}`,
+      fullname: "Old Name",
+    });
+
+    const req = {
+      user: { id: actor._id.toString(), role: "ADMIN" },
+      params: { userId: user._id.toString() },
+      body: { fullname: "New Name", role: "ADMIN" },
+    } as unknown as Request;
+
+    await updateUserInfoController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "auth" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(actor._id.toString());
+    expect(events[0].description).toContain(user.username);
+    expect(events[0].description).not.toContain("password");
+  });
+
+  it("200: не создаёт audit-событие без req.user", async () => {
+    const user = await createTestUser({
+      username: `testuser-${Date.now()}`,
+      fullname: "Old Name",
+    });
+
+    const req = {
+      params: { userId: user._id.toString() },
+      body: { fullname: "New Name" },
+    } as unknown as Request;
+
+    await updateUserInfoController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "auth" });
+    expect(events).toHaveLength(0);
   });
 });
 

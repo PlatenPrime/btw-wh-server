@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../models/Pallet.js";
 import { deletePalletEmptyPosesSchema } from "./schemas/deletePalletEmptyPosesSchema.js";
 import { deletePalletEmptyPosesUtil } from "./utils/deletePalletEmptyPosesUtil.js";
@@ -40,6 +41,14 @@ export const deletePalletEmptyPosesController = async (
         deletedCount: 0,
       });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "pallets",
+        description: `Видалено ${result.deletedCount} пустих позицій з паллети (id: ${id})`,
+      });
     }
 
     res.status(200).json({

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { deletePalletEmptyPosesSchema } from "./schemas/deletePalletEmptyPosesSchema.js";
 import { deletePalletEmptyPosesUtil } from "./utils/deletePalletEmptyPosesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -29,6 +30,13 @@ export const deletePalletEmptyPosesController = async (req, res) => {
                 deletedCount: 0,
             });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "pallets",
+                description: `Видалено ${result.deletedCount} пустих позицій з паллети (id: ${id})`,
+            });
         }
         res.status(200).json({
             message: "Empty poses removed from pallet successfully",

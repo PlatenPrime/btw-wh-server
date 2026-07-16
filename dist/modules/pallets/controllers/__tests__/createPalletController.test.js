@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
 import { createTestRow } from "../../../../test/utils/testHelpers.js";
+import { Event } from "../../../events/models/Event.js";
 import { createPalletController } from "../create-pallet/createPalletController.js";
 describe("createPalletController", () => {
     let res;
@@ -38,6 +40,24 @@ describe("createPalletController", () => {
         expect(responseJson._id).toBeDefined();
         expect(responseJson.title).toBe("Pallet-1-1");
         expect(responseJson.sector).toBe(101);
+    });
+    it("201: создаёт audit event, если есть req.user", async () => {
+        const row = await createTestRow({ title: "Row-Event" });
+        const user = await createTestUser({
+            username: `create-pallet-event-${Date.now()}`,
+        });
+        const req = {
+            user: { id: user._id.toString(), role: "ADMIN" },
+            body: {
+                title: "Pallet-Event",
+                rowData: { _id: String(row._id), title: row.title },
+            },
+        };
+        await createPalletController(req, res);
+        expect(responseStatus.code).toBe(201);
+        const events = await Event.find({ department: "pallets" });
+        expect(events).toHaveLength(1);
+        expect(events[0].description).toContain("Pallet-Event");
     });
     it("400: ошибка валидации при отсутствии title", async () => {
         const row = await createTestRow();

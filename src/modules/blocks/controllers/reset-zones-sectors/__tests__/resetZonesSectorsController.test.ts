@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Zone } from "../../../../zones/models/Zone.js";
 import { resetZonesSectors } from "../resetZonesSectors.js";
 
@@ -49,5 +50,18 @@ describe("resetZonesSectorsController", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.data.matchedCount).toBe(0);
     expect(responseJson.data.modifiedCount).toBe(0);
+  });
+
+  it("200: creates audit event when req.user is present", async () => {
+    const user = await createTestUser({
+      username: `reset-zones-sectors-event-${Date.now()}`,
+    });
+    const req = { user: { id: user._id.toString(), role: "ADMIN" } } as unknown as Request;
+
+    await resetZonesSectors(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "blocks" });
+    expect(events).toHaveLength(1);
   });
 });

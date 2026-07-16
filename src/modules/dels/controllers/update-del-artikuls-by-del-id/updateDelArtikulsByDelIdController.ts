@@ -3,6 +3,7 @@ import { Del } from "../../models/Del.js";
 import { updateDelArtikulsSchema } from "./schemas/updateDelArtikulsSchema.js";
 import { updateDelArtikulsByDelIdUtil } from "./utils/updateDelArtikulsByDelIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Запуск фонового обновления всех артикулов поставки (sharik.ua)
@@ -32,6 +33,14 @@ export const updateDelArtikulsByDelIdController = async (
     updateDelArtikulsByDelIdUtil(parseResult.data.id).catch((error) => {
       logModuleError("dels", error, "Error in background updateDelArtikulsByDelId:");
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "dels",
+        description: `Запущено оновлення всіх артикулів поставки "${del.title}" (id: ${parseResult.data.id})`,
+      });
+    }
 
     res.status(202).json({
       message: "Del artikuls update process started",

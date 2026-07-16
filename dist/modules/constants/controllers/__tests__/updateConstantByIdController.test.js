@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Constant } from "../../models/Constant.js";
 import { updateConstantByIdController } from "../update-constant-by-id/updateConstantByIdController.js";
 describe("updateConstantByIdController", () => {
@@ -7,6 +9,7 @@ describe("updateConstantByIdController", () => {
     let responseStatus;
     beforeEach(async () => {
         await Constant.deleteMany({});
+        await Event.deleteMany({});
         responseJson = {};
         responseStatus = {};
         res = {
@@ -50,5 +53,26 @@ describe("updateConstantByIdController", () => {
         await updateConstantByIdController(req, res);
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data.title).toBe("New Title");
+    });
+    it("200 creates audit event when req.user is present", async () => {
+        const user = await createTestUser({
+            username: `upd-event-${Date.now()}`,
+        });
+        const constant = await Constant.create({
+            name: "y",
+            title: "Old",
+            data: {},
+        });
+        const req = {
+            user: { id: user._id.toString(), role: "ADMIN" },
+            params: { id: constant._id.toString() },
+            body: { title: "New" },
+        };
+        await updateConstantByIdController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "constants" });
+        expect(events).toHaveLength(1);
+        expect(events[0].description).toContain("Оновлено константу");
+        expect(events[0].description).toContain("name=y");
     });
 });

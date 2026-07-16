@@ -4,6 +4,7 @@ import { checkUsernameAvailableForUpdateUtil } from "./utils/checkUsernameAvaila
 import { hashPasswordIfProvidedUtil } from "./utils/hashPasswordIfProvidedUtil.js";
 import { updateUserUtil } from "./utils/updateUserUtil.js";
 import { getUpdateUserResponseUtil } from "./utils/getUpdateUserResponseUtil.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const updateUserInfoController = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -53,6 +54,13 @@ export const updateUserInfoController = async (req, res) => {
         if (!updatedUser) {
             res.status(404).json({ message: "Користувач не знайдений" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "auth",
+                description: `Оновлено інформацію користувача ${updatedUser.username} (роль: ${updatedUser.role})`,
+            });
         }
         // Формирование ответа
         const response = getUpdateUserResponseUtil({ user: updatedUser });

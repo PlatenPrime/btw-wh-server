@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { updateVariantByIdSchema } from "./schemas/updateVariantByIdSchema.js";
 import { updateVariantByIdUtil } from "./utils/updateVariantByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Обновить вариант по id
@@ -32,6 +33,14 @@ export const updateVariantByIdController = async (
     if (!variant) {
       res.status(404).json({ message: "Variant not found" });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "variants",
+        description: `Оновлено варіант "${variant.title}" (id: ${variant._id})`,
+      });
     }
 
     res.status(200).json({

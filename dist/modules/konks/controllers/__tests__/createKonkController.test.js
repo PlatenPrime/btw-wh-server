@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Konk } from "../../models/Konk.js";
 import { createKonkController } from "../create-konk/createKonkController.js";
 describe("createKonkController", () => {
@@ -7,6 +9,7 @@ describe("createKonkController", () => {
     let responseStatus;
     beforeEach(async () => {
         await Konk.deleteMany({});
+        await Event.deleteMany({});
         responseJson = {};
         responseStatus = {};
         res = {
@@ -62,5 +65,22 @@ describe("createKonkController", () => {
         ]);
         const count = await Konk.countDocuments();
         expect(count).toBe(1);
+    });
+    it("201 creates audit event when req.user is present", async () => {
+        const user = await createTestUser({ username: `konk-event-${Date.now()}` });
+        const req = {
+            user: { id: user._id.toString(), role: "ADMIN" },
+            body: {
+                name: "audited",
+                title: "Audited",
+                url: "https://audited.com",
+                imageUrl: "https://audited.com/1.png",
+            },
+        };
+        await createKonkController(req, res);
+        expect(responseStatus.code).toBe(201);
+        const events = await Event.find({ department: "konks" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(user._id.toString());
     });
 });

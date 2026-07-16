@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createKonkSchema } from "./schemas/createKonkSchema.js";
 import { createKonkUtil } from "./utils/createKonkUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Создать конкурента
@@ -28,6 +29,14 @@ export const createKonkController = async (
       imageUrl: parseResult.data.imageUrl,
       recountDays: parseResult.data.recountDays,
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "konks",
+        description: `Створено конкурента ${konk.name} (id: ${konk._id})`,
+      });
+    }
 
     res.status(201).json({
       message: "Konk created successfully",

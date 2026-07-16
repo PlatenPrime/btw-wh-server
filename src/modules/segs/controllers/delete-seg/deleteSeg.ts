@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { z } from "zod";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { deleteSegUtil } from "./utils/deleteSegUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
@@ -42,6 +43,14 @@ export const deleteSeg = async (req: Request, res: Response) => {
         throw new Error("Segment not found");
       }
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "segs",
+        description: `Видалено сегмент (id: ${id}) з блоку ${deletedSeg.blockData.title}`,
+      });
+    }
 
     res.status(200).json({
       message: "Segment deleted successfully",

@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Row } from "../../models/Row.js";
 import { createRow } from "../create-row/createRow.js";
 
@@ -35,6 +37,23 @@ describe("createRowController", () => {
 
     // Cleanup
     await Row.deleteOne({ _id: responseJson._id });
+  });
+
+  it("201: создаёт audit event, если есть req.user", async () => {
+    const user = await createTestUser({
+      username: `create-row-event-${Date.now()}`,
+    });
+    const req = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      body: { title: "Row-Event" },
+    } as unknown as Request;
+
+    await createRow(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "rows" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("Row-Event");
   });
 
   it("400: ошибка валидации при отсутствии title", async () => {

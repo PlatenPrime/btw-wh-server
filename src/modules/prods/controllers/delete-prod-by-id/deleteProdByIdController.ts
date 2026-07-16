@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { deleteProdByIdSchema } from "./schemas/deleteProdByIdSchema.js";
 import { deleteProdByIdUtil } from "./utils/deleteProdByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Удалить производителя по id
@@ -27,6 +28,14 @@ export const deleteProdByIdController = async (
     if (!prod) {
       res.status(404).json({ message: "Prod not found" });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "prods",
+        description: `Видалено виробника ${prod.name} (id: ${prod._id})`,
+      });
     }
 
     res.status(200).json({

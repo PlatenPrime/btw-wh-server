@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createDelSchema } from "./schemas/createDelSchema.js";
 import { createDelUtil } from "./utils/createDelUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Создать поставку
@@ -32,6 +33,14 @@ export const createDelController = async (
         message: "Производитель с указанным name не найден",
       });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "dels",
+        description: `Створено поставку "${result.title}" від виробника ${result.prodName}`,
+      });
     }
 
     res.status(201).json({

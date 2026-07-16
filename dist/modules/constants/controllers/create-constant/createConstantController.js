@@ -1,6 +1,7 @@
+import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { createConstantSchema } from "./schemas/createConstantSchema.js";
 import { createConstantUtil } from "./utils/createConstantUtil.js";
-import { logModuleError } from "../../../../logging/logModuleError.js";
 /**
  * @desc    Создать константу
  * @route   POST /api/constants
@@ -20,6 +21,13 @@ export const createConstantController = async (req, res) => {
             title: parseResult.data.title,
             data: parseResult.data.data ?? {},
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "constants",
+                description: `Створено константу name=${constant.name}, title=${constant.title}`,
+            });
+        }
         res.status(201).json({
             message: "Constant created successfully",
             data: constant,

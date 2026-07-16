@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { reorderPalletGroupsSchema } from "./schemas/reorderPalletGroupsSchema.js";
 import { reorderPalletGroupsUtil } from "./utils/reorderPalletGroupsUtil.js";
 
@@ -28,6 +29,14 @@ export const reorderPalletGroupsController = async (
 
     await session.commitTransaction();
     session.endSession();
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "pallet-groups",
+        description: `Змінено порядок груп паллет: оновлено ${updatedCount} груп`,
+      });
+    }
 
     return res.status(200).json({
       message: "Pallet groups order updated successfully",

@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 
 export const resetPalletsSectorsController = async (
@@ -13,6 +14,14 @@ export const resetPalletsSectorsController = async (
         $unset: { palgr: "" },
       }
     );
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "pallet-groups",
+        description: `Скинуто сектори усіх паллет: оновлено ${result.modifiedCount} з ${result.matchedCount}`,
+      });
+    }
 
     return res.status(200).json({
       message: "Pallets sectors reset successfully",

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { createTestArt } from "../../../../test/setup.js";
+import { createTestArt, createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { upsertArtsController } from "../upsert-arts/upsertArtsController.js";
 describe("upsertArtsController", () => {
     let res;
@@ -53,5 +54,19 @@ describe("upsertArtsController", () => {
         await upsertArtsController(req, res);
         expect(responseStatus.code).toBe(400);
         expect(responseJson.message).toBe("Validation error");
+    });
+    it("200: создаёт audit event когда req.user присутствует", async () => {
+        const user = await createTestUser({ username: `art-upsert-event-${Date.now()}` });
+        const req = {
+            body: [
+                { artikul: "NEW-001", zone: "A1", nameukr: "New Art 1", abc: "A" },
+            ],
+            user: { id: user._id.toString(), role: "ADMIN" },
+        };
+        await upsertArtsController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "arts" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(user._id.toString());
     });
 });

@@ -155,8 +155,10 @@ flowchart TB
 |--------|-----|-----|--------------|
 | auth | [`src/modules/auth/`](src/modules/auth/) | `/api/auth` | [API](docs/api/auth.md) · [концепция](docs/modules/auth.md) |
 | constants | [`src/modules/constants/`](src/modules/constants/) | `/api/constants` | [API](docs/api/constants.md) · [концепция](docs/modules/constants.md) |
+| events | [`src/modules/events/`](src/modules/events/) | `/api/events` | [API](docs/api/events.md) · [концепция](docs/modules/events.md) |
 
 `constants` — эталон стандартного HTTP-модуля (см. [project.mdc](.cursor/rules/project.mdc)).
+`events` — append-only аудит действий; запись только внутренним util, чтение — GET.
 
 ---
 

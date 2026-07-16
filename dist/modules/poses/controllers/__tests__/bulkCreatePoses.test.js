@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
 import { createMockRequest, createMockResponse, createTestPallet, createTestRow, } from "../../../../test/utils/testHelpers.js";
+import { Event } from "../../../events/models/Event.js";
 import { Pos } from "../../models/Pos.js";
 import { bulkCreatePoses } from "../index.js";
 describe("bulkCreatePoses Controller", () => {
@@ -47,6 +49,31 @@ describe("bulkCreatePoses Controller", () => {
         expect(res.body.data[0].nameukr).toBe("Nameukr-1");
         expect(res.body.data[1].artikul).toBe("BULK-2");
         expect(res.body.data[1].nameukr).toBe("Nameukr-2");
+    });
+    it("should create an audit event when req.user is present", async () => {
+        const user = await createTestUser({
+            username: `bulk-pos-event-${Date.now()}`,
+        });
+        const req = createMockRequest({
+            user: { id: user._id.toString(), role: "ADMIN" },
+            body: {
+                poses: [
+                    {
+                        palletId: pallet._id.toString(),
+                        rowId: row._id.toString(),
+                        artikul: "BULK-EVENT",
+                        quant: 1,
+                        boxes: 1,
+                    },
+                ],
+            },
+        });
+        const res = createMockResponse();
+        await bulkCreatePoses(req, res);
+        expect(res.statusCode).toBe(201);
+        const events = await Event.find({ department: "poses" });
+        expect(events).toHaveLength(1);
+        expect(events[0].description).toContain("1");
     });
     it("should return 400 if poses array is empty", async () => {
         const req = createMockRequest({ body: { poses: [] } });

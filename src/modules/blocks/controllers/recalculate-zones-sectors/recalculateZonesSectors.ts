@@ -1,10 +1,19 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { calculateZonesSectorsUtil } from "../../utils/calculateZonesSectorsUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
 export const recalculateZonesSectors = async (req: Request, res: Response) => {
   try {
     const result = await calculateZonesSectorsUtil();
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "blocks",
+        description: `Перераховано сектори зон: оновлено ${result.updatedZones} зон у ${result.blocksProcessed} блоках`,
+      });
+    }
 
     res.status(200).json({
       message: "Zones sectors recalculated successfully",

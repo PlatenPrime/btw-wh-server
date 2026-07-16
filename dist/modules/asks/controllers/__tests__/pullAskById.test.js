@@ -5,6 +5,7 @@ vi.mock("../../../../utils/getCurrentFormattedDateTime.js", () => ({
 }));
 import { pullAskById } from "../pull-ask-by-id/pullAskById.js";
 import { createTestAsk, createTestUser, } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 describe("pullAskById controller", () => {
     let res;
     let responseJson;
@@ -51,6 +52,39 @@ describe("pullAskById controller", () => {
         expect(responseJson.events).toHaveLength(1);
         expect(responseJson.events[0].eventName).toBe("pull");
         expect(responseJson.events[0].pullDetails.quant).toBe(5);
+    });
+    it("200: создаёт audit-событие, когда есть req.user", async () => {
+        const solver = await createTestUser({
+            fullname: "Solver User",
+            username: `solver-${Date.now()}-${Math.random()}`,
+        });
+        const actor = await createTestUser({
+            fullname: "Actor",
+            username: `actor-${Date.now()}-${Math.random()}`,
+        });
+        const ask = await createTestAsk({ artikul: "ART-PULL" });
+        const req = {
+            user: { id: String(actor._id), role: "editor" },
+            params: { id: String(ask._id) },
+            body: {
+                solverId: String(solver._id),
+                action: "Сняли 5 штук",
+                pullAskData: {
+                    palletData: {
+                        _id: new mongoose.Types.ObjectId().toString(),
+                        title: "Pallet-123",
+                    },
+                    quant: 5,
+                    boxes: 2,
+                },
+            },
+        };
+        await pullAskById(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "asks" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(String(actor._id));
+        expect(events[0].description).toBe("Знято товар по заявці на артикул ART-PULL: 5 шт., 2 кор. (палет: Pallet-123)");
     });
     it("400: возвращает ошибку валидации", async () => {
         const req = {

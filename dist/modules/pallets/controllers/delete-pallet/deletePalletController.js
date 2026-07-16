@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
+import { Pallet } from "../../models/Pallet.js";
 import { deletePalletSchema } from "./schemas/deletePalletSchema.js";
 import { deletePalletUtil } from "./utils/deletePalletUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -15,13 +17,23 @@ export const deletePalletController = async (req, res) => {
             });
             return;
         }
+        let palletTitle;
         // Транзакция для удаления паллеты
         await session.withTransaction(async () => {
+            const pallet = await Pallet.findById(id).session(session);
+            palletTitle = pallet?.title;
             await deletePalletUtil({
                 palletId: id,
                 session,
             });
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "pallets",
+                description: `Видалено паллету ${palletTitle ?? id}`,
+            });
+        }
         res.status(200).json({ message: "Pallet deleted" });
     }
     catch (error) {

@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../../test/setup.js";
 import { Block } from "../../../../blocks/models/Block.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Zone } from "../../../../zones/models/Zone.js";
 import { Seg } from "../../../models/Seg.js";
 import { updateSeg } from "../updateSeg.js";
@@ -59,6 +61,32 @@ describe("updateSeg Controller", () => {
     expect(responseJson.message).toBe("Segment updated successfully");
     expect((responseJson.data as { order: number }).order).toBe(3);
     expect((responseJson.data as { sector: number }).sector).toBe(2003);
+  });
+
+  it("200: creates audit event when req.user is present", async () => {
+    const block = await Block.create({ title: `Block-${Date.now()}-event`, order: 2, segs: [] });
+    const seg = await Seg.create({
+      block: block._id,
+      blockData: { _id: block._id, title: block.title },
+      order: 1,
+      sector: 2001,
+      zones: [],
+    });
+    const user = await createTestUser({
+      username: `update-seg-event-${Date.now()}`,
+    });
+
+    mockRequest = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      params: { id: seg._id.toString() },
+      body: { order: 3 },
+    };
+
+    await updateSeg(mockRequest as Request, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "segs" });
+    expect(events).toHaveLength(1);
   });
 
   it("404: segment not found", async () => {

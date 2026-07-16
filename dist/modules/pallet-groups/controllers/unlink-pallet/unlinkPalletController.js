@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { calculatePalletsSectorsUtil } from "../../utils/calculatePalletsSectorsUtil.js";
 import { getPalletsShortForGroup } from "../../utils/getGroupPalletsShortDtoUtil.js";
 import { unlinkPalletSchema } from "./schemas/unlinkPalletSchema.js";
@@ -30,6 +31,13 @@ export const unlinkPalletController = async (req, res) => {
         }
         await calculatePalletsSectorsUtil({ groupIds: [group._id] });
         const pallets = await getPalletsShortForGroup(group);
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "pallet-groups",
+                description: `Відв'язано паллету (id: ${palletId}) від групи ${group.title}`,
+            });
+        }
         return res.status(200).json({
             message: "Pallet unlinked from group successfully",
             data: {

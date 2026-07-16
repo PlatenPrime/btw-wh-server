@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { PalletGroup } from "../../../models/PalletGroup.js";
 import { createPalletGroupController } from "../createPalletGroupController.js";
 
@@ -34,6 +35,23 @@ describe("createPalletGroupController", () => {
     expect((responseJson.data as { title: string }).title).toBe("New Group");
     expect((responseJson.data as { order: number }).order).toBe(1);
     expect((responseJson.data as { id: string }).id).toBeDefined();
+  });
+
+  it("201: creates audit event when req.user is present", async () => {
+    const user = await createTestUser({
+      username: `create-pallet-group-event-${Date.now()}`,
+    });
+    const req = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      body: { title: "Event Group" },
+    } as unknown as Request;
+
+    await createPalletGroupController(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "pallet-groups" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("Event Group");
   });
 
   it("400: validation error when title is missing", async () => {

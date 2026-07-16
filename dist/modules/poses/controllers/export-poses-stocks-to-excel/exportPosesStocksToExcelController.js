@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { formatPosesStocksForExcelUtil } from "./utils/formatPosesStocksForExcelUtil.js";
 import { generateExcelUtil } from "./utils/generateExcelUtil.js";
 import { getPosesStocksForExportUtil } from "./utils/getPosesStocksForExportUtil.js";
-import { logModuleError } from "../../../../logging/logModuleError.js";
 const exportBodySchema = z
     .object({
     sklad: z.enum(["merezhi", "pogrebi"]).optional(),
@@ -38,6 +39,14 @@ export const exportPosesStocksToExcelController = async (req, res) => {
         res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
         res.setHeader("Content-Length", buffer.length);
+        if (req.user?.id) {
+            const skladLabel = sklad ?? "усі склади";
+            await createEventUtil({
+                userId: req.user.id,
+                department: "poses",
+                description: `Експортовано залишки позицій у Excel: ${poses.length} поз., склад=${skladLabel}, файл=${fileName}`,
+            });
+        }
         res.status(200).send(buffer);
     }
     catch (error) {

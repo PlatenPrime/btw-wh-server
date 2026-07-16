@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../../test/setup.js";
+import { createTestUser } from "../../../../../test/setup.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Block } from "../../../models/Block.js";
 import { Seg } from "../../../../segs/models/Seg.js";
 import { deleteBlock } from "../deleteBlock.js";
@@ -41,6 +42,25 @@ describe("deleteBlockController", () => {
 
     const deleted = await Block.findById(block._id);
     expect(deleted).toBeNull();
+  });
+
+  it("200: creates audit event when req.user is present", async () => {
+    const block = await Block.create({ title: "Block Event", order: 1, segs: [] });
+    const user = await createTestUser({
+      username: `delete-block-event-${Date.now()}`,
+    });
+
+    const req = {
+      user: { id: user._id.toString(), role: "PRIME" },
+      params: { id: block._id.toString() },
+    } as unknown as Request;
+
+    await deleteBlock(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "blocks" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("Block Event");
   });
 
   it("404: block not found", async () => {

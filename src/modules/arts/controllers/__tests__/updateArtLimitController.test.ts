@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createTestArt } from "../../../../test/setup.js";
+import { createTestArt, createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { updateArtLimitController } from "../update-art-limit/updateArtLimitController.js";
 
 describe("updateArtLimitController", () => {
@@ -95,6 +96,25 @@ describe("updateArtLimitController", () => {
 
     expect(responseStatus.code).toBe(400);
     expect(responseJson.message).toBe("Validation error");
+  });
+
+  it("200: создаёт audit event когда req.user присутствует", async () => {
+    const user = await createTestUser({ username: `art-limit-event-${Date.now()}` });
+    const testArt = await createTestArt({ artikul: "ART-001", zone: "A1", limit: 50 });
+
+    const req = {
+      params: { id: testArt._id.toString() },
+      body: { limit: 100 },
+      user: { id: user._id.toString(), role: "ADMIN" },
+    } as unknown as Request;
+
+    await updateArtLimitController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "arts" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
+    expect(events[0].description).toContain("ART-001");
   });
 });
 

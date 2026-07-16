@@ -1,6 +1,7 @@
 import { updateAllBtradeStocksUtil } from "../../utils/updateAllBtradeStocksUtil.js";
 import { updateAllBtradeStocksSchema } from "./schemas/updateAllBtradeStocksSchema.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Обновить btradeStock для всех артикулов
  * @route   POST /api/arts/btrade-stock/update-all
@@ -18,7 +19,18 @@ export const updateAllBtradeStocksController = async (req, res) => {
             return;
         }
         // Запускаем обновление btradeStock для всех артикулов в фоне
-        updateAllBtradeStocksUtil().catch((error) => {
+        const userId = req.user?.id;
+        updateAllBtradeStocksUtil()
+            .then(async (result) => {
+            if (userId) {
+                await createEventUtil({
+                    userId,
+                    department: "arts",
+                    description: `Оновлено btradeStock для всіх артикулів: ${result.updated} з ${result.total} шт. (помилок: ${result.errors}, не знайдено: ${result.notFound})`,
+                });
+            }
+        })
+            .catch((error) => {
             logModuleError("arts", error, "Error in background updateAllBtradeStocks:");
         });
         // Сразу возвращаем ответ клиенту

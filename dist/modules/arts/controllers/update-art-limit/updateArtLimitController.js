@@ -1,6 +1,7 @@
 import { updateArtLimitSchema } from "./schemas/updateArtLimitSchema.js";
 import { updateArtLimitUtil } from "./utils/updateArtLimitUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const updateArtLimitController = async (req, res) => {
     try {
         const { id } = req.params;
@@ -24,6 +25,13 @@ export const updateArtLimitController = async (req, res) => {
                 message: "Art not found",
             });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "arts",
+                description: `Оновлено лімiт артикулу ${updatedArt.artikul} (id: ${updatedArt._id}) на ${updatedArt.limit}`,
+            });
         }
         res.status(200).json(updatedArt);
     }

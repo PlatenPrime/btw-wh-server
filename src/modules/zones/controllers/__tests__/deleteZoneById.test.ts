@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createTestZone } from "../../../../test/setup.js";
+import { createTestUser, createTestZone } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { deleteZoneById } from "../delete-zone-by-id/deleteZoneById.js";
 
 describe("deleteZoneById Controller", () => {
@@ -48,6 +49,29 @@ describe("deleteZoneById Controller", () => {
     expect(responseJson.data.bar).toBe(420502);
     expect(responseJson.data.sector).toBe(0);
     expect(responseJson.data._id.toString()).toBe(testZone._id.toString());
+  });
+
+  it("should create an audit event when req.user is present", async () => {
+    const testZone = await createTestZone({
+      title: "42-5-2",
+      bar: 420502,
+      sector: 0,
+    });
+    const user = await createTestUser({
+      username: `delete-zone-event-${Date.now()}`,
+    });
+
+    mockRequest = {
+      user: { id: user._id.toString(), role: "PRIME" },
+      params: { id: testZone._id.toString() },
+    };
+
+    await deleteZoneById(mockRequest as Request, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "zones" });
+    expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("42-5-2");
   });
 
   it("should return 404 when zone not found", async () => {

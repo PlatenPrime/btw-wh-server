@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Sku } from "../../../skus/models/Sku.js";
 import { Skugr } from "../../models/Skugr.js";
 import { createSkugrController } from "../create-skugr/createSkugrController.js";
@@ -9,6 +11,7 @@ describe("createSkugrController", () => {
     beforeEach(async () => {
         await Skugr.deleteMany({});
         await Sku.deleteMany({});
+        await Event.deleteMany({});
         responseJson = {};
         responseStatus = {};
         res = {
@@ -76,5 +79,23 @@ describe("createSkugrController", () => {
         expect(responseStatus.code).toBe(201);
         const data = responseJson.data;
         expect(data.skus).toEqual([sku._id.toString()]);
+    });
+    it("201 creates audit event when req.user is present", async () => {
+        const user = await createTestUser({ username: `skugr-event-${Date.now()}` });
+        const req = {
+            user: { id: user._id.toString(), role: "ADMIN" },
+            body: {
+                konkName: "k1",
+                prodName: "p1",
+                title: "Audited Group",
+                url: "https://k1.com/g-audited",
+                skus: [],
+            },
+        };
+        await createSkugrController(req, res);
+        expect(responseStatus.code).toBe(201);
+        const events = await Event.find({ department: "skugrs" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(user._id.toString());
     });
 });

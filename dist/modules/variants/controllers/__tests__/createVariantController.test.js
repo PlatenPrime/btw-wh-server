@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Variant } from "../../models/Variant.js";
 import { createVariantController } from "../create-variant/createVariantController.js";
 describe("createVariantController", () => {
@@ -7,6 +9,7 @@ describe("createVariantController", () => {
     let responseStatus;
     beforeEach(async () => {
         await Variant.deleteMany({});
+        await Event.deleteMany({});
         responseJson = {};
         responseStatus = {};
         res = {
@@ -79,5 +82,23 @@ describe("createVariantController", () => {
         expect(responseJson.message).toBe("Variant with this url already exists");
         const count = await Variant.countDocuments();
         expect(count).toBe(1);
+    });
+    it("201 creates audit event when req.user is present", async () => {
+        const user = await createTestUser({ username: `variant-event-${Date.now()}` });
+        const req = {
+            user: { id: user._id.toString(), role: "ADMIN" },
+            body: {
+                konkName: "k",
+                prodName: "p",
+                title: "Audited Variant",
+                url: "https://audited.com/variant",
+                imageUrl: "https://audited.com/img.png",
+            },
+        };
+        await createVariantController(req, res);
+        expect(responseStatus.code).toBe(201);
+        const events = await Event.find({ department: "variants" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(user._id.toString());
     });
 });

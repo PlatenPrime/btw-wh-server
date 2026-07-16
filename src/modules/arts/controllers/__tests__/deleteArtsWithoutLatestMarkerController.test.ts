@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { deleteArtsWithoutLatestMarkerController } from "../delete-arts-without-latest-marker/deleteArtsWithoutLatestMarkerController.js";
 import { deleteArtsWithoutLatestMarkerUtil } from "../delete-arts-without-latest-marker/utils/deleteArtsWithoutLatestMarkerUtil.js";
 
@@ -152,6 +154,26 @@ describe("deleteArtsWithoutLatestMarkerController", () => {
 
     // Проверяем, что json не был вызван (так как headers уже отправлены)
     expect(jsonCalled).toBe(false);
+  });
+
+  it("200: создаёт audit event когда req.user присутствует", async () => {
+    const user = await createTestUser({ username: `arts-marker-event-${Date.now()}` });
+    const mockResult = {
+      deletedCount: 5,
+      latestMarker: "20251123",
+    };
+    vi.mocked(deleteArtsWithoutLatestMarkerUtil).mockResolvedValue(mockResult);
+
+    const req = {
+      user: { id: user._id.toString(), role: "PRIME" },
+    } as unknown as Request;
+
+    await deleteArtsWithoutLatestMarkerController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "arts" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });
 

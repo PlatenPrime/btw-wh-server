@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Prod } from "../../models/Prod.js";
 import { updateProdByIdController } from "../update-prod-by-id/updateProdByIdController.js";
 describe("updateProdByIdController", () => {
@@ -7,6 +9,7 @@ describe("updateProdByIdController", () => {
     let responseStatus;
     beforeEach(async () => {
         await Prod.deleteMany({});
+        await Event.deleteMany({});
         responseJson = {};
         responseStatus = {};
         res = {
@@ -50,5 +53,23 @@ describe("updateProdByIdController", () => {
         await updateProdByIdController(req, res);
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data.title).toBe("New Title");
+    });
+    it("200 creates audit event when req.user is present", async () => {
+        const user = await createTestUser({ username: `prod-update-event-${Date.now()}` });
+        const prod = await Prod.create({
+            name: "x",
+            title: "Old",
+            imageUrl: "https://x.com/1.png",
+        });
+        const req = {
+            params: { id: prod._id.toString() },
+            body: { title: "New Title" },
+            user: { id: user._id.toString(), role: "ADMIN" },
+        };
+        await updateProdByIdController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "prods" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(user._id.toString());
     });
 });

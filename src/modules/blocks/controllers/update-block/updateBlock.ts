@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { updateBlockSchema } from "./schemas/updateBlockSchema.js";
 import { updateBlockUtil } from "./utils/updateBlockUtil.js";
 import { checkBlockDuplicatesUpdateUtil } from "./utils/checkBlockDuplicatesUpdateUtil.js";
@@ -62,6 +63,14 @@ export const updateBlock = async (req: Request, res: Response) => {
         message: "Block not found",
       });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "blocks",
+        description: `Оновлено блок ${updatedBlock.title} (id: ${id})`,
+      });
     }
 
     res.status(200).json({

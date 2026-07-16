@@ -1,6 +1,7 @@
 import { deleteSkuByIdSchema } from "./schemas/deleteSkuByIdSchema.js";
 import { deleteSkuByIdUtil } from "./utils/deleteSkuByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Удалить sku по id
  * @route   DELETE /api/skus/id/:id
@@ -21,6 +22,13 @@ export const deleteSkuByIdController = async (req, res) => {
         if (!sku) {
             res.status(404).json({ message: "Sku not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "skus",
+                description: `Видалено sku "${sku.title}" (id: ${sku._id}, артикул аналога: ${sku.btradeAnalog})`,
+            });
         }
         res.status(200).json({
             message: "Sku deleted successfully",

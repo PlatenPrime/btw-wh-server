@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { createUserController } from "../create-user/createUserController.js";
 
 describe("createUserController", () => {
@@ -120,5 +121,44 @@ describe("createUserController", () => {
 
     expect(responseStatus.code).toBe(400);
     expect(responseJson.message).toBe("Validation error");
+  });
+
+  it("201: создаёт audit-событие когда req.user присутствует", async () => {
+    const actor = await createTestUser({ username: `actor-${Date.now()}` });
+    const newUsername = `newuser-${Date.now()}`;
+    const req = {
+      user: { id: actor._id.toString(), role: "ADMIN" },
+      body: {
+        username: newUsername,
+        password: "password123",
+        fullname: "New User",
+        role: "ADMIN",
+      },
+    } as unknown as Request;
+
+    await createUserController(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "auth" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(actor._id.toString());
+    expect(events[0].description).toContain(newUsername);
+    expect(events[0].description).not.toContain("password123");
+  });
+
+  it("201: не создаёт audit-событие без req.user", async () => {
+    const req = {
+      body: {
+        username: `newuser-${Date.now()}`,
+        password: "password123",
+        fullname: "New User",
+      },
+    } as unknown as Request;
+
+    await createUserController(req, res);
+
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "auth" });
+    expect(events).toHaveLength(0);
   });
 });

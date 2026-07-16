@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { movePalletPosesSchema } from "./schemas/movePalletPosesSchema.js";
 import { movePalletPosesUtil } from "./utils/movePalletPosesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -41,6 +42,17 @@ export const movePalletPosesController = async (
         session,
       });
     });
+
+    if (req.user?.id) {
+      const movedCount = Array.isArray(result.targetPallet?.poses)
+        ? result.targetPallet.poses.length
+        : 0;
+      await createEventUtil({
+        userId: req.user.id,
+        department: "pallets",
+        description: `Переміщено ${movedCount} позицій з паллети (id: ${sourcePalletId}) на паллету ${result.targetPallet?.title ?? targetPalletId}`,
+      });
+    }
 
     res.status(200).json({
       message: "Poses moved successfully",

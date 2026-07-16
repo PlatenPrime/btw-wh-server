@@ -1,8 +1,16 @@
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { populateMissingPosDataUtil } from "./utils/populateMissingPosDataUtil.js";
-export const populateMissingPosDataController = async (_req, res) => {
+export const populateMissingPosDataController = async (req, res) => {
     try {
         // 1. Выполняем заполнение данных
         const result = await populateMissingPosDataUtil();
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "poses",
+                description: `Заповнено відсутні дані позицій: оновлено ${result.updated}, помилок ${result.errors}`,
+            });
+        }
         // 2. HTTP ответ
         res.status(200).json({
             updated: result.updated,

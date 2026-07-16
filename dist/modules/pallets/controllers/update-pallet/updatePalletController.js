@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Row } from "../../../rows/models/Row.js";
 import { updatePalletSchema } from "./schemas/updatePalletSchema.js";
 import { updatePalletUtil } from "./utils/updatePalletUtil.js";
@@ -52,6 +53,13 @@ export const updatePalletController = async (req, res) => {
                 session,
             });
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "pallets",
+                description: `Оновлено паллету ${updatedPallet.title} (id: ${id})`,
+            });
+        }
         res.status(200).json(updatedPallet);
     }
     catch (error) {

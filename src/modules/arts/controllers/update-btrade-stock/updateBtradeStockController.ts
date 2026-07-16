@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { updateBtradeStockSchema } from "./schemas/updateBtradeStockSchema.js";
 import { updateBtradeStockUtil } from "../../utils/updateBtradeStockUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Обновить btradeStock для одного артикула
@@ -35,6 +36,14 @@ export const updateBtradeStockController = async (
         message: "Art not found or product not found on sharik.ua",
       });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "arts",
+        description: `Оновлено btradeStock артикулу ${updatedArt.artikul} (id: ${updatedArt._id}): ${updatedArt.btradeStock?.value}`,
+      });
     }
 
     res.status(200).json({

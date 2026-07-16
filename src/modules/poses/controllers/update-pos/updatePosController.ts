@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { IPos, Pos } from "../../models/Pos.js";
 import { updatePosSchema } from "./schemas/updatePosSchema.js";
 import { updatePosUtil } from "./utils/updatePosUtil.js";
@@ -38,7 +39,15 @@ export const updatePosController = async (req: Request, res: Response) => {
 
     // 4. Получаем обновлённую позицию для ответа
     const updatedPos = await Pos.findById(id);
-    
+
+    if (req.user?.id && updatedPos) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "poses",
+        description: `Оновлено позицію ${updatedPos.artikul} (${updatedPos.quant} шт, ${updatedPos.boxes} ящ) на паллеті ${updatedPos.palletTitle}`,
+      });
+    }
+
     // 5. HTTP ответ
     res.status(200).json(updatedPos);
   } catch (error) {

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { updatePalletGroupSchema } from "./schemas/updatePalletGroupSchema.js";
 import { updatePalletGroupUtil } from "./utils/updatePalletGroupUtil.js";
 export const updatePalletGroupController = async (req, res) => {
@@ -24,6 +25,13 @@ export const updatePalletGroupController = async (req, res) => {
         });
         await session.commitTransaction();
         session.endSession();
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "pallet-groups",
+                description: `Оновлено групу паллет ${updated.title} (id: ${id})`,
+            });
+        }
         return res.status(200).json({
             message: "Pallet group updated successfully",
             data: {

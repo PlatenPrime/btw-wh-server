@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../models/Pallet.js";
 import { deletePalletPosesSchema } from "./schemas/deletePalletPosesSchema.js";
 import { deletePalletPosesUtil } from "./utils/deletePalletPosesUtil.js";
@@ -24,13 +25,28 @@ export const deletePalletPosesController = async (
       return;
     }
 
+    let palletTitle: string | undefined;
+    let removedCount = 0;
+
     // Транзакция для удаления poses
     await session.withTransaction(async () => {
+      const pallet = await Pallet.findById(id).session(session);
+      palletTitle = pallet?.title;
+      removedCount = pallet?.poses?.length ?? 0;
+
       await deletePalletPosesUtil({
         palletId: id,
         session,
       });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "pallets",
+        description: `Видалено ${removedCount} позицій з паллети ${palletTitle ?? id}`,
+      });
+    }
 
     res.status(200).json({
       message: "Pallet poses removed successfully",

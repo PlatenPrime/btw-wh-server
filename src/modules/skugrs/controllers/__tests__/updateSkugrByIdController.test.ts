@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Skugr } from "../../models/Skugr.js";
 import { updateSkugrByIdController } from "../update-skugr-by-id/updateSkugrByIdController.js";
 
@@ -10,6 +12,7 @@ describe("updateSkugrByIdController", () => {
 
   beforeEach(async () => {
     await Skugr.deleteMany({});
+    await Event.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -74,5 +77,29 @@ describe("updateSkugrByIdController", () => {
 
     expect(responseStatus.code).toBe(200);
     expect((responseJson.data as { isSliced: boolean }).isSliced).toBe(false);
+  });
+
+  it("200 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `skugr-update-event-${Date.now()}` });
+    const doc = await Skugr.create({
+      konkName: "k",
+      prodName: "p",
+      title: "Old",
+      url: "https://k.com/o-event",
+      skus: [],
+    });
+
+    const req = {
+      params: { id: doc._id.toString() },
+      body: { title: "New" },
+      user: { id: user._id.toString(), role: "ADMIN" },
+    } as unknown as Request;
+
+    await updateSkugrByIdController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "skugrs" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });

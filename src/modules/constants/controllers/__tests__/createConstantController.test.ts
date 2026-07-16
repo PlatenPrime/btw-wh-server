@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Constant } from "../../models/Constant.js";
 import { createConstantController } from "../create-constant/createConstantController.js";
 
@@ -10,6 +12,7 @@ describe("createConstantController", () => {
 
   beforeEach(async () => {
     await Constant.deleteMany({});
+    await Event.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -61,5 +64,27 @@ describe("createConstantController", () => {
     expect((responseJson.data as { name: string }).name).toBe("config");
     const count = await Constant.countDocuments();
     expect(count).toBe(1);
+  });
+
+  it("201 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({
+      username: `const-event-${Date.now()}`,
+    });
+    const req = {
+      user: { id: user._id.toString(), role: "ADMIN" },
+      body: {
+        name: "audited",
+        title: "Audited",
+        data: {},
+      },
+    } as unknown as Request;
+    await createConstantController(req, res);
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "constants" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
+    expect(events[0].description).toBe(
+      "Створено константу name=audited, title=Audited"
+    );
   });
 });

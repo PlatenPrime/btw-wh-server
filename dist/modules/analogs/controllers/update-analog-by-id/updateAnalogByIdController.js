@@ -1,6 +1,7 @@
 import { updateAnalogByIdSchema } from "./schemas/updateAnalogByIdSchema.js";
 import { updateAnalogByIdUtil } from "./utils/updateAnalogByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Обновить аналог по id
  * @route   PATCH /api/analogs/id/:id
@@ -24,6 +25,13 @@ export const updateAnalogByIdController = async (req, res) => {
         if (!analog) {
             res.status(404).json({ message: "Analog not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "analogs",
+                description: `Оновлено аналог артикулу ${analog.artikul} (id: ${analog._id})`,
+            });
         }
         res.status(200).json({
             message: "Analog updated successfully",

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { calculatePalletsSectorsUtil } from "../../utils/calculatePalletsSectorsUtil.js";
 import { getPalletsShortForGroup } from "../../utils/getGroupPalletsShortDtoUtil.js";
 import { setPalletsSchema } from "./schemas/setPalletsSchema.js";
@@ -23,6 +24,13 @@ export const setPalletsController = async (req, res) => {
         session.endSession();
         await calculatePalletsSectorsUtil({ groupIds: [group._id] });
         const pallets = await getPalletsShortForGroup(group);
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "pallet-groups",
+                description: `Встановлено ${palletIds.length} паллет для групи ${group.title}`,
+            });
+        }
         return res.status(200).json({
             message: "Pallets set for group successfully",
             data: {

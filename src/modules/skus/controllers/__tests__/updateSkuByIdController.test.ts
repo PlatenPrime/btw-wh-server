@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Sku } from "../../models/Sku.js";
 import { updateSkuByIdController } from "../update-sku-by-id/updateSkuByIdController.js";
 
@@ -10,6 +12,7 @@ describe("updateSkuByIdController", () => {
 
   beforeEach(async () => {
     await Sku.deleteMany({});
+    await Event.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -68,5 +71,26 @@ describe("updateSkuByIdController", () => {
     expect(
       (responseJson.data as { imageUrl: string }).imageUrl,
     ).toBe("https://img.example/x.webp");
+  });
+
+  it("200 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `sku-update-event-${Date.now()}` });
+    const sku = await Sku.create({
+      konkName: "k1",
+      prodName: "p1",
+      productId: "k1-update-event",
+      title: "Old",
+      url: "https://k1.com/old-update-event",
+    });
+    const req = {
+      params: { id: sku._id.toString() },
+      body: { title: "New" },
+      user: { id: user._id.toString(), role: "ADMIN" },
+    } as unknown as Request;
+    await updateSkuByIdController(req, res);
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "skus" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });

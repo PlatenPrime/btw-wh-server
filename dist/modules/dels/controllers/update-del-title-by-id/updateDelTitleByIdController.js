@@ -1,6 +1,7 @@
 import { updateDelTitleSchema } from "./schemas/updateDelTitleSchema.js";
 import { updateDelTitleByIdUtil } from "./utils/updateDelTitleByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Обновить название поставки
  * @route   PATCH /api/dels/:id/title
@@ -31,6 +32,13 @@ export const updateDelTitleByIdController = async (req, res) => {
         if (!result) {
             res.status(404).json({ message: "Del not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "dels",
+                description: `Оновлено назву поставки на "${result.title}" (виробник: ${result.prodName}, id: ${parseResult.data.id})`,
+            });
         }
         res.status(200).json({
             message: "Del title updated successfully",

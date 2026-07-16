@@ -4,6 +4,7 @@ import { createKaskSchema } from "./schemas/createKaskSchema.js";
 import { getCreateKaskMessageUtil } from "./utils/getCreateKaskMesUtil.js";
 import { sendCreateKaskMesUtil } from "./utils/sendCreateKaskMesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 export const createKaskController = async (
   req: Request,
@@ -27,6 +28,14 @@ export const createKaskController = async (
       ...(quant !== undefined && { quant }),
       ...(com !== undefined && { com }),
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "kasks",
+        description: `Створено касовий запит на артикул ${artikul} (${quant ?? 0} шт.)`,
+      });
+    }
 
     res.status(201).json(created);
 

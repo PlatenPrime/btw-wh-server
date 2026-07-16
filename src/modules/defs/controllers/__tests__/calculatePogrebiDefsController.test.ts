@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 
 const { logModuleError } = vi.hoisted(() => ({
   logModuleError: vi.fn(),
@@ -44,7 +46,7 @@ describe("calculatePogrebiDefsController", () => {
   let mockJson: ReturnType<typeof vi.fn>;
   let mockStatus: ReturnType<typeof vi.fn>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     mockJson = vi.fn().mockReturnThis();
     mockStatus = vi.fn().mockReturnThis();
 
@@ -56,6 +58,7 @@ describe("calculatePogrebiDefsController", () => {
 
     vi.clearAllMocks();
     mockedGetCalculationStatus.mockReturnValue(idleStatus);
+    await Event.deleteMany({});
   });
 
   it("409 when calculation is already running", async () => {
@@ -118,6 +121,55 @@ describe("calculatePogrebiDefsController", () => {
         createdAt: new Date("2024-01-15T10:00:00.000Z"),
       },
     });
+  });
+
+  it("201 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `defs-event-${Date.now()}` });
+    const mockSavedDef = {
+      _id: "test-id",
+      result: {},
+      createdAt: new Date("2024-01-15T10:00:00.000Z"),
+      total: 3,
+      totalCriticalDefs: 2,
+      totalLimitDefs: 1,
+    };
+
+    mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef as never);
+
+    await calculatePogrebiDefsController(
+      { user: { id: String(user._id), role: "ADMIN" } } as unknown as Request,
+      mockRes as Response
+    );
+
+    expect(mockStatus).toHaveBeenCalledWith(201);
+    const events = await Event.find({ department: "defs" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(String(user._id));
+    expect(events[0].description).toBe(
+      "Виконано розрахунок дефіцитів: всього 3, критичних 2, лімітних 1"
+    );
+  });
+
+  it("201 does not create audit event without req.user", async () => {
+    const mockSavedDef = {
+      _id: "test-id",
+      result: {},
+      createdAt: new Date("2024-01-15T10:00:00.000Z"),
+      total: 1,
+      totalCriticalDefs: 0,
+      totalLimitDefs: 0,
+    };
+
+    mockedCalculateAndSavePogrebiDefsUtil.mockResolvedValue(mockSavedDef as never);
+
+    await calculatePogrebiDefsController(
+      mockReq as Request,
+      mockRes as Response
+    );
+
+    expect(mockStatus).toHaveBeenCalledWith(201);
+    const events = await Event.find({ department: "defs" });
+    expect(events).toHaveLength(0);
   });
 
   it("500 when calculation throws", async () => {

@@ -5,6 +5,7 @@ import { Ask } from "../../models/Ask.js";
 import { updateAskActionsByIdSchema } from "./schemas/updateAskActionsByIdSchema.js";
 import { updateAskActionsUtil } from "./utils/updateAskActionsUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 export const updateAskActionsById = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -46,6 +47,14 @@ export const updateAskActionsById = async (req: Request, res: Response) => {
         session,
       });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "asks",
+        description: `Оновлено дії заявки на артикул ${updatedAsk.artikul}: "${parseResult.data.action}"`,
+      });
+    }
 
     res.status(200).json(updatedAsk);
   } catch (error) {

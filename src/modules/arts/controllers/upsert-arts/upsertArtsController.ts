@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { upsertArtsSchema } from "./schemas/upsertArtsSchema.js";
 import { upsertArtsUtil } from "./utils/upsertArtsUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 export const upsertArtsController = async (req: Request, res: Response) => {
   try {
@@ -18,6 +19,14 @@ export const upsertArtsController = async (req: Request, res: Response) => {
     const arts = parseResult.data;
 
     const result = await upsertArtsUtil({ arts });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "arts",
+        description: `Виконано upsert артикулів: ${arts.length} шт. (додано: ${result.upsertedCount}, оновлено: ${result.modifiedCount})`,
+      });
+    }
 
     res.status(200).json({ message: "Upsert completed", result });
   } catch (error) {

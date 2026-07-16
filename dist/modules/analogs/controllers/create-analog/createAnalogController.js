@@ -1,6 +1,7 @@
 import { createAnalogSchema } from "./schemas/createAnalogSchema.js";
 import { createAnalogUtil } from "./utils/createAnalogUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 function isDuplicateUrlError(err) {
     return (typeof err === "object" &&
         err !== null &&
@@ -23,6 +24,13 @@ export const createAnalogController = async (req, res) => {
             return;
         }
         const analog = await createAnalogUtil(parseResult.data);
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "analogs",
+                description: `Створено аналог артикулу ${analog.artikul} (id: ${analog._id}) для конкурента ${analog.konkName}`,
+            });
+        }
         res.status(201).json({
             message: "Analog created successfully",
             data: analog,

@@ -4,6 +4,7 @@ import { Ask } from "../../models/Ask.js";
 import { pullAskByIdSchema } from "./schemas/pullAskByIdSchema.js";
 import { pullAskUtil } from "./utils/pullAskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const pullAskById = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -40,6 +41,13 @@ export const pullAskById = async (req, res) => {
                 session,
             });
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "asks",
+                description: `Знято товар по заявці на артикул ${updatedAsk.artikul}: ${parsedPullAskData.quant} шт., ${parsedPullAskData.boxes} кор. (палет: ${parsedPullAskData.palletData.title})`,
+            });
+        }
         res.status(200).json(updatedAsk);
     }
     catch (error) {

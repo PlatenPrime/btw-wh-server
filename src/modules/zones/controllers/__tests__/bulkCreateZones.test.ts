@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createTestZone } from "../../../../test/setup.js";
+import { createTestUser, createTestZone } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { upsertZones } from "../bulk-create-zones/bulkCreateZones.js";
 
 describe("upsertZones Controller", () => {
@@ -46,6 +47,27 @@ describe("upsertZones Controller", () => {
     expect(responseJson.result).toBeDefined();
     expect(responseJson.result.upsertedCount).toBe(3);
     expect(responseJson.result.modifiedCount).toBe(0);
+  });
+
+  it("should create an audit event when req.user is present", async () => {
+    const user = await createTestUser({
+      username: `bulk-zones-event-${Date.now()}`,
+    });
+    mockRequest = {
+      user: { id: user._id.toString(), role: "PRIME" },
+      body: {
+        zones: [
+          { title: "90-1", bar: 9001 },
+          { title: "90-2", bar: 9002 },
+        ],
+      },
+    };
+
+    await upsertZones(mockRequest as Request, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "zones" });
+    expect(events).toHaveLength(1);
   });
 
   it("should update existing zones with same bar", async () => {

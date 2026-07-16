@@ -1,6 +1,7 @@
 import { deleteVariantByIdSchema } from "./schemas/deleteVariantByIdSchema.js";
 import { deleteVariantByIdUtil } from "./utils/deleteVariantByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Удалить вариант по id
  * @route   DELETE /api/variants/id/:id
@@ -20,6 +21,13 @@ export const deleteVariantByIdController = async (req, res) => {
         if (!variant) {
             res.status(404).json({ message: "Variant not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "variants",
+                description: `Видалено варіант "${variant.title}" (id: ${variant._id})`,
+            });
         }
         res.status(200).json({ message: "Variant deleted successfully" });
     }

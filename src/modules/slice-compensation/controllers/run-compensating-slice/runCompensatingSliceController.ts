@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import {
   releaseCompensatingRun,
   tryAcquireCompensatingRun,
@@ -36,6 +37,15 @@ export async function runCompensatingSliceController(
 
   try {
     const result = await runCompensatingSlicesForKonk(konkName);
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "slice-compensation",
+        description: `Запущено позачерговий компенсуючий забір слайсів для конкурента ${result.konkName}`,
+      });
+    }
+
     res.status(200).json({
       message: "Compensating slice completed",
       data: {

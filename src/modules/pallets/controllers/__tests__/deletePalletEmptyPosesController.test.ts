@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestPallet } from "../../../../test/utils/testHelpers.js";
-import { createTestPos } from "../../../../test/setup.js";
+import { createTestPos, createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { deletePalletEmptyPosesController } from "../delete-pallet-empty-poses/deletePalletEmptyPosesController.js";
 
 describe("deletePalletEmptyPosesController", () => {
@@ -87,6 +88,32 @@ describe("deletePalletEmptyPosesController", () => {
 
     expect(responseStatus.code).toBe(404);
     expect(responseJson.message).toBe("Pallet not found");
+  });
+
+  it("200: создаёт audit event, если есть req.user и удалены пустые poses", async () => {
+    const pallet = await createTestPallet({ title: "Pallet-1", poses: [] });
+    const emptyPos = await createTestPos({
+      pallet: pallet,
+      quant: 0,
+      boxes: 0,
+    });
+    const user = await createTestUser({
+      username: `delete-empty-poses-event-${Date.now()}`,
+    });
+
+    pallet.poses = [emptyPos._id];
+    await pallet.save();
+
+    const req = {
+      user: { id: user._id.toString(), role: "EDITOR" },
+      params: { id: String(pallet._id) },
+    } as unknown as Request;
+
+    await deletePalletEmptyPosesController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "pallets" });
+    expect(events).toHaveLength(1);
   });
 });
 

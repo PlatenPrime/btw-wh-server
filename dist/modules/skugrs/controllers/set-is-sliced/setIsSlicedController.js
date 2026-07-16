@@ -1,5 +1,6 @@
 import { setIsSlicedUtil } from "./utils/setIsSlicedUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Единоразово проставить isSliced=true для старых skugr без поля isSliced
  * @route   POST /api/skugrs/set-is-sliced
@@ -7,6 +8,13 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
 export const setIsSlicedController = async (req, res) => {
     try {
         const result = await setIsSlicedUtil();
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "skugrs",
+                description: `Масово встановлено isSliced для товарних груп: знайдено ${result.matchedCount}, змінено ${result.modifiedCount} шт.`,
+            });
+        }
         res.status(200).json({
             message: "Skugr isSliced field set successfully",
             data: {

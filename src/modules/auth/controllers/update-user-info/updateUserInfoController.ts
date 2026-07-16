@@ -5,6 +5,7 @@ import { checkUsernameAvailableForUpdateUtil } from "./utils/checkUsernameAvaila
 import { hashPasswordIfProvidedUtil } from "./utils/hashPasswordIfProvidedUtil.js";
 import { updateUserUtil } from "./utils/updateUserUtil.js";
 import { getUpdateUserResponseUtil } from "./utils/getUpdateUserResponseUtil.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 export const updateUserInfoController = async (
   req: Request,
@@ -71,6 +72,14 @@ export const updateUserInfoController = async (
     if (!updatedUser) {
       res.status(404).json({ message: "Користувач не знайдений" });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "auth",
+        description: `Оновлено інформацію користувача ${updatedUser.username} (роль: ${updatedUser.role})`,
+      });
     }
 
     // Формирование ответа

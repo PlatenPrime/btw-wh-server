@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../../test/setup.js";
 import { Block } from "../../../../blocks/models/Block.js";
+import { Event } from "../../../../events/models/Event.js";
 import { Seg } from "../../../models/Seg.js";
 import { deleteSeg } from "../deleteSeg.js";
 describe("deleteSeg Controller", () => {
@@ -37,6 +39,28 @@ describe("deleteSeg Controller", () => {
         expect(responseJson.message).toBe("Segment deleted successfully");
         expect(String(responseJson.data._id)).toBe(seg._id.toString());
         expect(await Seg.findById(seg._id).exec()).toBeNull();
+    });
+    it("200: creates audit event when req.user is present", async () => {
+        const block = await Block.create({ title: `Block-${Date.now()}-event`, order: 1, segs: [] });
+        const seg = await Seg.create({
+            block: block._id,
+            blockData: { _id: block._id, title: block.title },
+            order: 1,
+            sector: 1001,
+            zones: [],
+        });
+        const user = await createTestUser({
+            username: `delete-seg-event-${Date.now()}`,
+        });
+        mockRequest = {
+            user: { id: user._id.toString(), role: "ADMIN" },
+            params: { id: seg._id.toString() },
+        };
+        await deleteSeg(mockRequest, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "segs" });
+        expect(events).toHaveLength(1);
+        expect(events[0].description).toContain(block.title);
     });
     it("404: segment not found", async () => {
         mockRequest = {

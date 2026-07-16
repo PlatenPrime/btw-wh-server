@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { deleteZoneByIdSchema } from "./schemas/deleteZoneByIdSchema.js";
 import { deleteZoneByIdUtil } from "./utils/deleteZoneByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -24,6 +25,14 @@ export const deleteZoneById = async (req: Request, res: Response) => {
         message: "Zone not found",
       });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "zones",
+        description: `Видалено зону ${deletedZone.title} (бар: ${deletedZone.bar})`,
+      });
     }
 
     res.status(200).json({

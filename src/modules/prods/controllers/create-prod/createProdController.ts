@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createProdSchema } from "./schemas/createProdSchema.js";
 import { createProdUtil } from "./utils/createProdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Создать производителя
@@ -26,6 +27,14 @@ export const createProdController = async (
       title: parseResult.data.title,
       imageUrl: parseResult.data.imageUrl,
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "prods",
+        description: `Створено виробника ${prod.name} (id: ${prod._id})`,
+      });
+    }
 
     res.status(201).json({
       message: "Prod created successfully",

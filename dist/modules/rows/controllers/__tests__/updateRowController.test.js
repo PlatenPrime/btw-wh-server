@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Row } from "../../models/Row.js";
 import { updateRow } from "../update-row/updateRow.js";
 describe("updateRowController", () => {
@@ -29,6 +31,22 @@ describe("updateRowController", () => {
         expect(responseStatus.code).toBe(200);
         expect(responseJson.title).toBe("New Title");
         expect(responseJson._id.toString()).toBe(row._id.toString());
+    });
+    it("200: создаёт audit event, если есть req.user", async () => {
+        const row = await Row.create({ title: "Old Title Event" });
+        const user = await createTestUser({
+            username: `update-row-event-${Date.now()}`,
+        });
+        const req = {
+            user: { id: user._id.toString(), role: "ADMIN" },
+            params: { id: row._id.toString() },
+            body: { title: "New Title Event" },
+        };
+        await updateRow(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "rows" });
+        expect(events).toHaveLength(1);
+        expect(events[0].description).toContain("New Title Event");
     });
     it("404: когда ряд не найден", async () => {
         const req = {

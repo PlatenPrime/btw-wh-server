@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Variant } from "../../models/Variant.js";
 import { updateVariantByIdController } from "../update-variant-by-id/updateVariantByIdController.js";
 describe("updateVariantByIdController", () => {
@@ -7,6 +9,7 @@ describe("updateVariantByIdController", () => {
     let responseStatus;
     beforeEach(async () => {
         await Variant.deleteMany({});
+        await Event.deleteMany({});
         responseJson = {};
         responseStatus = {};
         res = {
@@ -67,5 +70,25 @@ describe("updateVariantByIdController", () => {
         await updateVariantByIdController(req, res);
         expect(responseStatus.code).toBe(200);
         expect(responseJson.data.title).toBe("New title");
+    });
+    it("200 creates audit event when req.user is present", async () => {
+        const user = await createTestUser({ username: `variant-update-event-${Date.now()}` });
+        const variant = await Variant.create({
+            konkName: "k",
+            prodName: "p",
+            title: "Old title",
+            url: "https://x.com",
+            imageUrl: "https://example.com/old.png",
+        });
+        const req = {
+            params: { id: variant._id.toString() },
+            body: { title: "New title" },
+            user: { id: user._id.toString(), role: "ADMIN" },
+        };
+        await updateVariantByIdController(req, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "variants" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(user._id.toString());
     });
 });

@@ -6,6 +6,7 @@ import { getCreateAskActionsUtil } from "./utils/getCreateAskActionsUtil.js";
 import { getCreateAskMessageUtil } from "./utils/getCreateAskMesUtil.js";
 import { sendCreateAskMesUtil } from "./utils/sendCreateAskMesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const createAskController = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -44,6 +45,13 @@ export const createAskController = async (req, res) => {
                 session,
             });
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "asks",
+                description: `Створено заявку на артикул ${parseResult.data.artikul} (${parseResult.data.quant} шт.)`,
+            });
+        }
         res.status(201).json(createdAsk);
         const message = getCreateAskMessageUtil({
             askerData,

@@ -1,6 +1,7 @@
 import { updateKonkByIdSchema } from "./schemas/updateKonkByIdSchema.js";
 import { updateKonkByIdUtil } from "./utils/updateKonkByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Обновить конкурента по id (указанные в body поля)
  * @route   PATCH /api/konks/id/:id
@@ -35,6 +36,13 @@ export const updateKonkByIdController = async (req, res) => {
         if (!konk) {
             res.status(404).json({ message: "Konk not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "konks",
+                description: `Оновлено конкурента ${konk.name} (id: ${konk._id})`,
+            });
         }
         res.status(200).json({
             message: "Konk updated successfully",

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { deleteSkusNotInAnySkugrQuerySchema } from "./schemas/deleteSkusNotInAnySkugrQuerySchema.js";
 import { deleteSkusNotInAnySkugrUtil } from "./utils/deleteSkusNotInAnySkugrUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Удалить все Sku, не входящие ни в одну товарную группу (опционально сузить query)
@@ -22,6 +23,14 @@ export const deleteSkusNotInAnySkugrController = async (
     }
 
     const result = await deleteSkusNotInAnySkugrUtil(parseResult.data);
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "skus",
+        description: `Видалено sku, що не входять до жодної товарної групи: ${result.deletedCount} шт.`,
+      });
+    }
 
     res.status(200).json({
       message: "Skus not in any skugr deleted successfully",

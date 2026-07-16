@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { calculatePalletsSectorsUtil } from "../../utils/calculatePalletsSectorsUtil.js";
 
 export const recalculatePalletsSectorsController = async (
@@ -7,6 +8,14 @@ export const recalculatePalletsSectorsController = async (
 ) => {
   try {
     const result = await calculatePalletsSectorsUtil();
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "pallet-groups",
+        description: `Перераховано сектори паллет: оновлено ${result.updatedPallets} паллет у ${result.groupsProcessed} групах, ${result.updatedPositions} позицій`,
+      });
+    }
 
     return res.status(200).json({
       message: "Pallets sectors recalculated successfully",

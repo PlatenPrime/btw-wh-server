@@ -5,6 +5,7 @@ import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../utils/fillSkugrSkusFromBrowserUtil.js";
 import { fillSkugrSkusSchema } from "./schemas/fillSkugrSkusSchema.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Заполнить состав skugr SKU из парсера страниц группы (browser)
@@ -37,6 +38,14 @@ export const fillSkugrSkusController = async (
     if (!result) {
       res.status(404).json({ message: "Skugr not found" });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "skugrs",
+        description: `Заповнено товарну групу "${result.skugr.title}" (id: ${result.skugr._id}) sku з парсера: створено ${result.stats.created}, прив'язано ${result.stats.linkedExisting} шт.`,
+      });
     }
 
     res.status(200).json({

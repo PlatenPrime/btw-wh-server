@@ -1,6 +1,7 @@
 import { updateSkuByIdSchema } from "./schemas/updateSkuByIdSchema.js";
 import { updateSkuByIdUtil } from "./utils/updateSkuByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 /**
  * @desc    Обновить sku по id (указанные в body поля)
  * @route   PATCH /api/skus/id/:id
@@ -29,6 +30,13 @@ export const updateSkuByIdController = async (req, res) => {
         if (!sku) {
             res.status(404).json({ message: "Sku not found" });
             return;
+        }
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "skus",
+                description: `Оновлено sku "${sku.title}" (id: ${sku._id}, артикул аналога: ${sku.btradeAnalog})`,
+            });
         }
         res.status(200).json({
             message: "Sku updated successfully",

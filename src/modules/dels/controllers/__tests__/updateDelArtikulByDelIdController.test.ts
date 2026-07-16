@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
 import { getSharikStockData } from "../../../browser/sharik/utils/getSharikStockData.js";
+import { Event } from "../../../events/models/Event.js";
 import { Del } from "../../models/Del.js";
 import { updateDelArtikulByDelIdController } from "../update-del-artikul-by-del-id/updateDelArtikulByDelIdController.js";
 
@@ -14,6 +16,7 @@ describe("updateDelArtikulByDelIdController", () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     await Del.deleteMany({});
+    await Event.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -79,5 +82,32 @@ describe("updateDelArtikulByDelIdController", () => {
       stock: 15,
       nameukr: "Товар",
     });
+  });
+
+  it("200 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `del-artikul-event-${Date.now()}` });
+    const del = await Del.create({
+      title: "Del",
+      prodName: "prod1",
+      prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
+      artikuls: { "ART-1": { quant: 5 } },
+    });
+    vi.mocked(getSharikStockData).mockResolvedValue({
+      nameukr: "Товар",
+      price: 100,
+      quantity: 15,
+    });
+    const req = {
+      user: { id: String(user._id), role: "ADMIN" },
+      params: { id: del._id.toString(), artikul: "ART-1" },
+    } as unknown as Request;
+    await updateDelArtikulByDelIdController(req, res);
+    expect(responseStatus.code).toBe(200);
+    const events = await Event.find({ department: "dels" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(String(user._id));
+    expect(events[0].description).toBe(
+      `Оновлено артикул ART-1 у поставці "Del" (id: ${del._id})`
+    );
   });
 });

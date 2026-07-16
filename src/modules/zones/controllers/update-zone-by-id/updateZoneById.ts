@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { updateZoneSchema } from "./schemas/updateZoneByIdSchema.js";
 import { checkZoneDuplicatesUpdateUtil } from "./utils/checkZoneDuplicatesUpdateUtil.js";
 import { updateZoneByIdUtil } from "./utils/updateZoneByIdUtil.js";
@@ -68,6 +69,14 @@ export const updateZoneById = async (req: Request, res: Response) => {
         message: "Zone not found",
       });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "zones",
+        description: `Оновлено зону ${updatedZone.title} (id: ${id})`,
+      });
     }
 
     res.status(200).json({

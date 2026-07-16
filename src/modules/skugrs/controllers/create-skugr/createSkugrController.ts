@@ -6,6 +6,7 @@ import {
   InvalidSkuReferencesError,
   createSkugrUtil,
 } from "./utils/createSkugrUtil.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Создать группу товаров конкурента (skugr)
@@ -26,6 +27,14 @@ export const createSkugrController = async (
     }
 
     const skugr = await createSkugrUtil(parseResult.data);
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "skugrs",
+        description: `Створено товарну групу "${skugr.title}" (id: ${skugr._id}) для конкурента ${skugr.konkName}`,
+      });
+    }
 
     res.status(201).json({
       message: "Skugr created successfully",

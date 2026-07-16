@@ -6,6 +6,7 @@ import { getRejectAskMesUtil } from "./utils/getRejectAskMesUtil.js";
 import { rejectAskUtil } from "./utils/rejectAskUtil.js";
 import { sendRejectAskMesUtil } from "./utils/sendRejectAskMesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const rejectAskById = async (req, res) => {
     const session = await mongoose.startSession();
     try {
@@ -38,6 +39,13 @@ export const rejectAskById = async (req, res) => {
                 session,
             });
         });
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "asks",
+                description: `Відхилено заявку на артикул ${existingAsk.artikul} (виконавець: ${solver.fullname})`,
+            });
+        }
         res.status(200).json(updatedAsk);
         // Отправка уведомления создателю запроса об отклонении
         if (existingAsk?.askerData?.telegram) {

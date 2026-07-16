@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createAnalogSchema } from "./schemas/createAnalogSchema.js";
 import { createAnalogUtil } from "./utils/createAnalogUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 function isDuplicateUrlError(err: unknown): err is { code: number; keyPattern?: { url?: number } } {
   return (
@@ -32,6 +33,14 @@ export const createAnalogController = async (
     }
 
     const analog = await createAnalogUtil(parseResult.data);
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "analogs",
+        description: `Створено аналог артикулу ${analog.artikul} (id: ${analog._id}) для конкурента ${analog.konkName}`,
+      });
+    }
 
     res.status(201).json({
       message: "Analog created successfully",

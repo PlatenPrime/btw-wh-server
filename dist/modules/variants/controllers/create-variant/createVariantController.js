@@ -1,6 +1,7 @@
 import { createVariantSchema } from "./schemas/createVariantSchema.js";
 import { createVariantUtil } from "./utils/createVariantUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 function isDuplicateUrlError(err) {
     return (typeof err === "object" &&
         err !== null &&
@@ -23,6 +24,13 @@ export const createVariantController = async (req, res) => {
             return;
         }
         const variant = await createVariantUtil(parseResult.data);
+        if (req.user?.id) {
+            await createEventUtil({
+                userId: req.user.id,
+                department: "variants",
+                description: `Створено варіант "${variant.title}" (id: ${variant._id}) для конкурента ${variant.konkName}`,
+            });
+        }
         res.status(201).json({
             message: "Variant created successfully",
             data: variant,

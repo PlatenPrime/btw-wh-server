@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Del } from "../../models/Del.js";
 import { Prod } from "../../../prods/models/Prod.js";
 import { createDelController } from "../create-del/createDelController.js";
@@ -12,6 +14,7 @@ describe("createDelController", () => {
   beforeEach(async () => {
     await Del.deleteMany({});
     await Prod.deleteMany({});
+    await Event.deleteMany({});
     await Prod.create({
       name: "acme",
       title: "Acme",
@@ -62,6 +65,26 @@ describe("createDelController", () => {
     });
     const count = await Del.countDocuments();
     expect(count).toBe(1);
+  });
+
+  it("201 creates audit event when req.user is present", async () => {
+    const user = await createTestUser({ username: `del-create-event-${Date.now()}` });
+    const req = {
+      user: { id: String(user._id), role: "ADMIN" },
+      body: {
+        title: "Audited",
+        prodName: "acme",
+        artikuls: [],
+      },
+    } as unknown as Request;
+    await createDelController(req, res);
+    expect(responseStatus.code).toBe(201);
+    const events = await Event.find({ department: "dels" });
+    expect(events).toHaveLength(1);
+    expect(events[0].userId.toString()).toBe(String(user._id));
+    expect(events[0].description).toBe(
+      'Створено поставку "Audited" від виробника acme'
+    );
   });
 
   it("400 when prodName does not exist in Prod", async () => {

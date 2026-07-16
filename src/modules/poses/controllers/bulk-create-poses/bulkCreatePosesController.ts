@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { bulkCreatePosesSchema } from "./schemas/bulkCreatePosesSchema.js";
 import { bulkCreatePosesUtil } from "./utils/bulkCreatePosesUtil.js";
 
@@ -23,6 +24,14 @@ export const bulkCreatePosesController = async (
     await session.withTransaction(async () => {
       createdPoses = await bulkCreatePosesUtil({ poses, session });
     });
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "poses",
+        description: `Масове створення позицій: ${createdPoses.length} шт`,
+      });
+    }
 
     // 3. HTTP ответ
     res.status(201).json({

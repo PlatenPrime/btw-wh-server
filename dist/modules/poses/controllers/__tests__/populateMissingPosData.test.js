@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import "../../../../test/setup";
+import { createTestUser } from "../../../../test/setup.js";
+import { Event } from "../../../events/models/Event.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 import { Row } from "../../../rows/models/Row.js";
 import { Pos } from "../../models/Pos.js";
@@ -154,6 +155,17 @@ describe("populateMissingPosData Controller", () => {
         expect(responseJson.errors).toBe(1);
         expect(responseJson.errorDetails).toHaveLength(1);
         expect(responseJson.errorDetails[0].reason).toContain("Pallet not found");
+    });
+    it("should create an audit event when req.user is present", async () => {
+        const user = await createTestUser({
+            username: `populate-pos-event-${Date.now()}`,
+        });
+        mockRequest = { user: { id: user._id.toString(), role: "ADMIN" } };
+        await populateMissingPosData(mockRequest, res);
+        expect(responseStatus.code).toBe(200);
+        const events = await Event.find({ department: "poses" });
+        expect(events).toHaveLength(1);
+        expect(events[0].userId.toString()).toBe(user._id.toString());
     });
     it("should return 500 on server error", async () => {
         // Arrange

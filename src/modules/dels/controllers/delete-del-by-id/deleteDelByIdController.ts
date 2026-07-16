@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { deleteDelByIdSchema } from "./schemas/deleteDelByIdSchema.js";
 import { deleteDelByIdUtil } from "./utils/deleteDelByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Удалить поставку по id
@@ -27,6 +28,14 @@ export const deleteDelByIdController = async (
     if (!del) {
       res.status(404).json({ message: "Del not found" });
       return;
+    }
+
+    if (req.user?.id) {
+      await createEventUtil({
+        userId: req.user.id,
+        department: "dels",
+        description: `Видалено поставку "${del.title}" від виробника ${del.prodName} (id: ${parseResult.data.id})`,
+      });
     }
 
     res.status(200).json({
