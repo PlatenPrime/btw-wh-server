@@ -18,6 +18,7 @@ export const upsertBlocksController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "blocks",
+                type: "other",
                 description: `Масовий upsert блоків: додано ${result.bulkResult.upsertedCount}, оновлено ${result.bulkResult.modifiedCount} з ${payload.length} переданих`,
             });
         }

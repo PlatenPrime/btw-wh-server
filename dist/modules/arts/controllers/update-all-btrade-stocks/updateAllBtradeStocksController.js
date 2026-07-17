@@ -26,6 +26,7 @@ export const updateAllBtradeStocksController = async (req, res) => {
                 await createEventUtil({
                     userId,
                     department: "arts",
+                    type: "edit",
                     description: `Оновлено btradeStock для всіх артикулів: ${result.updated} з ${result.total} шт. (помилок: ${result.errors}, не знайдено: ${result.notFound})`,
                 });
             }

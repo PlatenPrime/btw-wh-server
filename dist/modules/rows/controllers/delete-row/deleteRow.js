@@ -32,6 +32,7 @@ export const deleteRow = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "rows",
+                type: "delete",
                 description: `Видалено ряд ${rowTitle ?? parseResult.data.id} разом з пов'язаними паллетами та позиціями`,
             });
         }

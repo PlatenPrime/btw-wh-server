@@ -28,6 +28,7 @@ export const createVariantController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "variants",
+                type: "create",
                 description: `Створено варіант "${variant.title}" (id: ${variant._id}) для конкурента ${variant.konkName}`,
             });
         }

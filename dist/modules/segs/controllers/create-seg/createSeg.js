@@ -35,6 +35,7 @@ export const createSeg = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "segs",
+                type: "create",
                 description: `Створено сегмент у блоці ${blockData.title} (порядок: ${order}, зон: ${zones.length})`,
             });
         }

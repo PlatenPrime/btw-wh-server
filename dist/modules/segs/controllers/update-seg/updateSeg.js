@@ -40,6 +40,7 @@ export const updateSeg = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "segs",
+                type: "edit",
                 description: `Оновлено сегмент (id: ${id}) у блоці ${updatedSeg.blockData.title}, зон: ${updatedSeg.zones.length}`,
             });
         }

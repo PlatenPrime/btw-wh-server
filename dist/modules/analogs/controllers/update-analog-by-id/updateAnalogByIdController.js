@@ -30,6 +30,7 @@ export const updateAnalogByIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "analogs",
+                type: "edit",
                 description: `Оновлено аналог артикулу ${analog.artikul} (id: ${analog._id})`,
             });
         }

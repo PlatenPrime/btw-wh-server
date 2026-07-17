@@ -12,6 +12,7 @@ export const setIsSlicedController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "skugrs",
+                type: "edit",
                 description: `Масово встановлено isSliced для товарних груп: знайдено ${result.matchedCount}, змінено ${result.modifiedCount} шт.`,
             });
         }

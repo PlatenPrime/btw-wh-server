@@ -41,6 +41,7 @@ export const deleteAskById = async (
       await createEventUtil({
         userId: req.user.id,
         department: "asks",
+        type: "delete",
         description: `Видалено заявку на артикул ${ask.artikul} (id: ${id})`,
       });
     }

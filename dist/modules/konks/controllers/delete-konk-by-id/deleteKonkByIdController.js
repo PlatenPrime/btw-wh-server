@@ -27,6 +27,7 @@ export const deleteKonkByIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "konks",
+                type: "delete",
                 description: `Видалено конкурента ${konk.name} (id: ${konk._id})`,
             });
         }

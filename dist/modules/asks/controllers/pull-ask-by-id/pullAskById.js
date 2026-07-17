@@ -45,7 +45,8 @@ export const pullAskById = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "asks",
-                description: `Знято товар по заявці на артикул ${updatedAsk.artikul}: ${parsedPullAskData.quant} шт., ${parsedPullAskData.boxes} кор. (палет: ${parsedPullAskData.palletData.title})`,
+                type: "edit",
+                description: `Знято товар по заявці на артикул ${updatedAsk.artikul}: ${parsedPullAskData.quant} шт., ${parsedPullAskData.boxes} кор. (палета: ${parsedPullAskData.palletData.title})`,
             });
         }
         res.status(200).json(updatedAsk);

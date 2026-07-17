@@ -37,6 +37,7 @@ export const createBlock = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "blocks",
+        type: "create",
         description: `Створено блок ${block.title}`,
       });
     }

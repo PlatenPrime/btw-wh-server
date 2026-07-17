@@ -42,6 +42,7 @@ export const updateBtradeStockController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "arts",
+        type: "edit",
         description: `Оновлено btradeStock артикулу ${updatedArt.artikul} (id: ${updatedArt._id}): ${updatedArt.btradeStock?.value}`,
       });
     }

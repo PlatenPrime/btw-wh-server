@@ -26,6 +26,7 @@ export const deleteVariantByIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "variants",
+                type: "delete",
                 description: `Видалено варіант "${variant.title}" (id: ${variant._id})`,
             });
         }

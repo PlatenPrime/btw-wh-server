@@ -34,6 +34,7 @@ export const deleteConstantByIdController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "constants",
+        type: "delete",
         description: `Видалено константу id=${constant._id}, name=${constant.name}, title=${constant.title}`,
       });
     }

@@ -43,6 +43,7 @@ export const updateAskActionsById = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "asks",
+                type: "edit",
                 description: `Оновлено дії заявки на артикул ${updatedAsk.artikul}: "${parseResult.data.action}"`,
             });
         }

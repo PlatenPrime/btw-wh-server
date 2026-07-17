@@ -38,6 +38,7 @@ describe("getAllEventsController", () => {
         await createEventUtil({
             userId: user._id.toString(),
             department: "constants",
+            type: "create",
             description: "Listed",
         });
         const req = { query: {} };

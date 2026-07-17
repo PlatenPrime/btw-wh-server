@@ -2,6 +2,9 @@ import { Document, Model, Schema, Types } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 import { IUser } from "../../auth/models/User.js";
 
+export const EVENT_TYPES = ["create", "edit", "delete", "other"] as const;
+export type EventType = (typeof EVENT_TYPES)[number];
+
 export type EventUserData = Pick<
   IUser,
   "_id" | "fullname" | "telegram" | "photo"
@@ -12,6 +15,7 @@ export interface IEvent extends Document {
   userId: Types.ObjectId;
   userData: EventUserData;
   department: string;
+  type: EventType;
   description: string;
   createdAt: Date;
   updatedAt: Date;
@@ -37,6 +41,12 @@ const eventSchema = new Schema<IEvent>(
     },
     userData: { type: eventUserDataSchema, required: true },
     department: { type: String, required: true, index: true },
+    type: {
+      type: String,
+      enum: EVENT_TYPES,
+      required: true,
+      index: true,
+    },
     description: { type: String, required: true },
   },
   { timestamps: true }

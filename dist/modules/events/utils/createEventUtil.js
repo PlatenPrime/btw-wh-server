@@ -37,6 +37,7 @@ export const createEventUtil = async (input) => {
             userId: user._id,
             userData: mapUserToEventUserData(user),
             department,
+            type: input.type,
             description,
         });
         return event;

@@ -37,6 +37,7 @@ export const updateConstantByIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "constants",
+                type: "edit",
                 description: `Оновлено константу id=${constant._id}, name=${constant.name}, title=${constant.title}`,
             });
         }

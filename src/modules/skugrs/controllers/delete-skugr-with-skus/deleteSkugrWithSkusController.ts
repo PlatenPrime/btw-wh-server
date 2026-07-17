@@ -34,6 +34,7 @@ export const deleteSkugrWithSkusController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "skugrs",
+        type: "delete",
         description: `Видалено товарну групу (id: ${parseResult.data.id}) разом з sku: ${result.deletedSkusCount} шт. (оновлено інших груп: ${result.modifiedSkugrsCount})`,
       });
     }

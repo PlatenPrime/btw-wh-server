@@ -21,6 +21,7 @@ export const deleteSkusNotInAnySkugrController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "skus",
+                type: "delete",
                 description: `Видалено sku, що не входять до жодної товарної групи: ${result.deletedCount} шт.`,
             });
         }

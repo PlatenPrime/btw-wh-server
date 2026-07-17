@@ -38,6 +38,7 @@ export const setPalletsController = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "pallet-groups",
+        type: "edit",
         description: `Встановлено ${palletIds.length} паллет для групи ${group.title}`,
       });
     }

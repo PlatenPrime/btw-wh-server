@@ -57,6 +57,7 @@ export const renameBlock = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "blocks",
+                type: "edit",
                 description: `Перейменовано блок ${existingBlock.title} на ${renamedBlock.title}`,
             });
         }

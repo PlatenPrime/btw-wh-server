@@ -39,6 +39,7 @@ export const updateVariantByIdController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "variants",
+        type: "edit",
         description: `Оновлено варіант "${variant.title}" (id: ${variant._id})`,
       });
     }

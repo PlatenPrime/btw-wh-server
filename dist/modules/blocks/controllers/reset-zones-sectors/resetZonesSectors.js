@@ -9,6 +9,7 @@ export const resetZonesSectors = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "blocks",
+                type: "other",
                 description: `Скинуто сектори усіх зон: оновлено ${result.modifiedCount} з ${result.matchedCount}`,
             });
         }

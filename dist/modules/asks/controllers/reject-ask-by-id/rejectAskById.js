@@ -43,6 +43,7 @@ export const rejectAskById = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "asks",
+                type: "edit",
                 description: `Відхилено заявку на артикул ${existingAsk.artikul} (виконавець: ${solver.fullname})`,
             });
         }

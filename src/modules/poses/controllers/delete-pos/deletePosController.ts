@@ -38,6 +38,7 @@ export const deletePosController = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "poses",
+        type: "delete",
         description: `Видалено позицію ${deletedPosData.artikul} (${deletedPosData.quant} шт, ${deletedPosData.boxes} ящ) з паллети ${deletedPosData.palletTitle}`,
       });
     }

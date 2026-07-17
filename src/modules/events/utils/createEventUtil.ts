@@ -4,12 +4,13 @@ import {
   logModuleWarn,
 } from "../../../logging/logModuleError.js";
 import User from "../../auth/models/User.js";
-import { Event, IEvent } from "../models/Event.js";
+import { Event, EventType, IEvent } from "../models/Event.js";
 import { mapUserToEventUserData } from "./mapUserToEventUserData.js";
 
 export type CreateEventUtilInput = {
   userId: string;
   department: string;
+  type: EventType;
   description: string;
 };
 
@@ -53,6 +54,7 @@ export const createEventUtil = async (
       userId: user._id,
       userData: mapUserToEventUserData(user),
       department,
+      type: input.type,
       description,
     });
 

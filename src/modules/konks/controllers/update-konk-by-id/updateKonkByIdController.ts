@@ -48,6 +48,7 @@ export const updateKonkByIdController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "konks",
+        type: "edit",
         description: `Оновлено конкурента ${konk.name} (id: ${konk._id})`,
       });
     }

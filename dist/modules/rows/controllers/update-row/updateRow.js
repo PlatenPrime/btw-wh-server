@@ -27,6 +27,7 @@ export const updateRow = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "rows",
+                type: "edit",
                 description: `Оновлено ряд (id: ${parseResult.data.id}) новою назвою ${updatedRow.title}`,
             });
         }

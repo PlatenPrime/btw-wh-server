@@ -15,6 +15,7 @@ describe("getEventByIdUtil", () => {
     const created = await createEventUtil({
       userId: user._id.toString(),
       department: "constants",
+      type: "create",
       description: "Find me",
     });
 

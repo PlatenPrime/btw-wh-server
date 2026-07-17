@@ -35,6 +35,7 @@ export const createZone = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "zones",
+                type: "create",
                 description: `Створено зону ${zone.title} (бар: ${zone.bar})`,
             });
         }

@@ -14,6 +14,7 @@ export const populateMissingPosDataController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "poses",
+        type: "other",
         description: `Заповнено відсутні дані позицій: оновлено ${result.updated}, помилок ${result.errors}`,
       });
     }

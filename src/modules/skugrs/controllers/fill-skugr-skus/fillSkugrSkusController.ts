@@ -44,6 +44,7 @@ export const fillSkugrSkusController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "skugrs",
+        type: "edit",
         description: `Заповнено товарну групу "${result.skugr.title}" (id: ${result.skugr._id}) sku з парсера: створено ${result.stats.created}, прив'язано ${result.stats.linkedExisting} шт.`,
       });
     }

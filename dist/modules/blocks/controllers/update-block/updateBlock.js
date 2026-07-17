@@ -58,6 +58,7 @@ export const updateBlock = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "blocks",
+                type: "edit",
                 description: `Оновлено блок ${updatedBlock.title} (id: ${id})`,
             });
         }

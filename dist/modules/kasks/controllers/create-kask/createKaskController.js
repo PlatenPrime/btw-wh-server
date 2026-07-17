@@ -26,6 +26,7 @@ export const createKaskController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "kasks",
+                type: "create",
                 description: `Створено касовий запит на артикул ${artikul} (${quant ?? 0} шт.)`,
             });
         }

@@ -21,6 +21,7 @@ export const fixIncorrectSkuDataController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "skus",
+                type: "other",
                 description: `Масово виправлено дані sku: знайдено ${result.matchedCount}, змінено ${result.modifiedCount} шт.`,
             });
         }

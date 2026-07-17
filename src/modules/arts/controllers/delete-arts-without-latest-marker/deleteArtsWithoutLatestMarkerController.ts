@@ -31,6 +31,7 @@ export const deleteArtsWithoutLatestMarkerController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "arts",
+        type: "delete",
         description: `Видалено артикули без актуального маркера (маркер: ${result.latestMarker}): ${result.deletedCount} шт.`,
       });
     }

@@ -13,6 +13,7 @@ describe("getEventByIdUtil", () => {
         const created = await createEventUtil({
             userId: user._id.toString(),
             department: "constants",
+            type: "create",
             description: "Find me",
         });
         const found = await getEventByIdUtil(created._id.toString());

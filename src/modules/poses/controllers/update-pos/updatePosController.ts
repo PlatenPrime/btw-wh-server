@@ -44,6 +44,7 @@ export const updatePosController = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "poses",
+        type: "edit",
         description: `Оновлено позицію ${updatedPos.artikul} (${updatedPos.quant} шт, ${updatedPos.boxes} ящ) на паллеті ${updatedPos.palletTitle}`,
       });
     }

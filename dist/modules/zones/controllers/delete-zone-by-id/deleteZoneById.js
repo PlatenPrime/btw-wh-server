@@ -25,6 +25,7 @@ export const deleteZoneById = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "zones",
+                type: "delete",
                 description: `Видалено зону ${deletedZone.title} (бар: ${deletedZone.bar})`,
             });
         }

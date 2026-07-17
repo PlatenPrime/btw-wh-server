@@ -26,6 +26,7 @@ export const upsertSegsController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "segs",
+                type: "other",
                 description: `Масовий upsert сегментів: обробено ${result.processedSegs.length} з ${payload.length} переданих`,
             });
         }

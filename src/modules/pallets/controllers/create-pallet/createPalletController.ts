@@ -45,6 +45,7 @@ export const createPalletController = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "pallets",
+        type: "create",
         description: `Створено паллету ${createdPallet.title} у ряду ${rowData.title}${sector !== undefined ? `, сектор ${sector}` : ""}`,
       });
     }

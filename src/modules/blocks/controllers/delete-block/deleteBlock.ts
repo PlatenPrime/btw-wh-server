@@ -31,6 +31,7 @@ export const deleteBlock = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "blocks",
+        type: "delete",
         description: `Видалено блок ${deletedBlock.title}`,
       });
     }

@@ -59,6 +59,7 @@ export const updateUserInfoController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "auth",
+                type: "edit",
                 description: `Оновлено інформацію користувача ${updatedUser.username} (роль: ${updatedUser.role})`,
             });
         }

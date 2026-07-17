@@ -30,6 +30,7 @@ export const updateArtLimitController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "arts",
+                type: "edit",
                 description: `Оновлено лімiт артикулу ${updatedArt.artikul} (id: ${updatedArt._id}) на ${updatedArt.limit}`,
             });
         }

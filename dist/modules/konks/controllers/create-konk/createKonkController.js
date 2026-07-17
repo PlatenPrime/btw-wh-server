@@ -27,6 +27,7 @@ export const createKonkController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "konks",
+                type: "create",
                 description: `Створено конкурента ${konk.name} (id: ${konk._id})`,
             });
         }

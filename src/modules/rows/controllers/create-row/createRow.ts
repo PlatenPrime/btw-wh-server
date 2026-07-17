@@ -24,6 +24,7 @@ export const createRow = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "rows",
+        type: "create",
         description: `Створено ряд ${createdRow.title}`,
       });
     }

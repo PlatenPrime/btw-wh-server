@@ -57,6 +57,7 @@ export const updatePalletController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "pallets",
+                type: "edit",
                 description: `Оновлено паллету ${updatedPallet.title} (id: ${id})`,
             });
         }

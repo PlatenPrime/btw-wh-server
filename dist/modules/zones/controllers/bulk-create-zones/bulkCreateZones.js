@@ -23,6 +23,7 @@ export const upsertZones = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "zones",
+                type: "create",
                 description: `Масовий upsert зон: додано ${result.upsertedCount}, оновлено ${result.modifiedCount} з ${zones.length} переданих`,
             });
         }

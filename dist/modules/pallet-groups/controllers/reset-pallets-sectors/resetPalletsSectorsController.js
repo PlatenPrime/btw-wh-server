@@ -10,6 +10,7 @@ export const resetPalletsSectorsController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "pallet-groups",
+                type: "other",
                 description: `Скинуто сектори усіх паллет: оновлено ${result.modifiedCount} з ${result.matchedCount}`,
             });
         }

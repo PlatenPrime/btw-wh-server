@@ -32,6 +32,7 @@ export const createProdController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "prods",
+        type: "create",
         description: `Створено виробника ${prod.name} (id: ${prod._id})`,
       });
     }

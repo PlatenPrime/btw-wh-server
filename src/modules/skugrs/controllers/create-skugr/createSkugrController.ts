@@ -32,6 +32,7 @@ export const createSkugrController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "skugrs",
+        type: "create",
         description: `Створено товарну групу "${skugr.title}" (id: ${skugr._id}) для конкурента ${skugr.konkName}`,
       });
     }

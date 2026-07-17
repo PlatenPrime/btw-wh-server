@@ -31,6 +31,7 @@ export const createDelController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "dels",
+                type: "create",
                 description: `Створено поставку "${result.title}" від виробника ${result.prodName}`,
             });
         }

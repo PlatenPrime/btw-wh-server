@@ -31,6 +31,7 @@ export const updateDelArtikulByDelIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "dels",
+                type: "edit",
                 description: `Оновлено артикул ${parseResult.data.artikul} у поставці "${del.title}" (id: ${parseResult.data.id})`,
             });
         }

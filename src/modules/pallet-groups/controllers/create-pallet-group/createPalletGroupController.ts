@@ -37,6 +37,7 @@ export const createPalletGroupController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "pallet-groups",
+        type: "create",
         description: `Створено групу паллет ${group.title} (порядок: ${group.order})`,
       });
     }

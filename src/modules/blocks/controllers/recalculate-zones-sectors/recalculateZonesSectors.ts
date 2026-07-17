@@ -11,6 +11,7 @@ export const recalculateZonesSectors = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "blocks",
+        type: "other",
         description: `Перераховано сектори зон: оновлено ${result.updatedZones} зон у ${result.blocksProcessed} блоках`,
       });
     }

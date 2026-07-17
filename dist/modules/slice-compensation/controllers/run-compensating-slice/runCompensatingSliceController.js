@@ -30,6 +30,7 @@ export async function runCompensatingSliceController(req, res) {
             await createEventUtil({
                 userId: req.user.id,
                 department: "slice-compensation",
+                type: "other",
                 description: `Запущено позачерговий компенсуючий забір слайсів для конкурента ${result.konkName}`,
             });
         }

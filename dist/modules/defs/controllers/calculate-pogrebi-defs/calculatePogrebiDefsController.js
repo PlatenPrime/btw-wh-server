@@ -35,6 +35,7 @@ export const calculatePogrebiDefsController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "defs",
+                type: "other",
                 description: `Виконано розрахунок дефіцитів: всього ${savedDef.total}, критичних ${savedDef.totalCriticalDefs}, лімітних ${savedDef.totalLimitDefs}`,
             });
         }

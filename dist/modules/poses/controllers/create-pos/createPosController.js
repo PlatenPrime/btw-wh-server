@@ -48,6 +48,7 @@ export const createPosController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "poses",
+                type: "create",
                 description: `Створено позицію ${createdPos.artikul} (${createdPos.quant} шт, ${createdPos.boxes} ящ) на паллеті ${createdPos.palletTitle}, ряд ${createdPos.rowTitle}`,
             });
         }

@@ -49,7 +49,8 @@ export const createAskController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "asks",
-                description: `Створено заявку на артикул ${parseResult.data.artikul} (${parseResult.data.quant} шт.)`,
+                type: "create",
+                description: `Створено заявку на артикул ${parseResult.data.artikul} (${parseResult.data.quant ? parseResult.data.quant : 0} шт.)`,
             });
         }
         res.status(201).json(createdAsk);

@@ -60,6 +60,7 @@
   - `telegram`: string (опционально)
   - `photo`: string (опционально)
 - `department`: string — домен модуля (`constants`, `poses`, …)
+- `type`: `"create" | "edit" | "delete" | "other"` — категория действия
 - `description`: string — описание события
 - `createdAt`: Date (ISO строка в JSON)
 - `updatedAt`: Date (ISO строка в JSON)

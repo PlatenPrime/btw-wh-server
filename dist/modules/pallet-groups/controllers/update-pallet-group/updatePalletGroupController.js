@@ -29,6 +29,7 @@ export const updatePalletGroupController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "pallet-groups",
+                type: "edit",
                 description: `Оновлено групу паллет ${updated.title} (id: ${id})`,
             });
         }

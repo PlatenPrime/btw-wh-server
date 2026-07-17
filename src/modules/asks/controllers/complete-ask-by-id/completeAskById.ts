@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
+import { logModuleError } from "../../../../logging/logModuleError.js";
 import User from "../../../auth/models/User.js";
+import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Ask } from "../../models/Ask.js";
 import { completeAskByIdSchema } from "./schemas/completeAskByIdSchema.js";
 import { completeAskUtil } from "./utils/completeAskUtil.js";
 import { getCompleteAskMesUtil } from "./utils/getCompleteAskMesUtil.js";
 import { sendCompleteAskMesUtil } from "./utils/sendCompleteAskMesUtil.js";
-import { logModuleError } from "../../../../logging/logModuleError.js";
-import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 export const completeAskById = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
@@ -52,7 +52,8 @@ export const completeAskById = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "asks",
-        description: `Завершено заявку на артикул ${existingAsk.artikul} (виконавець: ${solver.fullname})`,
+        type: "edit",
+        description: `Завершено заявку на артикул ${existingAsk.artikul} `,
       });
     }
 

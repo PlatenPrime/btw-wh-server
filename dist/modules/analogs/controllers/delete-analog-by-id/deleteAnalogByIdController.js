@@ -26,6 +26,7 @@ export const deleteAnalogByIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "analogs",
+                type: "delete",
                 description: `Видалено аналог артикулу ${analog.artikul} (id: ${analog._id})`,
             });
         }

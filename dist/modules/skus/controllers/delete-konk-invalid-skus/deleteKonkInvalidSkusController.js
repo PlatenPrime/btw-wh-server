@@ -20,6 +20,7 @@ export const deleteKonkInvalidSkusController = async (req, res) => {
         await createEventUtil({
             userId: req.user.id,
             department: "skus",
+            type: "delete",
             description: `Видалено невалідні sku для конкурента ${paramsResult.data.konkName}: ${deletedCount} шт.`,
         });
     }

@@ -65,6 +65,7 @@ export const createUserController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "auth",
+        type: "create",
         description: `Створено користувача ${createdUser.username} (роль: ${createdUser.role})`,
       });
     }

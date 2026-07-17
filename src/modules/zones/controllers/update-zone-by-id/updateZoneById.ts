@@ -75,6 +75,7 @@ export const updateZoneById = async (req: Request, res: Response) => {
       await createEventUtil({
         userId: req.user.id,
         department: "zones",
+        type: "edit",
         description: `Оновлено зону ${updatedZone.title} (id: ${id})`,
       });
     }

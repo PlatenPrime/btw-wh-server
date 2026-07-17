@@ -38,6 +38,7 @@ export const createAnalogController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "analogs",
+        type: "create",
         description: `Створено аналог артикулу ${analog.artikul} (id: ${analog._id}) для конкурента ${analog.konkName}`,
       });
     }

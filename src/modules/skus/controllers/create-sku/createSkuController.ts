@@ -28,6 +28,7 @@ export const createSkuController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "skus",
+        type: "create",
         description: `Створено sku "${sku.title}" (id: ${sku._id}, артикул аналога: ${sku.btradeAnalog}) для конкурента ${sku.konkName}`,
       });
     }

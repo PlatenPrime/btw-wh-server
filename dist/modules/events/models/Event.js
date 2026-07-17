@@ -1,5 +1,6 @@
 import { Schema } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
+export const EVENT_TYPES = ["create", "edit", "delete", "other"];
 const eventUserDataSchema = new Schema({
     _id: { type: Schema.Types.ObjectId, required: true },
     fullname: { type: String, required: true },
@@ -15,6 +16,12 @@ const eventSchema = new Schema({
     },
     userData: { type: eventUserDataSchema, required: true },
     department: { type: String, required: true, index: true },
+    type: {
+        type: String,
+        enum: EVENT_TYPES,
+        required: true,
+        index: true,
+    },
     description: { type: String, required: true },
 }, { timestamps: true });
 eventSchema.index({ createdAt: -1 });

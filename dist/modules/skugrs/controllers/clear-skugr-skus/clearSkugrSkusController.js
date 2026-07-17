@@ -26,6 +26,7 @@ export const clearSkugrSkusController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "skugrs",
+                type: "edit",
                 description: `Очищено склад sku товарної групи "${skugr.title}" (id: ${skugr._id})`,
             });
         }

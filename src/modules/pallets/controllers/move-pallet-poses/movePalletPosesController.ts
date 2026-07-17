@@ -50,6 +50,7 @@ export const movePalletPosesController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "pallets",
+        type: "edit",
         description: `Переміщено ${movedCount} позицій з паллети (id: ${sourcePalletId}) на паллету ${result.targetPallet?.title ?? targetPalletId}`,
       });
     }

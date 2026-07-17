@@ -35,6 +35,7 @@ export const deletePalletEmptyPosesController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "pallets",
+                type: "delete",
                 description: `Видалено ${result.deletedCount} пустих позицій з паллети (id: ${id})`,
             });
         }

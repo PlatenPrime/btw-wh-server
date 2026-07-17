@@ -39,6 +39,7 @@ export const updateProdByIdController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "prods",
+        type: "edit",
         description: `Оновлено виробника ${prod.name} (id: ${prod._id})`,
       });
     }

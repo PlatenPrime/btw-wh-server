@@ -35,6 +35,7 @@ export const updateSkuByIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "skus",
+                type: "edit",
                 description: `Оновлено sku "${sku.title}" (id: ${sku._id}, артикул аналога: ${sku.btradeAnalog})`,
             });
         }

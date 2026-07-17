@@ -22,11 +22,13 @@ describe("getAllEventsUtil", () => {
         const first = await createEventUtil({
             userId: user._id.toString(),
             department: "constants",
+            type: "create",
             description: "First",
         });
         const second = await createEventUtil({
             userId: user._id.toString(),
             department: "poses",
+            type: "edit",
             description: "Second",
         });
         const result = await getAllEventsUtil({ page: 1, limit: 20 });
@@ -41,11 +43,13 @@ describe("getAllEventsUtil", () => {
         await createEventUtil({
             userId: user._id.toString(),
             department: "constants",
+            type: "create",
             description: "A",
         });
         await createEventUtil({
             userId: user._id.toString(),
             department: "poses",
+            type: "edit",
             description: "B",
         });
         const result = await getAllEventsUtil({
@@ -62,11 +66,13 @@ describe("getAllEventsUtil", () => {
         await createEventUtil({
             userId: userA._id.toString(),
             department: "constants",
+            type: "create",
             description: "A",
         });
         await createEventUtil({
             userId: userB._id.toString(),
             department: "constants",
+            type: "create",
             description: "B",
         });
         const result = await getAllEventsUtil({
@@ -82,6 +88,7 @@ describe("getAllEventsUtil", () => {
         const event = await createEventUtil({
             userId: user._id.toString(),
             department: "constants",
+            type: "create",
             description: "In range",
         });
         const from = new Date(event.createdAt.getTime() - 1000).toISOString();
@@ -106,6 +113,7 @@ describe("getAllEventsUtil", () => {
             await createEventUtil({
                 userId: user._id.toString(),
                 department: "constants",
+                type: "create",
                 description: `Event ${i}`,
             });
         }

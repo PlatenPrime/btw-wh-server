@@ -29,6 +29,7 @@ export const bulkCreatePosesController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "poses",
+        type: "create",
         description: `Масове створення позицій: ${createdPoses.length} шт`,
       });
     }

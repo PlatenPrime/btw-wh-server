@@ -19,6 +19,7 @@ export const upsertArtsController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "arts",
+                type: "other",
                 description: `Виконано upsert артикулів: ${arts.length} шт. (додано: ${result.upsertedCount}, оновлено: ${result.modifiedCount})`,
             });
         }

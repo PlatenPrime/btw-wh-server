@@ -35,6 +35,7 @@ export const unlinkPalletController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "pallet-groups",
+                type: "edit",
                 description: `Відв'язано паллету (id: ${palletId}) від групи ${group.title}`,
             });
         }

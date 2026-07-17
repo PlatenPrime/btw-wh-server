@@ -38,6 +38,7 @@ export const deletePalletGroupController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "pallet-groups",
+                type: "delete",
                 description: `Видалено групу паллет ${group.title} (звільнено паллет: ${palletIds.length})`,
             });
         }

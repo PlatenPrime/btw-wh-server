@@ -44,6 +44,7 @@ export const exportPosesStocksToExcelController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "poses",
+                type: "other",
                 description: `Експортовано залишки позицій у Excel: ${poses.length} поз., склад=${skladLabel}, файл=${fileName}`,
             });
         }

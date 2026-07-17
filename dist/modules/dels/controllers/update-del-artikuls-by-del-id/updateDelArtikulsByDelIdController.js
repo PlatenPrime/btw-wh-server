@@ -30,6 +30,7 @@ export const updateDelArtikulsByDelIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "dels",
+                type: "edit",
                 description: `Запущено оновлення всіх артикулів поставки "${del.title}" (id: ${parseResult.data.id})`,
             });
         }

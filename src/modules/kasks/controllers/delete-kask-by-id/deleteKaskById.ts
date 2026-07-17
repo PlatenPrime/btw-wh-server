@@ -29,6 +29,7 @@ export const deleteKaskById = async (
       await createEventUtil({
         userId: req.user.id,
         department: "kasks",
+        type: "delete",
         description: `Видалено касовий запит на артикул ${kask.artikul} (id: ${id})`,
       });
     }

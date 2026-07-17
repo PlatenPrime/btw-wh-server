@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
-import { Event } from "../../models/Event.js";
+import { EVENT_TYPES, Event } from "../../models/Event.js";
 import { createEventUtil } from "../createEventUtil.js";
 
 describe("createEventUtil", () => {
@@ -19,6 +19,7 @@ describe("createEventUtil", () => {
     const event = await createEventUtil({
       userId: user._id.toString(),
       department: "constants",
+      type: "create",
       description: "Создана константа config",
     });
 
@@ -28,10 +29,26 @@ describe("createEventUtil", () => {
     expect(event!.userData.telegram).toBe("111");
     expect(event!.userData.photo).toBe("a.jpg");
     expect(event!.department).toBe("constants");
+    expect(event!.type).toBe("create");
     expect(event!.description).toBe("Создана константа config");
 
     const found = await Event.findById(event!._id);
     expect(found).not.toBeNull();
+    expect(found!.type).toBe("create");
+  });
+
+  it.each(EVENT_TYPES)("persists type=%s", async (type) => {
+    const user = await createTestUser({ username: `type-${type}-${Date.now()}` });
+
+    const event = await createEventUtil({
+      userId: user._id.toString(),
+      department: "constants",
+      type,
+      description: `Event type ${type}`,
+    });
+
+    expect(event).not.toBeNull();
+    expect(event!.type).toBe(type);
   });
 
   it("trims department and description", async () => {
@@ -40,6 +57,7 @@ describe("createEventUtil", () => {
     const event = await createEventUtil({
       userId: user._id.toString(),
       department: "  poses  ",
+      type: "edit",
       description: "  Updated pose  ",
     });
 
@@ -52,6 +70,7 @@ describe("createEventUtil", () => {
     const event = await createEventUtil({
       userId: "not-an-object-id",
       department: "constants",
+      type: "create",
       description: "Should skip",
     });
     expect(event).toBeNull();
@@ -62,6 +81,7 @@ describe("createEventUtil", () => {
     const event = await createEventUtil({
       userId: new Types.ObjectId().toString(),
       department: "constants",
+      type: "create",
       description: "Missing user",
     });
     expect(event).toBeNull();
@@ -73,6 +93,7 @@ describe("createEventUtil", () => {
     const event = await createEventUtil({
       userId: user._id.toString(),
       department: "   ",
+      type: "create",
       description: "Has description",
     });
     expect(event).toBeNull();
@@ -84,6 +105,7 @@ describe("createEventUtil", () => {
     const event = await createEventUtil({
       userId: user._id.toString(),
       department: "constants",
+      type: "create",
       description: "   ",
     });
     expect(event).toBeNull();

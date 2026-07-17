@@ -41,6 +41,7 @@ describe("getEventByIdController", () => {
         const created = await createEventUtil({
             userId: user._id.toString(),
             department: "constants",
+            type: "create",
             description: "By id",
         });
         const req = {

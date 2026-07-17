@@ -31,6 +31,7 @@ export const deletePalletController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "pallets",
+                type: "delete",
                 description: `Видалено паллету ${palletTitle ?? id}`,
             });
         }

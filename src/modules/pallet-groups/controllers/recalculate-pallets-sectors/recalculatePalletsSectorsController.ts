@@ -13,6 +13,7 @@ export const recalculatePalletsSectorsController = async (
       await createEventUtil({
         userId: req.user.id,
         department: "pallet-groups",
+        type: "other",
         description: `Перераховано сектори паллет: оновлено ${result.updatedPallets} паллет у ${result.groupsProcessed} групах, ${result.updatedPositions} позицій`,
       });
     }

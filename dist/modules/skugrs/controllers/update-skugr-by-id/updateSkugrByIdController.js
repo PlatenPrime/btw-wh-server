@@ -33,6 +33,7 @@ export const updateSkugrByIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "skugrs",
+                type: "edit",
                 description: `Оновлено товарну групу "${skugr.title}" (id: ${skugr._id})`,
             });
         }

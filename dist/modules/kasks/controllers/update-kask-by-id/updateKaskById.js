@@ -29,6 +29,7 @@ export const updateKaskById = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "kasks",
+                type: "edit",
                 description: `Оновлено касовий запит на артикул ${kask.artikul} (id: ${paramsResult.data.id})`,
             });
         }

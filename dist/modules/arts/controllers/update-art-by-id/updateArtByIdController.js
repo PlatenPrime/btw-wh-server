@@ -30,6 +30,7 @@ export const updateArtByIdController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "arts",
+                type: "edit",
                 description: `Оновлено артикул ${updatedArt.artikul} (id: ${updatedArt._id})`,
             });
         }

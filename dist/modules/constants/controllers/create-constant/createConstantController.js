@@ -25,6 +25,7 @@ export const createConstantController = async (req, res) => {
             await createEventUtil({
                 userId: req.user.id,
                 department: "constants",
+                type: "create",
                 description: `Створено константу name=${constant.name}, title=${constant.title}`,
             });
         }
