@@ -67,6 +67,30 @@ describe("getAllEventsUtil", () => {
     expect(result.events[0].department).toBe("poses");
   });
 
+  it("filters by type", async () => {
+    const user = await createTestUser({ username: `type-${Date.now()}` });
+    await createEventUtil({
+      userId: user._id.toString(),
+      department: "constants",
+      type: "create",
+      description: "A",
+    });
+    await createEventUtil({
+      userId: user._id.toString(),
+      department: "constants",
+      type: "edit",
+      description: "B",
+    });
+
+    const result = await getAllEventsUtil({
+      page: 1,
+      limit: 20,
+      type: "edit",
+    });
+    expect(result.events).toHaveLength(1);
+    expect(result.events[0].type).toBe("edit");
+  });
+
   it("filters by userId", async () => {
     const userA = await createTestUser({ username: `ua-${Date.now()}` });
     const userB = await createTestUser({ username: `ub-${Date.now()}` });

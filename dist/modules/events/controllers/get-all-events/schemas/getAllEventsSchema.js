@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { z } from "zod";
+import { EVENT_TYPES } from "../../../models/Event.js";
 export const getAllEventsQuerySchema = z.object({
     page: z
         .string()
@@ -16,6 +17,7 @@ export const getAllEventsQuerySchema = z.object({
         .string()
         .optional()
         .refine((val) => val === undefined || mongoose.Types.ObjectId.isValid(val), { message: "Invalid userId format" }),
+    type: z.enum(EVENT_TYPES).optional(),
     from: z
         .string()
         .optional()

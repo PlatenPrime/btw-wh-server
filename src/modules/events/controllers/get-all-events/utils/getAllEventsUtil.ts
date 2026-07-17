@@ -17,6 +17,7 @@ export const getAllEventsUtil = async ({
   limit,
   department,
   userId,
+  type,
   from,
   to,
 }: GetAllEventsQuery): Promise<GetAllEventsResult> => {
@@ -28,6 +29,10 @@ export const getAllEventsUtil = async ({
 
   if (userId) {
     filter.userId = userId;
+  }
+
+  if (type) {
+    filter.type = type;
   }
 
   if (from || to) {

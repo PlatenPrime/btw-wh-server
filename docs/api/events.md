@@ -16,6 +16,7 @@
 - `limit`: string (опционально, по умолчанию `"20"`) — размер страницы 1–100
 - `department`: string (опционально) — фильтр по домену модуля
 - `userId`: string (опционально) — MongoDB ObjectId пользователя-актора
+- `type`: `"create" | "edit" | "delete" | "other"` (опционально) — фильтр по категории действия
 - `from`: string (опционально) — ISO-дата, нижняя граница `createdAt`
 - `to`: string (опционально) — ISO-дата, верхняя граница `createdAt`
 

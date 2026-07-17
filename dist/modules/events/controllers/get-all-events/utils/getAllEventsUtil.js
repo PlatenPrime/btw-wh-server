@@ -1,11 +1,14 @@
 import { Event } from "../../../models/Event.js";
-export const getAllEventsUtil = async ({ page, limit, department, userId, from, to, }) => {
+export const getAllEventsUtil = async ({ page, limit, department, userId, type, from, to, }) => {
     const filter = {};
     if (department) {
         filter.department = department;
     }
     if (userId) {
         filter.userId = userId;
+    }
+    if (type) {
+        filter.type = type;
     }
     if (from || to) {
         filter.createdAt = {};
