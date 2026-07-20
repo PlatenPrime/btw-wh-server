@@ -36,7 +36,7 @@ export const deletePalletEmptyPosesController = async (req, res) => {
                 userId: req.user.id,
                 department: "pallets",
                 type: "delete",
-                description: `Видалено ${result.deletedCount} пустих позицій з паллети (id: ${id})`,
+                description: `Видалено ${result.deletedCount} пустих позицій з паллети ${result.palletTitle ?? id}`,
             });
         }
         res.status(200).json({

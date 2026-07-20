@@ -114,6 +114,7 @@ describe("deletePalletEmptyPosesController", () => {
     expect(responseStatus.code).toBe(200);
     const events = await Event.find({ department: "pallets" });
     expect(events).toHaveLength(1);
+    expect(events[0].description).toContain("Pallet-1");
   });
 });
 

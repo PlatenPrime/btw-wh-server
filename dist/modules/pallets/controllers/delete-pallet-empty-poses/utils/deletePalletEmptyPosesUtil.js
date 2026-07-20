@@ -15,6 +15,7 @@ export const deletePalletEmptyPosesUtil = async ({ palletId, session, }) => {
         return {
             deletedCount: 0,
             affectedPoseIds: [],
+            palletTitle: pallet.title,
         };
     }
     // Получение ID пустых poses
@@ -31,5 +32,6 @@ export const deletePalletEmptyPosesUtil = async ({ palletId, session, }) => {
     return {
         deletedCount: deleteResult.deletedCount || 0,
         affectedPoseIds: emptyPoseIds.map((id) => id.toString()),
+        palletTitle: pallet.title,
     };
 };

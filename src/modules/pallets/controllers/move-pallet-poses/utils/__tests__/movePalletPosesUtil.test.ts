@@ -75,6 +75,9 @@ describe("movePalletPosesUtil", () => {
         session,
       });
 
+      expect(result.sourcePallet).toBeDefined();
+      expect(result.sourcePallet.title).toBe("Source-Pallet");
+      expect(result.sourcePallet.poses.length).toBe(0);
       expect(result.targetPallet).toBeDefined();
       expect(result.targetPallet.poses.length).toBe(2);
     });

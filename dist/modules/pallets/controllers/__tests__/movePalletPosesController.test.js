@@ -114,6 +114,7 @@ describe("movePalletPosesController", () => {
         expect(responseStatus.code).toBe(200);
         const events = await Event.find({ department: "pallets" });
         expect(events).toHaveLength(1);
+        expect(events[0].description).toContain("Source-Pallet-Event");
         expect(events[0].description).toContain("Target-Pallet-Event");
     });
     it("400: если source и target ID одинаковые", async () => {

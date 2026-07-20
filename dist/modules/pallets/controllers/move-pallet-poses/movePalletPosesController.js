@@ -40,7 +40,7 @@ export const movePalletPosesController = async (req, res) => {
                 userId: req.user.id,
                 department: "pallets",
                 type: "edit",
-                description: `Переміщено ${movedCount} позицій з паллети (id: ${sourcePalletId}) на паллету ${result.targetPallet?.title ?? targetPalletId}`,
+                description: `Переміщено ${movedCount} позицій з паллети ${result.sourcePallet?.title ?? sourcePalletId} на паллету ${result.targetPallet?.title ?? targetPalletId}`,
             });
         }
         res.status(200).json({

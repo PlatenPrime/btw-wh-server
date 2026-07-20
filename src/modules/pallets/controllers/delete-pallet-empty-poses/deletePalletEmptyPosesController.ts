@@ -48,7 +48,7 @@ export const deletePalletEmptyPosesController = async (
         userId: req.user.id,
         department: "pallets",
         type: "delete",
-        description: `Видалено ${result.deletedCount} пустих позицій з паллети (id: ${id})`,
+        description: `Видалено ${result.deletedCount} пустих позицій з паллети ${result.palletTitle ?? id}`,
       });
     }
 

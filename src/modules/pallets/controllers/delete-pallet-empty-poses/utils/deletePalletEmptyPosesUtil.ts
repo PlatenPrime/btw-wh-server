@@ -10,6 +10,7 @@ type DeletePalletEmptyPosesInput = {
 export type DeletePalletEmptyPosesResult = {
   deletedCount: number;
   affectedPoseIds: string[];
+  palletTitle: string;
 };
 
 export const deletePalletEmptyPosesUtil = async ({
@@ -32,6 +33,7 @@ export const deletePalletEmptyPosesUtil = async ({
     return {
       deletedCount: 0,
       affectedPoseIds: [],
+      palletTitle: pallet.title,
     };
   }
 
@@ -55,6 +57,7 @@ export const deletePalletEmptyPosesUtil = async ({
   return {
     deletedCount: deleteResult.deletedCount || 0,
     affectedPoseIds: emptyPoseIds.map((id: any) => id.toString()),
+    palletTitle: pallet.title,
   };
 };
 

@@ -59,6 +59,7 @@ describe("deletePalletEmptyPosesUtil", () => {
             });
             expect(result.deletedCount).toBe(2);
             expect(result.affectedPoseIds.length).toBe(2);
+            expect(result.palletTitle).toBe(pallet.title);
             const deletedEmpty1 = await Pos.findById(emptyPos1._id).session(session);
             const deletedEmpty2 = await Pos.findById(emptyPos2._id).session(session);
             const keptFilled = await Pos.findById(filledPos._id).session(session);
@@ -95,6 +96,7 @@ describe("deletePalletEmptyPosesUtil", () => {
             });
             expect(result.deletedCount).toBe(0);
             expect(result.affectedPoseIds.length).toBe(0);
+            expect(result.palletTitle).toBe("Pallet-1");
         });
         await session.endSession();
     });

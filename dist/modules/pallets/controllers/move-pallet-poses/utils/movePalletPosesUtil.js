@@ -57,6 +57,7 @@ export const movePalletPosesUtil = async ({ sourcePalletId, targetPalletId, sess
         sourcePallet.save({ session }),
     ]);
     return {
+        sourcePallet: serializeIds(sourcePallet.toObject()),
         targetPallet: serializeIds(targetPallet.toObject()),
     };
 };

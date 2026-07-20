@@ -12,6 +12,7 @@ type MovePalletPosesInput = {
 };
 
 export type MovePalletPosesResult = {
+  sourcePallet: any;
   targetPallet: any;
 };
 
@@ -84,6 +85,7 @@ export const movePalletPosesUtil = async ({
   ]);
 
   return {
+    sourcePallet: serializeIds(sourcePallet.toObject()),
     targetPallet: serializeIds(targetPallet.toObject()),
   };
 };
