@@ -41,6 +41,63 @@
 
 ---
 
+### GET `/api/sku-slices/client/air/pending`
+
+Очередь Air SKU для клиентского дозаполнения сегодняшнего среза (календарный день `Europe/Kiev`). В выборку попадают только SKU из групп `Skugr` с `isSliced: true`. Позиция pending, если в `SkuSlice` за сегодня нет ключа `productId` или `stock === -1` / `price === -1`. Отсутствие документа среза = все sliced Air SKU pending.
+
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    date: Date (ISO),
+    items: Array<{
+      skuId: string,
+      productId: string,
+      title: string,
+      url: string
+    }>
+  }
+}
+```
+
+**Ошибки:** 401, 403, 500.
+
+---
+
+### PUT `/api/sku-slices/client/air/sku/:skuId`
+
+Идемпотентная запись точки сегодняшнего Air `SkuSlice` из HTML first-party страницы товара. Backend парсит HTML тем же контрактом, что `readAirProductFromHtml`; сервер к сайту Air не ходит.
+
+**Path:** `skuId` — валидный ObjectId.
+
+**Body:**
+
+- `sourceUrl` (string, URL) — должен совпадать с `Sku.url` (нормализация: без hash, без завершающего `/` у path)
+- `html` (string, 1…2_000_000 символов) — `outerHTML` страницы товара
+
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    status: "saved" | "skipped",
+    date: Date (ISO),
+    productId: string,
+    stock: number,
+    price: number
+  }
+}
+```
+
+`saved` — ключ отсутствовал или содержал `-1`; `skipped` — валидное значение уже есть, перезаписи нет.
+
+**Ошибки:** 400 (валидация / не air / не sliced / URL mismatch), 401, 403, 404 (sku не найден), 422 (HTML без валидных stock/price), 500.
+
+---
+
 ### GET `/api/sku-slices/sku/:skuId`
 
 Одна точка остатка и цены по SKU на дату (значения из БД, без нормализации для отчётов).

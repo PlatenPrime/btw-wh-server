@@ -7,8 +7,9 @@ import { ANALOG_SLICE_KONK_NAMES, calculateAnalogSlice, } from "../utils/calcula
 import { getExcludedCompetitorSet, normalizeCompetitorName, } from "../../slices/config/excludedCompetitors.js";
 const log = createLogger({ module: "analog-slices", job: "cron" });
 /**
- * Запускает cron для ежедневных срезов аналогов (air, balun, sharte, yumi, yumin).
- * Ежедневно в 04:00 по киевскому времени. Все пять срезов считаются параллельно.
+ * Запускает cron для ежедневных срезов аналогов (balun, sharte, yumi, yumin).
+ * Ежедневно в 04:00 по киевскому времени. Включённые срезы считаются параллельно.
+ * Air исключён: серверный scrape отключён, SKU-срезы Air — через client-ingestion.
  */
 export function startAnalogSlicesCron() {
     const job = new CronJob("0 0 4 * * *", async () => {

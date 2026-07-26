@@ -1,14 +1,32 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getAirStockData } from "../getAirStockData.js";
-import { browserGet } from "../../../utils/browserRequest.js";
+import { fetchPageHtml } from "../../../utils/fetchPageHtml.js";
+import { logBrowserError } from "../../../utils/browserRequest.js";
 
-vi.mock("../../../utils/browserRequest.js");
+const mockWarn = vi.hoisted(() => vi.fn());
+
+vi.mock("../../../utils/fetchPageHtml.js");
+vi.mock("../../../utils/browserRequest.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../../../utils/browserRequest.js")>();
+  return { ...actual, logBrowserError: vi.fn() };
+});
+vi.mock("../../../../../logging/createLogger.js", () => ({
+  createLogger: () => ({
+    warn: mockWarn,
+    error: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  }),
+}));
 
 describe("getAirStockData", () => {
   const originalProxy = process.env.AIR_HTTP_PROXY_URL;
 
   beforeEach(() => {
-    vi.mocked(browserGet).mockReset();
+    vi.mocked(fetchPageHtml).mockReset();
+    vi.mocked(logBrowserError).mockClear();
+    mockWarn.mockClear();
     delete process.env.AIR_HTTP_PROXY_URL;
   });
 
@@ -47,7 +65,7 @@ describe("getAirStockData", () => {
   });
 
   describe("Успешные сценарии", () => {
-    it("должен возвращать { stock, price } при успешном парсинге", async () => {
+    it("должен возвращать { stock, price } через Playwright", async () => {
       const mockHtml = `
         <input type="hidden" id="max-product-quantity" value="6600" name="max_quantity">
         <div class="us-price-block us-price-block-not-special d-flex align-items-center">
@@ -55,16 +73,42 @@ describe("getAirStockData", () => {
           <div class="us-price-actual">2.08 грн.</div>
         </div>
       `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+      vi.mocked(fetchPageHtml).mockResolvedValue(mockHtml);
 
       const result = await getAirStockData(
         "https://example.com/product/123"
       );
 
       expect(result).toEqual({ stock: 6600, price: 2.08 });
-      expect(browserGet).toHaveBeenCalledWith(
+      expect(fetchPageHtml).toHaveBeenCalledWith(
         "https://example.com/product/123",
-        { proxyUrl: undefined }
+        {
+          konkName: "air",
+          transport: "playwright",
+          proxyUrl: undefined,
+          warmUpUrl: "https://example.com/",
+        }
+      );
+    });
+
+    it("передаёт AIR_HTTP_PROXY_URL в fetchPageHtml", async () => {
+      process.env.AIR_HTTP_PROXY_URL =
+        "http://user:secret@77.47.252.164:50100";
+      vi.mocked(fetchPageHtml).mockResolvedValue(`
+        <input type="hidden" id="max-product-quantity" value="1" name="max_quantity">
+        <div class="us-price-actual">1 грн.</div>
+      `);
+
+      await getAirStockData("https://example.com/product/1");
+
+      expect(fetchPageHtml).toHaveBeenCalledWith(
+        "https://example.com/product/1",
+        {
+          konkName: "air",
+          transport: "playwright",
+          proxyUrl: "http://user:secret@77.47.252.164:50100",
+          warmUpUrl: "https://example.com/",
+        }
       );
     });
 
@@ -73,7 +117,7 @@ describe("getAirStockData", () => {
         <input type="hidden" id="max-product-quantity" value="100" name="max_quantity">
         <div class="us-price-actual">1 234,56 грн.</div>
       `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+      vi.mocked(fetchPageHtml).mockResolvedValue(mockHtml);
 
       const result = await getAirStockData("https://example.com/product/1");
 
@@ -88,7 +132,7 @@ describe("getAirStockData", () => {
       const mockHtml = `
         <div class="us-price-actual">2.08 грн.</div>
       `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+      vi.mocked(fetchPageHtml).mockResolvedValue(mockHtml);
 
       const result = await getAirStockData("https://example.com/product/1");
 
@@ -100,7 +144,7 @@ describe("getAirStockData", () => {
         <input type="hidden" id="max-product-quantity" value="" name="max_quantity">
         <div class="us-price-actual">2.08 грн.</div>
       `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+      vi.mocked(fetchPageHtml).mockResolvedValue(mockHtml);
 
       const result = await getAirStockData("https://example.com/product/1");
 
@@ -109,13 +153,22 @@ describe("getAirStockData", () => {
 
     it("должен возвращать { stock: -1, price: -1 } когда нет .us-price-actual", async () => {
       const mockHtml = `
+        <title>Product</title>
         <input type="hidden" id="max-product-quantity" value="6600" name="max_quantity">
       `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+      vi.mocked(fetchPageHtml).mockResolvedValue(mockHtml);
 
       const result = await getAirStockData("https://example.com/product/1");
 
       expect(result).toEqual(negativeOutcome);
+      expect(mockWarn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: "Air stock HTML parsed to -1/-1",
+          link: "https://example.com/product/1",
+          title: "Product",
+        }),
+        "air stock parse negative"
+      );
     });
 
     it("должен возвращать { stock: -1, price: -1 } когда текст цены нечисловой", async () => {
@@ -123,48 +176,35 @@ describe("getAirStockData", () => {
         <input type="hidden" id="max-product-quantity" value="6600" name="max_quantity">
         <div class="us-price-actual">немає ціни</div>
       `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+      vi.mocked(fetchPageHtml).mockResolvedValue(mockHtml);
 
       const result = await getAirStockData("https://example.com/product/1");
 
       expect(result).toEqual(negativeOutcome);
+      expect(mockWarn).toHaveBeenCalled();
     });
   });
 
   describe("Обработка ошибок", () => {
     it("должен возвращать { stock: -1, price: -1 } при ошибке сети", async () => {
-      vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
+      vi.mocked(fetchPageHtml).mockRejectedValue(new Error("Network error"));
 
       const result = await getAirStockData("https://example.com/product/1");
 
       expect(result).toEqual({ stock: -1, price: -1 });
-    });
-  });
-
-  describe("HTTP proxy", () => {
-    const original = process.env.AIR_HTTP_PROXY_URL;
-
-    afterEach(() => {
-      if (original === undefined) {
-        delete process.env.AIR_HTTP_PROXY_URL;
-      } else {
-        process.env.AIR_HTTP_PROXY_URL = original;
-      }
+      expect(logBrowserError).toHaveBeenCalled();
+      expect(mockWarn).not.toHaveBeenCalled();
     });
 
-    it("не передаёт proxyUrl пока AIR_HTTP_PROXY_ENABLED=false", async () => {
-      process.env.AIR_HTTP_PROXY_URL =
-        "http://user:secret@77.47.252.164:50100";
-      vi.mocked(browserGet).mockResolvedValue(`
-        <input type="hidden" id="max-product-quantity" value="1" name="max_quantity">
-        <div class="us-price-actual">1 грн.</div>
-      `);
+    it("должен возвращать { stock: -1, price: -1 } при ошибке Playwright", async () => {
+      vi.mocked(fetchPageHtml).mockRejectedValue(
+        new Error("Playwright GET HTTP 429: https://example.com/product/1")
+      );
 
-      await getAirStockData("https://example.com/product/1");
+      const result = await getAirStockData("https://example.com/product/1");
 
-      expect(browserGet).toHaveBeenCalledWith("https://example.com/product/1", {
-        proxyUrl: undefined,
-      });
+      expect(result).toEqual({ stock: -1, price: -1 });
+      expect(logBrowserError).toHaveBeenCalled();
     });
   });
 });

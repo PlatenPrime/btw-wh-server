@@ -66,11 +66,16 @@ Sku — документ, описывающий единицу товара к�
 
 Список SKU конкретной группы (по id из поля `skugr.skus`) — **GET `/api/skus/by-skugr/:skugrId`** с пагинацией и поиском по `title`, см. [API Skus](../api/skus.md).
 
+### Live-остаток и цена
+
+Эндпоинт **GET `/api/skus/id/:id/stock`** по запросу опрашивает сайт конкурента: по `konkName` выбирается скрапер, по `url` карточки читаются актуальные `stock` и `price`. Это не данные из `SkuSlice` и не Btrade — только live-снимок для карточки SKU на фронте. Поддерживаются balun, yumi, yumin, sharte, perfect; **air не поддерживается** (серверный scrape отключён). Для срезов Air — [frontend: air-client-sku-slices](../frontend/air-client-sku-slices.md). Подробности live UX — [frontend: sku-live-stock](../frontend/sku-live-stock.md).
+
 ## API эндпоинты
 
 - `GET /api/skus` — список SKU с пагинацией и фильтрами (в т.ч. только не входящие ни в одну группу)
 - `GET /api/skus/by-skugr/:skugrId` — SKU группы по id `skugr` (множество `_id` из `skugr.skus`)
 - `GET /api/skus/id/:id` — получение SKU по id
+- `GET /api/skus/id/:id/stock` — live остаток и цена с сайта конкурента по `url` SKU
 - `POST /api/skus` — создание SKU
 - `PATCH /api/skus/id/:id` — частичное обновление SKU
 - `DELETE /api/skus/id/:id` — удаление SKU с удалением ссылки на этот id из всех `skugr.skus`

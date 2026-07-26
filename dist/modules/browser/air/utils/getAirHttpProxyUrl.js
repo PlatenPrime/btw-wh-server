@@ -1,8 +1,8 @@
 /**
- * Временно выкл.: air идёт без HTTP-прокси (чистый egress).
- * Верни `true`, когда снова нужен `AIR_HTTP_PROXY_URL`.
+ * Вкл.: air идёт через `AIR_HTTP_PROXY_URL`, если задан.
+ * Верни `false`, когда нужен чистый egress без HTTP-прокси.
  */
-export const AIR_HTTP_PROXY_ENABLED = false;
+export const AIR_HTTP_PROXY_ENABLED = true;
 /**
  * URL HTTP-прокси только для запросов к air (`AIR_HTTP_PROXY_URL`).
  * Пример: `http://user:pass@host:50100`

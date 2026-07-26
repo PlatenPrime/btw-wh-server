@@ -1,5 +1,3 @@
-import { Sku } from "../../skus/models/Sku.js";
-import { Skugr } from "../../skugrs/models/Skugr.js";
 import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE, } from "../../skus/utils/getSkuStockDataUtil.js";
 import { isInvalidSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { SkuSlice } from "../models/SkuSlice.js";
@@ -8,6 +6,7 @@ import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { SKU_SLICE_REQUEST_JITTER_MAX_MS, SKU_SLICE_REQUEST_JITTER_MIN_MS, } from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
+import { loadSlicedSkusForKonk } from "./loadSlicedSkusForKonk.js";
 async function fetchSkuStockWithRetry(konkName, productKey, skuId) {
     const log = createLogger({ module: "sku-slices", konkName });
     const delays = [1000, 3000, 5000];
@@ -36,13 +35,7 @@ async function fetchSkuStockWithRetry(konkName, productKey, skuId) {
 export async function runSkuSliceForKonkUtil(konkName, date) {
     const log = createLogger({ module: "sku-slices", konkName });
     const sliceDate = toSliceDate(date);
-    const skugrs = (await Skugr.find({ konkName, isSliced: true })
-        .select("skus")
-        .lean());
-    const slicedSkuIds = Array.from(new Set(skugrs.flatMap((group) => (group.skus ?? []).map((skuId) => skuId.toString()))));
-    const skus = (await Sku.find({ konkName, _id: { $in: slicedSkuIds } })
-        .select("_id productId")
-        .lean());
+    const skus = await loadSlicedSkusForKonk(konkName, "_id productId");
     await SkuSlice.findOneAndUpdate({ konkName, date: sliceDate }, { $setOnInsert: { konkName, date: sliceDate, data: {} } }, { upsert: true });
     let count = 0;
     let invalid = 0;

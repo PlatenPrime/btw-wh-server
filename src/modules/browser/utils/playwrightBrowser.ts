@@ -6,11 +6,15 @@ const browserLog = createLogger({ module: "browser" });
 const DEFAULT_PLAYWRIGHT_CONCURRENCY = 2;
 
 /** Минимальные типы под Playwright API (и тестовые моки). */
+export type PlaywrightResponseLike = {
+  status: () => number;
+};
+
 export type PlaywrightPageLike = {
   goto: (
     url: string,
     options?: { timeout?: number; waitUntil?: string }
-  ) => Promise<unknown>;
+  ) => Promise<PlaywrightResponseLike | null>;
   content: () => Promise<string>;
   close: () => Promise<void>;
 };
@@ -18,6 +22,7 @@ export type PlaywrightPageLike = {
 export type PlaywrightContextLike = {
   newPage: () => Promise<PlaywrightPageLike>;
   close: () => Promise<void>;
+  addInitScript?: (script: string | (() => void)) => Promise<void>;
 };
 
 export type PlaywrightBrowserLike = {
@@ -25,8 +30,14 @@ export type PlaywrightBrowserLike = {
   close: () => Promise<void>;
 };
 
+export type ChromiumLaunchOptions = {
+  headless?: boolean | "shell";
+  args?: string[];
+  ignoreDefaultArgs?: string[] | boolean;
+};
+
 export type ChromiumLauncher = {
-  launch: (options?: { headless?: boolean }) => Promise<PlaywrightBrowserLike>;
+  launch: (options?: ChromiumLaunchOptions) => Promise<PlaywrightBrowserLike>;
 };
 
 type ChromiumLoader = () => Promise<ChromiumLauncher>;
@@ -37,6 +48,39 @@ let chromiumLoader: ChromiumLoader | null = null;
 
 let activeSlots = 0;
 const slotWaiters: Array<() => void> = [];
+
+/**
+ * Опции context: без подмены UA (совпадает с бинарём), uk locale/tz, desktop viewport.
+ */
+export function buildPlaywrightContextOptions(
+  extra?: Record<string, unknown>
+): Record<string, unknown> {
+  return {
+    locale: "uk-UA",
+    timezoneId: "Europe/Kyiv",
+    viewport: { width: 1920, height: 1080 },
+    extraHTTPHeaders: {
+      "Accept-Language": "uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7",
+    },
+    ...extra,
+  };
+}
+
+/**
+ * Патч navigator.webdriver (игнор, если mock context без addInitScript).
+ */
+export async function applyPlaywrightStealth(
+  context: PlaywrightContextLike
+): Promise<void> {
+  if (typeof context.addInitScript !== "function") {
+    return;
+  }
+  await context.addInitScript(() => {
+    Object.defineProperty(Navigator.prototype, "webdriver", {
+      get: () => undefined,
+    });
+  });
+}
 
 function getConcurrencyLimit(): number {
   const raw = process.env.BROWSER_PLAYWRIGHT_CONCURRENCY?.trim();
@@ -100,12 +144,45 @@ export async function withPlaywrightSlot<T>(
   }
 }
 
+/**
+ * `BROWSER_PLAYWRIGHT_HEADLESS`: `true`/`1`/пусто → headless;
+ * `false`/`0` → окно Chromium; `shell` → old headless shell.
+ */
+export function resolvePlaywrightHeadless(
+  raw: string | undefined = process.env.BROWSER_PLAYWRIGHT_HEADLESS
+): boolean | "shell" {
+  const v = raw?.trim().toLowerCase();
+  if (!v || v === "true" || v === "1") {
+    return true;
+  }
+  if (v === "false" || v === "0") {
+    return false;
+  }
+  if (v === "shell") {
+    return "shell";
+  }
+  return true;
+}
+
+export function buildChromiumLaunchOptions(): ChromiumLaunchOptions {
+  const headless = resolvePlaywrightHeadless();
+  return {
+    headless,
+    args: ["--disable-blink-features=AutomationControlled"],
+    ignoreDefaultArgs: ["--enable-automation"],
+  };
+}
+
 async function getBrowser(): Promise<PlaywrightBrowserLike> {
   if (!browserPromise) {
     browserPromise = (async () => {
       const chromium = await loadChromium();
-      browserLog.info("launching Playwright Chromium");
-      return chromium.launch({ headless: true });
+      const launchOpts = buildChromiumLaunchOptions();
+      browserLog.info(
+        { headless: launchOpts.headless },
+        "launching Playwright Chromium"
+      );
+      return chromium.launch(launchOpts);
     })().catch((err) => {
       browserPromise = null;
       throw err;
@@ -114,15 +191,22 @@ async function getBrowser(): Promise<PlaywrightBrowserLike> {
   return browserPromise;
 }
 
+async function createStealthContext(
+  browser: PlaywrightBrowserLike,
+  extra?: Record<string, unknown>
+): Promise<PlaywrightContextLike> {
+  const context = await browser.newContext(
+    buildPlaywrightContextOptions(extra)
+  );
+  await applyPlaywrightStealth(context);
+  return context;
+}
+
 async function getDefaultContext(): Promise<PlaywrightContextLike> {
   if (!defaultContextPromise) {
     defaultContextPromise = (async () => {
       const browser = await getBrowser();
-      return browser.newContext({
-        userAgent:
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        locale: "uk-UA",
-      });
+      return createStealthContext(browser);
     })().catch((err) => {
       defaultContextPromise = null;
       throw err;
@@ -154,10 +238,7 @@ export async function acquirePlaywrightContext(
 
   const server = `${parsed.protocol}://${parsed.host}:${parsed.port}`;
   const browser = await getBrowser();
-  const context = await browser.newContext({
-    userAgent:
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-    locale: "uk-UA",
+  const context = await createStealthContext(browser, {
     proxy: {
       server,
       ...(parsed.auth && {

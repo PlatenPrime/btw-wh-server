@@ -5,6 +5,12 @@ describe("sku-slices router", () => {
         const paths = router.stack
             .filter((layer) => layer.route)
             .map((layer) => layer.route.path);
-        expect(paths).toEqual(["/", "/sku/:skuId/range", "/sku/:skuId"]);
+        expect(paths).toEqual([
+            "/",
+            "/client/air/pending",
+            "/client/air/sku/:skuId",
+            "/sku/:skuId/range",
+            "/sku/:skuId",
+        ]);
     });
 });

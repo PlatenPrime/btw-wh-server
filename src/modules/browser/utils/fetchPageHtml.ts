@@ -12,6 +12,8 @@ export type FetchPageHtmlOptions = {
   transport?: BrowserTransport;
   proxyUrl?: string;
   waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
+  /** Playwright: сначала открыть URL (origin), потом целевой — в той же вкладке. */
+  warmUpUrl?: string;
 };
 
 /**
@@ -29,6 +31,7 @@ export async function fetchPageHtml(
     return playwrightGet(url, {
       proxyUrl: options?.proxyUrl,
       waitUntil: options?.waitUntil,
+      warmUpUrl: options?.warmUpUrl,
     });
   }
 

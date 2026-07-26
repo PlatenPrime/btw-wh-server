@@ -13,7 +13,7 @@
 
 | Конкурент | Путь | HTTP-эндпоинт |
 |-----------|------|---------------|
-| air | [`src/modules/browser/air/`](../../src/modules/browser/air/) | `GET /api/browser/air/stock` |
+| air | [`src/modules/browser/air/`](../../src/modules/browser/air/) | нет публичного stock HTTP; HTML-парсер используется client-ingestion sku-slices |
 | balun | [`src/modules/browser/balun/`](../../src/modules/browser/balun/) | `GET /api/browser/balun/stock` |
 | perfect | [`src/modules/browser/perfect/`](../../src/modules/browser/perfect/) | `GET /api/browser/perfect/stock` |
 | sharte | [`src/modules/browser/sharte/`](../../src/modules/browser/sharte/) | `GET /api/browser/sharte/stock` |
@@ -25,17 +25,21 @@
 
 ## Связи между модулями
 
-- **analog-slices / analogs:** опрос остатков аналогов (air, balun, yumi, yumin, sharte).
-- **sku-slices / skus:** опрос SKU (+ perfect); используется в cron срезов и компенсации.
+- **analog-slices / analogs:** опрос остатков аналогов (balun, yumi, yumin, sharte). Air исключён из серверных stock-геттеров.
+- **sku-slices / skus:** опрос SKU (balun, yumi, yumin, sharte, perfect); Air SKU-срезы — через client-ingestion HTML, не через server scrape.
 - **btrade-slices:** bulk и search через sharik-парсеры.
-- **skugrs:** обход страниц групп для наполнения SKU (`group-products`).
-- **slice-compensation:** повторный опрос через stock-утилиты analog/sku.
+- **skugrs:** обход страниц групп для наполнения SKU (`group-products`), в т.ч. Air listing.
+- **slice-compensation:** повторный опрос через stock-утилиты analog/sku (Air в exclusions).
 
 ## Концепции и принятые решения
 
 ### Общий HTTP-клиент
 
 [`browserRequest.ts`](../../src/modules/browser/utils/browserRequest.ts) — singleton axios с browser-like заголовками и таймаутом 30 с. Текущие конкурентные парсеры вызывают его напрямую.
+
+### Air: парсер без серверного stock-трафика
+
+Публичный `GET /api/browser/air/stock` снят. Transport-код Playwright/axios для Air сохранён, но **серверные stock entrypoints больше не вызывают** `getAirStockData`. Актуальный путь данных для SKU-срезов Air — client-ingestion: расширение/браузер открывает first-party страницу, frontend шлёт HTML на backend, парсер [`readAirProductFromHtml`](../../src/modules/browser/air/utils/air-product-page-from-html/readAirProductFromHtml.ts) извлекает stock/price. Опциональный HTTP-прокси и Playwright-настройки остаются в коде для возможных внутренних/диагностических сценариев, но не участвуют в cron/live stock API.
 
 ### Dual-transport (`http` | `playwright`)
 
@@ -44,11 +48,11 @@
 - транспорт `http` — axios (`browserGet`);
 - транспорт `playwright` — headless Chromium (`page.goto` → HTML), lazy singleton, лимит параллелизма.
 
-Приоритет выбора транспорта: явный параметр вызова → карта env `BROWSER_TRANSPORT_BY_KONK` по `konkName` → `http`. Формат карты: пары `konk:transport` через запятую (например `air:playwright,balun:http`). Невалидные значения игнорируются с предупреждением в лог. Лимит параллельных Playwright-страниц — `BROWSER_PLAYWRIGHT_CONCURRENCY` (по умолчанию 2).
+Приоритет выбора транспорта: явный параметр вызова → карта env `BROWSER_TRANSPORT_BY_KONK` по `konkName` → `http`. Формат карты: пары `konk:transport` через запятую (например `air:playwright,balun:http`). Невалидные значения игнорируются с предупреждением в лог. Лимит параллельных Playwright-страниц — `BROWSER_PLAYWRIGHT_CONCURRENCY` (по умолчанию 2). Режим headless — `BROWSER_PLAYWRIGHT_HEADLESS` (`true` / `false` / `shell`).
 
 На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают.
 
-Существующие `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
+Существующие `get*StockData` (кроме отключённого серверного Air stock) и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются; Air SKU пишутся через client-ingestion.
 
 ### Сентинельные значения
 
@@ -61,7 +65,7 @@
 - разбор HTML-сущностей, относительных ссылок;
 - безопасный парсинг JSON из атрибутов;
 - извлечение чисел из «грязных» строк (`parseStrippedDecimal`);
-- `sleep`, merge cookies, resolve href;
+- `sleep`, merge cookies, resolve href, `HttpsProxyAgent` для HTTP(S) proxy;
 - dual-transport: `resolveBrowserTransport`, `fetchPageHtml`, `playwrightGet`.
 
 ### Group pages (обход листингов)

@@ -150,10 +150,7 @@ describe("runSkuSliceForKonkUtil", () => {
         });
         expect(getSkuStockDataUtil).not.toHaveBeenCalled();
         expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
-        expect(Sku.find).toHaveBeenCalledWith({
-            konkName: "air",
-            _id: { $in: [] },
-        });
+        expect(Sku.find).not.toHaveBeenCalled();
     });
     it("writes -1/-1 to data but counts as invalid not success", async () => {
         vi.mocked(Sku.find).mockReturnValue({

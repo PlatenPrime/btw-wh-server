@@ -32,7 +32,6 @@
 
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
-| GET | `/air/stock` | Нет | Публично |
 | GET | `/balun/stock` | Нет | Публично |
 | GET | `/perfect/stock` | Нет | Публично |
 | GET | `/yumi/stock` | Нет | Публично |
@@ -369,6 +368,7 @@
 | DELETE | `/konk/:konkName/invalid` | JWT | ≥ PRIME |
 | DELETE | `/not-in-any-skugr` | JWT | ≥ PRIME |
 | GET | `/by-skugr/:skugrId` | JWT | ≥ ADMIN |
+| GET | `/id/:id/stock` | JWT | ≥ ADMIN |
 | GET | `/id/:id` | JWT | ≥ ADMIN |
 | POST | `/` | JWT | ≥ ADMIN |
 | POST | `/fix-incorrect-sku-data` | JWT | ≥ ADMIN |
@@ -398,6 +398,8 @@
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
 | GET | `/` | JWT | ≥ ADMIN |
+| GET | `/client/air/pending` | JWT | ≥ ADMIN |
+| PUT | `/client/air/sku/:skuId` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId/range` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId` | JWT | ≥ ADMIN |
 

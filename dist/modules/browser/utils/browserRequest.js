@@ -1,6 +1,6 @@
 import axios, { isAxiosError, } from "axios";
 import { createLogger } from "../../../logging/createLogger.js";
-import { parseHttpProxyUrl } from "./parse-http-proxy-url/parseHttpProxyUrl.js";
+import { createHttpsProxyAgent } from "./create-https-proxy-agent/createHttpsProxyAgent.js";
 const browserLog = createLogger({ module: "browser" });
 /** Лимит ожидания одного HTTP GET (один URL / одна «страница»). На весь обход N страниц — до N × этого значения в худшем случае. */
 export const BROWSER_REQUEST_TIMEOUT_MS = 30_000;
@@ -19,6 +19,21 @@ const BROWSER_HEADERS = {
 };
 let browserAxiosInstance = null;
 const MAX_BROWSER_ERROR_MESSAGE_LENGTH = 240;
+/**
+ * Axios request agents для HTTP(S) proxy (HttpsProxyAgent), либо undefined без proxy.
+ * @throws Error при невалидном proxy URL
+ */
+export function resolveBrowserProxyAgents(proxyUrl) {
+    const trimmed = proxyUrl?.trim();
+    if (!trimmed) {
+        return undefined;
+    }
+    const agent = createHttpsProxyAgent(trimmed);
+    if (!agent) {
+        throw new Error(`Invalid browser HTTP proxy URL: ${trimmed}`);
+    }
+    return { httpAgent: agent, httpsAgent: agent };
+}
 function truncateMessage(message) {
     const trimmed = message.trim();
     if (trimmed.length <= MAX_BROWSER_ERROR_MESSAGE_LENGTH) {
@@ -55,9 +70,12 @@ export function getBrowserAxios() {
 export function formatBrowserFetchError(url, err) {
     if (isAxiosError(err)) {
         const msgLower = err.message.toLowerCase();
+        if (err.code === "ERR_FR_TOO_MANY_REDIRECTS" ||
+            msgLower.includes("maximum number of redirects")) {
+            return `Browser GET redirect loop: ${url}`;
+        }
         if (err.code === "ECONNABORTED" ||
-            msgLower.includes("timeout") ||
-            msgLower.includes("exceeded")) {
+            (msgLower.includes("timeout") && !msgLower.includes("redirect"))) {
             return `Browser GET timeout (${BROWSER_REQUEST_TIMEOUT_MS}ms): ${url}`;
         }
         if (err.response) {
@@ -73,6 +91,7 @@ export function formatBrowserFetchError(url, err) {
 }
 /**
  * Выполняет GET-запрос к URL с браузерными заголовками.
+ * Proxy — через HttpsProxyAgent (axios built-in proxy на HTTPS часто ломается).
  * @param url — полный URL
  * @param options.proxyUrl — опциональный HTTP(S) proxy (например air)
  * @returns data ответа (тип задаётся вызывающим)
@@ -80,19 +99,15 @@ export function formatBrowserFetchError(url, err) {
  */
 export async function browserGet(url, options) {
     const client = getBrowserAxios();
-    const proxyUrl = options?.proxyUrl?.trim();
-    let proxy = false;
-    if (proxyUrl) {
-        const parsed = parseHttpProxyUrl(proxyUrl);
-        if (!parsed) {
-            throw new Error(`Invalid browser HTTP proxy URL: ${proxyUrl}`);
-        }
-        proxy = parsed;
-    }
+    const agents = resolveBrowserProxyAgents(options?.proxyUrl);
     try {
         const response = await client.get(url, {
             timeout: BROWSER_REQUEST_TIMEOUT_MS,
-            proxy,
+            proxy: false,
+            ...(agents && {
+                httpAgent: agents.httpAgent,
+                httpsAgent: agents.httpsAgent,
+            }),
         });
         return response.data;
     }

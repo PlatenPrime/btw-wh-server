@@ -13,7 +13,7 @@
 | **AnalogSlice** | `stock === -1 && price === -1` | `getAnalogStockDataUtil` по `_id` аналога | если ответ не полный `-1/-1` |
 | **SkuSlice** | полный `-1/-1` **или** невалидная цена | `getSkuStockDataUtil` по `_id` SKU | если ответ не полный `-1/-1` |
 
-Пропускаются: конкуренты из [`excludedCompetitors`](slices.md), отсутствующие Analog/Sku, неподдерживаемый konk.
+Пропускаются: конкуренты из [`excludedCompetitors`](slices.md) (включая **air**), отсутствующие Analog/Sku, неподдерживаемый konk. Для Air `POST /run` даёт пустую очередь (noop); дозаполнение SKU-срезов Air — через client-ingestion в [sku-slices](sku-slices.md).
 
 ## Связи между модулями
 

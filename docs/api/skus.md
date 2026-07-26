@@ -64,6 +64,20 @@
 
 ---
 
+### GET `/api/skus/id/:id/stock`
+
+Получение остатка и цены товара по SKU. По id загружается SKU из коллекции; по полю `konkName` выбирается утилита скрапинга (balun, yumi, yumin, sharte, perfect), которая запрашивает данные по `url` SKU. **Air не поддерживается** серверным live-опросом (WAF): для срезов Air используйте client-ingestion в [sku-slices](sku-slices.md). Ответ всегда в формате `{ stock, price }`. Это live-опрос сайта конкурента, не данные из срезов.
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Запрос:** path-параметр `id` — MongoDB ObjectId (id SKU).
+
+**Ответ 200:** `{ message: string, data: { stock: number, price: number } }`.
+
+**Ошибки:** 400 (невалидный id или неподдерживаемый konkName для получения остатков), 401, 403, 404 (sku не найден или товар не найден / данные недоступны), 500.
+
+---
+
 Excel по каталогу (новинки, invalid) перенесён в [API sku-excel-reports](sku-excel-reports.md) (`/catalog/new-since`, `/catalog/invalid`).
 
 ---

@@ -4,10 +4,8 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RoleType } from "../../../constants/roles.js";
 import app from "../../../test/utils/testApp.js";
-import { getAirStockData } from "../air/utils/getAirStockData.js";
 import { getSharikStockData } from "../sharik/utils/getSharikStockData.js";
 
-vi.mock("../air/utils/getAirStockData.js");
 vi.mock("../sharik/utils/getSharikStockData.js");
 
 const createAuthHeader = (role: RoleType = RoleType.USER) => {
@@ -27,24 +25,11 @@ describe("Browser router integration", () => {
   });
 
   describe("GET /api/browser/air/stock", () => {
-    it("400 when link missing", async () => {
-      await request(app).get("/api/browser/air/stock").expect(400);
-      expect(getAirStockData).not.toHaveBeenCalled();
-    });
-
-    it("200 returns stock without auth", async () => {
-      vi.mocked(getAirStockData).mockResolvedValue({
-        stock: 3,
-        price: 10,
-      });
-
-      const response = await request(app)
+    it("404 after air server stock endpoint removed", async () => {
+      await request(app)
         .get("/api/browser/air/stock")
         .query({ link: "https://air.example/p/1" })
-        .expect(200);
-
-      expect(response.body.message).toBe("Air stock retrieved successfully");
-      expect(response.body.data.stock).toBe(3);
+        .expect(404);
     });
   });
 
@@ -74,15 +59,6 @@ describe("Browser router integration", () => {
   });
 
   describe("auth not required", () => {
-    it("air endpoint works without token", async () => {
-      vi.mocked(getAirStockData).mockResolvedValue({ stock: 1, price: 1 });
-
-      await request(app)
-        .get("/api/browser/air/stock")
-        .query({ link: "https://air.example/p/2" })
-        .expect(200);
-    });
-
     it("sharik endpoint works without token", async () => {
       vi.mocked(getSharikStockData).mockResolvedValue({
         nameukr: "X",

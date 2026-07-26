@@ -45,6 +45,21 @@ function axiosHttpError(
   );
 }
 
+describe("resolveBrowserProxyAgents", () => {
+  it("undefined без proxyUrl", async () => {
+    const { resolveBrowserProxyAgents } = await import("../browserRequest.js");
+    expect(resolveBrowserProxyAgents(undefined)).toBeUndefined();
+    expect(resolveBrowserProxyAgents("")).toBeUndefined();
+  });
+
+  it("бросает на SOCKS", async () => {
+    const { resolveBrowserProxyAgents } = await import("../browserRequest.js");
+    expect(() =>
+      resolveBrowserProxyAgents("socks5://user:pass@10.0.0.1:50101")
+    ).toThrow(/Invalid browser HTTP proxy URL/);
+  });
+});
+
 describe("browserGet proxy options", () => {
   it("бросает до запроса при невалидном proxyUrl", async () => {
     await expect(
@@ -67,6 +82,20 @@ describe("formatBrowserFetchError", () => {
     );
     expect(formatBrowserFetchError(url, err)).toBe(
       "Browser GET timeout (30000ms): https://yumi.market/api/products?x=1"
+    );
+  });
+
+  it("не путает redirect loop с timeout", () => {
+    const url = "https://airballoons.com.ua/";
+    const err = new AxiosError(
+      "Maximum number of redirects exceeded",
+      "ERR_FR_TOO_MANY_REDIRECTS",
+      axCfg(url),
+      undefined,
+      undefined
+    );
+    expect(formatBrowserFetchError(url, err)).toBe(
+      "Browser GET redirect loop: https://airballoons.com.ua/"
     );
   });
 

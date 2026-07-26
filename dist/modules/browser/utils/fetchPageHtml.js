@@ -11,6 +11,7 @@ export async function fetchPageHtml(url, options) {
         return playwrightGet(url, {
             proxyUrl: options?.proxyUrl,
             waitUntil: options?.waitUntil,
+            warmUpUrl: options?.warmUpUrl,
         });
     }
     return browserGet(url, { proxyUrl: options?.proxyUrl });

@@ -6,6 +6,8 @@ describe("sku-slices controllers index", () => {
             "getSkuSliceController",
             "getSkuSliceByDateController",
             "getSkuSliceRangeController",
+            "getAirClientPendingController",
+            "putAirClientSkuSliceController",
         ];
         for (const name of expected) {
             expect(typeof controllers[name]).toBe("function");

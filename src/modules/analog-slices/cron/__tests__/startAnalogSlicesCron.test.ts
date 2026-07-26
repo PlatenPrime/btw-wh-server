@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("cron");
 vi.mock("../../utils/calculateAnalogSlice.js", () => ({
-  ANALOG_SLICE_KONK_NAMES: ["air", "balun", "sharte", "yumi", "yumin"],
+  ANALOG_SLICE_KONK_NAMES: ["balun", "sharte", "yumi", "yumin"],
   calculateAnalogSlice: vi.fn(),
 }));
 vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
@@ -55,15 +55,13 @@ describe("startAnalogSlicesCron", () => {
     vi.mocked(calculateAnalogSlice).mockImplementation(async (konkName) => ({
       ...sliceResult,
       count:
-        konkName === "air"
-          ? 1
-          : konkName === "balun"
-            ? 2
-            : konkName === "sharte"
-              ? 3
-              : konkName === "yumi"
-                ? 4
-                : 5,
+        konkName === "balun"
+          ? 2
+          : konkName === "sharte"
+            ? 3
+            : konkName === "yumi"
+              ? 4
+              : 5,
     }));
     vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
   });
@@ -89,8 +87,7 @@ describe("startAnalogSlicesCron", () => {
       await cronCallback();
     }
 
-    expect(calculateAnalogSlice).toHaveBeenCalledTimes(3);
-    expect(calculateAnalogSlice).toHaveBeenCalledWith("air");
+    expect(calculateAnalogSlice).toHaveBeenCalledTimes(2);
     expect(calculateAnalogSlice).toHaveBeenCalledWith("sharte");
     expect(calculateAnalogSlice).toHaveBeenCalledWith("yumin");
     expect(calculateAnalogSlice).not.toHaveBeenCalledWith("balun");

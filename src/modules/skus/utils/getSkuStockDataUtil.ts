@@ -1,5 +1,4 @@
 import { Sku } from "../models/Sku.js";
-import { getAirStockData } from "../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../browser/balun/utils/getBalunStockData.js";
 import { getYumiStockData } from "../../browser/yumi/utils/getYumiStockData.js";
 import { getYuminStockData } from "../../browser/yumin/utils/getYuminStockData.js";
@@ -16,7 +15,6 @@ export interface SkuStockResult {
 type StockDataFn = (url: string) => Promise<{ stock: number; price?: number }>;
 
 const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
-  air: getAirStockData,
   balun: getBalunStockData,
   yumi: getYumiStockData,
   yumin: getYuminStockData,
@@ -26,6 +24,7 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
 
 /**
  * Остаток и цена по SKU: по konkName выбирается геттер, вызов с sku.url.
+ * Air не поддерживается серверным scrape — только client-ingestion в sku-slices.
  */
 export async function getSkuStockDataUtil(
   skuId: string

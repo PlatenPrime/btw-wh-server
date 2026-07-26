@@ -1,9 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Sku } from "../../models/Sku.js";
+import { getBalunStockData } from "../../../browser/balun/utils/getBalunStockData.js";
 
-vi.mock("../../../browser/air/utils/getAirStockData.js", () => ({
-  getAirStockData: vi.fn(),
-}));
 vi.mock("../../../browser/balun/utils/getBalunStockData.js", () => ({
   getBalunStockData: vi.fn(),
 }));
@@ -20,18 +18,17 @@ vi.mock("../../../browser/perfect/utils/getPerfectStockData.js", () => ({
   getPerfectStockData: vi.fn(),
 }));
 
-import { getAirStockData } from "../../../browser/air/utils/getAirStockData.js";
 import {
   getSkuStockDataUtil,
   UNSUPPORTED_KONK_CODE,
 } from "../getSkuStockDataUtil.js";
 
-const mockGetAirStockData = vi.mocked(getAirStockData);
+const mockGetBalunStockData = vi.mocked(getBalunStockData);
 
 describe("getSkuStockDataUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    mockGetAirStockData.mockReset();
+    mockGetBalunStockData.mockReset();
   });
 
   it("returns null when sku not found", async () => {
@@ -53,9 +50,7 @@ describe("getSkuStockDataUtil", () => {
     });
   });
 
-  it("calls konk-specific getter and maps stock and price", async () => {
-    mockGetAirStockData.mockResolvedValue({ stock: 8, price: 150 });
-
+  it("throws UNSUPPORTED_KONK for air (server scrape disabled)", async () => {
     const sku = await Sku.create({
       konkName: "air",
       prodName: "p",
@@ -64,21 +59,37 @@ describe("getSkuStockDataUtil", () => {
       url: "https://air.com/item",
     });
 
+    await expect(getSkuStockDataUtil(sku._id.toString())).rejects.toMatchObject({
+      code: UNSUPPORTED_KONK_CODE,
+    });
+  });
+
+  it("calls konk-specific getter and maps stock and price", async () => {
+    mockGetBalunStockData.mockResolvedValue({ stock: 8, price: 150 });
+
+    const sku = await Sku.create({
+      konkName: "balun",
+      prodName: "p",
+      productId: "balun-stock-1",
+      title: "Item",
+      url: "https://balun.com/item",
+    });
+
     const result = await getSkuStockDataUtil(sku._id.toString());
 
-    expect(mockGetAirStockData).toHaveBeenCalledWith("https://air.com/item");
+    expect(mockGetBalunStockData).toHaveBeenCalledWith("https://balun.com/item");
     expect(result).toEqual({ stock: 8, price: 150 });
   });
 
   it("uses -1 when getter omits price", async () => {
-    mockGetAirStockData.mockResolvedValue({ stock: 2 } as import("../../../browser/air/utils/air-product-types/airProductInfo.js").AirProductInfo);
+    mockGetBalunStockData.mockResolvedValue({ stock: 2 } as never);
 
     const sku = await Sku.create({
-      konkName: "air",
+      konkName: "balun",
       prodName: "p",
-      productId: "air-stock-2",
+      productId: "balun-stock-2",
       title: "No price",
-      url: "https://air.com/no-price",
+      url: "https://balun.com/no-price",
     });
 
     const result = await getSkuStockDataUtil(sku._id.toString());

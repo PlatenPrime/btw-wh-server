@@ -7,12 +7,12 @@ describe("normalizeCompetitorName", () => {
     });
 });
 describe("getExcludedCompetitorSet", () => {
-    it("returns normalized names for skuSlices", () => {
+    it("returns normalized names for skuSlices including air", () => {
         const set = getExcludedCompetitorSet("skuSlices");
-        expect(set).toEqual(new Set(["yumi"]));
+        expect(set).toEqual(new Set(["yumi", "air"]));
     });
-    it("returns empty set for analogSlices", () => {
-        expect(getExcludedCompetitorSet("analogSlices")).toEqual(new Set());
+    it("returns air for analogSlices", () => {
+        expect(getExcludedCompetitorSet("analogSlices")).toEqual(new Set(["air"]));
     });
     it("reflects excludedCompetitors config", () => {
         for (const sliceType of ["analogSlices", "skuSlices"]) {

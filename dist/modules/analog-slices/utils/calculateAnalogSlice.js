@@ -1,7 +1,6 @@
 import { runAnalogSliceForKonkUtil, } from "./runAnalogSliceForKonkUtil.js";
 /** Конкуренты, для которых cron собирает ежедневные срезы аналогов. */
 export const ANALOG_SLICE_KONK_NAMES = [
-    "air",
     "balun",
     "sharte",
     "yumi",

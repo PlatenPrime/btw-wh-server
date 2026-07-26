@@ -47,6 +47,7 @@ describe("fetchPageHtml", () => {
         expect(playwrightGet).toHaveBeenCalledWith("https://example.com", {
             proxyUrl: undefined,
             waitUntil: undefined,
+            warmUpUrl: undefined,
         });
         expect(browserGet).not.toHaveBeenCalled();
     });
@@ -56,10 +57,12 @@ describe("fetchPageHtml", () => {
             konkName: "air",
             proxyUrl: "http://proxy:1",
             waitUntil: "networkidle",
+            warmUpUrl: "https://example.com/",
         });
         expect(playwrightGet).toHaveBeenCalledWith("https://example.com/a", {
             proxyUrl: "http://proxy:1",
             waitUntil: "networkidle",
+            warmUpUrl: "https://example.com/",
         });
     });
     it("env + неизвестный konk → http", async () => {

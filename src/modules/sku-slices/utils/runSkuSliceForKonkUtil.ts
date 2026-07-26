@@ -1,5 +1,3 @@
-import { Sku } from "../../skus/models/Sku.js";
-import { Skugr } from "../../skugrs/models/Skugr.js";
 import {
   getSkuStockDataUtil,
   UNSUPPORTED_KONK_CODE,
@@ -14,15 +12,7 @@ import {
   SKU_SLICE_REQUEST_JITTER_MAX_MS,
   SKU_SLICE_REQUEST_JITTER_MIN_MS,
 } from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
-
-type SkuLean = {
-  _id: { toString(): string };
-  productId?: string;
-};
-
-type SkugrLean = {
-  skus?: Array<{ toString(): string }>;
-};
+import { loadSlicedSkusForKonk } from "./loadSlicedSkusForKonk.js";
 
 async function fetchSkuStockWithRetry(
   konkName: string,
@@ -81,19 +71,7 @@ export async function runSkuSliceForKonkUtil(
 ): Promise<SkuSliceKonkResult> {
   const log = createLogger({ module: "sku-slices", konkName });
   const sliceDate = toSliceDate(date);
-  const skugrs = (await Skugr.find({ konkName, isSliced: true })
-    .select("skus")
-    .lean()) as SkugrLean[];
-  const slicedSkuIds = Array.from(
-    new Set(
-      skugrs.flatMap((group) =>
-        (group.skus ?? []).map((skuId) => skuId.toString())
-      )
-    )
-  );
-  const skus = (await Sku.find({ konkName, _id: { $in: slicedSkuIds } })
-    .select("_id productId")
-    .lean()) as SkuLean[];
+  const skus = await loadSlicedSkusForKonk(konkName, "_id productId");
 
   await SkuSlice.findOneAndUpdate(
     { konkName, date: sliceDate },

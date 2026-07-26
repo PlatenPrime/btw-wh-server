@@ -11,6 +11,7 @@ import {
   getAllSkusController,
   getSkusBySkugrIdController,
   getSkuByIdController,
+  getSkuStockDataController,
   updateSkuByIdController,
 } from "./controllers/index.js";
 
@@ -39,6 +40,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkusBySkugrIdController)
+);
+router.get(
+  "/id/:id/stock",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuStockDataController)
 );
 router.get(
   "/id/:id",

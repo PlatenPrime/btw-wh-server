@@ -1,12 +1,18 @@
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import request from "supertest";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
 import { Skugr } from "../../skugrs/models/Skugr.js";
 import { Sku } from "../models/Sku.js";
+vi.mock("../utils/getSkuStockDataUtil.js", () => ({
+    getSkuStockDataUtil: vi.fn(),
+    UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
+}));
+import { getSkuStockDataUtil } from "../utils/getSkuStockDataUtil.js";
+const mockGetStock = vi.mocked(getSkuStockDataUtil);
 const createAuthHeader = (role = RoleType.ADMIN) => {
     const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
     const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, { expiresIn: "1h" });
@@ -16,6 +22,7 @@ describe("Skus router integration", () => {
     beforeEach(async () => {
         await Sku.deleteMany({});
         await Skugr.deleteMany({});
+        mockGetStock.mockReset();
     });
     describe("GET /api/skus", () => {
         it("401 without auth token", async () => {
@@ -59,6 +66,23 @@ describe("Skus router integration", () => {
                 .get("/api/skus/id/000000000000000000000000")
                 .set(createAuthHeader(RoleType.ADMIN))
                 .expect(404);
+        });
+    });
+    describe("GET /api/skus/id/:id/stock", () => {
+        it("200 returns stock data", async () => {
+            const sku = await Sku.create({
+                konkName: "air",
+                prodName: "p1",
+                productId: "air-stock",
+                title: "Stock SKU",
+                url: "https://ex.com/stock",
+            });
+            mockGetStock.mockResolvedValue({ stock: 7, price: 120 });
+            const response = await request(app)
+                .get(`/api/skus/id/${sku._id.toString()}/stock`)
+                .set(createAuthHeader(RoleType.ADMIN))
+                .expect(200);
+            expect(response.body.data).toEqual({ stock: 7, price: 120 });
         });
     });
     describe("POST /api/skus/fix-incorrect-sku-data", () => {

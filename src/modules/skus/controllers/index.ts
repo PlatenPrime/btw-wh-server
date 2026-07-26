@@ -6,4 +6,5 @@ export { fixIncorrectSkuDataController } from "./fix-incorrect-sku-data/fixIncor
 export { getAllSkusController } from "./get-all-skus/getAllSkusController.js";
 export { getSkusBySkugrIdController } from "./get-skus-by-skugr-id/getSkusBySkugrIdController.js";
 export { getSkuByIdController } from "./get-sku-by-id/getSkuByIdController.js";
+export { getSkuStockDataController } from "./get-sku-stock/getSkuStockDataController.js";
 export { updateSkuByIdController } from "./update-sku-by-id/updateSkuByIdController.js";
