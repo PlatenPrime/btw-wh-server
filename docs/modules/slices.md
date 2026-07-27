@@ -22,10 +22,10 @@
 
 Конфиг `excludedCompetitors` задаёт per-type списки:
 
-- `analogSlices` — `air` (серверный scrape отключён);
-- `skuSlices` — `yumi`, `air`.
+- `analogSlices` — пусто (Air снова в server scrape);
+- `skuSlices` — `yumi`.
 
-Имена нормализуются через `normalizeCompetitorName` (trim + lowercase). Cron срезов и компенсации пропускают таких конкурентов. Для Air SKU-срезов вместо compensation используется client-ingestion в модуле [sku-slices](sku-slices.md).
+Имена нормализуются через `normalizeCompetitorName` (trim + lowercase). Cron срезов и компенсации пропускают таких конкурентов. Для Air SKU параллельно доступен client-ingestion в модуле [sku-slices](sku-slices.md) как ручной/компенсирующий канал.
 
 ### Контракт `-1`
 

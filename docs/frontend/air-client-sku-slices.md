@@ -2,7 +2,7 @@
 
 ## Задача
 
-Серверный scrape Airballoons блокируется WAF (в т.ч. cross-origin `fetch` из SPA). Air исключён из sku/analog cron и compensation. Срезы Air SKU за **сегодня** (календарный день `Europe/Kiev`) дозаполняются с машины оператора: Chrome extension открывает first-party страницу товара, frontend с JWT отправляет HTML на backend.
+Серверный scrape Air снова primary (impit + cron/compensation/live). Client-ingestion остаётся **параллельным** каналом: дозаполнение срезов Air SKU за **сегодня** (календарный день `Europe/Kiev`) с машины оператора, когда серверный опрос вернул missing/`-1` или нужен ручной прогон. Chrome extension открывает first-party страницу товара, frontend с JWT отправляет HTML на backend.
 
 Расширение и frontend живут вне этого репозитория; здесь только контракт поведения.
 
@@ -15,7 +15,7 @@
 
 ## UX / поток
 
-1. Кнопка «Дозаполнить Air сегодня» (ADMIN/PRIME).
+1. Кнопка «Дозаполнить Air сегодня» (ADMIN/PRIME) — рядом с live-stock / compensating slice, не вместо них.
 2. Загрузить pending; показать счётчик и список (можно свёрнутый).
 3. Последовательно по `items` (не параллельный шторм вкладок):
    - extension открывает `url` как обычную навигацию (first-party);
@@ -38,7 +38,7 @@
 
 ## Не делать
 
-- Не `fetch(airUrl)` из SPA — WAF/CORS отдают 429 / блокируют чтение.
+- Не `fetch(airUrl)` из SPA ради HTML для PUT — WAF/CORS могут блокировать; для HTML используйте extension first-party.
 - Не слать JWT в расширение: HTML возвращается на страницу приложения, PUT делает frontend.
 - Не перезаписывать валидные точки повторным PUT — backend уже идемпотентен.
-- Не смешивать с `GET /api/skus/id/:id/stock` (live) и `POST /api/slice-compensation/run` (для air noop).
+- Не подменять этим каналом `GET /api/skus/id/:id/stock` (live) и `POST /api/slice-compensation/run` — они снова работают для air на сервере.

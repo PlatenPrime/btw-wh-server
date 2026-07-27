@@ -66,7 +66,7 @@
 
 ### GET `/api/skus/id/:id/stock`
 
-Получение остатка и цены товара по SKU. По id загружается SKU из коллекции; по полю `konkName` выбирается утилита скрапинга (balun, yumi, yumin, sharte, perfect), которая запрашивает данные по `url` SKU. **Air не поддерживается** серверным live-опросом (WAF): для срезов Air используйте client-ingestion в [sku-slices](sku-slices.md). Ответ всегда в формате `{ stock, price }`. Это live-опрос сайта конкурента, не данные из срезов.
+Получение остатка и цены товара по SKU. По id загружается SKU из коллекции; по полю `konkName` выбирается утилита скрапинга (air, balun, yumi, yumin, sharte, perfect), которая запрашивает данные по `url` SKU. Ответ всегда в формате `{ stock, price }`. Это live-опрос сайта конкурента, не данные из срезов. Для ручного дозаполнения срезов Air параллельно доступен client-ingestion в [sku-slices](sku-slices.md).
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 

@@ -4,8 +4,10 @@ import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RoleType } from "../../../constants/roles.js";
 import app from "../../../test/utils/testApp.js";
+import { getAirStockData } from "../air/utils/getAirStockData.js";
 import { getSharikStockData } from "../sharik/utils/getSharikStockData.js";
 
+vi.mock("../air/utils/getAirStockData.js");
 vi.mock("../sharik/utils/getSharikStockData.js");
 
 const createAuthHeader = (role: RoleType = RoleType.USER) => {
@@ -25,10 +27,31 @@ describe("Browser router integration", () => {
   });
 
   describe("GET /api/browser/air/stock", () => {
-    it("404 after air server stock endpoint removed", async () => {
-      await request(app)
+    it("200 returns air stock", async () => {
+      vi.mocked(getAirStockData).mockResolvedValue({
+        stock: 10,
+        price: 2.5,
+      });
+
+      const response = await request(app)
         .get("/api/browser/air/stock")
         .query({ link: "https://air.example/p/1" })
+        .expect(200);
+
+      expect(response.body.message).toBe("Air stock retrieved successfully");
+      expect(response.body.data).toEqual({ stock: 10, price: 2.5 });
+      expect(getAirStockData).toHaveBeenCalledWith("https://air.example/p/1");
+    });
+
+    it("404 when stock and price are -1", async () => {
+      vi.mocked(getAirStockData).mockResolvedValue({
+        stock: -1,
+        price: -1,
+      });
+
+      await request(app)
+        .get("/api/browser/air/stock")
+        .query({ link: "https://air.example/p/missing" })
         .expect(404);
     });
   });

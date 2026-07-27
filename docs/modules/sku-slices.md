@@ -16,15 +16,15 @@
 
 - **Sku** — ключи в `data` совпадают с `Sku.productId`.
 - **Skugr** — cron и client-pending обходят только SKU из групп с `isSliced: true`.
-- **browser** — серверный скрапинг через `getSkuStockDataUtil` для поддерживаемых конкурентов; для Air HTML-парсер используется только в client-ingestion.
+- **browser** — серверный скрапинг через `getSkuStockDataUtil` (включая Air через impit); HTML-парсер Air также используется в client-ingestion.
 
 ## Сбор данных
 
-Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/config/excludedCompetitors` (в т.ч. `air` и `yumi` исключены из sku-cron). Jitter из `sku-reporting/constants`. Ключ даты — `toNextKyivSliceDate`.
+Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/config/excludedCompetitors` (сейчас из sku-cron исключён `yumi`). Jitter из `sku-reporting/constants`. Ключ даты — `toNextKyivSliceDate`.
 
 ### Client-ingestion для Air
 
-Серверный scrape Air отключён (WAF). Срезы Air за **сегодня** (`toSliceDate`) дозаполняются через ADMIN API:
+Параллельный канал к server scrape: срезы Air за **сегодня** (`toSliceDate`) можно дозаполнить с клиента через ADMIN API, если серверный опрос не дал валидных данных или оператор запускает ручной прогон:
 
 1. `GET /client/air/pending` — очередь missing/`-1` среди sliced Air SKU;
 2. `PUT /client/air/sku/:skuId` — HTML first-party страницы → `readAirProductFromHtml` → атомарный `$set` только если ключ отсутствует или содержит `-1` (иначе `skipped`).

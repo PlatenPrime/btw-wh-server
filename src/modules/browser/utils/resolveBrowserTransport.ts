@@ -2,12 +2,16 @@ import { createLogger } from "../../../logging/createLogger.js";
 
 const browserLog = createLogger({ module: "browser" });
 
-export type BrowserTransport = "http" | "playwright";
+export type BrowserTransport = "http" | "impit" | "playwright";
 
-const VALID_TRANSPORTS = new Set<BrowserTransport>(["http", "playwright"]);
+const VALID_TRANSPORTS = new Set<BrowserTransport>([
+  "http",
+  "impit",
+  "playwright",
+]);
 
 /**
- * Парсит `BROWSER_TRANSPORT_BY_KONK` вида `air:playwright,foo:http`.
+ * Парсит `BROWSER_TRANSPORT_BY_KONK` вида `air:impit,foo:http`.
  * Ключи — lowercase konkName; невалидный transport пропускается (warn) и не попадает в map.
  */
 export function parseBrowserTransportByKonk(

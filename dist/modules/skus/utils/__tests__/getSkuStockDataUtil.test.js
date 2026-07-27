@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Sku } from "../../models/Sku.js";
+import { getAirStockData } from "../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../browser/balun/utils/getBalunStockData.js";
+vi.mock("../../../browser/air/utils/getAirStockData.js", () => ({
+    getAirStockData: vi.fn(),
+}));
 vi.mock("../../../browser/balun/utils/getBalunStockData.js", () => ({
     getBalunStockData: vi.fn(),
 }));
@@ -18,10 +22,12 @@ vi.mock("../../../browser/perfect/utils/getPerfectStockData.js", () => ({
 }));
 import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE, } from "../getSkuStockDataUtil.js";
 const mockGetBalunStockData = vi.mocked(getBalunStockData);
+const mockGetAirStockData = vi.mocked(getAirStockData);
 describe("getSkuStockDataUtil", () => {
     beforeEach(async () => {
         await Sku.deleteMany({});
         mockGetBalunStockData.mockReset();
+        mockGetAirStockData.mockReset();
     });
     it("returns null when sku not found", async () => {
         const result = await getSkuStockDataUtil("000000000000000000000000");
@@ -39,7 +45,8 @@ describe("getSkuStockDataUtil", () => {
             code: UNSUPPORTED_KONK_CODE,
         });
     });
-    it("throws UNSUPPORTED_KONK for air (server scrape disabled)", async () => {
+    it("calls getAirStockData for air", async () => {
+        mockGetAirStockData.mockResolvedValue({ stock: 4, price: 12.5 });
         const sku = await Sku.create({
             konkName: "air",
             prodName: "p",
@@ -47,9 +54,9 @@ describe("getSkuStockDataUtil", () => {
             title: "Item",
             url: "https://air.com/item",
         });
-        await expect(getSkuStockDataUtil(sku._id.toString())).rejects.toMatchObject({
-            code: UNSUPPORTED_KONK_CODE,
-        });
+        const result = await getSkuStockDataUtil(sku._id.toString());
+        expect(mockGetAirStockData).toHaveBeenCalledWith("https://air.com/item");
+        expect(result).toEqual({ stock: 4, price: 12.5 });
     });
     it("calls konk-specific getter and maps stock and price", async () => {
         mockGetBalunStockData.mockResolvedValue({ stock: 8, price: 150 });

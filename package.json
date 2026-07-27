@@ -31,6 +31,7 @@
     "express": "^5.0.1",
     "express-validator": "^7.2.1",
     "https-proxy-agent": "^9.1.0",
+    "impit": "^0.14.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.6",
     "pino": "^10.3.1",

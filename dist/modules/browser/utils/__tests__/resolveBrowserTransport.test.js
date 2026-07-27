@@ -7,17 +7,18 @@ describe("parseBrowserTransportByKonk", () => {
         expect(parseBrowserTransportByKonk("   ").size).toBe(0);
     });
     it("парсит пары konk:transport", () => {
-        const map = parseBrowserTransportByKonk("air:playwright, balun:http, YUMI:Playwright");
-        expect(map.get("air")).toBe("playwright");
+        const map = parseBrowserTransportByKonk("air:impit, balun:http, YUMI:Playwright");
+        expect(map.get("air")).toBe("impit");
         expect(map.get("balun")).toBe("http");
         expect(map.get("yumi")).toBe("playwright");
         expect(map.size).toBe(3);
     });
     it("игнорирует невалидный transport и malformed entry", () => {
-        const map = parseBrowserTransportByKonk("air:selenium, :playwright, noColon, foo:playwright");
+        const map = parseBrowserTransportByKonk("air:selenium, :playwright, noColon, foo:playwright, bar:impit");
         expect(map.get("air")).toBeUndefined();
         expect(map.get("foo")).toBe("playwright");
-        expect(map.size).toBe(1);
+        expect(map.get("bar")).toBe("impit");
+        expect(map.size).toBe(2);
     });
 });
 describe("resolveBrowserTransport", () => {
@@ -44,9 +45,9 @@ describe("resolveBrowserTransport", () => {
         expect(resolveBrowserTransport("balun")).toBe("http");
     });
     it("известный konk из env", () => {
-        process.env.BROWSER_TRANSPORT_BY_KONK = "Air:playwright,balun:http";
-        expect(resolveBrowserTransport("air")).toBe("playwright");
-        expect(resolveBrowserTransport(" AIR ")).toBe("playwright");
+        process.env.BROWSER_TRANSPORT_BY_KONK = "Air:impit,balun:http";
+        expect(resolveBrowserTransport("air")).toBe("impit");
+        expect(resolveBrowserTransport(" AIR ")).toBe("impit");
         expect(resolveBrowserTransport("balun")).toBe("http");
     });
     it("пустой env → http", () => {

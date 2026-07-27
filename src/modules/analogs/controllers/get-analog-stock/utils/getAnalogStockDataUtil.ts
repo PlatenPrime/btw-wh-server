@@ -1,4 +1,5 @@
 import { Analog } from "../../../models/Analog.js";
+import { getAirStockData } from "../../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../../browser/balun/utils/getBalunStockData.js";
 import { getYumiStockData } from "../../../../browser/yumi/utils/getYumiStockData.js";
 import { getYuminStockData } from "../../../../browser/yumin/utils/getYuminStockData.js";
@@ -14,6 +15,7 @@ export interface AnalogStockResult {
 type StockDataFn = (url: string) => Promise<{ stock: number; price?: number }>;
 
 const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
+  air: getAirStockData,
   balun: getBalunStockData,
   yumi: getYumiStockData,
   yumin: getYuminStockData,
@@ -23,7 +25,6 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
 /**
  * Получает остаток и цену по аналогу: загружает аналог по id,
  * по konkName выбирает утилиту скрапинга и вызывает её с analog.url.
- * Air не поддерживается серверным scrape.
  * @param analogId — id документа аналога
  * @returns { stock, price } или null если аналог не найден
  * @throws Error с code === UNSUPPORTED_KONK_CODE при неподдерживаемом konkName

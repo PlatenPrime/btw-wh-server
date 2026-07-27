@@ -38,4 +38,4 @@
 - Не подменять этим запросом чтение `GET /api/sku-slices/...` — срезы и live — разные источники.
 - Не трактовать 404 как «остаток ноль»: при недоступности данных бэкенд отдаёт 404, а не `{ stock: 0 }`.
 - Не вызывать endpoint массово по списку SKU без явной необходимости: каждый вызов — scrape.
-- Для `konkName === "air"` кнопку live-stock не показывать (или сразу вести в [air-client-sku-slices](air-client-sku-slices.md)): серверный scrape Air отключён, ответ будет 400 Unsupported competitor.
+- Для Air live-stock доступен; при массовых `-1` дополнительно можно запустить [air-client-sku-slices](air-client-sku-slices.md).

@@ -52,7 +52,7 @@ export type CrawlHtmlGroupListingPagesOptions<T> = {
    */
   delayBeforeNextMs?: number | (() => number);
   /** Подмена GET HTML (например air через HTTP-прокси). По умолчанию — browserGet. */
-  fetchPageHtml?: (url: string) => Promise<string>;
+  getHtml?: (url: string) => Promise<string>;
 };
 
 /**
@@ -68,7 +68,7 @@ export async function crawlHtmlGroupListingPages<T>(
     getNextPageUrl,
     stopOnEmptyPage = false,
     delayBeforeNextMs = 0,
-    fetchPageHtml = (url) => browserGet<string>(url),
+    getHtml = (url) => browserGet<string>(url),
   } = options;
 
   const visited = new Set<string>();
@@ -87,7 +87,7 @@ export async function crawlHtmlGroupListingPages<T>(
     }
     visited.add(currentUrl);
 
-    const html = await fetchPageHtml(currentUrl);
+    const html = await getHtml(currentUrl);
     const $ = cheerio.load(html);
 
     const pageProducts = parseProductsFromPage($, currentUrl);

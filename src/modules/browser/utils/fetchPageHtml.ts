@@ -1,4 +1,5 @@
 import { browserGet } from "./browserRequest.js";
+import { impitGet } from "./impitGet.js";
 import { playwrightGet } from "./playwrightGet.js";
 import {
   resolveBrowserTransport,
@@ -12,12 +13,12 @@ export type FetchPageHtmlOptions = {
   transport?: BrowserTransport;
   proxyUrl?: string;
   waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
-  /** Playwright: сначала открыть URL (origin), потом целевой — в той же вкладке. */
+  /** Playwright/impit: сначала открыть URL (origin), потом целевой. */
   warmUpUrl?: string;
 };
 
 /**
- * Единая точка получения HTML страницы: http (axios) или playwright.
+ * Единая точка получения HTML: http (axios), impit (browser TLS) или playwright.
  * Приоритет: options.transport → env по konkName → http.
  */
 export async function fetchPageHtml(
@@ -31,6 +32,13 @@ export async function fetchPageHtml(
     return playwrightGet(url, {
       proxyUrl: options?.proxyUrl,
       waitUntil: options?.waitUntil,
+      warmUpUrl: options?.warmUpUrl,
+    });
+  }
+
+  if (transport === "impit") {
+    return impitGet(url, {
+      proxyUrl: options?.proxyUrl,
       warmUpUrl: options?.warmUpUrl,
     });
   }

@@ -242,9 +242,9 @@ describe("crawlHtmlGroupListingPages", () => {
         expect(sleep).toHaveBeenCalledTimes(1);
         expect(sleep).toHaveBeenCalledWith(123);
     });
-    it("uses fetchPageHtml instead of browserGet when provided", async () => {
+    it("uses getHtml instead of browserGet when provided", async () => {
         const html = htmlWithNext('<div id="p1">a</div>');
-        const fetchPageHtml = vi.fn(async () => html);
+        const getHtml = vi.fn(async () => html);
         const result = await crawlHtmlGroupListingPages({
             startUrl: START,
             maxPages: 10,
@@ -255,10 +255,10 @@ describe("crawlHtmlGroupListingPages", () => {
                 return m;
             },
             getNextPageUrl: () => null,
-            fetchPageHtml,
+            getHtml,
         });
         expect(result).toEqual([{ id: "1" }]);
-        expect(fetchPageHtml).toHaveBeenCalledWith(START);
+        expect(getHtml).toHaveBeenCalledWith(START);
         expect(browserGet).not.toHaveBeenCalled();
     });
 });

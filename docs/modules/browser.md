@@ -13,7 +13,7 @@
 
 | Конкурент | Путь | HTTP-эндпоинт |
 |-----------|------|---------------|
-| air | [`src/modules/browser/air/`](../../src/modules/browser/air/) | нет публичного stock HTTP; HTML-парсер используется client-ingestion sku-slices |
+| air | [`src/modules/browser/air/`](../../src/modules/browser/air/) | `GET /api/browser/air/stock` |
 | balun | [`src/modules/browser/balun/`](../../src/modules/browser/balun/) | `GET /api/browser/balun/stock` |
 | perfect | [`src/modules/browser/perfect/`](../../src/modules/browser/perfect/) | `GET /api/browser/perfect/stock` |
 | sharte | [`src/modules/browser/sharte/`](../../src/modules/browser/sharte/) | `GET /api/browser/sharte/stock` |
@@ -25,34 +25,41 @@
 
 ## Связи между модулями
 
-- **analog-slices / analogs:** опрос остатков аналогов (balun, yumi, yumin, sharte). Air исключён из серверных stock-геттеров.
-- **sku-slices / skus:** опрос SKU (balun, yumi, yumin, sharte, perfect); Air SKU-срезы — через client-ingestion HTML, не через server scrape.
+- **analog-slices / analogs:** опрос остатков аналогов (air, balun, yumi, yumin, sharte).
+- **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect); для Air дополнительно доступен параллельный client-ingestion HTML как ручной/компенсирующий канал.
 - **btrade-slices:** bulk и search через sharik-парсеры.
 - **skugrs:** обход страниц групп для наполнения SKU (`group-products`), в т.ч. Air listing.
-- **slice-compensation:** повторный опрос через stock-утилиты analog/sku (Air в exclusions).
+- **slice-compensation:** повторный опрос через stock-утилиты analog/sku (Air включён в server scrape).
 
 ## Концепции и принятые решения
 
 ### Общий HTTP-клиент
 
-[`browserRequest.ts`](../../src/modules/browser/utils/browserRequest.ts) — singleton axios с browser-like заголовками и таймаутом 30 с. Текущие конкурентные парсеры вызывают его напрямую.
+[`browserRequest.ts`](../../src/modules/browser/utils/browserRequest.ts) — singleton axios с browser-like заголовками и таймаутом 30 с. Большинство конкурентных парсеров (кроме Air stock и сложных потоков вроде Perfect) вызывают его напрямую.
 
-### Air: парсер без серверного stock-трафика
+### Air: dual-path (server + client)
 
-Публичный `GET /api/browser/air/stock` снят. Transport-код Playwright/axios для Air сохранён, но **серверные stock entrypoints больше не вызывают** `getAirStockData`. Актуальный путь данных для SKU-срезов Air — client-ingestion: расширение/браузер открывает first-party страницу, frontend шлёт HTML на backend, парсер [`readAirProductFromHtml`](../../src/modules/browser/air/utils/air-product-page-from-html/readAirProductFromHtml.ts) извлекает stock/price. Опциональный HTTP-прокси и Playwright-настройки остаются в коде для возможных внутренних/диагностических сценариев, но не участвуют в cron/live stock API.
+**Primary:** серверный scrape через `getAirStockData` → `fetchPageHtml` с transport `impit` (Chrome TLS/HTTP fingerprint), опциональный `AIR_HTTP_PROXY_URL`. Публичный `GET /api/browser/air/stock`, live stock sku/analog, cron срезов и compensation используют этот путь. Парсер HTML — [`readAirProductFromHtml`](../../src/modules/browser/air/utils/air-product-page-from-html/readAirProductFromHtml.ts).
 
-### Dual-transport (`http` | `playwright`)
+**Secondary:** client-ingestion в [sku-slices](sku-slices.md) — расширение/браузер открывает first-party страницу, frontend шлёт HTML на backend; тот же парсер. Канал остаётся доступным всегда для ручного/компенсирующего дозаполнения, если серверный опрос не дал валидных данных.
 
-Для конкурентов, которым нужен рендер JS или headless Chromium, общая точка входа — [`fetchPageHtml`](../../src/modules/browser/utils/fetchPageHtml.ts):
+Air **group listing** (наполнение SKU) идёт через `browserGet` + proxy, не через impit.
+
+Результаты stock-scrape пишутся в info-лог (`browser stock result`: konk, link, stock, price, ok) с лимитом ≤20 сообщений в минуту на process; ошибки fetch — отдельно через `logBrowserError`.
+
+### Multi-transport (`http` | `impit` | `playwright`)
+
+Общая точка входа — [`fetchPageHtml`](../../src/modules/browser/utils/fetchPageHtml.ts):
 
 - транспорт `http` — axios (`browserGet`);
+- транспорт `impit` — HTTP-клиент с browser TLS/HTTP fingerprint (`impitGet`), без Chromium;
 - транспорт `playwright` — headless Chromium (`page.goto` → HTML), lazy singleton, лимит параллелизма.
 
-Приоритет выбора транспорта: явный параметр вызова → карта env `BROWSER_TRANSPORT_BY_KONK` по `konkName` → `http`. Формат карты: пары `konk:transport` через запятую (например `air:playwright,balun:http`). Невалидные значения игнорируются с предупреждением в лог. Лимит параллельных Playwright-страниц — `BROWSER_PLAYWRIGHT_CONCURRENCY` (по умолчанию 2). Режим headless — `BROWSER_PLAYWRIGHT_HEADLESS` (`true` / `false` / `shell`).
+Приоритет выбора транспорта: явный параметр вызова → карта env `BROWSER_TRANSPORT_BY_KONK` по `konkName` → `http`. Формат карты: пары `konk:transport` через запятую (например `air:impit,balun:http`). Невалидные значения игнорируются с предупреждением в лог. Лимит параллельных Playwright-страниц — `BROWSER_PLAYWRIGHT_CONCURRENCY` (по умолчанию 2). Режим headless — `BROWSER_PLAYWRIGHT_HEADLESS` (`true` / `false` / `shell`).
 
-На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают.
+На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают. Пакет `impit` тянет prebuilt native binary под платформу.
 
-Существующие `get*StockData` (кроме отключённого серверного Air stock) и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются; Air SKU пишутся через client-ingestion.
+Air stock явно задаёт `transport: "impit"`. Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
 
 ### Сентинельные значения
 
@@ -66,13 +73,14 @@
 - безопасный парсинг JSON из атрибутов;
 - извлечение чисел из «грязных» строк (`parseStrippedDecimal`);
 - `sleep`, merge cookies, resolve href, `HttpsProxyAgent` для HTTP(S) proxy;
-- dual-transport: `resolveBrowserTransport`, `fetchPageHtml`, `playwrightGet`.
+- multi-transport: `resolveBrowserTransport`, `fetchPageHtml`, `impitGet`, `playwrightGet`;
+- rate-limited `logBrowserStockResult`.
 
 ### Group pages (обход листингов)
 
 [`group-pages/`](../../src/modules/browser/group-pages/) — инфраструктура постраничного crawl HTML-листингов:
 
-- `crawlHtmlGroupListingPages` — pagination, dedupe по productId, `link[rel=next]`;
+- `crawlHtmlGroupListingPages` — pagination, dedupe по productId, `link[rel=next]`; опциональная подмена GET через `getHtml`;
 - `parsePromUaGroupListingProducts` — Prom.ua-совместимый парсер;
 - throttle 800–1600 мс между страницами.
 

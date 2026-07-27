@@ -2,10 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getAirStockData } from "../getAirStockData.js";
 import { fetchPageHtml } from "../../../utils/fetchPageHtml.js";
 import { logBrowserError } from "../../../utils/browserRequest.js";
+import { logBrowserStockResult } from "../../../utils/logBrowserStockResult.js";
 
 const mockWarn = vi.hoisted(() => vi.fn());
 
 vi.mock("../../../utils/fetchPageHtml.js");
+vi.mock("../../../utils/logBrowserStockResult.js", () => ({
+  logBrowserStockResult: vi.fn(),
+}));
 vi.mock("../../../utils/browserRequest.js", async (importOriginal) => {
   const actual =
     await importOriginal<typeof import("../../../utils/browserRequest.js")>();
@@ -26,6 +30,7 @@ describe("getAirStockData", () => {
   beforeEach(() => {
     vi.mocked(fetchPageHtml).mockReset();
     vi.mocked(logBrowserError).mockClear();
+    vi.mocked(logBrowserStockResult).mockClear();
     mockWarn.mockClear();
     delete process.env.AIR_HTTP_PROXY_URL;
   });
@@ -65,7 +70,7 @@ describe("getAirStockData", () => {
   });
 
   describe("Успешные сценарии", () => {
-    it("должен возвращать { stock, price } через Playwright", async () => {
+    it("должен возвращать { stock, price } через Impit", async () => {
       const mockHtml = `
         <input type="hidden" id="max-product-quantity" value="6600" name="max_quantity">
         <div class="us-price-block us-price-block-not-special d-flex align-items-center">
@@ -84,11 +89,16 @@ describe("getAirStockData", () => {
         "https://example.com/product/123",
         {
           konkName: "air",
-          transport: "playwright",
+          transport: "impit",
           proxyUrl: undefined,
-          warmUpUrl: "https://example.com/",
         }
       );
+      expect(logBrowserStockResult).toHaveBeenCalledWith({
+        konkName: "air",
+        link: "https://example.com/product/123",
+        stock: 6600,
+        price: 2.08,
+      });
     });
 
     it("передаёт AIR_HTTP_PROXY_URL в fetchPageHtml", async () => {
@@ -105,9 +115,8 @@ describe("getAirStockData", () => {
         "https://example.com/product/1",
         {
           konkName: "air",
-          transport: "playwright",
+          transport: "impit",
           proxyUrl: "http://user:secret@77.47.252.164:50100",
-          warmUpUrl: "https://example.com/",
         }
       );
     });
@@ -169,6 +178,12 @@ describe("getAirStockData", () => {
         }),
         "air stock parse negative"
       );
+      expect(logBrowserStockResult).toHaveBeenCalledWith({
+        konkName: "air",
+        link: "https://example.com/product/1",
+        stock: -1,
+        price: -1,
+      });
     });
 
     it("должен возвращать { stock: -1, price: -1 } когда текст цены нечисловой", async () => {
@@ -194,11 +209,12 @@ describe("getAirStockData", () => {
       expect(result).toEqual({ stock: -1, price: -1 });
       expect(logBrowserError).toHaveBeenCalled();
       expect(mockWarn).not.toHaveBeenCalled();
+      expect(logBrowserStockResult).not.toHaveBeenCalled();
     });
 
-    it("должен возвращать { stock: -1, price: -1 } при ошибке Playwright", async () => {
+    it("должен возвращать { stock: -1, price: -1 } при ошибке Impit", async () => {
       vi.mocked(fetchPageHtml).mockRejectedValue(
-        new Error("Playwright GET HTTP 429: https://example.com/product/1")
+        new Error("Impit GET HTTP 429: https://example.com/product/1")
       );
 
       const result = await getAirStockData("https://example.com/product/1");

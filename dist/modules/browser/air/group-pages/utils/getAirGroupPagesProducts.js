@@ -74,6 +74,6 @@ export async function getAirGroupPagesProducts(input) {
         getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
         stopOnEmptyPage: true,
         delayBeforeNextMs: getGroupPagesThrottleDelayMs,
-        fetchPageHtml: (url) => browserGet(url, { proxyUrl: getAirHttpProxyUrl() }),
+        getHtml: (url) => browserGet(url, { proxyUrl: getAirHttpProxyUrl() }),
     });
 }

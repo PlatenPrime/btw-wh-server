@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Analog } from "../../../../models/Analog.js";
+import { getAirStockData } from "../../../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../../../browser/balun/utils/getBalunStockData.js";
 
+vi.mock("../../../../../browser/air/utils/getAirStockData.js", () => ({
+  getAirStockData: vi.fn(),
+}));
 vi.mock("../../../../../browser/balun/utils/getBalunStockData.js", () => ({
   getBalunStockData: vi.fn(),
 }));
@@ -21,11 +25,13 @@ import {
 } from "../getAnalogStockDataUtil.js";
 
 const mockGetBalunStockData = vi.mocked(getBalunStockData);
+const mockGetAirStockData = vi.mocked(getAirStockData);
 
 describe("getAnalogStockDataUtil", () => {
   beforeEach(async () => {
     await Analog.deleteMany({});
     mockGetBalunStockData.mockReset();
+    mockGetAirStockData.mockReset();
   });
 
   it("returns null when analog not found", async () => {
@@ -46,7 +52,9 @@ describe("getAnalogStockDataUtil", () => {
     ).rejects.toMatchObject({ code: UNSUPPORTED_KONK_CODE });
   });
 
-  it("throws UNSUPPORTED_KONK for air (server scrape disabled)", async () => {
+  it("calls getAirStockData for air", async () => {
+    mockGetAirStockData.mockResolvedValue({ stock: 7, price: 3.5 });
+
     const analog = await Analog.create({
       konkName: "Air",
       prodName: "p",
@@ -54,9 +62,10 @@ describe("getAnalogStockDataUtil", () => {
       artikul: "A2",
     });
 
-    await expect(
-      getAnalogStockDataUtil(analog._id.toString()),
-    ).rejects.toMatchObject({ code: UNSUPPORTED_KONK_CODE });
+    const result = await getAnalogStockDataUtil(analog._id.toString());
+
+    expect(mockGetAirStockData).toHaveBeenCalledWith("https://air.com/item");
+    expect(result).toEqual({ stock: 7, price: 3.5 });
   });
 
   it("calls konk-specific getter and maps stock and price", async () => {

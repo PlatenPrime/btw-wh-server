@@ -47,6 +47,7 @@ import sliceCompensationRoute from "./modules/slice-compensation/router.js";
 import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
 import { logServerEgressGeo } from "./utils/server-egress-geo/logServerEgressGeo.js";
+import { runManualCompensatingSlice } from "./modules/slice-compensation/utils/runManualCompensatingSlice.js";
 
 const bootLog = createLogger({ module: "server" });
 registerProcessHandlers(bootLog);
@@ -110,6 +111,8 @@ async function start() {
     await mongoose.connect(getMongoUri());
 
     startCronOperations();
+
+    void runManualCompensatingSlice("perfect");
 
     app.listen(PORT, () => {
       bootLog.info({ port: PORT }, "server started");

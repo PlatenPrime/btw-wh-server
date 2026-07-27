@@ -68,7 +68,7 @@ Sku — документ, описывающий единицу товара к�
 
 ### Live-остаток и цена
 
-Эндпоинт **GET `/api/skus/id/:id/stock`** по запросу опрашивает сайт конкурента: по `konkName` выбирается скрапер, по `url` карточки читаются актуальные `stock` и `price`. Это не данные из `SkuSlice` и не Btrade — только live-снимок для карточки SKU на фронте. Поддерживаются balun, yumi, yumin, sharte, perfect; **air не поддерживается** (серверный scrape отключён). Для срезов Air — [frontend: air-client-sku-slices](../frontend/air-client-sku-slices.md). Подробности live UX — [frontend: sku-live-stock](../frontend/sku-live-stock.md).
+Эндпоинт **GET `/api/skus/id/:id/stock`** по запросу опрашивает сайт конкурента: по `konkName` выбирается скрапер, по `url` карточки читаются актуальные `stock` и `price`. Это не данные из `SkuSlice` и не Btrade — только live-снимок для карточки SKU на фронте. Поддерживаются air, balun, yumi, yumin, sharte, perfect. Для ручного дозаполнения срезов Air остаётся [frontend: air-client-sku-slices](../frontend/air-client-sku-slices.md). Подробности live UX — [frontend: sku-live-stock](../frontend/sku-live-stock.md).
 
 ## API эндпоинты
 

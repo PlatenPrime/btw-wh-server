@@ -68,7 +68,7 @@
 
 ### PUT `/api/sku-slices/client/air/sku/:skuId`
 
-Идемпотентная запись точки сегодняшнего Air `SkuSlice` из HTML first-party страницы товара. Backend парсит HTML тем же контрактом, что `readAirProductFromHtml`; сервер к сайту Air не ходит.
+Идемпотентная запись точки сегодняшнего Air `SkuSlice` из HTML first-party страницы товара. Backend парсит HTML тем же контрактом, что `readAirProductFromHtml`. Канал параллелен серверному scrape: сервер к сайту Air при этом PUT не ходит.
 
 **Path:** `skuId` — валидный ObjectId.
 
