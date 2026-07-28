@@ -29,6 +29,8 @@
 2. **Search-fallback** — для артикулов, не попавших в bulk-ответ, выполняется поштучный поиск с jitter 200–1000 мс между запросами.
 3. **Sentinel missing** — если артикул не найден ни в bulk, ни в search, в `data` записывается `{ price: -1, quantity: -1 }`. Такие позиции попадают в Telegram-отчёт как `missing` и видны клиенту через `GET /api/btrade-slices?isInvalid=true`.
 
+Оба HTTP-пути к sharik.ua используют общий browser-прокси через `SHARIK_HTTP_PROXY_URL` (см. [browser](browser.md)).
+
 Seed-артикул для URL bulk-страницы задаётся через env `BTRADE_SHARIK_PRODUCT_RESTS_SEED_ARTIKUL` (по умолчанию `1302-0065`).
 
 ### Aggregation-проекция

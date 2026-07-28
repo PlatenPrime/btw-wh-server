@@ -4,6 +4,7 @@ import {
   logBrowserError,
   summarizeBrowserError,
 } from "../../utils/browserRequest.js";
+import { getSharikHttpProxyUrl } from "./getSharikHttpProxyUrl.js";
 import type { SharikProductInfo } from "./sharik-product-types/sharikProductInfo.js";
 import { parseSharikSearchCard } from "./sharik-search-result-card/parseSharikSearchCard.js";
 
@@ -26,7 +27,9 @@ export async function getSharikStockData(
     const targetUrl = `https://sharik.ua/ua/search/?q=${encodeURIComponent(
       artikul
     )}`;
-    const html = await browserGet<string>(targetUrl);
+    const html = await browserGet<string>(targetUrl, {
+      proxyUrl: getSharikHttpProxyUrl(),
+    });
     const $ = cheerio.load(html);
 
     const productElements = $(".car-col .one-item");

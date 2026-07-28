@@ -1,4 +1,5 @@
 import { browserGet, logBrowserError, summarizeBrowserError, } from "../../browser/utils/browserRequest.js";
+import { getSharikHttpProxyUrl } from "../../browser/sharik/utils/getSharikHttpProxyUrl.js";
 import { buildProductRestsUrl, getProductRestsSeedArtikul } from "./constants.js";
 import { parseSharikProductRestsHtml } from "./parseSharikProductRestsHtml.js";
 /**
@@ -10,7 +11,9 @@ export async function fetchSharikProductRestsMap(seedArtikul = getProductRestsSe
     }
     const url = buildProductRestsUrl(seedArtikul);
     try {
-        const html = await browserGet(url);
+        const html = await browserGet(url, {
+            proxyUrl: getSharikHttpProxyUrl(),
+        });
         return parseSharikProductRestsHtml(html);
     }
     catch (error) {

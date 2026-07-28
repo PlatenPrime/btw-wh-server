@@ -45,6 +45,10 @@
 
 Air **group listing** (наполнение SKU) идёт через `browserGet` + proxy, не через impit.
 
+### Sharik: опциональный HTTP-прокси
+
+Запросы к sharik.ua (`getSharikStockData`, bulk `product_rests` в btrade-slices) идут через `browserGet` с опциональным `SHARIK_HTTP_PROXY_URL` (HTTP(S) proxy, UA egress). Kill-switch в коде — `SHARIK_HTTP_PROXY_ENABLED`: при `false` proxy не используется даже если env задан. Без URL — прямой egress.
+
 Результаты stock-scrape пишутся в info-лог (`browser stock result`: konk, link, stock, price, ok) с лимитом ≤20 сообщений в минуту на process; ошибки fetch — отдельно через `logBrowserError`.
 
 ### Multi-transport (`http` | `impit` | `playwright`)

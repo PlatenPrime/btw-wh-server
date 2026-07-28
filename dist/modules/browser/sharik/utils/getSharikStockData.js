@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { browserGet, logBrowserError, summarizeBrowserError, } from "../../utils/browserRequest.js";
+import { getSharikHttpProxyUrl } from "./getSharikHttpProxyUrl.js";
 import { parseSharikSearchCard } from "./sharik-search-result-card/parseSharikSearchCard.js";
 /**
  * Получает данные о товаре с сайта sharik.ua по артикулу
@@ -13,7 +14,9 @@ export async function getSharikStockData(artikul) {
     }
     try {
         const targetUrl = `https://sharik.ua/ua/search/?q=${encodeURIComponent(artikul)}`;
-        const html = await browserGet(targetUrl);
+        const html = await browserGet(targetUrl, {
+            proxyUrl: getSharikHttpProxyUrl(),
+        });
         const $ = cheerio.load(html);
         const productElements = $(".car-col .one-item");
         if (productElements.length === 0) {

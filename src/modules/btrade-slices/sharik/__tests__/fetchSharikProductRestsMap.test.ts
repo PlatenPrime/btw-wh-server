@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fetchSharikProductRestsMap } from "../fetchSharikProductRestsMap.js";
 import type * as BrowserRequest from "../../../browser/utils/browserRequest.js";
 
@@ -14,8 +14,19 @@ vi.mock("../../../browser/utils/browserRequest.js", async (importOriginal) => {
 import { browserGet } from "../../../browser/utils/browserRequest.js";
 
 describe("fetchSharikProductRestsMap", () => {
+  const originalProxy = process.env.SHARIK_HTTP_PROXY_URL;
+
   beforeEach(() => {
     vi.mocked(browserGet).mockReset();
+    delete process.env.SHARIK_HTTP_PROXY_URL;
+  });
+
+  afterEach(() => {
+    if (originalProxy === undefined) {
+      delete process.env.SHARIK_HTTP_PROXY_URL;
+    } else {
+      process.env.SHARIK_HTTP_PROXY_URL = originalProxy;
+    }
   });
 
   it("fetches product_rests URL and returns parsed map", async () => {
@@ -26,9 +37,25 @@ describe("fetchSharikProductRestsMap", () => {
     const map = await fetchSharikProductRestsMap("1302-0065");
 
     expect(browserGet).toHaveBeenCalledWith(
-      "https://sharik.ua/product_rests/1302-0065/"
+      "https://sharik.ua/product_rests/1302-0065/",
+      { proxyUrl: undefined }
     );
     expect(map.get("1501-3445")).toEqual({ quantity: 7, price: 509.6 });
+  });
+
+  it("передаёт SHARIK_HTTP_PROXY_URL в browserGet", async () => {
+    process.env.SHARIK_HTTP_PROXY_URL =
+      "http://user:secret@77.47.252.164:50100";
+    vi.mocked(browserGet).mockResolvedValue(
+      "<pre>1501-3445 = 7; 509.60</pre>"
+    );
+
+    await fetchSharikProductRestsMap("1302-0065");
+
+    expect(browserGet).toHaveBeenCalledWith(
+      "https://sharik.ua/product_rests/1302-0065/",
+      { proxyUrl: "http://user:secret@77.47.252.164:50100" }
+    );
   });
 
   it("throws when seed artikul is empty", async () => {

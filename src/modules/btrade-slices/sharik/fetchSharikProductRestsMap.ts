@@ -3,6 +3,7 @@ import {
   logBrowserError,
   summarizeBrowserError,
 } from "../../browser/utils/browserRequest.js";
+import { getSharikHttpProxyUrl } from "../../browser/sharik/utils/getSharikHttpProxyUrl.js";
 import { buildProductRestsUrl, getProductRestsSeedArtikul } from "./constants.js";
 import { parseSharikProductRestsHtml } from "./parseSharikProductRestsHtml.js";
 import type { SharikProductRestsItem } from "./types.js";
@@ -20,7 +21,9 @@ export async function fetchSharikProductRestsMap(
   const url = buildProductRestsUrl(seedArtikul);
 
   try {
-    const html = await browserGet<string>(url);
+    const html = await browserGet<string>(url, {
+      proxyUrl: getSharikHttpProxyUrl(),
+    });
     return parseSharikProductRestsHtml(html);
   } catch (error) {
     logBrowserError("Error fetching Sharik product_rests:", error);
