@@ -39,11 +39,11 @@
 
 ### Air: dual-path (server + client)
 
-**Primary:** серверный scrape через `getAirStockData` → `fetchPageHtml` с transport `impit` (Chrome TLS/HTTP fingerprint), опциональный `AIR_HTTP_PROXY_URL`. Публичный `GET /api/browser/air/stock`, live stock sku/analog, cron срезов и compensation используют этот путь. Парсер HTML — [`readAirProductFromHtml`](../../src/modules/browser/air/utils/air-product-page-from-html/readAirProductFromHtml.ts).
+**Primary:** серверный scrape через `getAirStockData` → `fetchPageHtml` с transport `impit` (Chrome TLS/HTTP fingerprint + `tough-cookie` jar), origin warm-up и Referer на product GET; при ответе WAF adm.tools («Захищена сторінка») Impit сам POST’ит `___ack` и повторяет GET. Опциональный `AIR_HTTP_PROXY_URL`. Публичный `GET /api/browser/air/stock`, live stock sku/analog, cron срезов и compensation используют этот путь. Парсер HTML — [`readAirProductFromHtml`](../../src/modules/browser/air/utils/air-product-page-from-html/readAirProductFromHtml.ts).
 
 **Secondary:** client-ingestion в [sku-slices](sku-slices.md) — расширение/браузер открывает first-party страницу, frontend шлёт HTML на backend; тот же парсер. Канал остаётся доступным всегда для ручного/компенсирующего дозаполнения, если серверный опрос не дал валидных данных.
 
-Air **group listing** (наполнение SKU) идёт через `browserGet` + proxy, не через impit.
+Air **group listing** (наполнение SKU) идёт через тот же Impit-путь (`fetchPageHtml` + cookie jar + adm.tools `___ack` solver): один origin warm-up, затем страницы листинга с Referer; опциональный `AIR_HTTP_PROXY_URL`.
 
 ### Sharik: опциональный HTTP-прокси
 
@@ -56,14 +56,14 @@ Air **group listing** (наполнение SKU) идёт через `browserGet
 Общая точка входа — [`fetchPageHtml`](../../src/modules/browser/utils/fetchPageHtml.ts):
 
 - транспорт `http` — axios (`browserGet`);
-- транспорт `impit` — HTTP-клиент с browser TLS/HTTP fingerprint (`impitGet`), без Chromium;
+- транспорт `impit` — HTTP-клиент с browser TLS/HTTP fingerprint (`impitGet`), cookie jar между запросами одного клиента, без Chromium; при challenge adm.tools — solver `___ack` + retry;
 - транспорт `playwright` — headless Chromium (`page.goto` → HTML), lazy singleton, лимит параллелизма.
 
 Приоритет выбора транспорта: явный параметр вызова → карта env `BROWSER_TRANSPORT_BY_KONK` по `konkName` → `http`. Формат карты: пары `konk:transport` через запятую (например `air:impit,balun:http`). Невалидные значения игнорируются с предупреждением в лог. Лимит параллельных Playwright-страниц — `BROWSER_PLAYWRIGHT_CONCURRENCY` (по умолчанию 2). Режим headless — `BROWSER_PLAYWRIGHT_HEADLESS` (`true` / `false` / `shell`).
 
 На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают. Пакет `impit` тянет prebuilt native binary под платформу.
 
-Air stock явно задаёт `transport: "impit"`. Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
+Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
 
 ### Сентинельные значения
 

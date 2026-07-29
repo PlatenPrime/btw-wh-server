@@ -111,6 +111,7 @@ describe("fetchPageHtml", () => {
     expect(impitGet).toHaveBeenCalledWith("https://example.com/a", {
       proxyUrl: "http://proxy:1",
       warmUpUrl: "https://example.com/",
+      headers: undefined,
     });
     expect(browserGet).not.toHaveBeenCalled();
     expect(playwrightGet).not.toHaveBeenCalled();
@@ -122,6 +123,26 @@ describe("fetchPageHtml", () => {
     expect(impitGet).toHaveBeenCalledWith("https://example.com", {
       proxyUrl: undefined,
       warmUpUrl: undefined,
+      headers: undefined,
+    });
+  });
+
+  it("пробрасывает headers в impitGet", async () => {
+    await fetchPageHtml("https://example.com/p", {
+      transport: "impit",
+      warmUpUrl: "https://example.com/",
+      headers: {
+        Referer: "https://example.com/",
+        "Sec-Fetch-Site": "same-origin",
+      },
+    });
+    expect(impitGet).toHaveBeenCalledWith("https://example.com/p", {
+      proxyUrl: undefined,
+      warmUpUrl: "https://example.com/",
+      headers: {
+        Referer: "https://example.com/",
+        "Sec-Fetch-Site": "same-origin",
+      },
     });
   });
 });

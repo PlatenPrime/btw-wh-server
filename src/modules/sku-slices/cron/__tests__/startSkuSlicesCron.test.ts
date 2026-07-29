@@ -18,7 +18,12 @@ vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", (
   sendCronAnalyticsReport: vi.fn(),
 }));
 vi.mock("../../../../cron/analytics-notifications/formatSkuSlicesReport.js", () => ({
-  formatSkuSlicesReport: vi.fn(() => "sku report"),
+  formatSkuKonkSliceReport: vi.fn(
+    (stats: { konkName: string }) => `sku:${stats.konkName}`
+  ),
+  formatSkuSlicesExcludedReport: vi.fn(
+    (excluded: string[]) => `sku-excluded:${excluded.join(",")}`
+  ),
 }));
 
 import { Sku } from "../../../skus/models/Sku.js";
@@ -68,7 +73,7 @@ describe("startSkuSlicesCron", () => {
     );
   });
 
-  it("filters excluded competitors and removes duplicates case-insensitively", async () => {
+  it("filters excluded competitors and sends per-konk reports", async () => {
     vi.useFakeTimers({ now: new Date("2026-04-02T17:00:00.000Z") });
     try {
       vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set(["yumi"]));
@@ -92,7 +97,13 @@ describe("startSkuSlicesCron", () => {
       );
       const d1 = vi.mocked(runSkuSliceForKonkUtil).mock.calls[0]![1];
       expect(d1.toISOString()).toBe("2026-04-03T00:00:00.000Z");
-      expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku report");
+
+      expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
+        "sku-excluded:yumi"
+      );
+      expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku:air");
+      expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku:balun");
+      expect(sendCronAnalyticsReport).toHaveBeenCalledTimes(3);
     } finally {
       vi.useRealTimers();
     }

@@ -7,8 +7,10 @@ import {
   getNextPageUrlFromLinkRelNext,
 } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
-import { browserGet } from "../../../utils/browserRequest.js";
+import { fetchPageHtml } from "../../../utils/fetchPageHtml.js";
+import { createLogger } from "../../../../../logging/createLogger.js";
 import { getAirHttpProxyUrl } from "../../utils/getAirHttpProxyUrl.js";
+import { resolveAirWarmUpUrl } from "../../utils/getAirStockData.js";
 import {
   getAirGroupPagesProductsSchema,
   type GetAirGroupPagesProductsInput,
@@ -22,6 +24,7 @@ export type AirGroupPageProduct = {
 };
 
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
+const airLog = createLogger({ module: "browser" });
 
 function pickProductCards($: cheerio.CheerioAPI): BrowserCheerio {
   const fromGrid = $(".us-category-products div.product-layout[data-pid]");
@@ -96,6 +99,27 @@ function parseProductsFromPage(
   return result;
 }
 
+function airListingFetchOptions(warmUpUrl: string | undefined) {
+  const proxyUrl = getAirHttpProxyUrl();
+  return {
+    konkName: "air" as const,
+    transport: "impit" as const,
+    proxyUrl,
+    ...(warmUpUrl
+      ? {
+          headers: {
+            Referer: warmUpUrl,
+            "Sec-Fetch-Site": "same-origin",
+          },
+        }
+      : {}),
+  };
+}
+
+/**
+ * Crawl HTML-листинга air (категория): Impit + cookie jar + adm.tools solver.
+ * Один origin warm-up до пагинации; listing pages без повторного warmUpUrl.
+ */
 export async function getAirGroupPagesProducts(
   input: GetAirGroupPagesProductsInput
 ): Promise<AirGroupPageProduct[]> {
@@ -105,6 +129,25 @@ export async function getAirGroupPagesProducts(
   }
 
   const { groupUrl, maxPages = 100 } = parseResult.data;
+  const warmUpUrl = resolveAirWarmUpUrl(groupUrl);
+  const listingOpts = airListingFetchOptions(warmUpUrl);
+
+  if (warmUpUrl) {
+    try {
+      await fetchPageHtml(warmUpUrl, listingOpts);
+    } catch (warmErr) {
+      airLog.warn(
+        {
+          context: "Air group listing warm-up failed, continue crawl",
+          url: warmUpUrl,
+          groupUrl,
+          details:
+            warmErr instanceof Error ? warmErr.message : String(warmErr),
+        },
+        "air group warmup failed"
+      );
+    }
+  }
 
   return crawlHtmlGroupListingPages({
     startUrl: groupUrl,
@@ -114,7 +157,6 @@ export async function getAirGroupPagesProducts(
       getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
     stopOnEmptyPage: true,
     delayBeforeNextMs: getGroupPagesThrottleDelayMs,
-    getHtml: (url) =>
-      browserGet<string>(url, { proxyUrl: getAirHttpProxyUrl() }),
+    getHtml: (url) => fetchPageHtml(url, listingOpts),
   });
 }

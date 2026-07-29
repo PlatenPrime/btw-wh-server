@@ -1,12 +1,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getAirGroupPagesProducts } from "../getAirGroupPagesProducts.js";
-import { browserGet } from "../../../../utils/browserRequest.js";
+import { fetchPageHtml } from "../../../../utils/fetchPageHtml.js";
 import { sleep } from "../../../../utils/sleep.js";
 
-vi.mock("../../../../utils/browserRequest.js");
+vi.mock("../../../../utils/fetchPageHtml.js");
 vi.mock("../../../../utils/sleep.js");
+vi.mock("../../../../../../logging/createLogger.js", () => ({
+  createLogger: () => ({
+    warn: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    debug: vi.fn(),
+  }),
+}));
 
 const GROUP_URL = "https://air.example.test/ua/index.php?route=product/category&path=1";
+const ORIGIN_URL = "https://air.example.test/";
 const PAGE2_URL =
   "https://air.example.test/ua/index.php?route=product/category&path=1&page=2";
 
@@ -48,11 +57,21 @@ function airPageHtml(opts: {
 </body></html>`;
 }
 
+const listingFetchOpts = {
+  konkName: "air",
+  transport: "impit",
+  proxyUrl: undefined,
+  headers: {
+    Referer: ORIGIN_URL,
+    "Sec-Fetch-Site": "same-origin",
+  },
+};
+
 describe("getAirGroupPagesProducts", () => {
   const originalProxy = process.env.AIR_HTTP_PROXY_URL;
 
   beforeEach(() => {
-    vi.mocked(browserGet).mockReset();
+    vi.mocked(fetchPageHtml).mockReset();
     vi.mocked(sleep).mockResolvedValue(undefined);
     delete process.env.AIR_HTTP_PROXY_URL;
   });
@@ -65,7 +84,7 @@ describe("getAirGroupPagesProducts", () => {
     }
   });
 
-  it("parses products across two pages", async () => {
+  it("parses products across two pages with origin warm-up", async () => {
     const html1 = airPageHtml({
       cards: [
         airProductCard({
@@ -88,7 +107,8 @@ describe("getAirGroupPagesProducts", () => {
       ],
     });
 
-    vi.mocked(browserGet).mockImplementation(async (url: string) => {
+    vi.mocked(fetchPageHtml).mockImplementation(async (url: string) => {
+      if (url === ORIGIN_URL) return "<html>home</html>";
       if (url === GROUP_URL) return html1;
       if (url === PAGE2_URL) return html2;
       throw new Error(`Unexpected url: ${url}`);
@@ -100,6 +120,10 @@ describe("getAirGroupPagesProducts", () => {
     });
 
     expect(result).toHaveLength(2);
+    expect(fetchPageHtml).toHaveBeenNthCalledWith(1, ORIGIN_URL, listingFetchOpts);
+    expect(fetchPageHtml).toHaveBeenCalledWith(GROUP_URL, listingFetchOpts);
+    expect(fetchPageHtml).toHaveBeenCalledWith(PAGE2_URL, listingFetchOpts);
+
     const p1 = result.find((p) => p.productId === "111");
     expect(p1?.url).toBe("https://air.example.test/ua/product/p111");
     expect(p1?.title).not.toContain("&#");
@@ -122,7 +146,8 @@ describe("getAirGroupPagesProducts", () => {
     });
     const html2 = airPageHtml({ cards: [] });
 
-    vi.mocked(browserGet).mockImplementation(async (url: string) => {
+    vi.mocked(fetchPageHtml).mockImplementation(async (url: string) => {
+      if (url === ORIGIN_URL) return "<html>home</html>";
       if (url === GROUP_URL) return html1;
       if (url === PAGE2_URL) return html2;
       throw new Error(`Unexpected url: ${url}`);
@@ -135,7 +160,8 @@ describe("getAirGroupPagesProducts", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]?.productId).toBe("1");
-    expect(vi.mocked(browserGet)).toHaveBeenCalledTimes(2);
+    // warm-up + page1 + page2
+    expect(vi.mocked(fetchPageHtml)).toHaveBeenCalledTimes(3);
   });
 
   it("regression: empty grid with Ukrainian message still stops", async () => {
@@ -155,7 +181,8 @@ describe("getAirGroupPagesProducts", () => {
       emptyMessage: "У даній категорії немає товарів.",
     });
 
-    vi.mocked(browserGet).mockImplementation(async (url: string) => {
+    vi.mocked(fetchPageHtml).mockImplementation(async (url: string) => {
+      if (url === ORIGIN_URL) return "<html>home</html>";
       if (url === GROUP_URL) return html1;
       if (url === PAGE2_URL) return html2;
       throw new Error(`Unexpected url: ${url}`);
@@ -186,7 +213,10 @@ describe("getAirGroupPagesProducts", () => {
       ],
     });
 
-    vi.mocked(browserGet).mockResolvedValue(html);
+    vi.mocked(fetchPageHtml).mockImplementation(async (url: string) => {
+      if (url === ORIGIN_URL) return "<html>home</html>";
+      return html;
+    });
 
     const result = await getAirGroupPagesProducts({
       groupUrl: GROUP_URL,
@@ -210,12 +240,50 @@ describe("getAirGroupPagesProducts", () => {
         }),
       ],
     });
-    vi.mocked(browserGet).mockResolvedValue(html);
+
+    vi.mocked(fetchPageHtml).mockImplementation(async (url: string) => {
+      if (url === ORIGIN_URL) return "<html>home</html>";
+      return html;
+    });
 
     await getAirGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 1 });
 
-    expect(browserGet).toHaveBeenCalledWith(GROUP_URL, {
+    expect(fetchPageHtml).toHaveBeenCalledWith(GROUP_URL, {
+      konkName: "air",
+      transport: "impit",
       proxyUrl: "http://user:secret@77.47.252.164:50100",
+      headers: {
+        Referer: ORIGIN_URL,
+        "Sec-Fetch-Site": "same-origin",
+      },
     });
+  });
+
+  it("continues crawl when warm-up fails", async () => {
+    const html = airPageHtml({
+      cards: [
+        airProductCard({
+          pid: "1",
+          productPath: "/ua/product/a",
+          imageUrl: "https://air.example.test/a.jpg",
+          title: "A",
+        }),
+      ],
+    });
+
+    vi.mocked(fetchPageHtml).mockImplementation(async (url: string) => {
+      if (url === ORIGIN_URL) {
+        throw new Error("warmup 429");
+      }
+      return html;
+    });
+
+    const result = await getAirGroupPagesProducts({
+      groupUrl: GROUP_URL,
+      maxPages: 1,
+    });
+
+    expect(result).toHaveLength(1);
+    expect(fetchPageHtml).toHaveBeenCalledWith(GROUP_URL, listingFetchOpts);
   });
 });

@@ -14,7 +14,12 @@ vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", (
   sendCronAnalyticsReport: vi.fn(),
 }));
 vi.mock("../../../../cron/analytics-notifications/formatAnalogSlicesReport.js", () => ({
-  formatAnalogSlicesReport: vi.fn(() => "analog report"),
+  formatAnalogKonkSliceReport: vi.fn(
+    (stats: { konkName: string }) => `analog:${stats.konkName}`
+  ),
+  formatAnalogSlicesExcludedReport: vi.fn(
+    (excluded: string[]) => `analog-excluded:${excluded.join(",")}`
+  ),
 }));
 vi.mock("../../../../cron/analytics-notifications/formatCronReports.js", () => ({
   formatCronErrorReport: vi.fn(() => "analog error"),
@@ -24,7 +29,6 @@ import { calculateAnalogSlice } from "../../utils/calculateAnalogSlice.js";
 import { startAnalogSlicesCron } from "../startAnalogSlicesCron.js";
 import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
 import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
-import { formatAnalogSlicesReport } from "../../../../cron/analytics-notifications/formatAnalogSlicesReport.js";
 
 const sliceResult = {
   saved: true,
@@ -78,7 +82,7 @@ describe("startAnalogSlicesCron", () => {
     );
   });
 
-  it("does not run excluded competitors", async () => {
+  it("does not run excluded competitors and sends per-konk reports", async () => {
     vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set(["balun", "yumi"]));
     startAnalogSlicesCron();
 
@@ -92,7 +96,12 @@ describe("startAnalogSlicesCron", () => {
     expect(calculateAnalogSlice).toHaveBeenCalledWith("yumin");
     expect(calculateAnalogSlice).not.toHaveBeenCalledWith("balun");
     expect(calculateAnalogSlice).not.toHaveBeenCalledWith("yumi");
-    expect(formatAnalogSlicesReport).toHaveBeenCalled();
-    expect(sendCronAnalyticsReport).toHaveBeenCalledWith("analog report");
+
+    expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
+      "analog-excluded:balun,yumi"
+    );
+    expect(sendCronAnalyticsReport).toHaveBeenCalledWith("analog:sharte");
+    expect(sendCronAnalyticsReport).toHaveBeenCalledWith("analog:yumin");
+    expect(sendCronAnalyticsReport).toHaveBeenCalledTimes(3);
   });
 });

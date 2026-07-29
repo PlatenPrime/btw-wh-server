@@ -8,10 +8,21 @@ import { summarizeAirHtmlForLog } from "./summarize-air-html-for-log/summarizeAi
 const NEGATIVE_OUTCOME = { stock: -1, price: -1 };
 const airLog = createLogger({ module: "browser" });
 /**
+ * Origin + "/" для Impit warm-up (cookies в jar до product GET).
+ */
+export function resolveAirWarmUpUrl(productUrl) {
+    if (!URL.canParse(productUrl)) {
+        return undefined;
+    }
+    return `${new URL(productUrl).origin}/`;
+}
+/**
  * Получает данные о количестве и цене товара со страницы товара сайта air по ссылке.
  * При отсутствии товара в наличии (элемент #max-product-quantity отсутствует в разметке) возвращает stock: 0 при валидной цене.
  * При скидке цена берётся из .us-price-new, если .us-price-actual пуст.
- * Fetch: Impit (Chrome TLS/HTTP fingerprint); опциональный HTTP-прокси.
+ * Fetch: Impit (Chrome TLS/HTTP fingerprint + cookie jar) с origin warm-up и Referer;
+ * adm.tools JS-challenge решается POST `___ack` внутри Impit;
+ * опциональный HTTP-прокси.
  * HTTP ≥ 400 на product → ошибка; успешный HTML без цены/стока → warn + `-1/-1`.
  * @param link — URL страницы товара
  * @returns Promise с объектом { stock, price }; при негативном исходе — { stock: -1, price: -1 }
@@ -22,11 +33,21 @@ export async function getAirStockData(link) {
         throw new Error("Link is required and must be a string");
     }
     const productUrl = link.trim();
+    const warmUpUrl = resolveAirWarmUpUrl(productUrl);
     try {
         const html = await fetchPageHtml(productUrl, {
             konkName: "air",
             transport: "impit",
             proxyUrl: getAirHttpProxyUrl(),
+            ...(warmUpUrl
+                ? {
+                    warmUpUrl,
+                    headers: {
+                        Referer: warmUpUrl,
+                        "Sec-Fetch-Site": "same-origin",
+                    },
+                }
+                : {}),
         });
         const parsed = readAirProductFromHtml(html);
         if (parsed.stock === -1 && parsed.price === -1) {

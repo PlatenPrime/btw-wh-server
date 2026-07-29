@@ -1,10 +1,16 @@
 import { Impit } from "impit";
+import { CookieJar } from "tough-cookie";
 import { createLogger } from "../../../logging/createLogger.js";
+import { isAdmToolsChallengeHtml, } from "./adm-tools-challenge/admToolsChallenge.js";
+import { solveAdmToolsChallenge } from "./adm-tools-challenge/solveAdmToolsChallenge.js";
 import { BROWSER_REQUEST_TIMEOUT_MS } from "./browserRequest.js";
 const browserLog = createLogger({ module: "browser" });
+/** Сколько символов body кладём в лог/ошибку при HTTP ≥ 400. */
+export const IMPIT_ERROR_BODY_SNIPPET_MAX = 300;
 const defaultImpitFactory = (options) => new Impit({
     browser: options.browser,
     timeout: options.timeout,
+    cookieJar: options.cookieJar,
     ...(options.proxyUrl ? { proxyUrl: options.proxyUrl } : {}),
 });
 let impitFactory = defaultImpitFactory;
@@ -39,6 +45,8 @@ function getOrCreateClient(proxyUrl) {
     const client = impitFactory({
         browser: "chrome",
         timeout: BROWSER_REQUEST_TIMEOUT_MS,
+        // tough-cookie CookieJar structurally satisfies Impit cookieJar; overloads don't match 1:1
+        cookieJar: new CookieJar(),
         ...(proxyUrl ? { proxyUrl } : {}),
     });
     clientByProxyKey.set(key, client);
@@ -51,6 +59,28 @@ function truncateMessage(message) {
     }
     return `${trimmed.slice(0, 200)}... [truncated]`;
 }
+/**
+ * Ужимает HTML/text для diag-лога (title + snippet).
+ */
+export function summarizeImpitErrorBody(html) {
+    const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+    const title = (titleMatch?.[1] ?? "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 120);
+    const snippet = html
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, IMPIT_ERROR_BODY_SNIPPET_MAX);
+    return { title, snippet, htmlLength: html.length };
+}
+function readRetryAfter(headers) {
+    if (!headers || typeof headers.get !== "function") {
+        return undefined;
+    }
+    const value = headers.get("retry-after")?.trim();
+    return value || undefined;
+}
 export function formatImpitFetchError(url, err) {
     if (err instanceof Error && err.message.startsWith("Impit GET HTTP ")) {
         return err.message;
@@ -58,18 +88,102 @@ export function formatImpitFetchError(url, err) {
     const msg = err instanceof Error ? err.message : String(err);
     return `Impit GET ${url} failed: ${truncateMessage(msg)}`;
 }
+function throwImpitHttpError(args) {
+    const bodySummary = summarizeImpitErrorBody(args.body);
+    const retryAfter = readRetryAfter(args.headers);
+    browserLog.warn({
+        context: "Impit GET non-2xx",
+        url: args.url,
+        httpStatus: args.status,
+        ...(retryAfter ? { retryAfter } : {}),
+        ...bodySummary,
+    }, "impit http error body");
+    const statusText = args.statusText?.trim();
+    const statusTail = statusText ? ` ${statusText}` : "";
+    const titlePart = bodySummary.title
+        ? ` title=${JSON.stringify(bodySummary.title)}`
+        : "";
+    const snippetPart = bodySummary.snippet
+        ? ` body=${JSON.stringify(bodySummary.snippet)}`
+        : "";
+    const retryPart = retryAfter
+        ? ` retryAfter=${JSON.stringify(retryAfter)}`
+        : "";
+    throw new Error(`Impit GET HTTP ${args.status}${statusTail}: ${args.url}${titlePart}${snippetPart}${retryPart}`);
+}
+async function readErrorBody(response) {
+    try {
+        return await response.text();
+    }
+    catch {
+        return "";
+    }
+}
 /**
- * GET HTML через Impit (Chrome TLS/HTTP fingerprint).
- * HTTP status ≥ 400 → throw.
+ * GET; при adm.tools challenge (обычно 429) — POST ___ack и один retry GET.
+ */
+async function fetchHtmlWithAdmToolsSolve(client, url, init) {
+    const first = await client.fetch(url, init);
+    if (first.status < 400) {
+        return await first.text();
+    }
+    const body = await readErrorBody(first);
+    if (!isAdmToolsChallengeHtml(body)) {
+        throwImpitHttpError({
+            url,
+            status: first.status,
+            statusText: first.statusText,
+            headers: first.headers,
+            body,
+        });
+    }
+    try {
+        await solveAdmToolsChallenge(client, url, body, {
+            timeoutMs: init.timeout,
+            headers: init.headers,
+        });
+    }
+    catch (solveErr) {
+        browserLog.warn({
+            context: "adm.tools challenge solve failed",
+            url,
+            details: solveErr instanceof Error ? solveErr.message : String(solveErr),
+        }, "adm tools challenge failed");
+        throwImpitHttpError({
+            url,
+            status: first.status,
+            statusText: first.statusText,
+            headers: first.headers,
+            body,
+        });
+    }
+    const second = await client.fetch(url, init);
+    if (second.status >= 400) {
+        const retryBody = await readErrorBody(second);
+        throwImpitHttpError({
+            url,
+            status: second.status,
+            statusText: second.statusText,
+            headers: second.headers,
+            body: retryBody,
+        });
+    }
+    return await second.text();
+}
+/**
+ * GET HTML через Impit (Chrome TLS/HTTP fingerprint + cookie jar).
+ * adm.tools JS-challenge: POST ___ack → retry.
+ * HTTP status ≥ 400 (после solve) → warn (snippet/Retry-After) + throw.
  */
 export async function impitGet(url, options) {
     const proxyUrl = resolveProxyUrl(options?.proxyUrl);
     const client = getOrCreateClient(proxyUrl);
+    const requestHeaders = options?.headers;
     try {
         const warmUpUrl = options?.warmUpUrl?.trim();
         if (warmUpUrl) {
             try {
-                await client.fetch(warmUpUrl, {
+                await fetchHtmlWithAdmToolsSolve(client, warmUpUrl, {
                     timeout: BROWSER_REQUEST_TIMEOUT_MS,
                 });
             }
@@ -84,15 +198,10 @@ export async function impitGet(url, options) {
                 }, "impit warmup failed");
             }
         }
-        const response = await client.fetch(url, {
+        return await fetchHtmlWithAdmToolsSolve(client, url, {
             timeout: BROWSER_REQUEST_TIMEOUT_MS,
+            ...(requestHeaders ? { headers: requestHeaders } : {}),
         });
-        if (response.status >= 400) {
-            const statusText = response.statusText?.trim();
-            const tail = statusText ? ` ${statusText}` : "";
-            throw new Error(`Impit GET HTTP ${response.status}${tail}: ${url}`);
-        }
-        return await response.text();
     }
     catch (err) {
         throw new Error(formatImpitFetchError(url, err), { cause: err });

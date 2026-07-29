@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getAirStockData } from "../getAirStockData.js";
+import {
+  getAirStockData,
+  resolveAirWarmUpUrl,
+} from "../getAirStockData.js";
 import { fetchPageHtml } from "../../../utils/fetchPageHtml.js";
 import { logBrowserError } from "../../../utils/browserRequest.js";
 import { logBrowserStockResult } from "../../../utils/logBrowserStockResult.js";
@@ -23,6 +26,20 @@ vi.mock("../../../../../logging/createLogger.js", () => ({
     debug: vi.fn(),
   }),
 }));
+
+describe("resolveAirWarmUpUrl", () => {
+  it("возвращает origin + /", () => {
+    expect(
+      resolveAirWarmUpUrl(
+        "https://airballoons.com.ua/ua/product/shar-metalik"
+      )
+    ).toBe("https://airballoons.com.ua/");
+  });
+
+  it("undefined при невалидном URL", () => {
+    expect(resolveAirWarmUpUrl("not-a-url")).toBeUndefined();
+  });
+});
 
 describe("getAirStockData", () => {
   const originalProxy = process.env.AIR_HTTP_PROXY_URL;
@@ -91,6 +108,11 @@ describe("getAirStockData", () => {
           konkName: "air",
           transport: "impit",
           proxyUrl: undefined,
+          warmUpUrl: "https://example.com/",
+          headers: {
+            Referer: "https://example.com/",
+            "Sec-Fetch-Site": "same-origin",
+          },
         }
       );
       expect(logBrowserStockResult).toHaveBeenCalledWith({
@@ -117,6 +139,11 @@ describe("getAirStockData", () => {
           konkName: "air",
           transport: "impit",
           proxyUrl: "http://user:secret@77.47.252.164:50100",
+          warmUpUrl: "https://example.com/",
+          headers: {
+            Referer: "https://example.com/",
+            "Sec-Fetch-Site": "same-origin",
+          },
         }
       );
     });

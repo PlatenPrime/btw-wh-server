@@ -1,4 +1,5 @@
 import {
+  formatKonkSliceLine,
   formatKonkSliceReportLines,
   type KonkSliceStats,
 } from "./formatKonkSliceStats.js";
@@ -17,4 +18,14 @@ export function formatAnalogSlicesReport(
   }
 
   return lines.join("\n");
+}
+
+/** Одно TG-сообщение по конкуренту после его analog-среза. */
+export function formatAnalogKonkSliceReport(stats: KonkSliceStats): string {
+  return `📊 Analog slices — ${stats.konkName}\n${formatKonkSliceLine(stats)}`;
+}
+
+/** Короткое TG-сообщение со списком исключённых конкурентов analog cron. */
+export function formatAnalogSlicesExcludedReport(excluded: string[]): string {
+  return `📊 Analog slices — пропущено: ${excluded.join(", ")}`;
 }

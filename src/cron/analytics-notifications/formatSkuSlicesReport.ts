@@ -1,5 +1,5 @@
 import {
-  formatKonkSliceReportLines,
+  formatKonkSliceLine,
   type KonkSliceStats,
 } from "./formatKonkSliceStats.js";
 
@@ -9,7 +9,7 @@ export function formatSkuSlicesReport(
 ): string {
   const lines = [
     "📊 SKU slices — завершено",
-    ...formatKonkSliceReportLines(competitors),
+    ...competitors.map(formatKonkSliceLine),
   ];
 
   if (excluded.length > 0) {
@@ -17,4 +17,14 @@ export function formatSkuSlicesReport(
   }
 
   return lines.join("\n");
+}
+
+/** Одно TG-сообщение по конкуренту после его SKU-среза. */
+export function formatSkuKonkSliceReport(stats: KonkSliceStats): string {
+  return `📊 SKU slices — ${stats.konkName}\n${formatKonkSliceLine(stats)}`;
+}
+
+/** Короткое TG-сообщение со списком исключённых конкурентов SKU cron. */
+export function formatSkuSlicesExcludedReport(excluded: string[]): string {
+  return `📊 SKU slices — пропущено: ${excluded.join(", ")}`;
 }

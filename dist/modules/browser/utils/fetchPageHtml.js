@@ -19,6 +19,7 @@ export async function fetchPageHtml(url, options) {
         return impitGet(url, {
             proxyUrl: options?.proxyUrl,
             warmUpUrl: options?.warmUpUrl,
+            headers: options?.headers,
         });
     }
     return browserGet(url, { proxyUrl: options?.proxyUrl });

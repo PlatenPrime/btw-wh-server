@@ -15,6 +15,8 @@ export type FetchPageHtmlOptions = {
   waitUntil?: "domcontentloaded" | "networkidle" | "load" | "commit";
   /** Playwright/impit: сначала открыть URL (origin), потом целевой. */
   warmUpUrl?: string;
+  /** Impit: request-level headers на целевой GET. */
+  headers?: Record<string, string>;
 };
 
 /**
@@ -40,6 +42,7 @@ export async function fetchPageHtml(
     return impitGet(url, {
       proxyUrl: options?.proxyUrl,
       warmUpUrl: options?.warmUpUrl,
+      headers: options?.headers,
     });
   }
 

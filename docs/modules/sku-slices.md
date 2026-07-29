@@ -20,7 +20,7 @@
 
 ## Сбор данных
 
-Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/config/excludedCompetitors` (сейчас из sku-cron исключён `yumi`). Jitter из `sku-reporting/constants`. Ключ даты — `toNextKyivSliceDate`.
+Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/config/excludedCompetitors` (сейчас из sku-cron исключён `yumi`). Jitter из `sku-reporting/constants`. Ключ даты — `toNextKyivSliceDate`. После завершения среза **каждого** конкурента — отдельное Telegram-сообщение в analytics chat (ночное окно 20:00–05:59 откладывает отправку до 06:00 Kyiv); список excluded — отдельным сообщением в начале.
 
 ### Client-ingestion для Air
 

@@ -16,7 +16,10 @@ import {
   formatImpitFetchError,
   impitGet,
   setImpitFactoryForTests,
+  summarizeImpitErrorBody,
   type ImpitClientLike,
+  type ImpitCookieJar,
+  type ImpitFetchInit,
 } from "../impitGet.js";
 
 function makeClient(handlers: {
@@ -39,6 +42,16 @@ describe("formatImpitFetchError", () => {
     expect(formatImpitFetchError("https://x", new Error("boom"))).toBe(
       "Impit GET https://x failed: boom"
     );
+  });
+});
+
+describe("summarizeImpitErrorBody", () => {
+  it("извлекает title и ужимает snippet", () => {
+    const html = `<html><head><title>  429\nBlocked  </title></head><body>${"z".repeat(500)}</body></html>`;
+    const out = summarizeImpitErrorBody(html);
+    expect(out.title).toBe("429 Blocked");
+    expect(out.snippet.length).toBeLessThanOrEqual(300);
+    expect(out.htmlLength).toBe(html.length);
   });
 });
 
@@ -68,7 +81,7 @@ describe("impitGet", () => {
     });
   });
 
-  it("передаёт proxyUrl в фабрику и кэширует клиент", async () => {
+  it("передаёт cookieJar и proxyUrl в фабрику и кэширует клиент", async () => {
     const factory = vi.fn(() =>
       makeClient({
         fetch: vi.fn(async () => ({
@@ -87,22 +100,89 @@ describe("impitGet", () => {
       browser: "chrome",
       timeout: 30_000,
       proxyUrl: "http://proxy:1",
+      cookieJar: expect.objectContaining({
+        setCookie: expect.any(Function),
+        getCookieString: expect.any(Function),
+      }) as ImpitCookieJar,
     });
   });
 
-  it("кидает на HTTP ≥ 400", async () => {
+  it("передаёт headers на целевой fetch", async () => {
+    const fetch = vi.fn(async () => ({
+      status: 200,
+      text: async () => "ok",
+    }));
+    setImpitFactoryForTests(() => makeClient({ fetch }));
+
+    await impitGet("https://example.com/p", {
+      headers: {
+        Referer: "https://example.com/",
+        "Sec-Fetch-Site": "same-origin",
+      },
+    });
+
+    expect(fetch).toHaveBeenCalledWith("https://example.com/p", {
+      timeout: 30_000,
+      headers: {
+        Referer: "https://example.com/",
+        "Sec-Fetch-Site": "same-origin",
+      },
+    });
+  });
+
+  it("warm-up затем product — два fetch на одном клиенте", async () => {
+    const fetch = vi.fn(async (url: string) => {
+      if (url.endsWith("/")) {
+        return { status: 200, text: async () => "home" };
+      }
+      return { status: 200, text: async () => "product" };
+    });
+    setImpitFactoryForTests(() => makeClient({ fetch }));
+
+    const html = await impitGet("https://example.com/product/1", {
+      warmUpUrl: "https://example.com/",
+      headers: { Referer: "https://example.com/" },
+    });
+
+    expect(html).toBe("product");
+    expect(fetch).toHaveBeenNthCalledWith(1, "https://example.com/", {
+      timeout: 30_000,
+    });
+    expect(fetch).toHaveBeenNthCalledWith(2, "https://example.com/product/1", {
+      timeout: 30_000,
+      headers: { Referer: "https://example.com/" },
+    });
+  });
+
+  it("кидает на HTTP ≥ 400 и логирует snippet + Retry-After", async () => {
     setImpitFactoryForTests(() =>
       makeClient({
         fetch: vi.fn(async () => ({
-          status: 403,
-          statusText: "Forbidden",
-          text: async () => "nope",
+          status: 429,
+          statusText: "Too Many Requests",
+          headers: {
+            get: (name: string) =>
+              name.toLowerCase() === "retry-after" ? "5" : null,
+          },
+          text: async () =>
+            "<html><head><title>Too Many Requests</title></head><body>rate limited by stormwall</body></html>",
         })),
       })
     );
 
     await expect(impitGet("https://example.com/blocked")).rejects.toThrow(
-      /Impit GET HTTP 403 Forbidden: https:\/\/example.com\/blocked/
+      /Impit GET HTTP 429 Too Many Requests: https:\/\/example.com\/blocked.*title="Too Many Requests".*body=.*stormwall.*retryAfter="5"/
+    );
+
+    expect(mockWarn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: "Impit GET non-2xx",
+        url: "https://example.com/blocked",
+        httpStatus: 429,
+        retryAfter: "5",
+        title: "Too Many Requests",
+      }),
+      "impit http error body"
     );
   });
 
@@ -127,5 +207,67 @@ describe("impitGet", () => {
     expect(html).toBe("ok");
     expect(mockWarn).toHaveBeenCalled();
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("adm.tools 429 challenge → POST ___ack → retry GET 200", async () => {
+    const challengeHtml = `<!DOCTYPE html>
+<title>Захищена сторінка</title>
+<a href="https://adm.tools">adm.tools</a>
+<script>form.append('___ack', eval('6-27+26+56'));</script>`;
+
+    let getCount = 0;
+    const fetch = vi.fn(async (_url: string, init?: ImpitFetchInit) => {
+      if (init?.method === "POST") {
+        expect(init.body).toBeInstanceOf(FormData);
+        expect((init.body as FormData).get("___ack")).toBe("61");
+        return { status: 200, text: async (): Promise<string> => "acked" };
+      }
+      getCount += 1;
+      if (getCount === 1) {
+        return {
+          status: 429,
+          statusText: "Too Many Requests",
+          text: async (): Promise<string> => challengeHtml,
+        };
+      }
+      return {
+        status: 200,
+        text: async (): Promise<string> => "<html>product ok</html>",
+      };
+    });
+    setImpitFactoryForTests(() => makeClient({ fetch }));
+
+    const html = await impitGet("https://airballoons.com.ua/ua/product/x");
+    expect(html).toBe("<html>product ok</html>");
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+
+  it("adm.tools challenge POST fail → исходный 429 throw", async () => {
+    const challengeHtml = `<!DOCTYPE html>
+<title>Захищена сторінка</title>
+<a href="https://adm.tools">adm.tools</a>
+<script>form.append('___ack', eval('1+1'));</script>`;
+
+    const fetch = vi.fn(async (_url: string, init?: ImpitFetchInit) => {
+      if (init?.method === "POST") {
+        return { status: 500, text: async (): Promise<string> => "fail" };
+      }
+      return {
+        status: 429,
+        statusText: "Too Many Requests",
+        text: async (): Promise<string> => challengeHtml,
+      };
+    });
+    setImpitFactoryForTests(() => makeClient({ fetch }));
+
+    await expect(
+      impitGet("https://airballoons.com.ua/ua/product/x")
+    ).rejects.toThrow(/Impit GET HTTP 429/);
+    expect(mockWarn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        context: "adm.tools challenge solve failed",
+      }),
+      "adm tools challenge failed"
+    );
   });
 });

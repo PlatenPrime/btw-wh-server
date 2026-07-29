@@ -1,6 +1,9 @@
 import { CronJob } from "cron";
 import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
-import { formatSkuSlicesReport } from "../../../cron/analytics-notifications/formatSkuSlicesReport.js";
+import {
+  formatSkuKonkSliceReport,
+  formatSkuSlicesExcludedReport,
+} from "../../../cron/analytics-notifications/formatSkuSlicesReport.js";
 import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { createLogger } from "../../../logging/createLogger.js";
 import { toNextKyivSliceDate } from "../../../utils/sliceDate.js";
@@ -16,6 +19,7 @@ const log = createLogger({ module: "sku-slices", job: "cron" });
 /**
  * Ежедневно в 20:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
  * Ключ дня среза — следующий календарный день в Киеве (как при старом запуске в полночь).
+ * TG: отдельное сообщение после каждого konk (+ excluded в начале, если есть).
  */
 export function startSkuSlicesCron(): CronJob {
   const job = new CronJob(
@@ -47,26 +51,29 @@ export function startSkuSlicesCron(): CronJob {
             { excludedCompetitors: excludedFromData },
             "excluded competitors"
           );
+          await sendCronAnalyticsReport(
+            formatSkuSlicesExcludedReport(excludedFromData)
+          );
         }
+
         const results = await Promise.all(
           konkNames.map(async (k) => {
             const r = await runSkuSliceForKonkUtil(
               k,
               toNextKyivSliceDate(new Date())
             );
-            return {
+            const stats = {
               konkName: k,
               count: r.count,
               errors: r.errors,
               invalid: r.invalid,
               total: r.total,
             };
+            await sendCronAnalyticsReport(formatSkuKonkSliceReport(stats));
+            return stats;
           })
         );
         log.info({ results }, "sku slices completed");
-        await sendCronAnalyticsReport(
-          formatSkuSlicesReport(results, excludedFromData)
-        );
       } catch (error) {
         log.error({ err: error }, "sku slices cron failed");
         await sendCronAnalyticsReport(formatCronErrorReport("SKU slices", error));

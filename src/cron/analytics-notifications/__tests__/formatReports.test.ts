@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { formatAnalogSlicesReport } from "../formatAnalogSlicesReport.js";
+import {
+  formatAnalogKonkSliceReport,
+  formatAnalogSlicesExcludedReport,
+  formatAnalogSlicesReport,
+} from "../formatAnalogSlicesReport.js";
 import {
   formatCronErrorReport,
   formatFillPosNameukrErrorReport,
@@ -13,7 +17,11 @@ import {
   formatKonkSliceReportLines,
 } from "../formatKonkSliceStats.js";
 import { formatSkuInvalidFlagReport } from "../formatSkuInvalidFlagReport.js";
-import { formatSkuSlicesReport } from "../formatSkuSlicesReport.js";
+import {
+  formatSkuKonkSliceReport,
+  formatSkuSlicesExcludedReport,
+  formatSkuSlicesReport,
+} from "../formatSkuSlicesReport.js";
 
 describe("formatKonkSliceStats", () => {
   it("formats single competitor line", () => {
@@ -54,6 +62,28 @@ describe("formatAnalogSlicesReport", () => {
   });
 });
 
+describe("formatAnalogKonkSliceReport", () => {
+  it("formats single konk message", () => {
+    expect(
+      formatAnalogKonkSliceReport({
+        konkName: "balun",
+        count: 5,
+        errors: 0,
+        invalid: 1,
+        total: 6,
+      })
+    ).toBe("📊 Analog slices — balun\nbalun: ✅5 / ❌0 / ⚠️1");
+  });
+});
+
+describe("formatAnalogSlicesExcludedReport", () => {
+  it("lists excluded", () => {
+    expect(formatAnalogSlicesExcludedReport(["balun"])).toBe(
+      "📊 Analog slices — пропущено: balun"
+    );
+  });
+});
+
 describe("formatSkuSlicesReport", () => {
   it("includes header and competitor lines", () => {
     const msg = formatSkuSlicesReport([
@@ -62,6 +92,28 @@ describe("formatSkuSlicesReport", () => {
 
     expect(msg).toContain("SKU slices");
     expect(msg).toContain("sharik: ✅10 / ❌2 / ⚠️1");
+  });
+});
+
+describe("formatSkuKonkSliceReport", () => {
+  it("formats single konk message", () => {
+    expect(
+      formatSkuKonkSliceReport({
+        konkName: "air",
+        count: 12,
+        errors: 1,
+        invalid: 2,
+        total: 15,
+      })
+    ).toBe("📊 SKU slices — air\nair: ✅12 / ❌1 / ⚠️2");
+  });
+});
+
+describe("formatSkuSlicesExcludedReport", () => {
+  it("lists excluded", () => {
+    expect(formatSkuSlicesExcludedReport(["yumi", "air"])).toBe(
+      "📊 SKU slices — пропущено: yumi, air"
+    );
   });
 });
 
