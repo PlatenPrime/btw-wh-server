@@ -17,21 +17,19 @@
 ## Связи между сущностями
 
 - **Art:** список артикулов для среза формируется из distinct `artikul` коллекции `Art` (`getUniqueArtikulsFromArtsUtil`).
-- **browser/sharik:** основной источник данных — bulk-страница `product_rests` и поисковый fallback по отдельным артикулам (`getSharikStockData`, `fetchSharikProductRestsMap`).
+- **browser/sharik:** источник — bulk-страница `product_rests`; в срез пишется **sliceQuantity** (второй остаток в строке `artikul = actual; slice; price`).
 - **sku-slices:** агрегация Btrade-срезов для chart-data и Excel (`aggregateBtradeSlices`, `sliceDataProjectForArtikulList`).
 - **analog-slices:** сравнение остатков и продаж аналога конкурента с Btrade в отчётах comparison.
 
 ## Концепции и принятые решения
 
-### Две стратегии получения данных
+### Источник данных product_rests
 
-1. **Bulk-запрос** — одна HTML-страница `product_rests` sharik.ua возвращает карту всех остатков; это основной путь.
-2. **Search-fallback** — для артикулов, не попавших в bulk-ответ, выполняется поштучный поиск с jitter 200–1000 мс между запросами.
-3. **Sentinel missing** — если артикул не найден ни в bulk, ни в search, в `data` записывается `{ price: -1, quantity: -1 }`. Такие позиции попадают в Telegram-отчёт как `missing` и видны клиенту через `GET /api/btrade-slices?isInvalid=true`.
+Одна HTML-страница `product_rests` sharik.ua возвращает карту всех артикулов в формате `artikul = actualQuantity; sliceQuantity; price`. Для daily slice используется `sliceQuantity` и `price`. Артикулы, отсутствующие в карте, получают sentinel `{ price: -1, quantity: -1 }` (видны через `GET /api/btrade-slices?isInvalid=true`). Поисковый fallback удалён.
 
-Оба HTTP-пути к sharik.ua используют общий browser-прокси через `SHARIK_HTTP_PROXY_URL` (см. [browser](browser.md)).
+Запросы к sharik.ua идут без HTTP-прокси (geo-block снят; см. [browser](browser.md)). Общий in-memory cache TTL ~1ч живёт в `browser/sharik/utils/product-rests`.
 
-Seed-артикул для URL bulk-страницы задаётся через env `BTRADE_SHARIK_PRODUCT_RESTS_SEED_ARTIKUL` (по умолчанию `1302-0065`).
+Seed-артикул для URL: env `BTRADE_SHARIK_PRODUCT_RESTS_SEED_ARTIKUL` (по умолчанию `1302-0065`).
 
 ### Aggregation-проекция
 
@@ -44,14 +42,14 @@ Seed-артикул для URL bulk-страницы задаётся через
 ## Сбор данных (cron)
 
 - **Расписание:** ежедневно в **00:00 Europe/Kiev** (`startBtradeSlicesCron`).
-- **Задача:** `calculateBtradeSlice()` — обход артикулов, запись/обновление документа на текущий день. Для артикулов без данных после bulk и search в `data` пишется sentinel `-1/-1`.
+- **Задача:** `calculateBtradeSlice()` — product_rests → upsert документа на текущий день.
 - **Отчёт:** Telegram-уведомление через `cron/analytics-notifications` после каждого запуска.
 
 ## HTTP
 
 Модуль предоставляет только чтение:
 
-- **GET `/api/btrade-slices`** — постраничный срез на дату (`date`, `page`, `limit`, опционально `isInvalid` для фильтра «битых» позиций в `data`). Строки обогащаются документом **Art** по `artikul`; контракт ответа согласован с листингом `GET /api/sku-slices` (items + pagination), с полем остатка `quantity` вместо `stock`.
-- **GET `/api/btrade-slices/artikul/:artikul/range`** — сырой ряд `quantity`/`price` по артикулу за период (без нормализации для продаж).
+- **GET `/api/btrade-slices`** — постраничный срез на дату (`date`, `page`, `limit`, опционально `isInvalid`).
+- **GET `/api/btrade-slices/artikul/:artikul/range`** — сырой ряд `quantity`/`price` по артикулу за период.
 
 Подробности — в [API документации](../api/btrade-slices.md) и [матрице доступа](../api/access-matrix.md).

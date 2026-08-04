@@ -1,9 +1,16 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
-import { beforeEach, describe, expect, it } from "vitest";
-import { Def } from "../../models/Def.js";
-import { createTestAsk } from "../../../../test/setup.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getLatestDefsController } from "../get-latest-defs/getLatestDefsController.js";
+
+vi.mock("../get-latest-defs/utils/calculateLivePogrebiDefsUtil.js", () => ({
+  calculateLivePogrebiDefsUtil: vi.fn(),
+}));
+vi.mock("../get-latest-defs/utils/enrichDefsWithAsksUtil.js", () => ({
+  enrichDefsWithAsksUtil: vi.fn(),
+}));
+
+import { calculateLivePogrebiDefsUtil } from "../get-latest-defs/utils/calculateLivePogrebiDefsUtil.js";
+import { enrichDefsWithAsksUtil } from "../get-latest-defs/utils/enrichDefsWithAsksUtil.js";
 
 describe("getLatestDefsController", () => {
   let res: Response;
@@ -11,6 +18,7 @@ describe("getLatestDefsController", () => {
   let responseStatus: any;
 
   beforeEach(() => {
+    vi.clearAllMocks();
     responseJson = {};
     responseStatus = {};
     res = {
@@ -22,12 +30,13 @@ describe("getLatestDefsController", () => {
         responseJson = data;
         return this;
       },
+      headersSent: false,
     } as unknown as Response;
   });
 
-  it("200: возвращает exists=true и данные при наличии дефицитов", async () => {
-    // Создаем запись дефицитов
-    const def = await Def.create({
+  it("200: возвращает live-расчёт с calculatedAt", async () => {
+    const calculatedAt = new Date("2026-08-04T12:00:00.000Z");
+    vi.mocked(calculateLivePogrebiDefsUtil).mockResolvedValue({
       result: {
         ART001: {
           nameukr: "Товар 1",
@@ -41,171 +50,38 @@ describe("getLatestDefsController", () => {
       total: 1,
       totalCriticalDefs: 1,
       totalLimitDefs: 0,
+      calculatedAt,
+    });
+    vi.mocked(enrichDefsWithAsksUtil).mockResolvedValue({
+      ART001: {
+        nameukr: "Товар 1",
+        quant: 10,
+        sharikQuant: 5,
+        difQuant: -5,
+        defLimit: 30,
+        status: "critical",
+        existingAsk: null,
+      },
     });
 
-    const req = {} as unknown as Request;
-    await getLatestDefsController(req, res);
+    await getLatestDefsController({} as Request, res);
 
     expect(responseStatus.code).toBe(200);
     expect(responseJson.exists).toBe(true);
-    expect(responseJson.message).toBe("Latest deficit calculation retrieved successfully");
-    expect(responseJson.data).toBeDefined();
-    expect(responseJson.data._id).toBeDefined();
     expect(responseJson.data.total).toBe(1);
-  });
-
-  it("200: возвращает exists=false при отсутствии дефицитов", async () => {
-    const req = {} as unknown as Request;
-    await getLatestDefsController(req, res);
-
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.exists).toBe(false);
-    expect(responseJson.message).toBe("No deficit calculations found");
-    expect(responseJson.data).toBeNull();
-  });
-
-  it("200: обогащает дефициты информацией о заявках", async () => {
-    // Создаем запись дефицитов
-    const def = await Def.create({
-      result: {
-        ART001: {
-          nameukr: "Товар 1",
-          quant: 10,
-          sharikQuant: 5,
-          difQuant: -5,
-          defLimit: 30,
-          status: "critical",
-        },
-      },
-      total: 1,
-      totalCriticalDefs: 1,
-      totalLimitDefs: 0,
-    });
-
-    // Создаем заявку для этого артикула
-    const ask = await createTestAsk({
-      artikul: "ART001",
-      status: "new",
-    });
-
-    const req = {} as unknown as Request;
-    await getLatestDefsController(req, res);
-
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.exists).toBe(true);
-    expect(responseJson.data.result.ART001).toBeDefined();
-    expect(responseJson.data.result.ART001).toHaveProperty("existingAsk");
-    expect(responseJson.data.result.ART001.existingAsk).not.toBeNull();
-    expect(responseJson.data.result.ART001.existingAsk._id).toBe(String(ask._id));
-  });
-
-  it("200: возвращает null для existingAsk если заявки нет", async () => {
-    // Создаем запись дефицитов
-    const def = await Def.create({
-      result: {
-        ART001: {
-          nameukr: "Товар 1",
-          quant: 10,
-          sharikQuant: 5,
-          difQuant: -5,
-          defLimit: 30,
-          status: "critical",
-        },
-      },
-      total: 1,
-      totalCriticalDefs: 1,
-      totalLimitDefs: 0,
-    });
-
-    const req = {} as unknown as Request;
-    await getLatestDefsController(req, res);
-
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.exists).toBe(true);
+    expect(responseJson.data.calculatedAt).toEqual(calculatedAt);
+    expect(responseJson.data._id).toBeUndefined();
     expect(responseJson.data.result.ART001.existingAsk).toBeNull();
   });
 
-  it("200: возвращает только первую заявку для артикула", async () => {
-    // Создаем запись дефицитов
-    const def = await Def.create({
-      result: {
-        ART001: {
-          nameukr: "Товар 1",
-          quant: 10,
-          sharikQuant: 5,
-          difQuant: -5,
-          defLimit: 30,
-          status: "critical",
-        },
-      },
-      total: 1,
-      totalCriticalDefs: 1,
-      totalLimitDefs: 0,
-    });
+  it("500 при ошибке расчёта", async () => {
+    vi.mocked(calculateLivePogrebiDefsUtil).mockRejectedValue(
+      new Error("boom")
+    );
 
-    // Создаем первую заявку
-    const firstAsk = await createTestAsk({
-      artikul: "ART001",
-      status: "new",
-    });
+    await getLatestDefsController({} as Request, res);
 
-    // Создаем вторую заявку
-    const secondAsk = await createTestAsk({
-      artikul: "ART001",
-      status: "new",
-    });
-
-    const req = {} as unknown as Request;
-    await getLatestDefsController(req, res);
-
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.exists).toBe(true);
-    expect(responseJson.data.result.ART001.existingAsk._id).toBe(String(firstAsk._id));
-    expect(responseJson.data.result.ART001.existingAsk._id).not.toBe(String(secondAsk._id));
-  });
-
-  it("возвращает последнюю запись если их несколько", async () => {
-    // Создаем первую запись
-    await Def.create({
-      result: {
-        ART001: {
-          nameukr: "Товар 1",
-          quant: 10,
-          sharikQuant: 5,
-          difQuant: -5,
-          defLimit: 30,
-          status: "critical",
-        },
-      },
-      total: 1,
-      totalCriticalDefs: 1,
-      totalLimitDefs: 0,
-    });
-
-    // Создаем вторую запись (должна быть возвращена)
-    const def2 = await Def.create({
-      result: {
-        ART002: {
-          nameukr: "Товар 2",
-          quant: 20,
-          sharikQuant: 25,
-          difQuant: 5,
-          defLimit: 40,
-          status: "limited",
-        },
-      },
-      total: 1,
-      totalCriticalDefs: 0,
-      totalLimitDefs: 1,
-    });
-
-    const req = {} as unknown as Request;
-    await getLatestDefsController(req, res);
-
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.exists).toBe(true);
-    expect(responseJson.data.result).toHaveProperty("ART002");
-    expect(responseJson.data.result).not.toHaveProperty("ART001");
+    expect(responseStatus.code).toBe(500);
+    expect(responseJson.success).toBe(false);
   });
 });
-

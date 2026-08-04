@@ -110,9 +110,7 @@
 
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
-| POST | `/calculate` | JWT | ≥ ADMIN |
 | GET | `/latest` | JWT | ≥ USER |
-| GET | `/calculation-status` | JWT | ≥ USER |
 
 ---
 

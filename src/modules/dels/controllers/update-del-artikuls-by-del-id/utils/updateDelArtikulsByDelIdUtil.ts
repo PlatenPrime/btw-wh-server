@@ -1,4 +1,5 @@
-import { getSharikStockData } from "../../../../browser/sharik/utils/getSharikStockData.js";
+import { getCachedSharikProductRestsMap } from "../../../../browser/sharik/utils/product-rests/index.js";
+import { Art } from "../../../../arts/models/Art.js";
 import { Del, IDelArtikulValue, IDelArtikuls } from "../../../models/Del.js";
 
 export type UpdateDelArtikulsByDelIdResult = {
@@ -15,9 +16,8 @@ const isDelArtikulValue = (v: unknown): v is IDelArtikulValue =>
   typeof (v as { quant: unknown }).quant === "number";
 
 /**
- * Обновляет stock всех артикулов поставки данными с sharik.ua.
- * quant и существующий stock (при ошибке/notFound) сохраняются.
- * Вызывать в фоне; между запросами к sharik — задержка 100ms.
+ * Обновляет stock всех артикулов поставки из product_rests (actualQuantity).
+ * nameukr — из Art одним bulk-запросом. quant сохраняется.
  */
 export const updateDelArtikulsByDelIdUtil = async (
   delId: string
@@ -42,26 +42,30 @@ export const updateDelArtikulsByDelIdUtil = async (
     artikulsObj[k] = { quant: v.quant, stock: v.stock, nameukr: v.nameukr };
   }
 
-  for (let i = 0; i < artikulKeys.length; i++) {
-    const artikul = artikulKeys[i];
+  const productRestsMap = await getCachedSharikProductRestsMap();
+  const arts = await Art.find({ artikul: { $in: artikulKeys } })
+    .select("artikul nameukr")
+    .lean();
+  const nameukrByArtikul = new Map(
+    arts.map((a) => [a.artikul, (a.nameukr ?? "").trim()] as const)
+  );
+
+  for (const artikul of artikulKeys) {
     const previous = artikulsObj[artikul];
     try {
-      const sharikData = await getSharikStockData(artikul);
-      if (!sharikData) {
+      const row = productRestsMap.get(artikul);
+      if (!row) {
         result.notFound++;
         continue;
       }
       artikulsObj[artikul] = {
         quant: previous.quant,
-        stock: sharikData.quantity,
-        nameukr: sharikData.nameukr ?? "",
+        stock: row.actualQuantity,
+        nameukr: nameukrByArtikul.get(artikul) || previous.nameukr || "",
       };
       result.updated++;
     } catch {
       result.errors++;
-    }
-    if (i < artikulKeys.length - 1) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
 

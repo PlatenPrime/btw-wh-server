@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createTestArt } from "../../../../../test/setup.js";
 import { getSharikStockData } from "../getSharikStockData.js";
+import { clearSharikProductRestsCache } from "../product-rests/index.js";
 import type * as BrowserRequest from "../../../utils/browserRequest.js";
 
 vi.mock("../../../utils/browserRequest.js", async (importOriginal) => {
@@ -14,19 +16,13 @@ vi.mock("../../../utils/browserRequest.js", async (importOriginal) => {
 import { browserGet } from "../../../utils/browserRequest.js";
 
 describe("getSharikStockData", () => {
-  const originalProxy = process.env.SHARIK_HTTP_PROXY_URL;
-
   beforeEach(() => {
+    clearSharikProductRestsCache();
     vi.mocked(browserGet).mockReset();
-    delete process.env.SHARIK_HTTP_PROXY_URL;
   });
 
   afterEach(() => {
-    if (originalProxy === undefined) {
-      delete process.env.SHARIK_HTTP_PROXY_URL;
-    } else {
-      process.env.SHARIK_HTTP_PROXY_URL = originalProxy;
-    }
+    clearSharikProductRestsCache();
   });
 
   describe("Валидация входных данных", () => {
@@ -56,67 +52,61 @@ describe("getSharikStockData", () => {
   });
 
   describe("Успешные сценарии", () => {
-    it("должен возвращать данные товара при успешном парсинге", async () => {
-      const mockHtml = `
-        <div class="car-col">
-          <div class="one-item">
-            <div class="one-item-tit">Тестовый товар</div>
-            <div class="one-item-price">1 250,50 грн</div>
-            <div class="one-item-quantity">В наличии: 15 шт</div>
-          </div>
-        </div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+    it("возвращает actualQuantity и nameukr из Art", async () => {
+      await createTestArt({
+        artikul: "1501-3445",
+        zone: "A1",
+        nameukr: "Товар з Art",
+      });
+      vi.mocked(browserGet).mockResolvedValue(
+        "<pre>1501-3445 = 15; 20; 1250.50</pre>"
+      );
 
-      const result = await getSharikStockData("test-artikul");
+      const result = await getSharikStockData("1501-3445");
 
       expect(result).toEqual({
-        nameukr: "Тестовый товар",
-        price: 125050,
+        nameukr: "Товар з Art",
+        price: 1250.5,
         quantity: 15,
       });
       expect(browserGet).toHaveBeenCalledWith(
-        "https://sharik.ua/ua/search/?q=test-artikul",
-        { proxyUrl: undefined }
+        "https://sharik.ua/product_rests/1302-0065/"
       );
     });
 
-    it("передаёт SHARIK_HTTP_PROXY_URL в browserGet", async () => {
-      process.env.SHARIK_HTTP_PROXY_URL =
-        "http://user:secret@77.47.252.164:50100";
-      vi.mocked(browserGet).mockResolvedValue(`<div class="car-col"></div>`);
-
-      await getSharikStockData("test-artikul");
-
-      expect(browserGet).toHaveBeenCalledWith(
-        "https://sharik.ua/ua/search/?q=test-artikul",
-        { proxyUrl: "http://user:secret@77.47.252.164:50100" }
+    it("nameukr пустой если Art нет", async () => {
+      vi.mocked(browserGet).mockResolvedValue(
+        "<pre>1501-3445 = 15; 20; 1250.50</pre>"
       );
+
+      const result = await getSharikStockData("1501-3445");
+
+      expect(result).toEqual({
+        nameukr: "",
+        price: 1250.5,
+        quantity: 15,
+      });
     });
 
-    it("должен правильно обрабатывать цену с запятыми и пробелами", async () => {
-      const mockHtml = `
-        <div class="car-col">
-          <div class="one-item">
-            <div class="one-item-tit">Товар</div>
-            <div class="one-item-price">2,500.75 грн</div>
-            <div class="one-item-quantity">10 шт</div>
-          </div>
-        </div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
-
-      const result = await getSharikStockData("test");
-
-      expect(result?.price).toBe(2500.75);
-    });
-
-    it("должен возвращать null когда нет товаров", async () => {
-      vi.mocked(browserGet).mockResolvedValue(`<div class="car-col"></div>`);
+    it("возвращает null когда артикула нет в map", async () => {
+      vi.mocked(browserGet).mockResolvedValue(
+        "<pre>1501-0001 = 1; 1; 10.00</pre>"
+      );
 
       const result = await getSharikStockData("nonexistent");
 
       expect(result).toBeNull();
+    });
+
+    it("переиспользует cache на повторном вызове", async () => {
+      vi.mocked(browserGet).mockResolvedValue(
+        "<pre>1501-3445 = 15; 20; 1250.50</pre>"
+      );
+
+      await getSharikStockData("1501-3445");
+      await getSharikStockData("1501-3445");
+
+      expect(browserGet).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -125,18 +115,7 @@ describe("getSharikStockData", () => {
       vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
 
       await expect(getSharikStockData("test")).rejects.toThrow(
-        "Failed to fetch data from sharik.ua: Network error"
-      );
-    });
-
-    it("должен правильно кодировать артикул в URL", async () => {
-      vi.mocked(browserGet).mockResolvedValue(`<div class="car-col"></div>`);
-
-      await getSharikStockData("тест с пробелами & символами");
-
-      expect(browserGet).toHaveBeenCalledWith(
-        "https://sharik.ua/ua/search/?q=%D1%82%D0%B5%D1%81%D1%82%20%D1%81%20%D0%BF%D1%80%D0%BE%D0%B1%D0%B5%D0%BB%D0%B0%D0%BC%D0%B8%20%26%20%D1%81%D0%B8%D0%BC%D0%B2%D0%BE%D0%BB%D0%B0%D0%BC%D0%B8",
-        { proxyUrl: undefined }
+        "Failed to fetch data from sharik.ua"
       );
     });
   });

@@ -1,6 +1,10 @@
-import { getSharikStockData } from "../../browser/sharik/utils/getSharikStockData.js";
 import { Art } from "../models/Art.js";
-import { logModuleError, logModuleInfo, logModuleWarn } from "../../../logging/logModuleError.js";
+import { getCachedSharikProductRestsMap } from "../../browser/sharik/utils/product-rests/index.js";
+import {
+  logModuleError,
+  logModuleInfo,
+  logModuleWarn,
+} from "../../../logging/logModuleError.js";
 
 type UpdateAllBtradeStocksResult = {
   total: number;
@@ -10,16 +14,14 @@ type UpdateAllBtradeStocksResult = {
 };
 
 /**
- * Обновляет btradeStock для всех артикулов данными с sharik.ua
- * Использует очередность с задержкой 100ms между запросами
- * @returns Promise со статистикой обновления
+ * Обновляет btradeStock для всех артикулов данными product_rests (actualQuantity).
+ * Один HTTP-запрос (или cache hit), затем обновления в Mongo.
  */
 export const updateAllBtradeStocksUtil =
   async (): Promise<UpdateAllBtradeStocksResult> => {
     const startTime = performance.now();
 
     try {
-      // Получаем все артикулы
       const arts = await Art.find().select("artikul").lean();
       const artikuls = arts.map((art) => art.artikul);
       const totalItems = artikuls.length;
@@ -33,27 +35,29 @@ export const updateAllBtradeStocksUtil =
         notFound: 0,
       };
 
-      // Обрабатываем каждый артикул последовательно с задержкой
-      for (let i = 0; i < artikuls.length; i++) {
-        const artikul = artikuls[i];
+      if (totalItems === 0) {
+        return result;
+      }
 
+      const productRestsMap = await getCachedSharikProductRestsMap();
+      const now = new Date();
+
+      for (const artikul of artikuls) {
         try {
-          // Получаем данные с sharik.ua
-          const sharikData = await getSharikStockData(artikul);
+          const row = productRestsMap.get(artikul);
 
-          if (!sharikData) {
+          if (!row) {
             logModuleWarn("arts", "product not found on sharik.ua", { artikul });
             result.notFound++;
             continue;
           }
 
-          // Обновляем btradeStock в базе данных
           await Art.findOneAndUpdate(
             { artikul },
             {
               btradeStock: {
-                value: sharikData.quantity,
-                date: new Date(),
+                value: row.actualQuantity,
+                date: now,
               },
             },
             {
@@ -63,24 +67,10 @@ export const updateAllBtradeStocksUtil =
 
           result.updated++;
         } catch (error) {
-          logModuleError("arts", error, "failed to update btrade stock", { artikul });
-          result.errors++;
-        }
-
-        // Добавляем задержку между запросами (кроме последнего)
-        if (i < artikuls.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms задержка
-        }
-
-        // Логируем прогресс каждые 10 артикулов
-        if ((i + 1) % 10 === 0 || i === artikuls.length - 1) {
-          logModuleInfo("arts", "btrade stock update progress", {
-            processed: i + 1,
-            totalItems: artikuls.length,
-            updated: result.updated,
-            errors: result.errors,
-            notFound: result.notFound,
+          logModuleError("arts", error, "failed to update btrade stock", {
+            artikul,
           });
+          result.errors++;
         }
       }
 
@@ -89,6 +79,9 @@ export const updateAllBtradeStocksUtil =
       logModuleInfo("arts", "btrade stock update completed", {
         totalItems,
         durationSec: duration,
+        updated: result.updated,
+        errors: result.errors,
+        notFound: result.notFound,
       });
 
       return result;
@@ -97,4 +90,3 @@ export const updateAllBtradeStocksUtil =
       throw error;
     }
   };
-

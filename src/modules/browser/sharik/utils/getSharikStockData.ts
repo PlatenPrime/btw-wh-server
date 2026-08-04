@@ -1,20 +1,16 @@
-import * as cheerio from "cheerio";
+import { Art } from "../../../arts/models/Art.js";
 import {
-  browserGet,
-  logBrowserError,
-  summarizeBrowserError,
-} from "../../utils/browserRequest.js";
-import { getSharikHttpProxyUrl } from "./getSharikHttpProxyUrl.js";
+  clearSharikProductRestsCache,
+  getCachedSharikProductRestsMap,
+} from "./product-rests/index.js";
 import type { SharikProductInfo } from "./sharik-product-types/sharikProductInfo.js";
-import { parseSharikSearchCard } from "./sharik-search-result-card/parseSharikSearchCard.js";
 
 export type { SharikProductInfo } from "./sharik-product-types/sharikProductInfo.js";
+export { clearSharikProductRestsCache };
 
 /**
- * Получает данные о товаре с сайта sharik.ua по артикулу
- * @param artikul - артикул товара в виде строки
- * @returns Promise с данными о товаре или null, если товар не найден
- * @throws Error при ошибке запроса или парсинга
+ * Получает данные о товаре с sharik.ua по артикулу через bulk product_rests
+ * (актуальный остаток = actualQuantity). nameukr — из коллекции Art.
  */
 export async function getSharikStockData(
   artikul: string
@@ -24,28 +20,34 @@ export async function getSharikStockData(
   }
 
   try {
-    const targetUrl = `https://sharik.ua/ua/search/?q=${encodeURIComponent(
-      artikul
-    )}`;
-    const html = await browserGet<string>(targetUrl, {
-      proxyUrl: getSharikHttpProxyUrl(),
-    });
-    const $ = cheerio.load(html);
-
-    const productElements = $(".car-col .one-item");
-
-    if (productElements.length === 0) {
+    const map = await getCachedSharikProductRestsMap();
+    const row = map.get(artikul);
+    if (!row) {
       return null;
     }
 
-    const firstElement = productElements.eq(0);
-    const data = parseSharikSearchCard(artikul, firstElement);
+    const art = await Art.findOne({ artikul }).select("nameukr").lean();
+    const nameukr =
+      typeof art?.nameukr === "string" && art.nameukr.trim() !== ""
+        ? art.nameukr
+        : "";
 
-    return data || null;
+    return {
+      nameukr,
+      price: row.price,
+      quantity: row.actualQuantity,
+    };
   } catch (error) {
-    logBrowserError("Error fetching data from sharik.ua:", error);
+    if (
+      error instanceof Error &&
+      error.message.startsWith("Artikul is required")
+    ) {
+      throw error;
+    }
     throw new Error(
-      `Failed to fetch data from sharik.ua: ${summarizeBrowserError(error)}`
+      `Failed to fetch data from sharik.ua: ${
+        error instanceof Error ? error.message : String(error)
+      }`
     );
   }
 }

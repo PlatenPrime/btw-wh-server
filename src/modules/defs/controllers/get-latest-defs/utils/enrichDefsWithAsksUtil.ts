@@ -1,28 +1,24 @@
 import { Ask } from "../../../../asks/models/Ask.js";
-import {
-  IDef,
+import type {
+  IDeficitCalculationResult,
   IDeficitCalculationResultWithAsks,
   IExistingAsk,
-} from "../../../models/Def.js";
+} from "../../../types.js";
 
 /**
  * Обогащает дефициты информацией о существующих активных заявках
- * @param latestDef - последняя запись дефицитов
- * @returns Promise<IDeficitCalculationResultWithAsks> - дефициты с информацией о заявках
  */
 export async function enrichDefsWithAsksUtil(
-  latestDef: IDef
+  result: IDeficitCalculationResult
 ): Promise<IDeficitCalculationResultWithAsks> {
-  // Получаем все активные заявки для артикулов из дефицитов
-  const artikuls = Object.keys(latestDef.result);
+  const artikuls = Object.keys(result);
   const existingAsks = await Ask.find({
     artikul: { $in: artikuls },
-    status: { $in: ["new"] }, // только необработанные заявки
+    status: { $in: ["new"] },
   })
     .select("artikul status createdAt askerData.fullname askerData._id")
     .lean();
 
-  // Группируем заявки по артикулу (берем только первую активную заявку)
   const asksByArtikul = existingAsks.reduce((acc, ask) => {
     if (!acc[ask.artikul]) {
       acc[ask.artikul] = {
@@ -36,12 +32,11 @@ export async function enrichDefsWithAsksUtil(
     return acc;
   }, {} as Record<string, IExistingAsk>);
 
-  // Добавляем информацию о заявках к каждому дефициту
   const resultWithAsks: IDeficitCalculationResultWithAsks = Object.keys(
-    latestDef.result
+    result
   ).reduce((acc, artikul) => {
     acc[artikul] = {
-      ...latestDef.result[artikul],
+      ...result[artikul],
       existingAsk: asksByArtikul[artikul] || null,
     };
     return acc;
@@ -49,4 +44,3 @@ export async function enrichDefsWithAsksUtil(
 
   return resultWithAsks;
 }
-

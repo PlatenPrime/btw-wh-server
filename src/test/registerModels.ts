@@ -12,7 +12,6 @@ import "../modules/kasks/models/Kask.js";
 import "../modules/auth/models/User.js";
 import "../modules/blocks/models/Block.js";
 import "../modules/constants/models/Constant.js";
-import "../modules/defs/models/Def.js";
 import "../modules/dels/models/Del.js";
 import "../modules/konks/models/Konk.js";
 import "../modules/prods/models/Prod.js";

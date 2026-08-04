@@ -124,12 +124,12 @@ describe("formatBtradeSliceReport", () => {
       totalArtikuls: 110,
       missing: 10,
       fromProductRests: 90,
-      fromSearch: 10,
     });
 
     expect(msg).toContain("Btrade slice");
     expect(msg).toContain("✅100 / ⚠️10 з 110");
-    expect(msg).toContain("product_rests: 90, search: 10");
+    expect(msg).toContain("product_rests: 90");
+    expect(msg).not.toContain("search:");
   });
 });
 

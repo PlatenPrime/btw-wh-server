@@ -1,4 +1,4 @@
-import { IDeficitCalculationResult } from "../models/Def.js";
+import { IDeficitCalculationResult } from "../types.js";
 
 /**
  * Интерфейс для итоговых значений расчета дефицитов

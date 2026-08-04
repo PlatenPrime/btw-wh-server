@@ -1,233 +1,64 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-const { logModuleError, logModuleInfo, logModuleWarn } = vi.hoisted(() => ({
-    logModuleError: vi.fn(),
-    logModuleInfo: vi.fn(),
-    logModuleWarn: vi.fn(),
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getCachedSharikProductRestsMap } from "../../../browser/sharik/utils/product-rests/index.js";
+import { getSharikStocks } from "../getSharikStocks.js";
+vi.mock("../../../browser/sharik/utils/product-rests/index.js", () => ({
+    getCachedSharikProductRestsMap: vi.fn(),
 }));
-vi.mock("../../../../logging/logModuleError.js", () => ({
-    logModuleError,
-    logModuleInfo,
-    logModuleWarn,
-}));
-import { getSharikStockData } from "../../../browser/sharik/utils/getSharikStockData.js";
-import { getSharikStocks } from "../../../poses/utils/getSharikStocks.js";
-// Мокаем getSharikStockData
-vi.mock("../../../browser/sharik/utils/getSharikStockData.js");
-const mockedGetSharikStockData = vi.mocked(getSharikStockData);
+const mockedGetCachedMap = vi.mocked(getCachedSharikProductRestsMap);
 describe("getSharikStocks", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        // Мокаем setTimeout для ускорения тестов
-        vi.useFakeTimers();
     });
-    afterEach(() => {
-        vi.useRealTimers();
-    });
-    it("должна расширять объекты данными Sharik при успешном получении", async () => {
+    it("расширяет stocks actualQuantity из product_rests", async () => {
         const mockStocks = {
-            ART001: {
-                nameukr: "Товар 1",
-                quant: 10,
-                boxes: 2,
-            },
-            ART002: {
-                nameukr: "Товар 2",
-                quant: 5,
-                boxes: 1,
-            },
+            ART001: { nameukr: "Товар 1", quant: 10, boxes: 2 },
+            ART002: { nameukr: "Товар 2", quant: 5, boxes: 1 },
         };
-        // Мокаем getSharikData для разных артикулов
-        mockedGetSharikStockData
-            .mockResolvedValueOnce({
-            nameukr: "Товар 1",
-            price: 100,
-            quantity: 15,
-        })
-            .mockResolvedValueOnce({
-            nameukr: "Товар 2",
-            price: 200,
-            quantity: 8,
+        mockedGetCachedMap.mockResolvedValue(new Map([
+            ["ART001", { actualQuantity: 15, sliceQuantity: 20, price: 100 }],
+            ["ART002", { actualQuantity: 8, sliceQuantity: 9, price: 200 }],
+        ]));
+        const result = await getSharikStocks(mockStocks, {
+            ART001: 20,
+            ART002: 10,
         });
-        const resultPromise = getSharikStocks(mockStocks);
-        // Пропускаем все таймеры
-        await vi.runAllTimersAsync();
-        const result = await resultPromise;
+        expect(mockedGetCachedMap).toHaveBeenCalledTimes(1);
         expect(result).toEqual({
             ART001: {
                 nameukr: "Товар 1",
                 quant: 10,
                 boxes: 2,
                 sharikQuant: 15,
-                difQuant: 5, // 15 - 10
+                difQuant: 5,
+                limit: 20,
             },
             ART002: {
                 nameukr: "Товар 2",
                 quant: 5,
                 boxes: 1,
                 sharikQuant: 8,
-                difQuant: 3, // 8 - 5
+                difQuant: 3,
+                limit: 10,
             },
         });
-        expect(mockedGetSharikStockData).toHaveBeenCalledTimes(2);
-        expect(mockedGetSharikStockData).toHaveBeenCalledWith("ART001");
-        expect(mockedGetSharikStockData).toHaveBeenCalledWith("ART002");
     });
-    it("должна обрабатывать случаи когда Sharik данные не найдены", async () => {
+    it("ставит sharikQuant=0 если артикула нет в map", async () => {
         const mockStocks = {
-            ART001: {
-                nameukr: "Товар 1",
-                quant: 10,
-                boxes: 2,
-            },
+            ART001: { nameukr: "Товар 1", quant: 10, boxes: 1 },
         };
-        // Мокаем getSharikData возвращающий null
-        mockedGetSharikStockData.mockResolvedValueOnce(null);
-        const resultPromise = getSharikStocks(mockStocks);
-        await vi.runAllTimersAsync();
-        const result = await resultPromise;
-        expect(result).toEqual({
-            ART001: {
-                nameukr: "Товар 1",
-                quant: 10,
-                boxes: 2,
-                sharikQuant: 0,
-                difQuant: -10, // 0 - 10
-            },
-        });
-    });
-    it("должна обрабатывать ошибки при получении данных Sharik", async () => {
-        const mockStocks = {
-            ART001: {
-                nameukr: "Товар 1",
-                quant: 10,
-                boxes: 2,
-            },
-        };
-        // Мокаем getSharikData выбрасывающий ошибку
-        mockedGetSharikStockData.mockRejectedValueOnce(new Error("Network error"));
-        const resultPromise = getSharikStocks(mockStocks);
-        await vi.runAllTimersAsync();
-        const result = await resultPromise;
-        expect(result).toEqual({
-            ART001: {
-                nameukr: "Товар 1",
-                quant: 10,
-                boxes: 2,
-                sharikQuant: 0,
-                difQuant: -10, // 0 - 10
-            },
-        });
-    });
-    it("должна обрабатывать пустой объект stocks", async () => {
-        const mockStocks = {};
-        const resultPromise = getSharikStocks(mockStocks);
-        await vi.runAllTimersAsync();
-        const result = await resultPromise;
-        expect(result).toEqual({});
-        expect(mockedGetSharikStockData).not.toHaveBeenCalled();
-    });
-    it("должна правильно рассчитывать difQuant для разных сценариев", async () => {
-        const mockStocks = {
-            ART001: { nameukr: "Товар 1", quant: 10, boxes: 2 },
-            ART002: { nameukr: "Товар 2", quant: 5, boxes: 1 },
-            ART003: { nameukr: "Товар 3", quant: 20, boxes: 4 },
-        };
-        // Мокаем разные сценарии
-        mockedGetSharikStockData
-            .mockResolvedValueOnce({ nameukr: "Товар 1", price: 100, quantity: 15 }) // больше чем в БД
-            .mockResolvedValueOnce({ nameukr: "Товар 2", price: 200, quantity: 3 }) // меньше чем в БД
-            .mockResolvedValueOnce({ nameukr: "Товар 3", price: 300, quantity: 20 }); // равно БД
-        const resultPromise = getSharikStocks(mockStocks);
-        await vi.runAllTimersAsync();
-        const result = await resultPromise;
-        expect(result.ART001.difQuant).toBe(5); // 15 - 10
-        expect(result.ART002.difQuant).toBe(-2); // 3 - 5
-        expect(result.ART003.difQuant).toBe(0); // 20 - 20
-    });
-    it("должна логировать прогресс каждые 10 артикулов", async () => {
-        // Создаем 25 артикулов для проверки логирования
-        const mockStocks = {};
-        for (let i = 1; i <= 25; i++) {
-            mockStocks[`ART${i.toString().padStart(3, "0")}`] = {
-                nameukr: `Товар ${i}`,
-                quant: i,
-                boxes: 1,
-            };
-        }
-        // Мокаем getSharikData для всех артикулов
-        mockedGetSharikStockData.mockResolvedValue({
-            nameukr: "Товар",
-            price: 100,
-            quantity: 10,
-        });
-        const resultPromise = getSharikStocks(mockStocks);
-        await vi.runAllTimersAsync();
-        await resultPromise;
-        // Проверяем что логировался прогресс
-        expect(logModuleInfo).toHaveBeenCalledWith("poses", "sharik stocks fetch started", { artikulCount: 25 });
-        expect(logModuleInfo).toHaveBeenCalledWith("poses", "sharik stocks fetch progress", {
-            processed: 10,
-            totalItems: 25,
-        });
-        expect(logModuleInfo).toHaveBeenCalledWith("poses", "sharik stocks fetch progress", {
-            processed: 20,
-            totalItems: 25,
-        });
-        expect(logModuleInfo).toHaveBeenCalledWith("poses", "sharik stocks fetch progress", {
-            processed: 25,
-            totalItems: 25,
-        });
-    });
-    it("должна обрабатывать смешанные сценарии (успех, null, ошибка)", async () => {
-        const mockStocks = {
-            ART001: { nameukr: "Товар 1", quant: 10, boxes: 2 },
-            ART002: { nameukr: "Товар 2", quant: 5, boxes: 1 },
-            ART003: { nameukr: "Товар 3", quant: 15, boxes: 3 },
-        };
-        // Мокаем разные сценарии
-        mockedGetSharikStockData
-            .mockResolvedValueOnce({ nameukr: "Товар 1", price: 100, quantity: 12 }) // успех
-            .mockResolvedValueOnce(null) // не найдено
-            .mockRejectedValueOnce(new Error("Network error")); // ошибка
-        const resultPromise = getSharikStocks(mockStocks);
-        await vi.runAllTimersAsync();
-        const result = await resultPromise;
+        mockedGetCachedMap.mockResolvedValue(new Map());
+        const result = await getSharikStocks(mockStocks);
         expect(result.ART001).toEqual({
             nameukr: "Товар 1",
             quant: 10,
-            boxes: 2,
-            sharikQuant: 12,
-            difQuant: 2,
-        });
-        expect(result.ART002).toEqual({
-            nameukr: "Товар 2",
-            quant: 5,
             boxes: 1,
             sharikQuant: 0,
-            difQuant: -5,
-        });
-        expect(result.ART003).toEqual({
-            nameukr: "Товар 3",
-            quant: 15,
-            boxes: 3,
-            sharikQuant: 0,
-            difQuant: -15,
+            difQuant: -10,
+            limit: undefined,
         });
     });
-    it("должна правильно обрабатывать задержки между запросами", async () => {
-        const mockStocks = {
-            ART001: { nameukr: "Товар 1", quant: 10, boxes: 2 },
-            ART002: { nameukr: "Товар 2", quant: 5, boxes: 1 },
-        };
-        mockedGetSharikStockData
-            .mockResolvedValueOnce({ nameukr: "Товар 1", price: 100, quantity: 12 })
-            .mockResolvedValueOnce({ nameukr: "Товар 2", price: 200, quantity: 8 });
-        const resultPromise = getSharikStocks(mockStocks);
-        // Проверяем что setTimeout был вызван
-        expect(vi.getTimerCount()).toStrictEqual(0); // Один setTimeout для задержки между запросами
-        await vi.runAllTimersAsync();
-        const result = await resultPromise;
-        expect(result).toHaveProperty("ART001");
-        expect(result).toHaveProperty("ART002");
+    it("бросает при ошибке fetch map", async () => {
+        mockedGetCachedMap.mockRejectedValue(new Error("Network error"));
+        await expect(getSharikStocks({ ART001: { nameukr: "T", quant: 1, boxes: 1 } })).rejects.toThrow("Не удалось получить данные Sharik");
     });
 });

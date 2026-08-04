@@ -1,9 +1,8 @@
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { isInvalidSliceStockPriceItem } from "../../slices/utils/isInvalidSliceStockPriceItem.js";
-import { fetchSharikProductRestsMap } from "../sharik/fetchSharikProductRestsMap.js";
+import { getCachedSharikProductRestsMap } from "../../browser/sharik/utils/product-rests/index.js";
 import { BtradeSlice } from "../models/BtradeSlice.js";
 import type { IBtradeSliceDataItem } from "../models/BtradeSlice.js";
-import { fetchMissingBtradeSliceItemsViaSearch } from "./calculateBtradeSliceViaSearch.js";
 import { getUniqueArtikulsFromArtsUtil } from "./getUniqueArtikulsFromArtsUtil.js";
 import { logModuleInfo } from "../../../logging/logModuleError.js";
 
@@ -11,8 +10,7 @@ const MISSING_SLICE_SENTINEL: IBtradeSliceDataItem = { price: -1, quantity: -1 }
 
 /**
  * Собирает ежедневный срез цен и остатков Btrade (Sharik):
- * один запрос product_rests, затем fallback search для пропущенных артикулов,
- * одна запись data в MongoDB.
+ * один запрос/cache product_rests, quantity = sliceQuantity, одна запись data в MongoDB.
  */
 export async function calculateBtradeSlice(): Promise<{
   saved: boolean;
@@ -20,7 +18,6 @@ export async function calculateBtradeSlice(): Promise<{
   totalArtikuls: number;
   missing: number;
   fromProductRests: number;
-  fromSearch: number;
 }> {
   const sliceDate = toSliceDate(new Date());
   const artikuls = await getUniqueArtikulsFromArtsUtil();
@@ -30,35 +27,22 @@ export async function calculateBtradeSlice(): Promise<{
     artikulCount: artikuls.length,
   });
 
-  const productRestsMap = await fetchSharikProductRestsMap();
+  const productRestsMap = await getCachedSharikProductRestsMap();
 
   const data: Record<string, IBtradeSliceDataItem> = {};
   for (const artikul of artikuls) {
     const row = productRestsMap.get(artikul);
     if (row) {
-      data[artikul] = { price: row.price, quantity: row.quantity };
+      data[artikul] = { price: row.price, quantity: row.sliceQuantity };
+    } else {
+      data[artikul] = MISSING_SLICE_SENTINEL;
     }
   }
 
-  const fromProductRests = Object.keys(data).length;
-  const missingArtikuls = artikuls.filter((artikul) => !(artikul in data));
-
-  if (missingArtikuls.length > 0) {
-    logModuleInfo("btrade-slices", "btrade slice search fallback started", {
-      missingCount: missingArtikuls.length,
-    });
-    const fromSearch = await fetchMissingBtradeSliceItemsViaSearch(
-      missingArtikuls
-    );
-    Object.assign(data, fromSearch);
-  }
-
-  const fromSearchCount = Object.keys(data).length - fromProductRests;
-
-  const stillMissingArtikuls = artikuls.filter((artikul) => !(artikul in data));
-  for (const artikul of stillMissingArtikuls) {
-    data[artikul] = MISSING_SLICE_SENTINEL;
-  }
+  const fromProductRests = artikuls.filter(
+    (artikul) =>
+      !isInvalidSliceStockPriceItem(data[artikul]!.quantity, data[artikul]!.price)
+  ).length;
 
   let count = 0;
   let missing = 0;
@@ -79,7 +63,6 @@ export async function calculateBtradeSlice(): Promise<{
 
   logModuleInfo("btrade-slices", "btrade slice completed", {
     fromProductRests,
-    fromSearch: fromSearchCount,
     valid: count,
     missing,
   });
@@ -90,6 +73,5 @@ export async function calculateBtradeSlice(): Promise<{
     totalArtikuls,
     missing,
     fromProductRests,
-    fromSearch: fromSearchCount,
   };
 }

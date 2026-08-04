@@ -1,8 +1,8 @@
 /**
- * Вкл.: sharik идёт через `SHARIK_HTTP_PROXY_URL`, если задан.
- * Верни `false`, когда нужен чистый egress без HTTP-прокси.
+ * Geo-block sharik.ua снят — прокси выключен.
+ * Верни `true`, если снова понадобится `SHARIK_HTTP_PROXY_URL`.
  */
-export const SHARIK_HTTP_PROXY_ENABLED = true;
+export const SHARIK_HTTP_PROXY_ENABLED = false;
 /**
  * URL HTTP-прокси только для запросов к sharik (`SHARIK_HTTP_PROXY_URL`).
  * Пример: `http://user:pass@host:50100`

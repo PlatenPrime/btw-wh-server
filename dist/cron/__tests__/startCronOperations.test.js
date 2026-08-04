@@ -5,9 +5,6 @@ vi.mock("../../modules/analog-slices/cron/startAnalogSlicesCron.js", () => ({
 vi.mock("../../modules/btrade-slices/cron/startBtradeSlicesCron.js", () => ({
     startBtradeSlicesCron: vi.fn(),
 }));
-vi.mock("../../modules/defs/cron/startDeficitCalculationCron.js", () => ({
-    startDeficitCalculationCron: vi.fn(),
-}));
 vi.mock("../../modules/sku-slices/cron/startSkuSlicesCron.js", () => ({
     startSkuSlicesCron: vi.fn(),
 }));
@@ -25,7 +22,6 @@ vi.mock("../startFillPosNameukrFromArtsCron.js", () => ({
 }));
 import { startAnalogSlicesCron } from "../../modules/analog-slices/cron/startAnalogSlicesCron.js";
 import { startBtradeSlicesCron } from "../../modules/btrade-slices/cron/startBtradeSlicesCron.js";
-import { startDeficitCalculationCron } from "../../modules/defs/cron/startDeficitCalculationCron.js";
 import { startSkuSlicesCron } from "../../modules/sku-slices/cron/startSkuSlicesCron.js";
 import { startFillSkugrSkusCron } from "../../modules/skugrs/cron/startFillSkugrSkusCron.js";
 import { startSkuInvalidFlagCron } from "../../modules/skus/cron/startSkuInvalidFlagCron.js";
@@ -36,9 +32,8 @@ describe("startCronOperations", () => {
     beforeEach(() => {
         vi.clearAllMocks();
     });
-    it("starts all cron jobs", () => {
+    it("starts all cron jobs except deficit calculation", () => {
         startCronOperations();
-        expect(startDeficitCalculationCron).toHaveBeenCalledOnce();
         expect(startFillPosNameukrFromArtsCron).toHaveBeenCalledOnce();
         expect(startAnalogSlicesCron).toHaveBeenCalledOnce();
         expect(startBtradeSlicesCron).toHaveBeenCalledOnce();

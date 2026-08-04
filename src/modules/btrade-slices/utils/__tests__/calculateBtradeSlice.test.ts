@@ -1,11 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { calculateBtradeSlice } from "../calculateBtradeSlice.js";
 
-vi.mock("../../sharik/fetchSharikProductRestsMap.js", () => ({
-  fetchSharikProductRestsMap: vi.fn(),
-}));
-vi.mock("../calculateBtradeSliceViaSearch.js", () => ({
-  fetchMissingBtradeSliceItemsViaSearch: vi.fn(),
+vi.mock("../../../browser/sharik/utils/product-rests/index.js", () => ({
+  getCachedSharikProductRestsMap: vi.fn(),
 }));
 vi.mock("../../models/BtradeSlice.js", () => ({
   BtradeSlice: {
@@ -16,8 +13,7 @@ vi.mock("../getUniqueArtikulsFromArtsUtil.js", () => ({
   getUniqueArtikulsFromArtsUtil: vi.fn(),
 }));
 
-import { fetchSharikProductRestsMap } from "../../sharik/fetchSharikProductRestsMap.js";
-import { fetchMissingBtradeSliceItemsViaSearch } from "../calculateBtradeSliceViaSearch.js";
+import { getCachedSharikProductRestsMap } from "../../../browser/sharik/utils/product-rests/index.js";
 import { BtradeSlice } from "../../models/BtradeSlice.js";
 import { getUniqueArtikulsFromArtsUtil } from "../getUniqueArtikulsFromArtsUtil.js";
 
@@ -31,13 +27,12 @@ describe("calculateBtradeSlice", () => {
       "ART-1",
       "ART-2",
     ]);
-    vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(
+    vi.mocked(getCachedSharikProductRestsMap).mockResolvedValue(
       new Map([
-        ["ART-1", { quantity: 5, price: 100 }],
-        ["ART-2", { quantity: 10, price: 200 }],
+        ["ART-1", { actualQuantity: 3, sliceQuantity: 5, price: 100 }],
+        ["ART-2", { actualQuantity: 8, sliceQuantity: 10, price: 200 }],
       ])
     );
-    vi.mocked(fetchMissingBtradeSliceItemsViaSearch).mockResolvedValue({});
     vi.mocked(BtradeSlice.findOneAndUpdate).mockResolvedValue({} as never);
   });
 
@@ -46,7 +41,7 @@ describe("calculateBtradeSlice", () => {
     vi.clearAllMocks();
   });
 
-  it("saves all artikuls from product_rests in a single DB update", async () => {
+  it("saves sliceQuantity from product_rests in a single DB update", async () => {
     const result = await calculateBtradeSlice();
 
     expect(result).toEqual({
@@ -55,11 +50,8 @@ describe("calculateBtradeSlice", () => {
       totalArtikuls: 2,
       missing: 0,
       fromProductRests: 2,
-      fromSearch: 0,
     });
-    expect(fetchSharikProductRestsMap).toHaveBeenCalledTimes(1);
-    expect(fetchMissingBtradeSliceItemsViaSearch).not.toHaveBeenCalled();
-    expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
+    expect(getCachedSharikProductRestsMap).toHaveBeenCalledTimes(1);
     expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith(
       { date: mockSliceDate },
       {
@@ -75,47 +67,10 @@ describe("calculateBtradeSlice", () => {
     );
   });
 
-  it("uses search fallback for artikuls missing on product_rests page", async () => {
-    vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(
-      new Map([["ART-1", { quantity: 5, price: 100 }]])
+  it("writes -1/-1 sentinel when artikul missing on product_rests", async () => {
+    vi.mocked(getCachedSharikProductRestsMap).mockResolvedValue(
+      new Map([["ART-1", { actualQuantity: 3, sliceQuantity: 5, price: 100 }]])
     );
-    vi.mocked(fetchMissingBtradeSliceItemsViaSearch).mockResolvedValue({
-      "ART-2": { price: 200, quantity: 10 },
-    });
-
-    const result = await calculateBtradeSlice();
-
-    expect(result).toEqual({
-      saved: true,
-      count: 2,
-      totalArtikuls: 2,
-      missing: 0,
-      fromProductRests: 1,
-      fromSearch: 1,
-    });
-    expect(fetchMissingBtradeSliceItemsViaSearch).toHaveBeenCalledWith([
-      "ART-2",
-    ]);
-    expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith(
-      { date: mockSliceDate },
-      {
-        $set: {
-          date: mockSliceDate,
-          data: {
-            "ART-1": { price: 100, quantity: 5 },
-            "ART-2": { price: 200, quantity: 10 },
-          },
-        },
-      },
-      { upsert: true }
-    );
-  });
-
-  it("writes -1/-1 sentinel when search fallback finds nothing for missing artikul", async () => {
-    vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(
-      new Map([["ART-1", { quantity: 5, price: 100 }]])
-    );
-    vi.mocked(fetchMissingBtradeSliceItemsViaSearch).mockResolvedValue({});
 
     const result = await calculateBtradeSlice();
 
@@ -125,11 +80,7 @@ describe("calculateBtradeSlice", () => {
       totalArtikuls: 2,
       missing: 1,
       fromProductRests: 1,
-      fromSearch: 0,
     });
-    expect(fetchMissingBtradeSliceItemsViaSearch).toHaveBeenCalledWith([
-      "ART-2",
-    ]);
     expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith(
       { date: mockSliceDate },
       {
@@ -147,7 +98,7 @@ describe("calculateBtradeSlice", () => {
 
   it("when no artikuls only upserts empty data", async () => {
     vi.mocked(getUniqueArtikulsFromArtsUtil).mockResolvedValue([]);
-    vi.mocked(fetchSharikProductRestsMap).mockResolvedValue(new Map());
+    vi.mocked(getCachedSharikProductRestsMap).mockResolvedValue(new Map());
 
     const result = await calculateBtradeSlice();
 
@@ -157,9 +108,7 @@ describe("calculateBtradeSlice", () => {
       totalArtikuls: 0,
       missing: 0,
       fromProductRests: 0,
-      fromSearch: 0,
     });
-    expect(fetchMissingBtradeSliceItemsViaSearch).not.toHaveBeenCalled();
     expect(BtradeSlice.findOneAndUpdate).toHaveBeenCalledWith(
       { date: mockSliceDate },
       { $set: { date: mockSliceDate, data: {} } },

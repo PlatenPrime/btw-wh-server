@@ -1,45 +1,51 @@
 # API дефицитов (Defs)
 
-Модуль расчёта дефицитов. Запуск расчёта — ADMIN; получение последних дефицитов и статуса расчёта — USER.
+Модуль live-расчёта дефицитов. Единственный эндпоинт — получение актуального расчёта.
 
 ## Эндпоинты
 
-### POST `/api/defs/calculate`
-
-Запуск расчёта дефицитов (pogrebi).
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** body при наличии — по схеме calculatePogrebiDefs (если есть параметры).
-
-**Ответ 200/202:** сообщение о запуске или результат расчёта (по реализации контроллера).
-
-**Ошибки:** 400, 401, 403, 500.
-
----
-
 ### GET `/api/defs/latest`
 
-Получение последних рассчитанных дефицитов.
-
-**Доступ:** checkAuth + checkRoles(USER).
-
-**Запрос:** без тела (query при наличии — из контроллера).
-
-**Ответ 200:** объект с данными дефицитов (массив или message/data).
-
-**Ошибки:** 401, 403, 500.
-
----
-
-### GET `/api/defs/calculation-status`
-
-Статус текущего или последнего расчёта дефицитов.
+Живой расчёт дефицитов (poses pogrebi def + product_rests `actualQuantity`) с enrichment заявок.
 
 **Доступ:** checkAuth + checkRoles(USER).
 
 **Запрос:** без тела.
 
-**Ответ 200:** объект со статусом (статус, прогресс и т.д.).
+**Ответ 200:**
+
+```
+{
+  exists: true,
+  message: string,
+  data: {
+    result: {
+      [artikul: string]: {
+        nameukr: string,
+        quant: number,
+        sharikQuant: number,
+        difQuant: number,
+        defLimit: number,
+        status: "limited" | "critical",
+        existingAsk: {
+          _id: string,
+          status: string,
+          createdAt: Date,
+          askerName: string,
+          askerId: string
+        } | null
+      }
+    },
+    total: number,
+    totalCriticalDefs: number,
+    totalLimitDefs: number,
+    calculatedAt: Date
+  }
+}
+```
+
+При пустом наборе дефицитов `result` — `{}`, totals — `0`, `exists` остаётся `true` (расчёт выполнен).
 
 **Ошибки:** 401, 403, 500.
+
+Удалённые эндпоинты (больше не существуют): `POST /api/defs/calculate`, `GET /api/defs/calculation-status`.

@@ -42,7 +42,6 @@ describe("startBtradeSlicesCron", () => {
       totalArtikuls: 12,
       missing: 2,
       fromProductRests: 8,
-      fromSearch: 2,
     });
     vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
   });

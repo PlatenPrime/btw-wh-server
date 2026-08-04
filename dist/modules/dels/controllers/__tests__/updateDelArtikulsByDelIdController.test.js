@@ -1,17 +1,19 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
-import { getSharikStockData } from "../../../browser/sharik/utils/getSharikStockData.js";
+import { getCachedSharikProductRestsMap } from "../../../browser/sharik/utils/product-rests/index.js";
 import { Event } from "../../../events/models/Event.js";
 import { Del } from "../../models/Del.js";
 import { updateDelArtikulsByDelIdController } from "../update-del-artikuls-by-del-id/updateDelArtikulsByDelIdController.js";
-vi.mock("../../../browser/sharik/utils/getSharikStockData.js");
+vi.mock("../../../browser/sharik/utils/product-rests/index.js", () => ({
+    getCachedSharikProductRestsMap: vi.fn(),
+}));
 describe("updateDelArtikulsByDelIdController", () => {
     let res;
     let responseJson;
     let responseStatus;
     beforeEach(async () => {
         vi.clearAllMocks();
-        vi.mocked(getSharikStockData).mockResolvedValue(null);
+        vi.mocked(getCachedSharikProductRestsMap).mockResolvedValue(new Map());
         await Del.deleteMany({});
         await Event.deleteMany({});
         responseJson = {};

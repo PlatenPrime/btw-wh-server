@@ -27,7 +27,7 @@
 
 - **analog-slices / analogs:** опрос остатков аналогов (air, balun, yumi, yumin, sharte).
 - **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect); для Air дополнительно доступен параллельный client-ingestion HTML как ручной/компенсирующий канал.
-- **btrade-slices:** bulk и search через sharik-парсеры.
+- **btrade-slices / arts / dels / defs:** остатки sharik через bulk `product_rests` (`actualQuantity` для live, `sliceQuantity` для daily btrade-slice).
 - **skugrs:** обход страниц групп для наполнения SKU (`group-products`), в т.ч. Air listing.
 - **slice-compensation:** повторный опрос через stock-утилиты analog/sku (Air включён в server scrape).
 
@@ -45,9 +45,9 @@
 
 Air **group listing** (наполнение SKU) идёт через тот же Impit-путь (`fetchPageHtml` + cookie jar + adm.tools `___ack` solver): один origin warm-up, затем страницы листинга с Referer; опциональный `AIR_HTTP_PROXY_URL`.
 
-### Sharik: опциональный HTTP-прокси
+### Sharik: product_rests без прокси
 
-Запросы к sharik.ua (`getSharikStockData`, bulk `product_rests` в btrade-slices) идут через `browserGet` с опциональным `SHARIK_HTTP_PROXY_URL` (HTTP(S) proxy, UA egress). Kill-switch в коде — `SHARIK_HTTP_PROXY_ENABLED`: при `false` proxy не используется даже если env задан. Без URL — прямой egress.
+Единый источник остатков/цен sharik.ua — страница `product_rests/{seed}/` (формат строки `artikul = actualQuantity; sliceQuantity; price`). Парсинг, fetch и in-memory cache TTL ~1ч — в `browser/sharik/utils/product-rests`. `getSharikStockData` читает `actualQuantity` из кэша; `nameukr` для single lookup — из Art. Geo-block снят: `SHARIK_HTTP_PROXY_ENABLED = false`, прокси не используется даже если задан `SHARIK_HTTP_PROXY_URL`.
 
 Результаты stock-scrape пишутся в info-лог (`browser stock result`: konk, link, stock, price, ok) с лимитом ≤20 сообщений в минуту на process; ошибки fetch — отдельно через `logBrowserError`.
 
