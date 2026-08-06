@@ -16,13 +16,21 @@ vi.mock("../../../utils/browserRequest.js", async (importOriginal) => {
 import { browserGet } from "../../../utils/browserRequest.js";
 
 describe("getSharikStockData", () => {
+  const originalProxy = process.env.SHARIK_HTTP_PROXY_URL;
+
   beforeEach(() => {
     clearSharikProductRestsCache();
     vi.mocked(browserGet).mockReset();
+    delete process.env.SHARIK_HTTP_PROXY_URL;
   });
 
   afterEach(() => {
     clearSharikProductRestsCache();
+    if (originalProxy === undefined) {
+      delete process.env.SHARIK_HTTP_PROXY_URL;
+    } else {
+      process.env.SHARIK_HTTP_PROXY_URL = originalProxy;
+    }
   });
 
   describe("Валидация входных данных", () => {
@@ -70,7 +78,8 @@ describe("getSharikStockData", () => {
         quantity: 15,
       });
       expect(browserGet).toHaveBeenCalledWith(
-        "https://sharik.ua/product_rests/1302-0065/"
+        "https://sharik.ua/product_rests/1302-0065/",
+        { proxyUrl: undefined }
       );
     });
 

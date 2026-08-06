@@ -45,9 +45,9 @@
 
 Air **group listing** (наполнение SKU) идёт через тот же Impit-путь (`fetchPageHtml` + cookie jar + adm.tools `___ack` solver): один origin warm-up, затем страницы листинга с Referer; опциональный `AIR_HTTP_PROXY_URL`.
 
-### Sharik: product_rests без прокси
+### Sharik: product_rests через HTTP-прокси
 
-Единый источник остатков/цен sharik.ua — страница `product_rests/{seed}/` (формат строки `artikul = actualQuantity; sliceQuantity; price`). Парсинг, fetch и in-memory cache TTL ~1ч — в `browser/sharik/utils/product-rests`. `getSharikStockData` читает `actualQuantity` из кэша; `nameukr` для single lookup — из Art. Geo-block снят: `SHARIK_HTTP_PROXY_ENABLED = false`, прокси не используется даже если задан `SHARIK_HTTP_PROXY_URL`.
+Единый источник остатков/цен sharik.ua — страница `product_rests/{seed}/` (формат строки `artikul = actualQuantity; sliceQuantity; price`). Парсинг, fetch и in-memory cache TTL ~1ч — в `browser/sharik/utils/product-rests`. `getSharikStockData` читает `actualQuantity` из кэша; `nameukr` для single lookup — из Art. Запросы идут через `SHARIK_HTTP_PROXY_URL` при `SHARIK_HTTP_PROXY_ENABLED = true`; без env — прямой egress.
 
 Результаты stock-scrape пишутся в info-лог (`browser stock result`: konk, link, stock, price, ok) с лимитом ≤20 сообщений в минуту на process; ошибки fetch — отдельно через `logBrowserError`.
 
