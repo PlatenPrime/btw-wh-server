@@ -33,13 +33,16 @@ describe("calculatePositionsForPullUtil", () => {
       "ask1",
       "ART-1",
       null,
-      null
+      null,
+      "ZONE-A"
     );
 
     expect(result.length).toBe(1);
     expect(result[0].plannedQuant).toBeNull();
     expect(result[0].askId).toBe("ask1");
     expect(result[0].askArtikul).toBe("ART-1");
+    expect(result[0].artZone).toBe("ZONE-A");
+    expect(result[0].quant).toBe(5);
     // Должна быть выбрана позиция с наименьшим сектором (sector 1)
     // sector может быть строкой или числом
     expect(Number(result[0].palletData.sector)).toBe(1);
@@ -75,7 +78,8 @@ describe("calculatePositionsForPullUtil", () => {
       "ask1",
       "ART-1",
       10,
-      8
+      8,
+      "ZONE-B"
     );
 
     expect(result.length).toBe(2); // Должно хватить на первые 2 позиции
@@ -85,6 +89,9 @@ describe("calculatePositionsForPullUtil", () => {
     expect(result[0].askArtikul).toBe("ART-1");
     expect(result[0].askQuant).toBe(10);
     expect(result[0].askRemainingQuantity).toBe(8);
+    expect(result[0].artZone).toBe("ZONE-B");
+    expect(result[1].artZone).toBe("ZONE-B");
+    expect(result[0].quant).toBe(5);
   });
 
   it("обрабатывает пустой массив позиций", () => {
@@ -94,7 +101,8 @@ describe("calculatePositionsForPullUtil", () => {
       "ask1",
       "ART-1",
       10,
-      10
+      10,
+      null
     );
 
     expect(result).toEqual([]);
@@ -130,7 +138,8 @@ describe("calculatePositionsForPullUtil", () => {
       "ask1",
       "ART-1",
       15,
-      15
+      15,
+      "ZONE-C"
     );
 
     // Позиции должны быть отсортированы по сектору
@@ -170,12 +179,14 @@ describe("calculatePositionsForPullUtil", () => {
       "ask1",
       "ART-1",
       10,
-      10
+      10,
+      null
     );
 
     // Только позиция с quant > 0 должна быть включена
     expect(result.length).toBe(1);
     expect(result[0].quant).toBe(10);
+    expect(result[0].artZone).toBeNull();
   });
 
   it("возвращает пустой массив когда все позиции имеют quant <= 0 и quant не указан", async () => {
@@ -194,7 +205,8 @@ describe("calculatePositionsForPullUtil", () => {
       "ask1",
       "ART-1",
       null,
-      null
+      null,
+      "ZONE-D"
     );
 
     expect(result).toEqual([]);
@@ -223,7 +235,8 @@ describe("calculatePositionsForPullUtil", () => {
       "ask1",
       "ART-1",
       7,
-      7
+      7,
+      "ZONE-E"
     );
 
     expect(result.length).toBe(2);
@@ -254,12 +267,38 @@ describe("calculatePositionsForPullUtil", () => {
       "ask1",
       "ART-1",
       10,
-      10
+      10,
+      "ZONE-F"
     );
 
     expect(result.length).toBe(2);
     expect(result[0].plannedQuant).toBe(3);
     expect(result[1].plannedQuant).toBe(2);
+    expect(result[0].artZone).toBe("ZONE-F");
+  });
+
+  it("проставляет artZone: null когда зона не передана", async () => {
+    const pos1 = await createTestPos({
+      artikul: "ART-1",
+      quant: 10,
+    });
+    pos1.palletData = { ...pos1.palletData, sector: 1 };
+    await pos1.save();
+
+    const result = calculatePositionsForPullUtil(
+      [pos1],
+      5,
+      "ask1",
+      "ART-1",
+      5,
+      5,
+      null
+    );
+
+    expect(result.length).toBe(1);
+    expect(result[0].artZone).toBeNull();
+    expect(result[0].quant).toBe(10);
+    expect(result[0].plannedQuant).toBe(5);
   });
 });
 

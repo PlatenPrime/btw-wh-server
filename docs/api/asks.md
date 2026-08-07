@@ -52,9 +52,11 @@
 
 **Доступ:** checkAuth + checkRoles(USER).
 
-**Запрос:** без тела (query при наличии — из контроллера).
+**Запрос:** без тела.
 
-**Ответ 200:** объект со списком позиций для снятия.
+**Ответ 200:** `{ message: string, data: { positionsBySector: Array<{ sector: number, positions: Array<PositionForPull> }> } }`
+
+Поля позиции (релевантные для UI): `quant` (остаток на паллете), `plannedQuant` (сколько снять), `artZone` (зона артикула из Arts, `null` если Art нет), `askId`, `askArtikul`, `askQuant`, `askRemainingQuantity`, плюс остальные поля Pos.
 
 **Ошибки:** 401, 403, 500.
 
@@ -68,7 +70,9 @@
 
 **Запрос:** path `id` — MongoDB ObjectId.
 
-**Ответ 200:** объект с позициями для снятия.
+**Ответ 200:** `{ message: string, data: { isPullRequired: boolean, positions: Array<PositionForPull>, remainingQuantity: number | null, status: "process" | "satisfied" | "no_poses" | "finished", message: string } }`
+
+Позиции содержат те же поля, что и в `/pulls`, включая `artZone`, `quant`, `plannedQuant`.
 
 **Ошибки:** 400, 401, 403, 404, 500.
 

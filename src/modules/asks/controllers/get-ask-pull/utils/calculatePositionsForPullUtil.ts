@@ -13,6 +13,7 @@ import { IPositionForPull } from "../types/getAskPullResponse.js";
  * @param askArtikul - Артикул из ask
  * @param askQuant - Количество товара, которое просят в ask (null если quant не указан)
  * @param askRemainingQuantity - Оставшееся количество для снятия по ask (null если quant не указан)
+ * @param artZone - Зона артикула из Arts (null если Art не найден)
  * @returns Массив позиций с указанием plannedQuant для снятия
  */
 export const calculatePositionsForPullUtil = (
@@ -21,7 +22,8 @@ export const calculatePositionsForPullUtil = (
   askId: string,
   askArtikul: string,
   askQuant: number | null,
-  askRemainingQuantity: number | null
+  askRemainingQuantity: number | null,
+  artZone: string | null
 ): IPositionForPull[] => {
   // Сценарий 3: позиций нет
   if (positions.length === 0) {
@@ -47,6 +49,7 @@ export const calculatePositionsForPullUtil = (
         askArtikul,
         askQuant,
         askRemainingQuantity,
+        artZone,
       } as IPositionForPull,
     ];
   }
@@ -74,6 +77,7 @@ export const calculatePositionsForPullUtil = (
         askArtikul,
         askQuant,
         askRemainingQuantity,
+        artZone,
       } as IPositionForPull);
       remaining -= plannedQuant;
     }

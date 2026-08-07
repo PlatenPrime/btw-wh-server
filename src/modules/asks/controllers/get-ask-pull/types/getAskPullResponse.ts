@@ -14,6 +14,8 @@ export interface IPositionForPull extends IPos {
   askQuant: number | null;
   /** Оставшееся количество для снятия по ask (null если quant не указан в ask) */
   askRemainingQuantity: number | null;
+  /** Зона артикула из справочника Arts (null если Art не найден) */
+  artZone: string | null;
 }
 
 /**

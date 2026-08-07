@@ -10,11 +10,11 @@ describe("getSharikHttpProxyUrl", () => {
             process.env.SHARIK_HTTP_PROXY_URL = original;
         }
     });
-    it("SHARIK_HTTP_PROXY_ENABLED=false — всегда undefined даже при env", () => {
-        expect(SHARIK_HTTP_PROXY_ENABLED).toBe(false);
+    it("SHARIK_HTTP_PROXY_ENABLED=true — возвращает trimmed URL из env", () => {
+        expect(SHARIK_HTTP_PROXY_ENABLED).toBe(true);
         process.env.SHARIK_HTTP_PROXY_URL =
             "  http://user:secret@77.47.252.164:50100  ";
-        expect(getSharikHttpProxyUrl()).toBeUndefined();
+        expect(getSharikHttpProxyUrl()).toBe("http://user:secret@77.47.252.164:50100");
     });
     it("undefined когда env пустой или отсутствует", () => {
         delete process.env.SHARIK_HTTP_PROXY_URL;

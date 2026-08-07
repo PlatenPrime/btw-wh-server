@@ -23,11 +23,13 @@ describe("calculatePositionsForPullUtil", () => {
         await pos3.save();
         const positions = [pos1, pos2, pos3];
         const result = calculatePositionsForPullUtil(positions, null, // remainingQuantity === null
-        "ask1", "ART-1", null, null);
+        "ask1", "ART-1", null, null, "ZONE-A");
         expect(result.length).toBe(1);
         expect(result[0].plannedQuant).toBeNull();
         expect(result[0].askId).toBe("ask1");
         expect(result[0].askArtikul).toBe("ART-1");
+        expect(result[0].artZone).toBe("ZONE-A");
+        expect(result[0].quant).toBe(5);
         // Должна быть выбрана позиция с наименьшим сектором (sector 1)
         // sector может быть строкой или числом
         expect(Number(result[0].palletData.sector)).toBe(1);
@@ -53,7 +55,7 @@ describe("calculatePositionsForPullUtil", () => {
         await pos3.save();
         const positions = [pos1, pos2, pos3];
         const result = calculatePositionsForPullUtil(positions, 8, // remainingQuantity = 8
-        "ask1", "ART-1", 10, 8);
+        "ask1", "ART-1", 10, 8, "ZONE-B");
         expect(result.length).toBe(2); // Должно хватить на первые 2 позиции
         expect(result[0].plannedQuant).toBe(5); // Вся первая позиция
         expect(result[1].plannedQuant).toBe(3); // Вся вторая позиция
@@ -61,9 +63,12 @@ describe("calculatePositionsForPullUtil", () => {
         expect(result[0].askArtikul).toBe("ART-1");
         expect(result[0].askQuant).toBe(10);
         expect(result[0].askRemainingQuantity).toBe(8);
+        expect(result[0].artZone).toBe("ZONE-B");
+        expect(result[1].artZone).toBe("ZONE-B");
+        expect(result[0].quant).toBe(5);
     });
     it("обрабатывает пустой массив позиций", () => {
-        const result = calculatePositionsForPullUtil([], 10, "ask1", "ART-1", 10, 10);
+        const result = calculatePositionsForPullUtil([], 10, "ask1", "ART-1", 10, 10, null);
         expect(result).toEqual([]);
     });
     it("сортирует позиции по сектору паллеты", async () => {
@@ -86,7 +91,7 @@ describe("calculatePositionsForPullUtil", () => {
         pos3.palletData = { ...pos3.palletData, sector: 2 };
         await pos3.save();
         const positions = [pos1, pos2, pos3];
-        const result = calculatePositionsForPullUtil(positions, 15, "ask1", "ART-1", 15, 15);
+        const result = calculatePositionsForPullUtil(positions, 15, "ask1", "ART-1", 15, 15, "ZONE-C");
         // Позиции должны быть отсортированы по сектору
         // sector может быть строкой или числом
         expect(Number(result[0].palletData.sector)).toBe(1);
@@ -113,10 +118,11 @@ describe("calculatePositionsForPullUtil", () => {
         pos3.palletData = { ...pos3.palletData, sector: 3 };
         await pos3.save();
         const positions = [pos1, pos2, pos3];
-        const result = calculatePositionsForPullUtil(positions, 10, "ask1", "ART-1", 10, 10);
+        const result = calculatePositionsForPullUtil(positions, 10, "ask1", "ART-1", 10, 10, null);
         // Только позиция с quant > 0 должна быть включена
         expect(result.length).toBe(1);
         expect(result[0].quant).toBe(10);
+        expect(result[0].artZone).toBeNull();
     });
     it("возвращает пустой массив когда все позиции имеют quant <= 0 и quant не указан", async () => {
         const pos1 = await createTestPos({
@@ -126,7 +132,7 @@ describe("calculatePositionsForPullUtil", () => {
         pos1.palletData = { ...pos1.palletData, sector: 1 };
         await pos1.save();
         const positions = [pos1];
-        const result = calculatePositionsForPullUtil(positions, null, "ask1", "ART-1", null, null);
+        const result = calculatePositionsForPullUtil(positions, null, "ask1", "ART-1", null, null, "ZONE-D");
         expect(result).toEqual([]);
     });
     it("распределяет частичное количество когда одной позиции недостаточно", async () => {
@@ -144,7 +150,7 @@ describe("calculatePositionsForPullUtil", () => {
         await pos2.save();
         const positions = [pos1, pos2];
         const result = calculatePositionsForPullUtil(positions, 7, // remainingQuantity = 7
-        "ask1", "ART-1", 7, 7);
+        "ask1", "ART-1", 7, 7, "ZONE-E");
         expect(result.length).toBe(2);
         expect(result[0].plannedQuant).toBe(3); // Вся первая позиция
         expect(result[1].plannedQuant).toBe(4); // Часть второй позиции (не вся)
@@ -164,9 +170,23 @@ describe("calculatePositionsForPullUtil", () => {
         await pos2.save();
         const positions = [pos1, pos2];
         const result = calculatePositionsForPullUtil(positions, 10, // remainingQuantity = 10, но доступно только 5
-        "ask1", "ART-1", 10, 10);
+        "ask1", "ART-1", 10, 10, "ZONE-F");
         expect(result.length).toBe(2);
         expect(result[0].plannedQuant).toBe(3);
         expect(result[1].plannedQuant).toBe(2);
+        expect(result[0].artZone).toBe("ZONE-F");
+    });
+    it("проставляет artZone: null когда зона не передана", async () => {
+        const pos1 = await createTestPos({
+            artikul: "ART-1",
+            quant: 10,
+        });
+        pos1.palletData = { ...pos1.palletData, sector: 1 };
+        await pos1.save();
+        const result = calculatePositionsForPullUtil([pos1], 5, "ask1", "ART-1", 5, 5, null);
+        expect(result.length).toBe(1);
+        expect(result[0].artZone).toBeNull();
+        expect(result[0].quant).toBe(10);
+        expect(result[0].plannedQuant).toBe(5);
     });
 });

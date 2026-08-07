@@ -1,3 +1,4 @@
+import { Art } from "../../../../arts/models/Art.js";
 import { Ask } from "../../../models/Ask.js";
 import { calculatePositionsForPullUtil } from "./calculatePositionsForPullUtil.js";
 import { getPosesByArtikulAndSkladUtil } from "./getPosesByArtikulAndSkladUtil.js";
@@ -50,13 +51,18 @@ export const getAskPullUtil = async (askId) => {
             message: "Позицій для зняття не знайдено",
         };
     }
+    const art = await Art.findOne({ artikul: ask.artikul })
+        .select("zone")
+        .lean()
+        .exec();
+    const artZone = art?.zone ?? null;
     const askQuant = (ask.quant !== undefined && ask.quant !== null && ask.quant > 0) ? ask.quant : null;
     const askRemainingQuantity = (askQuant !== null) ? remainingQuantity : null;
     const positionsForPull = calculatePositionsForPullUtil(positions, 
     // Если quant не указан, передаем null, чтобы сработал сценарий 1 (одна позиция)
     // getRemainingQuantityUtil возвращает 0 если quant не указан, но нам для calculatePositions нужно null
     (askQuant === null) ? null : remainingQuantity, askId, // Используем параметр функции, который уже является строкой
-    ask.artikul, askQuant, askRemainingQuantity);
+    ask.artikul, askQuant, askRemainingQuantity, artZone);
     return {
         isPullRequired: true,
         positions: positionsForPull,

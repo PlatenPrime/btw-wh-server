@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createTestAsk, createTestPos } from "../../../../../../test/setup.js";
+import { createTestArt, createTestAsk, createTestPos, } from "../../../../../../test/setup.js";
 import { getAsksPullsUtil } from "../getAsksPullsUtil.js";
 describe("getAsksPullsUtil", () => {
     it("получает позиции для всех активных заявок (new, processing)", async () => {
@@ -120,7 +120,7 @@ describe("getAsksPullsUtil", () => {
         expect(result.response.positionsBySector).toEqual([]);
         expect(result.processingAsks).toEqual([]);
     });
-    it("включает информацию о заявке в каждую позицию", async () => {
+    it("включает информацию о заявке, artZone и quant в каждую позицию", async () => {
         const ask = await createTestAsk({
             artikul: "ART-WITH-INFO",
             quant: 10,
@@ -128,17 +128,43 @@ describe("getAsksPullsUtil", () => {
             status: "new",
             sklad: "pogrebi",
         });
+        await createTestArt({
+            artikul: "ART-WITH-INFO",
+            zone: "42-1-1",
+        });
         await createTestPos({
             artikul: "ART-WITH-INFO",
             quant: 15,
             sklad: "pogrebi",
         });
         const result = await getAsksPullsUtil();
-        if (result.response.positionsBySector.length > 0) {
-            const firstPosition = result.response.positionsBySector[0].positions[0];
-            expect(firstPosition).toBeDefined();
-            expect(firstPosition.askId).toBeDefined();
-            expect(firstPosition.askArtikul).toBe("ART-WITH-INFO");
-        }
+        expect(result.response.positionsBySector.length).toBeGreaterThan(0);
+        const firstPosition = result.response.positionsBySector[0].positions[0];
+        expect(firstPosition).toBeDefined();
+        expect(firstPosition.askId).toBeDefined();
+        expect(firstPosition.askArtikul).toBe("ART-WITH-INFO");
+        expect(firstPosition.artZone).toBe("42-1-1");
+        expect(firstPosition.quant).toBe(15);
+        expect(firstPosition.plannedQuant).toBe(10);
+    });
+    it("проставляет artZone: null если Art для артикула отсутствует", async () => {
+        await createTestAsk({
+            artikul: "ART-NO-ZONE",
+            quant: 5,
+            pullQuant: 0,
+            status: "new",
+            sklad: "pogrebi",
+        });
+        await createTestPos({
+            artikul: "ART-NO-ZONE",
+            quant: 8,
+            sklad: "pogrebi",
+        });
+        const result = await getAsksPullsUtil();
+        expect(result.response.positionsBySector.length).toBeGreaterThan(0);
+        const firstPosition = result.response.positionsBySector[0].positions[0];
+        expect(firstPosition.artZone).toBeNull();
+        expect(firstPosition.quant).toBe(8);
+        expect(firstPosition.plannedQuant).toBe(5);
     });
 });

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Art } from '../../../../../arts/models/Art.js';
 import { Ask } from '../../../../models/Ask.js';
 import { getAskPullUtil } from '../getAskPullUtil.js';
 import * as getPosesByArtikulAndSkladUtilModule from '../getPosesByArtikulAndSkladUtil.js';
@@ -8,7 +9,21 @@ vi.mock('../../../../models/Ask.js', () => ({
         findById: vi.fn()
     }
 }));
+vi.mock('../../../../../arts/models/Art.js', () => ({
+    Art: {
+        findOne: vi.fn()
+    }
+}));
 vi.mock('../getPosesByArtikulAndSkladUtil.js');
+const mockArtFindOne = (zone) => {
+    Art.findOne.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+            lean: vi.fn().mockReturnValue({
+                exec: vi.fn().mockResolvedValue(zone === null ? null : { zone })
+            })
+        })
+    });
+};
 describe('getAskPullUtil', () => {
     beforeEach(() => {
         vi.resetAllMocks();
@@ -63,6 +78,7 @@ describe('getAskPullUtil', () => {
             exec: vi.fn().mockResolvedValue(mockAsk)
         });
         vi.spyOn(getPosesByArtikulAndSkladUtilModule, 'getPosesByArtikulAndSkladUtil').mockResolvedValue(mockPositions);
+        mockArtFindOne('42-1-1');
         const result = await getAskPullUtil('ask-124');
         expect(result).not.toBeNull();
         if (result) {
@@ -70,6 +86,35 @@ describe('getAskPullUtil', () => {
             expect(result.status).toBe('process');
             expect(result.remainingQuantity).toBe(0);
             expect(result.positions.length).toBeGreaterThan(0);
+            expect(result.positions[0].artZone).toBe('42-1-1');
+            expect(result.positions[0].quant).toBe(10);
+        }
+    });
+    it('проставляет artZone: null когда Art не найден', async () => {
+        const mockAsk = {
+            _id: 'ask-125',
+            status: 'new',
+            artikul: 'ART-MISSING',
+            sklad: 'pogrebi',
+            quant: 5,
+            pullQuant: 0,
+            toObject: () => ({}),
+        };
+        const mockPositions = [
+            { _id: 'pos-1', quant: 10, toObject: () => ({ _id: 'pos-1', quant: 10 }) }
+        ];
+        Ask.findById.mockReturnValue({
+            exec: vi.fn().mockResolvedValue(mockAsk)
+        });
+        vi.spyOn(getPosesByArtikulAndSkladUtilModule, 'getPosesByArtikulAndSkladUtil').mockResolvedValue(mockPositions);
+        mockArtFindOne(null);
+        const result = await getAskPullUtil('ask-125');
+        expect(result).not.toBeNull();
+        if (result) {
+            expect(result.isPullRequired).toBe(true);
+            expect(result.positions[0].artZone).toBeNull();
+            expect(result.positions[0].quant).toBe(10);
+            expect(result.positions[0].plannedQuant).toBe(5);
         }
     });
 });

@@ -1,9 +1,10 @@
 import { browserGet, logBrowserError, summarizeBrowserError, } from "../../../utils/browserRequest.js";
+import { getSharikHttpProxyUrl } from "../getSharikHttpProxyUrl.js";
 import { buildProductRestsUrl, getProductRestsSeedArtikul, } from "./constants.js";
 import { parseSharikProductRestsHtml } from "./parseSharikProductRestsHtml.js";
 /**
  * Загружает страницу product_rests и возвращает карту артикул → actual/slice/price.
- * Без HTTP-прокси (geo-block sharik.ua снят).
+ * HTTP-прокси: `SHARIK_HTTP_PROXY_URL` при `SHARIK_HTTP_PROXY_ENABLED`.
  */
 export async function fetchSharikProductRestsMap(seedArtikul = getProductRestsSeedArtikul()) {
     if (!seedArtikul || typeof seedArtikul !== "string") {
@@ -11,7 +12,9 @@ export async function fetchSharikProductRestsMap(seedArtikul = getProductRestsSe
     }
     const url = buildProductRestsUrl(seedArtikul);
     try {
-        const html = await browserGet(url);
+        const html = await browserGet(url, {
+            proxyUrl: getSharikHttpProxyUrl(),
+        });
         return parseSharikProductRestsHtml(html);
     }
     catch (error) {

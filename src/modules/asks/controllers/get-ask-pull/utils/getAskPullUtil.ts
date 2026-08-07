@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import { Art } from "../../../../arts/models/Art.js";
 import { Ask } from "../../../models/Ask.js";
 import { GetAskPullResponse } from "../types/getAskPullResponse.js";
 import { calculatePositionsForPullUtil } from "./calculatePositionsForPullUtil.js";
@@ -66,6 +66,12 @@ export const getAskPullUtil = async (
     };
   }
 
+  const art = await Art.findOne({ artikul: ask.artikul })
+    .select("zone")
+    .lean()
+    .exec();
+  const artZone = art?.zone ?? null;
+
   const askQuant = (ask.quant !== undefined && ask.quant !== null && ask.quant > 0) ? ask.quant : null;
   const askRemainingQuantity = (askQuant !== null) ? remainingQuantity : null;
   
@@ -77,7 +83,8 @@ export const getAskPullUtil = async (
     askId, // Используем параметр функции, который уже является строкой
     ask.artikul,
     askQuant,
-    askRemainingQuantity
+    askRemainingQuantity,
+    artZone
   );
 
   return {
