@@ -18,6 +18,7 @@ export type SkuReportingLean = {
   prodName: string;
   title: string;
   url: string;
+  imageUrl: string;
   productId: string;
   createdAt?: Date;
 };
@@ -83,7 +84,7 @@ export async function loadSkugrWithOrderedSkus(
   }
 
   const found = await Sku.find({ _id: { $in: skugr.skus } })
-    .select("konkName prodName title url productId createdAt")
+    .select("konkName prodName title url imageUrl productId createdAt")
     .lean<SkuReportingLean[]>();
 
   const byId = new Map(found.map((s) => [s._id.toString(), s]));

@@ -7,6 +7,7 @@ export type SkugrSkuSalesRow = {
   skuId: string;
   title: string;
   productId: string;
+  imageUrl: string;
   salesPcs: number;
   salesUah: number;
 };
@@ -59,6 +60,7 @@ export async function getSkugrSkusSalesUtil(
         skuId: s._id.toString(),
         title: s.title ?? "",
         productId: s.productId,
+        imageUrl: s.imageUrl ?? "",
         salesPcs: 0,
         salesUah: 0,
       })),
@@ -76,6 +78,7 @@ export async function getSkugrSkusSalesUtil(
       skuId: s._id.toString(),
       title: s.title ?? "",
       productId: s.productId,
+      imageUrl: s.imageUrl ?? "",
       salesPcs: row.salesPcs,
       salesUah: row.salesUah,
     };

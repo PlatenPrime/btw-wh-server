@@ -55,6 +55,7 @@ describe("getSkugrSkusSalesUtil", () => {
             productId: `${konk}-a`,
             title: "SKU A",
             url: "https://e.com/a",
+            imageUrl: "https://cdn.example/a.webp",
         });
         const skuB = await Sku.create({
             konkName: konk,
@@ -110,6 +111,7 @@ describe("getSkugrSkusSalesUtil", () => {
             skuId: skuA._id.toString(),
             title: "SKU A",
             productId: `${konk}-a`,
+            imageUrl: "https://cdn.example/a.webp",
             salesPcs: 5,
             salesUah: 25,
         });
@@ -117,6 +119,7 @@ describe("getSkugrSkusSalesUtil", () => {
             skuId: skuB._id.toString(),
             title: "SKU B",
             productId: `${konk}-b`,
+            imageUrl: "",
             salesPcs: 5,
             salesUah: 10,
         });

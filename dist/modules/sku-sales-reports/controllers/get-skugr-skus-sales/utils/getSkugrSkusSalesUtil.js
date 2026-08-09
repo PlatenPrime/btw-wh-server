@@ -28,6 +28,7 @@ export async function getSkugrSkusSalesUtil(input) {
                 skuId: s._id.toString(),
                 title: s.title ?? "",
                 productId: s.productId,
+                imageUrl: s.imageUrl ?? "",
                 salesPcs: 0,
                 salesUah: 0,
             })),
@@ -44,6 +45,7 @@ export async function getSkugrSkusSalesUtil(input) {
             skuId: s._id.toString(),
             title: s.title ?? "",
             productId: s.productId,
+            imageUrl: s.imageUrl ?? "",
             salesPcs: row.salesPcs,
             salesUah: row.salesUah,
         };
