@@ -2,7 +2,7 @@
 
 ## Назначение
 
-JSON-отчёты: продажи и выручка по одному SKU, дневные агрегаты по Skugr, итоги по группам пары konk+prod. Расчёты используют нормализацию `-1` и `Konk.recountDays` через [sku-reporting](sku-reporting.md) и [slices](slices.md).
+JSON-отчёты: продажи и выручка по одному SKU, дневные агрегаты по Skugr, итоги по каждому SKU внутри Skugr за период, итоги по группам пары konk+prod. Расчёты используют нормализацию `-1` и `Konk.recountDays` через [sku-reporting](sku-reporting.md) и [slices](slices.md).
 
 ## Эндпоинты
 

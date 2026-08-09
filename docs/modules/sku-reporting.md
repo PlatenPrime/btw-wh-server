@@ -15,6 +15,7 @@
 | `utils/skugrReporting` | Перечисление дат, карты срезов, загрузка Skugr со SKU |
 | `utils/coalesceSkuSliceItemsForReporting` | Forward-fill `-1` для отчётов |
 | `utils/aggregateDailySkuSliceMetricsForSkus` | Дневные суммы stock/sales/revenue по списку SKU |
+| `utils/aggregatePeriodSkuSliceMetricsForSkus` | Периодные итоги salesPcs/salesUah по каждому SKU |
 | `utils/buildSkuSliceExcel` | Сборка XLSX по срезам |
 | `utils/konkProdSkuChartCore` | Ряды конкурент vs Btrade для chart-data |
 | `utils/prodDisplayTitles` | Заголовки производителей из Prod |

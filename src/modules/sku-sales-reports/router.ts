@@ -5,6 +5,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   getKonkProdSkugrGroupsSalesController,
   getSkugrDailySummaryController,
+  getSkugrSkusSalesController,
   getSkuSalesByDateController,
   getSkuSalesRangeController,
 } from "./controllers/index.js";
@@ -22,6 +23,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkugrDailySummaryController),
+);
+router.get(
+  "/skugr/:skugrId/skus-sales",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkugrSkusSalesController),
 );
 router.get(
   "/sku/:skuId/by-date",

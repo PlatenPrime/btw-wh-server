@@ -432,6 +432,7 @@
 |-------|------|----------------|--------|
 | GET | `/konk-prod/skugr-groups-sales` | JWT | ≥ ADMIN |
 | GET | `/skugr/:skugrId/daily-summary` | JWT | ≥ ADMIN |
+| GET | `/skugr/:skugrId/skus-sales` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId/by-date` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId/range` | JWT | ≥ ADMIN |
 

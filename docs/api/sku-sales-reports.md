@@ -42,6 +42,18 @@
 
 ---
 
+### GET `/api/sku-sales-reports/skugr/:skugrId/skus-sales`
+
+Итоги продаж за период по каждому SKU внутри товарной группы.
+
+**Path:** `skugrId` — ObjectId.
+
+**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD), `dateFrom` ≤ `dateTo`.
+
+**Ответ 200:** `{ message: string, data: Array<{ skuId, title, productId, salesPcs, salesUah }>, all: { title, salesPcs, salesUah } }`.
+
+---
+
 ### GET `/api/sku-sales-reports/konk-prod/skugr-groups-sales`
 
 Итоги продаж за период по каждой Skugr пары `konk` + `prod`.

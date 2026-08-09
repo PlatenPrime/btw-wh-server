@@ -7,6 +7,7 @@ describe("sku-sales-reports router", () => {
             .map((layer) => layer.route.path);
         expect(paths).toContain("/konk-prod/skugr-groups-sales");
         expect(paths).toContain("/skugr/:skugrId/daily-summary");
+        expect(paths).toContain("/skugr/:skugrId/skus-sales");
         expect(paths).toContain("/sku/:skuId/by-date");
         expect(paths).toContain("/sku/:skuId/range");
     });
