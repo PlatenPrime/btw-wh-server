@@ -50,7 +50,7 @@
 
 **Query:** `dateFrom`, `dateTo` (YYYY-MM-DD), `dateFrom` ≤ `dateTo`.
 
-**Ответ 200:** `{ message: string, data: Array<{ skuId, title, productId, imageUrl, salesPcs, salesUah }>, all: { title, salesPcs, salesUah } }`.
+**Ответ 200:** `{ message: string, skugrTitle: string, data: Array<{ skuId, title, productId, imageUrl, salesPcs, salesUah }>, all: { title, salesPcs, salesUah } }`.
 
 ---
 

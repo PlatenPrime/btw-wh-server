@@ -7,12 +7,14 @@ export async function getSkugrSkusSalesUtil(input) {
     if (!loaded)
         return { ok: false };
     const { skugr, skus } = loaded;
+    const skugrTitle = (skugr.title ?? "").trim();
     if (skus.length === 0) {
         return {
             ok: true,
+            skugrTitle,
             data: [],
             all: {
-                title: (skugr.title ?? "").trim() || ALL_SKUS_TITLE,
+                title: ALL_SKUS_TITLE,
                 salesPcs: 0,
                 salesUah: 0,
             },
@@ -24,6 +26,7 @@ export async function getSkugrSkusSalesUtil(input) {
     if (!metrics.ok) {
         return {
             ok: true,
+            skugrTitle,
             data: skus.map((s) => ({
                 skuId: s._id.toString(),
                 title: s.title ?? "",
@@ -58,6 +61,7 @@ export async function getSkugrSkusSalesUtil(input) {
     }
     return {
         ok: true,
+        skugrTitle,
         data,
         all: {
             title: ALL_SKUS_TITLE,

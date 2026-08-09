@@ -67,6 +67,7 @@ describe("getSkugrSkusSalesController", () => {
   it("200 returns data and all from util", async () => {
     vi.mocked(getSkugrSkusSalesUtil).mockResolvedValue({
       ok: true,
+      skugrTitle: "Group Title",
       data: [
         {
           skuId: "507f1f77bcf86cd799439012",
@@ -92,6 +93,7 @@ describe("getSkugrSkusSalesController", () => {
     } as unknown as Request;
     await getSkugrSkusSalesController(req, res);
     expect(responseStatus.code).toBe(200);
+    expect(responseJson.skugrTitle).toBe("Group Title");
     expect(responseJson.data).toEqual([
       {
         skuId: "507f1f77bcf86cd799439012",

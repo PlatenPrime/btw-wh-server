@@ -40,9 +40,10 @@ describe("getSkugrSkusSalesUtil", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
+    expect(result.skugrTitle).toBe("Empty group");
     expect(result.data).toEqual([]);
     expect(result.all).toEqual({
-      title: "Empty group",
+      title: "Усього",
       salesPcs: 0,
       salesUah: 0,
     });
@@ -116,6 +117,7 @@ describe("getSkugrSkusSalesUtil", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
+    expect(result.skugrTitle).toBe("Group");
     expect(result.data).toHaveLength(2);
     expect(result.data[0]).toMatchObject({
       skuId: skuA._id.toString(),
@@ -215,6 +217,7 @@ describe("getSkugrSkusSalesUtil", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
 
+    expect(result.skugrTitle).toBe("Recount group");
     expect(result.data[0]).toMatchObject({
       skuId: skuFlat._id.toString(),
       salesPcs: 0,

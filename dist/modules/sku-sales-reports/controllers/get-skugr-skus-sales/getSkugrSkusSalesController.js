@@ -26,6 +26,7 @@ export const getSkugrSkusSalesController = async (req, res) => {
     }
     res.status(200).json({
         message: "Skugr skus sales retrieved successfully",
+        skugrTitle: result.skugrTitle,
         data: result.data,
         all: result.all,
     });

@@ -21,7 +21,12 @@ type SkugrSkusSalesTotal = {
 const ALL_SKUS_TITLE = "Усього";
 
 export type GetSkugrSkusSalesResult =
-  | { ok: true; data: SkugrSkuSalesRow[]; all: SkugrSkusSalesTotal }
+  | {
+      ok: true;
+      skugrTitle: string;
+      data: SkugrSkuSalesRow[];
+      all: SkugrSkusSalesTotal;
+    }
   | { ok: false };
 
 export async function getSkugrSkusSalesUtil(
@@ -31,13 +36,15 @@ export async function getSkugrSkusSalesUtil(
   if (!loaded) return { ok: false };
 
   const { skugr, skus } = loaded;
+  const skugrTitle = (skugr.title ?? "").trim();
 
   if (skus.length === 0) {
     return {
       ok: true,
+      skugrTitle,
       data: [],
       all: {
-        title: (skugr.title ?? "").trim() || ALL_SKUS_TITLE,
+        title: ALL_SKUS_TITLE,
         salesPcs: 0,
         salesUah: 0,
       },
@@ -56,6 +63,7 @@ export async function getSkugrSkusSalesUtil(
   if (!metrics.ok) {
     return {
       ok: true,
+      skugrTitle,
       data: skus.map((s) => ({
         skuId: s._id.toString(),
         title: s.title ?? "",
@@ -93,6 +101,7 @@ export async function getSkugrSkusSalesUtil(
 
   return {
     ok: true,
+    skugrTitle,
     data,
     all: {
       title: ALL_SKUS_TITLE,
