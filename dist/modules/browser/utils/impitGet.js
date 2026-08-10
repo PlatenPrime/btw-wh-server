@@ -120,15 +120,17 @@ async function readErrorBody(response) {
     }
 }
 /**
- * GET; при adm.tools challenge (обычно 429) — POST ___ack и один retry GET.
+ * GET; при adm.tools challenge (часто 429, иногда 200 с HTML-заглушкой) —
+ * POST ack (`__ack` JSON или legacy `___ack` FormData) и один retry GET.
  */
 async function fetchHtmlWithAdmToolsSolve(client, url, init) {
     const first = await client.fetch(url, init);
-    if (first.status < 400) {
-        return await first.text();
+    const body = first.status < 400 ? await first.text() : await readErrorBody(first);
+    const isChallenge = isAdmToolsChallengeHtml(body);
+    if (first.status < 400 && !isChallenge) {
+        return body;
     }
-    const body = await readErrorBody(first);
-    if (!isAdmToolsChallengeHtml(body)) {
+    if (!isChallenge) {
         throwImpitHttpError({
             url,
             status: first.status,
@@ -151,7 +153,7 @@ async function fetchHtmlWithAdmToolsSolve(client, url, init) {
         }, "adm tools challenge failed");
         throwImpitHttpError({
             url,
-            status: first.status,
+            status: first.status < 400 ? 429 : first.status,
             statusText: first.statusText,
             headers: first.headers,
             body,
@@ -168,11 +170,21 @@ async function fetchHtmlWithAdmToolsSolve(client, url, init) {
             body: retryBody,
         });
     }
-    return await second.text();
+    const retryHtml = await second.text();
+    if (isAdmToolsChallengeHtml(retryHtml)) {
+        throwImpitHttpError({
+            url,
+            status: 429,
+            statusText: second.statusText,
+            headers: second.headers,
+            body: retryHtml,
+        });
+    }
+    return retryHtml;
 }
 /**
  * GET HTML через Impit (Chrome TLS/HTTP fingerprint + cookie jar).
- * adm.tools JS-challenge: POST ___ack → retry.
+ * adm.tools JS-challenge: POST ack → retry.
  * HTTP status ≥ 400 (после solve) → warn (snippet/Retry-After) + throw.
  */
 export async function impitGet(url, options) {

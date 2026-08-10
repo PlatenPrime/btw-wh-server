@@ -181,6 +181,64 @@ describe("impitGet", () => {
         expect(html).toBe("<html>product ok</html>");
         expect(fetch).toHaveBeenCalledTimes(3);
     });
+    it("adm.tools 429 JSON __ack challenge → POST JSON → retry GET 200", async () => {
+        const challengeHtml = `<!DOCTYPE html>
+<title>Захищена сторінка</title>
+<a href="https://adm.tools">adm.tools</a>
+<script>xhr.send(JSON.stringify({__ack: eval('10-93-92+33')}));</script>`;
+        let getCount = 0;
+        const fetch = vi.fn(async (_url, init) => {
+            if (init?.method === "POST") {
+                expect(init.body).toBe(JSON.stringify({ __ack: -142 }));
+                expect(init.headers?.["Content-Type"]).toBe("application/json; charset=UTF-8");
+                return { status: 200, text: async () => "acked" };
+            }
+            getCount += 1;
+            if (getCount === 1) {
+                return {
+                    status: 429,
+                    statusText: "Too Many Requests",
+                    text: async () => challengeHtml,
+                };
+            }
+            return {
+                status: 200,
+                text: async () => "<html>product ok</html>",
+            };
+        });
+        setImpitFactoryForTests(() => makeClient({ fetch }));
+        const html = await impitGet("https://airballoons.com.ua/ua/product/x");
+        expect(html).toBe("<html>product ok</html>");
+        expect(fetch).toHaveBeenCalledTimes(3);
+    });
+    it("adm.tools 200 challenge HTML → POST ack → retry GET product", async () => {
+        const challengeHtml = `<!DOCTYPE html>
+<title>Захищена сторінка</title>
+<a href="https://adm.tools">adm.tools</a>
+<script>xhr.send(JSON.stringify({__ack: eval('1+2')}));</script>`;
+        let getCount = 0;
+        const fetch = vi.fn(async (_url, init) => {
+            if (init?.method === "POST") {
+                expect(init.body).toBe(JSON.stringify({ __ack: 3 }));
+                return { status: 200, text: async () => "acked" };
+            }
+            getCount += 1;
+            if (getCount === 1) {
+                return {
+                    status: 200,
+                    text: async () => challengeHtml,
+                };
+            }
+            return {
+                status: 200,
+                text: async () => "<html>product ok</html>",
+            };
+        });
+        setImpitFactoryForTests(() => makeClient({ fetch }));
+        const html = await impitGet("https://airballoons.com.ua/ua/product/x");
+        expect(html).toBe("<html>product ok</html>");
+        expect(fetch).toHaveBeenCalledTimes(3);
+    });
     it("adm.tools challenge POST fail → исходный 429 throw", async () => {
         const challengeHtml = `<!DOCTYPE html>
 <title>Захищена сторінка</title>

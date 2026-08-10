@@ -14,11 +14,19 @@ vi.mock("../../../../../logging/createLogger.js", () => ({
 import type { ImpitClientLike, ImpitFetchInit } from "../../impitGet.js";
 import { solveAdmToolsChallenge } from "../solveAdmToolsChallenge.js";
 
-const SAMPLE_CHALLENGE_HTML = `<!DOCTYPE html>
+const SAMPLE_FORM_CHALLENGE_HTML = `<!DOCTYPE html>
 <title>Захищена сторінка</title>
 <a href="https://adm.tools">adm.tools</a>
 <script>
 form.append('___ack', eval('6-27+26+56'));
+</script>`;
+
+const SAMPLE_JSON_CHALLENGE_HTML = `<!DOCTYPE html>
+<title>Захищена сторінка</title>
+<a href="https://adm.tools">adm.tools</a>
+<script>
+xhr.setRequestHeader("Content-Type", "application/json; charset=UTF-8");
+xhr.send(JSON.stringify({__ack: eval('10-93-92+33')}));
 </script>`;
 
 describe("solveAdmToolsChallenge", () => {
@@ -26,7 +34,7 @@ describe("solveAdmToolsChallenge", () => {
     mockInfo.mockClear();
   });
 
-  it("POST FormData ___ack=61 и ждёт 200", async () => {
+  it("POST FormData ___ack=61 и ждёт 200 (legacy)", async () => {
     const fetch = vi.fn(async (_url: string, init?: ImpitFetchInit) => {
       expect(init?.method).toBe("POST");
       expect(init?.body).toBeInstanceOf(FormData);
@@ -38,12 +46,42 @@ describe("solveAdmToolsChallenge", () => {
     const result = await solveAdmToolsChallenge(
       client,
       "https://airballoons.com.ua/ua/product/x",
-      SAMPLE_CHALLENGE_HTML
+      SAMPLE_FORM_CHALLENGE_HTML
     );
 
-    expect(result).toEqual({ ack: 61, postStatus: 200 });
+    expect(result).toEqual({
+      ack: 61,
+      postStatus: 200,
+      protocol: "form-___ack",
+    });
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(mockInfo).toHaveBeenCalled();
+  });
+
+  it("POST JSON __ack=-142 и Content-Type application/json", async () => {
+    const fetch = vi.fn(async (_url: string, init?: ImpitFetchInit) => {
+      expect(init?.method).toBe("POST");
+      expect(typeof init?.body).toBe("string");
+      expect(init?.body).toBe(JSON.stringify({ __ack: -142 }));
+      expect(init?.headers?.["Content-Type"]).toBe(
+        "application/json; charset=UTF-8"
+      );
+      return { status: 200, text: async () => "ok" };
+    });
+    const client: ImpitClientLike = { fetch };
+
+    const result = await solveAdmToolsChallenge(
+      client,
+      "https://airballoons.com.ua/ua/product/x",
+      SAMPLE_JSON_CHALLENGE_HTML
+    );
+
+    expect(result).toEqual({
+      ack: -142,
+      postStatus: 200,
+      protocol: "json-__ack",
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it("кидает если не challenge HTML", async () => {
@@ -64,8 +102,8 @@ describe("solveAdmToolsChallenge", () => {
       solveAdmToolsChallenge(
         client,
         "https://example.com/p",
-        SAMPLE_CHALLENGE_HTML
+        SAMPLE_FORM_CHALLENGE_HTML
       )
-    ).rejects.toThrow(/___ack POST HTTP 403/);
+    ).rejects.toThrow(/form-___ack POST HTTP 403/);
   });
 });

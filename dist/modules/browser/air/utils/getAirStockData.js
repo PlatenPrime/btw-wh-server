@@ -21,7 +21,7 @@ export function resolveAirWarmUpUrl(productUrl) {
  * При отсутствии товара в наличии (элемент #max-product-quantity отсутствует в разметке) возвращает stock: 0 при валидной цене.
  * При скидке цена берётся из .us-price-new, если .us-price-actual пуст.
  * Fetch: Impit (Chrome TLS/HTTP fingerprint + cookie jar) с origin warm-up и Referer;
- * adm.tools JS-challenge решается POST `___ack` внутри Impit;
+ * adm.tools JS-challenge решается POST ack (`__ack` JSON / legacy `___ack`) внутри Impit;
  * опциональный HTTP-прокси.
  * HTTP ≥ 400 на product → ошибка; успешный HTML без цены/стока → warn + `-1/-1`.
  * @param link — URL страницы товара
