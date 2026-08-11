@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AxiosError } from "axios";
-import { browserGet, formatBrowserFetchError, getBrowserFetchLogLevel, logBrowserError, resolveAxiosError, } from "../browserRequest.js";
+import { browserGet, browserGetBuffer, formatBrowserFetchError, getBrowserAxios, getBrowserFetchLogLevel, logBrowserError, resolveAxiosError, } from "../browserRequest.js";
 const mockError = vi.hoisted(() => vi.fn());
 const mockWarn = vi.hoisted(() => vi.fn());
 vi.mock("../../../../logging/createLogger.js", () => ({
@@ -40,6 +40,55 @@ describe("browserGet proxy options", () => {
         await expect(browserGet("https://example.com/page", {
             proxyUrl: "socks5://user:pass@10.0.0.1:50101",
         })).rejects.toThrow(/Invalid browser HTTP proxy URL/);
+    });
+});
+describe("browserGetBuffer", () => {
+    it("бросает до запроса при невалидном proxyUrl", async () => {
+        await expect(browserGetBuffer("https://example.com/img.jpg", {
+            proxyUrl: "socks5://user:pass@10.0.0.1:50101",
+        })).rejects.toThrow(/Invalid browser HTTP proxy URL/);
+    });
+    it("возвращает buffer + contentType + status без throw на HTTP 404", async () => {
+        const client = getBrowserAxios();
+        const getSpy = vi.spyOn(client, "get").mockResolvedValue({
+            status: 404,
+            data: new ArrayBuffer(0),
+            headers: { "content-type": "text/html; charset=utf-8" },
+        });
+        try {
+            const result = await browserGetBuffer("https://sharik.ua/missing.jpg");
+            expect(result.status).toBe(404);
+            expect(result.contentType).toBe("text/html");
+            expect(result.buffer.length).toBe(0);
+            expect(getSpy).toHaveBeenCalledWith("https://sharik.ua/missing.jpg", expect.objectContaining({
+                responseType: "arraybuffer",
+                proxy: false,
+                headers: expect.objectContaining({
+                    Accept: expect.stringContaining("image/"),
+                }),
+            }));
+        }
+        finally {
+            getSpy.mockRestore();
+        }
+    });
+    it("возвращает JPEG bytes на 200", async () => {
+        const jpegBytes = Uint8Array.from([0xff, 0xd8, 0xff, 0xd9]);
+        const client = getBrowserAxios();
+        const getSpy = vi.spyOn(client, "get").mockResolvedValue({
+            status: 200,
+            data: jpegBytes.buffer,
+            headers: { "content-type": "image/jpeg" },
+        });
+        try {
+            const result = await browserGetBuffer("https://sharik.ua/ok.jpg");
+            expect(result.status).toBe(200);
+            expect(result.contentType).toBe("image/jpeg");
+            expect(result.buffer.equals(Buffer.from(jpegBytes))).toBe(true);
+        }
+        finally {
+            getSpy.mockRestore();
+        }
     });
 });
 describe("formatBrowserFetchError", () => {

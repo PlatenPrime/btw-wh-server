@@ -12,6 +12,7 @@ API системы управления складом предоставляе�
 - [API Analogs](analogs.md) — `/api/analogs` — аналоги артикулов у конкурентов
 - [API Variants](variants.md) — `/api/variants` — варианты товаров у конкурентов
 - [API Browser](browser.md) — `/api/browser` — остаток и цена по URL страницы товара (yumi, yumin)
+- [API Media](media.md) — `/api/media` — публичный proxy JPEG артикулов sharik
 - [API Btrade Slices](btrade-slices.md) — `/api/btrade-slices` — срезы Btrade
 - [API Auth](auth.md) — `/api/auth` — аутентификация и управление пользователями
 - [API Arts](arts.md) — `/api/arts` — артикулы
@@ -54,7 +55,7 @@ Authorization: Bearer <token>
 
 Для журнала аудита ([Events](events.md)) актор определяется только из этого JWT: отдельный `userId` в теле/query запросов передавать не нужно.
 
-Публичные маршруты (без JWT): `POST /api/auth/login`, `POST /api/auth/register`, все `GET` под `/api/browser/*` — см. [Матрица доступа](access-matrix.md).
+Публичные маршруты (без JWT): `POST /api/auth/login`, `POST /api/auth/register`, все `GET` под `/api/browser/*`, все `GET` под `/api/media/*` — см. [Матрица доступа](access-matrix.md).
 
 ## Роли и права доступа
 
@@ -215,4 +216,4 @@ Authorization: Bearer <token>
 - [API Skugrs](skugrs.md)
 - [API Sku Slices](sku-slices.md)
 
-Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — analog-slices, analogs, auth, arts, asks, kasks, blocks, segs, zones, rows, pallets, [pallet-groups](../modules/pallet-groups.md), poses, defs, dels, konks, prods, skus, skugrs, sku-slices, [browser](../modules/browser.md), [btrade-slices](../modules/btrade-slices.md), [slices](../modules/slices.md), [slice-compensation](../modules/slice-compensation.md), variants, constants.
+Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — analog-slices, analogs, auth, arts, asks, kasks, blocks, segs, zones, rows, pallets, [pallet-groups](../modules/pallet-groups.md), poses, defs, dels, konks, prods, skus, skugrs, sku-slices, [browser](../modules/browser.md), [media](../modules/media.md), [btrade-slices](../modules/btrade-slices.md), [slices](../modules/slices.md), [slice-compensation](../modules/slice-compensation.md), variants, constants.

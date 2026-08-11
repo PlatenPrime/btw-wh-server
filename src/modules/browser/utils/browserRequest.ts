@@ -37,6 +37,15 @@ export type BrowserGetOptions = {
   proxyUrl?: string;
 };
 
+export type BrowserGetBufferResult = {
+  buffer: Buffer;
+  contentType: string;
+  status: number;
+};
+
+const IMAGE_ACCEPT =
+  "image/avif,image/webp,image/apng,image/*,*/*;q=0.8";
+
 /**
  * Axios request agents для HTTP(S) proxy (HttpsProxyAgent), либо undefined без proxy.
  * @throws Error при невалидном proxy URL
@@ -143,6 +152,52 @@ export async function browserGet<T = unknown>(
       }),
     });
     return response.data as unknown as T;
+  } catch (err) {
+    throw new Error(formatBrowserFetchError(url, err), { cause: err });
+  }
+}
+
+/**
+ * Binary GET (images) с browser-like headers и тем же proxy-стеком, что `browserGet`.
+ * HTTP-статусы не бросают (включая 4xx/5xx) — вызывающий сам решает по `status`/телу.
+ * Сетевые/proxy ошибки — Error с `formatBrowserFetchError`.
+ */
+export async function browserGetBuffer(
+  url: string,
+  options?: BrowserGetOptions
+): Promise<BrowserGetBufferResult> {
+  const client = getBrowserAxios();
+  const agents = resolveBrowserProxyAgents(options?.proxyUrl);
+
+  try {
+    const response = await client.get<ArrayBuffer>(url, {
+      timeout: BROWSER_REQUEST_TIMEOUT_MS,
+      proxy: false,
+      responseType: "arraybuffer",
+      validateStatus: () => true,
+      headers: {
+        Accept: IMAGE_ACCEPT,
+        "Sec-Fetch-Dest": "image",
+        "Sec-Fetch-Mode": "no-cors",
+        "Sec-Fetch-Site": "cross-site",
+      },
+      ...(agents && {
+        httpAgent: agents.httpAgent,
+        httpsAgent: agents.httpsAgent,
+      }),
+    });
+
+    const rawContentType = response.headers["content-type"];
+    const contentType =
+      (typeof rawContentType === "string"
+        ? rawContentType.split(";")[0]?.trim()
+        : "") || "application/octet-stream";
+
+    return {
+      buffer: Buffer.from(response.data ?? []),
+      contentType,
+      status: response.status,
+    };
   } catch (err) {
     throw new Error(formatBrowserFetchError(url, err), { cause: err });
   }
