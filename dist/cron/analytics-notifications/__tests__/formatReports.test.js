@@ -4,6 +4,7 @@ import { formatCronErrorReport, formatFillPosNameukrErrorReport, formatFillPosNa
 import { formatBtradeSliceReport } from "../formatBtradeSliceReport.js";
 import { formatCompensatingSlicesReport } from "../formatCompensatingSlicesReport.js";
 import { formatFillSkugrSkusReport } from "../formatFillSkugrSkusReport.js";
+import { formatGraboSkuSyncReport } from "../formatGraboSkuSyncReport.js";
 import { formatKonkSliceLine, formatKonkSliceReportLines, } from "../formatKonkSliceStats.js";
 import { formatSkuInvalidFlagReport } from "../formatSkuInvalidFlagReport.js";
 import { formatSkuKonkSliceReport, formatSkuSlicesExcludedReport, formatSkuSlicesReport, } from "../formatSkuSlicesReport.js";
@@ -120,6 +121,38 @@ describe("formatSkuInvalidFlagReport", () => {
         const msg = formatSkuInvalidFlagReport({ updated: 15, konkCount: 4 });
         expect(msg).toContain("Sku invalid flag sync");
         expect(msg).toContain("Оновлено SKU: 15, конкурентів: 4");
+    });
+});
+describe("formatGraboSkuSyncReport", () => {
+    it("includes catalog stats", () => {
+        const msg = formatGraboSkuSyncReport({
+            categoryCount: 12,
+            listed: 400,
+            created: 10,
+            updated: 390,
+            skippedNoProductId: 1,
+            errors: 2,
+            markedOffSite: 5,
+            catalogComplete: true,
+        });
+        expect(msg).toContain("Grabo SKU sync");
+        expect(msg).toContain("listed: 400");
+        expect(msg).toContain("Створено: 10, оновлено: 390");
+        expect(msg).toContain("Off-site: 5");
+        expect(msg).toContain("catalogComplete: yes");
+    });
+    it("marks catalogComplete no", () => {
+        const msg = formatGraboSkuSyncReport({
+            categoryCount: 12,
+            listed: 10,
+            created: 0,
+            updated: 10,
+            skippedNoProductId: 0,
+            errors: 0,
+            markedOffSite: 0,
+            catalogComplete: false,
+        });
+        expect(msg).toContain("catalogComplete: no");
     });
 });
 describe("formatFillPosNameukrReport", () => {

@@ -65,7 +65,7 @@ export async function getCachedSharikProductRestsMap(
   }
 }
 
-/** Сброс кэша (тесты). */
+/** Сброс кэша (тесты и hourly deficit cron). */
 export function clearSharikProductRestsCache(): void {
   cache = null;
 }

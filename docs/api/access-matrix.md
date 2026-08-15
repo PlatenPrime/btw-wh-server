@@ -419,6 +419,17 @@
 
 ---
 
+## `/api/grabo-skus`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| GET | `/` | JWT | ≥ ADMIN |
+| GET | `/id/:id` | JWT | ≥ ADMIN |
+| POST | `/sync` | JWT | ≥ ADMIN |
+| GET | `/excel` | JWT | ≥ ADMIN |
+
+---
+
 ## `/api/sku-excel-reports`
 
 | Метод | Путь | Аутентификация | Доступ |

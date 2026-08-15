@@ -42,7 +42,7 @@ export async function getCachedSharikProductRestsMap(seedArtikul = getProductRes
         throw error;
     }
 }
-/** Сброс кэша (тесты). */
+/** Сброс кэша (тесты и hourly deficit cron). */
 export function clearSharikProductRestsCache() {
     cache = null;
 }

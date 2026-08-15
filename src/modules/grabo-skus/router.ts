@@ -1,0 +1,42 @@
+import { Router } from "express";
+import { RoleType } from "../../constants/roles.js";
+import { checkAuth, checkRoles } from "../../middleware/index.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import {
+  getAllGraboSkusController,
+  getGraboSkuByIdController,
+  getGraboSkuExcelController,
+  runGraboSkuSyncController,
+} from "./controllers/index.js";
+
+const router = Router();
+
+router.get(
+  "/",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getAllGraboSkusController)
+);
+
+router.get(
+  "/id/:id",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getGraboSkuByIdController)
+);
+
+router.post(
+  "/sync",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(runGraboSkuSyncController)
+);
+
+router.get(
+  "/excel",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getGraboSkuExcelController)
+);
+
+export default router;

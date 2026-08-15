@@ -7,7 +7,7 @@
 - **прямые API-эндпоинты** для запроса stock/price по URL или артикулу;
 - **библиотеки парсинга**, которые вызывают cron-задачи срезов, модули `analogs`, `skus`, `arts`, `skugrs` и компенсирующие срезы.
 
-Организация кода — **по конкуренту** (`air/`, `balun/`, `perfect/`, …) плюс общие утилиты в `browser/utils/`.
+Организация кода — **по конкуренту** (`air/`, `balun/`, `perfect/`, …), плюс производитель Grabo в `browser/grabo/` и общие утилиты в `browser/utils/`.
 
 ## Поддерживаемые конкуренты
 
@@ -29,6 +29,7 @@
 - **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect); для Air дополнительно доступен параллельный client-ingestion HTML как ручной/компенсирующий канал.
 - **btrade-slices / arts / dels / defs:** остатки sharik через bulk `product_rests` (`actualQuantity` для live, `sliceQuantity` для daily btrade-slice).
 - **skugrs:** обход страниц групп для наполнения SKU (`group-products`), в т.ч. Air listing.
+- **grabo-skus:** полный обход каталога производителя Grabo (sitemap → категории → карточки) через `browser/grabo`.
 - **slice-compensation:** повторный опрос через stock-утилиты analog/sku (Air включён в server scrape).
 
 ## Концепции и принятые решения
@@ -88,7 +89,7 @@ Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/
 - `parsePromUaGroupListingProducts` — Prom.ua-совместимый парсер;
 - throttle 800–1600 мс между страницами.
 
-Per-competitor обёртки: `get*GroupPagesProducts` + Zod-схема (`groupUrl`, `maxPages`).
+Per-competitor обёртки: `get*GroupPagesProducts` + Zod-схема (`groupUrl`, `maxPages`). Grabo listing — `getGraboListingProducts`: пагинация только по `rel="next"` в `nav.archive-links.pages` (`rel="last"` на сайте врёт). Категории каталога — `parseGraboSitemapCategoryUrls` из `.site-map li.nav900`. Сбор URL карточек — `collectGraboCatalogProductUrls`.
 
 ### Group products (диспетчер)
 

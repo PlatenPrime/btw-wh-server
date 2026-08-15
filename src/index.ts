@@ -29,6 +29,7 @@ import constantsRoute from "./modules/constants/router.js";
 import defsRoute from "./modules/defs/router.js";
 import delsRoute from "./modules/dels/router.js";
 import eventsRoute from "./modules/events/router.js";
+import graboSkusRoute from "./modules/grabo-skus/router.js";
 import kasksRoute from "./modules/kasks/router.js";
 import konksRoute from "./modules/konks/router.js";
 import mediaRoute from "./modules/media/router.js";
@@ -45,7 +46,6 @@ import skuSlicesRoute from "./modules/sku-slices/router.js";
 import skugrsRoute from "./modules/skugrs/router.js";
 import skusRoute from "./modules/skus/router.js";
 import sliceCompensationRoute from "./modules/slice-compensation/router.js";
-import { runManualCompensatingSlice } from "./modules/slice-compensation/utils/runManualCompensatingSlice.js";
 import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
 import { logServerEgressGeo } from "./utils/server-egress-geo/logServerEgressGeo.js";
@@ -87,6 +87,7 @@ app.use("/api/skugrs", skugrsRoute);
 app.use("/api/blocks", blocksRoute);
 app.use("/api/segs", segsRoute);
 app.use("/api/slice-compensation", sliceCompensationRoute);
+app.use("/api/grabo-skus", graboSkusRoute);
 app.use("/api/rows", rowsRoute);
 app.use("/api/pallets", palletsRoute);
 app.use("/api/pallet-groups", palletGroupsRoute);
@@ -113,8 +114,6 @@ async function start() {
     await mongoose.connect(getMongoUri());
 
     startCronOperations();
-
-    void runManualCompensatingSlice("perfect");
 
     app.listen(PORT, () => {
       bootLog.info({ port: PORT }, "server started");

@@ -35,6 +35,7 @@ API системы управления складом предоставляе�
 - [API Skugrs](skugrs.md) — `/api/skugrs` — группы товаров конкурента
 - [API Sku Slices](sku-slices.md) — `/api/sku-slices` — сырые ежедневные срезы остатков и цен
 - [API Slice Compensation](slice-compensation.md) — `/api/slice-compensation` — внеочередной compensating refetch по конкуренту
+- [API Grabo Skus](grabo-skus.md) — `/api/grabo-skus` — каталог производителя Grabo: список, карточка, ручной срез и Excel
 - [API Sku Excel Reports](sku-excel-reports.md) — `/api/sku-excel-reports` — Excel по SKU, группам и каталогу
 - [API Sku Sales Reports](sku-sales-reports.md) — `/api/sku-sales-reports` — JSON продажи и агрегаты
 - [API Sku Chart Reports](sku-chart-reports.md) — `/api/sku-chart-reports` — JSON для графиков konk vs Btrade
@@ -215,5 +216,7 @@ Authorization: Bearer <token>
 - [API Skus](skus.md)
 - [API Skugrs](skugrs.md)
 - [API Sku Slices](sku-slices.md)
+- [API Grabo Skus](grabo-skus.md)
+- [API Slice Compensation](slice-compensation.md)
 
-Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — analog-slices, analogs, auth, arts, asks, kasks, blocks, segs, zones, rows, pallets, [pallet-groups](../modules/pallet-groups.md), poses, defs, dels, konks, prods, skus, skugrs, sku-slices, [browser](../modules/browser.md), [media](../modules/media.md), [btrade-slices](../modules/btrade-slices.md), [slices](../modules/slices.md), [slice-compensation](../modules/slice-compensation.md), variants, constants.
+Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — analog-slices, analogs, auth, arts, asks, kasks, blocks, segs, zones, rows, pallets, [pallet-groups](../modules/pallet-groups.md), poses, defs, dels, konks, prods, skus, skugrs, sku-slices, [grabo-skus](../modules/grabo-skus.md), [browser](../modules/browser.md), [media](../modules/media.md), [btrade-slices](../modules/btrade-slices.md), [slices](../modules/slices.md), [slice-compensation](../modules/slice-compensation.md), variants, constants.

@@ -5,6 +5,8 @@ import { startFillSkugrSkusCron } from "../modules/skugrs/cron/startFillSkugrSku
 import { startSkuInvalidFlagCron } from "../modules/skus/cron/startSkuInvalidFlagCron.js";
 import { startCompensatingSlicesCron } from "../modules/slice-compensation/cron/startCompensatingSlicesCron.js";
 import { startFillPosNameukrFromArtsCron } from "./startFillPosNameukrFromArtsCron.js";
+import { startGraboSkuSyncCron } from "../modules/grabo-skus/cron/startGraboSkuSyncCron.js";
+import { startDeficitReportCron } from "../modules/defs/cron/startDeficitReportCron.js";
 export const startCronOperations = () => {
     startFillPosNameukrFromArtsCron();
     startAnalogSlicesCron();
@@ -13,4 +15,6 @@ export const startCronOperations = () => {
     startCompensatingSlicesCron();
     startFillSkugrSkusCron();
     startSkuInvalidFlagCron();
+    startGraboSkuSyncCron();
+    startDeficitReportCron();
 };
