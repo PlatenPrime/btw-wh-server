@@ -15,6 +15,7 @@ export const getAllGraboSkusQuerySchema = z.object({
   material: z.string().optional(),
   gas: z.string().optional(),
   language: z.string().optional(),
+  gasCapacity: z.string().optional(),
   tag: z.string().optional(),
   includeFilterOptions: z
     .union([z.literal("true"), z.literal("false")])

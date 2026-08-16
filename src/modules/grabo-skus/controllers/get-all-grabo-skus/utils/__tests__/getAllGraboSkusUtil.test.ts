@@ -135,6 +135,7 @@ describe("getAllGraboSkusUtil", () => {
         material: "Foil",
         gas: "Helium",
         language: "EN",
+        gasCapacity: "air only",
         tags: ["birthday", "gold"],
       })
     );
@@ -144,6 +145,7 @@ describe("getAllGraboSkusUtil", () => {
         isOnSite: false,
         isNewProduct: false,
         color: "Blue",
+        gasCapacity: "helium 0.02 m3",
         tags: ["other"],
       })
     );
@@ -158,6 +160,7 @@ describe("getAllGraboSkusUtil", () => {
       material: "Foil",
       gas: "Helium",
       language: "EN",
+      gasCapacity: "air only",
       tag: "birthday",
     });
 
@@ -206,13 +209,31 @@ describe("getAllGraboSkusUtil", () => {
 
   it("includes filterOptions from the whole collection, not the current page", async () => {
     await GraboSku.create(
-      graboSkuDoc({ productId: "G1", color: "Pink", size: '14" / a' })
+      graboSkuDoc({
+        productId: "G1",
+        color: "Pink",
+        size: '14" / a',
+        gasCapacity: "air only",
+        tags: ["Party"],
+      })
     );
     await GraboSku.create(
-      graboSkuDoc({ productId: "G2", color: "Blue", size: '18" / b' })
+      graboSkuDoc({
+        productId: "G2",
+        color: "Blue",
+        size: '18" / b',
+        gasCapacity: "helium 0.02 m3",
+        tags: ["Girl", "Party"],
+      })
     );
     await GraboSku.create(
-      graboSkuDoc({ productId: "G3", color: "Gold", size: '14" / c' })
+      graboSkuDoc({
+        productId: "G3",
+        color: "Gold",
+        size: '14" / c',
+        gasCapacity: "",
+        tags: [],
+      })
     );
 
     const result = await getAllGraboSkusUtil({
@@ -226,5 +247,10 @@ describe("getAllGraboSkusUtil", () => {
     expect(result.graboSkus[0]!.productId).toBe("G1");
     expect(result.filterOptions?.color).toEqual(["Blue", "Gold", "Pink"]);
     expect(result.filterOptions?.size).toEqual(['14"', '18"']);
+    expect(result.filterOptions?.gasCapacity).toEqual([
+      "air only",
+      "helium 0.02 m3",
+    ]);
+    expect(result.filterOptions?.tags).toEqual(["Girl", "Party"]);
   });
 });

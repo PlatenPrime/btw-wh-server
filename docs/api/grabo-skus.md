@@ -19,7 +19,7 @@
 - `search` — регистронезависимый regex по `title` **или** `productId`; спецсимволы экранируются; пустая строка после trim игнорируется
 - `productId` — точное совпадение после trim
 - `isOnSite`, `isNewProduct` — только `"true"` или `"false"`
-- `color`, `material`, `gas`, `language` — точное совпадение после trim
+- `color`, `material`, `gas`, `language`, `gasCapacity` — точное совпадение после trim
 - `size` — значение опции селекта (префикс сырого поля до первого `/`, например `40"` для документа `40" / 62x91x25 cm`), не полная строка из Mongo
 - `tag` — документ, у которого массив `tags` содержит значение
 - `includeFilterOptions` — `"true"` или `"false"`, по умолчанию false. При `"true"` в ответ добавляется `filterOptions`
@@ -40,7 +40,9 @@
     size: string[],
     material: string[],
     gas: string[],
-    language: string[]
+    language: string[],
+    gasCapacity: string[],
+    tags: string[]
   }
 }
 ```
@@ -102,12 +104,12 @@
 
 XLSX всех документов `GraboSku`, сортировка по `productId`.
 
-Заголовки колонок — camelCase имена полей модели без `_id` и `__v`:
+Заголовки колонок — украинские подписи (не имена полей модели), без `_id` и `__v`:
 
-`productId`, `title`, `url`, `isNewProduct`, `color`, `size`, `material`, `gas`, `language`, `gasCapacity`, `tags`, `images`, `isOnSite`, `lastSeenAt`, `createdAt`, `updatedAt`
+`ID`, `Назва`, `URL`, `Новинка`, `Колір`, `Розмір`, `Матеріал`, `Газ`, `Мова`, `Об'єм газу`, `Теги`, `Зображення`, `На сайті`, `Остання поява`, `Створено`, `Оновлено`
 
 `tags` и `images` — строки, элементы через `"; "`. Даты — ISO-8601. Boolean — `true`/`false`.
 
-**Ответ 200:** бинарный `.xlsx`, `Content-Disposition: attachment; filename="graboskus.xlsx"`.
+**Ответ 200:** бинарный `.xlsx`, `Content-Disposition: attachment; filename="grabo-catalog-YYYY-MM-DD.xlsx"` (календарный день Киева).
 
 **401 / 403** — как у `/sync`.

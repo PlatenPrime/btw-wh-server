@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { GRABO_SKU_EXCEL_COLUMNS } from "../graboSkuExcelColumns.js";
 
 describe("GRABO_SKU_EXCEL_COLUMNS", () => {
-  it("lists model field names without mongo id", () => {
-    expect(GRABO_SKU_EXCEL_COLUMNS).toEqual([
+  it("maps model field keys without mongo id", () => {
+    expect(GRABO_SKU_EXCEL_COLUMNS.map((col) => col.key)).toEqual([
       "productId",
       "title",
       "url",
@@ -21,7 +21,28 @@ describe("GRABO_SKU_EXCEL_COLUMNS", () => {
       "createdAt",
       "updatedAt",
     ]);
-    expect(GRABO_SKU_EXCEL_COLUMNS).not.toContain("_id");
-    expect(GRABO_SKU_EXCEL_COLUMNS).not.toContain("__v");
+    expect(GRABO_SKU_EXCEL_COLUMNS.map((col) => col.key)).not.toContain("_id");
+    expect(GRABO_SKU_EXCEL_COLUMNS.map((col) => col.key)).not.toContain("__v");
+  });
+
+  it("exposes editable Ukrainian headers", () => {
+    expect(GRABO_SKU_EXCEL_COLUMNS.map((col) => col.header)).toEqual([
+      "ID",
+      "Назва",
+      "URL",
+      "Новинка",
+      "Колір",
+      "Розмір",
+      "Матеріал",
+      "Газ",
+      "Мова",
+      "Об'єм газу",
+      "Теги",
+      "Зображення",
+      "На сайті",
+      "Остання поява",
+      "Створено",
+      "Оновлено",
+    ]);
   });
 });

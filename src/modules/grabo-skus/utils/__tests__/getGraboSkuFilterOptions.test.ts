@@ -29,6 +29,8 @@ describe("getGraboSkuFilterOptions", () => {
       material: [],
       gas: [],
       language: [],
+      gasCapacity: [],
+      tags: [],
     });
   });
 
@@ -41,6 +43,8 @@ describe("getGraboSkuFilterOptions", () => {
         material: "Foil",
         gas: "Helium",
         language: "EN",
+        gasCapacity: "air only",
+        tags: ["Party", "Girl"],
       })
     );
     await GraboSku.create(
@@ -51,6 +55,8 @@ describe("getGraboSkuFilterOptions", () => {
         material: "",
         gas: "Air",
         language: "IT",
+        gasCapacity: "helium 0.02 m3",
+        tags: ["Girl", ""],
       })
     );
     await GraboSku.create(
@@ -61,6 +67,8 @@ describe("getGraboSkuFilterOptions", () => {
         material: "Latex",
         gas: "",
         language: "",
+        gasCapacity: "",
+        tags: [],
       })
     );
 
@@ -71,6 +79,8 @@ describe("getGraboSkuFilterOptions", () => {
     expect(options.material).toEqual(["Foil", "Latex"]);
     expect(options.gas).toEqual(["Air", "Helium"]);
     expect(options.language).toEqual(["EN", "IT"]);
+    expect(options.gasCapacity).toEqual(["air only", "helium 0.02 m3"]);
+    expect(options.tags).toEqual(["Girl", "Party"]);
   });
 
   it("collapses distinct size strings to unique prefixes and sorts them", async () => {
@@ -106,6 +116,8 @@ describe("getGraboSkuFilterOptions", () => {
       material: ["Pink"],
       gas: ["Pink"],
       language: ["Pink"],
+      gasCapacity: ["Pink"],
+      tags: ["Pink"],
     });
   });
 });

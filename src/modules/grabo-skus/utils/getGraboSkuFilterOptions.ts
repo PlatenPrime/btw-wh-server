@@ -7,6 +7,8 @@ export type GraboSkuFilterOptions = {
   material: string[];
   gas: string[];
   language: string[];
+  gasCapacity: string[];
+  tags: string[];
 };
 
 function uniqueSortedNonEmpty(values: unknown[]): string[] {
@@ -33,13 +35,16 @@ function uniqueSortedSizeOptions(values: unknown[]): string[] {
  * Уникальные значения селектов из всей коллекции, без сужения текущими фильтрами.
  */
 export async function getGraboSkuFilterOptions(): Promise<GraboSkuFilterOptions> {
-  const [color, size, material, gas, language] = await Promise.all([
-    GraboSku.distinct("color"),
-    GraboSku.distinct("size"),
-    GraboSku.distinct("material"),
-    GraboSku.distinct("gas"),
-    GraboSku.distinct("language"),
-  ]);
+  const [color, size, material, gas, language, gasCapacity, tags] =
+    await Promise.all([
+      GraboSku.distinct("color"),
+      GraboSku.distinct("size"),
+      GraboSku.distinct("material"),
+      GraboSku.distinct("gas"),
+      GraboSku.distinct("language"),
+      GraboSku.distinct("gasCapacity"),
+      GraboSku.distinct("tags"),
+    ]);
 
   return {
     color: uniqueSortedNonEmpty(color),
@@ -47,5 +52,7 @@ export async function getGraboSkuFilterOptions(): Promise<GraboSkuFilterOptions>
     material: uniqueSortedNonEmpty(material),
     gas: uniqueSortedNonEmpty(gas),
     language: uniqueSortedNonEmpty(language),
+    gasCapacity: uniqueSortedNonEmpty(gasCapacity),
+    tags: uniqueSortedNonEmpty(tags),
   };
 }

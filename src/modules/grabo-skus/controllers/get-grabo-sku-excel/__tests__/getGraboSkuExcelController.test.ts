@@ -12,7 +12,7 @@ describe("getGraboSkuExcelController", () => {
     const buffer = Buffer.from("xlsx");
     vi.mocked(getGraboSkuExcelUtil).mockResolvedValue({
       buffer,
-      fileName: "graboskus.xlsx",
+      fileName: "grabo-catalog-2026-08-16.xlsx",
     });
 
     const setHeader = vi.fn();
@@ -28,7 +28,7 @@ describe("getGraboSkuExcelController", () => {
     );
     expect(setHeader).toHaveBeenCalledWith(
       "Content-Disposition",
-      'attachment; filename="graboskus.xlsx"'
+      'attachment; filename="grabo-catalog-2026-08-16.xlsx"'
     );
     expect(status).toHaveBeenCalledWith(200);
     expect(send).toHaveBeenCalledWith(buffer);

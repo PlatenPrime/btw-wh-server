@@ -24,6 +24,7 @@ describe("buildGraboSkuListMongoFilter", () => {
         material: "",
         gas: "\t",
         language: "",
+        gasCapacity: "  ",
         tag: "  ",
       })
     ).toEqual({});
@@ -49,6 +50,7 @@ describe("buildGraboSkuListMongoFilter", () => {
         material: "Foil",
         gas: "Helium",
         language: "EN",
+        gasCapacity: " air only ",
         tag: " birthday ",
       })
     ).toEqual({
@@ -60,6 +62,7 @@ describe("buildGraboSkuListMongoFilter", () => {
       material: "Foil",
       gas: "Helium",
       language: "EN",
+      gasCapacity: "air only",
       tags: "birthday",
     });
   });

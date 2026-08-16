@@ -27,6 +27,7 @@ export function buildGraboSkuListMongoFilter(
   const material = trimmedOrUndefined(query.material);
   const gas = trimmedOrUndefined(query.gas);
   const language = trimmedOrUndefined(query.language);
+  const gasCapacity = trimmedOrUndefined(query.gasCapacity);
   const tag = trimmedOrUndefined(query.tag);
 
   if (search !== undefined) {
@@ -50,6 +51,7 @@ export function buildGraboSkuListMongoFilter(
   if (material !== undefined) filter.material = material;
   if (gas !== undefined) filter.gas = gas;
   if (language !== undefined) filter.language = language;
+  if (gasCapacity !== undefined) filter.gasCapacity = gasCapacity;
   if (tag !== undefined) filter.tags = tag;
 
   return filter;

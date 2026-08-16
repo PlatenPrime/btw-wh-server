@@ -3,7 +3,12 @@ import {
   applyDataRowStyle,
   applyHeaderStyle,
 } from "../../../lib/excel/worksheetStyles.js";
-import { GRABO_SKU_EXCEL_COLUMNS } from "../constants/graboSkuExcelColumns.js";
+import { fitColumnWidths } from "../../../lib/excel/fitColumnWidths.js";
+import { toSliceDate } from "../../../utils/sliceDate.js";
+import {
+  GRABO_SKU_EXCEL_COLUMNS,
+  type GraboSkuExcelColumnKey,
+} from "../constants/graboSkuExcelColumns.js";
 
 export type GraboSkuExcelRow = {
   productId: string;
@@ -32,6 +37,19 @@ function toIso(value: Date | undefined | null): string {
   return value instanceof Date ? value.toISOString() : "";
 }
 
+function excelCellValue(
+  row: GraboSkuExcelRow,
+  key: GraboSkuExcelColumnKey
+): string | boolean {
+  if (key === "tags" || key === "images") {
+    return joinList(row[key]);
+  }
+  if (key === "lastSeenAt" || key === "createdAt" || key === "updatedAt") {
+    return toIso(row[key]);
+  }
+  return row[key];
+}
+
 export async function buildGraboSkuExcelBuffer(
   rows: GraboSkuExcelRow[]
 ): Promise<{ buffer: Buffer; fileName: string }> {
@@ -40,40 +58,25 @@ export async function buildGraboSkuExcelBuffer(
   const columnCount = GRABO_SKU_EXCEL_COLUMNS.length;
 
   const headerRow = sheet.getRow(1);
-  GRABO_SKU_EXCEL_COLUMNS.forEach((label, i) => {
-    headerRow.getCell(i + 1).value = label;
+  GRABO_SKU_EXCEL_COLUMNS.forEach((col, i) => {
+    headerRow.getCell(i + 1).value = col.header;
   });
   applyHeaderStyle(sheet, columnCount);
 
   for (let r = 0; r < rows.length; r++) {
     const row = rows[r]!;
     const excelRow = sheet.getRow(r + 2);
-    excelRow.getCell(1).value = row.productId;
-    excelRow.getCell(2).value = row.title;
-    excelRow.getCell(3).value = row.url;
-    excelRow.getCell(4).value = row.isNewProduct;
-    excelRow.getCell(5).value = row.color;
-    excelRow.getCell(6).value = row.size;
-    excelRow.getCell(7).value = row.material;
-    excelRow.getCell(8).value = row.gas;
-    excelRow.getCell(9).value = row.language;
-    excelRow.getCell(10).value = row.gasCapacity;
-    excelRow.getCell(11).value = joinList(row.tags);
-    excelRow.getCell(12).value = joinList(row.images);
-    excelRow.getCell(13).value = row.isOnSite;
-    excelRow.getCell(14).value = toIso(row.lastSeenAt);
-    excelRow.getCell(15).value = toIso(row.createdAt);
-    excelRow.getCell(16).value = toIso(row.updatedAt);
+    GRABO_SKU_EXCEL_COLUMNS.forEach((col, i) => {
+      excelRow.getCell(i + 1).value = excelCellValue(row, col.key);
+    });
     applyDataRowStyle(sheet, r + 2, columnCount);
   }
 
-  for (let c = 1; c <= columnCount; c++) {
-    sheet.getColumn(c).width = 18;
-  }
+  fitColumnWidths(sheet, { columnCount });
 
   const buf = await workbook.xlsx.writeBuffer();
   return {
     buffer: Buffer.from(buf),
-    fileName: "graboskus.xlsx",
+    fileName: `grabo-catalog-${toSliceDate(new Date()).toISOString().slice(0, 10)}.xlsx`,
   };
 }

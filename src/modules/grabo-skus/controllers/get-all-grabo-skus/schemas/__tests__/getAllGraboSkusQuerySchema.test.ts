@@ -48,6 +48,7 @@ describe("getAllGraboSkusQuerySchema", () => {
       material: "Foil",
       gas: "Helium",
       language: "EN",
+      gasCapacity: "air only",
       tag: "birthday",
     });
     expect(result.success).toBe(true);
@@ -59,6 +60,7 @@ describe("getAllGraboSkusQuerySchema", () => {
     expect(result.data.material).toBe("Foil");
     expect(result.data.gas).toBe("Helium");
     expect(result.data.language).toBe("EN");
+    expect(result.data.gasCapacity).toBe("air only");
     expect(result.data.tag).toBe("birthday");
   });
 

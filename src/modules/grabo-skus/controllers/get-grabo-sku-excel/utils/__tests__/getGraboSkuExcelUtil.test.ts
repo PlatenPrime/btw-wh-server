@@ -1,5 +1,6 @@
 import ExcelJS from "exceljs";
 import { beforeEach, describe, expect, it } from "vitest";
+import { toSliceDate } from "../../../../../../utils/sliceDate.js";
 import { GraboSku } from "../../../../models/GraboSku.js";
 import { getGraboSkuExcelUtil } from "../getGraboSkuExcelUtil.js";
 
@@ -25,7 +26,8 @@ describe("getGraboSkuExcelUtil", () => {
     ]);
 
     const { buffer, fileName } = await getGraboSkuExcelUtil();
-    expect(fileName).toBe("graboskus.xlsx");
+    const ymd = toSliceDate(new Date()).toISOString().slice(0, 10);
+    expect(fileName).toBe(`grabo-catalog-${ymd}.xlsx`);
 
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(buffer as unknown as ArrayBuffer);
