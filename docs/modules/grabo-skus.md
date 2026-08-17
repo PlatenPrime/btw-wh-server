@@ -45,7 +45,7 @@
 
 ### Обход каталога
 
-Источник категорий — HTML sitemap `/en/sitemap`, только дерево Products (`.site-map li.nav900`). Каждая категория пагинируется по `nav.archive-links.pages a[rel="next"]`. Ссылка `rel="last"` на сайте Grabo может указывать не на фактическую последнюю страницу, поэтому её не используем.
+Источник категорий — HTML sitemap `/en/sitemap`, только дерево Products (`.site-map li.nav900`), плюс ручной список листингов, которых в sitemap нет (Maverick tableware: plates, napkins, banner, paper-cups). Extras мержатся после sitemap с дедупом: если URL уже есть в дереве Products, повторно не обходим. Каждая категория пагинируется по `nav.archive-links.pages a[rel="next"]`. Ссылка `rel="last"` на сайте Grabo может указывать не на фактическую последнюю страницу, поэтому её не используем.
 
 URL карточек дедуплицируются: один товар в нескольких категориях даёт одну запись.
 

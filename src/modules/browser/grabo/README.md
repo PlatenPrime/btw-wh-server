@@ -5,6 +5,7 @@
 ## Задача
 
 - из HTML sitemap взять URL категорий дерева Products;
+- добавить листинги, которых в sitemap нет (ручной список extras);
 - обойти листинги категорий с пагинацией и собрать URL карточек;
 - по URL карточки получить HTML и извлечь поля сущности GraboSku.
 
@@ -34,11 +35,13 @@
 
 **parseGraboSitemapCategoryUrls** — из HTML sitemap берёт абсолютные URL только из `.site-map li.nav900` (дерево Products). About Us, catalogues, premioloon не входят.
 
+**GRABO_EXTRA_CATEGORY_URLS / mergeGraboCategoryUrls** — ручной список листингов, которых нет в sitemap (Maverick tableware: plates, napkins, banner, paper-cups). Merge сохраняет порядок sitemap и дописывает extras без дублей.
+
 **parseGraboListingPage** — из HTML листинга категории: URL карточек (`section.archive article.allclick h2.title a`) и next page (`nav.archive-links.pages a[rel="next"]`). `rel="last"` не используется: на сайте он может указывать не на фактическую последнюю страницу.
 
 **getGraboListingProducts** — crawl одной категории через `crawlHtmlGroupListingPages` и `fetchGraboPageHtml`.
 
-**collectGraboCatalogProductUrls** — sitemap + все категории, дедуп URL карточек. Ошибка одной категории попадает в `failedCategoryUrls`, остальные категории продолжаются. Ошибка sitemap пробрасывается.
+**collectGraboCatalogProductUrls** — sitemap + extras вне sitemap + все категории, дедуп URL карточек. Ошибка одной категории попадает в `failedCategoryUrls`, остальные категории продолжаются. Ошибка sitemap пробрасывается.
 
 **fetchGraboPageHtml** — GET HTML с `konkName: grabo`. При ETIMEDOUT и родственных сетевых сбоях повторяет **тот же URL** (три попытки, паузы 8 / 20 / 45 с). HTTP 404 и прочие прикладные ошибки не ретраятся.
 

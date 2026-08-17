@@ -4,6 +4,10 @@ import { fetchGraboPageHtml } from "../fetch-grabo-page-html/fetchGraboPageHtml.
 import { getGraboListingProducts } from "../get-grabo-listing-products/getGraboListingProducts.js";
 import { parseGraboSitemapCategoryUrls } from "../parse-grabo-sitemap/parseGraboSitemapCategoryUrls.js";
 import { GRABO_SITEMAP_URL } from "../types/graboSkuData.js";
+import {
+  GRABO_EXTRA_CATEGORY_URLS,
+  mergeGraboCategoryUrls,
+} from "./graboExtraCategoryUrls.js";
 
 const log = createLogger({ module: "browser", konk: "grabo" });
 
@@ -18,6 +22,7 @@ export type CollectGraboCatalogOptions = {
   delayBetweenCategoriesMs?: number | (() => number);
   maxPages?: number;
   getHtml?: (url: string) => Promise<string>;
+  extraCategoryUrls?: readonly string[];
 };
 
 function resolveDelay(delay?: number | (() => number)): number {
@@ -28,18 +33,28 @@ function resolveDelay(delay?: number | (() => number)): number {
 }
 
 /**
- * Sitemap → категории Products → уникальные URL карточек.
+ * Sitemap → категории Products + extras вне sitemap → уникальные URL карточек.
  * Ошибка sitemap пробрасывается. Ошибка одной категории — в failedCategoryUrls, остальные идут дальше.
  */
 export async function collectGraboCatalogProductUrls(
   options?: CollectGraboCatalogOptions
 ): Promise<CollectGraboCatalogResult> {
   const getHtml = options?.getHtml ?? fetchGraboPageHtml;
+  const extraCategoryUrls =
+    options?.extraCategoryUrls ?? GRABO_EXTRA_CATEGORY_URLS;
 
   const sitemapHtml = await getHtml(GRABO_SITEMAP_URL);
-  const categoryUrls = parseGraboSitemapCategoryUrls(sitemapHtml);
+  const sitemapCategoryUrls = parseGraboSitemapCategoryUrls(sitemapHtml);
+  const categoryUrls = mergeGraboCategoryUrls(
+    sitemapCategoryUrls,
+    extraCategoryUrls
+  );
   log.info(
-    { sitemapUrl: GRABO_SITEMAP_URL, categoryCount: categoryUrls.length },
+    {
+      sitemapUrl: GRABO_SITEMAP_URL,
+      extraCategoryCount: extraCategoryUrls.length,
+      categoryCount: categoryUrls.length,
+    },
     "grabo catalog sitemap parsed"
   );
   const productUrls = new Set<string>();

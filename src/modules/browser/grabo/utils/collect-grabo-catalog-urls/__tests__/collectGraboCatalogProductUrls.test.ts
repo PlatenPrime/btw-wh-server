@@ -4,6 +4,7 @@ import { sleep } from "../../../../utils/sleep.js";
 import { getGraboListingProducts } from "../../get-grabo-listing-products/getGraboListingProducts.js";
 import { GRABO_SITEMAP_URL } from "../../types/graboSkuData.js";
 import { collectGraboCatalogProductUrls } from "../collectGraboCatalogProductUrls.js";
+import { GRABO_EXTRA_CATEGORY_URLS } from "../graboExtraCategoryUrls.js";
 
 const mockLogger = vi.hoisted(() => ({
   info: vi.fn(),
@@ -56,6 +57,7 @@ describe("collectGraboCatalogProductUrls", () => {
       delayBetweenCategoriesMs: 5,
       delayBeforeNextMs: 3,
       maxPages: 4,
+      extraCategoryUrls: [],
     });
 
     expect(fetchPageHtml).toHaveBeenCalledWith(GRABO_SITEMAP_URL, {
@@ -70,7 +72,11 @@ describe("collectGraboCatalogProductUrls", () => {
     expect(result.failedCategoryUrls).toEqual([]);
     expect(sleep).toHaveBeenCalledWith(5);
     expect(mockLogger.info).toHaveBeenCalledWith(
-      { sitemapUrl: GRABO_SITEMAP_URL, categoryCount: 2 },
+      {
+        sitemapUrl: GRABO_SITEMAP_URL,
+        extraCategoryCount: 0,
+        categoryCount: 2,
+      },
       "grabo catalog sitemap parsed"
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
@@ -93,7 +99,9 @@ describe("collectGraboCatalogProductUrls", () => {
       .mockRejectedValueOnce(new Error("boom"))
       .mockResolvedValueOnce([PRODUCT_A]);
 
-    const result = await collectGraboCatalogProductUrls();
+    const result = await collectGraboCatalogProductUrls({
+      extraCategoryUrls: [],
+    });
 
     expect(result.failedCategoryUrls).toEqual([CAT_A]);
     expect(result.productUrls).toEqual([PRODUCT_A]);
@@ -121,11 +129,83 @@ describe("collectGraboCatalogProductUrls", () => {
     const result = await collectGraboCatalogProductUrls({
       getHtml,
       delayBetweenCategoriesMs: () => 9,
+      extraCategoryUrls: [],
     });
 
     expect(getHtml).toHaveBeenCalledWith(GRABO_SITEMAP_URL);
     expect(fetchPageHtml).not.toHaveBeenCalled();
     expect(sleep).toHaveBeenCalledWith(9);
     expect(result.categoryUrls).toEqual([CAT_A, CAT_B]);
+  });
+
+  it("appends extra category urls missing from sitemap and crawls them", async () => {
+    const extraA = "https://www.grabo-balloons.com/en/plates";
+    const extraB = "https://www.grabo-balloons.com/en/napkins";
+    const extraProduct = "https://www.grabo-balloons.com/en/g3-plate";
+
+    vi.mocked(fetchPageHtml).mockResolvedValue(sitemapWithCategories([CAT_A]));
+    vi.mocked(getGraboListingProducts)
+      .mockResolvedValueOnce([PRODUCT_A])
+      .mockResolvedValueOnce([extraProduct])
+      .mockResolvedValueOnce([PRODUCT_B]);
+
+    const result = await collectGraboCatalogProductUrls({
+      extraCategoryUrls: [extraA, extraB],
+    });
+
+    expect(result.categoryUrls).toEqual([CAT_A, extraA, extraB]);
+    expect(getGraboListingProducts).toHaveBeenCalledTimes(3);
+    expect(getGraboListingProducts).toHaveBeenNthCalledWith(
+      2,
+      { groupUrl: extraA },
+      expect.anything()
+    );
+    expect(result.productUrls).toEqual([PRODUCT_A, extraProduct, PRODUCT_B]);
+    expect(mockLogger.info).toHaveBeenCalledWith(
+      {
+        sitemapUrl: GRABO_SITEMAP_URL,
+        extraCategoryCount: 2,
+        categoryCount: 3,
+      },
+      "grabo catalog sitemap parsed"
+    );
+  });
+
+  it("does not recrawl extras already present in sitemap", async () => {
+    const extraA = "https://www.grabo-balloons.com/en/plates";
+
+    vi.mocked(fetchPageHtml).mockResolvedValue(
+      sitemapWithCategories([CAT_A, extraA])
+    );
+    vi.mocked(getGraboListingProducts).mockResolvedValue([PRODUCT_A]);
+
+    const result = await collectGraboCatalogProductUrls({
+      extraCategoryUrls: [extraA],
+    });
+
+    expect(result.categoryUrls).toEqual([CAT_A, extraA]);
+    expect(getGraboListingProducts).toHaveBeenCalledTimes(2);
+    expect(getGraboListingProducts).toHaveBeenNthCalledWith(
+      1,
+      { groupUrl: CAT_A },
+      expect.anything()
+    );
+    expect(getGraboListingProducts).toHaveBeenNthCalledWith(
+      2,
+      { groupUrl: extraA },
+      expect.anything()
+    );
+  });
+
+  it("merges default extra category urls when option is omitted", async () => {
+    vi.mocked(fetchPageHtml).mockResolvedValue(sitemapWithCategories([CAT_A]));
+    vi.mocked(getGraboListingProducts).mockResolvedValue([PRODUCT_A]);
+
+    const result = await collectGraboCatalogProductUrls();
+
+    expect(result.categoryUrls).toEqual([CAT_A, ...GRABO_EXTRA_CATEGORY_URLS]);
+    expect(getGraboListingProducts).toHaveBeenCalledTimes(
+      1 + GRABO_EXTRA_CATEGORY_URLS.length
+    );
   });
 });
