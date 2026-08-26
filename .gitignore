@@ -3,3 +3,4 @@ node_modules/.cache/mongodb-memory-server
 .env
 .env.test
 coverage
+dist

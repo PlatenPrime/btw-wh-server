@@ -19,7 +19,7 @@
 | `utils/buildSkuSliceExcel` | Сборка XLSX по срезам |
 | `utils/konkProdSkuChartCore` | Ряды конкурент vs Btrade для chart-data |
 | `utils/prodDisplayTitles` | Заголовки производителей из Prod |
-| `constants/skuSliceRequestJitterMs` | Пауза между HTTP при сборе/компенсации срезов |
+| `constants/skuSliceRequestJitterMs` | Пауза между HTTP при сборе/компенсации срезов (`resolveSkuSliceRequestJitterMs`: дефолт 500–1500 мс, `air` ×2) |
 
 ## Связи
 

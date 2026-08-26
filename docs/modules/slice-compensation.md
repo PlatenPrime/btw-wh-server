@@ -20,7 +20,8 @@
 - **analog-slices / sku-slices** — целевые коллекции `AnalogSlice`, `SkuSlice` на `sliceDate = toSliceDate(new Date())`.
 - **analogs / skus** — lookup сущностей и stock-утилиты (которые вызывают **browser**).
 - **slices** — конфиг исключений и семантика `-1`.
-- **sku-reporting** — jitter между запросами (`skuSliceRequestJitterMs`).
+- **sku-reporting** — jitter между запросами (`resolveSkuSliceRequestJitterMs`: дефолт 500–1500 мс, для `air` — 1000–3000 мс).
+- **analog-slices** — пауза первичного сбора analog (`resolveAnalogSliceRequestDelayMs`: дефолт 1000 мс, для `air` — 2000 мс); compensating analog/sku используют sku jitter-резолвер по `konkName` следующего item.
 
 ## Концепции и принятые решения
 
@@ -30,7 +31,7 @@
 
 ### Параллельность и последовательность
 
-В одном cron-tick (и в ручном запуске) analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов). По каждой позиции в лог пишется start/done цикла и результат refetch (`stock`, `price`, `updated`) — одинаково для cron и ручного запуска.
+В одном cron-tick (и в ручном запуске) analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов; диапазон зависит от `konkName` следующего item, для air удвоен). По каждой позиции в лог пишется start/done цикла и результат refetch (`stock`, `price`, `updated`) — одинаково для cron и ручного запуска.
 
 ### Фильтр по конкуренту
 

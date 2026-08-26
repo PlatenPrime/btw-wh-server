@@ -8,10 +8,7 @@ import { createLogger } from "../../../logging/createLogger.js";
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-import {
-  SKU_SLICE_REQUEST_JITTER_MAX_MS,
-  SKU_SLICE_REQUEST_JITTER_MIN_MS,
-} from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
+import { resolveSkuSliceRequestJitterMs } from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import { loadSlicedSkusForKonk } from "./loadSlicedSkusForKonk.js";
 
 async function fetchSkuStockWithRetry(
@@ -55,7 +52,8 @@ async function fetchSkuStockWithRetry(
 
 /**
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
- * с паузой 500–1500 мс (jitter) — запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
+ * с паузой resolveSkuSliceRequestJitterMs(konk) (дефолт 500–1500 мс, air ×2) —
+ * запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
  */
 export type SkuSliceKonkResult = {
   saved: boolean;
@@ -127,9 +125,8 @@ export async function runSkuSliceForKonkUtil(
     }
 
     if (i < withPid.length - 1) {
-      await delay(
-        jitterMs(SKU_SLICE_REQUEST_JITTER_MIN_MS, SKU_SLICE_REQUEST_JITTER_MAX_MS)
-      );
+      const { minMs, maxMs } = resolveSkuSliceRequestJitterMs(konkName);
+      await delay(jitterMs(minMs, maxMs));
     }
   }
 

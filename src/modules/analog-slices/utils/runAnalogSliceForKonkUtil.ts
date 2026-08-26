@@ -5,10 +5,9 @@ import { AnalogSlice } from "../models/AnalogSlice.js";
 import { createLogger } from "../../../logging/createLogger.js";
 import { delay } from "../../../utils/delay.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
+import { resolveAnalogSliceRequestDelayMs } from "../constants/analogSliceRequestDelayMs.js";
 
 export { toSliceDate } from "../../../utils/sliceDate.js";
-
-const DELAY_MS = 1000;
 
 type AnalogLean = { _id: { toString(): string }; artikul?: string };
 
@@ -22,7 +21,7 @@ export type AnalogSliceKonkResult = {
 
 /**
  * Собирает срез по всем аналогам конкурента: сначала создаёт документ среза с пустым data,
- * затем по мере обработки каждого аналога (с паузой 5 сек) добавляет запись в data.
+ * затем по мере обработки каждого аналога (пауза resolveAnalogSliceRequestDelayMs) добавляет запись в data.
  * Ошибка по одному аналогу не прерывает обработку остальных.
  */
 export async function runAnalogSliceForKonkUtil(
@@ -87,7 +86,7 @@ export async function runAnalogSliceForKonkUtil(
       log.error({ artikulKey, err: msg }, "analog slice item failed");
     }
     if (i < analogs.length - 1) {
-      await delay(DELAY_MS);
+      await delay(resolveAnalogSliceRequestDelayMs(konkName));
     }
   }
 

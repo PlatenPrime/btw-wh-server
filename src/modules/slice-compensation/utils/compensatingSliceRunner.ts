@@ -1,9 +1,6 @@
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
-import {
-  SKU_SLICE_REQUEST_JITTER_MAX_MS,
-  SKU_SLICE_REQUEST_JITTER_MIN_MS,
-} from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
+import { resolveSkuSliceRequestJitterMs } from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
 import { logModuleInfo } from "../../../logging/logModuleError.js";
 
@@ -41,16 +38,22 @@ export type CompensatingSliceRefetchStats = {
   updated: number;
 };
 
+export type CompensatingSliceJitterOverride = {
+  minMs: number;
+  maxMs: number;
+};
+
 /**
  * Последовательная обработка очереди с jitter между итерациями (как при сборе SkuSlice).
+ * Пауза перед следующим item резолвится по его konkName (air — ×2),
+ * если не передан явный jitterOverride (тесты / ручной форс).
  */
 export async function runCompensatingSliceRefetchLoop(
   queue: CompensatingDataKeyWork[],
   processItem: (
     work: CompensatingDataKeyWork
   ) => Promise<CompensatingSliceRefetchStats>,
-  jitterMinMs: number = SKU_SLICE_REQUEST_JITTER_MIN_MS,
-  jitterMaxMs: number = SKU_SLICE_REQUEST_JITTER_MAX_MS
+  jitterOverride?: CompensatingSliceJitterOverride
 ): Promise<CompensatingSliceRefetchStats> {
   let refetched = 0;
   let updated = 0;
@@ -74,7 +77,10 @@ export async function runCompensatingSliceRefetchLoop(
     refetched += stats.refetched;
     updated += stats.updated;
     if (i < queue.length - 1) {
-      await delay(jitterMs(jitterMinMs, jitterMaxMs));
+      const next = queue[i + 1]!;
+      const range =
+        jitterOverride ?? resolveSkuSliceRequestJitterMs(next.konkName);
+      await delay(jitterMs(range.minMs, range.maxMs));
     }
   }
   return { refetched, updated };

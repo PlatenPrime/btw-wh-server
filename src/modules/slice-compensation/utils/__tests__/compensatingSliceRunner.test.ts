@@ -153,7 +153,7 @@ describe("runCompensatingSliceRefetchLoop", () => {
     );
   });
 
-  it("delays between items but not after the last", async () => {
+  it("delays between items but not after the last (explicit override)", async () => {
     const processItem = vi.fn().mockResolvedValue({ refetched: 0, updated: 0 });
     const queue = [
       { konkName: "a", dataKey: "1" },
@@ -161,11 +161,39 @@ describe("runCompensatingSliceRefetchLoop", () => {
       { konkName: "a", dataKey: "3" },
     ];
 
-    await runCompensatingSliceRefetchLoop(queue, processItem, 10, 20);
+    await runCompensatingSliceRefetchLoop(queue, processItem, {
+      minMs: 10,
+      maxMs: 20,
+    });
 
     expect(delay).toHaveBeenCalledTimes(2);
     expect(jitterMs).toHaveBeenCalledWith(10, 20);
     expect(vi.mocked(delay).mock.calls[0]![0]).toBe(100);
+  });
+
+  it("resolves jitter by next item konkName (air = 2x default)", async () => {
+    const processItem = vi.fn().mockResolvedValue({ refetched: 0, updated: 0 });
+    const queue = [
+      { konkName: "balun", dataKey: "1" },
+      { konkName: "air", dataKey: "2" },
+    ];
+
+    await runCompensatingSliceRefetchLoop(queue, processItem);
+
+    expect(delay).toHaveBeenCalledTimes(1);
+    expect(jitterMs).toHaveBeenCalledWith(1000, 3000);
+  });
+
+  it("resolves default jitter when next item is non-air", async () => {
+    const processItem = vi.fn().mockResolvedValue({ refetched: 0, updated: 0 });
+    const queue = [
+      { konkName: "air", dataKey: "1" },
+      { konkName: "balun", dataKey: "2" },
+    ];
+
+    await runCompensatingSliceRefetchLoop(queue, processItem);
+
+    expect(jitterMs).toHaveBeenCalledWith(500, 1500);
   });
 
   it("does not delay for single-item queue", async () => {
