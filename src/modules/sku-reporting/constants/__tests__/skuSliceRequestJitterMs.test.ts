@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS,
+  AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS,
+  AIR_SKU_SLICE_CLUSTER_SIZE,
   resolveSkuSliceRequestJitterMs,
+  shouldPauseAirSkuSliceCluster,
   SKU_SLICE_REQUEST_JITTER_BY_KONK,
   SKU_SLICE_REQUEST_JITTER_MAX_MS,
   SKU_SLICE_REQUEST_JITTER_MIN_MS,
@@ -15,11 +19,17 @@ describe("skuSliceRequestJitterMs constants", () => {
     );
   });
 
-  it("air override is 2x default", () => {
+  it("air override is 2000–5000 ms", () => {
     expect(SKU_SLICE_REQUEST_JITTER_BY_KONK.air).toEqual({
-      minMs: 1000,
-      maxMs: 3000,
+      minMs: 2000,
+      maxMs: 5000,
     });
+  });
+
+  it("air cluster pause is 10 SKUs then 20–40 s", () => {
+    expect(AIR_SKU_SLICE_CLUSTER_SIZE).toBe(10);
+    expect(AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS).toBe(20_000);
+    expect(AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS).toBe(40_000);
   });
 });
 
@@ -42,14 +52,24 @@ describe("resolveSkuSliceRequestJitterMs", () => {
     });
   });
 
-  it("returns air 2x range case-insensitively", () => {
+  it("returns air 2000–5000 range case-insensitively", () => {
     expect(resolveSkuSliceRequestJitterMs("air")).toEqual({
-      minMs: 1000,
-      maxMs: 3000,
+      minMs: 2000,
+      maxMs: 5000,
     });
     expect(resolveSkuSliceRequestJitterMs(" AIR ")).toEqual({
-      minMs: 1000,
-      maxMs: 3000,
+      minMs: 2000,
+      maxMs: 5000,
     });
+  });
+});
+
+describe("shouldPauseAirSkuSliceCluster", () => {
+  it("pauses after 10th when more remain, not after last", () => {
+    expect(shouldPauseAirSkuSliceCluster(10, 11)).toBe(true);
+    expect(shouldPauseAirSkuSliceCluster(20, 21)).toBe(true);
+    expect(shouldPauseAirSkuSliceCluster(10, 10)).toBe(false);
+    expect(shouldPauseAirSkuSliceCluster(9, 11)).toBe(false);
+    expect(shouldPauseAirSkuSliceCluster(0, 11)).toBe(false);
   });
 });

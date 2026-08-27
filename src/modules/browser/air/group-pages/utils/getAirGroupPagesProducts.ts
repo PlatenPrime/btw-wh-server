@@ -9,6 +9,7 @@ import {
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
 import { fetchPageHtml } from "../../../utils/fetchPageHtml.js";
 import { createLogger } from "../../../../../logging/createLogger.js";
+import { isOriginBlockedError } from "../../../utils/browserOriginBlockedError.js";
 import { getAirHttpProxyUrl } from "../../utils/getAirHttpProxyUrl.js";
 import { resolveAirWarmUpUrl } from "../../utils/getAirStockData.js";
 import {
@@ -136,6 +137,9 @@ export async function getAirGroupPagesProducts(
     try {
       await fetchPageHtml(warmUpUrl, listingOpts);
     } catch (warmErr) {
+      if (isOriginBlockedError(warmErr)) {
+        throw warmErr;
+      }
       airLog.warn(
         {
           context: "Air group listing warm-up failed, continue crawl",

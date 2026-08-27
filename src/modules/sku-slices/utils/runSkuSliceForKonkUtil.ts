@@ -8,7 +8,14 @@ import { createLogger } from "../../../logging/createLogger.js";
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-import { resolveSkuSliceRequestJitterMs } from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
+import {
+  AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS,
+  AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS,
+  resolveSkuSliceRequestJitterMs,
+  shouldPauseAirSkuSliceCluster,
+} from "../../sku-reporting/constants/skuSliceRequestJitterMs.js";
+import { isOriginBlockedError } from "../../browser/utils/browserOriginBlockedError.js";
+import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
 import { loadSlicedSkusForKonk } from "./loadSlicedSkusForKonk.js";
 
 async function fetchSkuStockWithRetry(
@@ -27,7 +34,7 @@ async function fetchSkuStockWithRetry(
     } catch (err) {
       const e = err as Error & { code?: string };
 
-      if (e.code === UNSUPPORTED_KONK_CODE) {
+      if (e.code === UNSUPPORTED_KONK_CODE || isOriginBlockedError(err)) {
         throw e;
       }
 
@@ -52,8 +59,10 @@ async function fetchSkuStockWithRetry(
 
 /**
  * Собирает срез по всем SKU конкурента: upsert документа, затем по каждому SKU
- * с паузой resolveSkuSliceRequestJitterMs(konk) (дефолт 500–1500 мс, air ×2) —
- * запись в data[productId]. Ошибка по одному SKU не рвёт цикл.
+ * с паузой resolveSkuSliceRequestJitterMs(konk) (дефолт 500–1500 мс, air 2000–5000)
+ * и кластерной паузой air каждые 10 SKU — запись в data[productId].
+ * ORIGIN_BLOCKED / unsupported konk обрывает цикл; хвост не пишется.
+ * Ошибка по одному SKU не рвёт цикл (кроме origin-block).
  */
 export type SkuSliceKonkResult = {
   saved: boolean;
@@ -114,8 +123,13 @@ export async function runSkuSliceForKonkUtil(
       }
     } catch (err) {
       const e = err as Error & { code?: string };
-      if (e.code === UNSUPPORTED_KONK_CODE) {
-        log.warn("unsupported konk for stock fetch, slice aborted");
+      if (e.code === UNSUPPORTED_KONK_CODE || isOriginBlockedError(err)) {
+        log.warn(
+          { productKey, err: e.message, remaining: withPid.length - i },
+          isOriginBlockedError(err)
+            ? "origin blocked, sku slice aborted"
+            : "unsupported konk for stock fetch, slice aborted"
+        );
         errors += withPid.length - i;
         break;
       }
@@ -127,6 +141,17 @@ export async function runSkuSliceForKonkUtil(
     if (i < withPid.length - 1) {
       const { minMs, maxMs } = resolveSkuSliceRequestJitterMs(konkName);
       await delay(jitterMs(minMs, maxMs));
+      if (
+        normalizeCompetitorName(konkName) === "air" &&
+        shouldPauseAirSkuSliceCluster(i + 1, withPid.length)
+      ) {
+        await delay(
+          jitterMs(
+            AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS,
+            AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS
+          )
+        );
+      }
     }
   }
 

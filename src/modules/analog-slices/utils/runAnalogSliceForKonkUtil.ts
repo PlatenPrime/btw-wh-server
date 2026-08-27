@@ -6,6 +6,7 @@ import { createLogger } from "../../../logging/createLogger.js";
 import { delay } from "../../../utils/delay.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { resolveAnalogSliceRequestDelayMs } from "../constants/analogSliceRequestDelayMs.js";
+import { isOriginBlockedError } from "../../browser/utils/browserOriginBlockedError.js";
 
 export { toSliceDate } from "../../../utils/sliceDate.js";
 
@@ -22,7 +23,8 @@ export type AnalogSliceKonkResult = {
 /**
  * Собирает срез по всем аналогам конкурента: сначала создаёт документ среза с пустым data,
  * затем по мере обработки каждого аналога (пауза resolveAnalogSliceRequestDelayMs) добавляет запись в data.
- * Ошибка по одному аналогу не прерывает обработку остальных.
+ * ORIGIN_BLOCKED обрывает цикл; хвост не пишется.
+ * Ошибка по одному аналогу не прерывает обработку остальных (кроме origin-block).
  */
 export async function runAnalogSliceForKonkUtil(
   konkName: string,
@@ -81,6 +83,18 @@ export async function runAnalogSliceForKonkUtil(
         count += 1;
       }
     } catch (err) {
+      if (isOriginBlockedError(err)) {
+        log.warn(
+          {
+            artikulKey,
+            err: err.message,
+            remaining: analogs.length - i,
+          },
+          "origin blocked, analog slice aborted"
+        );
+        errors += analogs.length - i;
+        break;
+      }
       errors += 1;
       const msg = err instanceof Error ? err.message : String(err);
       log.error({ artikulKey, err: msg }, "analog slice item failed");

@@ -11,7 +11,7 @@
 - Тело: `{ "konkName": string }`
 - Полный контракт ответов: [`docs/api/slice-compensation.md`](../api/slice-compensation.md)
 
-Список конкурентов для селекта — из существующего `GET /api/konks` (или уже закэшированного справочника на клиенте). Имя в запросе можно слать в любом регистре; бэкенд нормализует. **Air можно предлагать** — серверный scrape снова включён; client-ingestion ([air-client-sku-slices](air-client-sku-slices.md)) остаётся опциональным дозаполнением.
+Список конкурентов для селекта — из существующего `GET /api/konks` (или уже закэшированного справочника на клиенте). Имя в запросе можно слать в любом регистре; бэкенд нормализует. **Air в compensation не предлагать** (или ожидать пустую очередь `refetched/updated = 0`): Air исключён из server compensation. Хвост после ночного abort / missing — через client-ingestion ([air-client-sku-slices](air-client-sku-slices.md)).
 
 ## UX
 

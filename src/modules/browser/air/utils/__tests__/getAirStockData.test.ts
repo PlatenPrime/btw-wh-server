@@ -6,6 +6,10 @@ import {
 import { fetchPageHtml } from "../../../utils/fetchPageHtml.js";
 import { logBrowserError } from "../../../utils/browserRequest.js";
 import { logBrowserStockResult } from "../../../utils/logBrowserStockResult.js";
+import {
+  BrowserOriginBlockedError,
+  ORIGIN_BLOCKED_CODE,
+} from "../../../utils/browserOriginBlockedError.js";
 
 const mockWarn = vi.hoisted(() => vi.fn());
 
@@ -123,7 +127,7 @@ describe("getAirStockData", () => {
       });
     });
 
-    it("передаёт AIR_HTTP_PROXY_URL в fetchPageHtml", async () => {
+    it("игнорирует AIR_HTTP_PROXY_URL пока AIR_HTTP_PROXY_ENABLED=false", async () => {
       process.env.AIR_HTTP_PROXY_URL =
         "http://user:secret@77.47.252.164:50100";
       vi.mocked(fetchPageHtml).mockResolvedValue(`
@@ -138,7 +142,7 @@ describe("getAirStockData", () => {
         {
           konkName: "air",
           transport: "impit",
-          proxyUrl: "http://user:secret@77.47.252.164:50100",
+          proxyUrl: undefined,
           warmUpUrl: "https://example.com/",
           headers: {
             Referer: "https://example.com/",
@@ -248,6 +252,23 @@ describe("getAirStockData", () => {
 
       expect(result).toEqual({ stock: -1, price: -1 });
       expect(logBrowserError).toHaveBeenCalled();
+    });
+
+    it("пробрасывает ORIGIN_BLOCKED без -1/-1", async () => {
+      const blocked = new BrowserOriginBlockedError("cf 520", {
+        httpStatus: 520,
+        retryAfterSec: 60,
+      });
+      vi.mocked(fetchPageHtml).mockRejectedValue(blocked);
+
+      await expect(
+        getAirStockData("https://example.com/product/1")
+      ).rejects.toMatchObject({
+        code: ORIGIN_BLOCKED_CODE,
+        httpStatus: 520,
+      });
+      expect(logBrowserError).not.toHaveBeenCalled();
+      expect(logBrowserStockResult).not.toHaveBeenCalled();
     });
   });
 });

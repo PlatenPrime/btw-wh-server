@@ -2,7 +2,7 @@
  * Вкл.: air идёт через `AIR_HTTP_PROXY_URL`, если задан.
  * Верни `false`, когда нужен чистый egress без HTTP-прокси.
  */
-export const AIR_HTTP_PROXY_ENABLED = true;
+export const AIR_HTTP_PROXY_ENABLED = false;
 
 /**
  * URL HTTP-прокси только для запросов к air (`AIR_HTTP_PROXY_URL`).

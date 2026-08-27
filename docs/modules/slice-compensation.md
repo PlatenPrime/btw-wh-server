@@ -13,14 +13,14 @@
 | **AnalogSlice** | `stock === -1 && price === -1` | `getAnalogStockDataUtil` по `_id` аналога | если ответ не полный `-1/-1` |
 | **SkuSlice** | полный `-1/-1` **или** невалидная цена | `getSkuStockDataUtil` по `_id` SKU | если ответ не полный `-1/-1` |
 
-Пропускаются: конкуренты из [`excludedCompetitors`](slices.md), отсутствующие Analog/Sku, неподдерживаемый konk. Air участвует в server compensation; дополнительно SKU Air можно дозаполнить через client-ingestion в [sku-slices](sku-slices.md).
+Пропускаются: конкуренты из `getCompensationExcludedCompetitorSet` (union [`excludedCompetitors`](slices.md) и `compensationExcludedCompetitors`), отсутствующие Analog/Sku, неподдерживаемый konk. **Air исключён из server compensation** (и cron 10:30, и ручной POST по `konkName=air` дают пустую очередь). Дозаполнение Air SKU — только client-ingestion в [sku-slices](sku-slices.md).
 
 ## Связи между модулями
 
 - **analog-slices / sku-slices** — целевые коллекции `AnalogSlice`, `SkuSlice` на `sliceDate = toSliceDate(new Date())`.
 - **analogs / skus** — lookup сущностей и stock-утилиты (которые вызывают **browser**).
-- **slices** — конфиг исключений и семантика `-1`.
-- **sku-reporting** — jitter между запросами (`resolveSkuSliceRequestJitterMs`: дефолт 500–1500 мс, для `air` — 1000–3000 мс).
+- **slices** — конфиг исключений (cron + compensation-only) и семантика `-1`.
+- **sku-reporting** — jitter между запросами (`resolveSkuSliceRequestJitterMs`: дефолт 500–1500 мс, для `air` — 2000–5000 мс; на compensation air не попадает).
 - **analog-slices** — пауза первичного сбора analog (`resolveAnalogSliceRequestDelayMs`: дефолт 1000 мс, для `air` — 2000 мс); compensating analog/sku используют sku jitter-резолвер по `konkName` следующего item.
 
 ## Концепции и принятые решения
@@ -31,11 +31,11 @@
 
 ### Параллельность и последовательность
 
-В одном cron-tick (и в ручном запуске) analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов; диапазон зависит от `konkName` следующего item, для air удвоен). По каждой позиции в лог пишется start/done цикла и результат refetch (`stock`, `price`, `updated`) — одинаково для cron и ручного запуска.
+В одном cron-tick (и в ручном запуске) analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов; диапазон зависит от `konkName` следующего item). По каждой позиции в лог пишется start/done цикла и результат refetch (`stock`, `price`, `updated`) — одинаково для cron и ручного запуска.
 
 ### Фильтр по конкуренту
 
-Утилиты принимают опциональный `konkName`: cron вызывает без фильтра (все документы дня), HTTP — только выбранный конкурент. Исключения из `excludedCompetitors` по-прежнему дают пустую очередь.
+Утилиты принимают опциональный `konkName`: cron вызывает без фильтра (все документы дня), HTTP — только выбранный конкурент. Исключения из `getCompensationExcludedCompetitorSet` дают пустую очередь (в т.ч. `air`).
 
 ### Ручной запуск и lock
 

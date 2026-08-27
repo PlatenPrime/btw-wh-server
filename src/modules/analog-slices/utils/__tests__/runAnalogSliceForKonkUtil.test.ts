@@ -18,6 +18,7 @@ vi.mock("../../models/AnalogSlice.js", () => ({
 import { Analog } from "../../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { AnalogSlice } from "../../models/AnalogSlice.js";
+import { BrowserOriginBlockedError } from "../../../browser/utils/browserOriginBlockedError.js";
 
 describe("runAnalogSliceForKonkUtil", () => {
   const sliceDate = toSliceDate(new Date("2025-03-01T12:00:00.000Z"));
@@ -184,6 +185,51 @@ describe("runAnalogSliceForKonkUtil", () => {
       total: 1,
       invalid: 1,
       errors: 0,
+    });
+  });
+
+  it("aborts remaining analogs on ORIGIN_BLOCKED without writing the blocked key", async () => {
+    vi.mocked(Analog.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([
+          { _id: { toString: () => "id1" }, artikul: "ART-001" },
+          { _id: { toString: () => "id2" }, artikul: "ART-002" },
+          { _id: { toString: () => "id3" }, artikul: "ART-003" },
+        ]),
+      }),
+    } as any);
+    vi.mocked(getAnalogStockDataUtil).mockReset();
+    vi.mocked(getAnalogStockDataUtil)
+      .mockResolvedValueOnce({ stock: 10, price: 1 })
+      .mockRejectedValueOnce(
+        new BrowserOriginBlockedError("cf 520", { httpStatus: 520 })
+      );
+
+    vi.useFakeTimers();
+    const resultPromise = runAnalogSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01")
+    );
+    await vi.runAllTimersAsync();
+    const result = await resultPromise;
+    vi.useRealTimers();
+
+    expect(result).toEqual({
+      saved: true,
+      count: 1,
+      total: 3,
+      invalid: 0,
+      errors: 2,
+    });
+    expect(getAnalogStockDataUtil).toHaveBeenCalledTimes(2);
+    const dataSets = vi
+      .mocked(AnalogSlice.findOneAndUpdate)
+      .mock.calls.filter((c) => "$set" in (c[1] as object));
+    expect(dataSets).toHaveLength(1);
+    expect(dataSets[0]![1]).toEqual({
+      $set: {
+        "data.ART-001": { stock: 10, price: 1, artikul: "ART-001" },
+      },
     });
   });
 });

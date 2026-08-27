@@ -1,7 +1,7 @@
 import { Analog } from "../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { AnalogSlice } from "../../analog-slices/models/AnalogSlice.js";
-import { getExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
+import { getCompensationExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
 import {
   buildCompensatingDataKeyQueue,
   runCompensatingSliceRefetchLoop,
@@ -34,7 +34,7 @@ export async function runCompensatingAnalogSlices(
   sliceDate: Date,
   options?: RunCompensatingSlicesOptions
 ): Promise<{ refetched: number; updated: number }> {
-  const excluded = getExcludedCompetitorSet("analogSlices");
+  const excluded = getCompensationExcludedCompetitorSet("analogSlices");
   const filter: { date: Date; konkName?: string } = { date: sliceDate };
   if (options?.konkName) {
     filter.konkName = options.konkName;

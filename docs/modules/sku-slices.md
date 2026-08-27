@@ -20,11 +20,11 @@
 
 ## Сбор данных
 
-Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/config/excludedCompetitors` (сейчас из sku-cron исключён `yumi`). Jitter из `resolveSkuSliceRequestJitterMs` (дефолт 500–1500 мс; для `air` — 1000–3000 мс). Ключ даты — `toNextKyivSliceDate`. После завершения среза **каждого** конкурента — отдельное Telegram-сообщение в analytics chat (ночное окно 20:00–05:59 откладывает отправку до 06:00 Kyiv); список excluded — отдельным сообщением в начале.
+Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/config/excludedCompetitors` (сейчас из sku-cron исключён `yumi`; Air в primary cron остаётся). Jitter из `resolveSkuSliceRequestJitterMs` (дефолт 500–1500 мс; для `air` — 2000–5000 мс). Для Air дополнительно кластерная пауза каждые 10 SKU (20–40 с), кроме последней позиции. Cloudflare `ORIGIN_BLOCKED` (520–526) обрывает сбор: уже записанные ключи сохраняются, хвост **не** пишется как `-1` (pending видит missing). Ключ даты — `toNextKyivSliceDate`. После завершения среза **каждого** конкурента — отдельное Telegram-сообщение в analytics chat (ночное окно 20:00–05:59 откладывает отправку до 06:00 Kyiv); список excluded — отдельным сообщением в начале.
 
 ### Client-ingestion для Air
 
-Параллельный канал к server scrape: срезы Air за **сегодня** (`toSliceDate`) можно дозаполнить с клиента через ADMIN API, если серверный опрос не дал валидных данных или оператор запускает ручной прогон:
+Параллельный канал к server scrape и **основной** способ дозаполнить хвост после abort/`-1` (server compensation для Air выключена): срезы Air за **сегодня** (`toSliceDate`) через ADMIN API:
 
 1. `GET /client/air/pending` — очередь missing/`-1` среди sliced Air SKU;
 2. `PUT /client/air/sku/:skuId` — HTML first-party страницы → `readAirProductFromHtml` → атомарный `$set` только если ключ отсутствует или содержит `-1` (иначе `skipped`).

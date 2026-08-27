@@ -15,13 +15,11 @@ describe("getAirHttpProxyUrl", () => {
     }
   });
 
-  it("AIR_HTTP_PROXY_ENABLED=true — возвращает trimmed URL из env", () => {
-    expect(AIR_HTTP_PROXY_ENABLED).toBe(true);
+  it("AIR_HTTP_PROXY_ENABLED=false — всегда undefined, даже если env задан", () => {
+    expect(AIR_HTTP_PROXY_ENABLED).toBe(false);
     process.env.AIR_HTTP_PROXY_URL =
       "  http://user:secret@77.47.252.164:50100  ";
-    expect(getAirHttpProxyUrl()).toBe(
-      "http://user:secret@77.47.252.164:50100"
-    );
+    expect(getAirHttpProxyUrl()).toBeUndefined();
   });
 
   it("undefined когда env пустой или отсутствует", () => {

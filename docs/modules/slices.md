@@ -10,7 +10,7 @@
 
 | Файл | Назначение |
 |------|------------|
-| [`config/excludedCompetitors.ts`](../../src/modules/slices/config/excludedCompetitors.ts) | Списки конкурентов, исключённых из cron срезов |
+| [`config/excludedCompetitors.ts`](../../src/modules/slices/config/excludedCompetitors.ts) | Списки конкурентов: primary cron + compensation-only (`compensationExcludedCompetitors`) |
 | [`utils/enumerateSliceDates.ts`](../../src/modules/slices/utils/enumerateSliceDates.ts) | Перечисление UTC-дней в диапазоне `from…to` |
 | [`utils/isInvalidSliceStockResult.ts`](../../src/modules/slices/utils/isInvalidSliceStockResult.ts) | Правила сентинельных значений `-1` |
 | [`utils/mapSliceDocsToRangeItems.ts`](../../src/modules/slices/utils/mapSliceDocsToRangeItems.ts) | Документы срезов → `{ date, stock, price }[]` |
@@ -20,12 +20,14 @@
 
 ### Исключения конкурентов
 
-Конфиг `excludedCompetitors` задаёт per-type списки:
+Конфиг `excludedCompetitors` задаёт per-type списки для **primary cron** срезов:
 
-- `analogSlices` — пусто (Air снова в server scrape);
+- `analogSlices` — пусто (Air в ночном/дневном server scrape);
 - `skuSlices` — `yumi`.
 
-Имена нормализуются через `normalizeCompetitorName` (trim + lowercase). Cron срезов и компенсации пропускают таких конкурентов. Для Air SKU параллельно доступен client-ingestion в модуле [sku-slices](sku-slices.md) как ручной/компенсирующий канал.
+Отдельно `compensationExcludedCompetitors` + `getCompensationExcludedCompetitorSet` — union с cron-списком **только для компенсации**. Сейчас туда добавлен `air` (analog + sku): после Cloudflare 520 повторный серверный опрос бессмысленен; хвост дозаполняется через client-ingestion.
+
+Имена нормализуются через `normalizeCompetitorName` (trim + lowercase). Primary cron смотрит только `excludedCompetitors`; compensation — union.
 
 ### Контракт `-1`
 

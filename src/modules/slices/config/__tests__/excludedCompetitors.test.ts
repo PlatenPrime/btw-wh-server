@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  compensationExcludedCompetitors,
   excludedCompetitors,
+  getCompensationExcludedCompetitorSet,
   getExcludedCompetitorSet,
   normalizeCompetitorName,
 } from "../excludedCompetitors.js";
@@ -32,6 +34,34 @@ describe("getExcludedCompetitorSet", () => {
         )
       );
       expect(getExcludedCompetitorSet(sliceType)).toEqual(expected);
+    }
+  });
+});
+
+describe("getCompensationExcludedCompetitorSet", () => {
+  it("skuSlices unions yumi (cron) and air (compensation-only)", () => {
+    expect(getCompensationExcludedCompetitorSet("skuSlices")).toEqual(
+      new Set(["yumi", "air"])
+    );
+    expect(getExcludedCompetitorSet("skuSlices").has("air")).toBe(false);
+  });
+
+  it("analogSlices excludes air only from compensation", () => {
+    expect(getCompensationExcludedCompetitorSet("analogSlices")).toEqual(
+      new Set(["air"])
+    );
+    expect(getExcludedCompetitorSet("analogSlices")).toEqual(new Set());
+  });
+
+  it("reflects union of both configs", () => {
+    for (const sliceType of ["analogSlices", "skuSlices"] as const) {
+      const expected = new Set(
+        [
+          ...excludedCompetitors[sliceType],
+          ...compensationExcludedCompetitors[sliceType],
+        ].map((name) => normalizeCompetitorName(name))
+      );
+      expect(getCompensationExcludedCompetitorSet(sliceType)).toEqual(expected);
     }
   });
 });

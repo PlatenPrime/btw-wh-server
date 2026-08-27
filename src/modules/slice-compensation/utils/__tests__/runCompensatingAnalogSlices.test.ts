@@ -16,6 +16,7 @@ vi.mock("../../../analog-slices/models/AnalogSlice.js", () => ({
 }));
 vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
   getExcludedCompetitorSet: vi.fn(),
+  getCompensationExcludedCompetitorSet: vi.fn(),
   normalizeCompetitorName: vi.fn((v: string) => v.trim().toLowerCase()),
 }));
 
@@ -34,7 +35,7 @@ vi.mock("../../../../logging/logModuleError.js", () => ({
 import { Analog } from "../../../analogs/models/Analog.js";
 import { getAnalogStockDataUtil } from "../../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js";
 import { AnalogSlice } from "../../../analog-slices/models/AnalogSlice.js";
-import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
+import { getCompensationExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
 import { delay } from "../../../../utils/delay.js";
 import { runCompensatingAnalogSlices } from "../runCompensatingAnalogSlices.js";
 
@@ -43,7 +44,7 @@ describe("runCompensatingAnalogSlices", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set());
+    vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(new Set());
     vi.mocked(AnalogSlice.findOneAndUpdate).mockResolvedValue({} as never);
   });
 
@@ -70,7 +71,9 @@ describe("runCompensatingAnalogSlices", () => {
   }
 
   it("skips documents for excluded competitors", async () => {
-    vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set(["air"]));
+    vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(
+      new Set(["air"])
+    );
     mockFindLean([
       {
         konkName: "air",

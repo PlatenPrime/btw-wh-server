@@ -2,6 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getAirGroupPagesProducts } from "../getAirGroupPagesProducts.js";
 import { fetchPageHtml } from "../../../../utils/fetchPageHtml.js";
 import { sleep } from "../../../../utils/sleep.js";
+import {
+  BrowserOriginBlockedError,
+  ORIGIN_BLOCKED_CODE,
+} from "../../../../utils/browserOriginBlockedError.js";
 
 vi.mock("../../../../utils/fetchPageHtml.js");
 vi.mock("../../../../utils/sleep.js");
@@ -227,7 +231,7 @@ describe("getAirGroupPagesProducts", () => {
     expect(result[0]?.imageUrl).toBe(real);
   });
 
-  it("passes proxyUrl when AIR_HTTP_PROXY_ENABLED and env set", async () => {
+  it("не передаёт proxyUrl пока AIR_HTTP_PROXY_ENABLED=false, даже если env задан", async () => {
     process.env.AIR_HTTP_PROXY_URL =
       "http://user:secret@77.47.252.164:50100";
     const html = airPageHtml({
@@ -251,7 +255,7 @@ describe("getAirGroupPagesProducts", () => {
     expect(fetchPageHtml).toHaveBeenCalledWith(GROUP_URL, {
       konkName: "air",
       transport: "impit",
-      proxyUrl: "http://user:secret@77.47.252.164:50100",
+      proxyUrl: undefined,
       headers: {
         Referer: ORIGIN_URL,
         "Sec-Fetch-Site": "same-origin",
@@ -285,5 +289,22 @@ describe("getAirGroupPagesProducts", () => {
 
     expect(result).toHaveLength(1);
     expect(fetchPageHtml).toHaveBeenCalledWith(GROUP_URL, listingFetchOpts);
+  });
+
+  it("rethrows ORIGIN_BLOCKED on listing warm-up without crawl", async () => {
+    const blocked = new BrowserOriginBlockedError("cf 520", {
+      httpStatus: 520,
+      retryAfterSec: 60,
+    });
+    vi.mocked(fetchPageHtml).mockRejectedValue(blocked);
+
+    await expect(
+      getAirGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 1 })
+    ).rejects.toMatchObject({
+      code: ORIGIN_BLOCKED_CODE,
+      httpStatus: 520,
+    });
+    expect(fetchPageHtml).toHaveBeenCalledTimes(1);
+    expect(fetchPageHtml).toHaveBeenCalledWith(ORIGIN_URL, listingFetchOpts);
   });
 });

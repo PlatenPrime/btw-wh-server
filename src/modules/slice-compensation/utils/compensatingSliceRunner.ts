@@ -45,7 +45,7 @@ export type CompensatingSliceJitterOverride = {
 
 /**
  * Последовательная обработка очереди с jitter между итерациями (как при сборе SkuSlice).
- * Пауза перед следующим item резолвится по его konkName (air — ×2),
+ * Пауза перед следующим item резолвится по его konkName (air — 2000–5000 мс),
  * если не передан явный jitterOverride (тесты / ручной форс).
  */
 export async function runCompensatingSliceRefetchLoop(

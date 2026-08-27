@@ -19,6 +19,7 @@ vi.mock("../../../sku-slices/models/SkuSlice.js", () => ({
 }));
 vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
   getExcludedCompetitorSet: vi.fn(),
+  getCompensationExcludedCompetitorSet: vi.fn(),
   normalizeCompetitorName: vi.fn((v: string) => v.trim().toLowerCase()),
 }));
 
@@ -40,7 +41,7 @@ import {
   UNSUPPORTED_KONK_CODE,
 } from "../../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../../sku-slices/models/SkuSlice.js";
-import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
+import { getCompensationExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
 import { runCompensatingSkuSlices } from "../runCompensatingSkuSlices.js";
 
 describe("runCompensatingSkuSlices", () => {
@@ -48,7 +49,7 @@ describe("runCompensatingSkuSlices", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set());
+    vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(new Set());
     vi.mocked(SkuSlice.findOneAndUpdate).mockResolvedValue({} as never);
   });
 
@@ -75,7 +76,9 @@ describe("runCompensatingSkuSlices", () => {
   }
 
   it("skips excluded competitors", async () => {
-    vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set(["yumi"]));
+    vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(
+      new Set(["yumi"])
+    );
     mockFindLean([
       { konkName: "yumi", data: { P1: { stock: -1, price: -1 } } },
     ]);

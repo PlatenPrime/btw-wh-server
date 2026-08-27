@@ -1,5 +1,6 @@
 import { createLogger } from "../../../../logging/createLogger.js";
 import { logBrowserError } from "../../utils/browserRequest.js";
+import { isOriginBlockedError } from "../../utils/browserOriginBlockedError.js";
 import { fetchPageHtml } from "../../utils/fetchPageHtml.js";
 import { logBrowserStockResult } from "../../utils/logBrowserStockResult.js";
 import type { AirProductInfo } from "./air-product-types/airProductInfo.js";
@@ -28,11 +29,12 @@ export function resolveAirWarmUpUrl(productUrl: string): string | undefined {
  * При скидке цена берётся из .us-price-new, если .us-price-actual пуст.
  * Fetch: Impit (Chrome TLS/HTTP fingerprint + cookie jar) с origin warm-up и Referer;
  * adm.tools JS-challenge решается POST ack (`__ack` JSON / legacy `___ack`) внутри Impit;
- * опциональный HTTP-прокси.
- * HTTP ≥ 400 на product → ошибка; успешный HTML без цены/стока → warn + `-1/-1`.
+ * опциональный HTTP-прокси (сейчас выключен флагом `AIR_HTTP_PROXY_ENABLED`).
+ * HTTP ≥ 400 на product → ошибка; Cloudflare 520–526 → ORIGIN_BLOCKED (проброс);
+ * успешный HTML без цены/стока → warn + `-1/-1`.
  * @param link — URL страницы товара
  * @returns Promise с объектом { stock, price }; при негативном исходе — { stock: -1, price: -1 }
- * @throws Error при пустом/не-строковом link
+ * @throws Error при пустом/не-строковом link; BrowserOriginBlockedError при CF 520–526
  */
 export async function getAirStockData(
   link: string
@@ -79,6 +81,9 @@ export async function getAirStockData(
     });
     return parsed;
   } catch (error) {
+    if (isOriginBlockedError(error)) {
+      throw error;
+    }
     logBrowserError("Error fetching data from air product page:", error);
     return NEGATIVE_OUTCOME;
   }

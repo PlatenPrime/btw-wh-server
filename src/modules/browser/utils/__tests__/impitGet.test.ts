@@ -21,6 +21,9 @@ import {
   type ImpitCookieJar,
   type ImpitFetchInit,
 } from "../impitGet.js";
+import {
+  ORIGIN_BLOCKED_CODE,
+} from "../browserOriginBlockedError.js";
 
 function makeClient(handlers: {
   fetch: ImpitClientLike["fetch"];
@@ -207,6 +210,85 @@ describe("impitGet", () => {
     expect(html).toBe("ok");
     expect(mockWarn).toHaveBeenCalled();
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("HTTP 520 — BrowserOriginBlockedError с retryAfterSec, без обёртки", async () => {
+    setImpitFactoryForTests(() =>
+      makeClient({
+        fetch: vi.fn(async () => ({
+          status: 520,
+          statusText: "unknown",
+          headers: {
+            get: (name: string) =>
+              name.toLowerCase() === "retry-after" ? "60" : null,
+          },
+          text: async () =>
+            "<html><head><title>airballoons.com.ua | 520: Web server is returning an unknown error</title></head></html>",
+        })),
+      })
+    );
+
+    await expect(impitGet("https://airballoons.com.ua/p")).rejects.toMatchObject({
+      name: "BrowserOriginBlockedError",
+      code: ORIGIN_BLOCKED_CODE,
+      httpStatus: 520,
+      retryAfterSec: 60,
+    });
+  });
+
+  it("warm-up 520 → не идёт в target", async () => {
+    const fetch = vi.fn(async (url: string) => {
+      if (url.endsWith("/")) {
+        return {
+          status: 520,
+          headers: {
+            get: (name: string) =>
+              name.toLowerCase() === "retry-after" ? "60" : null,
+          },
+          text: async (): Promise<string> =>
+            "<html><head><title>520</title></head><body>cf</body></html>",
+        };
+      }
+      return { status: 200, text: async (): Promise<string> => "product" };
+    });
+    setImpitFactoryForTests(() => makeClient({ fetch }));
+
+    await expect(
+      impitGet("https://example.com/product/1", {
+        warmUpUrl: "https://example.com/",
+      })
+    ).rejects.toMatchObject({
+      code: ORIGIN_BLOCKED_CODE,
+      httpStatus: 520,
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith("https://example.com/", {
+      timeout: 30_000,
+    });
+  });
+
+  it("второй warm-up того же origin пропускается после успеха", async () => {
+    const fetch = vi.fn(async (url: string) => {
+      if (url.endsWith("/")) {
+        return { status: 200, text: async () => "home" };
+      }
+      return { status: 200, text: async () => "product" };
+    });
+    setImpitFactoryForTests(() => makeClient({ fetch }));
+
+    await impitGet("https://example.com/p/1", {
+      warmUpUrl: "https://example.com/",
+    });
+    await impitGet("https://example.com/p/2", {
+      warmUpUrl: "https://example.com/",
+    });
+
+    const urls = fetch.mock.calls.map((c) => c[0]);
+    expect(urls).toEqual([
+      "https://example.com/",
+      "https://example.com/p/1",
+      "https://example.com/p/2",
+    ]);
   });
 
   it("adm.tools 429 challenge → POST ___ack → retry GET 200", async () => {

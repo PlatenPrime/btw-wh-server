@@ -4,7 +4,7 @@ import {
   UNSUPPORTED_KONK_CODE,
 } from "../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../sku-slices/models/SkuSlice.js";
-import { getExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
+import { getCompensationExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
 import {
   buildCompensatingDataKeyQueue,
   runCompensatingSliceRefetchLoop,
@@ -37,7 +37,7 @@ export async function runCompensatingSkuSlices(
   sliceDate: Date,
   options?: RunCompensatingSkuSlicesOptions
 ): Promise<{ refetched: number; updated: number }> {
-  const excluded = getExcludedCompetitorSet("skuSlices");
+  const excluded = getCompensationExcludedCompetitorSet("skuSlices");
   const filter: { date: Date; konkName?: string } = { date: sliceDate };
   if (options?.konkName) {
     filter.konkName = options.konkName;

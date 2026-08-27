@@ -6,6 +6,12 @@ import {
   isAdmToolsChallengeHtml,
 } from "./adm-tools-challenge/admToolsChallenge.js";
 import { solveAdmToolsChallenge } from "./adm-tools-challenge/solveAdmToolsChallenge.js";
+import {
+  BrowserOriginBlockedError,
+  isCloudflareOriginBlockedStatus,
+  isOriginBlockedError,
+  parseRetryAfterSeconds,
+} from "./browserOriginBlockedError.js";
 import { BROWSER_REQUEST_TIMEOUT_MS } from "./browserRequest.js";
 
 const browserLog = createLogger({ module: "browser" });
@@ -76,16 +82,49 @@ let impitFactory: ImpitFactory = defaultImpitFactory;
 /** Кэш клиентов по ключу proxy (пустая строка = без proxy). */
 const clientByProxyKey = new Map<string, ImpitClientLike>();
 
+/** Origins, для которых cookie jar уже прогрет (ключ = proxy key). */
+const warmedOriginsByProxyKey = new Map<string, Set<string>>();
+
 /**
  * Подмена фабрики Impit в тестах. `null` — вернуть default и сбросить кэш.
  */
 export function setImpitFactoryForTests(factory: ImpitFactory | null): void {
   impitFactory = factory ?? defaultImpitFactory;
   clientByProxyKey.clear();
+  warmedOriginsByProxyKey.clear();
 }
 
 export function clearImpitClientCacheForTests(): void {
   clientByProxyKey.clear();
+  warmedOriginsByProxyKey.clear();
+}
+
+function originOf(url: string): string | undefined {
+  if (!URL.canParse(url)) {
+    return undefined;
+  }
+  return new URL(url).origin;
+}
+
+function isOriginWarmed(proxyKey: string, url: string): boolean {
+  const origin = originOf(url);
+  if (!origin) {
+    return false;
+  }
+  return warmedOriginsByProxyKey.get(proxyKey)?.has(origin) === true;
+}
+
+function markOriginWarmed(proxyKey: string, url: string): void {
+  const origin = originOf(url);
+  if (!origin) {
+    return;
+  }
+  let set = warmedOriginsByProxyKey.get(proxyKey);
+  if (!set) {
+    set = new Set();
+    warmedOriginsByProxyKey.set(proxyKey, set);
+  }
+  set.add(origin);
 }
 
 function resolveProxyUrl(proxyUrl: string | undefined): string | undefined {
@@ -193,9 +232,16 @@ function throwImpitHttpError(args: {
     ? ` retryAfter=${JSON.stringify(retryAfter)}`
     : "";
 
-  throw new Error(
-    `Impit GET HTTP ${args.status}${statusTail}: ${args.url}${titlePart}${snippetPart}${retryPart}`
-  );
+  const message = `Impit GET HTTP ${args.status}${statusTail}: ${args.url}${titlePart}${snippetPart}${retryPart}`;
+
+  if (isCloudflareOriginBlockedStatus(args.status)) {
+    throw new BrowserOriginBlockedError(message, {
+      httpStatus: args.status,
+      retryAfterSec: parseRetryAfterSeconds(retryAfter),
+    });
+  }
+
+  throw new Error(message);
 }
 
 async function readErrorBody(response: ImpitResponseLike): Promise<string> {
@@ -293,17 +339,22 @@ export async function impitGet(
   options?: ImpitGetOptions
 ): Promise<string> {
   const proxyUrl = resolveProxyUrl(options?.proxyUrl);
+  const proxyKey = proxyUrl ?? "";
   const client = getOrCreateClient(proxyUrl);
   const requestHeaders = options?.headers;
 
   try {
     const warmUpUrl = options?.warmUpUrl?.trim();
-    if (warmUpUrl) {
+    if (warmUpUrl && !isOriginWarmed(proxyKey, warmUpUrl)) {
       try {
         await fetchHtmlWithAdmToolsSolve(client, warmUpUrl, {
           timeout: BROWSER_REQUEST_TIMEOUT_MS,
         });
+        markOriginWarmed(proxyKey, warmUpUrl);
       } catch (warmErr) {
+        if (isOriginBlockedError(warmErr)) {
+          throw warmErr;
+        }
         browserLog.warn(
           {
             context: "Impit warm-up failed, continue to target",
@@ -319,11 +370,16 @@ export async function impitGet(
       }
     }
 
-    return await fetchHtmlWithAdmToolsSolve(client, url, {
+    const html = await fetchHtmlWithAdmToolsSolve(client, url, {
       timeout: BROWSER_REQUEST_TIMEOUT_MS,
       ...(requestHeaders ? { headers: requestHeaders } : {}),
     });
+    markOriginWarmed(proxyKey, url);
+    return html;
   } catch (err) {
+    if (isOriginBlockedError(err)) {
+      throw err;
+    }
     throw new Error(formatImpitFetchError(url, err), { cause: err });
   }
 }

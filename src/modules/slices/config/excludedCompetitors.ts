@@ -20,3 +20,23 @@ export function getExcludedCompetitorSet(sliceType: SliceType): Set<string> {
     excludedCompetitors[sliceType].map((name) => normalizeCompetitorName(name))
   );
 }
+
+/**
+ * Доп. исключения только для компенсации (основной cron срезов не смотрит сюда).
+ * Air: Cloudflare 520 — повторный серверный опрос бессмысленен; хвост через client-ingest.
+ */
+export const compensationExcludedCompetitors: ExcludedCompetitorsConfig = {
+  analogSlices: ["air"],
+  skuSlices: ["air"],
+};
+
+/** Union cron-исключений и compensation-only списка. */
+export function getCompensationExcludedCompetitorSet(
+  sliceType: SliceType
+): Set<string> {
+  const names = [
+    ...excludedCompetitors[sliceType],
+    ...compensationExcludedCompetitors[sliceType],
+  ];
+  return new Set(names.map((name) => normalizeCompetitorName(name)));
+}

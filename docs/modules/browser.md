@@ -26,11 +26,11 @@
 ## Связи между модулями
 
 - **analog-slices / analogs:** опрос остатков аналогов (air, balun, yumi, yumin, sharte).
-- **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect); для Air дополнительно доступен параллельный client-ingestion HTML как ручной/компенсирующий канал.
+- **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect); для Air — client-ingestion HTML как канал дозаполнения после abort/`-1` (server compensation для Air выключена).
 - **btrade-slices / arts / dels / defs:** остатки sharik через bulk `product_rests` (`actualQuantity` для live, `sliceQuantity` для daily btrade-slice).
 - **skugrs:** обход страниц групп для наполнения SKU (`group-products`), в т.ч. Air listing.
 - **grabo-skus:** полный обход каталога производителя Grabo (sitemap → категории → карточки) через `browser/grabo`.
-- **slice-compensation:** повторный опрос через stock-утилиты analog/sku (Air включён в server scrape).
+- **slice-compensation:** повторный опрос через stock-утилиты analog/sku; Air из compensation исключён.
 
 ## Концепции и принятые решения
 
@@ -40,11 +40,11 @@
 
 ### Air: dual-path (server + client)
 
-**Primary:** серверный scrape через `getAirStockData` → `fetchPageHtml` с transport `impit` (Chrome TLS/HTTP fingerprint + `tough-cookie` jar), origin warm-up и Referer на product GET; при ответе WAF adm.tools («Захищена сторінка», в т.ч. HTTP 200 с HTML-заглушкой) Impit сам POST’ит ack — актуальный JSON `__ack` или legacy FormData `___ack` — и повторяет GET. Опциональный `AIR_HTTP_PROXY_URL`. Публичный `GET /api/browser/air/stock`, live stock sku/analog, cron срезов и compensation используют этот путь. Парсер HTML — [`readAirProductFromHtml`](../../src/modules/browser/air/utils/air-product-page-from-html/readAirProductFromHtml.ts).
+**Primary:** серверный scrape через `getAirStockData` → `fetchPageHtml` с transport `impit` (Chrome TLS/HTTP fingerprint + `tough-cookie` jar), origin warm-up и Referer на product GET; при ответе WAF adm.tools («Захищена сторінка», в т.ч. HTTP 200 с HTML-заглушкой) Impit сам POST’ит ack — актуальный JSON `__ack` или legacy FormData `___ack` — и повторяет GET. HTTP-прокси для Air сейчас выключен (`AIR_HTTP_PROXY_ENABLED = false`): egress прямой с хоста; env `AIR_HTTP_PROXY_URL` игнорируется, пока флаг снова не включат. Cloudflare origin-error **520–526** → `ORIGIN_BLOCKED` (не глотается в `-1/-1`): warm-up с таким статусом не продолжает к product; основной SKU/analog срез обрывается, хвост не пишется. Origin warm-up на одном Impit-клиенте (тот же proxy-key) выполняется один раз на origin — повторные product GET того же origin skip’ают warm-up. Публичный `GET /api/browser/air/stock`, live stock sku/analog и cron первичных срезов используют этот путь; server compensation для Air выключена (см. [slice-compensation](slice-compensation.md)). Парсер HTML — [`readAirProductFromHtml`](../../src/modules/browser/air/utils/air-product-page-from-html/readAirProductFromHtml.ts).
 
-**Secondary:** client-ingestion в [sku-slices](sku-slices.md) — расширение/браузер открывает first-party страницу, frontend шлёт HTML на backend; тот же парсер. Канал остаётся доступным всегда для ручного/компенсирующего дозаполнения, если серверный опрос не дал валидных данных.
+**Secondary:** client-ingestion в [sku-slices](sku-slices.md) — расширение/браузер открывает first-party страницу, frontend шлёт HTML на backend; тот же парсер. Канал — основной способ дозаполнить хвост после `ORIGIN_BLOCKED` или missing/`-1`, без повторного серверного молотка.
 
-Air **group listing** (наполнение SKU) идёт через тот же Impit-путь (`fetchPageHtml` + cookie jar + adm.tools ack solver): один origin warm-up, затем страницы листинга с Referer; опциональный `AIR_HTTP_PROXY_URL`.
+Air **group listing** (наполнение SKU) идёт через тот же Impit-путь (`fetchPageHtml` + cookie jar + adm.tools ack solver): один origin warm-up, затем страницы листинга с Referer; прокси выключен тем же флагом. Warm-up с `ORIGIN_BLOCKED` прерывает crawl.
 
 ### Sharik: product_rests через HTTP-прокси
 
@@ -57,7 +57,7 @@ Air **group listing** (наполнение SKU) идёт через тот же
 Общая точка входа — [`fetchPageHtml`](../../src/modules/browser/utils/fetchPageHtml.ts):
 
 - транспорт `http` — axios (`browserGet`);
-- транспорт `impit` — HTTP-клиент с browser TLS/HTTP fingerprint (`impitGet`), cookie jar между запросами одного клиента, без Chromium; при challenge adm.tools — solver ack (`__ack` JSON / legacy `___ack` FormData) + retry;
+- транспорт `impit` — HTTP-клиент с browser TLS/HTTP fingerprint (`impitGet`), cookie jar между запросами одного клиента, без Chromium; при challenge adm.tools — solver ack (`__ack` JSON / legacy `___ack` FormData) + retry; статусы Cloudflare 520–526 → типизированный `ORIGIN_BLOCKED`;
 - транспорт `playwright` — headless Chromium (`page.goto` → HTML), lazy singleton, лимит параллелизма.
 
 Приоритет выбора транспорта: явный параметр вызова → карта env `BROWSER_TRANSPORT_BY_KONK` по `konkName` → `http`. Формат карты: пары `konk:transport` через запятую (например `air:impit,balun:http`). Невалидные значения игнорируются с предупреждением в лог. Лимит параллельных Playwright-страниц — `BROWSER_PLAYWRIGHT_CONCURRENCY` (по умолчанию 2). Режим headless — `BROWSER_PLAYWRIGHT_HEADLESS` (`true` / `false` / `shell`).
@@ -68,7 +68,7 @@ Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/
 
 ### Сентинельные значения
 
-При недоступности данных парсеры возвращают `stock: -1`, `price: -1`. Это общий контракт срезов (см. модуль [`slices`](slices.md)): `-1` означает «данных нет», компенсирующий cron пытается перезапросить такие позиции.
+При недоступности данных парсеры возвращают `stock: -1`, `price: -1`. Это общий контракт срезов (см. модуль [`slices`](slices.md)): `-1` означает «данных нет». Компенсирующий cron пытается перезапросить такие позиции у конкурентов, не исключённых из compensation (Air — нет; хвост через client-ingest). Cloudflare `ORIGIN_BLOCKED` при сборе среза не превращается в массовые `-1` по хвосту — цикл обрывается.
 
 ### Shared utils
 
