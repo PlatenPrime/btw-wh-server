@@ -95,6 +95,11 @@ export function setImpitFactoryForTests(factory: ImpitFactory | null): void {
 }
 
 export function clearImpitClientCacheForTests(): void {
+  resetImpitClientCache();
+}
+
+/** Сброс кэша Impit-клиентов и warmed origins (между чанками air slice). */
+export function resetImpitClientCache(): void {
   clientByProxyKey.clear();
   warmedOriginsByProxyKey.clear();
 }

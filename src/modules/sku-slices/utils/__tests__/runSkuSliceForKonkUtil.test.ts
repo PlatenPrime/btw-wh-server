@@ -22,7 +22,11 @@ vi.mock(
 vi.mock("../../models/SkuSlice.js", () => ({
   SkuSlice: {
     findOneAndUpdate: vi.fn(),
+    findOne: vi.fn(),
   },
+}));
+vi.mock("../../../browser/utils/impitGet.js", () => ({
+  resetImpitClientCache: vi.fn(),
 }));
 vi.mock("../../../../utils/delay.js", () => ({
   delay: vi.fn().mockResolvedValue(undefined),
@@ -36,16 +40,34 @@ import { Skugr } from "../../../skugrs/models/Skugr.js";
 import { getSkuStockDataUtil } from "../../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSlice } from "../../models/SkuSlice.js";
 import { delay } from "../../../../utils/delay.js";
+import { resetImpitClientCache } from "../../../browser/utils/impitGet.js";
+import { AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS } from "../../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import {
   BrowserOriginBlockedError,
   ORIGIN_BLOCKED_CODE,
 } from "../../../browser/utils/browserOriginBlockedError.js";
+
+function mockAirSkus(count: number) {
+  return Array.from({ length: count }, (_, i) => ({
+    _id: { toString: () => `id${i + 1}` },
+    productId: `air-${i + 1}`,
+  }));
+}
+
+function mockSliceFindOne(data: Record<string, unknown> = {}) {
+  vi.mocked(SkuSlice.findOne).mockReturnValue({
+    select: vi.fn().mockReturnValue({
+      lean: vi.fn().mockResolvedValue({ data }),
+    }),
+  } as any);
+}
 
 describe("runSkuSliceForKonkUtil", () => {
   const sliceDate = toSliceDate(new Date("2025-03-01T12:00:00.000Z"));
 
   beforeEach(() => {
     vi.mocked(SkuSlice.findOneAndUpdate).mockResolvedValue({} as any);
+    mockSliceFindOne({});
     vi.mocked(Skugr.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue([
@@ -326,5 +348,106 @@ describe("runSkuSliceForKonkUtil", () => {
     expect(delayMs.filter((ms) => ms === 20_000)).toHaveLength(1);
     expect(delayMs[9]).toBe(2000);
     expect(delayMs[10]).toBe(20_000);
+  });
+
+  it("air: 2400 SKUs → two chunks, inter-chunk pause + resetImpit", async () => {
+    const skus = mockAirSkus(2400);
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue(skus),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 1, price: 1 });
+    vi.mocked(delay).mockClear();
+    vi.mocked(resetImpitClientCache).mockClear();
+
+    const result = await runSkuSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01T12:00:00.000Z")
+    );
+
+    expect(result).toEqual({
+      saved: true,
+      count: 2400,
+      total: 2400,
+      invalid: 0,
+      errors: 0,
+    });
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(2400);
+    expect(resetImpitClientCache).toHaveBeenCalledTimes(1);
+    const interChunkPauses = vi
+      .mocked(delay)
+      .mock.calls.filter((c) => c[0] === AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS);
+    expect(interChunkPauses).toHaveLength(1);
+  });
+
+  it("air: valid keys in data skip fetch quota", async () => {
+    const skus = mockAirSkus(1700);
+    const prefilled: Record<string, { stock: number; price: number }> = {};
+    for (let i = 1; i <= 500; i++) {
+      prefilled[`air-${i}`] = { stock: 10, price: 100 };
+    }
+    mockSliceFindOne(prefilled);
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue(skus),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 1, price: 1 });
+
+    const result = await runSkuSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01T12:00:00.000Z")
+    );
+
+    expect(result.count).toBe(1200);
+    expect(result.errors).toBe(0);
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(1200);
+  });
+
+  it("air: proactive chunk stop at 1200 does not add errors", async () => {
+    const skus = mockAirSkus(1300);
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue(skus),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 1, price: 1 });
+
+    const result = await runSkuSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01T12:00:00.000Z")
+    );
+
+    expect(result).toEqual({
+      saved: true,
+      count: 1300,
+      total: 1300,
+      invalid: 0,
+      errors: 0,
+    });
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(1300);
+    expect(resetImpitClientCache).toHaveBeenCalledTimes(1);
+  });
+
+  it("balun: no chunk loop or resetImpit", async () => {
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([
+          { _id: { toString: () => "id1" }, productId: "balun-1" },
+        ]),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 1, price: 1 });
+    vi.mocked(resetImpitClientCache).mockClear();
+
+    await runSkuSliceForKonkUtil("balun", new Date("2025-03-01T12:00:00.000Z"));
+
+    expect(resetImpitClientCache).not.toHaveBeenCalled();
+    expect(SkuSlice.findOne).not.toHaveBeenCalled();
   });
 });

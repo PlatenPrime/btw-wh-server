@@ -27,6 +27,24 @@ export const AIR_SKU_SLICE_CLUSTER_SIZE = 10;
 export const AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS = 20_000;
 export const AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS = 40_000;
 
+/** Max HTTP fetch на чанк air primary SKU-среза (запас до CF ~1226). */
+export const AIR_SKU_SLICE_CHUNK_MAX_FETCHES = 1200;
+
+/** Пауза между чанками air (45–60 мин). */
+export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS = 45 * 60 * 1000;
+export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS = 60 * 60 * 1000;
+
+export function isAirSkuSliceChunkKonk(konkName: string): boolean {
+  return normalizeCompetitorName(konkName) === "air";
+}
+
+export function shouldEndAirSkuSliceChunk(
+  fetchesInChunk: number,
+  maxFetches: number = AIR_SKU_SLICE_CHUNK_MAX_FETCHES
+): boolean {
+  return fetchesInChunk >= maxFetches;
+}
+
 /**
  * Пауза после 10-го, 20-го, … SKU, но не после последнего.
  * @param completedCount сколько уже обработано (1-based)

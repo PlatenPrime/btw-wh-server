@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  AIR_SKU_SLICE_CHUNK_MAX_FETCHES,
+  AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS,
+  AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS,
   AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS,
   AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS,
   AIR_SKU_SLICE_CLUSTER_SIZE,
+  isAirSkuSliceChunkKonk,
   resolveSkuSliceRequestJitterMs,
+  shouldEndAirSkuSliceChunk,
   shouldPauseAirSkuSliceCluster,
   SKU_SLICE_REQUEST_JITTER_BY_KONK,
   SKU_SLICE_REQUEST_JITTER_MAX_MS,
@@ -30,6 +35,12 @@ describe("skuSliceRequestJitterMs constants", () => {
     expect(AIR_SKU_SLICE_CLUSTER_SIZE).toBe(10);
     expect(AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS).toBe(20_000);
     expect(AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS).toBe(40_000);
+  });
+
+  it("air chunk max fetches is 1200 with 45–60 min inter-chunk pause", () => {
+    expect(AIR_SKU_SLICE_CHUNK_MAX_FETCHES).toBe(1200);
+    expect(AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS).toBe(45 * 60 * 1000);
+    expect(AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS).toBe(60 * 60 * 1000);
   });
 });
 
@@ -71,5 +82,19 @@ describe("shouldPauseAirSkuSliceCluster", () => {
     expect(shouldPauseAirSkuSliceCluster(10, 10)).toBe(false);
     expect(shouldPauseAirSkuSliceCluster(9, 11)).toBe(false);
     expect(shouldPauseAirSkuSliceCluster(0, 11)).toBe(false);
+  });
+});
+
+describe("air chunk helpers", () => {
+  it("isAirSkuSliceChunkKonk is case-insensitive", () => {
+    expect(isAirSkuSliceChunkKonk("air")).toBe(true);
+    expect(isAirSkuSliceChunkKonk(" AIR ")).toBe(true);
+    expect(isAirSkuSliceChunkKonk("balun")).toBe(false);
+  });
+
+  it("shouldEndAirSkuSliceChunk at 1200", () => {
+    expect(shouldEndAirSkuSliceChunk(1199)).toBe(false);
+    expect(shouldEndAirSkuSliceChunk(1200)).toBe(true);
+    expect(shouldEndAirSkuSliceChunk(1201)).toBe(true);
   });
 });

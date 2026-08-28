@@ -15,6 +15,7 @@ import {
   clearImpitClientCacheForTests,
   formatImpitFetchError,
   impitGet,
+  resetImpitClientCache,
   setImpitFactoryForTests,
   summarizeImpitErrorBody,
   type ImpitClientLike,
@@ -82,6 +83,24 @@ describe("impitGet", () => {
     expect(fetch).toHaveBeenCalledWith("https://example.com/p", {
       timeout: 30_000,
     });
+  });
+
+  it("resetImpitClientCache создаёт новый клиент после сброса", async () => {
+    const factory = vi.fn(() =>
+      makeClient({
+        fetch: vi.fn(async () => ({
+          status: 200,
+          text: async () => "a",
+        })),
+      })
+    );
+    setImpitFactoryForTests(factory);
+
+    await impitGet("https://a");
+    resetImpitClientCache();
+    await impitGet("https://b");
+
+    expect(factory).toHaveBeenCalledTimes(2);
   });
 
   it("передаёт cookieJar и proxyUrl в фабрику и кэширует клиент", async () => {
