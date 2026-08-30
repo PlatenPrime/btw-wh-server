@@ -37,6 +37,36 @@ describe("formatKonkSliceStats", () => {
     ).toBe("air: ✅12 / ❌1 / ⚠️2");
   });
 
+  it("formats abort reason with remaining errors", () => {
+    expect(
+      formatKonkSliceLine({
+        konkName: "air",
+        count: 0,
+        errors: 5283,
+        invalid: 0,
+        total: 5283,
+        abortReason: "origin_blocked",
+      })
+    ).toBe(
+      "air: ✅0 / ❌5283 / ⚠️0 — abort ORIGIN_BLOCKED remaining 5283"
+    );
+  });
+
+  it("formats consecutive_invalid abort", () => {
+    expect(
+      formatKonkSliceLine({
+        konkName: "air",
+        count: 0,
+        errors: 5,
+        invalid: 15,
+        total: 20,
+        abortReason: "consecutive_invalid",
+      })
+    ).toBe(
+      "air: ✅0 / ❌5 / ⚠️15 — abort CONSECUTIVE_INVALID remaining 5"
+    );
+  });
+
   it("formats multiple competitors", () => {
     expect(
       formatKonkSliceReportLines([

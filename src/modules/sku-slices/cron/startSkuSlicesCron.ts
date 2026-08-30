@@ -68,6 +68,7 @@ export function startSkuSlicesCron(): CronJob {
               errors: r.errors,
               invalid: r.invalid,
               total: r.total,
+              ...(r.abortReason ? { abortReason: r.abortReason } : {}),
             };
             await sendCronAnalyticsReport(formatSkuKonkSliceReport(stats));
             return stats;

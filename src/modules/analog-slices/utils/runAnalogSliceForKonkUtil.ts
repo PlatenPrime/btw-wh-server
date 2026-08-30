@@ -84,11 +84,14 @@ export async function runAnalogSliceForKonkUtil(
       }
     } catch (err) {
       if (isOriginBlockedError(err)) {
-        log.warn(
+        log.error(
           {
             artikulKey,
             err: err.message,
             remaining: analogs.length - i,
+            count,
+            invalid,
+            errors,
           },
           "origin blocked, analog slice aborted"
         );

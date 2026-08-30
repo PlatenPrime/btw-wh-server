@@ -41,7 +41,7 @@ import { getSkuStockDataUtil } from "../../../skus/utils/getSkuStockDataUtil.js"
 import { SkuSlice } from "../../models/SkuSlice.js";
 import { delay } from "../../../../utils/delay.js";
 import { resetImpitClientCache } from "../../../browser/utils/impitGet.js";
-import { AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS } from "../../../sku-reporting/constants/skuSliceRequestJitterMs.js";
+import { AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS, AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS } from "../../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import {
   BrowserOriginBlockedError,
   ORIGIN_BLOCKED_CODE,
@@ -311,6 +311,7 @@ describe("runSkuSliceForKonkUtil", () => {
       total: 3,
       invalid: 0,
       errors: 2,
+      abortReason: "origin_blocked",
     });
     expect(getSkuStockDataUtil).toHaveBeenCalledTimes(2);
     const dataSets = vi
@@ -350,8 +351,37 @@ describe("runSkuSliceForKonkUtil", () => {
     expect(delayMs[10]).toBe(20_000);
   });
 
-  it("air: 2400 SKUs → two chunks, inter-chunk pause + resetImpit", async () => {
-    const skus = mockAirSkus(2400);
+  it("adds air block pause after every 100 SKUs (not stacked with cluster)", async () => {
+    const skus = mockAirSkus(101);
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue(skus),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 1, price: 1 });
+    vi.mocked(delay).mockClear();
+
+    const result = await runSkuSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01T12:00:00.000Z")
+    );
+
+    expect(result.count).toBe(101);
+    const delayMs = vi.mocked(delay).mock.calls.map((c) => c[0]);
+    expect(delayMs.filter((ms) => ms === AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS)).toHaveLength(
+      1
+    );
+    // На 100 — только block, без cluster 20s в тот же момент
+    const idxAfter100Jitter = delayMs.findIndex(
+      (ms, i) => ms === AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS && i > 0
+    );
+    expect(idxAfter100Jitter).toBeGreaterThan(0);
+    expect(delayMs[idxAfter100Jitter - 1]).toBe(2000);
+  });
+
+  it("air: 2000 SKUs → two chunks, inter-chunk pause + resetImpit, no jitter on chunk boundary", async () => {
+    const skus = mockAirSkus(2000);
     vi.mocked(Sku.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue(skus),
@@ -369,12 +399,12 @@ describe("runSkuSliceForKonkUtil", () => {
 
     expect(result).toEqual({
       saved: true,
-      count: 2400,
-      total: 2400,
+      count: 2000,
+      total: 2000,
       invalid: 0,
       errors: 0,
     });
-    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(2400);
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(2000);
     expect(resetImpitClientCache).toHaveBeenCalledTimes(1);
     const interChunkPauses = vi
       .mocked(delay)
@@ -383,7 +413,7 @@ describe("runSkuSliceForKonkUtil", () => {
   });
 
   it("air: valid keys in data skip fetch quota", async () => {
-    const skus = mockAirSkus(1700);
+    const skus = mockAirSkus(1500);
     const prefilled: Record<string, { stock: number; price: number }> = {};
     for (let i = 1; i <= 500; i++) {
       prefilled[`air-${i}`] = { stock: 10, price: 100 };
@@ -402,13 +432,13 @@ describe("runSkuSliceForKonkUtil", () => {
       new Date("2025-03-01T12:00:00.000Z")
     );
 
-    expect(result.count).toBe(1200);
+    expect(result.count).toBe(1000);
     expect(result.errors).toBe(0);
-    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(1200);
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(1000);
   });
 
-  it("air: proactive chunk stop at 1200 does not add errors", async () => {
-    const skus = mockAirSkus(1300);
+  it("air: proactive chunk stop at 1000 does not add errors", async () => {
+    const skus = mockAirSkus(1100);
     vi.mocked(Sku.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue(skus),
@@ -424,13 +454,65 @@ describe("runSkuSliceForKonkUtil", () => {
 
     expect(result).toEqual({
       saved: true,
-      count: 1300,
-      total: 1300,
+      count: 1100,
+      total: 1100,
       invalid: 0,
       errors: 0,
     });
-    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(1300);
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(1100);
     expect(resetImpitClientCache).toHaveBeenCalledTimes(1);
+  });
+
+  it("air: aborts after 15 consecutive invalid", async () => {
+    const skus = mockAirSkus(20);
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue(skus),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: -1, price: -1 });
+
+    const result = await runSkuSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01T12:00:00.000Z")
+    );
+
+    expect(result).toEqual({
+      saved: true,
+      count: 0,
+      total: 20,
+      invalid: 15,
+      errors: 5,
+      abortReason: "consecutive_invalid",
+    });
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(15);
+  });
+
+  it("air: 14 consecutive invalid then success does not abort", async () => {
+    const skus = mockAirSkus(16);
+    vi.mocked(Sku.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue(skus),
+      }),
+    } as any);
+    vi.mocked(getSkuStockDataUtil).mockReset();
+    const mock = vi.mocked(getSkuStockDataUtil);
+    for (let i = 0; i < 14; i++) {
+      mock.mockResolvedValueOnce({ stock: -1, price: -1 });
+    }
+    mock.mockResolvedValue({ stock: 1, price: 1 });
+
+    const result = await runSkuSliceForKonkUtil(
+      "air",
+      new Date("2025-03-01T12:00:00.000Z")
+    );
+
+    expect(result.abortReason).toBeUndefined();
+    expect(result.invalid).toBe(14);
+    expect(result.count).toBe(2);
+    expect(result.errors).toBe(0);
+    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(16);
   });
 
   it("balun: no chunk loop or resetImpit", async () => {

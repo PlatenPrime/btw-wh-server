@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
 import {
+  AIR_SKU_SLICE_BLOCK_PAUSE_MAX_MS,
+  AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS,
+  AIR_SKU_SLICE_BLOCK_SIZE,
   AIR_SKU_SLICE_CHUNK_MAX_FETCHES,
+  AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT,
   AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS,
   AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS,
   AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS,
   AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS,
   AIR_SKU_SLICE_CLUSTER_SIZE,
   isAirSkuSliceChunkKonk,
+  resolveAirSkuSlicePauseKind,
   resolveSkuSliceRequestJitterMs,
   shouldEndAirSkuSliceChunk,
   shouldPauseAirSkuSliceCluster,
@@ -37,10 +42,20 @@ describe("skuSliceRequestJitterMs constants", () => {
     expect(AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS).toBe(40_000);
   });
 
-  it("air chunk max fetches is 1200 with 45–60 min inter-chunk pause", () => {
-    expect(AIR_SKU_SLICE_CHUNK_MAX_FETCHES).toBe(1200);
+  it("air block pause is 100 SKUs then 4–6 min", () => {
+    expect(AIR_SKU_SLICE_BLOCK_SIZE).toBe(100);
+    expect(AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS).toBe(4 * 60 * 1000);
+    expect(AIR_SKU_SLICE_BLOCK_PAUSE_MAX_MS).toBe(6 * 60 * 1000);
+  });
+
+  it("air chunk max fetches is 1000 with 45–60 min inter-chunk pause", () => {
+    expect(AIR_SKU_SLICE_CHUNK_MAX_FETCHES).toBe(1000);
     expect(AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS).toBe(45 * 60 * 1000);
     expect(AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS).toBe(60 * 60 * 1000);
+  });
+
+  it("consecutive invalid abort threshold is 15", () => {
+    expect(AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT).toBe(15);
   });
 });
 
@@ -85,6 +100,38 @@ describe("shouldPauseAirSkuSliceCluster", () => {
   });
 });
 
+describe("resolveAirSkuSlicePauseKind", () => {
+  it("returns none for last or zero", () => {
+    expect(resolveAirSkuSlicePauseKind(10, true)).toBe("none");
+    expect(resolveAirSkuSlicePauseKind(0, false)).toBe("none");
+  });
+
+  it("returns cluster after 10, not 100/1000", () => {
+    expect(resolveAirSkuSlicePauseKind(10, false)).toBe("cluster");
+    expect(resolveAirSkuSlicePauseKind(20, false)).toBe("cluster");
+    expect(resolveAirSkuSlicePauseKind(90, false)).toBe("cluster");
+  });
+
+  it("returns block after 100, not stacked with cluster", () => {
+    expect(resolveAirSkuSlicePauseKind(100, false)).toBe("block");
+    expect(resolveAirSkuSlicePauseKind(200, false)).toBe("block");
+    expect(resolveAirSkuSlicePauseKind(900, false)).toBe("block");
+  });
+
+  it("returns none on chunk boundary 1000 (inter-chunk owns pause)", () => {
+    expect(resolveAirSkuSlicePauseKind(1000, false)).toBe("none");
+    expect(resolveAirSkuSlicePauseKind(2000, false)).toBe("none");
+  });
+
+  it("returns none between pause boundaries", () => {
+    expect(resolveAirSkuSlicePauseKind(1, false)).toBe("none");
+    expect(resolveAirSkuSlicePauseKind(9, false)).toBe("none");
+    expect(resolveAirSkuSlicePauseKind(11, false)).toBe("none");
+    expect(resolveAirSkuSlicePauseKind(99, false)).toBe("none");
+    expect(resolveAirSkuSlicePauseKind(101, false)).toBe("none");
+  });
+});
+
 describe("air chunk helpers", () => {
   it("isAirSkuSliceChunkKonk is case-insensitive", () => {
     expect(isAirSkuSliceChunkKonk("air")).toBe(true);
@@ -92,9 +139,9 @@ describe("air chunk helpers", () => {
     expect(isAirSkuSliceChunkKonk("balun")).toBe(false);
   });
 
-  it("shouldEndAirSkuSliceChunk at 1200", () => {
-    expect(shouldEndAirSkuSliceChunk(1199)).toBe(false);
-    expect(shouldEndAirSkuSliceChunk(1200)).toBe(true);
-    expect(shouldEndAirSkuSliceChunk(1201)).toBe(true);
+  it("shouldEndAirSkuSliceChunk at 1000", () => {
+    expect(shouldEndAirSkuSliceChunk(999)).toBe(false);
+    expect(shouldEndAirSkuSliceChunk(1000)).toBe(true);
+    expect(shouldEndAirSkuSliceChunk(1001)).toBe(true);
   });
 });
