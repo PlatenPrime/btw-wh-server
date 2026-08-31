@@ -1,3 +1,4 @@
+import { resolveScrapeProfile } from "../../slices/config/competitorScrapeProfiles.js";
 import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
 
 /** Дефолтная пауза между запросами при сборе/компенсации SKU-срезов. */
@@ -11,7 +12,7 @@ export type SkuSliceRequestJitterRange = {
 
 /**
  * Per-konk override поверх дефолта (ключ — нормализованное имя).
- * Air: 2000–5000 мс — Cloudflare 520 при плотном egress.
+ * Источник правды — competitorScrapeProfiles (runKind skuSlice).
  */
 export const SKU_SLICE_REQUEST_JITTER_BY_KONK: Readonly<
   Record<string, SkuSliceRequestJitterRange>
@@ -22,28 +23,35 @@ export const SKU_SLICE_REQUEST_JITTER_BY_KONK: Readonly<
   },
 };
 
+const airSkuProfile = resolveScrapeProfile("air", "skuSlice");
+
 /** Кластерная пауза только для основного Air SKU-среза (каждые 10 fetch). */
-export const AIR_SKU_SLICE_CLUSTER_SIZE = 10;
-export const AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS = 20_000;
-export const AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS = 40_000;
+export const AIR_SKU_SLICE_CLUSTER_SIZE = airSkuProfile.cluster!.every;
+export const AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS =
+  airSkuProfile.cluster!.pauseMinMs;
+export const AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS =
+  airSkuProfile.cluster!.pauseMaxMs;
 
 /** Блочная пауза Air (каждые 100 fetch, не на границе чанка). */
-export const AIR_SKU_SLICE_BLOCK_SIZE = 100;
-export const AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS = 4 * 60 * 1000;
-export const AIR_SKU_SLICE_BLOCK_PAUSE_MAX_MS = 6 * 60 * 1000;
+export const AIR_SKU_SLICE_BLOCK_SIZE = airSkuProfile.block!.every;
+export const AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS = airSkuProfile.block!.pauseMinMs;
+export const AIR_SKU_SLICE_BLOCK_PAUSE_MAX_MS = airSkuProfile.block!.pauseMaxMs;
 
 /** Max HTTP fetch на чанк air primary SKU-среза. */
-export const AIR_SKU_SLICE_CHUNK_MAX_FETCHES = 1000;
+export const AIR_SKU_SLICE_CHUNK_MAX_FETCHES = airSkuProfile.chunk!.maxFetches;
 
 /** Пауза между чанками air (45–60 мин). */
-export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS = 45 * 60 * 1000;
-export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS = 60 * 60 * 1000;
+export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS =
+  airSkuProfile.chunk!.interChunkPauseMinMs;
+export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS =
+  airSkuProfile.chunk!.interChunkPauseMaxMs;
 
 /**
  * Сколько подряд soft-invalid (`-1` / null) до abort air-run
  * (тихий WAF/бан без CF 520).
  */
-export const AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT = 15;
+export const AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT =
+  airSkuProfile.consecutiveInvalidAbort!;
 
 export type AirSkuSlicePauseKind = "none" | "cluster" | "block";
 
@@ -108,13 +116,9 @@ export function resolveAirSkuSlicePauseKind(
 export function resolveSkuSliceRequestJitterMs(
   konkName: string
 ): SkuSliceRequestJitterRange {
-  const key = normalizeCompetitorName(konkName);
-  const override = SKU_SLICE_REQUEST_JITTER_BY_KONK[key];
-  if (override) {
-    return { minMs: override.minMs, maxMs: override.maxMs };
-  }
+  const profile = resolveScrapeProfile(konkName, "skuSlice");
   return {
-    minMs: SKU_SLICE_REQUEST_JITTER_MIN_MS,
-    maxMs: SKU_SLICE_REQUEST_JITTER_MAX_MS,
+    minMs: profile.requestJitter.minMs,
+    maxMs: profile.requestJitter.maxMs,
   };
 }

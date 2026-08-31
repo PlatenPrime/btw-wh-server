@@ -28,7 +28,9 @@ import { isOriginBlockedError } from "../../browser/utils/browserOriginBlockedEr
 import { resetImpitClientCache } from "../../browser/utils/impitGet.js";
 import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
 import { loadSlicedSkusForKonk } from "./loadSlicedSkusForKonk.js";
+import { filterSlicedSkusForRotation } from "./filterSlicedSkusForRotation.js";
 import { isSkuSliceDataKeyFilled } from "./isSkuSliceDataKeyFilled.js";
+import type { ISkuSliceRotationMeta } from "../models/SkuSlice.js";
 
 type SliceCounters = {
   count: number;
@@ -468,6 +470,8 @@ export type SkuSliceKonkResult = {
   saved: boolean;
   count: number;
   total: number;
+  dueTotal?: number;
+  rotationMeta?: ISkuSliceRotationMeta;
   invalid: number;
   errors: number;
   abortReason?: SkuSliceAbortReason;
@@ -477,6 +481,7 @@ export async function runSkuSliceForKonkUtil(
   konkName: string,
   date: Date
 ): Promise<SkuSliceKonkResult> {
+  const log = createLogger({ module: "sku-slices", konkName });
   const sliceDate = toSliceDate(date);
   const skus = await loadSlicedSkusForKonk(konkName, "_id productId");
 
@@ -488,10 +493,38 @@ export async function runSkuSliceForKonkUtil(
 
   const counters: SliceCounters = { count: 0, invalid: 0, errors: 0 };
   const total = skus.length;
-  const withPid = skus.filter(
+  const withPidAll = skus.filter(
     (s) => (s.productId ?? "").trim() !== ""
   ) as SlicedSkuRow[];
-  counters.invalid += total - withPid.length;
+  counters.invalid += total - withPidAll.length;
+
+  const { skus: withPid, rotation } = filterSlicedSkusForRotation(
+    withPidAll,
+    sliceDate,
+    konkName
+  );
+
+  let rotationMeta: ISkuSliceRotationMeta | undefined;
+  if (rotation) {
+    rotationMeta = {
+      cycleDays: rotation.cycleDays,
+      dayIndex: rotation.dayIndex,
+      dueCount: withPid.length,
+    };
+    await SkuSlice.findOneAndUpdate(
+      { konkName, date: sliceDate },
+      { $set: { rotationMeta } }
+    );
+    log.info(
+      {
+        rotationDayIndex: rotation.dayIndex,
+        cycleDays: rotation.cycleDays,
+        dueCount: withPid.length,
+        totalSliced: withPidAll.length,
+      },
+      "sku slice rotation filter applied"
+    );
+  }
 
   let abortReason: SkuSliceAbortReason | null = null;
 
@@ -518,6 +551,10 @@ export async function runSkuSliceForKonkUtil(
     invalid: counters.invalid,
     errors: counters.errors,
   };
+  if (rotationMeta) {
+    result.dueTotal = rotationMeta.dueCount;
+    result.rotationMeta = rotationMeta;
+  }
   if (abortReason !== null) {
     result.abortReason = abortReason;
   }

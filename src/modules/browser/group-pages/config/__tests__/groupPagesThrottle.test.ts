@@ -3,6 +3,7 @@ import {
   GROUP_PAGES_THROTTLE_MAX_DELAY_MS,
   GROUP_PAGES_THROTTLE_MIN_DELAY_MS,
   getGroupPagesThrottleDelayMs,
+  getGroupPagesThrottleDelayMsForKonk,
 } from "../groupPagesThrottle.js";
 
 describe("groupPagesThrottle", () => {
@@ -16,6 +17,11 @@ describe("groupPagesThrottle", () => {
     expect(getGroupPagesThrottleDelayMs()).toBe(
       GROUP_PAGES_THROTTLE_MAX_DELAY_MS
     );
+  });
+
+  it("returns air-specific slower page delay", () => {
+    vi.spyOn(Math, "random").mockReturnValue(0);
+    expect(getGroupPagesThrottleDelayMsForKonk("air")).toBe(2000);
   });
 
   it("throws on invalid delay range", () => {

@@ -47,6 +47,10 @@
 
 Составной индекс `{ konkName: 1, prodName: 1 }` ускоряет выборки по конкуренту и производителю.
 
+### Weekly cron refill (вс 22:00 Kyiv)
+
+`startFillSkugrSkusCron` последовательно обходит все группы. Throttle из `slices/config/competitorScrapeProfiles` (`runKind: groupPagesFill` / `groupPagesPage`): между страницами листинга — jitter (дефолт 800–1600 ms; **air** 2000–4000 ms); между группами **air** — inter-unit 45–90 s и cluster каждые 5 групп 20–40 s. При `ORIGIN_BLOCKED` на air-группе cron **не обрабатывает оставшиеся air-группы** в этом run; группы других конкурентов продолжают.
+
 ### Роли доступа
 
 Как у модуля `skus`:

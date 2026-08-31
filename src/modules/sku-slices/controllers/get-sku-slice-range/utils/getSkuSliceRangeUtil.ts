@@ -16,6 +16,12 @@ export type GetSkuSliceRangeResult =
   | { ok: true; data: SkuSliceRangeItem[] }
   | { ok: false };
 
+function sliceDateMinusDays(sliceDate: Date, days: number): Date {
+  const d = new Date(sliceDate);
+  d.setUTCDate(d.getUTCDate() - days);
+  return d;
+}
+
 export async function getSkuSliceRangeUtil(
   input: GetSkuSliceRangeInput
 ): Promise<GetSkuSliceRangeResult> {
@@ -28,17 +34,21 @@ export async function getSkuSliceRangeUtil(
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
 
   const docs = await aggregateSkuSlices([
     {
       $match: {
         konkName: sku.konkName,
-        date: { $gte: dateFrom, $lte: dateTo },
+        date: { $gte: warmStart, $lte: dateTo },
       },
     },
     { $sort: { date: 1 } },
     sliceDataProjectForSingleProductId(productKey),
   ]);
 
-  return { ok: true, data: mapSliceDocsToRangeItems(docs, productKey) };
+  return {
+    ok: true,
+    data: mapSliceDocsToRangeItems(docs, productKey, { dateFrom, dateTo }),
+  };
 }

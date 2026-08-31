@@ -16,6 +16,7 @@ export const getAirClientPendingController = async (
     data: {
       date: result.date,
       items: result.items,
+      rotation: result.rotation,
     },
   });
 };

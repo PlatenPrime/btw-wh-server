@@ -1,8 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("../../modules/analog-slices/cron/startAnalogSlicesCron.js", () => ({
-  startAnalogSlicesCron: vi.fn(),
-}));
 vi.mock("../../modules/btrade-slices/cron/startBtradeSlicesCron.js", () => ({
   startBtradeSlicesCron: vi.fn(),
 }));
@@ -31,7 +28,6 @@ vi.mock("../../modules/defs/cron/startDeficitReportCron.js", () => ({
   startDeficitReportCron: vi.fn(),
 }));
 
-import { startAnalogSlicesCron } from "../../modules/analog-slices/cron/startAnalogSlicesCron.js";
 import { startBtradeSlicesCron } from "../../modules/btrade-slices/cron/startBtradeSlicesCron.js";
 import { startSkuSlicesCron } from "../../modules/sku-slices/cron/startSkuSlicesCron.js";
 import { startFillSkugrSkusCron } from "../../modules/skugrs/cron/startFillSkugrSkusCron.js";
@@ -51,7 +47,6 @@ describe("startCronOperations", () => {
     startCronOperations();
 
     expect(startFillPosNameukrFromArtsCron).toHaveBeenCalledOnce();
-    expect(startAnalogSlicesCron).toHaveBeenCalledOnce();
     expect(startBtradeSlicesCron).toHaveBeenCalledOnce();
     expect(startSkuSlicesCron).toHaveBeenCalledOnce();
     expect(startCompensatingSlicesCron).toHaveBeenCalledOnce();

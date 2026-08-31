@@ -114,12 +114,12 @@
 
 ### GET `/api/sku-slices/sku/:skuId/range`
 
-Массив точек среза по SKU за период (сырые значения из документов среза).
+Плотный массив точек среза по SKU за период: по каждому UTC-дню от `dateFrom` до `dateTo` включительно. Пропуски ключа в `data`, а также `-1` в stock/price заполняются forward-fill из последнего валидного значения (warm-start — день до `dateFrom`). До первого валидного среза в периоде — `stock: 0`, `price: 0`. Расчёт продаж не выполняется (см. sales-range).
 
 **Path:** `skuId` — валидный ObjectId.
 
 **Query:** `dateFrom`, `dateTo` (YYYY-MM-DD, обязательно), `dateFrom` ≤ `dateTo`.
 
-**Ответ 200:** `{ message: string, data: Array<{ date: string (ISO), stock: number, price: number }> }`.
+**Ответ 200:** `{ message: string, data: Array<{ date: string (ISO), stock: number, price: number }> }` — длина массива = число календарных дней в диапазоне.
 
 **Ошибки:** 400, 401, 403, 404, 500.

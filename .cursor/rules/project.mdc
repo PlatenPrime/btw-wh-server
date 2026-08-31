@@ -89,6 +89,18 @@ modules/<name>/
 
 **Запрещено:** импорт из `controllers/common/` другого модуля — выносить в `modules/slices/` или `src/lib/`.
 
+### Competitor-specific features (переиспользуемость)
+
+Логика, завязанная на конкретного конкурента (`air`, `balun`, …), оформляется так, чтобы новый konk добавлялся конфигом, а не копией runner'а:
+
+| Что | Где |
+|-----|-----|
+| rotation, throttle, exclusions | `modules/slices/config/` |
+| resolve/filter/delay helpers | `modules/slices/utils/` |
+| парсинг HTML / URL конкурента | `modules/browser/<konk>/` |
+
+**Запрещено:** inline `if (konk === 'air')` в cron/runner без выноса в shared resolver. Новый konk — строка в config map + при необходимости browser-парсер.
+
 ### Основные принципы
 
 - **Модульная архитектура**: каждый модуль самодостаточен

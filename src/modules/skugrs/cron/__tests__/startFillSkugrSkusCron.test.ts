@@ -19,11 +19,18 @@ vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", (
 vi.mock("../../../../cron/analytics-notifications/formatFillSkugrSkusReport.js", () => ({
   formatFillSkugrSkusReport: vi.fn(() => "skugr report"),
 }));
+vi.mock("../../../../utils/delay.js", () => ({
+  delay: vi.fn().mockResolvedValue(undefined),
+}));
 
 import { Skugr } from "../../models/Skugr.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../utils/fillSkugrSkusFromBrowserUtil.js";
 import { startFillSkugrSkusCron } from "../startFillSkugrSkusCron.js";
 import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
+import { delay } from "../../../../utils/delay.js";
+import {
+  BrowserOriginBlockedError,
+} from "../../../browser/utils/browserOriginBlockedError.js";
 
 describe("startFillSkugrSkusCron", () => {
   let cronCallback: (() => Promise<void>) | null = null;
@@ -62,7 +69,11 @@ describe("startFillSkugrSkusCron", () => {
   });
 
   it("continues processing when one group fails", async () => {
-    const groups = [{ _id: "g1" }, { _id: "g2" }, { _id: "g3" }];
+    const groups = [
+      { _id: { toString: () => "g1" }, konkName: "balun" },
+      { _id: { toString: () => "g2" }, konkName: "balun" },
+      { _id: { toString: () => "g3" }, konkName: "balun" },
+    ];
     const exec = vi.fn().mockResolvedValue(groups);
     const lean = vi.fn().mockReturnValue({ exec });
     const select = vi.fn().mockReturnValue({ lean });
@@ -90,5 +101,43 @@ describe("startFillSkugrSkusCron", () => {
     expect(fillSkugrSkusFromBrowserUtil).toHaveBeenNthCalledWith(2, "g2");
     expect(fillSkugrSkusFromBrowserUtil).toHaveBeenNthCalledWith(3, "g3");
     expect(sendCronAnalyticsReport).toHaveBeenCalledWith("skugr report");
+    expect(delay).not.toHaveBeenCalled();
+  });
+
+  it("delays between air groups and skips remaining air after origin block", async () => {
+    const groups = [
+      { _id: { toString: () => "g1" }, konkName: "air" },
+      { _id: { toString: () => "g2" }, konkName: "air" },
+      { _id: { toString: () => "g3" }, konkName: "balun" },
+    ];
+    const exec = vi.fn().mockResolvedValue(groups);
+    const lean = vi.fn().mockReturnValue({ exec });
+    const select = vi.fn().mockReturnValue({ lean });
+    vi.mocked(Skugr.find).mockReturnValue({ select } as never);
+
+    vi.mocked(fillSkugrSkusFromBrowserUtil)
+      .mockResolvedValueOnce({
+        skugr: {} as never,
+        stats: { created: 1 } as never,
+      })
+      .mockRejectedValueOnce(
+        new BrowserOriginBlockedError("blocked", {
+          httpStatus: 520,
+          retryAfterSec: 60,
+        })
+      )
+      .mockResolvedValueOnce({
+        skugr: {} as never,
+        stats: { created: 2 } as never,
+      });
+
+    startFillSkugrSkusCron();
+    if (cronCallback) {
+      await cronCallback();
+    }
+
+    expect(fillSkugrSkusFromBrowserUtil).toHaveBeenCalledTimes(3);
+    expect(fillSkugrSkusFromBrowserUtil).toHaveBeenNthCalledWith(3, "g3");
+    expect(delay).toHaveBeenCalled();
   });
 });

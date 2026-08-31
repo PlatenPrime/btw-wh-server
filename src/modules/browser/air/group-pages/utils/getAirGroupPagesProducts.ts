@@ -160,7 +160,7 @@ export async function getAirGroupPagesProducts(
     getNextPageUrl: ($, url) =>
       getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
     stopOnEmptyPage: true,
-    delayBeforeNextMs: getGroupPagesThrottleDelayMs,
+    delayBeforeNextMs: () => getGroupPagesThrottleDelayMs("air"),
     getHtml: (url) => fetchPageHtml(url, listingOpts),
   });
 }

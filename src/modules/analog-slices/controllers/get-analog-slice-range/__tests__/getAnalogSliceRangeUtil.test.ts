@@ -88,23 +88,37 @@ describe("getAnalogSliceRangeUtil", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("returns empty data array when no slices in range", async () => {
+  it("returns dense zeros when no slices in range", async () => {
     const analog = await Analog.create({
       konkName: "air",
       prodName: "gemar",
       artikul: "1102-0259",
       url: "https://example.com/product-range-empty",
     });
+    const d1 = new Date("2026-03-01T00:00:00.000Z");
+    const d2 = new Date("2026-03-02T00:00:00.000Z");
     const result = await getAnalogSliceRangeUtil({
       analogId: analog._id.toString(),
-      dateFrom: new Date("2026-03-01T00:00:00.000Z"),
-      dateTo: new Date("2026-03-31T00:00:00.000Z"),
+      dateFrom: d1,
+      dateTo: d2,
     });
     expect(result.ok).toBe(true);
-    if (result.ok) expect(result.data).toHaveLength(0);
+    if (result.ok) {
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]).toEqual({
+        date: d1.toISOString(),
+        stock: 0,
+        price: 0,
+      });
+      expect(result.data[1]).toEqual({
+        date: d2.toISOString(),
+        stock: 0,
+        price: 0,
+      });
+    }
   });
 
-  it("returns only dates that have entry for artikul", async () => {
+  it("returns dense range with forward-fill for missing artikul entries", async () => {
     const analog = await Analog.create({
       konkName: "air",
       prodName: "gemar",
@@ -128,10 +142,17 @@ describe("getAnalogSliceRangeUtil", () => {
     });
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.data).toHaveLength(1);
-      expect(result.data[0].date).toBe(d2.toISOString());
-      expect(result.data[0].stock).toBe(1);
-      expect(result.data[0].price).toBe(1.5);
+      expect(result.data).toHaveLength(2);
+      expect(result.data[0]).toEqual({
+        date: d1.toISOString(),
+        stock: 0,
+        price: 0,
+      });
+      expect(result.data[1]).toEqual({
+        date: d2.toISOString(),
+        stock: 1,
+        price: 1.5,
+      });
     }
   });
 });

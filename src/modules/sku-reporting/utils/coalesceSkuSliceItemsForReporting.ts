@@ -1,4 +1,8 @@
 import type { ISkuSliceDataItem } from "../../sku-slices/models/SkuSlice.js";
+import {
+  isValidSliceMetricValue,
+  isValidSliceMetricValue as isValidSkuSliceMetricValue,
+} from "../../slices/utils/isInvalidSliceStockResult.js";
 
 export type ReportingCoalescedPoint = {
   stock: number | null;
@@ -10,14 +14,7 @@ export type ReportingCarry = {
   lastPrice: number | null;
 };
 
-/**
- * Значение годится для рядов отчётности: конечное число и не sentinel -1 (нет данных в срезе).
- */
-export function isValidSkuSliceMetricValue(v: unknown): v is number {
-  if (typeof v !== "number" || !Number.isFinite(v)) return false;
-  if (v === -1) return false;
-  return true;
-}
+export { isValidSkuSliceMetricValue };
 
 /** Предыдущий календарный день ключа среза (UTC-сутки как в хранилище). */
 export function sliceDateMinusDays(sliceDate: Date, days: number): Date {
@@ -42,8 +39,8 @@ export function coalesceSkuSliceItemsAlongDates(
     const item = getItem(d);
     const rawS = item?.stock;
     const rawP = item?.price;
-    if (isValidSkuSliceMetricValue(rawS)) lastStock = rawS;
-    if (isValidSkuSliceMetricValue(rawP)) lastPrice = rawP;
+    if (isValidSliceMetricValue(rawS)) lastStock = rawS;
+    if (isValidSliceMetricValue(rawP)) lastPrice = rawP;
     out.push({
       stock: lastStock,
       price: lastPrice,

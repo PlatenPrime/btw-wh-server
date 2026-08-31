@@ -24,6 +24,7 @@ describe("getAirClientPendingController", () => {
           url: "https://airballoons.com.ua/ua/product/1",
         },
       ],
+      rotation: { cycleDays: 3, dayIndex: 1, dueCount: 1200 },
     });
 
     const req = {} as never;
@@ -47,6 +48,7 @@ describe("getAirClientPendingController", () => {
             url: "https://airballoons.com.ua/ua/product/1",
           },
         ],
+        rotation: { cycleDays: 3, dayIndex: 1, dueCount: 1200 },
       },
     });
   });

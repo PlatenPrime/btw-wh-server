@@ -39,7 +39,7 @@
 
 - **GET `/api/analog-slices`** — срез по конкуренту и дате (query: `konkName`, `date`). Возвращает весь объект среза (konkName, date, data). Доступ: USER.
 - **GET `/api/analog-slices/analog/:analogId`** — срез по конкретному аналогу на одну дату (query: `date`). Ответ: `{ stock, price }`. Доступ: USER.
-- **GET `/api/analog-slices/analog/:analogId/range`** — данные по аналогу за период дат (query: `dateFrom`, `dateTo`). Ответ: массив `{ date, stock, price }[]`. Доступ: USER.
+- **GET `/api/analog-slices/analog/:analogId/range`** — плотный ряд stock/price за период с forward-fill (query: `dateFrom`, `dateTo`). Ответ: массив `{ date, stock, price }[]`. Доступ: USER.
 - **GET `/api/analog-slices/analog/:analogId/sales-by-date`** — продажи и выручка по аналогу на одну дату (query: `date`). Ответ: `{ sales, revenue, price, isDeliveryDay }`. Доступ: USER. См. [документацию для фронтенда](../frontend/analog-sales-charts.md).
 - **GET `/api/analog-slices/analog/:analogId/sales-range`** — продажи и выручка по аналогу за период (query: `dateFrom`, `dateTo`). Ответ: массив `{ date, sales, revenue, price, isDeliveryDay }[]`. Доступ: USER. См. [документацию для фронтенда](../frontend/analog-sales-charts.md).
 - **GET `/api/analog-slices/analog/:analogId/comparison-excel`** — экспорт Excel с сравнением срезов аналога и Btrade за период (query: `dateFrom`, `dateTo`). Ответ: файл .xlsx. Доступ: см. [API](../api/analog-slices.md) (сейчас без проверки роли; при включении checkAuth — USER).

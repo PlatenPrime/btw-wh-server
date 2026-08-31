@@ -4,6 +4,15 @@ export type SliceStockResult = {
 };
 
 /**
+ * Значение годится для рядов среза: конечное число и не sentinel -1.
+ */
+export function isValidSliceMetricValue(v: unknown): v is number {
+  if (typeof v !== "number" || !Number.isFinite(v)) return false;
+  if (v === -1) return false;
+  return true;
+}
+
+/**
  * Полный «негативный исход» в срезе: и остаток, и цена равны -1.
  */
 export function isFullMinusOneStockPrice(

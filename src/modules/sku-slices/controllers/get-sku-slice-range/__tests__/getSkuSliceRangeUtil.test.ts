@@ -9,6 +9,48 @@ describe("getSkuSliceRangeUtil", () => {
     await SkuSlice.deleteMany({});
   });
 
+  it("returns dense range with forward-fill when only one day scraped", async () => {
+    const sku = await Sku.create({
+      konkName: "air",
+      prodName: "gemar",
+      productId: "air-range-1",
+      title: "T",
+      url: "https://example.com/r1",
+    });
+    const d1 = new Date("2026-03-01T00:00:00.000Z");
+    const d2 = new Date("2026-03-02T00:00:00.000Z");
+    const d3 = new Date("2026-03-03T00:00:00.000Z");
+    await SkuSlice.insertMany([
+      { konkName: "air", date: d1, data: { "air-range-1": { stock: 1, price: 10 } } },
+    ]);
+
+    const result = await getSkuSliceRangeUtil({
+      skuId: sku._id.toString(),
+      dateFrom: d1,
+      dateTo: d3,
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.data).toHaveLength(3);
+      expect(result.data[0]).toEqual({
+        date: d1.toISOString(),
+        stock: 1,
+        price: 10,
+      });
+      expect(result.data[1]).toEqual({
+        date: d2.toISOString(),
+        stock: 1,
+        price: 10,
+      });
+      expect(result.data[2]).toEqual({
+        date: d3.toISOString(),
+        stock: 1,
+        price: 10,
+      });
+    }
+  });
+
   it("returns slice points for date range", async () => {
     const sku = await Sku.create({
       konkName: "air",

@@ -1,16 +1,14 @@
-import { startAnalogSlicesCron } from "../modules/analog-slices/cron/startAnalogSlicesCron.js";
 import { startBtradeSlicesCron } from "../modules/btrade-slices/cron/startBtradeSlicesCron.js";
+import { startDeficitReportCron } from "../modules/defs/cron/startDeficitReportCron.js";
+import { startGraboSkuSyncCron } from "../modules/grabo-skus/cron/startGraboSkuSyncCron.js";
 import { startSkuSlicesCron } from "../modules/sku-slices/cron/startSkuSlicesCron.js";
 import { startFillSkugrSkusCron } from "../modules/skugrs/cron/startFillSkugrSkusCron.js";
 import { startSkuInvalidFlagCron } from "../modules/skus/cron/startSkuInvalidFlagCron.js";
 import { startCompensatingSlicesCron } from "../modules/slice-compensation/cron/startCompensatingSlicesCron.js";
 import { startFillPosNameukrFromArtsCron } from "./startFillPosNameukrFromArtsCron.js";
-import { startGraboSkuSyncCron } from "../modules/grabo-skus/cron/startGraboSkuSyncCron.js";
-import { startDeficitReportCron } from "../modules/defs/cron/startDeficitReportCron.js";
 
 export const startCronOperations = () => {
   startFillPosNameukrFromArtsCron();
-  startAnalogSlicesCron();
   startBtradeSlicesCron();
   startSkuSlicesCron();
   startCompensatingSlicesCron();

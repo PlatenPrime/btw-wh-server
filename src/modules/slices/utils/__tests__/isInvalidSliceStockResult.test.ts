@@ -3,6 +3,7 @@ import {
   isFullMinusOneSliceStockResult,
   isFullMinusOneStockPrice,
   isInvalidSliceStockResult,
+  isValidSliceMetricValue,
 } from "../isInvalidSliceStockResult.js";
 
 describe("isFullMinusOneStockPrice", () => {
@@ -44,5 +45,21 @@ describe("isInvalidSliceStockResult", () => {
 
   it("returns true when only price is -1", () => {
     expect(isInvalidSliceStockResult({ stock: 10, price: -1 })).toBe(true);
+  });
+});
+
+describe("isValidSliceMetricValue", () => {
+  it("rejects -1 and non-finite", () => {
+    expect(isValidSliceMetricValue(-1)).toBe(false);
+    expect(isValidSliceMetricValue(NaN)).toBe(false);
+    expect(isValidSliceMetricValue(Infinity)).toBe(false);
+    expect(isValidSliceMetricValue("1")).toBe(false);
+    expect(isValidSliceMetricValue(null)).toBe(false);
+  });
+
+  it("accepts normal numbers including 0", () => {
+    expect(isValidSliceMetricValue(0)).toBe(true);
+    expect(isValidSliceMetricValue(10)).toBe(true);
+    expect(isValidSliceMetricValue(3.5)).toBe(true);
   });
 });

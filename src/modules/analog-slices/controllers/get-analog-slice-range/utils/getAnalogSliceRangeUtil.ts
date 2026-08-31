@@ -13,10 +13,15 @@ export type GetAnalogSliceRangeResult =
   | { ok: true; data: SliceRangeItem[] }
   | { ok: false };
 
+function sliceDateMinusDays(sliceDate: Date, days: number): Date {
+  const d = new Date(sliceDate);
+  d.setUTCDate(d.getUTCDate() - days);
+  return d;
+}
+
 /**
  * Возвращает массив данных среза по аналогу за период дат (для графиков).
- * Каждый элемент: { date: ISO string, stock, price }. Сортировка по date по возрастанию.
- * Только те даты, по которым есть срез и запись для артикула аналога.
+ * Плотный ряд по каждому UTC-дню dateFrom..dateTo с forward-fill пропусков и -1.
  * ok: false — аналог не найден или у аналога пустой artikul.
  */
 export async function getAnalogSliceRangeUtil(
@@ -33,14 +38,18 @@ export async function getAnalogSliceRangeUtil(
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
+  const warmStart = sliceDateMinusDays(dateFrom, 1);
 
   const docs = await AnalogSlice.find({
     konkName: analog.konkName,
-    date: { $gte: dateFrom, $lte: dateTo },
+    date: { $gte: warmStart, $lte: dateTo },
   })
     .select("date data")
     .sort({ date: 1 })
     .lean();
 
-  return { ok: true, data: mapSliceDocsToRangeItems(docs, artikulKey) };
+  return {
+    ok: true,
+    data: mapSliceDocsToRangeItems(docs, artikulKey, { dateFrom, dateTo }),
+  };
 }

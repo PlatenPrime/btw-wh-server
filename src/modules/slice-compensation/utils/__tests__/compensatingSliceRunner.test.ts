@@ -181,7 +181,7 @@ describe("runCompensatingSliceRefetchLoop", () => {
     await runCompensatingSliceRefetchLoop(queue, processItem);
 
     expect(delay).toHaveBeenCalledTimes(1);
-    expect(jitterMs).toHaveBeenCalledWith(1000, 3000);
+    expect(jitterMs).toHaveBeenCalledWith(2000, 5000);
   });
 
   it("resolves default jitter when next item is non-air", async () => {
