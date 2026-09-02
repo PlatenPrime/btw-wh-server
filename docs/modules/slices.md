@@ -52,7 +52,7 @@
 
 ### Rotation server-срезов (SKU)
 
-Per-konk цикл в `sliceRotationByKonk` (сейчас `air`: 3 дня). Bucket товара: `stableStringBucket(productId) % cycleDays`. Day index: календарный день Kyiv `% cycleDays`. Cron пишет в `SkuSlice.data` только due-bucket; `rotationMeta` на документе — observability. Client-ingest Air фильтрует pending по тому же правилу.
+Per-konk цикл в `sliceRotationByKonk` (сейчас пусто: Air без rotation, полный каталог за день). Bucket товара: `stableStringBucket(productId) % cycleDays`. Day index: календарный день Kyiv `% cycleDays`. Если у konk задан цикл — cron пишет в `SkuSlice.data` только due-bucket, `rotationMeta` на документе — observability, client-ingest фильтрует pending по тому же правилу.
 
 ### Throttle скрапинга конкурентов
 

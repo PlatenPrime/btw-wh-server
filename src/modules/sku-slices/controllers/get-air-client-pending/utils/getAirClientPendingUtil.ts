@@ -32,7 +32,7 @@ function isPendingSliceItem(item: ISkuSliceDataItem | undefined): boolean {
 }
 
 /**
- * Air SKU из sliced-групп due-сегодня (rotation), у которых в сегодняшнем SkuSlice
+ * Air SKU из sliced-групп, у которых в сегодняшнем SkuSlice
  * нет записи или stock/price содержат sentinel -1.
  */
 export async function getAirClientPendingUtil(

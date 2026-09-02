@@ -7,12 +7,11 @@ export type SliceRotationConfig = {
 /**
  * Per-konk цикл server-среза: за `cycleDays` календарных дней Kyiv
  * каждый productId попадает в один bucket (hash % cycleDays).
+ * Пустая карта — полный каталог каждый день (Air rotation выключен).
  */
 export const SLICE_ROTATION_BY_KONK: Readonly<
   Record<string, SliceRotationConfig>
-> = {
-  air: { cycleDays: 3 },
-};
+> = {};
 
 export function resolveSliceRotationConfig(
   konkName: string

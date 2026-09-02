@@ -105,6 +105,7 @@ describe("Sku-slices air client ingestion integration", () => {
       expect(response.body.data.date).toBe(
         toSliceDate(new Date()).toISOString()
       );
+      expect(response.body.data.rotation).toBeNull();
       expect(response.body.data.items).toEqual([
         {
           skuId: pending._id.toString(),
