@@ -1,8 +1,4 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  getAirStockData,
-  resolveAirWarmUpUrl,
-} from "../getAirStockData.js";
 import { fetchPageHtml } from "../../../utils/fetchPageHtml.js";
 import { logBrowserError } from "../../../utils/browserRequest.js";
 import { logBrowserStockResult } from "../../../utils/logBrowserStockResult.js";
@@ -13,6 +9,7 @@ import {
 
 const mockWarn = vi.hoisted(() => vi.fn());
 
+vi.mock("../airIdleMode.js", () => ({ AIR_IDLE_MODE: false }));
 vi.mock("../../../utils/fetchPageHtml.js");
 vi.mock("../../../utils/logBrowserStockResult.js", () => ({
   logBrowserStockResult: vi.fn(),
@@ -30,6 +27,11 @@ vi.mock("../../../../../logging/createLogger.js", () => ({
     debug: vi.fn(),
   }),
 }));
+
+import {
+  getAirStockData,
+  resolveAirWarmUpUrl,
+} from "../getAirStockData.js";
 
 describe("resolveAirWarmUpUrl", () => {
   it("возвращает origin + /", () => {
