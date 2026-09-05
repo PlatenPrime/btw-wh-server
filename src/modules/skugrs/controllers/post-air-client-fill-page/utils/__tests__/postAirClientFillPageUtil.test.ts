@@ -7,32 +7,25 @@ const GROUP_URL =
   "https://airballoons.com.ua/ua/index.php?route=product/category&path=1";
 const PAGE2_URL = `${GROUP_URL}&page=2`;
 
-function airProductCard(opts: {
-  pid: string;
-  productPath: string;
-  imageUrl: string;
-  title: string;
-}): string {
-  return `<div class="product-layout product-grid" data-pid="${opts.pid}">
-    <div class="us-module-img">
-      <a href="${opts.productPath}">
-        <img src="${opts.imageUrl}" alt="" />
-      </a>
-    </div>
-    <div class="us-module-title">
-      <a href="${opts.productPath}">${opts.title}</a>
-    </div>
-  </div>`;
-}
+const productOne = {
+  productId: "111",
+  title: "One",
+  url: "https://airballoons.com.ua/ua/product/p111",
+  imageUrl: "https://airballoons.com.ua/img/a.jpg",
+};
 
-function airPageHtml(opts: { cards: string[]; nextHref?: string }): string {
-  const next =
-    opts.nextHref != null
-      ? `<link rel="next" href="${opts.nextHref}" />`
-      : "";
-  return `<!DOCTYPE html><html><head>${next}</head><body>
-    <div class="row us-category-products">${opts.cards.join("")}</div>
-  </body></html>`;
+function payload(
+  overrides: Partial<Parameters<typeof postAirClientFillPageUtil>[0]> = {}
+) {
+  return {
+    id: "507f1f77bcf86cd799439011",
+    sourceUrl: GROUP_URL,
+    pageUrl: GROUP_URL,
+    products: [] as typeof productOne[],
+    nextPageUrl: null as string | null,
+    hasListingMarkup: true,
+    ...overrides,
+  };
 }
 
 describe("postAirClientFillPageUtil", () => {
@@ -42,12 +35,7 @@ describe("postAirClientFillPageUtil", () => {
   });
 
   it("returns SKUGR_NOT_FOUND", async () => {
-    const result = await postAirClientFillPageUtil({
-      id: "507f1f77bcf86cd799439011",
-      sourceUrl: GROUP_URL,
-      pageUrl: GROUP_URL,
-      html: "<html></html>",
-    });
+    const result = await postAirClientFillPageUtil(payload());
     expect(result).toMatchObject({ ok: false, code: "SKUGR_NOT_FOUND" });
   });
 
@@ -59,12 +47,9 @@ describe("postAirClientFillPageUtil", () => {
       url: GROUP_URL,
       skus: [],
     });
-    const result = await postAirClientFillPageUtil({
-      id: skugr._id.toString(),
-      sourceUrl: GROUP_URL,
-      pageUrl: GROUP_URL,
-      html: "<html></html>",
-    });
+    const result = await postAirClientFillPageUtil(
+      payload({ id: skugr._id.toString() })
+    );
     expect(result).toMatchObject({ ok: false, code: "NOT_AIR" });
   });
 
@@ -76,12 +61,12 @@ describe("postAirClientFillPageUtil", () => {
       url: GROUP_URL,
       skus: [],
     });
-    const result = await postAirClientFillPageUtil({
-      id: skugr._id.toString(),
-      sourceUrl: "https://airballoons.com.ua/other",
-      pageUrl: GROUP_URL,
-      html: "<html></html>",
-    });
+    const result = await postAirClientFillPageUtil(
+      payload({
+        id: skugr._id.toString(),
+        sourceUrl: "https://airballoons.com.ua/other",
+      })
+    );
     expect(result).toMatchObject({ ok: false, code: "URL_MISMATCH" });
   });
 
@@ -93,16 +78,16 @@ describe("postAirClientFillPageUtil", () => {
       url: GROUP_URL,
       skus: [],
     });
-    const result = await postAirClientFillPageUtil({
-      id: skugr._id.toString(),
-      sourceUrl: GROUP_URL,
-      pageUrl: "https://airballoons.com.ua/ua/product/x",
-      html: "<html></html>",
-    });
+    const result = await postAirClientFillPageUtil(
+      payload({
+        id: skugr._id.toString(),
+        pageUrl: "https://airballoons.com.ua/ua/product/x",
+      })
+    );
     expect(result).toMatchObject({ ok: false, code: "PAGE_URL_MISMATCH" });
   });
 
-  it("returns PARSE_FAILED for WAF html", async () => {
+  it("returns PARSE_FAILED when no products and no listing markup", async () => {
     const skugr = await Skugr.create({
       konkName: "air",
       prodName: "p",
@@ -110,12 +95,12 @@ describe("postAirClientFillPageUtil", () => {
       url: GROUP_URL,
       skus: [],
     });
-    const result = await postAirClientFillPageUtil({
-      id: skugr._id.toString(),
-      sourceUrl: GROUP_URL,
-      pageUrl: GROUP_URL,
-      html: "<html><body>Захищена сторінка</body></html>",
-    });
+    const result = await postAirClientFillPageUtil(
+      payload({
+        id: skugr._id.toString(),
+        hasListingMarkup: false,
+      })
+    );
     expect(result).toMatchObject({ ok: false, code: "PARSE_FAILED" });
   });
 
@@ -127,24 +112,14 @@ describe("postAirClientFillPageUtil", () => {
       url: GROUP_URL,
       skus: [],
     });
-    const html = airPageHtml({
-      cards: [
-        airProductCard({
-          pid: "111",
-          productPath: "/ua/product/p111",
-          imageUrl: "https://airballoons.com.ua/img/a.jpg",
-          title: "One",
-        }),
-      ],
-      nextHref: PAGE2_URL,
-    });
 
-    const result = await postAirClientFillPageUtil({
-      id: skugr._id.toString(),
-      sourceUrl: GROUP_URL,
-      pageUrl: GROUP_URL,
-      html,
-    });
+    const result = await postAirClientFillPageUtil(
+      payload({
+        id: skugr._id.toString(),
+        products: [productOne],
+        nextPageUrl: PAGE2_URL,
+      })
+    );
 
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -165,14 +140,13 @@ describe("postAirClientFillPageUtil", () => {
       url: GROUP_URL,
       skus: [],
     });
-    const html = airPageHtml({ cards: [] });
 
-    const result = await postAirClientFillPageUtil({
-      id: skugr._id.toString(),
-      sourceUrl: GROUP_URL,
-      pageUrl: GROUP_URL,
-      html,
-    });
+    const result = await postAirClientFillPageUtil(
+      payload({
+        id: skugr._id.toString(),
+        nextPageUrl: PAGE2_URL,
+      })
+    );
 
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -190,28 +164,74 @@ describe("postAirClientFillPageUtil", () => {
       url: GROUP_URL,
       skus: [],
     });
-    const html = airPageHtml({
-      cards: [
-        airProductCard({
-          pid: "222",
-          productPath: "/ua/product/p222",
-          imageUrl: "https://airballoons.com.ua/img/b.jpg",
-          title: "Two",
-        }),
-      ],
-    });
 
-    const result = await postAirClientFillPageUtil({
-      id: skugr._id.toString(),
-      sourceUrl: GROUP_URL,
-      pageUrl: PAGE2_URL,
-      html,
-    });
+    const result = await postAirClientFillPageUtil(
+      payload({
+        id: skugr._id.toString(),
+        pageUrl: PAGE2_URL,
+        products: [
+          {
+            productId: "222",
+            title: "Two",
+            url: "https://airballoons.com.ua/ua/product/p222",
+            imageUrl: "https://airballoons.com.ua/img/b.jpg",
+          },
+        ],
+      })
+    );
 
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.productsOnPage).toBe(1);
       expect(result.nextPageUrl).toBeNull();
+    }
+  });
+
+  it("nulls nextPageUrl that is not a listing page of the group", async () => {
+    const skugr = await Skugr.create({
+      konkName: "air",
+      prodName: "acme",
+      title: "A",
+      url: GROUP_URL,
+      skus: [],
+    });
+
+    const result = await postAirClientFillPageUtil(
+      payload({
+        id: skugr._id.toString(),
+        products: [productOne],
+        nextPageUrl:
+          "https://airballoons.com.ua/ua/index.php?route=product/category&path=999&page=3",
+      })
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.nextPageUrl).toBeNull();
+      expect(result.stats.created).toBe(1);
+    }
+  });
+
+  it("fills products even without listing markup", async () => {
+    const skugr = await Skugr.create({
+      konkName: "air",
+      prodName: "acme",
+      title: "A",
+      url: GROUP_URL,
+      skus: [],
+    });
+
+    const result = await postAirClientFillPageUtil(
+      payload({
+        id: skugr._id.toString(),
+        products: [productOne],
+        hasListingMarkup: false,
+      })
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.stats.created).toBe(1);
     }
   });
 });

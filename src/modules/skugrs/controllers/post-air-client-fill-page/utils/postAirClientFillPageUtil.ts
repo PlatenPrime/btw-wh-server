@@ -1,4 +1,3 @@
-import { parseAirGroupListingPage } from "../../../../browser/air/group-pages/utils/parseAirGroupListingPage.js";
 import { normalizeCompetitorName } from "../../../../slices/config/excludedCompetitors.js";
 import { AIR_CLIENT_SKUGR_KONK } from "../../../constants/airClientSkugrFill.js";
 import { Skugr } from "../../../models/Skugr.js";
@@ -28,8 +27,22 @@ export type PostAirClientFillPageResult =
       message: string;
     };
 
+function resolveNextPageUrl(
+  productsLength: number,
+  nextPageUrl: string | null,
+  skugrUrl: string
+): string | null {
+  if (productsLength === 0 || nextPageUrl == null) {
+    return null;
+  }
+  if (!isAirListingPageOfGroup(nextPageUrl, skugrUrl)) {
+    return null;
+  }
+  return nextPageUrl;
+}
+
 /**
- * Парсит HTML одной страницы Air-листинга и аддитивно заполняет группу.
+ * Принимает карточки одной страницы Air-листинга с клиента и аддитивно заполняет группу.
  */
 export async function postAirClientFillPageUtil(
   input: PostAirClientFillPageInput
@@ -67,18 +80,17 @@ export async function postAirClientFillPageUtil(
     };
   }
 
-  const parsed = parseAirGroupListingPage(input.html, input.pageUrl);
-  if (parsed.products.length === 0 && !parsed.hasListingMarkup) {
+  if (input.products.length === 0 && !input.hasListingMarkup) {
     return {
       ok: false,
       code: "PARSE_FAILED",
-      message: "HTML did not contain an Air listing",
+      message: "Payload did not contain an Air listing",
     };
   }
 
   const fillResult = await fillSkugrSkusFromProductsUtil(
     skugr,
-    parsed.products
+    input.products
   );
   if (!fillResult) {
     return {
@@ -88,13 +100,14 @@ export async function postAirClientFillPageUtil(
     };
   }
 
-  const nextPageUrl =
-    parsed.products.length === 0 ? null : parsed.nextPageUrl;
-
   return {
     ok: true,
     stats: fillResult.stats,
-    nextPageUrl,
-    productsOnPage: parsed.products.length,
+    nextPageUrl: resolveNextPageUrl(
+      input.products.length,
+      input.nextPageUrl,
+      skugr.url
+    ),
+    productsOnPage: input.products.length,
   };
 }

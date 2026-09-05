@@ -1,19 +1,39 @@
 import { describe, expect, it } from "vitest";
-import { AIR_CLIENT_SKUGR_HTML_MAX_CHARS } from "../../../../constants/airClientSkugrFill.js";
+import { AIR_CLIENT_SKUGR_PRODUCTS_MAX } from "../../../../constants/airClientSkugrFill.js";
 import { postAirClientFillPageSchema } from "../postAirClientFillPageSchema.js";
 
 describe("postAirClientFillPageSchema", () => {
+  const product = {
+    productId: "111",
+    title: "One",
+    url: "https://airballoons.com.ua/ua/product/p111",
+    imageUrl: "https://airballoons.com.ua/img/a.jpg",
+  };
+
   const valid = {
     id: "507f1f77bcf86cd799439011",
     sourceUrl:
       "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
     pageUrl:
       "https://airballoons.com.ua/ua/index.php?route=product/category&path=1&page=2",
-    html: "<html><body>ok</body></html>",
+    products: [product],
+    nextPageUrl:
+      "https://airballoons.com.ua/ua/index.php?route=product/category&path=1&page=3",
+    hasListingMarkup: true,
   };
 
   it("accepts valid payload", () => {
     expect(postAirClientFillPageSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it("accepts empty products with null nextPageUrl", () => {
+    expect(
+      postAirClientFillPageSchema.safeParse({
+        ...valid,
+        products: [],
+        nextPageUrl: null,
+      }).success
+    ).toBe(true);
   });
 
   it("rejects invalid id", () => {
@@ -22,17 +42,22 @@ describe("postAirClientFillPageSchema", () => {
     ).toBe(false);
   });
 
-  it("rejects empty html", () => {
-    expect(
-      postAirClientFillPageSchema.safeParse({ ...valid, html: "" }).success
-    ).toBe(false);
-  });
-
-  it("rejects html above max length", () => {
+  it("rejects too many products", () => {
     expect(
       postAirClientFillPageSchema.safeParse({
         ...valid,
-        html: "x".repeat(AIR_CLIENT_SKUGR_HTML_MAX_CHARS + 1),
+        products: Array.from({ length: AIR_CLIENT_SKUGR_PRODUCTS_MAX + 1 }, () => ({
+          ...product,
+        })),
+      }).success
+    ).toBe(false);
+  });
+
+  it("rejects product without url", () => {
+    expect(
+      postAirClientFillPageSchema.safeParse({
+        ...valid,
+        products: [{ ...product, url: "not-url" }],
       }).success
     ).toBe(false);
   });
@@ -42,6 +67,18 @@ describe("postAirClientFillPageSchema", () => {
       postAirClientFillPageSchema.safeParse({
         ...valid,
         pageUrl: "not-url",
+      }).success
+    ).toBe(false);
+  });
+
+  it("rejects missing hasListingMarkup", () => {
+    expect(
+      postAirClientFillPageSchema.safeParse({
+        id: valid.id,
+        sourceUrl: valid.sourceUrl,
+        pageUrl: valid.pageUrl,
+        products: valid.products,
+        nextPageUrl: valid.nextPageUrl,
       }).success
     ).toBe(false);
   });

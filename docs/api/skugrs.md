@@ -146,7 +146,7 @@
 
 ### POST `/api/skugrs/client/air/id/:id/fill-page`
 
-Одна страница HTML-листинга Air: парсинг карточек на сервере, аддитивный fill состава группы. `nextPageUrl` — следующая страница (`link[rel=next]`) или `null` (пустая сетка / конец).
+Одна страница Air-листинга: клиент присылает уже разобранные карточки, сервер аддитивно пишет состав группы. `nextPageUrl` в ответе — следующая страница той же категории или `null` (пустая сетка, конец, либо next не той категории).
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
@@ -156,7 +156,9 @@
 
 - `sourceUrl`: string (URL) — должен совпадать с `skugr.url`
 - `pageUrl`: string (URL) — та же категория: origin и pathname как у группы, query совпадает кроме `page`
-- `html`: string — `document.documentElement.outerHTML`, максимум 2_000_000 символов
+- `products`: массив до 200 элементов `{ productId, title, url, imageUrl }` (все строки, `url` и `imageUrl` — абсолютные URL)
+- `nextPageUrl`: string (URL) или `null` — кандидат следующей страницы с клиента (`link[rel=next]`)
+- `hasListingMarkup`: boolean — на странице была сетка `#us-category-products` / `.us-category-products`
 
 **Ответ 200:**
 
@@ -183,7 +185,7 @@
 
 `stats` — те же счётчики, что у `fill-skus`, но только по карточкам этой страницы.
 
-**Ошибки:** 400 (`URL_MISMATCH`, `PAGE_URL_MISMATCH`, `NOT_AIR`, валидация), 404 (группа не найдена), 422 (`PARSE_FAILED` — нет сетки листинга и нет карточек), 401, 403.
+**Ошибки:** 400 (`URL_MISMATCH`, `PAGE_URL_MISMATCH`, `NOT_AIR`, валидация), 404 (группа не найдена), 422 (`PARSE_FAILED` — нет карточек и `hasListingMarkup: false`), 401, 403.
 
 ---
 

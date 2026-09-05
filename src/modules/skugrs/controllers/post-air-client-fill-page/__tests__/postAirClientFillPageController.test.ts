@@ -13,7 +13,16 @@ const body = {
     "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
   pageUrl:
     "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
-  html: "<html>ok</html>",
+  products: [
+    {
+      productId: "111",
+      title: "One",
+      url: "https://airballoons.com.ua/ua/product/p111",
+      imageUrl: "https://airballoons.com.ua/img/a.jpg",
+    },
+  ],
+  nextPageUrl: null,
+  hasListingMarkup: true,
 };
 
 describe("postAirClientFillPageController", () => {
@@ -49,7 +58,7 @@ describe("postAirClientFillPageController", () => {
     vi.mocked(postAirClientFillPageUtil).mockResolvedValue({
       ok: false,
       code: "PARSE_FAILED",
-      message: "HTML did not contain an Air listing",
+      message: "Payload did not contain an Air listing",
     });
     const req = { params: { id }, body } as never;
     const res = { status: vi.fn().mockReturnThis(), json: vi.fn() };

@@ -17,9 +17,9 @@ JWT лежит в `chrome.storage.local`. В git и в копию папки т�
 
 - `GET /api/skugrs/client/air/pending`
 - Для каждой группы открывает first-party вкладку `airballoons.com.ua`
-- Снимает `document.documentElement.outerHTML`
-- `POST /api/skugrs/client/air/id/:id/fill-page`
-- Идёт по `nextPageUrl`, пока не `null`
+- Парсит карточки листинга в DOM (`parseAirListing.js`)
+- `POST /api/skugrs/client/air/id/:id/fill-page` с `{ products, nextPageUrl, hasListingMarkup }`
+- Идёт по `nextPageUrl` из ответа, пока не `null`
 - Jitter между страницами 2–4 s, между группами 10–20 s (крутилки в popup)
 
 422 — один retry страницы. 401/403 — стоп.

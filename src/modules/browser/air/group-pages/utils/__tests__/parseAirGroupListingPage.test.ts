@@ -64,6 +64,28 @@ describe("parseAirGroupListingPage", () => {
     expect(result.products[0]?.title).toContain("10");
   });
 
+  it("uses data-src when src is lazy placeholder", () => {
+    const real =
+      "https://air.example.test/image/cache/catalog/x-228x228.jpg";
+    const html = airPageHtml({
+      cards: [
+        airProductCard({
+          pid: "8",
+          productPath: "/ua/product/y",
+          imageUrl:
+            "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
+          title: "Y",
+        }).replace(
+          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg"`,
+          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-src="${real}"`
+        ),
+      ],
+    });
+
+    const result = parseAirGroupListingPage(html, PAGE_URL);
+    expect(result.products[0]?.imageUrl).toBe(real);
+  });
+
   it("uses data-srcset when src is lazy placeholder", () => {
     const real =
       "https://air.example.test/image/cache/catalog/x-228x228.jpg";

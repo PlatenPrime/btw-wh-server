@@ -1,3 +1,5 @@
+import { isAirListingPayload } from "./parseAirListing.js";
+
 const STORAGE_KEYS = {
   apiBase: "apiBase",
   jwt: "jwt",
@@ -79,29 +81,25 @@ function waitTabComplete(tabId) {
   });
 }
 
-async function getHtmlFromTab(tabId) {
-  let lastError = "no html";
+}
+
+async function getListingFromTab(tabId) {
+  let lastError = "no listing";
   for (let attempt = 0; attempt < 8; attempt += 1) {
     try {
-      const response = await chrome.tabs.sendMessage(tabId, { type: "GET_HTML" });
-      if (response && typeof response.html === "string" && response.html.length > 0) {
-        return response.html;
+      const response = await chrome.tabs.sendMessage(tabId, {
+        type: "GET_LISTING",
+      });
+      if (isAirListingPayload(response)) {
+        return response;
       }
-      lastError = "empty html";
+      lastError = "empty listing";
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
-      try {
-        await chrome.scripting.executeScript({
-          target: { tabId },
-          files: ["content.js"],
-        });
-      } catch {
-        /* ignore inject races */
-      }
     }
     await delay(400);
   }
-  throw new Error(`Failed to read page HTML: ${lastError}`);
+  throw new Error(`Failed to read listing: ${lastError}`);
 }
 
 async function openOrNavigate(tabId, url) {
@@ -120,7 +118,7 @@ async function openOrNavigate(tabId, url) {
   return tabId;
 }
 
-async function fillPage(apiBase, jwt, group, pageUrl, html) {
+async function fillPage(apiBase, jwt, group, pageUrl, listing) {
   const { res, body } = await apiFetch(
     apiBase,
     jwt,
@@ -130,7 +128,9 @@ async function fillPage(apiBase, jwt, group, pageUrl, html) {
       body: JSON.stringify({
         sourceUrl: group.url,
         pageUrl,
-        html,
+        products: listing.products,
+        nextPageUrl: listing.nextPageUrl,
+        hasListingMarkup: listing.hasListingMarkup,
       }),
     }
   );
@@ -195,9 +195,9 @@ async function runFill() {
         while (pageUrl && !stopRequested) {
           pageIndex += 1;
           tabId = await openOrNavigate(tabId, pageUrl);
-          const html = await getHtmlFromTab(tabId);
+          const listing = await getListingFromTab(tabId);
 
-          let result = await fillPage(apiBase, jwt, group, pageUrl, html);
+          let result = await fillPage(apiBase, jwt, group, pageUrl, listing);
           if (result.status === 422) {
             log({
               level: "warn",
@@ -205,8 +205,8 @@ async function runFill() {
             });
             await delay(jitter(3000, 6000));
             tabId = await openOrNavigate(tabId, pageUrl);
-            const htmlRetry = await getHtmlFromTab(tabId);
-            result = await fillPage(apiBase, jwt, group, pageUrl, htmlRetry);
+            const listingRetry = await getListingFromTab(tabId);
+            result = await fillPage(apiBase, jwt, group, pageUrl, listingRetry);
           }
 
           if (result.status === 401 || result.status === 403) {

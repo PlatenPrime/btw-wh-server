@@ -3,7 +3,7 @@ import { postAirClientFillPageSchema } from "./schemas/postAirClientFillPageSche
 import { postAirClientFillPageUtil } from "./utils/postAirClientFillPageUtil.js";
 
 /**
- * @desc    Refill одной страницы Air-группы из HTML first-party листинга
+ * @desc    Refill одной страницы Air-группы из карточек first-party листинга
  * @route   POST /api/skugrs/client/air/id/:id/fill-page
  */
 export const postAirClientFillPageController = async (
@@ -14,7 +14,9 @@ export const postAirClientFillPageController = async (
     id: req.params.id,
     sourceUrl: req.body?.sourceUrl,
     pageUrl: req.body?.pageUrl,
-    html: req.body?.html,
+    products: req.body?.products,
+    nextPageUrl: req.body?.nextPageUrl,
+    hasListingMarkup: req.body?.hasListingMarkup,
   });
   if (!parseResult.success) {
     res.status(400).json({

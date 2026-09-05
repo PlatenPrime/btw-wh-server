@@ -28,7 +28,7 @@
 - **analog-slices / analogs:** опрос остатков аналогов (air, balun, yumi, yumin, sharte).
 - **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect); для Air — client-ingestion HTML как канал дозаполнения после abort/`-1` (server compensation для Air выключена).
 - **btrade-slices / arts / dels / defs:** остатки sharik через bulk `product_rests` (`actualQuantity` для live, `sliceQuantity` для daily btrade-slice).
-- **skugrs:** обход страниц групп для наполнения SKU (`group-products`); Air listing при `AIR_IDLE_MODE` с сервера не ходит — client-ingest HTML.
+- **skugrs:** обход страниц групп для наполнения SKU (`group-products`); Air listing при `AIR_IDLE_MODE` с сервера не ходит — client-ingest карточек листинга.
 - **grabo-skus:** полный обход каталога производителя Grabo (sitemap → категории → карточки) через `browser/grabo`.
 - **slice-compensation:** повторный опрос через stock-утилиты analog/sku; Air из compensation исключён.
 

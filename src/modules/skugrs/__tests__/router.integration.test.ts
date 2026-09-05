@@ -181,7 +181,13 @@ describe("Skugrs router integration", () => {
       await request(app)
         .post("/api/skugrs/client/air/id/bad-id/fill-page")
         .set(createAuthHeader())
-        .send({ sourceUrl: groupUrl, pageUrl: groupUrl, html: "<html></html>" })
+        .send({
+          sourceUrl: groupUrl,
+          pageUrl: groupUrl,
+          products: [],
+          nextPageUrl: null,
+          hasListingMarkup: true,
+        })
         .expect(400);
     });
 
@@ -194,7 +200,9 @@ describe("Skugrs router integration", () => {
         .send({
           sourceUrl: groupUrl,
           pageUrl: groupUrl,
-          html: "<html></html>",
+          products: [],
+          nextPageUrl: null,
+          hasListingMarkup: true,
         })
         .expect(404);
     });
@@ -207,25 +215,23 @@ describe("Skugrs router integration", () => {
         url: groupUrl,
         skus: [],
       });
-      const html = `<!DOCTYPE html><html><head></head><body>
-        <div class="row us-category-products">
-          <div class="product-layout" data-pid="333">
-            <div class="us-module-img">
-              <a href="/ua/product/p333">
-                <img src="https://airballoons.com.ua/img/c.jpg" alt="" />
-              </a>
-            </div>
-            <div class="us-module-title">
-              <a href="/ua/product/p333">Three</a>
-            </div>
-          </div>
-        </div>
-      </body></html>`;
-
       const response = await request(app)
         .post(`/api/skugrs/client/air/id/${skugr._id.toString()}/fill-page`)
         .set(createAuthHeader())
-        .send({ sourceUrl: groupUrl, pageUrl: groupUrl, html })
+        .send({
+          sourceUrl: groupUrl,
+          pageUrl: groupUrl,
+          products: [
+            {
+              productId: "333",
+              title: "Three",
+              url: "https://airballoons.com.ua/ua/product/p333",
+              imageUrl: "https://airballoons.com.ua/img/c.jpg",
+            },
+          ],
+          nextPageUrl: null,
+          hasListingMarkup: true,
+        })
         .expect(200);
 
       expect(response.body.data.productsOnPage).toBe(1);

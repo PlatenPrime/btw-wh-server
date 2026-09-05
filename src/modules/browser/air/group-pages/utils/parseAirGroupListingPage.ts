@@ -18,9 +18,12 @@ export type ParseAirGroupListingPageResult = {
 };
 
 const LAZY_IMAGE_MARKER = "lazy-image.svg";
+const GRID_CARDS_SEL =
+  "#us-category-products div.product-layout[data-pid], .us-category-products div.product-layout[data-pid]";
+const GRID_SEL = "#us-category-products, .us-category-products";
 
 function pickProductCards($: cheerio.CheerioAPI): BrowserCheerio {
-  const fromGrid = $(".us-category-products div.product-layout[data-pid]");
+  const fromGrid = $(GRID_CARDS_SEL);
   if (fromGrid.length > 0) {
     return fromGrid;
   }
@@ -30,6 +33,7 @@ function pickProductCards($: cheerio.CheerioAPI): BrowserCheerio {
 function extractImageUrl($img: BrowserCheerio, baseUrl: string): string | null {
   const src = $img.attr("src")?.trim();
   const dataSrcset = $img.attr("data-srcset")?.trim();
+  const dataSrc = $img.attr("data-src")?.trim();
 
   if (src && !src.includes(LAZY_IMAGE_MARKER)) {
     return resolveHrefAgainstBase(src, baseUrl);
@@ -43,6 +47,10 @@ function extractImageUrl($img: BrowserCheerio, baseUrl: string): string | null {
         return resolved;
       }
     }
+  }
+
+  if (dataSrc) {
+    return resolveHrefAgainstBase(dataSrc, baseUrl);
   }
 
   if (src) {
@@ -96,7 +104,7 @@ export function parseAirGroupListingProductsMap(
 }
 
 export function hasAirGroupListingMarkup($: cheerio.CheerioAPI): boolean {
-  return $(".us-category-products").length > 0;
+  return $(GRID_SEL).length > 0;
 }
 
 /**
