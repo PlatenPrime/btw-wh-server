@@ -22,12 +22,16 @@ vi.mock("../../../../cron/analytics-notifications/formatFillSkugrSkusReport.js",
 vi.mock("../../../../utils/delay.js", () => ({
   delay: vi.fn().mockResolvedValue(undefined),
 }));
+vi.mock("../../config/isServerSkugrFillDisabled.js", () => ({
+  isServerSkugrFillDisabled: vi.fn(() => false),
+}));
 
 import { Skugr } from "../../models/Skugr.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../utils/fillSkugrSkusFromBrowserUtil.js";
 import { startFillSkugrSkusCron } from "../startFillSkugrSkusCron.js";
 import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { delay } from "../../../../utils/delay.js";
+import { isServerSkugrFillDisabled } from "../../config/isServerSkugrFillDisabled.js";
 import {
   BrowserOriginBlockedError,
 } from "../../../browser/utils/browserOriginBlockedError.js";
@@ -54,6 +58,7 @@ describe("startFillSkugrSkusCron", () => {
     const select = vi.fn().mockReturnValue({ lean });
     vi.mocked(Skugr.find).mockReturnValue({ select } as never);
     vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
+    vi.mocked(isServerSkugrFillDisabled).mockImplementation(() => false);
   });
 
   it("creates CronJob with expected schedule and timezone", () => {
@@ -139,5 +144,35 @@ describe("startFillSkugrSkusCron", () => {
     expect(fillSkugrSkusFromBrowserUtil).toHaveBeenCalledTimes(3);
     expect(fillSkugrSkusFromBrowserUtil).toHaveBeenNthCalledWith(3, "g3");
     expect(delay).toHaveBeenCalled();
+  });
+
+  it("skips air groups when server fill is disabled and still fills others", async () => {
+    vi.mocked(isServerSkugrFillDisabled).mockImplementation(
+      (konkName: string) => konkName.trim().toLowerCase() === "air"
+    );
+
+    const groups = [
+      { _id: { toString: () => "g1" }, konkName: "air" },
+      { _id: { toString: () => "g2" }, konkName: "AIR" },
+      { _id: { toString: () => "g3" }, konkName: "balun" },
+    ];
+    const exec = vi.fn().mockResolvedValue(groups);
+    const lean = vi.fn().mockReturnValue({ exec });
+    const select = vi.fn().mockReturnValue({ lean });
+    vi.mocked(Skugr.find).mockReturnValue({ select } as never);
+
+    vi.mocked(fillSkugrSkusFromBrowserUtil).mockResolvedValue({
+      skugr: {} as never,
+      stats: { created: 2 } as never,
+    });
+
+    startFillSkugrSkusCron();
+    if (cronCallback) {
+      await cronCallback();
+    }
+
+    expect(fillSkugrSkusFromBrowserUtil).toHaveBeenCalledTimes(1);
+    expect(fillSkugrSkusFromBrowserUtil).toHaveBeenCalledWith("g3");
+    expect(sendCronAnalyticsReport).toHaveBeenCalledWith("skugr report");
   });
 });

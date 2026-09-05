@@ -12,6 +12,7 @@ import {
   shouldApplyInterUnitClusterPause,
 } from "../../slices/utils/competitorScrapeThrottle.js";
 import { delay } from "../../../utils/delay.js";
+import { isServerSkugrFillDisabled } from "../config/isServerSkugrFillDisabled.js";
 import { Skugr } from "../models/Skugr.js";
 import { fillSkugrSkusFromBrowserUtil } from "../utils/fillSkugrSkusFromBrowserUtil.js";
 
@@ -91,6 +92,14 @@ export function startFillSkugrSkusCron(): CronJob {
           const konkName = (skugr.konkName ?? "").trim();
           const normalizedKonk = normalizeCompetitorName(konkName);
           const isLast = index >= skugrs.length - 1;
+
+          if (isServerSkugrFillDisabled(konkName)) {
+            log.info(
+              { skugrId, konkName, index: index + 1, total: skugrs.length },
+              "skugr refill skipped (server fill disabled)"
+            );
+            continue;
+          }
 
           if (airOriginBlocked && normalizedKonk === "air") {
             log.warn(

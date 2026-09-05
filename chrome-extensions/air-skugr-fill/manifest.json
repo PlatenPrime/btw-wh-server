@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "BTW Air Skugr Fill",
+  "version": "1.0.0",
+  "description": "Клиентский refill товарных групп Air: first-party листинг → POST HTML на backend.",
+  "permissions": ["storage", "tabs", "scripting"],
+  "host_permissions": [
+    "https://airballoons.com.ua/*",
+    "http://localhost:3232/*",
+    "http://127.0.0.1:3232/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_title": "Air Skugr Fill",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://airballoons.com.ua/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

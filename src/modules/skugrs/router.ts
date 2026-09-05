@@ -8,14 +8,28 @@ import {
   deleteSkugrByIdController,
   deleteSkugrWithSkusController,
   fillSkugrSkusController,
+  getAirClientSkugrPendingController,
   getAllSkugrsController,
   getSkugrByIdController,
+  postAirClientFillPageController,
   setIsSlicedController,
   updateSkugrByIdController,
 } from "./controllers/index.js";
 
 const router = Router();
 
+router.get(
+  "/client/air/pending",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getAirClientSkugrPendingController),
+);
+router.post(
+  "/client/air/id/:id/fill-page",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(postAirClientFillPageController),
+);
 router.get(
   "/",
   checkAuth,

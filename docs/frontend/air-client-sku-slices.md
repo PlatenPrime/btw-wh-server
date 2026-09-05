@@ -4,7 +4,7 @@
 
 Серверный scrape Air — primary для live и ночного SKU/analog cron (impit, прямой egress). Server compensation для Air выключена. Client-ingestion — канал дозаполнения срезов Air SKU за **сегодня** (календарный день `Europe/Kiev`) с машины оператора: missing после abort на Cloudflare 520, ключи с `-1`, или ручной прогон. Chrome extension открывает first-party страницу товара, frontend с JWT отправляет HTML на backend.
 
-> **AIR_IDLE_MODE (активен):** серверный scrape и live-stock эндпоинт переведены в холостой режим — возвращают `-1/-1` без сетевых запросов. Компенсация выполняется на клиенте. Флаг: `src/modules/browser/air/utils/airIdleMode.ts`.
+> **AIR_IDLE_MODE (активен):** серверный scrape и live-stock эндпоинт переведены в холостой режим — возвращают `-1/-1` без сетевых запросов. Group listing crawl с сервера тоже выключен (refill групп — [air-client-skugr-fill](air-client-skugr-fill.md)). Компенсация срезов выполняется на клиенте. Флаг: `src/modules/browser/air/utils/airIdleMode.ts`.
 
 Расширение и frontend живут вне этого репозитория; здесь только контракт поведения.
 

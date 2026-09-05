@@ -389,6 +389,8 @@
 |-------|------|----------------|--------|
 | GET | `/` | JWT | ≥ ADMIN |
 | GET | `/id/:id` | JWT | ≥ ADMIN |
+| GET | `/client/air/pending` | JWT | ≥ ADMIN |
+| POST | `/client/air/id/:id/fill-page` | JWT | ≥ ADMIN |
 | POST | `/` | JWT | ≥ ADMIN |
 | POST | `/id/:id/fill-skus` | JWT | ≥ ADMIN |
 | POST | `/set-is-sliced` | JWT | ≥ ADMIN |

@@ -3,6 +3,7 @@ import { UnsupportedKonkForGroupProductsError } from "../../../browser/group-pro
 import { summarizeBrowserError } from "../../../browser/utils/browserRequest.js";
 import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../utils/fillSkugrSkusFromBrowserUtil.js";
+import { ServerSkugrFillDisabledError } from "../../utils/serverSkugrFillDisabledError.js";
 import { fillSkugrSkusSchema } from "./schemas/fillSkugrSkusSchema.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
@@ -55,6 +56,13 @@ export const fillSkugrSkusController = async (
       stats: result.stats,
     });
   } catch (error) {
+    if (error instanceof ServerSkugrFillDisabledError) {
+      res.status(400).json({
+        message: error.message,
+        code: error.code,
+      });
+      return;
+    }
     if (error instanceof UnsupportedKonkForGroupProductsError) {
       res.status(400).json({ message: error.message });
       return;

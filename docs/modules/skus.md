@@ -62,7 +62,7 @@ Sku — документ, описывающий единицу товара к�
 - создание и обновление (`POST`, `PATCH`) — роль ADMIN;
 - удаление (`DELETE`) — роль PRIME.
 
-Массовое создание SKU при привязке к группе конкурента выполняется через **POST `/api/skugrs/id/:id/fill-skus`** (см. [модуль Skugrs](./skugrs.md) и [API Skugrs](../api/skugrs.md)).
+Массовое создание SKU при привязке к группе конкурента выполняется через **POST `/api/skugrs/id/:id/fill-skus`**. Для Air при `AIR_IDLE_MODE` — **POST `/api/skugrs/client/air/id/:id/fill-page`** (см. [модуль Skugrs](./skugrs.md) и [API Skugrs](../api/skugrs.md)).
 
 Список SKU конкретной группы (по id из поля `skugr.skus`) — **GET `/api/skus/by-skugr/:skugrId`** с пагинацией и поиском по `title`, см. [API Skus](../api/skus.md).
 

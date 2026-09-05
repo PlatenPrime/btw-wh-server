@@ -245,4 +245,40 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
     const refreshed = await Skugr.findById(skugr._id).lean();
     expect(refreshed!.skus.map(String)).toContain(existing._id.toString());
   });
+
+  it("throws CLIENT_INGEST_REQUIRED for air when idle and does not fetch", async () => {
+    const skugr = await Skugr.create({
+      konkName: "air",
+      prodName: "acme",
+      title: "Air group",
+      url: "https://airballoons.com.ua/g",
+      skus: [],
+    });
+
+    await expect(
+      fillSkugrSkusFromBrowserUtil(skugr._id.toString())
+    ).rejects.toMatchObject({
+      name: "ServerSkugrFillDisabledError",
+      code: "CLIENT_INGEST_REQUIRED",
+    });
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it("forwards maxPages to fetch", async () => {
+    mockFetch.mockResolvedValue([]);
+    const skugr = await Skugr.create({
+      konkName: "yumi",
+      prodName: "acme",
+      title: "Group",
+      url: "https://yumi.example/group",
+      skus: [],
+    });
+
+    await fillSkugrSkusFromBrowserUtil(skugr._id.toString(), { maxPages: 3 });
+
+    expect(mockFetch).toHaveBeenCalledWith("yumi", {
+      groupUrl: "https://yumi.example/group",
+      maxPages: 3,
+    });
+  });
 });

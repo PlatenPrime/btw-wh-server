@@ -5,6 +5,7 @@ import { createTestUser } from "../../../../../test/setup.js";
 import { UnsupportedKonkForGroupProductsError } from "../../../../browser/group-products/fetchGroupProductsByKonkName.js";
 import { Event } from "../../../../events/models/Event.js";
 import { fillSkugrSkusController } from "../fillSkugrSkusController.js";
+import { ServerSkugrFillDisabledError } from "../../../utils/serverSkugrFillDisabledError.js";
 
 vi.mock("../../../utils/fillSkugrSkusFromBrowserUtil.js", () => ({
   fillSkugrSkusFromBrowserUtil: vi.fn(),
@@ -73,6 +74,23 @@ describe("fillSkugrSkusController", () => {
 
     expect(responseStatus.code).toBe(400);
     expect(responseJson.message).toMatch(/air/);
+  });
+
+  it("400 CLIENT_INGEST_REQUIRED when server fill is disabled", async () => {
+    mockFill.mockRejectedValue(new ServerSkugrFillDisabledError("air"));
+
+    const req = {
+      params: { id: "507f1f77bcf86cd799439011" },
+      body: {},
+    } as unknown as Request;
+
+    await fillSkugrSkusController(req, res);
+
+    expect(responseStatus.code).toBe(400);
+    expect(responseJson).toMatchObject({
+      code: "CLIENT_INGEST_REQUIRED",
+    });
+    expect(mockFill).toHaveBeenCalled();
   });
 
   it("200 creates audit event when req.user is present", async () => {

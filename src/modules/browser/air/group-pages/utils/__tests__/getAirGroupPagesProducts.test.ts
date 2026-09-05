@@ -9,6 +9,7 @@ import {
 
 vi.mock("../../../../utils/fetchPageHtml.js");
 vi.mock("../../../../utils/sleep.js");
+vi.mock("../../../utils/airIdleMode.js", () => ({ AIR_IDLE_MODE: false }));
 vi.mock("../../../../../../logging/createLogger.js", () => ({
   createLogger: () => ({
     warn: vi.fn(),

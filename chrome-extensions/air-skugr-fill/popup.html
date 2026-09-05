@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>Air Skugr Fill</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>Air Skugr Fill</h1>
+    <label>
+      API origin
+      <input id="apiBase" type="text" placeholder="http://localhost:3232" />
+    </label>
+    <label>
+      JWT
+      <input id="jwt" type="password" placeholder="Bearer token без префикса" />
+    </label>
+    <div class="row">
+      <label>
+        Page jitter min ms
+        <input id="pageMinMs" type="number" />
+      </label>
+      <label>
+        Page jitter max ms
+        <input id="pageMaxMs" type="number" />
+      </label>
+    </div>
+    <div class="row">
+      <label>
+        Group jitter min ms
+        <input id="groupMinMs" type="number" />
+      </label>
+      <label>
+        Group jitter max ms
+        <input id="groupMaxMs" type="number" />
+      </label>
+    </div>
+    <div class="actions">
+      <button id="save" type="button">Save</button>
+      <button id="start" type="button">Start</button>
+      <button id="stop" type="button">Stop</button>
+    </div>
+    <pre id="log"></pre>
+    <script src="popup.js"></script>
+  </body>
+</html>

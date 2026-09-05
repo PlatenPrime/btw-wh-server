@@ -78,7 +78,7 @@
 
 ### POST `/api/skugrs/id/:id/fill-skus`
 
-Заполнение массива `skus` группы по данным парсера страниц группы в модуле `browser`. Для `konkName` выбирается реализация: `yumi`, `yumin`, `air`, `sharte`, `balun`, `perfect`; для неподдерживаемого конкурента — **400**.
+Заполнение массива `skus` группы по данным парсера страниц группы в модуле `browser`. Для `konkName` выбирается реализация: `yumi`, `yumin`, `air`, `sharte`, `balun`, `perfect`; для неподдерживаемого конкурента — **400**. Для **air** при активном `AIR_IDLE_MODE` — **400** `{ code: "CLIENT_INGEST_REQUIRED" }`; refill через `POST /api/skugrs/client/air/id/:id/fill-page`.
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
@@ -112,7 +112,78 @@
 
 Поле `stats`: сколько позиций вернул парсер (`fetched`); сколько отброшено из‑за дубликата `url` в выдаче (`dedupedByUrl`); сколько URL уже были в группе (`skippedAlreadyInGroup`); без идентификатора товара в выдаче (`skippedNoProductId`); конфликт по занятому другим URL `productId` (`skippedProductIdConflict`); для группы с производителем-заглушкой `newsku` — сколько существующих по URL SKU не добавлено, потому что у них уже другой `prodName` (`skippedNonNewskuManufacturer`); для группы с любым другим `prodName` — сколько существующих по URL SKU имели `prodName: "newsku"` и получили обновление на `prodName` текущей группы (`promotedFromNewsku`); сколько существующих SKU только добавлено в группу (`linkedExisting`); сколько создано новых документов SKU (`created`). У **новых** SKU при создании заполняются `title`, `url` и `imageUrl` из ответа парсера. У уже существующих SKU поля обычно не меняются, кроме случая промоута с `newsku` на `prodName` парсируемой группы (см. модуль Skugrs).
 
-**Ошибки:** 400 (валидация или неподдерживаемый `konkName`), 404 (группа не найдена), 401, 403, 500.
+**Ошибки:** 400 (валидация, неподдерживаемый `konkName`, или `CLIENT_INGEST_REQUIRED` для air при idle), 404 (группа не найдена), 401, 403, 500.
+
+---
+
+### GET `/api/skugrs/client/air/pending`
+
+Очередь всех товарных групп `konkName=air` с непустым `url` для клиентского refill.
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Ответ 200:**
+
+```json
+{
+  "message": "Air client skugr pending retrieved successfully",
+  "data": {
+    "items": [
+      {
+        "skugrId": "hex ObjectId",
+        "title": "string",
+        "url": "string",
+        "prodName": "string"
+      }
+    ]
+  }
+}
+```
+
+**Ошибки:** 401, 403.
+
+---
+
+### POST `/api/skugrs/client/air/id/:id/fill-page`
+
+Одна страница HTML-листинга Air: парсинг карточек на сервере, аддитивный fill состава группы. `nextPageUrl` — следующая страница (`link[rel=next]`) или `null` (пустая сетка / конец).
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Параметры пути:** `id` — ObjectId группы.
+
+**Body (JSON):**
+
+- `sourceUrl`: string (URL) — должен совпадать с `skugr.url`
+- `pageUrl`: string (URL) — та же категория: origin и pathname как у группы, query совпадает кроме `page`
+- `html`: string — `document.documentElement.outerHTML`, максимум 2_000_000 символов
+
+**Ответ 200:**
+
+```json
+{
+  "message": "Air client skugr page filled successfully",
+  "data": {
+    "stats": {
+      "fetched": 0,
+      "dedupedByUrl": 0,
+      "skippedAlreadyInGroup": 0,
+      "skippedNoProductId": 0,
+      "skippedProductIdConflict": 0,
+      "skippedNonNewskuManufacturer": 0,
+      "promotedFromNewsku": 0,
+      "linkedExisting": 0,
+      "created": 0
+    },
+    "nextPageUrl": null,
+    "productsOnPage": 0
+  }
+}
+```
+
+`stats` — те же счётчики, что у `fill-skus`, но только по карточкам этой страницы.
+
+**Ошибки:** 400 (`URL_MISMATCH`, `PAGE_URL_MISMATCH`, `NOT_AIR`, валидация), 404 (группа не найдена), 422 (`PARSE_FAILED` — нет сетки листинга и нет карточек), 401, 403.
 
 ---
 
