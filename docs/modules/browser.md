@@ -36,7 +36,7 @@
 
 ### Общий HTTP-клиент
 
-[`browserRequest.ts`](../../src/modules/browser/utils/browserRequest.ts) — singleton axios с browser-like заголовками и таймаутом 30 с. Большинство конкурентных парсеров (кроме Air stock и сложных потоков вроде Perfect) вызывают его напрямую.
+[`browserRequest.ts`](../../src/modules/browser/utils/browserRequest.ts) — singleton axios с browser-like заголовками и таймаутом 30 с. Большинство конкурентных парсеров (кроме Air stock и сложных потоков вроде Perfect и Balun) вызывают его напрямую.
 
 ### Air: dual-path (server + client)
 
@@ -52,6 +52,14 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 Результаты stock-scrape пишутся в info-лог (`browser stock result`: konk, link, stock, price, ok) с лимитом ≤20 сообщений в минуту на process; ошибки fetch — отдельно через `logBrowserError`.
 
+### Balun: остаток через GraphQL корзины Prom
+
+Число остатка на карточке Balun (company site Prom.ua) больше не лежит в HTML-аналитике Facebook (`data-advtracking-fb-product-data`). Актуальный источник — GraphQL `/bfg/graphql`: анонимная сессия с GET карточки (`Set-Cookie`), `AddProductToCart`, затем `CartChangeProductQuantity` с заведомо большим qty. Prom отвечает union `RequestedQuantityRecalculatedType` и клампит qty до склада (`recalculatedQuantity`, reason `EXCEEDS_AMOUNT_OF_PRODUCT_IN_STOCK`). Если qty приняли как есть (`RequestedQuantitySet`), точное число склада неизвестно — сентинель `-1`, чтобы не записать probe в срезы. Товар, который нельзя заказать (`ProductNotOrderableError` / удалён), даёт stock `0` при живой цене.
+
+Цена по-прежнему с HTML `data-analytics` (`clerk.price_original`); если атрибута нет — unit selling из ответа корзины. CSRF для add: токен из HTML, иначе cookie `csrf_token_company_site` в заголовок `x-csrftoken`. Сессия эфемерная (cookie только этого запроса), корзину после замера не чистим.
+
+`getBalunStockData` ходит через `getBrowserAxios` + merge `Set-Cookie`, как Perfect, а не через `browserGet` (тот не отдаёт заголовки).
+
 ### Multi-transport (`http` | `impit` | `playwright`)
 
 Общая точка входа — [`fetchPageHtml`](../../src/modules/browser/utils/fetchPageHtml.ts):
@@ -64,7 +72,7 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают. Пакет `impit` тянет prebuilt native binary под платформу.
 
-Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
+Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Perfect и Balun stock используют `getBrowserAxios` напрямую (cookie jar). Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
 
 ### Сентинельные значения
 

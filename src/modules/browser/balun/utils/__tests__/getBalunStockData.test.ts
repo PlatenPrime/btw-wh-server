@@ -1,22 +1,123 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getBalunStockData } from "../getBalunStockData.js";
-import { browserGet } from "../../../utils/browserRequest.js";
+import { getBalunStockData, parseBalunHtmlPrice } from "../getBalunStockData.js";
+import { getBrowserAxios } from "../../../utils/browserRequest.js";
+import {
+  ADD_PRODUCT_TO_CART_QUERY,
+  BALUN_PROBE_QUANTITY,
+  CART_CHANGE_PRODUCT_QUANTITY_QUERY,
+} from "../balun-graphql/balunGraphqlQueries.js";
 
-vi.mock("../../../utils/browserRequest.js");
+vi.mock("../../../utils/browserRequest.js", () => ({
+  getBrowserAxios: vi.fn(),
+  logBrowserError: vi.fn(),
+}));
 
-const validFbProductData =
-  '{"content_ids":[1341820466],"contents":[{"id":1341820466,"quantity":10000}],"value":0.04,"currency":"USD"}';
-const validAnalyticsData =
-  '{"clerk":{"price_original":"1.58","product_id":"1341820466"}}';
+const PRODUCT_URL =
+  "https://balun.com.ua/ua/p1341824038-folgirovannaya-sharik-zvezda.html";
+const PRODUCT_ID = "1341824038";
+const CART_ID = "1094691970";
+const HTML_WITH_PRICE = `
+  <div data-analytics='{"clerk":{"price_original":"1.46"}}'></div>
+`;
+const HTML_WITH_COMMA_PRICE = `
+  <div data-analytics='{"clerk":{"price_original":"12,34"}}'></div>
+`;
+
+const ADD_SUCCESS = {
+  data: {
+    cartAddProduct: {
+      __typename: "CartAddProductSuccess",
+      self: {
+        cartList: {
+          carts: [
+            {
+              id: CART_ID,
+              items: [
+                {
+                  productId: PRODUCT_ID,
+                  price: { unit: { selling: "1.46" } },
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
+  },
+};
+
+const CHANGE_RECALCULATED = {
+  data: {
+    cartChangeProductQuantity: {
+      __typename: "RequestedQuantityRecalculatedType",
+      recalculatedReason: "EXCEEDS_AMOUNT_OF_PRODUCT_IN_STOCK",
+      recalculatedQuantity: 371,
+      self: {
+        cartList: {
+          cart: {
+            items: [
+              {
+                productId: PRODUCT_ID,
+                price: { unit: { selling: "1.46" } },
+              },
+            ],
+          },
+        },
+      },
+    },
+  },
+};
+
+describe("parseBalunHtmlPrice", () => {
+  it("reads clerk.price_original", () => {
+    expect(parseBalunHtmlPrice(HTML_WITH_PRICE)).toBe(1.46);
+  });
+
+  it("parses comma decimals", () => {
+    expect(parseBalunHtmlPrice(HTML_WITH_COMMA_PRICE)).toBe(12.34);
+  });
+
+  it("returns undefined when analytics/price is missing or invalid", () => {
+    expect(parseBalunHtmlPrice("<div></div>")).toBeUndefined();
+    expect(
+      parseBalunHtmlPrice(`<div data-analytics='{"clerk":{}}'></div>`)
+    ).toBeUndefined();
+    expect(
+      parseBalunHtmlPrice(
+        `<div data-analytics='{"clerk":{"price_original":""}}'></div>`
+      )
+    ).toBeUndefined();
+    expect(
+      parseBalunHtmlPrice(
+        `<div data-analytics='{"clerk":{"price_original":"немає"}}'></div>`
+      )
+    ).toBeUndefined();
+  });
+});
 
 describe("getBalunStockData", () => {
+  const mockGet = vi.fn();
+  const mockPost = vi.fn();
+
   beforeEach(() => {
-    vi.mocked(browserGet).mockReset();
+    mockGet.mockReset();
+    mockPost.mockReset();
+    vi.mocked(getBrowserAxios).mockReset();
+    vi.mocked(getBrowserAxios).mockReturnValue({
+      get: mockGet,
+      post: mockPost,
+    } as unknown as ReturnType<typeof getBrowserAxios>);
   });
 
   describe("Валидация входных данных", () => {
     it("должен выбрасывать ошибку при пустой ссылке", async () => {
       await expect(getBalunStockData("")).rejects.toThrow(
+        "Link is required and must be a string"
+      );
+    });
+
+    it("должен выбрасывать ошибку при пробельной ссылке", async () => {
+      await expect(getBalunStockData("   ")).rejects.toThrow(
         "Link is required and must be a string"
       );
     });
@@ -40,120 +141,302 @@ describe("getBalunStockData", () => {
     });
   });
 
-  describe("Успешные сценарии", () => {
-    it("должен возвращать { stock, price } при успешном парсинге", async () => {
-      const mockHtml = `
-        <div data-advtracking-fb-product-data='${validFbProductData}'></div>
-        <div data-analytics='${validAnalyticsData}'></div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
-
-      const result = await getBalunStockData(
-        "https://example.com/product/1341820466"
-      );
-
-      expect(result).toEqual({ stock: 10000, price: 1.58 });
-      expect(browserGet).toHaveBeenCalledWith(
-        "https://example.com/product/1341820466"
-      );
+  it("returns stock from recalculatedQuantity and HTML price", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: HTML_WITH_PRICE,
+      headers: {
+        "set-cookie": ["csrf_token_company_site=cookie-csrf; Path=/"],
+      },
     });
+    mockPost
+      .mockResolvedValueOnce({ status: 200, data: ADD_SUCCESS, headers: {} })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: CHANGE_RECALCULATED,
+        headers: {},
+      });
 
-    it("должен обрабатывать цену с запятой", async () => {
-      const mockHtml = `
-        <div data-advtracking-fb-product-data='{"contents":[{"quantity":5}]}'></div>
-        <div data-analytics='{"clerk":{"price_original":"12,34"}}'></div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+    const result = await getBalunStockData(PRODUCT_URL);
 
-      const result = await getBalunStockData("https://example.com/product/1");
+    expect(result).toEqual({ stock: 371, price: 1.46 });
+    expect(mockPost).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining("operation_name=AddProductToCart"),
+      expect.objectContaining({
+        operationName: "AddProductToCart",
+        query: ADD_PRODUCT_TO_CART_QUERY,
+        variables: {
+          payload: {
+            productId: PRODUCT_ID,
+            quantity: 1,
+            source: "COMPANY_SITE",
+          },
+          viewerSource: "COMPANY_SITE",
+        },
+      }),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Cookie: expect.stringContaining("csrf_token_company_site=cookie-csrf"),
+          "x-csrftoken": "cookie-csrf",
+        }),
+      })
+    );
+    expect(mockPost).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining("operation_name=CartChangeProductQuantity"),
+      expect.objectContaining({
+        operationName: "CartChangeProductQuantity",
+        query: CART_CHANGE_PRODUCT_QUANTITY_QUERY,
+        variables: {
+          payload: {
+            productId: PRODUCT_ID,
+            quantity: BALUN_PROBE_QUANTITY,
+            source: "COMPANY_SITE",
+          },
+          cartId: CART_ID,
+          source: "COMPANY_SITE",
+        },
+      }),
+      expect.anything()
+    );
+  });
 
-      expect(result).toEqual({ stock: 5, price: 12.34 });
+  it("prefers HTML csrf token over cookie", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: `${HTML_WITH_PRICE}<meta name="csrf-token" content="html-csrf">`,
+      headers: {
+        "set-cookie": ["csrf_token_company_site=cookie-csrf; Path=/"],
+      },
+    });
+    mockPost
+      .mockResolvedValueOnce({ status: 200, data: ADD_SUCCESS, headers: {} })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: CHANGE_RECALCULATED,
+        headers: {},
+      });
+
+    await getBalunStockData(PRODUCT_URL);
+
+    expect(mockPost.mock.calls[0]?.[2]?.headers).toEqual(
+      expect.objectContaining({ "x-csrftoken": "html-csrf" })
+    );
+  });
+
+  it("falls back to GraphQL unit selling when HTML price is missing", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: "<html>product</html>",
+      headers: {},
+    });
+    mockPost
+      .mockResolvedValueOnce({ status: 200, data: ADD_SUCCESS, headers: {} })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: CHANGE_RECALCULATED,
+        headers: {},
+      });
+
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: 371,
+      price: 1.46,
     });
   });
 
-  describe("Отсутствие ключа stock — присваивать 0", () => {
-    it("должен возвращать stock: 0 при отсутствии data-advtracking-fb-product-data", async () => {
-      const mockHtml = `
-        <div data-analytics='${validAnalyticsData}'></div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+  it("returns -1 when productId is missing in URL", async () => {
+    await expect(
+      getBalunStockData("https://balun.com.ua/ua/catalog")
+    ).resolves.toEqual({ stock: -1, price: -1 });
+    expect(getBrowserAxios).not.toHaveBeenCalled();
+  });
 
-      const result = await getBalunStockData("https://example.com/product/1");
+  it("returns -1 when product page HTML is empty", async () => {
+    mockGet.mockResolvedValueOnce({ data: "  ", headers: {} });
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: -1,
+      price: -1,
+    });
+    expect(mockPost).not.toHaveBeenCalled();
+  });
 
-      expect(result).toEqual({ stock: 0, price: 1.58 });
+  it("returns stock 0 when add says not orderable and HTML price exists", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: HTML_WITH_PRICE,
+      headers: {},
+    });
+    mockPost.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        data: {
+          cartAddProduct: { __typename: "ProductNotOrderableError" },
+        },
+      },
+      headers: {},
     });
 
-    it("должен возвращать stock: 0 при пустом contents", async () => {
-      const mockHtml = `
-        <div data-advtracking-fb-product-data='{"contents":[]}'></div>
-        <div data-analytics='${validAnalyticsData}'></div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: 0,
+      price: 1.46,
+    });
+    expect(mockPost).toHaveBeenCalledTimes(1);
+  });
 
-      const result = await getBalunStockData("https://example.com/product/1");
-
-      expect(result).toEqual({ stock: 0, price: 1.58 });
+  it("returns -1 when add says not orderable without a price", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: "<html>product</html>",
+      headers: {},
+    });
+    mockPost.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        data: {
+          cartAddProduct: { __typename: "ProductNotOrderableError" },
+        },
+      },
+      headers: {},
     });
 
-    it("должен возвращать stock: 0 при отсутствии quantity в contents[0]", async () => {
-      const mockHtml = `
-        <div data-advtracking-fb-product-data='{"contents":[{"id":123}]}'></div>
-        <div data-analytics='${validAnalyticsData}'></div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
-
-      const result = await getBalunStockData("https://example.com/product/1");
-
-      expect(result).toEqual({ stock: 0, price: 1.58 });
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: -1,
+      price: -1,
     });
   });
 
-  describe("Отсутствие или невалидные данные price", () => {
-    const negativeOutcome = { stock: -1, price: -1 };
-
-    it("должен возвращать { stock: -1, price: -1 } когда нет data-analytics", async () => {
-      const mockHtml = `
-        <div data-advtracking-fb-product-data='${validFbProductData}'></div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
-
-      const result = await getBalunStockData("https://example.com/product/1");
-
-      expect(result).toEqual(negativeOutcome);
+  it("returns -1 on AuthenticationError", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: HTML_WITH_PRICE,
+      headers: {},
+    });
+    mockPost.mockResolvedValueOnce({
+      status: 200,
+      data: {
+        data: { cartAddProduct: { __typename: "AuthenticationError" } },
+      },
+      headers: {},
     });
 
-    it("должен возвращать { stock: -1, price: -1 } когда clerk.price_original отсутствует", async () => {
-      const mockHtml = `
-        <div data-advtracking-fb-product-data='${validFbProductData}'></div>
-        <div data-analytics='{"clerk":{}}'></div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
-
-      const result = await getBalunStockData("https://example.com/product/1");
-
-      expect(result).toEqual(negativeOutcome);
-    });
-
-    it("должен возвращать { stock: -1, price: -1 } когда цена нечисловая", async () => {
-      const mockHtml = `
-        <div data-advtracking-fb-product-data='${validFbProductData}'></div>
-        <div data-analytics='{"clerk":{"price_original":"немає"}}'></div>
-      `;
-      vi.mocked(browserGet).mockResolvedValue(mockHtml);
-
-      const result = await getBalunStockData("https://example.com/product/1");
-
-      expect(result).toEqual(negativeOutcome);
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: -1,
+      price: -1,
     });
   });
 
-  describe("Обработка ошибок", () => {
-    it("должен возвращать { stock: -1, price: -1 } при ошибке сети", async () => {
-      vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
-
-      const result = await getBalunStockData("https://example.com/product/1");
-
-      expect(result).toEqual({ stock: -1, price: -1 });
+  it("returns -1 when change qty is accepted without clamp", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: HTML_WITH_PRICE,
+      headers: {},
     });
+    mockPost
+      .mockResolvedValueOnce({ status: 200, data: ADD_SUCCESS, headers: {} })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          data: {
+            cartChangeProductQuantity: { __typename: "RequestedQuantitySet" },
+          },
+        },
+        headers: {},
+      });
+
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: -1,
+      price: -1,
+    });
+  });
+
+  it("returns -1 when add HTTP status is 4xx", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: HTML_WITH_PRICE,
+      headers: {},
+    });
+    mockPost.mockResolvedValueOnce({
+      status: 403,
+      data: {},
+      headers: {},
+    });
+
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: -1,
+      price: -1,
+    });
+  });
+
+  it("returns -1 when change HTTP status is 4xx", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: HTML_WITH_PRICE,
+      headers: {},
+    });
+    mockPost
+      .mockResolvedValueOnce({ status: 200, data: ADD_SUCCESS, headers: {} })
+      .mockResolvedValueOnce({ status: 500, data: {}, headers: {} });
+
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: -1,
+      price: -1,
+    });
+  });
+
+  it("returns -1 when recalculated but no price from HTML or GraphQL", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: "<html>product</html>",
+      headers: {},
+    });
+    mockPost
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          data: {
+            cartAddProduct: {
+              __typename: "CartAddProductSuccess",
+              self: { cartList: { carts: [{ id: CART_ID, items: [] }] } },
+            },
+          },
+        },
+        headers: {},
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: {
+          data: {
+            cartChangeProductQuantity: {
+              __typename: "RequestedQuantityRecalculatedType",
+              recalculatedReason: "EXCEEDS_AMOUNT_OF_PRODUCT_IN_STOCK",
+              recalculatedQuantity: 371,
+            },
+          },
+        },
+        headers: {},
+      });
+
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: -1,
+      price: -1,
+    });
+  });
+
+  it("returns -1 on network error", async () => {
+    mockGet.mockRejectedValueOnce(new Error("Network error"));
+    await expect(getBalunStockData(PRODUCT_URL)).resolves.toEqual({
+      stock: -1,
+      price: -1,
+    });
+  });
+
+  it("omits x-csrftoken when HTML and cookie have no token", async () => {
+    mockGet.mockResolvedValueOnce({
+      data: HTML_WITH_PRICE,
+      headers: { "set-cookie": ["cid=1; Path=/"] },
+    });
+    mockPost
+      .mockResolvedValueOnce({ status: 200, data: ADD_SUCCESS, headers: {} })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: CHANGE_RECALCULATED,
+        headers: {},
+      });
+
+    await getBalunStockData(PRODUCT_URL);
+
+    const headers = mockPost.mock.calls[0]?.[2]?.headers as Record<string, string>;
+    expect(headers["x-csrftoken"]).toBeUndefined();
   });
 });
