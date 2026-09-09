@@ -7,6 +7,20 @@ vi.mock("../../../utils/browserRequest.js", () => ({
   logBrowserError: vi.fn(),
 }));
 
+const CART_URL = "https://perfectparty.in.ua/cart";
+
+function inStockPageHtml(extra = ""): string {
+  return `
+    <html><head>
+      <meta property="og:title" content="Кулька 10 шт. в уп.">
+      <meta property="product:availability" content="in_stock" />
+    </head><body>
+      <script>var prestashop = {"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id_product":"16467"};</script>
+      ${extra}
+    </body></html>
+  `;
+}
+
 describe("getPerfectStockData", () => {
   const mockGet = vi.fn();
   const mockPost = vi.fn();
@@ -20,22 +34,43 @@ describe("getPerfectStockData", () => {
     } as unknown as ReturnType<typeof getBrowserAxios>);
   });
 
+  function mockRefreshMissThenCart(
+    cart: { status?: number; data: unknown; headers?: Record<string, unknown> },
+    deleteResp: { data?: unknown } = {}
+  ): void {
+    mockPost
+      .mockResolvedValueOnce({ status: 200, data: "{}" })
+      .mockResolvedValueOnce({
+        status: cart.status ?? 200,
+        data: typeof cart.data === "string" ? cart.data : JSON.stringify(cart.data),
+        headers: cart.headers,
+      })
+      .mockResolvedValueOnce({ status: 200, data: deleteResp.data ?? "{}" });
+  }
+
+  function expectRefreshThenCartDelete(productUrl: string): void {
+    expect(mockPost.mock.calls[0]?.[0]).toBe(productUrl);
+    const refresh = new URLSearchParams(String(mockPost.mock.calls[0]?.[1] ?? ""));
+    expect(refresh.get("action")).toBe("refresh");
+    expect(refresh.get("ajax")).toBe("1");
+
+    const cartCalls = mockPost.mock.calls.filter((call) => call[0] === CART_URL);
+    expect(cartCalls).toHaveLength(2);
+    expect(new URLSearchParams(String(cartCalls[0]?.[1] ?? "")).get("add")).toBe("1");
+    expect(new URLSearchParams(String(cartCalls[1]?.[1] ?? "")).get("delete")).toBe("1");
+  }
+
   it("returns stock and price per piece when title has pack count", async () => {
+    const productUrl =
+      "https://perfectparty.in.ua/bez-malyunku-po-10-sht20-sht/16467-product.html";
     mockGet.mockResolvedValueOnce({
-      data: `
-        <html><head>
-          <meta property="og:title" content="Кулька 10 шт. в уп.">
-        </head><body>
-          <script>var prestashop = {"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id_product":"16467"};</script>
-        </body></html>
-      `,
+      data: inStockPageHtml(),
       headers: {
         "set-cookie": ["PHPSESSID=abc; path=/", "PrestaShop-foo=bar; path=/"],
       },
     });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({
+    mockRefreshMissThenCart({
+      data: {
         success: true,
         cart: {
           products: [
@@ -46,12 +81,10 @@ describe("getPerfectStockData", () => {
             },
           ],
         },
-      }),
+      },
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/bez-malyunku-po-10-sht20-sht/16467-product.html"
-    );
+    const result = await getPerfectStockData(productUrl);
 
     expect(result).toEqual({
       stock: 90,
@@ -59,10 +92,9 @@ describe("getPerfectStockData", () => {
       title: "Кулька 10 шт. в уп.",
       source: "cart",
     });
-    expect(mockGet).toHaveBeenCalledTimes(1);
-    expect(mockPost).toHaveBeenCalledTimes(1);
+    expectRefreshThenCartDelete(productUrl);
     expect(mockPost).toHaveBeenCalledWith(
-      "https://perfectparty.in.ua/cart",
+      CART_URL,
       expect.any(String),
       expect.objectContaining({
         headers: expect.objectContaining({
@@ -73,6 +105,7 @@ describe("getPerfectStockData", () => {
   });
 
   it("uses pack count from product HTML when title has no N шт", async () => {
+    const productUrl = "https://perfectparty.in.ua/test/16467-product.html";
     mockGet.mockResolvedValueOnce({
       data: `
         <html><head>
@@ -84,9 +117,8 @@ describe("getPerfectStockData", () => {
       `,
       headers: {},
     });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({
+    mockRefreshMissThenCart({
+      data: {
         success: true,
         cart: {
           products: [
@@ -97,12 +129,10 @@ describe("getPerfectStockData", () => {
             },
           ],
         },
-      }),
+      },
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/test/16467-product.html"
-    );
+    const result = await getPerfectStockData(productUrl);
 
     expect(result).toEqual({
       stock: 100,
@@ -110,9 +140,11 @@ describe("getPerfectStockData", () => {
       title: 'Кулька Gemar 12"/57 КП Пастель яскраво-рожевий',
       source: "cart",
     });
+    expectRefreshThenCartDelete(productUrl);
   });
 
   it("returns stock and price as is when pack count is absent", async () => {
+    const productUrl = "https://perfectparty.in.ua/test/16467-product.html";
     mockGet.mockResolvedValueOnce({
       data: `
         <html><head>
@@ -123,9 +155,8 @@ describe("getPerfectStockData", () => {
       `,
       headers: {},
     });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({
+    mockRefreshMissThenCart({
+      data: {
         success: true,
         cart: {
           products: [
@@ -136,12 +167,10 @@ describe("getPerfectStockData", () => {
             },
           ],
         },
-      }),
+      },
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/test/16467-product.html"
-    );
+    const result = await getPerfectStockData(productUrl);
 
     expect(result).toEqual({
       stock: 9,
@@ -156,9 +185,8 @@ describe("getPerfectStockData", () => {
       data: `<script>{"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id_product":"16467"}</script>`,
       headers: {},
     });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({
+    mockRefreshMissThenCart({
+      data: {
         success: true,
         cart: {
           products: [
@@ -171,7 +199,7 @@ describe("getPerfectStockData", () => {
             },
           ],
         },
-      }),
+      },
     });
 
     const result = await getPerfectStockData(
@@ -183,6 +211,7 @@ describe("getPerfectStockData", () => {
   });
 
   it("uses cart?action=show fallback when token is missing in product page", async () => {
+    const productUrl = "https://perfectparty.in.ua/path/16467-item.html";
     mockGet
       .mockResolvedValueOnce({
         data: `<html><body>{"id_product":"16467"}</body></html>`,
@@ -192,18 +221,15 @@ describe("getPerfectStockData", () => {
         data: `<a href="/cart?update=1&id_product=16467&token=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb">u</a>`,
         headers: { "set-cookie": ["PrestaShop-foo=bar; path=/"] },
       });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({
+    mockRefreshMissThenCart({
+      data: {
         cart: {
           products: [{ stock_quantity: 5, price_without_reduction: 50, name: "Товар" }],
         },
-      }),
+      },
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/path/16467-item.html"
-    );
+    const result = await getPerfectStockData(productUrl);
 
     expect(result).toEqual({
       stock: 5,
@@ -220,6 +246,7 @@ describe("getPerfectStockData", () => {
         }),
       })
     );
+    expectRefreshThenCartDelete(productUrl);
   });
 
   it("returns negative outcome when token is missing in both product page and cart page", async () => {
@@ -242,20 +269,20 @@ describe("getPerfectStockData", () => {
   });
 
   it("returns negative outcome when cart response is invalid json", async () => {
+    const productUrl = "https://perfectparty.in.ua/path/16467-item.html";
     mockGet.mockResolvedValueOnce({
       data: `<script>{"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id_product":"16467"}</script>`,
       headers: {},
     });
-    mockPost.mockResolvedValueOnce({ status: 200, data: "<html>oops</html>" });
+    mockRefreshMissThenCart({ status: 200, data: "<html>oops</html>" });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/path/16467-item.html"
-    );
+    const result = await getPerfectStockData(productUrl);
 
     expect(result).toEqual({ stock: -1, price: -1, source: "unavailable" });
+    expectRefreshThenCartDelete(productUrl);
   });
 
-  it("returns stock 0 and per-piece price from HTML when cart has no product (OOS)", async () => {
+  it("returns stock 0 and per-piece price from HTML when page is OOS", async () => {
     mockGet.mockResolvedValueOnce({
       data: `
         <html><head>
@@ -268,10 +295,6 @@ describe("getPerfectStockData", () => {
       `,
       headers: {},
     });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({ success: true, cart: { products: [] } }),
-    });
 
     const result = await getPerfectStockData(
       "https://perfectparty.in.ua/path/16467-item.html"
@@ -283,6 +306,7 @@ describe("getPerfectStockData", () => {
       title: "Кулька латексна, 50 шт.",
       source: "html-oos",
     });
+    expect(mockPost).not.toHaveBeenCalled();
   });
 
   it("OOS HTML fallback uses pack count from Штук в упаковці when title has no шт", async () => {
@@ -299,10 +323,6 @@ describe("getPerfectStockData", () => {
       `,
       headers: {},
     });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({ success: true, cart: { products: [] } }),
-    });
 
     const result = await getPerfectStockData(
       "https://perfectparty.in.ua/path/16467-item.html"
@@ -314,9 +334,11 @@ describe("getPerfectStockData", () => {
       title: "Кулька Gemar пастель",
       source: "html-oos",
     });
+    expect(mockPost).not.toHaveBeenCalled();
   });
 
   it("returns negative outcome when in stock but no data-product and cart is empty", async () => {
+    const productUrl = "https://perfectparty.in.ua/path/16467-item.html";
     mockGet.mockResolvedValueOnce({
       status: 200,
       data: `
@@ -331,19 +353,18 @@ describe("getPerfectStockData", () => {
       `,
       headers: {},
     });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({ success: true, cart: { products: [] } }),
+    mockRefreshMissThenCart({
+      data: { success: true, cart: { products: [] } },
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/path/16467-item.html"
-    );
+    const result = await getPerfectStockData(productUrl);
 
     expect(result).toEqual({ stock: -1, price: -1, source: "unavailable" });
+    expectRefreshThenCartDelete(productUrl);
   });
 
   it("sends combination fields in cart POST without TOC checkout fields", async () => {
+    const productUrl = "https://perfectparty.in.ua/x/12115-3651-product.html";
     mockGet.mockResolvedValueOnce({
       data: `
         <form id="add-to-cart-or-refresh" action="/cart">
@@ -354,21 +375,20 @@ describe("getPerfectStockData", () => {
       `,
       headers: {},
     });
-    mockPost.mockResolvedValueOnce({
-      status: 200,
-      data: JSON.stringify({
+    mockRefreshMissThenCart({
+      data: {
         cart: {
           products: [{ stock_quantity: 5, price_without_reduction: 553, name: "Товар" }],
         },
-      }),
+      },
     });
 
-    await getPerfectStockData(
-      "https://perfectparty.in.ua/x/12115-3651-product.html"
-    );
+    await getPerfectStockData(productUrl);
 
-    const postBody = String(mockPost.mock.calls[0]?.[1] ?? "");
-    const params = new URLSearchParams(postBody);
+    const addCall = mockPost.mock.calls.find((call) => {
+      return call[0] === CART_URL && String(call[1]).includes("add=1");
+    });
+    const params = new URLSearchParams(String(addCall?.[1] ?? ""));
     expect(params.get("id_product_attribute")).toBe("3651");
     expect(params.get("group[2]")).toBe("5");
     expect(params.get("first_name")).toBeNull();
@@ -403,6 +423,35 @@ describe("getPerfectStockData", () => {
     expect(mockPost).not.toHaveBeenCalled();
   });
 
+  it("uses data-product quantity when related product is OOS", async () => {
+    mockGet.mockResolvedValueOnce({
+      status: 200,
+      data: `
+        <html><head>
+          <meta property="product:availability" content="in_stock" />
+        </head><body>
+          <div id="product-details" data-product='{"quantity":4,"price_amount":100,"name":"Кулька"}'></div>
+          <article class="product-miniature">
+            <link itemprop="availability" href="https://schema.org/OutOfStock" />
+          </article>
+        </body></html>
+      `,
+      headers: {},
+    });
+
+    const result = await getPerfectStockData(
+      "https://perfectparty.in.ua/x/12115-product.html"
+    );
+
+    expect(result).toEqual({
+      stock: 4,
+      price: 100,
+      title: "Кулька",
+      source: "data-product",
+    });
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
   it("parses data-product when GET returns HTTP 500 with product HTML", async () => {
     mockGet.mockResolvedValueOnce({
       status: 500,
@@ -430,6 +479,95 @@ describe("getPerfectStockData", () => {
       source: "data-product",
     });
     expect(mockPost).not.toHaveBeenCalled();
+  });
+
+  it("uses refresh product_details without posting to cart", async () => {
+    const productUrl = "https://perfectparty.in.ua/path/16467-item.html";
+    mockGet.mockResolvedValueOnce({
+      data: `<script>{"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id_product":"16467"}</script>`,
+      headers: {},
+    });
+    mockPost.mockResolvedValueOnce({
+      status: 200,
+      data: JSON.stringify({
+        product_details: `<div id="product-details" data-product='{"quantity":7,"price_amount":40,"name":"Товар"}'></div>`,
+      }),
+    });
+
+    const result = await getPerfectStockData(productUrl);
+
+    expect(result).toEqual({
+      stock: 7,
+      price: 40,
+      title: "Товар",
+      source: "refresh",
+    });
+    expect(mockPost).toHaveBeenCalledTimes(1);
+    expect(mockPost.mock.calls[0]?.[0]).toBe(productUrl);
+    expect(String(mockPost.mock.calls[0]?.[1])).toContain("action=refresh");
+  });
+
+  it("falls through to cart when refresh returns HTTP 400", async () => {
+    const productUrl = "https://perfectparty.in.ua/path/16467-item.html";
+    mockGet.mockResolvedValueOnce({
+      data: `<script>{"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id_product":"16467"}</script>`,
+      headers: {},
+    });
+    mockPost
+      .mockResolvedValueOnce({ status: 400, data: "{}" })
+      .mockResolvedValueOnce({
+        status: 200,
+        data: JSON.stringify({
+          cart: {
+            products: [{ stock_quantity: 2, price_without_reduction: 10, name: "Товар" }],
+          },
+        }),
+      })
+      .mockResolvedValueOnce({ status: 200, data: "{}" });
+
+    const result = await getPerfectStockData(productUrl);
+
+    expect(result).toEqual({
+      stock: 2,
+      price: 10,
+      title: "Товар",
+      source: "cart",
+    });
+    expectRefreshThenCartDelete(productUrl);
+  });
+
+  it("deletes from cart even when add throws", async () => {
+    const productUrl = "https://perfectparty.in.ua/path/16467-item.html";
+    mockGet.mockResolvedValueOnce({
+      data: `<script>{"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id_product":"16467"}</script>`,
+      headers: {},
+    });
+    mockPost
+      .mockResolvedValueOnce({ status: 200, data: "{}" })
+      .mockRejectedValueOnce(new Error("cart down"))
+      .mockResolvedValueOnce({ status: 200, data: "{}" });
+
+    const result = await getPerfectStockData(productUrl);
+
+    expect(result).toEqual({ stock: -1, price: -1, source: "unavailable" });
+    const deleteCall = mockPost.mock.calls.find((call) =>
+      String(call[1]).includes("delete=1")
+    );
+    expect(deleteCall?.[0]).toBe(CART_URL);
+  });
+
+  it("deletes from cart when add returns HTTP 400", async () => {
+    const productUrl = "https://perfectparty.in.ua/path/16467-item.html";
+    mockGet.mockResolvedValueOnce({
+      data: `<script>{"token":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","id_product":"16467"}</script>`,
+      headers: {},
+    });
+    mockRefreshMissThenCart({ status: 400, data: "{}" });
+
+    const result = await getPerfectStockData(productUrl);
+
+    expect(result.source).toBe("unavailable");
+    expectRefreshThenCartDelete(productUrl);
   });
 
   it("returns unavailable when GET is HTTP 500 with empty body", async () => {

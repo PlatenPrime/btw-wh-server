@@ -60,6 +60,12 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 `getBalunStockData` ходит через `getBrowserAxios` + merge `Set-Cookie`, как Perfect, а не через `browserGet` (тот не отдаёт заголовки).
 
+### Perfect: остаток без удержания склада
+
+Карточка PerfectParty — PrestaShop 1.7. Add-to-cart пишет гостевую корзину и **глобально** уменьшает `StockAvailable`, пока запись в `ps_cart` жива. Cookies запроса эфемерны, поэтому чужой зависший резерв после деплоя снять нельзя — только не создавать новый.
+
+Порядок опроса: `data-product.quantity` текущей комбинации на GET карточки; если quantity нет и страница не OOS — ajax `action=refresh` на URL карточки (склад не трогает); add-to-cart только если refresh не отдал quantity, сразу `delete=1` в той же сессии. `html-oos` — когда quantity нет и карточка реально распродана. OOS у related-миниатюр не затирает живой остаток основной позиции.
+
 ### Multi-transport (`http` | `impit` | `playwright`)
 
 Общая точка входа — [`fetchPageHtml`](../../src/modules/browser/utils/fetchPageHtml.ts):

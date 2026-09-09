@@ -29,6 +29,9 @@ export function extractDisplayPriceFromProductHtml(html: string): number | null 
   return null;
 }
 
+const RELATED_PRODUCT_SCOPE =
+  ".product-miniature, .product-accessories, .featured-products";
+
 export function isPerfectProductPageOutOfStock(html: string): boolean {
   const $ = cheerio.load(html);
 
@@ -37,15 +40,17 @@ export function isPerfectProductPageOutOfStock(html: string): boolean {
     return true;
   }
 
-  const schemaOos = $("link[itemprop=availability]")
-    .toArray()
-    .some((el) => {
-      const href = $(el).attr("href") ?? "";
-      return /OutOfStock/i.test(href);
-    });
-  if (schemaOos) return true;
+  const mainAvailability = $("link[itemprop=availability]")
+    .filter((_, el) => $(el).closest(RELATED_PRODUCT_SCOPE).length === 0)
+    .first();
+  const href = mainAvailability.attr("href") ?? "";
+  if (/OutOfStock/i.test(href)) {
+    return true;
+  }
 
-  const flagsBlock = $(".product-flags");
+  const flagsBlock = $(".product-flags")
+    .filter((_, el) => $(el).closest(RELATED_PRODUCT_SCOPE).length === 0)
+    .first();
   if (flagsBlock.length) {
     const flagText = flagsBlock.text();
     if (/розпродано/i.test(flagText)) return true;

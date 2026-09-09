@@ -55,11 +55,23 @@ describe("tryPerfectDataProductFallback", () => {
     });
   });
 
-  it("returns null when page is OOS", () => {
+  it("returns null when page is OOS and quantity is 0", () => {
     const html = `
       <link itemprop="availability" href="https://schema.org/OutOfStock" />
       <div id="product-details" data-product='{"quantity":0,"price_amount":100}'></div>`;
     expect(tryPerfectDataProductFallback(html, "x")).toBeNull();
+  });
+
+  it("returns quantity when data-product has stock despite OOS marker", () => {
+    const html = `
+      <link itemprop="availability" href="https://schema.org/OutOfStock" />
+      <div id="product-details" data-product='{"quantity":5,"price_amount":100,"name":"Кулька"}'></div>`;
+    expect(tryPerfectDataProductFallback(html, "x")).toMatchObject({
+      stock: 5,
+      price: 100,
+      title: "Кулька",
+      source: "data-product",
+    });
   });
 
   it("returns null when data-product is absent", () => {

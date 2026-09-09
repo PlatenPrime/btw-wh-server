@@ -29,4 +29,15 @@ describe("isPerfectProductPageOutOfStock", () => {
       <meta property="product:price:amount" content="100" />`;
     expect(isPerfectProductPageOutOfStock(html)).toBe(false);
   });
+
+  it("ignores OutOfStock on related miniatures", () => {
+    const html = `
+      <meta property="product:availability" content="in_stock" />
+      <link itemprop="availability" href="https://schema.org/InStock" />
+      <article class="product-miniature">
+        <link itemprop="availability" href="https://schema.org/OutOfStock" />
+        <ul class="product-flags"><li>Розпродано</li></ul>
+      </article>`;
+    expect(isPerfectProductPageOutOfStock(html)).toBe(false);
+  });
 });

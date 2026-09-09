@@ -1,5 +1,6 @@
 export type PerfectStockSource =
   | "data-product"
+  | "refresh"
   | "cart"
   | "html-oos"
   | "unavailable";

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   buildPerfectAddToCartBody,
+  buildPerfectDeleteFromCartBody,
+  buildPerfectRefreshBody,
   extractProductAttributeId,
   extractProductGroupSelections,
   extractProductId,
@@ -114,5 +116,55 @@ describe("buildPerfectAddToCartBody", () => {
     expect(params.get("action")).toBe("update");
     expect(params.get("first_name")).toBeNull();
     expect(params.get("id_toc_state")).toBeNull();
+  });
+});
+
+describe("buildPerfectRefreshBody", () => {
+  it("builds ajax refresh fields without add", () => {
+    const body = buildPerfectRefreshBody({
+      token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      idProduct: "12115",
+      idProductAttribute: "3651",
+      groupSelections: { "2": "5" },
+    });
+    const params = new URLSearchParams(body);
+    expect(params.get("action")).toBe("refresh");
+    expect(params.get("ajax")).toBe("1");
+    expect(params.get("qty")).toBe("1");
+    expect(params.get("id_product")).toBe("12115");
+    expect(params.get("id_product_attribute")).toBe("3651");
+    expect(params.get("group[2]")).toBe("5");
+    expect(params.get("add")).toBeNull();
+    expect(params.get("delete")).toBeNull();
+  });
+});
+
+describe("buildPerfectDeleteFromCartBody", () => {
+  it("builds delete=1 without add or qty", () => {
+    const body = buildPerfectDeleteFromCartBody({
+      token: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      idProduct: "12115",
+      idProductAttribute: "3651",
+      idCustomization: "0",
+    });
+    const params = new URLSearchParams(body);
+    expect(params.get("delete")).toBe("1");
+    expect(params.get("action")).toBe("update");
+    expect(params.get("id_product")).toBe("12115");
+    expect(params.get("id_product_attribute")).toBe("3651");
+    expect(params.get("id_customization")).toBe("0");
+    expect(params.get("add")).toBeNull();
+    expect(params.get("qty")).toBeNull();
+  });
+
+  it("defaults empty customization to 0", () => {
+    const params = new URLSearchParams(
+      buildPerfectDeleteFromCartBody({
+        token: "aa",
+        idProduct: "1",
+      })
+    );
+    expect(params.get("id_customization")).toBe("0");
+    expect(params.get("id_product_attribute")).toBeNull();
   });
 });

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { parseCartResponse, parsePackPrice } from "../perfectCartResponse.js";
+import {
+  parseCartResponse,
+  parsePackPrice,
+  resolvePerfectCartDeleteIds,
+} from "../perfectCartResponse.js";
 
 describe("parseCartResponse", () => {
   it("parses valid cart JSON", () => {
@@ -43,5 +47,43 @@ describe("parsePackPrice", () => {
       })
     ).toBe(8);
     expect(parsePackPrice({ price: 7 })).toBe(7);
+  });
+});
+
+describe("resolvePerfectCartDeleteIds", () => {
+  it("uses cart product ids when present", () => {
+    expect(
+      resolvePerfectCartDeleteIds(
+        { id_product: 12115, id_product_attribute: 3651, id_customization: 3 },
+        { idProduct: "1", idProductAttribute: "2", idCustomization: "0" }
+      )
+    ).toEqual({
+      idProduct: "12115",
+      idProductAttribute: "3651",
+      idCustomization: "3",
+    });
+  });
+
+  it("falls back when product is missing", () => {
+    const fallback = {
+      idProduct: "1",
+      idProductAttribute: "2",
+      idCustomization: "0",
+    };
+    expect(resolvePerfectCartDeleteIds(undefined, fallback)).toEqual(fallback);
+  });
+
+  it("falls back when cart ids are empty", () => {
+    const fallback = {
+      idProduct: "1",
+      idProductAttribute: "2",
+      idCustomization: "0",
+    };
+    expect(
+      resolvePerfectCartDeleteIds(
+        { id_product: "  ", id_product_attribute: "", id_customization: "" },
+        fallback
+      )
+    ).toEqual(fallback);
   });
 });

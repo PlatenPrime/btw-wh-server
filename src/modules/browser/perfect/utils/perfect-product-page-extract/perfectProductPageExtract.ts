@@ -87,23 +87,62 @@ export interface PerfectAddToCartParams {
   groupSelections?: Record<string, string>;
 }
 
+export interface PerfectDeleteFromCartParams {
+  token: string;
+  idProduct: string;
+  idProductAttribute?: string | null;
+  idCustomization?: string | null;
+}
+
+function appendPerfectProductIdentity(
+  body: URLSearchParams,
+  params: PerfectAddToCartParams
+): void {
+  body.set("token", params.token);
+  body.set("id_product", params.idProduct);
+  body.set("id_customization", "0");
+  if (params.idProductAttribute) {
+    body.set("id_product_attribute", params.idProductAttribute);
+  }
+  for (const [groupId, value] of Object.entries(params.groupSelections ?? {})) {
+    body.set(`group[${groupId}]`, value);
+  }
+}
+
 export function buildPerfectAddToCartBody(params: PerfectAddToCartParams): string {
   const body = new URLSearchParams({
-    token: params.token,
-    id_product: params.idProduct,
-    id_customization: "0",
     qty: "1",
     add: "1",
     action: "update",
   });
+  appendPerfectProductIdentity(body, params);
+  return body.toString();
+}
 
+/** PrestaShop ajax refresh карточки: без add, склад не резервируется. */
+export function buildPerfectRefreshBody(params: PerfectAddToCartParams): string {
+  const body = new URLSearchParams({
+    qty: "1",
+    action: "refresh",
+    ajax: "1",
+  });
+  appendPerfectProductIdentity(body, params);
+  return body.toString();
+}
+
+export function buildPerfectDeleteFromCartBody(
+  params: PerfectDeleteFromCartParams
+): string {
+  const customization = params.idCustomization?.trim() || "0";
+  const body = new URLSearchParams({
+    token: params.token,
+    id_product: params.idProduct,
+    id_customization: customization,
+    delete: "1",
+    action: "update",
+  });
   if (params.idProductAttribute) {
     body.set("id_product_attribute", params.idProductAttribute);
   }
-
-  for (const [groupId, value] of Object.entries(params.groupSelections ?? {})) {
-    body.set(`group[${groupId}]`, value);
-  }
-
   return body.toString();
 }
