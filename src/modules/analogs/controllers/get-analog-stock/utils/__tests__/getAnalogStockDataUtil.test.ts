@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Analog } from "../../../../models/Analog.js";
 import { getAirStockData } from "../../../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../../../browser/balun/utils/getBalunStockData.js";
+import { getSvbumStockData } from "../../../../../browser/svbum/utils/getSvbumStockData.js";
 
 vi.mock("../../../../../browser/air/utils/getAirStockData.js", () => ({
   getAirStockData: vi.fn(),
@@ -18,6 +19,9 @@ vi.mock("../../../../../browser/yumin/utils/getYuminStockData.js", () => ({
 vi.mock("../../../../../browser/sharte/utils/getSharteStockData.js", () => ({
   getSharteStockData: vi.fn(),
 }));
+vi.mock("../../../../../browser/svbum/utils/getSvbumStockData.js", () => ({
+  getSvbumStockData: vi.fn(),
+}));
 
 import {
   getAnalogStockDataUtil,
@@ -26,12 +30,14 @@ import {
 
 const mockGetBalunStockData = vi.mocked(getBalunStockData);
 const mockGetAirStockData = vi.mocked(getAirStockData);
+const mockGetSvbumStockData = vi.mocked(getSvbumStockData);
 
 describe("getAnalogStockDataUtil", () => {
   beforeEach(async () => {
     await Analog.deleteMany({});
     mockGetBalunStockData.mockReset();
     mockGetAirStockData.mockReset();
+    mockGetSvbumStockData.mockReset();
   });
 
   it("returns null when analog not found", async () => {
@@ -96,5 +102,23 @@ describe("getAnalogStockDataUtil", () => {
 
     const result = await getAnalogStockDataUtil(analog._id.toString());
     expect(result).toEqual({ stock: 3, price: -1 });
+  });
+
+  it("calls getSvbumStockData for svbum", async () => {
+    mockGetSvbumStockData.mockResolvedValue({ stock: 300, price: 3.93 });
+
+    const analog = await Analog.create({
+      konkName: "Svbum",
+      prodName: "p",
+      url: "https://sviatobum.ua/item",
+      artikul: "A4",
+    });
+
+    const result = await getAnalogStockDataUtil(analog._id.toString());
+
+    expect(mockGetSvbumStockData).toHaveBeenCalledWith(
+      "https://sviatobum.ua/item"
+    );
+    expect(result).toEqual({ stock: 300, price: 3.93 });
   });
 });

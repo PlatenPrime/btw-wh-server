@@ -135,6 +135,7 @@ flowchart TB
 | sharte | [`src/modules/browser/sharte/`](src/modules/browser/sharte/) |
 | yumi | [`src/modules/browser/yumi/`](src/modules/browser/yumi/) |
 | yumin | [`src/modules/browser/yumin/`](src/modules/browser/yumin/) |
+| svbum | [`src/modules/browser/svbum/`](src/modules/browser/svbum/) |
 | общие утилиты | [`src/modules/browser/utils/`](src/modules/browser/utils/) |
 | group-pages | [`src/modules/browser/group-pages/`](src/modules/browser/group-pages/) |
 | group-products | [`src/modules/browser/group-products/`](src/modules/browser/group-products/) |

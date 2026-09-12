@@ -20,13 +20,14 @@
 | sharik (Btrade) | [`src/modules/browser/sharik/`](../../src/modules/browser/sharik/) | `GET /api/browser/sharik/stock/:artikul` |
 | yumi | [`src/modules/browser/yumi/`](../../src/modules/browser/yumi/) | `GET /api/browser/yumi/stock` |
 | yumin | [`src/modules/browser/yumin/`](../../src/modules/browser/yumin/) | `GET /api/browser/yumin/stock` |
+| svbum | [`src/modules/browser/svbum/`](../../src/modules/browser/svbum/) | `GET /api/browser/svbum/stock` |
 
 Каждая папка конкурента содержит `controllers/` и `utils/get*StockData.ts` с логикой разбора HTML/DOM/JSON конкретного сайта.
 
 ## Связи между модулями
 
-- **analog-slices / analogs:** опрос остатков аналогов (air, balun, yumi, yumin, sharte).
-- **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect); для Air — client-ingestion HTML как канал дозаполнения после abort/`-1` (server compensation для Air выключена).
+- **analog-slices / analogs:** live-опрос аналогов (air, balun, yumi, yumin, sharte, svbum). Ежедневный analog-slices cron — только `ANALOG_SLICE_KONK_NAMES` (air, balun, sharte, yumi, yumin), без svbum.
+- **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect, svbum); для Air — client-ingestion HTML как канал дозаполнения после abort/`-1` (server compensation для Air выключена).
 - **btrade-slices / arts / dels / defs:** остатки sharik через bulk `product_rests` (`actualQuantity` для live, `sliceQuantity` для daily btrade-slice).
 - **skugrs:** обход страниц групп для наполнения SKU (`group-products`); Air listing при `AIR_IDLE_MODE` с сервера не ходит — client-ingest карточек листинга.
 - **grabo-skus:** полный обход каталога производителя Grabo (sitemap → категории → карточки) через `browser/grabo`.
@@ -66,6 +67,14 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 Порядок опроса: `data-product.quantity` текущей комбинации на GET карточки; если quantity нет и страница не OOS — ajax `action=refresh` на URL карточки (склад не трогает); add-to-cart только если refresh не отдал quantity, сразу `delete=1` в той же сессии. `html-oos` — когда quantity нет и карточка реально распродана. OOS у related-миниатюр не затирает живой остаток основной позиции.
 
+### Svbum: цена за штуку с карточки OpenCart
+
+Источник — HTML главной карточки `sviatobum.ua` (`#product` + `h1.page-title`). JSON-LD не используется: на скидке он отдаёт старую цену выбранного по умолчанию варианта, на soldout врёт `InStock`. Блоки рекомендаций игнорируются.
+
+Если на карточке есть radio-варианты упаковки (`упаковка (Nшт)`), цена — минимум цены за штуку среди вариантов с остатком > 0, остаток — сумма `qty пачек × N` по тем же in-stock вариантам. Если все варианты OOS — stock `0`, цена с самого дешёвого OOS. Без вариантов: `data-product-quantity` и `.price-new` (`data-special` иначе `data-price`); фасовка `N шт` из заголовка делит цену и умножает остаток, только когда вариантов нет.
+
+`getSvbumStockData` ходит через `fetchPageHtml` с `konkName: "svbum"` — транспорт можно сменить через `BROWSER_TRANSPORT_BY_KONK` без правки кода.
+
 ### Multi-transport (`http` | `impit` | `playwright`)
 
 Общая точка входа — [`fetchPageHtml`](../../src/modules/browser/utils/fetchPageHtml.ts):
@@ -78,7 +87,7 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают. Пакет `impit` тянет prebuilt native binary под платформу.
 
-Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Perfect и Balun stock используют `getBrowserAxios` напрямую (cookie jar). Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
+Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Perfect и Balun stock используют `getBrowserAxios` напрямую (cookie jar). Svbum stock — `fetchPageHtml` (`konkName: "svbum"`), на него влияет `BROWSER_TRANSPORT_BY_KONK`. Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
 
 ### Сентинельные значения
 

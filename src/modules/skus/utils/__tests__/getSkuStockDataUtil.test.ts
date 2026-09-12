@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Sku } from "../../models/Sku.js";
 import { getAirStockData } from "../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../browser/balun/utils/getBalunStockData.js";
+import { getSvbumStockData } from "../../../browser/svbum/utils/getSvbumStockData.js";
 
 vi.mock("../../../browser/air/utils/getAirStockData.js", () => ({
   getAirStockData: vi.fn(),
@@ -21,6 +22,9 @@ vi.mock("../../../browser/sharte/utils/getSharteStockData.js", () => ({
 vi.mock("../../../browser/perfect/utils/getPerfectStockData.js", () => ({
   getPerfectStockData: vi.fn(),
 }));
+vi.mock("../../../browser/svbum/utils/getSvbumStockData.js", () => ({
+  getSvbumStockData: vi.fn(),
+}));
 
 import {
   getSkuStockDataUtil,
@@ -29,12 +33,14 @@ import {
 
 const mockGetBalunStockData = vi.mocked(getBalunStockData);
 const mockGetAirStockData = vi.mocked(getAirStockData);
+const mockGetSvbumStockData = vi.mocked(getSvbumStockData);
 
 describe("getSkuStockDataUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
     mockGetBalunStockData.mockReset();
     mockGetAirStockData.mockReset();
+    mockGetSvbumStockData.mockReset();
   });
 
   it("returns null when sku not found", async () => {
@@ -103,5 +109,24 @@ describe("getSkuStockDataUtil", () => {
 
     const result = await getSkuStockDataUtil(sku._id.toString());
     expect(result).toEqual({ stock: 2, price: -1 });
+  });
+
+  it("calls getSvbumStockData for svbum", async () => {
+    mockGetSvbumStockData.mockResolvedValue({ stock: 300, price: 3.93 });
+
+    const sku = await Sku.create({
+      konkName: "svbum",
+      prodName: "p",
+      productId: "svbum-stock-1",
+      title: "Item",
+      url: "https://sviatobum.ua/item",
+    });
+
+    const result = await getSkuStockDataUtil(sku._id.toString());
+
+    expect(mockGetSvbumStockData).toHaveBeenCalledWith(
+      "https://sviatobum.ua/item"
+    );
+    expect(result).toEqual({ stock: 300, price: 3.93 });
   });
 });

@@ -11,7 +11,7 @@ API системы управления складом предоставляе�
 - [API Analog Slices](analog-slices.md) — `/api/analog-slices` — срезы остатков и цен аналогов по датам
 - [API Analogs](analogs.md) — `/api/analogs` — аналоги артикулов у конкурентов
 - [API Variants](variants.md) — `/api/variants` — варианты товаров у конкурентов
-- [API Browser](browser.md) — `/api/browser` — остаток и цена по URL страницы товара (yumi, yumin)
+- [API Browser](browser.md) — `/api/browser` — остаток и цена по URL страницы товара
 - [API Media](media.md) — `/api/media` — публичный proxy JPEG артикулов sharik
 - [API Btrade Slices](btrade-slices.md) — `/api/btrade-slices` — срезы Btrade
 - [API Auth](auth.md) — `/api/auth` — аутентификация и управление пользователями

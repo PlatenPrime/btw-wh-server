@@ -56,6 +56,18 @@
 
 ---
 
+### GET `/api/browser/svbum/stock`
+
+**Запрос:** query `link` — полный URL страницы товара на сайте СвятоБум (sviatobum.ua).
+
+**Ответ 200:** `{ message: string, data: { stock: number, price: number, title?: string } }`.
+
+**Ответ 404:** `{ message: string }` — товар не найден или данные недоступны (`stock: -1`, `price: -1`).
+
+**Ответ 400:** `{ message: string, errors: ... }` — ошибка валидации `link` (Zod).
+
+---
+
 ### GET `/api/browser/sharik/stock/:artikul`
 
 Остаток и цена по артикулу из bulk `product_rests` (`actualQuantity` + `price`). `nameukr` — из коллекции Art (может быть пустым).
