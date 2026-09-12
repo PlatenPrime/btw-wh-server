@@ -78,7 +78,7 @@
 
 ### POST `/api/skugrs/id/:id/fill-skus`
 
-Заполнение массива `skus` группы по данным парсера страниц группы в модуле `browser`. Для `konkName` выбирается реализация: `yumi`, `yumin`, `air`, `sharte`, `balun`, `perfect`; для неподдерживаемого конкурента — **400**. Для **air** при активном `AIR_IDLE_MODE` — **400** `{ code: "CLIENT_INGEST_REQUIRED" }`; refill через `POST /api/skugrs/client/air/id/:id/fill-page`.
+Заполнение массива `skus` группы по данным парсера страниц группы в модуле `browser`. Для `konkName` выбирается реализация: `yumi`, `yumin`, `air`, `sharte`, `balun`, `perfect`, `svbum`; для неподдерживаемого конкурента — **400**. Для **air** при активном `AIR_IDLE_MODE` — **400** `{ code: "CLIENT_INGEST_REQUIRED" }`; refill через `POST /api/skugrs/client/air/id/:id/fill-page`. Для **svbum** `url` группы должен сохранять query-фильтр `ocf`, иначе пагинация уйдёт на нефильтрованный листинг.
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
@@ -86,7 +86,7 @@
 
 **Body (JSON, опционально):**
 
-- `maxPages?: number` — лимит страниц пагинации для парсера (1–200), для конкурентов с постраничным обходом листинга (в т.ч. Yumi, Balun, Perfect и др.).
+- `maxPages?: number` — лимит страниц пагинации для парсера (1–200), для конкурентов с постраничным обходом листинга (в т.ч. Yumi, Balun, Perfect, Svbum и др.).
 
 **Ответ 200:**
 

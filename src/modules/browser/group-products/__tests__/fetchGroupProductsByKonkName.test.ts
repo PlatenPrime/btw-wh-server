@@ -22,9 +22,13 @@ vi.mock("../../yumi/group-pages/utils/getYumiGroupPagesProducts.js", () => ({
 vi.mock("../../yumin/group-pages/utils/getYuminGroupPagesProducts.js", () => ({
   getYuminGroupPagesProducts: vi.fn(),
 }));
+vi.mock("../../svbum/group-pages/utils/getSvbumGroupPagesProducts.js", () => ({
+  getSvbumGroupPagesProducts: vi.fn(),
+}));
 
 import { getYumiGroupPagesProducts } from "../../yumi/group-pages/utils/getYumiGroupPagesProducts.js";
 import { getAirGroupPagesProducts } from "../../air/group-pages/utils/getAirGroupPagesProducts.js";
+import { getSvbumGroupPagesProducts } from "../../svbum/group-pages/utils/getSvbumGroupPagesProducts.js";
 
 const sampleRow = {
   title: "Product A",
@@ -62,6 +66,21 @@ describe("fetchGroupProductsByKonkName", () => {
 
     expect(getAirGroupPagesProducts).toHaveBeenCalledWith({
       groupUrl: "https://air.example/group",
+    });
+    expect(result).toEqual([sampleRow]);
+  });
+
+  it("dispatches to svbum fetcher", async () => {
+    vi.mocked(getSvbumGroupPagesProducts).mockResolvedValue([sampleRow]);
+
+    const result = await fetchGroupProductsByKonkName("SVBUM", {
+      groupUrl: "https://sviatobum.ua/povitryani-kuli/lateksni-kulki/?ocf=abc",
+      maxPages: 3,
+    });
+
+    expect(getSvbumGroupPagesProducts).toHaveBeenCalledWith({
+      groupUrl: "https://sviatobum.ua/povitryani-kuli/lateksni-kulki/?ocf=abc",
+      maxPages: 3,
     });
     expect(result).toEqual([sampleRow]);
   });

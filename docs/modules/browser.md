@@ -73,7 +73,7 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 Если на карточке есть radio-варианты упаковки (`упаковка (Nшт)`), цена — минимум цены за штуку среди вариантов с остатком > 0, остаток — сумма `qty пачек × N` по тем же in-stock вариантам. Если все варианты OOS — stock `0`, цена с самого дешёвого OOS. Без вариантов: `data-product-quantity` и `.price-new` (`data-special` иначе `data-price`); фасовка `N шт` из заголовка делит цену и умножает остаток, только когда вариантов нет.
 
-`getSvbumStockData` ходит через `fetchPageHtml` с `konkName: "svbum"` — транспорт можно сменить через `BROWSER_TRANSPORT_BY_KONK` без правки кода.
+`getSvbumStockData` ходит через `fetchPageHtml` с `konkName: "svbum"` — транспорт можно сменить через `BROWSER_TRANSPORT_BY_KONK` без правки кода. Обход товарных групп (`getSvbumGroupPagesProducts`) тем же транспортом: карточки `li.product-layout`, `productId` с `button[data-p_id]`; пагинация по `rel=next` или «Вперед», query-фильтр `ocf` с первой страницы группы мержится на следующие (сайт его выкидывает из `rel=next`). Гайд для UI: [frontend: svbum](../frontend/svbum.md).
 
 ### Multi-transport (`http` | `impit` | `playwright`)
 
@@ -87,7 +87,7 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают. Пакет `impit` тянет prebuilt native binary под платформу.
 
-Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Perfect и Balun stock используют `getBrowserAxios` напрямую (cookie jar). Svbum stock — `fetchPageHtml` (`konkName: "svbum"`), на него влияет `BROWSER_TRANSPORT_BY_KONK`. Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
+Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Perfect и Balun stock используют `getBrowserAxios` напрямую (cookie jar). Svbum stock и crawl листинга групп — `fetchPageHtml` (`konkName: "svbum"`), на них влияет `BROWSER_TRANSPORT_BY_KONK`. Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
 
 ### Сентинельные значения
 
@@ -116,7 +116,7 @@ Per-competitor обёртки: `get*GroupPagesProducts` + Zod-схема (`group
 
 ### Group products (диспетчер)
 
-[`group-products/fetchGroupProductsByKonkName`](../../src/modules/browser/group-products/fetchGroupProductsByKonkName.ts) маршрутизирует запрос к нужному конкуренту. Поддерживаются: yumi, yumin, air, sharte, balun, perfect. Sharik не поддерживается для group-products.
+[`group-products/fetchGroupProductsByKonkName`](../../src/modules/browser/group-products/fetchGroupProductsByKonkName.ts) маршрутизирует запрос к нужному конкуренту. Поддерживаются: yumi, yumin, air, sharte, balun, perfect, svbum. Sharik не поддерживается для group-products.
 
 Возвращает `GroupBrowserProduct[]`: `{ title, url, imageUrl, productId }` — для создания SKU в `skugrs`.
 

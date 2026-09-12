@@ -2,6 +2,7 @@ import { getAirGroupPagesProducts } from "../air/group-pages/utils/getAirGroupPa
 import { getBalunGroupPagesProducts } from "../balun/group-pages/utils/getBalunGroupPagesProducts.js";
 import { getPerfectGroupPagesProducts } from "../perfect/group-pages/utils/getPerfectGroupPagesProducts.js";
 import { getSharteGroupPagesProducts } from "../sharte/group-pages/utils/getSharteGroupPagesProducts.js";
+import { getSvbumGroupPagesProducts } from "../svbum/group-pages/utils/getSvbumGroupPagesProducts.js";
 import { getYumiGroupPagesProducts } from "../yumi/group-pages/utils/getYumiGroupPagesProducts.js";
 import { getYuminGroupPagesProducts } from "../yumin/group-pages/utils/getYuminGroupPagesProducts.js";
 import type { FetchGroupProductsInput, GroupBrowserProduct } from "./types.js";
@@ -61,6 +62,8 @@ export async function fetchGroupProductsByKonkName(
       return fetchGroupPagesProductsVia(input, getBalunGroupPagesProducts);
     case "perfect":
       return fetchGroupPagesProductsVia(input, getPerfectGroupPagesProducts);
+    case "svbum":
+      return fetchGroupPagesProductsVia(input, getSvbumGroupPagesProducts);
     default:
       throw new UnsupportedKonkForGroupProductsError(konkName);
   }
