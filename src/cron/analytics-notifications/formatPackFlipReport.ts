@@ -1,4 +1,4 @@
-import type { PackFlipReviewResult } from "../../modules/sku-slices/utils/reviewPerfectPackFlipsUtil.js";
+import type { PackFlipReviewResult } from "../../modules/sku-slices/utils/reviewPackFlipsUtil.js";
 
 const SAMPLE_LIMIT = 15;
 
@@ -25,7 +25,7 @@ function formatSection(
   return [`${label}:`, ...shown];
 }
 
-export function formatPerfectPackFlipReport(result: PackFlipReviewResult): string {
+export function formatPackFlipReport(result: PackFlipReviewResult): string {
   const mode = result.apply ? "applied" : "dry-run";
   const range =
     result.dates.length > 0
@@ -33,7 +33,7 @@ export function formatPerfectPackFlipReport(result: PackFlipReviewResult): strin
       : "no-dates";
 
   return [
-    `📊 Perfect pack-flip — ${mode}`,
+    `📊 Pack-flip ${result.konkName} — ${mode}`,
     `${result.konkName} ${range}: patched ${result.patched.length}, price-only ${result.priceOnly.length}, ambiguous ${result.ambiguous.length}`,
     ...formatSection("patched", result.patched),
     ...formatSection("price-only", result.priceOnly),

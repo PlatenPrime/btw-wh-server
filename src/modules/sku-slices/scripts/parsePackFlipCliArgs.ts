@@ -1,6 +1,7 @@
 import { dateStringSchema } from "../../sku-reporting/schemas/dateSchema.js";
+import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
 
-export type PerfectPackFlipCliArgs = {
+export type PackFlipCliArgs = {
   from?: Date;
   to?: Date;
   apply: boolean;
@@ -23,7 +24,7 @@ function parseYmd(flag: string, raw: string): Date {
   return parsed.data;
 }
 
-export function parsePerfectPackFlipCliArgs(argv: string[]): PerfectPackFlipCliArgs {
+export function parsePackFlipCliArgs(argv: string[]): PackFlipCliArgs {
   let from: Date | undefined;
   let to: Date | undefined;
   let apply = false;
@@ -47,10 +48,11 @@ export function parsePerfectPackFlipCliArgs(argv: string[]): PerfectPackFlipCliA
     }
     if (arg === "--konk") {
       const value = readFlagValue(argv, i, "--konk");
-      if (!value.trim()) {
+      const normalized = normalizeCompetitorName(value);
+      if (!normalized) {
         throw new Error("--konk requires a name");
       }
-      konkName = value.trim();
+      konkName = normalized;
       i += 1;
       continue;
     }

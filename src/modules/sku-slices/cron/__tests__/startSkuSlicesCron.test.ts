@@ -25,15 +25,15 @@ vi.mock("../../../../cron/analytics-notifications/formatSkuSlicesReport.js", () 
     (excluded: string[]) => `sku-excluded:${excluded.join(",")}`
   ),
 }));
-vi.mock("../../../../cron/analytics-notifications/formatPerfectPackFlipReport.js", () => ({
-  formatPerfectPackFlipReport: vi.fn(() => "pack-flip:ok"),
+vi.mock("../../../../cron/analytics-notifications/formatPackFlipReport.js", () => ({
+  formatPackFlipReport: vi.fn(() => "pack-flip:ok"),
 }));
-vi.mock("../../utils/reviewPerfectPackFlipsUtil.js", async (importOriginal) => {
+vi.mock("../../utils/reviewPackFlipsUtil.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("../../utils/reviewPerfectPackFlipsUtil.js")>();
+    await importOriginal<typeof import("../../utils/reviewPackFlipsUtil.js")>();
   return {
     ...actual,
-    reviewPerfectPackFlipsUtil: vi.fn(),
+    reviewPackFlipsUtil: vi.fn(),
   };
 });
 
@@ -42,7 +42,7 @@ import { runSkuSliceForKonkUtil } from "../../utils/runSkuSliceForKonkUtil.js";
 import { startSkuSlicesCron } from "../startSkuSlicesCron.js";
 import { getExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
 import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
-import { reviewPerfectPackFlipsUtil } from "../../utils/reviewPerfectPackFlipsUtil.js";
+import { reviewPackFlipsUtil } from "../../utils/reviewPackFlipsUtil.js";
 
 const emptyReview = {
   konkName: "perfect",
@@ -80,7 +80,7 @@ describe("startSkuSlicesCron", () => {
       errors: 0,
     });
     vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
-    vi.mocked(reviewPerfectPackFlipsUtil).mockResolvedValue(emptyReview);
+    vi.mocked(reviewPackFlipsUtil).mockResolvedValue(emptyReview);
   });
 
   it("creates CronJob with expected schedule", () => {
@@ -95,7 +95,7 @@ describe("startSkuSlicesCron", () => {
     );
   });
 
-  it("filters excluded competitors, then reviews perfect pack-flips", async () => {
+  it("filters excluded competitors, then reviews pack-flips from config", async () => {
     vi.useFakeTimers({ now: new Date("2026-04-02T17:00:00.000Z") });
     try {
       vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set(["yumi"]));
@@ -120,19 +120,20 @@ describe("startSkuSlicesCron", () => {
       const d1 = vi.mocked(runSkuSliceForKonkUtil).mock.calls[0]![1];
       expect(d1.toISOString()).toBe("2026-04-03T00:00:00.000Z");
 
-      expect(reviewPerfectPackFlipsUtil).toHaveBeenCalledWith({
+      expect(reviewPackFlipsUtil).toHaveBeenCalledWith({
         dates: [
           new Date("2026-04-01T00:00:00.000Z"),
           new Date("2026-04-02T00:00:00.000Z"),
           new Date("2026-04-03T00:00:00.000Z"),
         ],
         apply: true,
+        konkName: "perfect",
       });
       const lastSliceOrder = Math.max(
         ...vi.mocked(runSkuSliceForKonkUtil).mock.invocationCallOrder
       );
       const reviewOrder =
-        vi.mocked(reviewPerfectPackFlipsUtil).mock.invocationCallOrder[0];
+        vi.mocked(reviewPackFlipsUtil).mock.invocationCallOrder[0];
       expect(reviewOrder).toBeGreaterThan(lastSliceOrder);
 
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
@@ -150,12 +151,12 @@ describe("startSkuSlicesCron", () => {
   it("does not fail the cron when pack-flip review throws", async () => {
     vi.useFakeTimers({ now: new Date("2026-04-02T17:00:00.000Z") });
     try {
-      vi.mocked(reviewPerfectPackFlipsUtil).mockRejectedValue(new Error("db down"));
+      vi.mocked(reviewPackFlipsUtil).mockRejectedValue(new Error("db down"));
       startSkuSlicesCron();
       await cronCallback?.();
 
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
-        expect.stringContaining("Perfect pack-flip review")
+        expect.stringContaining("Pack-flip review (perfect)")
       );
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
         expect.stringContaining("db down")
@@ -173,7 +174,7 @@ describe("startSkuSlicesCron", () => {
       await cronCallback?.();
 
       expect(runSkuSliceForKonkUtil).not.toHaveBeenCalled();
-      expect(reviewPerfectPackFlipsUtil).toHaveBeenCalledOnce();
+      expect(reviewPackFlipsUtil).toHaveBeenCalledOnce();
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith("pack-flip:ok");
     } finally {
       vi.useRealTimers();

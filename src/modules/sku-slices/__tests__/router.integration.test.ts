@@ -33,6 +33,17 @@ describe("Sku-slices router integration", () => {
         .expect(401);
     });
 
+    it("GET /api/sku-slices/pack-flips returns 401 without token", async () => {
+      await request(app)
+        .get("/api/sku-slices/pack-flips")
+        .query({
+          konkName: "perfect",
+          dateFrom: "2026-09-01",
+          dateTo: "2026-09-15",
+        })
+        .expect(401);
+    });
+
     it("GET /api/sku-slices returns 403 for USER role", async () => {
       await request(app)
         .get("/api/sku-slices")
@@ -78,6 +89,60 @@ describe("Sku-slices router integration", () => {
       expect(response.body.message).toBe("Sku slice retrieved successfully");
       expect(response.body.data.konkName).toBe(konk);
       expect(response.body.data.items.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("GET /api/sku-slices/pack-flips", () => {
+    it("400 when query validation fails", async () => {
+      const response = await request(app)
+        .get("/api/sku-slices/pack-flips")
+        .set(createAuthHeader())
+        .query({ konkName: "perfect", dateFrom: "2026-09-15", dateTo: "2026-09-01" })
+        .expect(400);
+
+      expect(response.body.message).toBe("Validation error");
+    });
+
+    it("200 returns dry-run findings for ADMIN", async () => {
+      await Sku.create({
+        konkName: "perfect",
+        prodName: "gemar",
+        productId: "perfect-1",
+        title: "Balloon",
+        url: "https://perfect.example/1",
+      });
+      await SkuSlice.create({
+        konkName: "perfect",
+        date: new Date("2026-09-13T00:00:00.000Z"),
+        data: { "perfect-1": { stock: 100, price: 100 } },
+      });
+      await SkuSlice.create({
+        konkName: "perfect",
+        date: new Date("2026-09-14T00:00:00.000Z"),
+        data: { "perfect-1": { stock: 10000, price: 1 } },
+      });
+      await SkuSlice.create({
+        konkName: "perfect",
+        date: new Date("2026-09-15T00:00:00.000Z"),
+        data: { "perfect-1": { stock: 100, price: 100 } },
+      });
+
+      const response = await request(app)
+        .get("/api/sku-slices/pack-flips")
+        .set(createAuthHeader())
+        .query({
+          konkName: "perfect",
+          dateFrom: "2026-09-13",
+          dateTo: "2026-09-15",
+        })
+        .expect(200);
+
+      expect(response.body.message).toBe(
+        "Pack-flip review retrieved successfully"
+      );
+      expect(response.body.data.apply).toBeUndefined();
+      expect(response.body.data.patched).toHaveLength(1);
+      expect(response.body.data.patched[0].productId).toBe("perfect-1");
     });
   });
 

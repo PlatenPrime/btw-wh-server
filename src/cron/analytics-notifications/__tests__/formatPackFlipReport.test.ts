@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { formatPerfectPackFlipReport } from "../formatPerfectPackFlipReport.js";
-import type { PackFlipFinding } from "../../../modules/sku-slices/utils/reviewPerfectPackFlipsUtil.js";
+import { formatPackFlipReport } from "../formatPackFlipReport.js";
+import type { PackFlipFinding } from "../../../modules/sku-slices/utils/reviewPackFlipsUtil.js";
 
 function finding(
   overrides: Partial<PackFlipFinding> & Pick<PackFlipFinding, "productId" | "kind">
@@ -16,9 +16,9 @@ function finding(
   };
 }
 
-describe("formatPerfectPackFlipReport", () => {
+describe("formatPackFlipReport", () => {
   it("formats zero counts for applied empty review", () => {
-    const msg = formatPerfectPackFlipReport({
+    const msg = formatPackFlipReport({
       konkName: "perfect",
       apply: true,
       dates: ["2026-09-13", "2026-09-14", "2026-09-15"],
@@ -26,7 +26,7 @@ describe("formatPerfectPackFlipReport", () => {
       priceOnly: [],
       ambiguous: [],
     });
-    expect(msg).toContain("📊 Perfect pack-flip — applied");
+    expect(msg).toContain("📊 Pack-flip perfect — applied");
     expect(msg).toContain(
       "perfect 2026-09-13…2026-09-15: patched 0, price-only 0, ambiguous 0"
     );
@@ -34,15 +34,16 @@ describe("formatPerfectPackFlipReport", () => {
   });
 
   it("renders no-dates when the range is empty", () => {
-    const msg = formatPerfectPackFlipReport({
-      konkName: "perfect",
+    const msg = formatPackFlipReport({
+      konkName: "air",
       apply: true,
       dates: [],
       patched: [],
       priceOnly: [],
       ambiguous: [],
     });
-    expect(msg).toContain("perfect no-dates: patched 0");
+    expect(msg).toContain("Pack-flip air — applied");
+    expect(msg).toContain("air no-dates: patched 0");
   });
 
   it("lists patched and price-only samples and truncates", () => {
@@ -54,7 +55,7 @@ describe("formatPerfectPackFlipReport", () => {
         patched: { stock: 100, price: 100 },
       })
     );
-    const msg = formatPerfectPackFlipReport({
+    const msg = formatPackFlipReport({
       konkName: "perfect",
       apply: false,
       dates: ["2026-09-11", "2026-09-15"],

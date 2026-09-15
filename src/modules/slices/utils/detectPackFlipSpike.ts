@@ -1,4 +1,4 @@
-import { isSkuSliceDataKeyFilled } from "./isSkuSliceDataKeyFilled.js";
+import { isValidSliceMetricValue } from "./isInvalidSliceStockResult.js";
 
 export const PACK_FLIP_MIN_FACTOR = 2;
 export const PACK_FLIP_VALUE_REL_TOL = 0.05;
@@ -53,8 +53,11 @@ export function isUsablePackFlipPoint(
 }
 
 export function readPackFlipPoint(item: unknown): SlicePoint | null {
-  if (!isSkuSliceDataKeyFilled(item)) return null;
-  const o = item as { stock: number; price: number };
+  if (item === null || typeof item !== "object") return null;
+  const o = item as Record<string, unknown>;
+  if (!isValidSliceMetricValue(o.stock) || !isValidSliceMetricValue(o.price)) {
+    return null;
+  }
   if (o.stock <= 0 || o.price <= 0) return null;
   return { stock: o.stock, price: o.price };
 }

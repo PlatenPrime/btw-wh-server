@@ -2,20 +2,21 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import mongoose from "mongoose";
 import { SkuSlice } from "../../models/SkuSlice.js";
 import {
-  executePerfectPackFlipReviewCli,
-  resolvePerfectPackFlipCliDates,
-  runPerfectPackFlipReviewConnected,
-} from "../runPerfectPackFlipReview.js";
+  executePackFlipReviewCli,
+  resolvePackFlipCliDates,
+  runPackFlipReviewConnected,
+} from "../runPackFlipReview.js";
 
-describe("resolvePerfectPackFlipCliDates", () => {
+describe("resolvePackFlipCliDates", () => {
   it("uses explicit from/to range", () => {
-    const parsed = resolvePerfectPackFlipCliDates([
+    const parsed = resolvePackFlipCliDates([
       "--from",
       "2026-09-11",
       "--to",
       "2026-09-13",
     ]);
     expect(parsed.apply).toBe(false);
+    expect(parsed.konkName).toBe("perfect");
     expect(parsed.dates.map((d) => d.toISOString().slice(0, 10))).toEqual([
       "2026-09-11",
       "2026-09-12",
@@ -26,8 +27,9 @@ describe("resolvePerfectPackFlipCliDates", () => {
   it("defaults to 7 days when flags omitted", () => {
     vi.useFakeTimers({ now: new Date("2026-09-15T10:00:00.000Z") });
     try {
-      const parsed = resolvePerfectPackFlipCliDates(["--apply"]);
+      const parsed = resolvePackFlipCliDates(["--apply"]);
       expect(parsed.apply).toBe(true);
+      expect(parsed.konkName).toBe("perfect");
       expect(parsed.dates).toHaveLength(7);
       expect(parsed.dates[0]!.toISOString().slice(0, 10)).toBe("2026-09-09");
       expect(parsed.dates[6]!.toISOString().slice(0, 10)).toBe("2026-09-15");
@@ -37,7 +39,7 @@ describe("resolvePerfectPackFlipCliDates", () => {
   });
 
   it("forwards --konk", () => {
-    const parsed = resolvePerfectPackFlipCliDates([
+    const parsed = resolvePackFlipCliDates([
       "--from",
       "2026-09-11",
       "--to",
@@ -50,7 +52,7 @@ describe("resolvePerfectPackFlipCliDates", () => {
   });
 });
 
-describe("executePerfectPackFlipReviewCli", () => {
+describe("executePackFlipReviewCli", () => {
   beforeEach(async () => {
     await SkuSlice.deleteMany({});
     vi.restoreAllMocks();
@@ -77,7 +79,7 @@ describe("executePerfectPackFlipReviewCli", () => {
       data: { "perfect-1": { stock: 100, price: 100 } },
     });
 
-    const result = await executePerfectPackFlipReviewCli([
+    const result = await executePackFlipReviewCli([
       "--from",
       "2026-09-13",
       "--to",
@@ -92,7 +94,7 @@ describe("executePerfectPackFlipReviewCli", () => {
   });
 });
 
-describe("runPerfectPackFlipReviewConnected", () => {
+describe("runPackFlipReviewConnected", () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -105,7 +107,7 @@ describe("runPerfectPackFlipReviewConnected", () => {
       .spyOn(mongoose, "disconnect")
       .mockResolvedValue(undefined);
 
-    await expect(runPerfectPackFlipReviewConnected(["--wat"])).rejects.toThrow(
+    await expect(runPackFlipReviewConnected(["--wat"])).rejects.toThrow(
       /Unknown argument/
     );
     expect(connect).toHaveBeenCalledOnce();

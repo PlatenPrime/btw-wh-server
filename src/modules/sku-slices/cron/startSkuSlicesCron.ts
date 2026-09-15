@@ -1,6 +1,6 @@
 import { CronJob } from "cron";
 import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
-import { formatPerfectPackFlipReport } from "../../../cron/analytics-notifications/formatPerfectPackFlipReport.js";
+import { formatPackFlipReport } from "../../../cron/analytics-notifications/formatPackFlipReport.js";
 import {
   formatSkuKonkSliceReport,
   formatSkuSlicesExcludedReport,
@@ -9,11 +9,12 @@ import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/s
 import { createLogger } from "../../../logging/createLogger.js";
 import { toNextKyivSliceDate } from "../../../utils/sliceDate.js";
 import { Sku } from "../../skus/models/Sku.js";
+import { packFlipAutoApplyKonks } from "../../slices/config/packFlipAutoApplyKonks.js";
 import { runSkuSliceForKonkUtil } from "../utils/runSkuSliceForKonkUtil.js";
 import {
   packFlipReviewDatesForSliceDay,
-  reviewPerfectPackFlipsUtil,
-} from "../utils/reviewPerfectPackFlipsUtil.js";
+  reviewPackFlipsUtil,
+} from "../utils/reviewPackFlipsUtil.js";
 import {
   getExcludedCompetitorSet,
   normalizeCompetitorName,
@@ -21,18 +22,22 @@ import {
 
 const log = createLogger({ module: "sku-slices", job: "cron" });
 
-async function reviewPerfectPackFlipsAfterSlices(sliceDate: Date): Promise<void> {
-  try {
-    const review = await reviewPerfectPackFlipsUtil({
-      dates: packFlipReviewDatesForSliceDay(sliceDate),
-      apply: true,
-    });
-    await sendCronAnalyticsReport(formatPerfectPackFlipReport(review));
-  } catch (reviewError) {
-    log.error({ err: reviewError }, "perfect pack-flip review failed");
-    await sendCronAnalyticsReport(
-      formatCronErrorReport("Perfect pack-flip review", reviewError)
-    );
+async function reviewPackFlipsAfterSlices(sliceDate: Date): Promise<void> {
+  const dates = packFlipReviewDatesForSliceDay(sliceDate);
+  for (const konkName of packFlipAutoApplyKonks) {
+    try {
+      const review = await reviewPackFlipsUtil({
+        dates,
+        apply: true,
+        konkName,
+      });
+      await sendCronAnalyticsReport(formatPackFlipReport(review));
+    } catch (reviewError) {
+      log.error({ err: reviewError, konkName }, "pack-flip review failed");
+      await sendCronAnalyticsReport(
+        formatCronErrorReport(`Pack-flip review (${konkName})`, reviewError)
+      );
+    }
   }
 }
 
@@ -40,7 +45,7 @@ async function reviewPerfectPackFlipsAfterSlices(sliceDate: Date): Promise<void>
  * Ежедневно в 20:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
  * Ключ дня среза — следующий календарный день в Киеве (как при старом запуске в полночь).
  * TG: отдельное сообщение после каждого konk (+ excluded в начале, если есть).
- * После всех срезов — pack-flip review Perfect (3 дня, авто-рескейл инверсий).
+ * После всех срезов — pack-flip review по packFlipAutoApplyKonks (3 дня, авто-рескейл инверсий).
  */
 export function startSkuSlicesCron(): CronJob {
   const job = new CronJob(
@@ -94,7 +99,7 @@ export function startSkuSlicesCron(): CronJob {
           })
         );
         log.info({ results }, "sku slices completed");
-        await reviewPerfectPackFlipsAfterSlices(sliceDate);
+        await reviewPackFlipsAfterSlices(sliceDate);
       } catch (error) {
         log.error({ err: error }, "sku slices cron failed");
         await sendCronAnalyticsReport(formatCronErrorReport("SKU slices", error));

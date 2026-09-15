@@ -7,6 +7,7 @@ describe("sku-slices controllers index", () => {
       "getSkuSliceController",
       "getSkuSliceByDateController",
       "getSkuSliceRangeController",
+      "getPackFlipReviewController",
       "getAirClientPendingController",
       "putAirClientSkuSliceController",
     ] as const;

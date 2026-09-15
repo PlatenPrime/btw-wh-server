@@ -409,6 +409,7 @@
 | GET | `/` | JWT | ≥ ADMIN |
 | GET | `/client/air/pending` | JWT | ≥ ADMIN |
 | PUT | `/client/air/sku/:skuId` | JWT | ≥ ADMIN |
+| GET | `/pack-flips` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId/range` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId` | JWT | ≥ ADMIN |
 

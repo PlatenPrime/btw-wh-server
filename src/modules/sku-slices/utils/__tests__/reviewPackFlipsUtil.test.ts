@@ -5,9 +5,9 @@ import {
   addUtcDays,
   defaultPackFlipReviewDates,
   packFlipReviewDatesForSliceDay,
-  reviewPerfectPackFlipsUtil,
+  reviewPackFlipsUtil,
   toUtcYmd,
-} from "../reviewPerfectPackFlipsUtil.js";
+} from "../reviewPackFlipsUtil.js";
 
 const D0 = new Date("2026-09-13T00:00:00.000Z");
 const D1 = new Date("2026-09-14T00:00:00.000Z");
@@ -56,7 +56,7 @@ describe("packFlip date helpers", () => {
   });
 });
 
-describe("reviewPerfectPackFlipsUtil", () => {
+describe("reviewPackFlipsUtil", () => {
   beforeEach(async () => {
     await SkuSlice.deleteMany({});
     await Sku.deleteMany({});
@@ -76,9 +76,10 @@ describe("reviewPerfectPackFlipsUtil", () => {
       { date: D2, pid: { "perfect-1": { stock: 100, price: 100 } } },
     ]);
 
-    const result = await reviewPerfectPackFlipsUtil({
+    const result = await reviewPackFlipsUtil({
       dates: [D0, D1, D2],
       apply: false,
+      konkName: "perfect",
     });
 
     expect(result.patched).toHaveLength(1);
@@ -101,9 +102,10 @@ describe("reviewPerfectPackFlipsUtil", () => {
       { date: D2, pid: { "perfect-1": { stock: 100, price: 100 } } },
     ]);
 
-    const result = await reviewPerfectPackFlipsUtil({
+    const result = await reviewPackFlipsUtil({
       dates: [D0, D1, D2],
       apply: true,
+      konkName: "perfect",
     });
 
     expect(result.apply).toBe(true);
@@ -122,7 +124,11 @@ describe("reviewPerfectPackFlipsUtil", () => {
       { date: D2, pid: { "perfect-1": { stock: 1000, price: 100 } } },
     ]);
 
-    await reviewPerfectPackFlipsUtil({ dates: [D0, D1, D2], apply: true });
+    await reviewPackFlipsUtil({
+      dates: [D0, D1, D2],
+      apply: true,
+      konkName: "perfect",
+    });
 
     const today = await SkuSlice.findOne({ konkName: "perfect", date: D2 }).lean();
     expect(today?.data["perfect-1"]).toEqual({ stock: 500, price: 200 });
@@ -135,7 +141,11 @@ describe("reviewPerfectPackFlipsUtil", () => {
       { date: D2, pid: { "perfect-1": { stock: 100, price: 100 } } },
     ]);
 
-    await reviewPerfectPackFlipsUtil({ dates: [D0, D1, D2], apply: true });
+    await reviewPackFlipsUtil({
+      dates: [D0, D1, D2],
+      apply: true,
+      konkName: "perfect",
+    });
 
     const today = await SkuSlice.findOne({ konkName: "perfect", date: D2 }).lean();
     expect(today?.data["perfect-1"]).toEqual({ stock: 100, price: 100 });
@@ -147,9 +157,10 @@ describe("reviewPerfectPackFlipsUtil", () => {
       { date: D2, pid: { "perfect-1": { stock: 95, price: 1 } } },
     ]);
 
-    const result = await reviewPerfectPackFlipsUtil({
+    const result = await reviewPackFlipsUtil({
       dates: [D1, D2],
       apply: true,
+      konkName: "perfect",
     });
 
     expect(result.patched).toEqual([]);
@@ -187,7 +198,7 @@ describe("reviewPerfectPackFlipsUtil", () => {
       data: { "air-1": { stock: 50, price: 20 } },
     });
 
-    const result = await reviewPerfectPackFlipsUtil({
+    const result = await reviewPackFlipsUtil({
       dates: [D0, D1, D2],
       apply: false,
       konkName: "air",
@@ -200,7 +211,11 @@ describe("reviewPerfectPackFlipsUtil", () => {
   });
 
   it("returns empty result for empty dates without throwing", async () => {
-    const result = await reviewPerfectPackFlipsUtil({ dates: [], apply: true });
+    const result = await reviewPackFlipsUtil({
+      dates: [],
+      apply: true,
+      konkName: "perfect",
+    });
     expect(result).toMatchObject({
       konkName: "perfect",
       patched: [],

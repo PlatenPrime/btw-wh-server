@@ -49,6 +49,8 @@ describe("isUsablePackFlipPoint / readPackFlipPoint", () => {
     expect(isUsablePackFlipPoint({ stock: NaN, price: 1 })).toBe(false);
     expect(readPackFlipPoint({ stock: -1, price: -1 })).toBeNull();
     expect(readPackFlipPoint({ stock: 0, price: 10 })).toBeNull();
+    expect(readPackFlipPoint(null)).toBeNull();
+    expect(readPackFlipPoint("x")).toBeNull();
     expect(readPackFlipPoint({ stock: 10, price: 20 })).toEqual(pt(10, 20));
   });
 });

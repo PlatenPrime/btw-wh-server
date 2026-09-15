@@ -2,18 +2,16 @@ import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReportin
 import { Sku } from "../../skus/models/Sku.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import {
-  SkuSlice,
-  type ISkuSliceDataItem,
-} from "../models/SkuSlice.js";
-import {
   decidePackFlipPatchesForSeries,
   readPackFlipPoint,
   type PackFlipSeriesDecision,
   type SeriesDay,
   type SlicePoint,
-} from "./detectPackFlipSpike.js";
-
-export const PERFECT_PACK_FLIP_KONK = "perfect";
+} from "../../slices/utils/detectPackFlipSpike.js";
+import {
+  SkuSlice,
+  type ISkuSliceDataItem,
+} from "../models/SkuSlice.js";
 
 export type PackFlipFinding = {
   productId: string;
@@ -36,10 +34,10 @@ export type PackFlipReviewResult = {
   ambiguous: PackFlipFinding[];
 };
 
-export type ReviewPerfectPackFlipsInput = {
+export type ReviewPackFlipsInput = {
   dates: Date[];
   apply: boolean;
-  konkName?: string;
+  konkName: string;
 };
 
 type LeanSlice = {
@@ -184,10 +182,10 @@ function buildFindings(
   return findings;
 }
 
-export async function reviewPerfectPackFlipsUtil(
-  input: ReviewPerfectPackFlipsInput
+export async function reviewPackFlipsUtil(
+  input: ReviewPackFlipsInput
 ): Promise<PackFlipReviewResult> {
-  const konkName = input.konkName ?? PERFECT_PACK_FLIP_KONK;
+  const konkName = input.konkName;
   const dates = [...input.dates]
     .map((d) => addUtcDays(d, 0))
     .sort((a, b) => a.getTime() - b.getTime());

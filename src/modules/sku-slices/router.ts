@@ -4,6 +4,7 @@ import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
   getAirClientPendingController,
+  getPackFlipReviewController,
   getSkuSliceByDateController,
   getSkuSliceController,
   getSkuSliceRangeController,
@@ -29,6 +30,12 @@ router.put(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(putAirClientSkuSliceController),
+);
+router.get(
+  "/pack-flips",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getPackFlipReviewController),
 );
 router.get(
   "/sku/:skuId/range",

@@ -4,20 +4,25 @@ import mongoose from "mongoose";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getMongoUri } from "../../../config/getMongoUri.js";
+import { packFlipAutoApplyKonks } from "../../slices/config/packFlipAutoApplyKonks.js";
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
 import {
   defaultPackFlipReviewDates,
-  reviewPerfectPackFlipsUtil,
+  reviewPackFlipsUtil,
   type PackFlipReviewResult,
-} from "../utils/reviewPerfectPackFlipsUtil.js";
-import { parsePerfectPackFlipCliArgs } from "./parsePerfectPackFlipCliArgs.js";
+} from "../utils/reviewPackFlipsUtil.js";
+import { parsePackFlipCliArgs } from "./parsePackFlipCliArgs.js";
 
-export function resolvePerfectPackFlipCliDates(argv: string[]): {
+export function resolvePackFlipCliDates(argv: string[]): {
   dates: Date[];
   apply: boolean;
-  konkName?: string;
+  konkName: string;
 } {
-  const args = parsePerfectPackFlipCliArgs(argv);
+  const args = parsePackFlipCliArgs(argv);
+  const konkName = args.konkName ?? packFlipAutoApplyKonks[0];
+  if (!konkName) {
+    throw new Error("Specify --konk or configure packFlipAutoApplyKonks");
+  }
   const dates =
     args.from && args.to
       ? enumerateReportingDates(args.from, args.to)
@@ -25,25 +30,25 @@ export function resolvePerfectPackFlipCliDates(argv: string[]): {
   return {
     dates,
     apply: args.apply,
-    ...(args.konkName ? { konkName: args.konkName } : {}),
+    konkName,
   };
 }
 
-export async function executePerfectPackFlipReviewCli(
+export async function executePackFlipReviewCli(
   argv: string[]
 ): Promise<PackFlipReviewResult> {
-  const parsed = resolvePerfectPackFlipCliDates(argv);
-  const result = await reviewPerfectPackFlipsUtil(parsed);
+  const parsed = resolvePackFlipCliDates(argv);
+  const result = await reviewPackFlipsUtil(parsed);
   console.log(JSON.stringify(result, null, 2));
   return result;
 }
 
-export async function runPerfectPackFlipReviewConnected(
+export async function runPackFlipReviewConnected(
   argv: string[]
 ): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
-    await executePerfectPackFlipReviewCli(argv);
+    await executePackFlipReviewCli(argv);
   } finally {
     await mongoose.disconnect();
   }
@@ -56,7 +61,7 @@ function isExecutedAsCli(): boolean {
 }
 
 if (isExecutedAsCli()) {
-  runPerfectPackFlipReviewConnected(process.argv.slice(2)).catch((err) => {
+  runPackFlipReviewConnected(process.argv.slice(2)).catch((err) => {
     const message = err instanceof Error ? err.message : String(err);
     console.error(message);
     process.exitCode = 1;

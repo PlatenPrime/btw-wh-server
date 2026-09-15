@@ -11,6 +11,7 @@ describe("sku-slices router", () => {
       "/",
       "/client/air/pending",
       "/client/air/sku/:skuId",
+      "/pack-flips",
       "/sku/:skuId/range",
       "/sku/:skuId",
     ]);

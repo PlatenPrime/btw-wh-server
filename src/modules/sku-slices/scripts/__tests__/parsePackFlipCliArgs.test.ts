@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { parsePerfectPackFlipCliArgs } from "../parsePerfectPackFlipCliArgs.js";
+import { parsePackFlipCliArgs } from "../parsePackFlipCliArgs.js";
 
-describe("parsePerfectPackFlipCliArgs", () => {
+describe("parsePackFlipCliArgs", () => {
   it("defaults to dry-run without dates", () => {
-    expect(parsePerfectPackFlipCliArgs([])).toEqual({ apply: false });
+    expect(parsePackFlipCliArgs([])).toEqual({ apply: false });
   });
 
   it("parses from/to/apply/konk", () => {
     expect(
-      parsePerfectPackFlipCliArgs([
+      parsePackFlipCliArgs([
         "--from",
         "2026-09-11",
         "--to",
@@ -25,12 +25,19 @@ describe("parsePerfectPackFlipCliArgs", () => {
     });
   });
 
+  it("normalizes --konk", () => {
+    expect(parsePackFlipCliArgs(["--konk", " Air "])).toEqual({
+      apply: false,
+      konkName: "air",
+    });
+  });
+
   it("rejects a single bound and inverted range", () => {
-    expect(() => parsePerfectPackFlipCliArgs(["--from", "2026-09-11"])).toThrow(
+    expect(() => parsePackFlipCliArgs(["--from", "2026-09-11"])).toThrow(
       /both --from and --to/
     );
     expect(() =>
-      parsePerfectPackFlipCliArgs([
+      parsePackFlipCliArgs([
         "--from",
         "2026-09-15",
         "--to",
@@ -40,14 +47,14 @@ describe("parsePerfectPackFlipCliArgs", () => {
   });
 
   it("rejects unknown flags and bad dates", () => {
-    expect(() => parsePerfectPackFlipCliArgs(["--wat"])).toThrow(/Unknown/);
-    expect(() => parsePerfectPackFlipCliArgs(["--from", "15.09"])).toThrow(
+    expect(() => parsePackFlipCliArgs(["--wat"])).toThrow(/Unknown/);
+    expect(() => parsePackFlipCliArgs(["--from", "15.09"])).toThrow(
       /YYYY-MM-DD/
     );
-    expect(() => parsePerfectPackFlipCliArgs(["--apply", "--to"])).toThrow(
+    expect(() => parsePackFlipCliArgs(["--apply", "--to"])).toThrow(
       /--to requires a value/
     );
-    expect(() => parsePerfectPackFlipCliArgs(["--konk", "   "])).toThrow(
+    expect(() => parsePackFlipCliArgs(["--konk", "   "])).toThrow(
       /--konk requires a name/
     );
   });
