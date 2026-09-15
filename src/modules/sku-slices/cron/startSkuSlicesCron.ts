@@ -1,5 +1,6 @@
 import { CronJob } from "cron";
 import { formatCronErrorReport } from "../../../cron/analytics-notifications/formatCronReports.js";
+import { formatPerfectPackFlipReport } from "../../../cron/analytics-notifications/formatPerfectPackFlipReport.js";
 import {
   formatSkuKonkSliceReport,
   formatSkuSlicesExcludedReport,
@@ -10,16 +11,36 @@ import { toNextKyivSliceDate } from "../../../utils/sliceDate.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { runSkuSliceForKonkUtil } from "../utils/runSkuSliceForKonkUtil.js";
 import {
+  packFlipReviewDatesForSliceDay,
+  reviewPerfectPackFlipsUtil,
+} from "../utils/reviewPerfectPackFlipsUtil.js";
+import {
   getExcludedCompetitorSet,
   normalizeCompetitorName,
 } from "../../slices/config/excludedCompetitors.js";
 
 const log = createLogger({ module: "sku-slices", job: "cron" });
 
+async function reviewPerfectPackFlipsAfterSlices(sliceDate: Date): Promise<void> {
+  try {
+    const review = await reviewPerfectPackFlipsUtil({
+      dates: packFlipReviewDatesForSliceDay(sliceDate),
+      apply: true,
+    });
+    await sendCronAnalyticsReport(formatPerfectPackFlipReport(review));
+  } catch (reviewError) {
+    log.error({ err: reviewError }, "perfect pack-flip review failed");
+    await sendCronAnalyticsReport(
+      formatCronErrorReport("Perfect pack-flip review", reviewError)
+    );
+  }
+}
+
 /**
  * Ежедневно в 20:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
  * Ключ дня среза — следующий календарный день в Киеве (как при старом запуске в полночь).
  * TG: отдельное сообщение после каждого konk (+ excluded в начале, если есть).
+ * После всех срезов — pack-flip review Perfect (3 дня, авто-рескейл инверсий).
  */
 export function startSkuSlicesCron(): CronJob {
   const job = new CronJob(
@@ -56,12 +77,10 @@ export function startSkuSlicesCron(): CronJob {
           );
         }
 
+        const sliceDate = toNextKyivSliceDate(new Date());
         const results = await Promise.all(
           konkNames.map(async (k) => {
-            const r = await runSkuSliceForKonkUtil(
-              k,
-              toNextKyivSliceDate(new Date())
-            );
+            const r = await runSkuSliceForKonkUtil(k, sliceDate);
             const stats = {
               konkName: k,
               count: r.count,
@@ -75,6 +94,7 @@ export function startSkuSlicesCron(): CronJob {
           })
         );
         log.info({ results }, "sku slices completed");
+        await reviewPerfectPackFlipsAfterSlices(sliceDate);
       } catch (error) {
         log.error({ err: error }, "sku slices cron failed");
         await sendCronAnalyticsReport(formatCronErrorReport("SKU slices", error));
