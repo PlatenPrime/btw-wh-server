@@ -10,20 +10,20 @@ describe("getMongoUri", () => {
   });
 
   it("returns MONGODB_URI when set", () => {
-    process.env.MONGODB_URI =
-      "mongodb+srv://user:pass@cluster0.b6qtdz4.mongodb.net/btw?retryWrites=true&w=majority";
+    process.env.MONGODB_URI = "mongodb://127.0.0.1:27017/btw";
 
     expect(getMongoUri()).toBe(process.env.MONGODB_URI);
   });
 
-  it("builds URI from DB_* env vars when MONGODB_URI is missing", () => {
+  it("builds URI from DB_* and MONGO_CLUSTER_HOST when MONGODB_URI is missing", () => {
     delete process.env.MONGODB_URI;
     process.env.DB_USER = "test-user";
     process.env.DB_PASSWORD = "test-password";
     process.env.DB_NAME = "test-db";
+    process.env.MONGO_CLUSTER_HOST = "mongo.example.test";
 
     expect(getMongoUri()).toBe(
-      "mongodb+srv://test-user:test-password@cluster0.b6qtdz4.mongodb.net/test-db?retryWrites=true&w=majority"
+      "mongodb+srv://test-user:test-password@mongo.example.test/test-db?retryWrites=true&w=majority"
     );
   });
 });

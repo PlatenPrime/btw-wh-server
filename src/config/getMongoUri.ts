@@ -1,5 +1,3 @@
-const MONGO_CLUSTER_HOST = "cluster0.b6qtdz4.mongodb.net";
-
 export function getMongoUri(): string {
   if (process.env.MONGODB_URI) {
     return process.env.MONGODB_URI;
@@ -8,6 +6,7 @@ export function getMongoUri(): string {
   const dbUser = process.env.DB_USER;
   const dbPassword = process.env.DB_PASSWORD;
   const dbName = process.env.DB_NAME;
+  const clusterHost = process.env.MONGO_CLUSTER_HOST;
 
-  return `mongodb+srv://${dbUser}:${dbPassword}@${MONGO_CLUSTER_HOST}/${dbName}?retryWrites=true&w=majority`;
+  return `mongodb+srv://${dbUser}:${dbPassword}@${clusterHost}/${dbName}?retryWrites=true&w=majority`;
 }
