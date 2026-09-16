@@ -27,17 +27,19 @@
 
 ## Catalog Excel: изменение параметров
 
-Раньше ключ конкурента был в path (`konkName`), теперь — в query **`konk`** (то же значение, включая зарезервированное `all`).
+Раньше ключ конкурента был в path (`konkName`), потом — в query **`konk`** (то же значение, включая зарезервированное `all`). Сейчас эти GET отвечают **410**; params те же, kind: `sku-catalog-new-since`, `sku-catalog-invalid`. См. [excel-jobs](excel-jobs.md).
 
-- Новинки: `GET /api/sku-excel-reports/catalog/new-since?konk={name|all}&since=YYYY-MM-DD`
-- Invalid: `GET /api/sku-excel-reports/catalog/invalid?konk={name|all}`
+## Excel jobs (вторая миграция)
+
+Строки таблицы выше со `sku-excel-reports` — промежуточный путь. Эти URL больше не отдают XLSX: **410** `EXCEL_JOBS_MIGRATED` + `kind`. Постановка: `POST /api/excel-jobs`.
 
 ## Новые базовые пути
 
-- `/api/sku-excel-reports` — все XLSX
+- `/api/excel-jobs` — постановка, прогресс и скачивание XLSX
+- `/api/sku-excel-reports` — 410-заглушки бывших SKU Excel GET
 - `/api/sku-sales-reports` — JSON продажи и агрегаты
 - `/api/sku-chart-reports` — JSON для графиков
 
 Доступ и роли — как у прежних маршрутов (ADMIN для reporting-модулей, см. [access-matrix](access-matrix.md)).
 
-Детали форматов: [sku-slices](sku-slices.md), [sku-excel-reports](sku-excel-reports.md), [sku-sales-reports](sku-sales-reports.md), [sku-chart-reports](sku-chart-reports.md).
+Детали форматов: [sku-slices](sku-slices.md), [sku-excel-reports](sku-excel-reports.md), [excel-jobs](excel-jobs.md), [sku-sales-reports](sku-sales-reports.md), [sku-chart-reports](sku-chart-reports.md).

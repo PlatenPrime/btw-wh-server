@@ -14,6 +14,7 @@ import {
   createSlowRequestLogger,
 } from "./logging/httpLogger.js";
 import { registerProcessHandlers } from "./logging/registerProcessHandlers.js";
+import { startExcelJobRuntime } from "./modules/excel-jobs/utils/startExcelJobRuntime.js";
 import analogSlicesRoute from "./modules/analog-slices/router.js";
 import analogsRoute from "./modules/analogs/router.js";
 import artChartReportsRoute from "./modules/art-chart-reports/router.js";
@@ -29,6 +30,7 @@ import constantsRoute from "./modules/constants/router.js";
 import defsRoute from "./modules/defs/router.js";
 import delsRoute from "./modules/dels/router.js";
 import eventsRoute from "./modules/events/router.js";
+import excelJobsRoute from "./modules/excel-jobs/router.js";
 import graboSkusRoute from "./modules/grabo-skus/router.js";
 import kasksRoute from "./modules/kasks/router.js";
 import konksRoute from "./modules/konks/router.js";
@@ -76,6 +78,7 @@ app.use("/api/media", mediaRoute);
 app.use("/api/dels", delsRoute);
 app.use("/api/constants", constantsRoute);
 app.use("/api/events", eventsRoute);
+app.use("/api/excel-jobs", excelJobsRoute);
 app.use("/api/konks", konksRoute);
 app.use("/api/prods", prodsRoute);
 app.use("/api/skus", skusRoute);
@@ -114,6 +117,7 @@ async function start() {
     await mongoose.connect(getMongoUri());
 
     startCronOperations();
+    await startExcelJobRuntime();
 
     app.listen(PORT, () => {
       bootLog.info({ port: PORT }, "server started");

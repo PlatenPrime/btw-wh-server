@@ -21,6 +21,8 @@ API системы управления складом предоставляе�
 - [API Blocks](blocks.md) — `/api/blocks` — блоки
 - [API Constants](constants.md) — `/api/constants` — именованные константы приложения
 - [API Events](events.md) — `/api/events` — журнал действий пользователей (аудит)
+- [API Excel Jobs](excel-jobs.md) — `/api/excel-jobs` — постановка, прогресс и скачивание XLSX
+- [Excel Jobs для фронтенда](excel-jobs-frontend.md) — UX: подготовка vs download, 410, token
 - [API Segs](segs.md) — `/api/segs` — сегменты
 - [API Zones](zones.md) — `/api/zones` — зоны
 - [API Rows](rows.md) — `/api/rows` — ряды
@@ -35,13 +37,13 @@ API системы управления складом предоставляе�
 - [API Skugrs](skugrs.md) — `/api/skugrs` — группы товаров конкурента
 - [API Sku Slices](sku-slices.md) — `/api/sku-slices` — сырые ежедневные срезы остатков и цен
 - [API Slice Compensation](slice-compensation.md) — `/api/slice-compensation` — внеочередной compensating refetch по конкуренту
-- [API Grabo Skus](grabo-skus.md) — `/api/grabo-skus` — каталог производителя Grabo: список, карточка, ручной срез и Excel
-- [API Sku Excel Reports](sku-excel-reports.md) — `/api/sku-excel-reports` — Excel по SKU, группам и каталогу
+- [API Grabo Skus](grabo-skus.md) — `/api/grabo-skus` — каталог производителя Grabo: список, карточка, ручной срез; Excel — 410 → excel-jobs
+- [API Sku Excel Reports](sku-excel-reports.md) — `/api/sku-excel-reports` — 410, миграция на excel-jobs
+- [API Art Excel Reports](art-excel-reports.md) — `/api/art-excel-reports` — 410, миграция на excel-jobs
 - [API Sku Sales Reports](sku-sales-reports.md) — `/api/sku-sales-reports` — JSON продажи и агрегаты
 - [API Sku Chart Reports](sku-chart-reports.md) — `/api/sku-chart-reports` — JSON для графиков konk vs Btrade
 - [API Art Sales Reports](art-sales-reports.md) — `/api/art-sales-reports` — JSON продажи по артикулу Btrade
 - [API Art Chart Reports](art-chart-reports.md) — `/api/art-chart-reports` — JSON графиков остатков и продаж артикула
-- [API Art Excel Reports](art-excel-reports.md) — `/api/art-excel-reports` — Excel по артикулу Btrade
 - [Миграция API SKU](sku-api-migration.md) — таблица замены путей после реструктуризации
 
 ## Аутентификация

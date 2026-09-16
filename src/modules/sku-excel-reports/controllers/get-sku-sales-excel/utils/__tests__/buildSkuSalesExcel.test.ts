@@ -67,4 +67,18 @@ describe("buildSkuSalesExcelForSkus", () => {
     expect(sheet).toBeDefined();
     expect(sheet!.getRow(1).getCell(1).value).toBe("Ідентифікатор товару");
   });
+
+  it("reports onProgress once per sku", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const calls: Array<[number, number]> = [];
+    await buildSkuSalesExcelForSkus(
+      [SKU],
+      from,
+      to,
+      () => ({ stock: 1, price: 1 }),
+      { onProgress: (done, total) => calls.push([done, total]) },
+    );
+    expect(calls).toEqual([[1, 1]]);
+  });
 });

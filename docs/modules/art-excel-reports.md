@@ -1,13 +1,5 @@
 # Модуль Art Excel Reports
 
-## Назначение
+HTTP-заглушка: GET stock/sales Excel по артикулу отвечают 410. Фактическая выгрузка — job `art-stock` / `art-sales` в [excel-jobs](../modules/excel-jobs.md). Логика файла — [art-reporting](art-reporting.md).
 
-HTTP-модуль XLSX-выгрузок остатков и продаж по одному артикулу Btrade. Логика сборки — в [art-reporting](art-reporting.md).
-
-## Эндпоинты
-
-Базовый путь `/api/art-excel-reports`. См. [API art-excel-reports](../api/art-excel-reports.md).
-
-## Роли
-
-ADMIN.
+Роли: ADMIN.

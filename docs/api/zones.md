@@ -34,15 +34,7 @@
 
 ### GET `/api/zones/export`
 
-Экспорт зон в Excel.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** без тела.
-
-**Ответ 200:** бинарное тело (файл Excel).
-
-**Ошибки:** 401, 403, 500.
+**410** `EXCEL_JOBS_MIGRATED`, kind `zones-export`. Выгрузка: [excel-jobs](excel-jobs.md).
 
 ---
 

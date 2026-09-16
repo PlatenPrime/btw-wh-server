@@ -150,29 +150,19 @@ BtradeStock представляет информацию об остатках 
 
 ### GET `/api/arts/export`
 
-Экспорт всех артикулов в Excel файл.
-
-**Запрос:**
-- Query параметры отсутствуют
-
-**Ответ:**
-- 200: Excel файл (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
-- 404: `{ message: string }` - артикулы не найдены
-- 500: `{ message: string, error?: any }` - ошибка сервера
+HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `arts-export`. Сборка файла — job в [excel-jobs](excel-jobs.md).
 
 **Доступ:** Требует роль ADMIN
 
 ### GET `/api/arts/export-with-stocks`
 
-Экспорт всех артикулов в Excel файл с данными о запасах и витрине.
+HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-with-stocks`.
 
-**Запрос:**
-- Query параметры отсутствуют
+**Доступ:** Требует роль ADMIN
 
-**Ответ:**
-- 200: Excel файл (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
-- 404: `{ message: string }` - артикулы не найдены
-- 500: `{ message: string, error?: any }` - ошибка сервера
+### GET `/api/arts/export-keys`
+
+HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`.
 
 **Доступ:** Требует роль ADMIN
 

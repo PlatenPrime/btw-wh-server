@@ -134,32 +134,15 @@ describe("Poses router integration", () => {
         .expect(403);
     });
 
-    it("200 exports stocks for ADMIN", async () => {
-      await createTestPos({
-        pallet: { _id: pallet._id, title: pallet.title },
-        row: { _id: row._id, title: row.title },
-        artikul: "EXPORT-ART",
-        quant: 10,
-        sklad: "merezhi",
-      });
-
+    it("410 migrated for ADMIN", async () => {
       const response = await request(app)
         .post("/api/poses/export-stocks")
         .set(createAuthHeader(RoleType.ADMIN))
         .send({ sklad: "merezhi" })
-        .buffer(true)
-        .parse((res, callback) => {
-          const chunks: Buffer[] = [];
-          res.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-          res.on("end", () => callback(null, Buffer.concat(chunks)));
-        })
-        .expect(200);
+        .expect(410);
 
-      expect(response.headers["content-type"]).toContain(
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      expect(Buffer.isBuffer(response.body)).toBe(true);
-      expect((response.body as Buffer).length).toBeGreaterThan(0);
+      expect(response.body.code).toBe("EXCEL_JOBS_MIGRATED");
+      expect(response.body.kind).toBe("poses-export-stocks");
     });
   });
 });

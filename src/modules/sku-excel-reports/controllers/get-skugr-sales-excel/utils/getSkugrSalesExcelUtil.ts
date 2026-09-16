@@ -1,3 +1,4 @@
+import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
@@ -29,6 +30,7 @@ export type GetSkugrSalesExcelResult =
 
 export async function getSkugrSalesExcelUtil(
   input: GetSkugrSalesExcelInput,
+  progress: ExcelUtilProgressOptions = {},
 ): Promise<GetSkugrSalesExcelResult> {
   const loaded = await loadSkugrWithOrderedSkus(input.skugrId);
   if (!loaded) return { ok: false };
@@ -79,6 +81,7 @@ export async function getSkugrSalesExcelUtil(
       summarySalesLabel: "Загальні продажі, шт",
       summaryRevenueLabel: "Загальна виручка, грн",
       recountDays: (konkDoc?.recountDays ?? []).map(String),
+      onProgress: progress.onProgress,
     },
   );
 

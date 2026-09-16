@@ -13,18 +13,21 @@ import {
 import { loadProdDisplayTitlesByName } from "../../../../sku-reporting/utils/prodDisplayTitles.js";
 import { resolveKonkProdSkus } from "../../../../sku-reporting/utils/resolveKonkProdSkus.js";
 import type { GetKonkSkuSalesExcelInput } from "../schemas/getKonkSkuSalesExcelSchema.js";
+import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import {
   buildSkuSalesExcelForSkus,
   computeSkuSalesPeriodMetrics,
   type SkuSalesExcelSkuRow,
 } from "../../get-sku-sales-excel/utils/buildSkuSalesExcel.js";
+import { sortSkuSalesExcelRowsByScore } from "../../get-sku-sales-excel/utils/sortSkuSalesExcelRowsByScore.js";
 
 export type GetKonkSkuSalesExcelResult =
   | { ok: true; buffer: Buffer; fileName: string }
   | { ok: false };
 
 export async function getKonkSkuSalesExcelUtil(
-  input: GetKonkSkuSalesExcelInput
+  input: GetKonkSkuSalesExcelInput,
+  progress: ExcelUtilProgressOptions = {},
 ): Promise<GetKonkSkuSalesExcelResult> {
   const resolved = await resolveKonkProdSkus({
     konk: input.konk,
@@ -86,43 +89,17 @@ export async function getKonkSkuSalesExcelUtil(
   };
 
   let rowsOrdered: SkuSalesExcelSkuRow[] = rows;
-  if (input.sortBy === "sales") {
-    rowsOrdered = [...rows].sort((a, b) => {
-      const ta = computeSkuSalesPeriodMetrics(
-        a,
+  if (input.sortBy === "sales" || input.sortBy === "revenue") {
+    const metric = input.sortBy;
+    rowsOrdered = sortSkuSalesExcelRowsByScore(rows, (row) => {
+      const computed = computeSkuSalesPeriodMetrics(
+        row,
         dateFrom,
         dateTo,
         getSliceItem,
         recountDaysSet,
-      ).totalSales;
-      const tb = computeSkuSalesPeriodMetrics(
-        b,
-        dateFrom,
-        dateTo,
-        getSliceItem,
-        recountDaysSet,
-      ).totalSales;
-      if (tb !== ta) return tb - ta;
-      return a.productId.localeCompare(b.productId);
-    });
-  } else if (input.sortBy === "revenue") {
-    rowsOrdered = [...rows].sort((a, b) => {
-      const ta = computeSkuSalesPeriodMetrics(
-        a,
-        dateFrom,
-        dateTo,
-        getSliceItem,
-        recountDaysSet,
-      ).totalRevenue;
-      const tb = computeSkuSalesPeriodMetrics(
-        b,
-        dateFrom,
-        dateTo,
-        getSliceItem,
-        recountDaysSet,
-      ).totalRevenue;
-      if (tb !== ta) return tb - ta;
-      return a.productId.localeCompare(b.productId);
+      );
+      return metric === "sales" ? computed.totalSales : computed.totalRevenue;
     });
   }
 
@@ -136,6 +113,7 @@ export async function getKonkSkuSalesExcelUtil(
       summarySalesLabel: "Загальні продажі, шт",
       summaryRevenueLabel: "Загальна виручка, грн",
       recountDays,
+      onProgress: progress.onProgress,
     }
   );
 

@@ -60,11 +60,10 @@ describe("updateAllBtradeStocksController", () => {
     await updateAllBtradeStocksController(req, res);
     expect(responseStatus.code).toBe(202);
 
-    // Ждём завершения фонового промиса, который создаёт audit event
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    const events = await Event.find({ department: "arts" });
-    expect(events).toHaveLength(1);
-    expect(events[0].userId.toString()).toBe(user._id.toString());
+    await vi.waitFor(async () => {
+      const events = await Event.find({ department: "arts" });
+      expect(events).toHaveLength(1);
+      expect(events[0].userId.toString()).toBe(user._id.toString());
+    });
   });
 });

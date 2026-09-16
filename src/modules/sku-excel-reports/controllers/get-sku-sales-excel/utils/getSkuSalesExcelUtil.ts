@@ -1,3 +1,4 @@
+import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
@@ -23,7 +24,8 @@ export type GetSkuSalesExcelResult =
   | { ok: false };
 
 export async function getSkuSalesExcelUtil(
-  input: GetSkuSalesExcelInput
+  input: GetSkuSalesExcelInput,
+  progress: ExcelUtilProgressOptions = {},
 ): Promise<GetSkuSalesExcelResult> {
   const sku = await Sku.findById(input.skuId).lean();
   if (!sku) return { ok: false };
@@ -80,6 +82,7 @@ export async function getSkuSalesExcelUtil(
     {
       summaryMode: "perSku",
       recountDays: (konkDoc?.recountDays ?? []).map(String),
+      onProgress: progress.onProgress,
     }
   );
 

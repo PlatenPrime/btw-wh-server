@@ -185,26 +185,14 @@ describe("Zones router integration", () => {
   });
 
   describe("GET /api/zones/export", () => {
-    it("404 when no zones exist", async () => {
-      await request(app)
-        .get("/api/zones/export")
-        .set(createAuthHeader(RoleType.ADMIN))
-        .expect(404);
-    });
-
-    it("200 returns excel file when zones exist", async () => {
-      await Zone.create({ title: "42-12", bar: 4212, sector: 0 });
-
+    it("410 migrated for ADMIN", async () => {
       const response = await request(app)
         .get("/api/zones/export")
         .set(createAuthHeader(RoleType.ADMIN))
-        .expect(200);
+        .expect(410);
 
-      expect(response.headers["content-type"]).toContain(
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-      );
-      expect(response.headers["content-disposition"]).toContain("attachment");
-      expect(Number(response.headers["content-length"])).toBeGreaterThan(0);
+      expect(response.body.code).toBe("EXCEL_JOBS_MIGRATED");
+      expect(response.body.kind).toBe("zones-export");
     });
   });
 });

@@ -118,15 +118,7 @@
 
 ### POST `/api/poses/export-stocks`
 
-Экспорт позиций/запасов в Excel.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** без тела.
-
-**Ответ 200:** бинарное тело (файл Excel).
-
-**Ошибки:** 401, 403, 500.
+**410** `EXCEL_JOBS_MIGRATED`, kind `poses-export-stocks`. Params: опционально `sklad`. См. [excel-jobs](excel-jobs.md).
 
 ---
 

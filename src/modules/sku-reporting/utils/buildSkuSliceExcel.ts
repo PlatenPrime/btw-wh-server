@@ -1,5 +1,9 @@
 import ExcelJS from "exceljs";
 import {
+  notifyExcelBuildProgress,
+  type ExcelBuildProgressHandler,
+} from "../../../lib/excel/excelBuildProgress.js";
+import {
   applyDataRowStyle,
   applyHeaderStyle,
 } from "../../../lib/excel/worksheetStyles.js";
@@ -70,6 +74,7 @@ export type SkuSliceExcelTitles = {
 export type SkuSliceExcelOptions = {
   includeTotalsRow?: boolean;
   totalsRowLabel?: string;
+  onProgress?: ExcelBuildProgressHandler;
 };
 
 function getFirstAndLastNumeric(
@@ -259,7 +264,8 @@ export async function buildSkuSliceExcelForSkus(
   let totalDiff = 0;
   let totalFirstStock = 0;
   let startRow = 2;
-  for (let s = 0; s < skus.length; s++) {
+  const skuTotal = skus.length;
+  for (let s = 0; s < skuTotal; s++) {
     const sku = skus[s]!;
     const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) =>
       getItem(sku.konkName, sku.productId, d),
@@ -317,6 +323,7 @@ export async function buildSkuSliceExcelForSkus(
     }
 
     startRow += ROWS_PER_SKU_BLOCK;
+    notifyExcelBuildProgress(options.onProgress, s + 1, skuTotal);
   }
 
   if (options.includeTotalsRow) {

@@ -132,43 +132,19 @@
 
 ### GET `/api/arts/export`
 
-Экспорт всех артикулов в Excel.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** без тела.
-
-**Ответ 200:** бинарное тело (файл Excel), Content-Type для скачивания.
-
-**Ошибки:** 401, 403, 404, 500.
+**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export`. Выгрузка: [excel-jobs](excel-jobs.md).
 
 ---
 
 ### GET `/api/arts/export-with-stocks`
 
-Экспорт артикулов в Excel с данными о запасах и витрине.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** без тела.
-
-**Ответ 200:** бинарное тело (файл Excel).
-
-**Ошибки:** 401, 403, 404, 500.
+**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-with-stocks`.
 
 ---
 
 ### GET `/api/arts/export-keys`
 
-Экспорт всех артикулов в Excel с key-based заголовками колонок для последующего редактирования и обратной загрузки.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** без тела.
-
-**Ответ 200:** бинарное тело (файл Excel). Заголовки колонок: `artikul`, `prodName`, `nameukr`, `namerus`, `zone`, `limit`, `marker`, `abc`.
-
-**Ошибки:** 401, 403, 404, 500.
+**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`.
 
 ---
 

@@ -1,29 +1,12 @@
-# API Excel-отчётов артикула Btrade
+# API Art Excel Reports
 
-Базовый путь: `/api/art-excel-reports`. XLSX по одному артикулу за период.
+Базовый путь: `/api/art-excel-reports`. GET больше не отдают XLSX: **410** `EXCEL_JOBS_MIGRATED`.
 
 Доступ: checkAuth + checkRoles(ADMIN).
 
-## Эндпоинты
+| Путь | kind |
+|------|------|
+| GET `/artikul/:artikul/stock` | `art-stock` |
+| GET `/artikul/:artikul/sales` | `art-sales` |
 
-### GET `/api/art-excel-reports/artikul/:artikul/stock`
-
-Excel остатков и цен по артикулу за период.
-
-**Path:** `artikul` — строка артикула.
-
-**Query:** `dateFrom`, `dateTo` (YYYY-MM-DD).
-
-**Ответ 200:** бинарный `.xlsx`. Заголовки колонок дат: украинский день недели + `YYYY-MM-DD`.
-
----
-
-### GET `/api/art-excel-reports/artikul/:artikul/sales`
-
-Excel продаж, цен и выручки по артикулу за период.
-
-**Path / Query:** как у `stock`.
-
-**Ответ 200:** бинарный `.xlsx`.
-
-**Ошибки (оба эндпоинта):** 400, 401, 403, 404 (артикул не найден), 500.
+Новый контракт: [excel-jobs](excel-jobs.md), [excel-jobs-frontend](excel-jobs-frontend.md).

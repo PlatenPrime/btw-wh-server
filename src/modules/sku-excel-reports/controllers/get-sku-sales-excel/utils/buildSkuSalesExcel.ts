@@ -6,6 +6,10 @@ import {
 import { formatExcelDateHeaderUk } from "../../../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { ISkuSliceDataItem } from "../../../../sku-slices/models/SkuSlice.js";
 import {
+  notifyExcelBuildProgress,
+  type ExcelBuildProgressHandler,
+} from "../../../../../lib/excel/excelBuildProgress.js";
+import {
   applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
@@ -48,6 +52,7 @@ export type SkuSalesExcelOptions = {
   summarySalesLabel?: string;
   summaryRevenueLabel?: string;
   recountDays?: string[];
+  onProgress?: ExcelBuildProgressHandler;
 };
 
 export type SkuSalesPeriodMetrics = {
@@ -184,8 +189,10 @@ export async function buildSkuSalesExcelForSkus(
   let grandTotalSales = 0;
   let grandTotalRevenue = 0;
   let startRow = 2;
+  const skuTotal = skus.length;
 
-  for (const sku of skus) {
+  for (let skuIndex = 0; skuIndex < skuTotal; skuIndex++) {
+    const sku = skus[skuIndex]!;
     const {
       salesByDay,
       revenueByDay,
@@ -254,6 +261,7 @@ export async function buildSkuSalesExcelForSkus(
       writeSummaryRow(sheet, startRow + 1, summaryRevenueLabel, totalRevenue);
       startRow += 3;
     }
+    notifyExcelBuildProgress(options.onProgress, skuIndex + 1, skuTotal);
   }
 
   if (summaryMode === "bottomOnly") {

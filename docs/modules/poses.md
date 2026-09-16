@@ -46,7 +46,7 @@
 
 ### Экспорт остатков
 
-Модуль поддерживает экспорт остатков товаров в Excel файл. Это позволяет работать с данными об остатках во внешних системах и выполнять анализ.
+Сборка XLSX остатков больше не идёт внутри HTTP-запроса модуля. `POST /api/poses/export-stocks` отвечает 410 и указывает kind `poses-export-stocks` для [excel-jobs](../modules/excel-jobs.md).
 
 ### Группировка по артикулам
 
@@ -168,14 +168,7 @@
 
 ### POST `/api/poses/export-stocks`
 
-Экспорт остатков товаров в Excel файл.
-
-**Запрос:**
-- Body отсутствует
-
-**Ответ:**
-- 200: Excel файл (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
-- 500: `{ message: string, error?: any }` - ошибка сервера
+HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `poses-export-stocks`. Params: опционально `sklad`.
 
 **Доступ:** Требует роль ADMIN
 

@@ -64,9 +64,9 @@
 | PATCH | `/:artikul/btrade-stock` | JWT | ≥ ADMIN |
 | PATCH | `/:id` | JWT | ≥ ADMIN |
 | POST | `/btrade-stock/update-all` | JWT | ≥ ADMIN |
-| GET | `/export` | JWT | ≥ ADMIN |
-| GET | `/export-with-stocks` | JWT | ≥ ADMIN |
-| GET | `/export-keys` | JWT | ≥ ADMIN |
+| GET | `/export` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/export-with-stocks` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/export-keys` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
 | DELETE | `/without-latest-marker` | JWT | ≥ PRIME |
 
 ---
@@ -184,7 +184,7 @@
 | POST | `/` | JWT | ≥ EDITOR |
 | POST | `/bulk` | JWT | ≥ EDITOR |
 | POST | `/populate-missing-data` | JWT | ≥ EDITOR |
-| POST | `/export-stocks` | JWT | ≥ ADMIN |
+| POST | `/export-stocks` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
 | PUT | `/:id` | JWT | ≥ ADMIN |
 | DELETE | `/:id` | JWT | ≥ ADMIN |
 
@@ -227,7 +227,7 @@
 |-------|------|----------------|--------|
 | POST | `/` | JWT | ≥ ADMIN |
 | GET | `/` | JWT | ≥ ADMIN |
-| GET | `/export` | JWT | ≥ ADMIN |
+| GET | `/export` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
 | GET | `/title/:title` | JWT | ≥ ADMIN |
 | GET | `/by-block/:blockId` | JWT | ≥ ADMIN |
 | GET | `/:id` | JWT | ≥ ADMIN |
@@ -321,12 +321,12 @@
 | GET | `/analog/:analogId/range` | JWT | ≥ ADMIN |
 | GET | `/analog/:analogId/sales-range` | JWT | ≥ ADMIN |
 | GET | `/analog/:analogId/sales-by-date` | JWT | ≥ ADMIN |
-| GET | `/analog/:analogId/comparison-excel` | JWT | ≥ ADMIN |
+| GET | `/analog/:analogId/comparison-excel` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
 | GET | `/konk-btrade/sales-comparison` | JWT | ≥ ADMIN |
 | GET | `/konk-btrade/stock-comparison` | JWT | ≥ ADMIN |
-| GET | `/konk-btrade/comparison-excel` | JWT | ≥ ADMIN |
-| GET | `/konk-btrade/sales-comparison-excel` | JWT | ≥ ADMIN |
-| GET | `/analog/:analogId/sales-comparison-excel` | JWT | ≥ ADMIN |
+| GET | `/konk-btrade/comparison-excel` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/konk-btrade/sales-comparison-excel` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/analog/:analogId/sales-comparison-excel` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
 | GET | `/analog/:analogId` | JWT | ≥ ADMIN |
 
 ---
@@ -362,8 +362,8 @@
 
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
-| GET | `/artikul/:artikul/stock` | JWT | ≥ ADMIN |
-| GET | `/artikul/:artikul/sales` | JWT | ≥ ADMIN |
+| GET | `/artikul/:artikul/stock` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/artikul/:artikul/sales` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
 
 ---
 
@@ -430,7 +430,19 @@
 | GET | `/` | JWT | ≥ ADMIN |
 | GET | `/id/:id` | JWT | ≥ ADMIN |
 | POST | `/sync` | JWT | ≥ ADMIN |
-| GET | `/excel` | JWT | ≥ ADMIN |
+| GET | `/excel` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+
+---
+
+## `/api/excel-jobs`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| POST | `/` | JWT | ≥ ADMIN |
+| GET | `/` | JWT | ≥ ADMIN |
+| GET | `/:id/file` | download token в query `token` | владелец job |
+| GET | `/:id` | JWT | ≥ ADMIN, только свой job |
+| DELETE | `/:id` | JWT | ≥ ADMIN, только свой job |
 
 ---
 
@@ -438,14 +450,14 @@
 
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
-| GET | `/catalog/new-since` | JWT | ≥ ADMIN |
-| GET | `/catalog/invalid` | JWT | ≥ ADMIN |
-| GET | `/konk/stock` | JWT | ≥ ADMIN |
-| GET | `/konk/sales` | JWT | ≥ ADMIN |
-| GET | `/skugr/:skugrId/stock` | JWT | ≥ ADMIN |
-| GET | `/skugr/:skugrId/sales` | JWT | ≥ ADMIN |
-| GET | `/sku/:skuId/stock` | JWT | ≥ ADMIN |
-| GET | `/sku/:skuId/sales` | JWT | ≥ ADMIN |
+| GET | `/catalog/new-since` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/catalog/invalid` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/konk/stock` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/konk/sales` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/skugr/:skugrId/stock` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/skugr/:skugrId/sales` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/sku/:skuId/stock` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
+| GET | `/sku/:skuId/sales` | JWT | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
 
 ---
 

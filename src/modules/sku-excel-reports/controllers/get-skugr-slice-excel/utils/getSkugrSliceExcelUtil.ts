@@ -1,3 +1,4 @@
+import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
@@ -27,6 +28,7 @@ export type GetSkugrSliceExcelResult =
 
 export async function getSkugrSliceExcelUtil(
   input: GetSkugrSliceExcelInput,
+  progress: ExcelUtilProgressOptions = {},
 ): Promise<GetSkugrSliceExcelResult> {
   const loaded = await loadSkugrWithOrderedSkus(input.skugrId);
   if (!loaded) return { ok: false };
@@ -78,6 +80,7 @@ export async function getSkugrSliceExcelUtil(
     {
       includeTotalsRow: true,
       totalsRowLabel: "Підсумок",
+      onProgress: progress.onProgress,
     },
   );
 

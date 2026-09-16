@@ -1,3 +1,4 @@
+import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
@@ -19,7 +20,8 @@ export type GetSkuSliceExcelResult =
   | { ok: false };
 
 export async function getSkuSliceExcelUtil(
-  input: GetSkuSliceExcelInput
+  input: GetSkuSliceExcelInput,
+  progress: ExcelUtilProgressOptions = {},
 ): Promise<GetSkuSliceExcelResult> {
   const sku = await Sku.findById(input.skuId).lean();
   if (!sku) return { ok: false };
@@ -75,7 +77,8 @@ export async function getSkuSliceExcelUtil(
       const rec = byDate.get(toSliceDate(d).getTime());
       return rec?.[pid];
     },
-    titles
+    titles,
+    { onProgress: progress.onProgress },
   );
 
   return { ok: true, buffer, fileName };

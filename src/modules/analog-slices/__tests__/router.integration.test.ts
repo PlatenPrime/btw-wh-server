@@ -209,7 +209,7 @@ describe("Analog-slices router integration", () => {
   });
 
   describe("Excel export endpoints", () => {
-    it("GET comparison-excel returns xlsx for ADMIN", async () => {
+    it("GET comparison-excel returns 410 migrated", async () => {
       const analog = await seedBaseData();
 
       const response = await request(app)
@@ -218,22 +218,13 @@ describe("Analog-slices router integration", () => {
         )
         .set(createAuthHeader(RoleType.ADMIN))
         .query({ dateFrom: "2026-03-01", dateTo: "2026-03-02" })
-        .buffer(true)
-        .parse((res, callback) => {
-          const chunks: Buffer[] = [];
-          res.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-          res.on("end", () => callback(null, Buffer.concat(chunks)));
-        })
-        .expect(200);
+        .expect(410);
 
-      expect(response.headers["content-type"]).toContain(
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      );
-      expect(Buffer.isBuffer(response.body)).toBe(true);
-      expect((response.body as Buffer).length).toBeGreaterThan(0);
+      expect(response.body.code).toBe("EXCEL_JOBS_MIGRATED");
+      expect(response.body.kind).toBe("analog-comparison");
     });
 
-    it("GET sales-comparison-excel returns xlsx for ADMIN", async () => {
+    it("GET sales-comparison-excel returns 410 migrated", async () => {
       const analog = await seedBaseData();
 
       const response = await request(app)
@@ -242,14 +233,13 @@ describe("Analog-slices router integration", () => {
         )
         .set(createAuthHeader(RoleType.ADMIN))
         .query({ dateFrom: "2026-03-01", dateTo: "2026-03-02" })
-        .expect(200);
+        .expect(410);
 
-      expect(response.headers["content-type"]).toContain(
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      );
+      expect(response.body.code).toBe("EXCEL_JOBS_MIGRATED");
+      expect(response.body.kind).toBe("analog-sales-comparison");
     });
 
-    it("GET konk-btrade/comparison-excel returns xlsx for ADMIN", async () => {
+    it("GET konk-btrade/comparison-excel returns 410 migrated", async () => {
       await seedBaseData();
 
       const response = await request(app)
@@ -261,14 +251,12 @@ describe("Analog-slices router integration", () => {
           dateFrom: "2026-03-01",
           dateTo: "2026-03-02",
         })
-        .expect(200);
+        .expect(410);
 
-      expect(response.headers["content-type"]).toContain(
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      );
+      expect(response.body.kind).toBe("konk-btrade-comparison");
     });
 
-    it("GET konk-btrade/sales-comparison-excel returns xlsx for ADMIN", async () => {
+    it("GET konk-btrade/sales-comparison-excel returns 410 migrated", async () => {
       await seedBaseData();
 
       const response = await request(app)
@@ -280,11 +268,9 @@ describe("Analog-slices router integration", () => {
           dateFrom: "2026-03-01",
           dateTo: "2026-03-02",
         })
-        .expect(200);
+        .expect(410);
 
-      expect(response.headers["content-type"]).toContain(
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      );
+      expect(response.body.kind).toBe("konk-btrade-sales-comparison");
     });
   });
 });

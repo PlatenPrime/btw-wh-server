@@ -1,3 +1,4 @@
+import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import type { ISkuSliceDataItem } from "../../../../sku-slices/models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
@@ -21,7 +22,8 @@ export type GetKonkSkuSliceExcelResult =
   | { ok: false };
 
 export async function getKonkSkuSliceExcelUtil(
-  input: GetKonkSkuSliceExcelInput
+  input: GetKonkSkuSliceExcelInput,
+  progress: ExcelUtilProgressOptions = {},
 ): Promise<GetKonkSkuSliceExcelResult> {
   const resolved = await resolveKonkProdSkus({
     konk: input.konk,
@@ -88,6 +90,7 @@ export async function getKonkSkuSliceExcelUtil(
     {
       includeTotalsRow: true,
       totalsRowLabel: "Підсумок",
+      onProgress: progress.onProgress,
     }
   );
 

@@ -38,7 +38,7 @@
 
 ### Экспорт в Excel
 
-Модуль поддерживает экспорт всех зон в Excel файл. Это позволяет работать с данными о зонах во внешних системах и выполнять массовые операции.
+`GET /api/zones/export` отвечает 410 и указывает kind `zones-export`. Файл собирает [excel-jobs](excel-jobs.md).
 
 ### Пагинация и поиск
 
@@ -171,15 +171,7 @@
 
 ### GET `/api/zones/export`
 
-Экспорт всех зон в Excel файл.
-
-**Запрос:**
-- Query параметры отсутствуют
-
-**Ответ:**
-- 200: Excel файл (application/vnd.openxmlformats-officedocument.spreadsheetml.sheet)
-- 404: `{ message: string }` - зоны не найдены
-- 500: `{ message: string, error?: any }` - ошибка сервера
+HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `zones-export`.
 
 **Доступ:** Требует роль ADMIN
 
