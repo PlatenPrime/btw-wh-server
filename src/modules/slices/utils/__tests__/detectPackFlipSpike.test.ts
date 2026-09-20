@@ -78,9 +78,34 @@ describe("detectInversePackFlip", () => {
     });
   });
 
+  it("prefers stock factor when price rounding shifts the integer", () => {
+    expect(detectInversePackFlip(pt(1, 48.5), pt(100, 0.48))).toEqual({
+      kind: "inverse",
+      factor: 100,
+      currStockScaledUp: true,
+    });
+    expect(detectInversePackFlip(pt(100, 0.48), pt(1, 48.5))).toEqual({
+      kind: "inverse",
+      factor: 100,
+      currStockScaledUp: false,
+    });
+  });
+
+  it("falls back to price factor when stock ratio is not integer", () => {
+    expect(detectInversePackFlip(pt(80, 10), pt(170, 4.8))).toEqual({
+      kind: "inverse",
+      factor: 2,
+      currStockScaledUp: true,
+    });
+  });
+
   it("does not treat real sales or restock as flip", () => {
     expect(detectInversePackFlip(pt(100, 100), pt(90, 100))).toBeNull();
     expect(detectInversePackFlip(pt(100, 100), pt(200, 100))).toBeNull();
+  });
+
+  it("skips opposite move without an integer factor", () => {
+    expect(detectInversePackFlip(pt(10, 100), pt(13, 77))).toBeNull();
   });
 
   it("skips -1 / unusable points", () => {
@@ -99,6 +124,7 @@ describe("detectPriceOnlyPackFlip", () => {
 
   it("does not flag inverse as price-only", () => {
     expect(detectPriceOnlyPackFlip(pt(100, 100), pt(10000, 1))).toBeNull();
+    expect(detectPriceOnlyPackFlip(pt(1, 48.5), pt(100, 0.48))).toBeNull();
   });
 
   it("does not flag stock move beyond 10%", () => {
@@ -116,6 +142,9 @@ describe("rescaleToNeighborScale", () => {
     );
     expect(rescaleToNeighborScale(pt(500, 200), pt(1000, 100))).toEqual(
       pt(500, 200)
+    );
+    expect(rescaleToNeighborScale(pt(1, 48.5), pt(100, 0.48))).toEqual(
+      pt(1, 48)
     );
   });
 });
@@ -141,6 +170,22 @@ describe("decidePackFlipPatchesForSeries", () => {
       from: pt(10000, 1),
       patched: pt(100, 100),
     });
+  });
+
+  it("patches the middle day when price rounding shifts the factor", () => {
+    const decisions = decidePackFlipPatchesForSeries(
+      series([pt(1, 48.5), pt(100, 0.48), pt(1, 48.5)])
+    );
+    expect(decisions).toHaveLength(1);
+    expect(decisions[0]).toMatchObject({
+      kind: "inverse",
+      index: 1,
+      neighborIndex: 0,
+      factor: 100,
+      from: pt(100, 0.48),
+      patched: pt(1, 48),
+    });
+    expect(decisions.every((d) => d.index !== 0 && d.index !== 2)).toBe(true);
   });
 
   it("patches today when yesterday is stable vs d-2", () => {

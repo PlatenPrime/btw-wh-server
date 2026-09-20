@@ -94,12 +94,12 @@ export function detectInversePackFlip(
 
   const stockFactor = nearestIntegerFactor(curr.stock / prev.stock);
   const priceFactor = nearestIntegerFactor(curr.price / prev.price);
-  if (stockFactor === null || priceFactor === null) return null;
-  if (stockFactor !== priceFactor) return null;
+  const factor = stockFactor ?? priceFactor;
+  if (factor === null) return null;
 
   return {
     kind: "inverse",
-    factor: stockFactor,
+    factor,
     currStockScaledUp: stockUp,
   };
 }
