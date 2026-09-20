@@ -6,6 +6,7 @@ describe("sku-slices controllers index", () => {
     const expected = [
       "getSkuSliceController",
       "getSkuSliceByDateController",
+      "patchSkuSliceByDateController",
       "getSkuSliceRangeController",
       "getPackFlipReviewController",
       "getAirClientPendingController",

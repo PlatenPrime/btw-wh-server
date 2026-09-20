@@ -1,4 +1,3 @@
-import { Impit } from "impit";
 import { CookieJar } from "tough-cookie";
 
 import { createLogger } from "../../../logging/createLogger.js";
@@ -69,15 +68,80 @@ export type ImpitFactory = (options: {
   cookieJar: ImpitCookieJar;
 }) => ImpitClientLike;
 
-const defaultImpitFactory: ImpitFactory = (options) =>
-  new Impit({
-    browser: options.browser,
-    timeout: options.timeout,
-    cookieJar: options.cookieJar,
-    ...(options.proxyUrl ? { proxyUrl: options.proxyUrl } : {}),
-  }) as ImpitClientLike;
+type ImpitCtor = new (options: {
+  browser: "chrome";
+  timeout: number;
+  proxyUrl?: string;
+  cookieJar: ImpitCookieJar;
+}) => ImpitClientLike;
 
-let impitFactory: ImpitFactory = defaultImpitFactory;
+export type ImpitNativeModule = {
+  Impit: ImpitCtor;
+};
+
+export type ImpitModuleLoader = () => Promise<ImpitNativeModule>;
+
+export const IMPIT_NATIVE_LOAD_ERROR_PREFIX =
+  "Impit native bindings failed to load";
+
+const defaultImpitModuleLoader: ImpitModuleLoader = () =>
+  import("impit") as Promise<ImpitNativeModule>;
+
+let impitModuleLoader: ImpitModuleLoader = defaultImpitModuleLoader;
+let cachedNativeFactory: ImpitFactory | undefined;
+let nativeFactoryPromise: Promise<ImpitFactory> | undefined;
+let testImpitFactory: ImpitFactory | null = null;
+
+function createNativeImpitFactory(Impit: ImpitCtor): ImpitFactory {
+  return (options) =>
+    new Impit({
+      browser: options.browser,
+      timeout: options.timeout,
+      cookieJar: options.cookieJar,
+      ...(options.proxyUrl ? { proxyUrl: options.proxyUrl } : {}),
+    });
+}
+
+function wrapNativeImpitLoadError(err: unknown): Error {
+  const msg = err instanceof Error ? err.message : String(err);
+  return new Error(`${IMPIT_NATIVE_LOAD_ERROR_PREFIX}: ${msg}`, { cause: err });
+}
+
+async function getNativeImpitFactory(): Promise<ImpitFactory> {
+  if (cachedNativeFactory) {
+    return cachedNativeFactory;
+  }
+  if (!nativeFactoryPromise) {
+    nativeFactoryPromise = impitModuleLoader()
+      .then(({ Impit }) => {
+        cachedNativeFactory = createNativeImpitFactory(Impit);
+        return cachedNativeFactory;
+      })
+      .catch((err: unknown) => {
+        nativeFactoryPromise = undefined;
+        throw wrapNativeImpitLoadError(err);
+      });
+  }
+  return nativeFactoryPromise;
+}
+
+async function resolveImpitFactory(): Promise<ImpitFactory> {
+  if (testImpitFactory) {
+    return testImpitFactory;
+  }
+  return getNativeImpitFactory();
+}
+
+/**
+ * Подмена `import("impit")` в тестах. `null` — вернуть default loader и сбросить native cache.
+ */
+export function setImpitModuleLoaderForTests(
+  loader: ImpitModuleLoader | null
+): void {
+  impitModuleLoader = loader ?? defaultImpitModuleLoader;
+  cachedNativeFactory = undefined;
+  nativeFactoryPromise = undefined;
+}
 
 /** Кэш клиентов по ключу proxy (пустая строка = без proxy). */
 const clientByProxyKey = new Map<string, ImpitClientLike>();
@@ -86,10 +150,10 @@ const clientByProxyKey = new Map<string, ImpitClientLike>();
 const warmedOriginsByProxyKey = new Map<string, Set<string>>();
 
 /**
- * Подмена фабрики Impit в тестах. `null` — вернуть default и сбросить кэш.
+ * Подмена фабрики Impit в тестах. `null` — вернуть lazy native factory и сбросить кэш.
  */
 export function setImpitFactoryForTests(factory: ImpitFactory | null): void {
-  impitFactory = factory ?? defaultImpitFactory;
+  testImpitFactory = factory;
   clientByProxyKey.clear();
   warmedOriginsByProxyKey.clear();
 }
@@ -143,13 +207,20 @@ function resolveProxyUrl(proxyUrl: string | undefined): string | undefined {
   return trimmed;
 }
 
-function getOrCreateClient(proxyUrl: string | undefined): ImpitClientLike {
+async function getOrCreateClient(
+  proxyUrl: string | undefined
+): Promise<ImpitClientLike> {
   const key = proxyUrl ?? "";
   const cached = clientByProxyKey.get(key);
   if (cached) {
     return cached;
   }
-  const client = impitFactory({
+  const factory = await resolveImpitFactory();
+  const existing = clientByProxyKey.get(key);
+  if (existing) {
+    return existing;
+  }
+  const client = factory({
     browser: "chrome",
     timeout: BROWSER_REQUEST_TIMEOUT_MS,
     // tough-cookie CookieJar structurally satisfies Impit cookieJar; overloads don't match 1:1
@@ -345,7 +416,7 @@ export async function impitGet(
 ): Promise<string> {
   const proxyUrl = resolveProxyUrl(options?.proxyUrl);
   const proxyKey = proxyUrl ?? "";
-  const client = getOrCreateClient(proxyUrl);
+  const client = await getOrCreateClient(proxyUrl);
   const requestHeaders = options?.headers;
 
   try {

@@ -46,7 +46,7 @@ describe("formatPackFlipReport", () => {
     expect(msg).toContain("air no-dates: patched 0");
   });
 
-  it("lists patched and price-only samples and truncates", () => {
+  it("lists every finding with icons and punctuation, without truncation", () => {
     const patched = Array.from({ length: 16 }, (_, i) =>
       finding({
         productId: `perfect-${i + 1}`,
@@ -79,11 +79,13 @@ describe("formatPackFlipReport", () => {
     });
     expect(msg).toContain("dry-run");
     expect(msg).toContain("patched 16, price-only 1, ambiguous 1");
-    expect(msg).toContain("2026-09-14 perfect-1 ×100 Balloon");
-    expect(msg).toContain("… +1");
+    expect(msg).toContain("🔸 2026-09-14 · perfect-1 · ×100");
+    expect(msg).toContain("   Balloon");
+    expect(msg).toContain("🔸 2026-09-14 · perfect-16 · ×100");
+    expect(msg).not.toContain("… +1");
     expect(msg).toContain("price-only:");
-    expect(msg).toContain("2026-09-15 perfect-po ×2");
+    expect(msg).toContain("💰 2026-09-15 · perfect-po · ×2");
     expect(msg).toContain("ambiguous:");
-    expect(msg).toContain("2026-09-14 perfect-amb ×4");
+    expect(msg).toContain("⚠️ 2026-09-14 · perfect-amb · ×4");
   });
 });

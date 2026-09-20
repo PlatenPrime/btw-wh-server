@@ -26,7 +26,10 @@ describe("buildSkuListMongoFilter", () => {
 
     expect(filter.konkName).toBe("air");
     expect(filter.prodName).toBe("maker");
-    expect(filter.title).toEqual({ $regex: "widget", $options: "i" });
+    expect(filter.$or).toEqual([
+      { title: { $regex: "widget", $options: "i" } },
+      { productId: { $regex: "widget", $options: "i" } },
+    ]);
     expect(filter.isInvalid).toBe(true);
     expect(filter.createdAt).toEqual({
       $gte: toSliceDate(new Date("2026-01-01")),
@@ -63,5 +66,13 @@ describe("buildSkuListMongoFilter", () => {
   it("notInAnySkugr omits _id when no skugr references", async () => {
     const filter = await buildSkuListMongoFilter({ notInAnySkugr: true });
     expect(filter).not.toHaveProperty("_id");
+  });
+
+  it("escapes regex metacharacters in search", async () => {
+    const filter = await buildSkuListMongoFilter({ search: "perfect.1" });
+    expect(filter.$or).toEqual([
+      { title: { $regex: "perfect\\.1", $options: "i" } },
+      { productId: { $regex: "perfect\\.1", $options: "i" } },
+    ]);
   });
 });

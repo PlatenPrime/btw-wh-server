@@ -8,6 +8,7 @@ import {
   getSkuSliceByDateController,
   getSkuSliceController,
   getSkuSliceRangeController,
+  patchSkuSliceByDateController,
   putAirClientSkuSliceController,
 } from "./controllers/index.js";
 
@@ -48,6 +49,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkuSliceByDateController),
+);
+router.patch(
+  "/sku/:skuId",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(patchSkuSliceByDateController),
 );
 
 export default router;

@@ -89,6 +89,33 @@ describe("getAllSkusUtil", () => {
     expect(result.pagination.total).toBe(1);
   });
 
+  it("applies search by productId substring (case-insensitive)", async () => {
+    await Sku.create({
+      konkName: "perfect",
+      prodName: "p1",
+      productId: "perfect-14938",
+      title: "Foil circle",
+      url: "https://perfect.example/14938",
+    });
+    await Sku.create({
+      konkName: "perfect",
+      prodName: "p1",
+      productId: "perfect-9710",
+      title: "Napkins",
+      url: "https://perfect.example/9710",
+    });
+
+    const result = await getAllSkusUtil({
+      page: 1,
+      limit: 10,
+      search: "perfect-14938",
+    });
+
+    expect(result.skus).toHaveLength(1);
+    expect(result.skus[0].productId).toBe("perfect-14938");
+    expect(result.pagination.total).toBe(1);
+  });
+
   it("combines search with konkName and prodName", async () => {
     await Sku.create({
       konkName: "k-x",

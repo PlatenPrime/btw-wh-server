@@ -14,9 +14,11 @@ vi.mock("../../../../logging/createLogger.js", () => ({
 import {
   clearImpitClientCacheForTests,
   formatImpitFetchError,
+  IMPIT_NATIVE_LOAD_ERROR_PREFIX,
   impitGet,
   resetImpitClientCache,
   setImpitFactoryForTests,
+  setImpitModuleLoaderForTests,
   summarizeImpitErrorBody,
   type ImpitClientLike,
   type ImpitCookieJar,
@@ -63,11 +65,13 @@ describe("impitGet", () => {
   beforeEach(() => {
     clearImpitClientCacheForTests();
     setImpitFactoryForTests(null);
+    setImpitModuleLoaderForTests(null);
     mockWarn.mockClear();
   });
 
   afterEach(() => {
     setImpitFactoryForTests(null);
+    setImpitModuleLoaderForTests(null);
     clearImpitClientCacheForTests();
   });
 
@@ -435,6 +439,121 @@ describe("impitGet", () => {
         context: "adm.tools challenge solve failed",
       }),
       "adm tools challenge failed"
+    );
+  });
+
+  it("не грузит native impit, если задана test factory", async () => {
+    const loader = vi.fn(async () => {
+      throw new Error("should not load native impit");
+    });
+    setImpitModuleLoaderForTests(loader);
+    setImpitFactoryForTests(() =>
+      makeClient({
+        fetch: vi.fn(async () => ({
+          status: 200,
+          text: async () => "ok",
+        })),
+      })
+    );
+
+    await expect(impitGet("https://example.com/p")).resolves.toBe("ok");
+    expect(loader).not.toHaveBeenCalled();
+  });
+
+  it("лениво создаёт Impit через module loader и кэширует клиент", async () => {
+    const Impit = vi.fn().mockImplementation(() =>
+      makeClient({
+        fetch: vi.fn(async () => ({
+          status: 200,
+          text: async () => "native-ok",
+        })),
+      })
+    );
+    const loader = vi.fn(async () => ({ Impit }));
+    setImpitModuleLoaderForTests(loader);
+
+    await expect(impitGet("https://example.com/p")).resolves.toBe("native-ok");
+    await expect(impitGet("https://example.com/p2")).resolves.toBe("native-ok");
+
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(Impit).toHaveBeenCalledTimes(1);
+    expect(Impit).toHaveBeenCalledWith({
+      browser: "chrome",
+      timeout: 30_000,
+      cookieJar: expect.objectContaining({
+        setCookie: expect.any(Function),
+        getCookieString: expect.any(Function),
+      }),
+    });
+  });
+
+  it("параллельные GET делят один native client после загрузки модуля", async () => {
+    const Impit = vi.fn().mockImplementation(() =>
+      makeClient({
+        fetch: vi.fn(async () => ({
+          status: 200,
+          text: async () => "ok",
+        })),
+      })
+    );
+    const loader = vi.fn(async () => {
+      await Promise.resolve();
+      return { Impit };
+    });
+    setImpitModuleLoaderForTests(loader);
+
+    await Promise.all([
+      impitGet("https://example.com/a"),
+      impitGet("https://example.com/b"),
+    ]);
+
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(Impit).toHaveBeenCalledTimes(1);
+  });
+
+  it("ошибка native bindings кидается на первом GET, не при импорте модуля", async () => {
+    const blocked = new Error(
+      "An Application Control policy has blocked this file"
+    );
+    setImpitModuleLoaderForTests(async () => {
+      throw blocked;
+    });
+
+    await expect(impitGet("https://example.com")).rejects.toMatchObject({
+      message: `${IMPIT_NATIVE_LOAD_ERROR_PREFIX}: An Application Control policy has blocked this file`,
+      cause: blocked,
+    });
+  });
+
+  it("после fail загрузки следующий GET повторяет loader", async () => {
+    const Impit = vi.fn().mockImplementation(() =>
+      makeClient({
+        fetch: vi.fn(async () => ({
+          status: 200,
+          text: async () => "ok",
+        })),
+      })
+    );
+    const loader = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("blocked"))
+      .mockResolvedValueOnce({ Impit });
+    setImpitModuleLoaderForTests(loader);
+
+    await expect(impitGet("https://a")).rejects.toThrow(
+      IMPIT_NATIVE_LOAD_ERROR_PREFIX
+    );
+    await expect(impitGet("https://a")).resolves.toBe("ok");
+    expect(loader).toHaveBeenCalledTimes(2);
+  });
+
+  it("non-Error reject native loader → String(err) в сообщении", async () => {
+    setImpitModuleLoaderForTests(async () => {
+      throw "blocked";
+    });
+
+    await expect(impitGet("https://example.com")).rejects.toThrow(
+      `${IMPIT_NATIVE_LOAD_ERROR_PREFIX}: blocked`
     );
   });
 });

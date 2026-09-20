@@ -112,6 +112,39 @@
 
 ---
 
+### PATCH `/api/sku-slices/sku/:skuId`
+
+Ручная запись `stock`/`price` SKU в существующий документ среза на дату. Документ дня не создаётся. Ключ `data[productId]` создаётся или перезаписывается. `0` и `-1` допустимы.
+
+**Path:** `skuId` — валидный ObjectId.
+
+**Body:**
+
+- `date` (string, YYYY-MM-DD, обязательно)
+- `stock` (number, finite, обязательно)
+- `price` (number, finite, обязательно)
+
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    productId: string,
+    date: Date (ISO),
+    stock: number,
+    price: number,
+    previous: { stock: number, price: number } | null
+  }
+}
+```
+
+`previous` — прежняя точка, если ключ уже был; `null`, если ключ создан.
+
+**Ошибки:** 400, 401, 403, 404 (нет SKU / нет productId / нет документа среза на дату), 500.
+
+---
+
 ### GET `/api/sku-slices/sku/:skuId/range`
 
 Плотный массив точек среза по SKU за период: по каждому UTC-дню от `dateFrom` до `dateTo` включительно. Пропуски ключа в `data`, а также `-1` в stock/price заполняются forward-fill из последнего валидного значения (warm-start — день до `dateFrom`). До первого валидного среза в периоде — `stock: 0`, `price: 0`. Расчёт продаж не выполняется (см. sales-range).

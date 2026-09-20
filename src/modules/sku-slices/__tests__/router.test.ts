@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import router from "../router.js";
 
 describe("sku-slices router", () => {
-  it("registers expected GET routes", () => {
+  it("registers expected routes", () => {
     const paths = (router.stack as Array<{ route?: { path: string } }>)
       .filter((layer) => layer.route)
       .map((layer) => layer.route!.path);
@@ -13,6 +13,7 @@ describe("sku-slices router", () => {
       "/client/air/sku/:skuId",
       "/pack-flips",
       "/sku/:skuId/range",
+      "/sku/:skuId",
       "/sku/:skuId",
     ]);
   });

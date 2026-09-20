@@ -51,6 +51,21 @@ describe("Sku-slices router integration", () => {
         .query({ konkName: "air", date: "2026-06-01" })
         .expect(403);
     });
+
+    it("PATCH /api/sku-slices/sku/:skuId returns 401 without token", async () => {
+      await request(app)
+        .patch("/api/sku-slices/sku/507f1f77bcf86cd799439011")
+        .send({ date: "2026-09-20", stock: 3, price: 110 })
+        .expect(401);
+    });
+
+    it("PATCH /api/sku-slices/sku/:skuId returns 403 for USER role", async () => {
+      await request(app)
+        .patch("/api/sku-slices/sku/507f1f77bcf86cd799439011")
+        .set(createAuthHeader(RoleType.USER))
+        .send({ date: "2026-09-20", stock: 3, price: 110 })
+        .expect(403);
+    });
   });
 
   describe("GET /api/sku-slices", () => {
@@ -178,6 +193,65 @@ describe("Sku-slices router integration", () => {
       const data = response.body.data as { stock: number; price: number };
       expect(data.stock).toBe(4);
       expect(data.price).toBe(6);
+    });
+  });
+
+  describe("PATCH /api/sku-slices/sku/:skuId", () => {
+    it("400 for invalid body", async () => {
+      const response = await request(app)
+        .patch("/api/sku-slices/sku/507f1f77bcf86cd799439011")
+        .set(createAuthHeader())
+        .send({ date: "2026-09-20", stock: "3", price: 110 })
+        .expect(400);
+
+      expect(response.body.message).toBe("Validation error");
+    });
+
+    it("404 when slice document is missing", async () => {
+      const sku = await Sku.create({
+        konkName: "r-k",
+        prodName: "p",
+        productId: "r-k-missing",
+        title: "One",
+        url: "https://e.com/1",
+      });
+
+      await request(app)
+        .patch(`/api/sku-slices/sku/${sku._id.toString()}`)
+        .set(createAuthHeader())
+        .send({ date: "2026-09-20", stock: 3, price: 110 })
+        .expect(404);
+    });
+
+    it("200 updates slice point for ADMIN", async () => {
+      const sku = await Sku.create({
+        konkName: "r-k",
+        prodName: "p",
+        productId: "r-k-patch",
+        title: "One",
+        url: "https://e.com/1",
+      });
+      await SkuSlice.create({
+        konkName: "r-k",
+        date: new Date("2026-09-20T00:00:00.000Z"),
+        data: { "r-k-patch": { stock: 60, price: 5.5 } },
+      });
+
+      const response = await request(app)
+        .patch(`/api/sku-slices/sku/${sku._id.toString()}`)
+        .set(createAuthHeader())
+        .send({ date: "2026-09-20", stock: 3, price: 110 })
+        .expect(200);
+
+      expect(response.body.message).toBe(
+        "Sku slice by date updated successfully"
+      );
+      expect(response.body.data).toMatchObject({
+        productId: "r-k-patch",
+        stock: 3,
+        price: 110,
+        previous: { stock: 60, price: 5.5 },
+      });
     });
   });
 });

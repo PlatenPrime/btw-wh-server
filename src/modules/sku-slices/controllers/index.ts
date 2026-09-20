@@ -1,5 +1,6 @@
 export { getSkuSliceController } from "./get-sku-slice/getSkuSliceController.js";
 export { getSkuSliceByDateController } from "./get-sku-slice-by-date/getSkuSliceByDateController.js";
+export { patchSkuSliceByDateController } from "./patch-sku-slice-by-date/patchSkuSliceByDateController.js";
 export { getSkuSliceRangeController } from "./get-sku-slice-range/getSkuSliceRangeController.js";
 export { getPackFlipReviewController } from "./get-pack-flip-review/getPackFlipReviewController.js";
 export { getAirClientPendingController } from "./get-air-client-pending/getAirClientPendingController.js";

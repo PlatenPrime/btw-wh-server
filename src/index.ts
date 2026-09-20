@@ -14,7 +14,6 @@ import {
   createSlowRequestLogger,
 } from "./logging/httpLogger.js";
 import { registerProcessHandlers } from "./logging/registerProcessHandlers.js";
-import { startExcelJobRuntime } from "./modules/excel-jobs/utils/startExcelJobRuntime.js";
 import analogSlicesRoute from "./modules/analog-slices/router.js";
 import analogsRoute from "./modules/analogs/router.js";
 import artChartReportsRoute from "./modules/art-chart-reports/router.js";
@@ -31,6 +30,7 @@ import defsRoute from "./modules/defs/router.js";
 import delsRoute from "./modules/dels/router.js";
 import eventsRoute from "./modules/events/router.js";
 import excelJobsRoute from "./modules/excel-jobs/router.js";
+import { startExcelJobRuntime } from "./modules/excel-jobs/utils/startExcelJobRuntime.js";
 import graboSkusRoute from "./modules/grabo-skus/router.js";
 import kasksRoute from "./modules/kasks/router.js";
 import konksRoute from "./modules/konks/router.js";

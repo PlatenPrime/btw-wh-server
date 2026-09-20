@@ -1,28 +1,39 @@
 import type { PackFlipReviewResult } from "../../modules/sku-slices/utils/reviewPackFlipsUtil.js";
 
-const SAMPLE_LIMIT = 15;
-
-function formatSampleLine(finding: {
+type PackFlipLineFinding = {
   productId: string;
   date: string;
   factor: number;
   title: string;
-}): string {
-  const title = finding.title ? ` ${finding.title}` : "";
-  return `${finding.date} ${finding.productId} ×${finding.factor}${title}`;
+};
+
+const SECTION_ICON = {
+  patched: "🔸",
+  "price-only": "💰",
+  ambiguous: "⚠️",
+} as const;
+
+function formatFindingLines(
+  icon: string,
+  finding: PackFlipLineFinding
+): string[] {
+  const head = `${icon} ${finding.date} · ${finding.productId} · ×${finding.factor}`;
+  const title = finding.title.trim();
+  if (!title) return [head];
+  return [head, `   ${title}`];
 }
 
 function formatSection(
-  label: string,
-  rows: Array<{ productId: string; date: string; factor: number; title: string }>
+  label: keyof typeof SECTION_ICON,
+  rows: PackFlipLineFinding[]
 ): string[] {
   if (rows.length === 0) return [];
-  const shown = rows.slice(0, SAMPLE_LIMIT).map(formatSampleLine);
-  const extra = rows.length - SAMPLE_LIMIT;
-  if (extra > 0) {
-    shown.push(`… +${extra}`);
+  const icon = SECTION_ICON[label];
+  const lines = [`${label}:`];
+  for (const row of rows) {
+    lines.push(...formatFindingLines(icon, row));
   }
-  return [`${label}:`, ...shown];
+  return lines;
 }
 
 export function formatPackFlipReport(result: PackFlipReviewResult): string {

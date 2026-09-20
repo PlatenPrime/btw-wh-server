@@ -87,4 +87,31 @@ describe("getAllSkusController", () => {
     expect(responseJson.data[0].title).toBe("Unique Search Title");
     expect(responseJson.pagination.total).toBe(1);
   });
+
+  it("200 applies search query on productId", async () => {
+    await Sku.create({
+      konkName: "perfect",
+      prodName: "p1",
+      productId: "perfect-14938",
+      title: "Foil",
+      url: "https://perfect.example/14938",
+    });
+    await Sku.create({
+      konkName: "perfect",
+      prodName: "p1",
+      productId: "perfect-9710",
+      title: "Napkins",
+      url: "https://perfect.example/9710",
+    });
+
+    const req = {
+      query: { page: "1", limit: "10", search: "perfect-14938" },
+    } as unknown as Request;
+
+    await getAllSkusController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.data).toHaveLength(1);
+    expect(responseJson.data[0].productId).toBe("perfect-14938");
+  });
 });

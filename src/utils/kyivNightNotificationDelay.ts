@@ -1,4 +1,8 @@
 import { sendMessageToAnalyticsChat } from "./telegram/sendMessageToAnalyticsChat.js";
+import {
+  TELEGRAM_MESSAGE_CHUNK_DELAY_MS,
+  chunkTelegramMessage,
+} from "./telegram/chunkTelegramMessage.js";
 import { logModuleError, logModuleInfo } from "../logging/logModuleError.js";
 
 const KYIV_TIMEZONE = "Europe/Kiev";
@@ -77,26 +81,47 @@ async function sendAnalyticsChatNotificationSafe(message: string): Promise<void>
   }
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+async function sendAnalyticsChatChunks(chunks: string[]): Promise<void> {
+  for (let i = 0; i < chunks.length; i += 1) {
+    const chunk = chunks[i];
+    if (chunk !== undefined) {
+      await sendAnalyticsChatNotificationSafe(chunk);
+    }
+    if (i < chunks.length - 1) {
+      await delay(TELEGRAM_MESSAGE_CHUNK_DELAY_MS);
+    }
+  }
+}
+
 /**
  * Отправляет сообщение в чат аналитики сразу или откладывает до 06:00 Kyiv,
  * если завершение попало в ночное окно 20:00–05:59.
+ * Текст длиннее лимита Telegram режется на чанки и шлётся последовательно.
  */
 export async function sendAnalyticsChatNotificationDeferred(
   message: string,
   finishedAt: Date = new Date()
 ): Promise<void> {
+  const chunks = chunkTelegramMessage(message);
   const delayMs = getMsUntilKyivMorningSend(finishedAt);
 
   if (delayMs <= 0) {
-    await sendAnalyticsChatNotificationSafe(message);
+    await sendAnalyticsChatChunks(chunks);
     return;
   }
 
   logModuleInfo("kyivNightNotificationDelay", "analytics notification night delay", {
     delayMin: Math.round(delayMs / 60000),
+    chunkCount: chunks.length,
   });
 
   setTimeout(() => {
-    void sendAnalyticsChatNotificationSafe(message);
+    void sendAnalyticsChatChunks(chunks);
   }, delayMs);
 }

@@ -43,7 +43,7 @@
 
 ### Не делать
 
-- Не слать флаг apply и не ждать записи в Mongo: эндпоинт всегда dry-run.
+- Не слать флаг apply и не ждать записи в Mongo: эндпоинт всегда dry-run. Ручная правка точки — отдельный `PATCH /api/sku-slices/sku/:skuId` ([patch-sku-slice](patch-sku-slice.md)), не compensating scrape.
 - Не путать с compensating slice и live-stock — другие источники и побочные эффекты.
 - Не дёргать параллельно огромные диапазоны: бэкенд грузит полные `data` срезов за каждый день.
 - Не трактовать пустые `patched`/`priceOnly`/`ambiguous` как 404.

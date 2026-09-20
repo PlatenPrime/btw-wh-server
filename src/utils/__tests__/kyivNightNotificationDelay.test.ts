@@ -21,6 +21,10 @@ vi.mock("../telegram/sendMessageToAnalyticsChat.js", () => ({
 }));
 
 import { sendMessageToAnalyticsChat } from "../telegram/sendMessageToAnalyticsChat.js";
+import {
+  TELEGRAM_MESSAGE_CHUNK_DELAY_MS,
+  TELEGRAM_MESSAGE_MAX_CHARS,
+} from "../telegram/chunkTelegramMessage.js";
 
 /** UTC instant when Kyiv wall clock shows given local date/time (DST-aware). */
 function kyivLocalToUtc(
@@ -178,5 +182,23 @@ describe("sendAnalyticsChatNotificationDeferred", () => {
       expect.any(Error),
       "analytics notification failed"
     );
+  });
+
+  it("splits oversized text into sequential telegram chunks", async () => {
+    vi.setSystemTime(kyivLocalToUtc(2025, 6, 6, 10, 0));
+    vi.mocked(sendMessageToAnalyticsChat).mockResolvedValue(undefined);
+
+    const text = `${"a".repeat(TELEGRAM_MESSAGE_MAX_CHARS)}\nz`;
+    const pending = sendAnalyticsChatNotificationDeferred(text);
+    await vi.advanceTimersByTimeAsync(TELEGRAM_MESSAGE_CHUNK_DELAY_MS);
+    await pending;
+
+    const send = vi.mocked(sendMessageToAnalyticsChat);
+    expect(send.mock.calls.length).toBeGreaterThan(1);
+    for (const [message] of send.mock.calls) {
+      expect(String(message).length).toBeLessThanOrEqual(
+        TELEGRAM_MESSAGE_MAX_CHARS
+      );
+    }
   });
 });
