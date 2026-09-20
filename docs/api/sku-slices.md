@@ -178,8 +178,10 @@
     dates: string[],
     patched: Array<{
       productId: string,
+      skuId: string,
       title: string,
       url: string,
+      imageUrl: string,
       kind: "inverse",
       date: string,
       neighborDate: string,
@@ -189,8 +191,10 @@
     }>,
     priceOnly: Array<{
       productId: string,
+      skuId: string,
       title: string,
       url: string,
+      imageUrl: string,
       kind: "price-only",
       date: string,
       neighborDate: string,
@@ -199,8 +203,10 @@
     }>,
     ambiguous: Array<{
       productId: string,
+      skuId: string,
       title: string,
       url: string,
+      imageUrl: string,
       kind: "ambiguous",
       date: string,
       neighborDate: string,
@@ -211,6 +217,6 @@
 }
 ```
 
-`dates` — UTC YYYY-MM-DD, inclusive. Пустые массивы findings — скачков нет, не ошибка. Поле `patched` у finding — предлагаемый рескейл, не записан.
+`dates` — UTC YYYY-MM-DD, inclusive. Пустые массивы findings — скачков нет, не ошибка. Поле `patched` у finding — предлагаемый рескейл, не записан. `skuId` — Mongo `_id` документа Sku (пустая строка, если Sku нет). `imageUrl` — из документа Sku. `url` — страница конкурента.
 
 **Ошибки:** 400, 401, 403, 500.

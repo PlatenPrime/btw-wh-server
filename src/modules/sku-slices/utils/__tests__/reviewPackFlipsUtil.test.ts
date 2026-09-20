@@ -63,12 +63,13 @@ describe("reviewPackFlipsUtil", () => {
   });
 
   it("dry-run finds round-trip and does not write", async () => {
-    await Sku.create({
+    const sku = await Sku.create({
       konkName: "perfect",
       prodName: "gemar",
       productId: "perfect-1",
       title: "Balloon",
       url: "https://perfect.example/1",
+      imageUrl: "https://cdn.example/balloon.webp",
     });
     await seedSlices([
       { date: D0, pid: { "perfect-1": { stock: 100, price: 100 } } },
@@ -85,7 +86,9 @@ describe("reviewPackFlipsUtil", () => {
     expect(result.patched).toHaveLength(1);
     expect(result.patched[0]).toMatchObject({
       productId: "perfect-1",
+      skuId: sku._id.toString(),
       title: "Balloon",
+      imageUrl: "https://cdn.example/balloon.webp",
       date: "2026-09-14",
       factor: 100,
       patched: { stock: 100, price: 100 },
@@ -223,5 +226,29 @@ describe("reviewPackFlipsUtil", () => {
       ambiguous: [],
       dates: [],
     });
+  });
+
+  it("emits empty skuId and imageUrl when Sku is missing", async () => {
+    await seedSlices([
+      { date: D0, pid: { "perfect-1": { stock: 100, price: 100 } } },
+      { date: D1, pid: { "perfect-1": { stock: 10000, price: 1 } } },
+      { date: D2, pid: { "perfect-1": { stock: 100, price: 100 } } },
+    ]);
+
+    const result = await reviewPackFlipsUtil({
+      dates: [D0, D1, D2],
+      apply: false,
+      konkName: "perfect",
+    });
+
+    expect(result.patched).toEqual([
+      expect.objectContaining({
+        productId: "perfect-1",
+        skuId: "",
+        imageUrl: "",
+        title: "",
+        url: "",
+      }),
+    ]);
   });
 });

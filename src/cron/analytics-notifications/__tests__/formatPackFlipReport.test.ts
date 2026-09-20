@@ -6,8 +6,10 @@ function finding(
   overrides: Partial<PackFlipFinding> & Pick<PackFlipFinding, "productId" | "kind">
 ): PackFlipFinding {
   return {
+    skuId: "",
     title: "",
     url: "",
+    imageUrl: "",
     date: "2026-09-14",
     neighborDate: "2026-09-13",
     factor: 100,

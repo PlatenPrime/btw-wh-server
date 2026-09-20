@@ -15,8 +15,10 @@ import {
 
 export type PackFlipFinding = {
   productId: string;
+  skuId: string;
   title: string;
   url: string;
+  imageUrl: string;
   kind: "inverse" | "price-only" | "ambiguous";
   date: string;
   neighborDate: string;
@@ -46,7 +48,7 @@ type LeanSlice = {
   data?: Record<string, unknown>;
 };
 
-type SkuMeta = { title: string; url: string };
+type SkuMeta = { skuId: string; title: string; url: string; imageUrl: string };
 
 export function addUtcDays(date: Date, delta: number): Date {
   return new Date(
@@ -105,8 +107,10 @@ function toFinding(
   const neighbor = dates[decision.neighborIndex];
   return {
     productId,
+    skuId: meta?.skuId ?? "",
     title: meta?.title ?? "",
     url: meta?.url ?? "",
+    imageUrl: meta?.imageUrl ?? "",
     kind: decision.kind,
     date: date ? toUtcYmd(date) : "",
     neighborDate: neighbor ? toUtcYmd(neighbor) : "",
@@ -120,14 +124,22 @@ async function loadSkuMetaByProductId(
   konkName: string
 ): Promise<Map<string, SkuMeta>> {
   const rows = await Sku.find({ konkName })
-    .select("productId title url")
-    .lean<{ productId?: string; title?: string; url?: string }[]>();
+    .select("_id productId title url imageUrl")
+    .lean<{
+      _id?: { toString(): string };
+      productId?: string;
+      title?: string;
+      url?: string;
+      imageUrl?: string;
+    }[]>();
   const map = new Map<string, SkuMeta>();
   for (const row of rows) {
     if (typeof row.productId !== "string" || !row.productId) continue;
     map.set(row.productId, {
+      skuId: row._id ? row._id.toString() : "",
       title: typeof row.title === "string" ? row.title : "",
       url: typeof row.url === "string" ? row.url : "",
+      imageUrl: typeof row.imageUrl === "string" ? row.imageUrl : "",
     });
   }
   return map;

@@ -48,12 +48,13 @@ describe("getPackFlipReviewController", () => {
   });
 
   it("200 returns dry-run inverse finding", async () => {
-    await Sku.create({
+    const sku = await Sku.create({
       konkName: "perfect",
       prodName: "gemar",
       productId: "perfect-1",
       title: "Balloon",
       url: "https://perfect.example/1",
+      imageUrl: "https://cdn.example/balloon.webp",
     });
     await SkuSlice.create({
       konkName: "perfect",
@@ -85,11 +86,13 @@ describe("getPackFlipReviewController", () => {
     const data = responseJson.data as {
       konkName: string;
       apply?: boolean;
-      patched: Array<{ productId: string }>;
+      patched: Array<{ productId: string; skuId: string; imageUrl: string }>;
     };
     expect(data.konkName).toBe("perfect");
     expect(data.apply).toBeUndefined();
     expect(data.patched).toHaveLength(1);
     expect(data.patched[0]!.productId).toBe("perfect-1");
+    expect(data.patched[0]!.skuId).toBe(sku._id.toString());
+    expect(data.patched[0]!.imageUrl).toBe("https://cdn.example/balloon.webp");
   });
 });
