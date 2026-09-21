@@ -423,6 +423,35 @@ describe("getPerfectStockData", () => {
     expect(mockPost).not.toHaveBeenCalled();
   });
 
+  it("ignores related miniature pack when main product has no фасовка", async () => {
+    mockGet.mockResolvedValueOnce({
+      status: 200,
+      data: `
+        <html><body>
+          <section id="main">
+            <div id="product-details" data-product='{"quantity":1,"price_amount":68.5,"name":"Повітряна кулька Art Show"}'></div>
+            <article class="product-miniature js-product-miniature">
+              <p>Штук в упаковці: 100</p>
+            </article>
+          </section>
+        </body></html>
+      `,
+      headers: {},
+    });
+
+    const result = await getPerfectStockData(
+      "https://perfectparty.in.ua/x/10276-3315-product.html"
+    );
+
+    expect(result).toEqual({
+      stock: 1,
+      price: 68.5,
+      title: "Повітряна кулька Art Show",
+      source: "data-product",
+    });
+    expect(mockPost).not.toHaveBeenCalled();
+  });
+
   it("uses data-product quantity when related product is OOS", async () => {
     mockGet.mockResolvedValueOnce({
       status: 200,

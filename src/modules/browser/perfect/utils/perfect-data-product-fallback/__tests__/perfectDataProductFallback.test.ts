@@ -77,4 +77,28 @@ describe("tryPerfectDataProductFallback", () => {
   it("returns null when data-product is absent", () => {
     expect(tryPerfectDataProductFallback("<html></html>", "x")).toBeNull();
   });
+
+  it("does not apply related miniature pack to main product without фасовка", () => {
+    const html = `
+      <section id="main">
+        <div id="product-details" data-product='{"quantity":1,"price_amount":68.5,"name":"Повітряна кулька Art Show Небесний блакитний 36\\" (90 см)"}'></div>
+        <article class="product-miniature js-product-miniature">
+          <p class="infoblock_p">Штук в упаковці: 100</p>
+        </article>
+        <article class="product-miniature js-product-miniature">
+          <p class="infoblock_p">Штук в упаковці: 50</p>
+        </article>
+      </section>`;
+    expect(
+      tryPerfectDataProductFallback(
+        html,
+        "Кулька-гігант Небесний 36\" (90 см) Perfect Party"
+      )
+    ).toEqual({
+      stock: 1,
+      price: 68.5,
+      title: 'Повітряна кулька Art Show Небесний блакитний 36" (90 см)',
+      source: "data-product",
+    });
+  });
 });

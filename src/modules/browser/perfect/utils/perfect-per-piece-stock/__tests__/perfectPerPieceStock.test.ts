@@ -23,6 +23,20 @@ describe("toStockAndPrice", () => {
     });
   });
 
+  it("ignores related miniature pack when main has none", () => {
+    const html = `
+      <section id="main">
+        <article class="product-miniature">
+          <p>Штук в упаковці: 100</p>
+        </article>
+      </section>`;
+    expect(toStockAndPrice(1, 68.5, "Повітряна кулька Art Show", html)).toEqual({
+      stock: 1,
+      price: 68.5,
+      title: "Повітряна кулька Art Show",
+    });
+  });
+
   it("returns packs as stock when no pack info", () => {
     expect(toStockAndPrice(9, 45, "Без фасовки", "")).toEqual({
       stock: 9,
