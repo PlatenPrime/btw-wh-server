@@ -12,6 +12,7 @@ import {
   getAllSkugrsController,
   getSkugrByIdController,
   postAirClientFillPageController,
+  purgePromotedFromNewskuController,
   setIsSlicedController,
   updateSkugrByIdController,
 } from "./controllers/index.js";
@@ -59,6 +60,12 @@ router.post(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(setIsSlicedController),
+);
+router.post(
+  "/purge-promoted-from-newsku",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(purgePromotedFromNewskuController),
 );
 router.patch(
   "/id/:id",

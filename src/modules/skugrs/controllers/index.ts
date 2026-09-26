@@ -7,5 +7,6 @@ export { getAirClientSkugrPendingController } from "./get-air-client-pending/get
 export { getAllSkugrsController } from "./get-all-skugrs/getAllSkugrsController.js";
 export { getSkugrByIdController } from "./get-skugr-by-id/getSkugrByIdController.js";
 export { postAirClientFillPageController } from "./post-air-client-fill-page/postAirClientFillPageController.js";
+export { purgePromotedFromNewskuController } from "./purge-promoted-from-newsku/purgePromotedFromNewskuController.js";
 export { setIsSlicedController } from "./set-is-sliced/setIsSlicedController.js";
 export { updateSkugrByIdController } from "./update-skugr-by-id/updateSkugrByIdController.js";

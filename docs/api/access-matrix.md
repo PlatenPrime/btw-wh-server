@@ -395,6 +395,7 @@
 | POST | `/` | JWT | ≥ ADMIN |
 | POST | `/id/:id/fill-skus` | JWT | ≥ ADMIN |
 | POST | `/set-is-sliced` | JWT | ≥ ADMIN |
+| POST | `/purge-promoted-from-newsku` | JWT | ≥ ADMIN |
 | PATCH | `/id/:id` | JWT | ≥ ADMIN |
 | POST | `/id/:id/clear-skus` | JWT | ≥ ADMIN |
 | DELETE | `/id/:id/with-skus` | JWT | ≥ PRIME |

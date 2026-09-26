@@ -275,6 +275,34 @@
 
 **Ошибки:** 401, 403, 500.
 
+---
+
+### POST `/api/skugrs/purge-promoted-from-newsku`
+
+По всем товарным группам с `prodName: "newsku"` убирает из массива `skus` ссылки на карточки, у которых уже другой `prodName`. Документы `Sku` не удаляются и не меняются. В группах остаются только ещё не присвоенные (`prodName: "newsku"`).
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Body:** не требуется.
+
+**Ответ 200:**
+
+```json
+{
+  "message": "Promoted skus purged from newsku groups successfully",
+  "data": {
+    "groupsTotal": 0,
+    "groupsModified": 0,
+    "uniqueSkusRemoved": 0,
+    "linksRemoved": 0
+  }
+}
+```
+
+Поля `data`: сколько newsku-групп найдено (`groupsTotal`); сколько документов групп изменилось (`groupsModified`); сколько уникальных id SKU вытащено (`uniqueSkusRemoved`); сколько ссылок суммарно убрано по всем группам (`linksRemoved` — один и тот же SKU в двух группах даёт `2`).
+
+**Ошибки:** 401, 403, 500.
+
 ## Формат Skugr в `data`
 
 Используется в ответах `GET /api/skugrs` (каждый элемент массива), `POST /api/skugrs`, `PATCH /api/skugrs/id/:id`, `POST /api/skugrs/id/:id/fill-skus`, `POST /api/skugrs/id/:id/clear-skus` (поле `data`).
