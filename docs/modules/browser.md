@@ -7,7 +7,7 @@
 - **прямые API-эндпоинты** для запроса stock/price по URL или артикулу;
 - **библиотеки парсинга**, которые вызывают cron-задачи срезов, модули `analogs`, `skus`, `arts`, `skugrs` и компенсирующие срезы.
 
-Организация кода — **по конкуренту** (`air/`, `balun/`, `perfect/`, …), плюс производитель Grabo в `browser/grabo/` и общие утилиты в `browser/utils/`.
+Организация кода — **по конкуренту** (`air/`, `balun/`, `perfect/`, …), плюс производитель Grabo в `browser/grabo/`, общий слой Prom.ua company site в `browser/promua/` и утилиты в `browser/utils/`.
 
 ## Поддерживаемые конкуренты
 
@@ -21,13 +21,14 @@
 | yumi | [`src/modules/browser/yumi/`](../../src/modules/browser/yumi/) | `GET /api/browser/yumi/stock` |
 | yumin | [`src/modules/browser/yumin/`](../../src/modules/browser/yumin/) | `GET /api/browser/yumin/stock` |
 | svbum | [`src/modules/browser/svbum/`](../../src/modules/browser/svbum/) | `GET /api/browser/svbum/stock` |
+| dojdevik | [`src/modules/browser/dojdevik/`](../../src/modules/browser/dojdevik/) | `GET /api/browser/dojdevik/stock` |
 
 Каждая папка конкурента содержит `controllers/` и `utils/get*StockData.ts` с логикой разбора HTML/DOM/JSON конкретного сайта.
 
 ## Связи между модулями
 
-- **analog-slices / analogs:** live-опрос аналогов (air, balun, yumi, yumin, sharte, svbum). Ежедневный analog-slices cron — только `ANALOG_SLICE_KONK_NAMES` (air, balun, sharte, yumi, yumin), без svbum.
-- **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect, svbum); для Air — client-ingestion HTML как канал дозаполнения после abort/`-1` (server compensation для Air выключена).
+- **analog-slices / analogs:** live-опрос аналогов (air, balun, yumi, yumin, sharte, svbum, dojdevik). Ежедневный analog-slices cron — только `ANALOG_SLICE_KONK_NAMES` (air, balun, sharte, yumi, yumin), без svbum/dojdevik.
+- **sku-slices / skus:** опрос SKU (air, balun, yumi, yumin, sharte, perfect, svbum, dojdevik); для Air — client-ingestion HTML как канал дозаполнения после abort/`-1` (server compensation для Air выключена).
 - **btrade-slices / arts / dels / defs:** остатки sharik через bulk `product_rests` (`actualQuantity` для live, `sliceQuantity` для daily btrade-slice).
 - **skugrs:** обход страниц групп для наполнения SKU (`group-products`); Air listing при `AIR_IDLE_MODE` с сервера не ходит — client-ingest карточек листинга.
 - **grabo-skus:** полный обход каталога производителя Grabo (sitemap → категории → карточки) через `browser/grabo`.
@@ -53,13 +54,17 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 Результаты stock-scrape пишутся в info-лог (`browser stock result`: konk, link, stock, price, ok) с лимитом ≤20 сообщений в минуту на process; ошибки fetch — отдельно через `logBrowserError`.
 
-### Balun: остаток через GraphQL корзины Prom
+### Prom.ua company site: общий cart clamp (`promua/`)
 
-Число остатка на карточке Balun (company site Prom.ua) больше не лежит в HTML-аналитике Facebook (`data-advtracking-fb-product-data`). Актуальный источник — GraphQL `/bfg/graphql`: анонимная сессия с GET карточки (`Set-Cookie`), `AddProductToCart`, затем `CartChangeProductQuantity` с заведомо большим qty. Prom отвечает union `RequestedQuantityRecalculatedType` и клампит qty до склада (`recalculatedQuantity`, reason `EXCEEDS_AMOUNT_OF_PRODUCT_IN_STOCK`). Если qty приняли как есть (`RequestedQuantitySet`), точное число склада неизвестно — сентинель `-1`, чтобы не записать probe в срезы. Товар, который нельзя заказать (`ProductNotOrderableError` / удалён), даёт stock `0` при живой цене.
+Платформенный слой [`browser/promua/`](../../src/modules/browser/promua/) — общий для company site на Prom.ua (сейчас balun и dojdevik): GraphQL `/bfg/graphql` (`AddProductToCart` → `CartChangeProductQuantity`), CSRF (`csrf_token_company_site` / meta), productId из URL `/p{digits}`, probe qty `10_000_000_000` (чтобы кламп срабатывал и при миллионных остатках). Origin передаётся параметром в `postPromUaGraphql`.
 
-Цена по-прежнему с HTML `data-analytics` (`clerk.price_original`); если атрибута нет — unit selling из ответа корзины. CSRF для add: токен из HTML, иначе cookie `csrf_token_company_site` в заголовок `x-csrftoken`. Сессия эфемерная (cookie только этого запроса), корзину после замера не чистим.
+Число остатка на карточке больше не лежит в HTML-аналитике Facebook. Актуальный источник — GraphQL: анонимная сессия с GET карточки (`Set-Cookie`), add, затем change с probe. Prom отвечает union `RequestedQuantityRecalculatedType` и клампит qty до склада (`recalculatedQuantity`, reason `EXCEEDS_AMOUNT_OF_PRODUCT_IN_STOCK`). Если qty приняли как есть (`RequestedQuantitySet`), точное число склада неизвестно — сентинель `-1`. Товар, который нельзя заказать (`ProductNotOrderableError` / удалён), даёт stock `0` при живой цене.
 
-`getBalunStockData` ходит через `getBrowserAxios` + merge `Set-Cookie`, как Perfect, а не через `browserGet` (тот не отдаёт заголовки).
+**Balun:** цена с HTML `data-analytics` (`clerk.price_original`), иначе unit selling из корзины; stock = `recalculatedQuantity` в единицах продажи сайта. `getBalunStockData` использует `getBrowserAxios` + `promua`.
+
+**Dojdevik:** цена упаковки с DOM `[data-qaid="product_price"]`, иначе unit selling; packSize из характеристики «Кількість в пачці» (`attribute_value`) или из описания «Кількість в упаковці N шт» (fallback 1); наружу — цена за штуку (`packagePrice / packSize`, 2 знака) и stock в штуках (`packs × packSize`). Обход групп — shared `parsePromUaGroupListingProducts`. Гайд для UI: [frontend: dojdevik](../frontend/dojdevik.md).
+
+CSRF для add: токен из HTML, иначе cookie `csrf_token_company_site` в `x-csrftoken`. Сессия эфемерная, корзину после замера не чистим.
 
 ### Perfect: остаток без удержания склада
 
@@ -87,7 +92,7 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 На машине/сервере, где реально используется transport `playwright`, нужен установленный Chromium: `npx playwright install chromium`. Обычный boot и тесты без вызова Playwright-пути браузер не поднимают. Пакет `impit` тянет prebuilt native binary под платформу.
 
-Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Perfect и Balun stock используют `getBrowserAxios` напрямую (cookie jar). Svbum stock и crawl листинга групп — `fetchPageHtml` (`konkName: "svbum"`), на них влияет `BROWSER_TRANSPORT_BY_KONK`. Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
+Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/`Sec-Fetch-Site` (session soft-block WAF). Perfect, Balun и Dojdevik stock используют `getBrowserAxios` напрямую (cookie jar). Svbum stock и crawl листинга групп — `fetchPageHtml` (`konkName: "svbum"`), на них влияет `BROWSER_TRANSPORT_BY_KONK`. Остальные `get*StockData` и default crawl листингов по-прежнему идут через `browserGet`; env на них **не влияет**, пока getter не переведён на `fetchPageHtml`. Cron срезов и контракт `{ stock, price }` / `-1` не меняются.
 
 ### Сентинельные значения
 
@@ -116,7 +121,7 @@ Per-competitor обёртки: `get*GroupPagesProducts` + Zod-схема (`group
 
 ### Group products (диспетчер)
 
-[`group-products/fetchGroupProductsByKonkName`](../../src/modules/browser/group-products/fetchGroupProductsByKonkName.ts) маршрутизирует запрос к нужному конкуренту. Поддерживаются: yumi, yumin, air, sharte, balun, perfect, svbum. Sharik не поддерживается для group-products.
+[`group-products/fetchGroupProductsByKonkName`](../../src/modules/browser/group-products/fetchGroupProductsByKonkName.ts) маршрутизирует запрос к нужному конкуренту. Поддерживаются: yumi, yumin, air, sharte, balun, perfect, svbum, dojdevik. Sharik не поддерживается для group-products.
 
 Возвращает `GroupBrowserProduct[]`: `{ title, url, imageUrl, productId }` — для создания SKU в `skugrs`.
 

@@ -3,6 +3,7 @@ import { Sku } from "../../models/Sku.js";
 import { getAirStockData } from "../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../browser/balun/utils/getBalunStockData.js";
 import { getSvbumStockData } from "../../../browser/svbum/utils/getSvbumStockData.js";
+import { getDojdevikStockData } from "../../../browser/dojdevik/utils/getDojdevikStockData.js";
 
 vi.mock("../../../browser/air/utils/getAirStockData.js", () => ({
   getAirStockData: vi.fn(),
@@ -25,6 +26,9 @@ vi.mock("../../../browser/perfect/utils/getPerfectStockData.js", () => ({
 vi.mock("../../../browser/svbum/utils/getSvbumStockData.js", () => ({
   getSvbumStockData: vi.fn(),
 }));
+vi.mock("../../../browser/dojdevik/utils/getDojdevikStockData.js", () => ({
+  getDojdevikStockData: vi.fn(),
+}));
 
 import {
   getSkuStockDataUtil,
@@ -34,6 +38,7 @@ import {
 const mockGetBalunStockData = vi.mocked(getBalunStockData);
 const mockGetAirStockData = vi.mocked(getAirStockData);
 const mockGetSvbumStockData = vi.mocked(getSvbumStockData);
+const mockGetDojdevikStockData = vi.mocked(getDojdevikStockData);
 
 describe("getSkuStockDataUtil", () => {
   beforeEach(async () => {
@@ -41,6 +46,7 @@ describe("getSkuStockDataUtil", () => {
     mockGetBalunStockData.mockReset();
     mockGetAirStockData.mockReset();
     mockGetSvbumStockData.mockReset();
+    mockGetDojdevikStockData.mockReset();
   });
 
   it("returns null when sku not found", async () => {
@@ -128,5 +134,24 @@ describe("getSkuStockDataUtil", () => {
       "https://sviatobum.ua/item"
     );
     expect(result).toEqual({ stock: 300, price: 3.93 });
+  });
+
+  it("calls getDojdevikStockData for dojdevik", async () => {
+    mockGetDojdevikStockData.mockResolvedValue({ stock: 3500, price: 1.7 });
+
+    const sku = await Sku.create({
+      konkName: "dojdevik",
+      prodName: "p",
+      productId: "dojdevik-stock-1",
+      title: "Item",
+      url: "https://dojdevik.com.ua/ua/p17755382.html",
+    });
+
+    const result = await getSkuStockDataUtil(sku._id.toString());
+
+    expect(mockGetDojdevikStockData).toHaveBeenCalledWith(
+      "https://dojdevik.com.ua/ua/p17755382.html"
+    );
+    expect(result).toEqual({ stock: 3500, price: 1.7 });
   });
 });

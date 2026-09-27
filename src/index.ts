@@ -23,6 +23,7 @@ import artsRoute from "./modules/arts/router.js";
 import asksRoute from "./modules/asks/router.js";
 import authRoute from "./modules/auth/router.js";
 import blocksRoute from "./modules/blocks/router.js";
+import { getBalunStockData } from "./modules/browser/balun/utils/getBalunStockData.js";
 import browserRoute from "./modules/browser/router.js";
 import btradeSlicesRoute from "./modules/btrade-slices/router.js";
 import constantsRoute from "./modules/constants/router.js";
@@ -130,3 +131,7 @@ async function start() {
 }
 
 start();
+
+
+
+getBalunStockData("https://balun.com.ua/ua/p3199435375-nabir-povitryanih-kulok.html").then(console.log);

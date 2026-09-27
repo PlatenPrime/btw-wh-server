@@ -38,6 +38,7 @@
 | GET | `/yumin/stock` | Нет | Публично |
 | GET | `/sharte/stock` | Нет | Публично |
 | GET | `/svbum/stock` | Нет | Публично |
+| GET | `/dojdevik/stock` | Нет | Публично |
 | GET | `/sharik/stock/:artikul` | Нет | Публично |
 
 ---

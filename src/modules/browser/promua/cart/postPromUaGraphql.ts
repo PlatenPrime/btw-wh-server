@@ -2,9 +2,7 @@ import type { AxiosInstance } from "axios";
 import {
   mergeCookies,
   pickHeaderCaseInsensitive,
-} from "../../../utils/merge-response-cookies/mergeResponseCookies.js";
-
-export const BALUN_ORIGIN = "https://balun.com.ua";
+} from "../../utils/merge-response-cookies/mergeResponseCookies.js";
 
 export const BROWSER_TEXT_CONFIG = {
   responseType: "text" as const,
@@ -12,7 +10,8 @@ export const BROWSER_TEXT_CONFIG = {
   validateStatus: () => true,
 };
 
-export type PostBalunGraphqlInput = {
+export type PostPromUaGraphqlInput = {
+  origin: string;
   operationName: string;
   query: string;
   variables: Record<string, unknown>;
@@ -21,24 +20,28 @@ export type PostBalunGraphqlInput = {
   csrfToken?: string;
 };
 
-export type PostBalunGraphqlResult = {
+export type PostPromUaGraphqlResult = {
   status: number;
   body: unknown;
   cookieHeader: string;
 };
 
 /**
- * URL Prom GraphQL на company site Balun.
+ * URL Prom GraphQL на company site: `${origin}/bfg/graphql?...`.
  */
-export function buildBalunGraphqlUrl(operationName: string): string {
+export function buildPromUaGraphqlUrl(
+  origin: string,
+  operationName: string
+): string {
   const params = new URLSearchParams({
     operation_name: operationName,
     source: "COMPANY_SITE",
   });
-  return `${BALUN_ORIGIN}/bfg/graphql?${params.toString()}`;
+  return `${origin.replace(/\/$/, "")}/bfg/graphql?${params.toString()}`;
 }
 
 function buildGraphqlHeaders(
+  origin: string,
   productUrl: string,
   cookieHeader: string,
   csrfToken: string | undefined
@@ -46,7 +49,7 @@ function buildGraphqlHeaders(
   const headers: Record<string, string> = {
     Accept: "application/json, text/plain, */*",
     "Content-Type": "application/json",
-    Origin: BALUN_ORIGIN,
+    Origin: origin.replace(/\/$/, ""),
     Referer: productUrl,
     "X-Language": "uk",
     "X-Web-Device": "desktop",
@@ -67,11 +70,12 @@ function buildGraphqlHeaders(
 /**
  * POST в `/bfg/graphql` с cookie jar и опциональным CSRF.
  */
-export async function postBalunGraphql(
+export async function postPromUaGraphql(
   client: AxiosInstance,
-  input: PostBalunGraphqlInput
-): Promise<PostBalunGraphqlResult> {
-  const url = buildBalunGraphqlUrl(input.operationName);
+  input: PostPromUaGraphqlInput
+): Promise<PostPromUaGraphqlResult> {
+  const origin = input.origin.replace(/\/$/, "");
+  const url = buildPromUaGraphqlUrl(origin, input.operationName);
   const response = await client.post(
     url,
     {
@@ -82,6 +86,7 @@ export async function postBalunGraphql(
     {
       ...BROWSER_TEXT_CONFIG,
       headers: buildGraphqlHeaders(
+        origin,
         input.productUrl,
         input.cookieHeader,
         input.csrfToken

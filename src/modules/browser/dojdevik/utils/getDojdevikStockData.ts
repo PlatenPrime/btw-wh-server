@@ -4,8 +4,6 @@ import {
   mergeCookies,
   pickHeaderCaseInsensitive,
 } from "../../utils/merge-response-cookies/mergeResponseCookies.js";
-import { parseJsonHtmlAttribute } from "../../utils/parse-json-html-attribute/parseJsonHtmlAttribute.js";
-import { parseStrippedDecimal } from "../../utils/parse-stripped-decimal/parseStrippedDecimal.js";
 import {
   ADD_PRODUCT_TO_CART_QUERY,
   CART_CHANGE_PRODUCT_QUANTITY_QUERY,
@@ -21,62 +19,57 @@ import {
 } from "../../promua/cart/postPromUaGraphql.js";
 import { extractPromUaCsrfToken } from "../../promua/extract-promua-csrf-token/extractPromUaCsrfToken.js";
 import { extractPromUaProductId } from "../../promua/extract-promua-product-id/extractPromUaProductId.js";
+import {
+  parseDojdevikPackagePriceFromDom,
+  parseDojdevikTitleFromDom,
+} from "./dojdevik-product-price-from-dom/parseDojdevikPackagePriceFromDom.js";
+import type { DojdevikProductInfo } from "./dojdevik-product-types/dojdevikProductInfo.js";
+import { DOJDEVIK_NEGATIVE_OUTCOME } from "./dojdevik-product-types/dojdevikProductInfo.js";
+import { extractDojdevikPackCount } from "./extract-dojdevik-pack-count/extractDojdevikPackCount.js";
 
-export const BALUN_ORIGIN = "https://balun.com.ua";
+export type { DojdevikProductInfo } from "./dojdevik-product-types/dojdevikProductInfo.js";
 
-export interface BalunProductInfo {
-  stock: number;
-  price: number;
+export const DOJDEVIK_ORIGIN = "https://dojdevik.com.ua";
+
+function toMoney(value: number): number {
+  return Number(value.toFixed(2));
 }
 
-interface AnalyticsData {
-  clerk?: { price_original?: string };
-}
-
-const NEGATIVE_OUTCOME: BalunProductInfo = { stock: -1, price: -1 };
-
-/**
- * Цена со страницы: data-analytics → clerk.price_original.
- */
-export function parseBalunHtmlPrice(html: string): number | undefined {
-  const $ = cheerio.load(html);
-  const analyticsAttr = $("[data-analytics]").first().attr("data-analytics");
-  const analyticsData = parseJsonHtmlAttribute(analyticsAttr) as
-    | AnalyticsData
-    | undefined;
-  const priceOriginal = analyticsData?.clerk?.price_original;
-  if (priceOriginal === undefined || priceOriginal === "") {
-    return undefined;
-  }
-  const price = parseStrippedDecimal(String(priceOriginal));
-  return price === null ? undefined : price;
-}
-
-function resolvePrice(
-  htmlPrice: number | undefined,
+function resolvePackagePrice(
+  htmlPrice: number | null,
   graphqlPrice: number | null | undefined
 ): number | undefined {
-  if (htmlPrice !== undefined) return htmlPrice;
+  if (htmlPrice !== null) return htmlPrice;
   if (graphqlPrice != null && Number.isFinite(graphqlPrice) && graphqlPrice >= 0) {
     return graphqlPrice;
   }
   return undefined;
 }
 
-function withPrice(stock: number, price: number | undefined): BalunProductInfo {
-  if (price === undefined) return NEGATIVE_OUTCOME;
-  return { stock, price };
+function withNormalizedOutcome(
+  packs: number,
+  packagePrice: number | undefined,
+  packSize: number,
+  title: string
+): DojdevikProductInfo {
+  if (packagePrice === undefined) {
+    return DOJDEVIK_NEGATIVE_OUTCOME;
+  }
+
+  const price = toMoney(packagePrice / packSize);
+  const stock = packs * packSize;
+  return title.length > 0 ? { stock, price, title } : { stock, price };
 }
 
 /**
- * Остаток и цена карточки Balun.
- * Stock — GraphQL-кламп корзины (`recalculatedQuantity` при qty >> склада).
- * Price — `data-analytics.clerk.price_original`, иначе unit.selling из корзины.
+ * Остаток и цена карточки dojdevik (Prom company site).
+ * Stock — GraphQL clamp упаковок × packSize (штуки).
+ * Price — цена упаковки / packSize (2 знака).
  * Негативный исход — `{ stock: -1, price: -1 }`.
  */
-export async function getBalunStockData(
+export async function getDojdevikStockData(
   link: string
-): Promise<BalunProductInfo> {
+): Promise<DojdevikProductInfo> {
   if (!link || typeof link !== "string") {
     throw new Error("Link is required and must be a string");
   }
@@ -89,15 +82,23 @@ export async function getBalunStockData(
   try {
     const productId = extractPromUaProductId(productUrl);
     if (!productId) {
-      return NEGATIVE_OUTCOME;
+      return DOJDEVIK_NEGATIVE_OUTCOME;
     }
 
     const client = getBrowserAxios();
-    const htmlResponse = await client.get<string>(productUrl, BROWSER_TEXT_CONFIG);
+    const htmlResponse = await client.get<string>(
+      productUrl,
+      BROWSER_TEXT_CONFIG
+    );
     const html = String(htmlResponse.data ?? "");
     if (!html.trim()) {
-      return NEGATIVE_OUTCOME;
+      return DOJDEVIK_NEGATIVE_OUTCOME;
     }
+
+    const $ = cheerio.load(html);
+    const title = parseDojdevikTitleFromDom($);
+    const packSize = extractDojdevikPackCount(html);
+    const htmlPackagePrice = parseDojdevikPackagePriceFromDom($);
 
     const htmlHeaders =
       (htmlResponse as { headers?: Record<string, unknown> }).headers ?? {};
@@ -106,10 +107,9 @@ export async function getBalunStockData(
       pickHeaderCaseInsensitive(htmlHeaders, "set-cookie")
     );
     const csrfToken = extractPromUaCsrfToken(html, cookieHeader);
-    const htmlPrice = parseBalunHtmlPrice(html);
 
     const addResp = await postPromUaGraphql(client, {
-      origin: BALUN_ORIGIN,
+      origin: DOJDEVIK_ORIGIN,
       operationName: "AddProductToCart",
       query: ADD_PRODUCT_TO_CART_QUERY,
       variables: {
@@ -127,19 +127,19 @@ export async function getBalunStockData(
     cookieHeader = addResp.cookieHeader;
 
     if (addResp.status >= 400) {
-      return NEGATIVE_OUTCOME;
+      return DOJDEVIK_NEGATIVE_OUTCOME;
     }
 
     const addResult = parsePromUaAddProductResponse(addResp.body, productId);
     if (addResult.kind === "notOrderable") {
-      return withPrice(0, htmlPrice);
+      return withNormalizedOutcome(0, resolvePackagePrice(htmlPackagePrice, null), packSize, title);
     }
     if (addResult.kind !== "success") {
-      return NEGATIVE_OUTCOME;
+      return DOJDEVIK_NEGATIVE_OUTCOME;
     }
 
     const changeResp = await postPromUaGraphql(client, {
-      origin: BALUN_ORIGIN,
+      origin: DOJDEVIK_ORIGIN,
       operationName: "CartChangeProductQuantity",
       query: CART_CHANGE_PRODUCT_QUANTITY_QUERY,
       variables: {
@@ -157,7 +157,7 @@ export async function getBalunStockData(
     });
 
     if (changeResp.status >= 400) {
-      return NEGATIVE_OUTCOME;
+      return DOJDEVIK_NEGATIVE_OUTCOME;
     }
 
     const changeResult = parsePromUaChangeQuantityResponse(
@@ -165,16 +165,21 @@ export async function getBalunStockData(
       productId
     );
     if (changeResult.kind !== "recalculated") {
-      return NEGATIVE_OUTCOME;
+      return DOJDEVIK_NEGATIVE_OUTCOME;
     }
 
-    const price = resolvePrice(
-      htmlPrice,
+    const packagePrice = resolvePackagePrice(
+      htmlPackagePrice,
       changeResult.unitSellingPrice ?? addResult.unitSellingPrice
     );
-    return withPrice(changeResult.quantity, price);
+    return withNormalizedOutcome(
+      changeResult.quantity,
+      packagePrice,
+      packSize,
+      title
+    );
   } catch (error) {
-    logBrowserError("Error fetching data from balun product page:", error);
-    return NEGATIVE_OUTCOME;
+    logBrowserError("Error fetching data from dojdevik product page:", error);
+    return DOJDEVIK_NEGATIVE_OUTCOME;
   }
 }

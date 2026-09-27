@@ -3,9 +3,9 @@ import { getBalunStockData, parseBalunHtmlPrice } from "../getBalunStockData.js"
 import { getBrowserAxios } from "../../../utils/browserRequest.js";
 import {
   ADD_PRODUCT_TO_CART_QUERY,
-  BALUN_PROBE_QUANTITY,
   CART_CHANGE_PRODUCT_QUANTITY_QUERY,
-} from "../balun-graphql/balunGraphqlQueries.js";
+  PROMUA_CART_PROBE_QUANTITY,
+} from "../../../promua/cart/promUaCartGraphqlQueries.js";
 
 vi.mock("../../../utils/browserRequest.js", () => ({
   getBrowserAxios: vi.fn(),
@@ -190,7 +190,7 @@ describe("getBalunStockData", () => {
         variables: {
           payload: {
             productId: PRODUCT_ID,
-            quantity: BALUN_PROBE_QUANTITY,
+            quantity: PROMUA_CART_PROBE_QUANTITY,
             source: "COMPANY_SITE",
           },
           cartId: CART_ID,

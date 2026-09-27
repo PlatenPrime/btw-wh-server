@@ -1,4 +1,5 @@
-export const BALUN_PROBE_QUANTITY = 999_999;
+/** Probe qty для clamp корзины Prom company site (>> типичных миллионных остатков). */
+export const PROMUA_CART_PROBE_QUANTITY = 10_000_000_000;
 
 export const ADD_PRODUCT_TO_CART_QUERY = `
   mutation AddProductToCart($payload: CartAddProductInput!, $viewerSource: ViewerSource!) {

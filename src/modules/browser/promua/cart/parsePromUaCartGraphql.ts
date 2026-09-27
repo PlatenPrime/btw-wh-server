@@ -1,14 +1,14 @@
-import { tryParseJsonRecord } from "../../../utils/try-parse-json-record/tryParseJsonRecord.js";
-import { parseStrippedDecimal } from "../../../utils/parse-stripped-decimal/parseStrippedDecimal.js";
+import { tryParseJsonRecord } from "../../utils/try-parse-json-record/tryParseJsonRecord.js";
+import { parseStrippedDecimal } from "../../utils/parse-stripped-decimal/parseStrippedDecimal.js";
 
 const STOCK_CLAMP_REASON = "EXCEEDS_AMOUNT_OF_PRODUCT_IN_STOCK";
 
-export type BalunAddProductResult =
+export type PromUaAddProductResult =
   | { kind: "success"; cartId: string; unitSellingPrice: number | null }
   | { kind: "notOrderable" }
   | { kind: "error" };
 
-export type BalunChangeQuantityResult =
+export type PromUaChangeQuantityResult =
   | { kind: "recalculated"; quantity: number; unitSellingPrice: number | null }
   | { kind: "set" }
   | { kind: "error" };
@@ -69,18 +69,23 @@ function readCarts(payload: Record<string, unknown>): unknown[] {
   return Array.isArray(carts) ? carts : [];
 }
 
-function readChangeCart(payload: Record<string, unknown>): Record<string, unknown> | undefined {
-  if (!isRecord(payload.self) || !isRecord(payload.self.cartList)) return undefined;
-  return isRecord(payload.self.cartList.cart) ? payload.self.cartList.cart : undefined;
+function readChangeCart(
+  payload: Record<string, unknown>
+): Record<string, unknown> | undefined {
+  if (!isRecord(payload.self) || !isRecord(payload.self.cartList))
+    return undefined;
+  return isRecord(payload.self.cartList.cart)
+    ? payload.self.cartList.cart
+    : undefined;
 }
 
 /**
  * Разбирает union `cartAddProduct`.
  */
-export function parseBalunAddProductResponse(
+export function parsePromUaAddProductResponse(
   body: unknown,
   productId: string
-): BalunAddProductResult {
+): PromUaAddProductResult {
   const data = unwrapGraphqlData(body);
   if (!data || !isRecord(data.cartAddProduct)) {
     return { kind: "error" };
@@ -118,10 +123,10 @@ export function parseBalunAddProductResponse(
  * Разбирает union `cartChangeProductQuantity`.
  * Точный остаток — только `RequestedQuantityRecalculatedType` с reason склада.
  */
-export function parseBalunChangeQuantityResponse(
+export function parsePromUaChangeQuantityResponse(
   body: unknown,
   productId: string
-): BalunChangeQuantityResult {
+): PromUaChangeQuantityResult {
   const data = unwrapGraphqlData(body);
   if (!data || !isRecord(data.cartChangeProductQuantity)) {
     return { kind: "error" };

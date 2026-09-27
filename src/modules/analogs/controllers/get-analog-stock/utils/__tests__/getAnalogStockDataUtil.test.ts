@@ -3,6 +3,7 @@ import { Analog } from "../../../../models/Analog.js";
 import { getAirStockData } from "../../../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../../../browser/balun/utils/getBalunStockData.js";
 import { getSvbumStockData } from "../../../../../browser/svbum/utils/getSvbumStockData.js";
+import { getDojdevikStockData } from "../../../../../browser/dojdevik/utils/getDojdevikStockData.js";
 
 vi.mock("../../../../../browser/air/utils/getAirStockData.js", () => ({
   getAirStockData: vi.fn(),
@@ -22,6 +23,9 @@ vi.mock("../../../../../browser/sharte/utils/getSharteStockData.js", () => ({
 vi.mock("../../../../../browser/svbum/utils/getSvbumStockData.js", () => ({
   getSvbumStockData: vi.fn(),
 }));
+vi.mock("../../../../../browser/dojdevik/utils/getDojdevikStockData.js", () => ({
+  getDojdevikStockData: vi.fn(),
+}));
 
 import {
   getAnalogStockDataUtil,
@@ -31,6 +35,7 @@ import {
 const mockGetBalunStockData = vi.mocked(getBalunStockData);
 const mockGetAirStockData = vi.mocked(getAirStockData);
 const mockGetSvbumStockData = vi.mocked(getSvbumStockData);
+const mockGetDojdevikStockData = vi.mocked(getDojdevikStockData);
 
 describe("getAnalogStockDataUtil", () => {
   beforeEach(async () => {
@@ -38,6 +43,7 @@ describe("getAnalogStockDataUtil", () => {
     mockGetBalunStockData.mockReset();
     mockGetAirStockData.mockReset();
     mockGetSvbumStockData.mockReset();
+    mockGetDojdevikStockData.mockReset();
   });
 
   it("returns null when analog not found", async () => {
@@ -120,5 +126,23 @@ describe("getAnalogStockDataUtil", () => {
       "https://sviatobum.ua/item"
     );
     expect(result).toEqual({ stock: 300, price: 3.93 });
+  });
+
+  it("calls getDojdevikStockData for dojdevik", async () => {
+    mockGetDojdevikStockData.mockResolvedValue({ stock: 3500, price: 1.7 });
+
+    const analog = await Analog.create({
+      konkName: "Dojdevik",
+      prodName: "p",
+      url: "https://dojdevik.com.ua/ua/p17755382.html",
+      artikul: "A5",
+    });
+
+    const result = await getAnalogStockDataUtil(analog._id.toString());
+
+    expect(mockGetDojdevikStockData).toHaveBeenCalledWith(
+      "https://dojdevik.com.ua/ua/p17755382.html"
+    );
+    expect(result).toEqual({ stock: 3500, price: 1.7 });
   });
 });

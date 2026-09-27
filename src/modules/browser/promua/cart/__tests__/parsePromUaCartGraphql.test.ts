@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-  parseBalunAddProductResponse,
-  parseBalunChangeQuantityResponse,
-} from "../parseBalunCartGraphql.js";
+  parsePromUaAddProductResponse,
+  parsePromUaChangeQuantityResponse,
+} from "../parsePromUaCartGraphql.js";
 
 const PRODUCT_ID = "1341824038";
 
-describe("parseBalunAddProductResponse", () => {
+describe("parsePromUaAddProductResponse", () => {
   it("reads cartId and unit price from success", () => {
     const body = {
       data: {
@@ -31,7 +31,7 @@ describe("parseBalunAddProductResponse", () => {
       },
     };
 
-    expect(parseBalunAddProductResponse(body, PRODUCT_ID)).toEqual({
+    expect(parsePromUaAddProductResponse(body, PRODUCT_ID)).toEqual({
       kind: "success",
       cartId: "1094691970",
       unitSellingPrice: 1.46,
@@ -47,7 +47,7 @@ describe("parseBalunAddProductResponse", () => {
         },
       },
     });
-    expect(parseBalunAddProductResponse(body, PRODUCT_ID)).toEqual({
+    expect(parsePromUaAddProductResponse(body, PRODUCT_ID)).toEqual({
       kind: "success",
       cartId: "1",
       unitSellingPrice: null,
@@ -56,7 +56,7 @@ describe("parseBalunAddProductResponse", () => {
 
   it("maps not-orderable unions", () => {
     expect(
-      parseBalunAddProductResponse(
+      parsePromUaAddProductResponse(
         {
           data: {
             cartAddProduct: { __typename: "ProductNotOrderableError" },
@@ -66,7 +66,7 @@ describe("parseBalunAddProductResponse", () => {
       )
     ).toEqual({ kind: "notOrderable" });
     expect(
-      parseBalunAddProductResponse(
+      parsePromUaAddProductResponse(
         {
           data: {
             cartAddProduct: {
@@ -81,13 +81,13 @@ describe("parseBalunAddProductResponse", () => {
 
   it("maps auth/already-in-cart/invalid payload to error", () => {
     expect(
-      parseBalunAddProductResponse(
+      parsePromUaAddProductResponse(
         { data: { cartAddProduct: { __typename: "AuthenticationError" } } },
         PRODUCT_ID
       )
     ).toEqual({ kind: "error" });
     expect(
-      parseBalunAddProductResponse(
+      parsePromUaAddProductResponse(
         {
           data: {
             cartAddProduct: { __typename: "ProductAlreadyInCartError" },
@@ -96,14 +96,14 @@ describe("parseBalunAddProductResponse", () => {
         PRODUCT_ID
       )
     ).toEqual({ kind: "error" });
-    expect(parseBalunAddProductResponse("not-json", PRODUCT_ID)).toEqual({
+    expect(parsePromUaAddProductResponse("not-json", PRODUCT_ID)).toEqual({
       kind: "error",
     });
-    expect(parseBalunAddProductResponse({ data: {} }, PRODUCT_ID)).toEqual({
+    expect(parsePromUaAddProductResponse({ data: {} }, PRODUCT_ID)).toEqual({
       kind: "error",
     });
     expect(
-      parseBalunAddProductResponse(
+      parsePromUaAddProductResponse(
         {
           data: {
             cartAddProduct: {
@@ -116,7 +116,7 @@ describe("parseBalunAddProductResponse", () => {
       )
     ).toEqual({ kind: "error" });
     expect(
-      parseBalunAddProductResponse(
+      parsePromUaAddProductResponse(
         {
           data: {
             cartAddProduct: {
@@ -128,7 +128,7 @@ describe("parseBalunAddProductResponse", () => {
         PRODUCT_ID
       )
     ).toEqual({ kind: "error" });
-    expect(parseBalunAddProductResponse([], PRODUCT_ID)).toEqual({
+    expect(parsePromUaAddProductResponse([], PRODUCT_ID)).toEqual({
       kind: "error",
     });
   });
@@ -160,7 +160,7 @@ describe("parseBalunAddProductResponse", () => {
         },
       },
     };
-    expect(parseBalunAddProductResponse(body, PRODUCT_ID)).toEqual({
+    expect(parsePromUaAddProductResponse(body, PRODUCT_ID)).toEqual({
       kind: "success",
       cartId: "c1",
       unitSellingPrice: 1.46,
@@ -169,7 +169,7 @@ describe("parseBalunAddProductResponse", () => {
 
   it("falls back to first cart item when productId is absent", () => {
     expect(
-      parseBalunAddProductResponse(
+      parsePromUaAddProductResponse(
         {
           data: {
             cartAddProduct: {
@@ -179,9 +179,7 @@ describe("parseBalunAddProductResponse", () => {
                   carts: [
                     {
                       id: "c1",
-                      items: [
-                        { price: { unit: { selling: 2 } } },
-                      ],
+                      items: [{ price: { unit: { selling: 2 } } }],
                     },
                   ],
                 },
@@ -199,7 +197,7 @@ describe("parseBalunAddProductResponse", () => {
   });
 });
 
-describe("parseBalunChangeQuantityResponse", () => {
+describe("parsePromUaChangeQuantityResponse", () => {
   it("reads recalculated stock when reason is warehouse clamp", () => {
     const body = {
       data: {
@@ -222,7 +220,7 @@ describe("parseBalunChangeQuantityResponse", () => {
         },
       },
     };
-    expect(parseBalunChangeQuantityResponse(body, PRODUCT_ID)).toEqual({
+    expect(parsePromUaChangeQuantityResponse(body, PRODUCT_ID)).toEqual({
       kind: "recalculated",
       quantity: 371,
       unitSellingPrice: 1.46,
@@ -231,7 +229,7 @@ describe("parseBalunChangeQuantityResponse", () => {
 
   it("accepts numeric string quantity", () => {
     expect(
-      parseBalunChangeQuantityResponse(
+      parsePromUaChangeQuantityResponse(
         {
           data: {
             cartChangeProductQuantity: {
@@ -252,7 +250,7 @@ describe("parseBalunChangeQuantityResponse", () => {
 
   it("returns set when qty was accepted as-is", () => {
     expect(
-      parseBalunChangeQuantityResponse(
+      parsePromUaChangeQuantityResponse(
         {
           data: {
             cartChangeProductQuantity: {
@@ -267,7 +265,7 @@ describe("parseBalunChangeQuantityResponse", () => {
 
   it("rejects clamp with unknown reason or invalid quantity", () => {
     expect(
-      parseBalunChangeQuantityResponse(
+      parsePromUaChangeQuantityResponse(
         {
           data: {
             cartChangeProductQuantity: {
@@ -281,7 +279,7 @@ describe("parseBalunChangeQuantityResponse", () => {
       )
     ).toEqual({ kind: "error" });
     expect(
-      parseBalunChangeQuantityResponse(
+      parsePromUaChangeQuantityResponse(
         {
           data: {
             cartChangeProductQuantity: {
@@ -295,7 +293,7 @@ describe("parseBalunChangeQuantityResponse", () => {
       )
     ).toEqual({ kind: "error" });
     expect(
-      parseBalunChangeQuantityResponse(
+      parsePromUaChangeQuantityResponse(
         {
           data: {
             cartChangeProductQuantity: {
@@ -306,11 +304,11 @@ describe("parseBalunChangeQuantityResponse", () => {
         PRODUCT_ID
       )
     ).toEqual({ kind: "error" });
-    expect(parseBalunChangeQuantityResponse({}, PRODUCT_ID)).toEqual({
+    expect(parsePromUaChangeQuantityResponse({}, PRODUCT_ID)).toEqual({
       kind: "error",
     });
     expect(
-      parseBalunChangeQuantityResponse(
+      parsePromUaChangeQuantityResponse(
         {
           data: {
             cartChangeProductQuantity: {
@@ -327,7 +325,7 @@ describe("parseBalunChangeQuantityResponse", () => {
 
   it("returns null unit price when item price shape is incomplete", () => {
     expect(
-      parseBalunChangeQuantityResponse(
+      parsePromUaChangeQuantityResponse(
         {
           data: {
             cartChangeProductQuantity: {

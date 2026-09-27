@@ -1,20 +1,27 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AxiosInstance } from "axios";
 import {
-  BALUN_ORIGIN,
-  buildBalunGraphqlUrl,
-  postBalunGraphql,
-} from "../postBalunGraphql.js";
+  buildPromUaGraphqlUrl,
+  postPromUaGraphql,
+} from "../postPromUaGraphql.js";
 
-describe("buildBalunGraphqlUrl", () => {
+const ORIGIN = "https://balun.com.ua";
+
+describe("buildPromUaGraphqlUrl", () => {
   it("builds company-site GraphQL URL with operation name", () => {
-    expect(buildBalunGraphqlUrl("AddProductToCart")).toBe(
-      `${BALUN_ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`
+    expect(buildPromUaGraphqlUrl(ORIGIN, "AddProductToCart")).toBe(
+      `${ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`
+    );
+  });
+
+  it("strips trailing slash from origin", () => {
+    expect(buildPromUaGraphqlUrl(`${ORIGIN}/`, "AddProductToCart")).toBe(
+      `${ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`
     );
   });
 });
 
-describe("postBalunGraphql", () => {
+describe("postPromUaGraphql", () => {
   it("posts JSON, sends csrf/cookie, merges Set-Cookie", async () => {
     const post = vi.fn().mockResolvedValue({
       status: 200,
@@ -23,7 +30,8 @@ describe("postBalunGraphql", () => {
     });
     const client = { post } as unknown as AxiosInstance;
 
-    const result = await postBalunGraphql(client, {
+    const result = await postPromUaGraphql(client, {
+      origin: ORIGIN,
       operationName: "AddProductToCart",
       query: "mutation X { x }",
       variables: { payload: { productId: "1" } },
@@ -37,7 +45,7 @@ describe("postBalunGraphql", () => {
     expect(result.cookieHeader).toContain("shopping-cart=new");
     expect(result.cookieHeader).toContain("csrf_token_company_site=abc");
     expect(post).toHaveBeenCalledWith(
-      `${BALUN_ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`,
+      `${ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`,
       {
         operationName: "AddProductToCart",
         variables: { payload: { productId: "1" } },
@@ -48,7 +56,7 @@ describe("postBalunGraphql", () => {
           Cookie: "csrf_token_company_site=abc; cid=1",
           "x-csrftoken": "csrf-from-page",
           Referer: "https://balun.com.ua/ua/p1-x.html",
-          Origin: BALUN_ORIGIN,
+          Origin: ORIGIN,
           "X-Language": "uk",
           "X-Requested-With": "XMLHttpRequest",
         }),
@@ -64,11 +72,12 @@ describe("postBalunGraphql", () => {
     });
     const client = { post } as unknown as AxiosInstance;
 
-    const result = await postBalunGraphql(client, {
+    const result = await postPromUaGraphql(client, {
+      origin: "https://dojdevik.com.ua",
       operationName: "CartChangeProductQuantity",
       query: "mutation Y { y }",
       variables: {},
-      productUrl: "https://balun.com.ua/p1.html",
+      productUrl: "https://dojdevik.com.ua/p1.html",
       cookieHeader: "",
     });
 
@@ -77,5 +86,6 @@ describe("postBalunGraphql", () => {
     const headers = post.mock.calls[0]?.[2]?.headers as Record<string, string>;
     expect(headers.Cookie).toBeUndefined();
     expect(headers["x-csrftoken"]).toBeUndefined();
+    expect(headers.Origin).toBe("https://dojdevik.com.ua");
   });
 });

@@ -8,6 +8,7 @@ import { getSharteStockController } from "./sharte/controllers/index.js";
 import { getYumiStockController } from "./yumi/controllers/index.js";
 import { getYuminStockController } from "./yumin/controllers/index.js";
 import { getSvbumStockController } from "./svbum/controllers/index.js";
+import { getDojdevikStockController } from "./dojdevik/controllers/index.js";
 
 const router = Router();
 
@@ -38,6 +39,10 @@ router.get(
 router.get(
   "/svbum/stock",
   asyncHandler(getSvbumStockController)
+);
+router.get(
+  "/dojdevik/stock",
+  asyncHandler(getDojdevikStockController)
 );
 router.get(
   "/sharik/stock/:artikul",

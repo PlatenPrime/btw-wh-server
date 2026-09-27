@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   ADD_PRODUCT_TO_CART_QUERY,
-  BALUN_PROBE_QUANTITY,
   CART_CHANGE_PRODUCT_QUANTITY_QUERY,
-} from "../balunGraphqlQueries.js";
+  PROMUA_CART_PROBE_QUANTITY,
+} from "../promUaCartGraphqlQueries.js";
 
-describe("balunGraphqlQueries", () => {
-  it("exposes clamp probe quantity", () => {
-    expect(BALUN_PROBE_QUANTITY).toBe(999_999);
+describe("promUaCartGraphqlQueries", () => {
+  it("exposes clamp probe quantity of 10 billion", () => {
+    expect(PROMUA_CART_PROBE_QUANTITY).toBe(10_000_000_000);
   });
 
   it("keeps AddProductToCart union fields", () => {

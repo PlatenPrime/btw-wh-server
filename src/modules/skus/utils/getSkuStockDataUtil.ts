@@ -6,6 +6,7 @@ import { getYuminStockData } from "../../browser/yumin/utils/getYuminStockData.j
 import { getSharteStockData } from "../../browser/sharte/utils/getSharteStockData.js";
 import { getPerfectStockData } from "../../browser/perfect/utils/getPerfectStockData.js";
 import { getSvbumStockData } from "../../browser/svbum/utils/getSvbumStockData.js";
+import { getDojdevikStockData } from "../../browser/dojdevik/utils/getDojdevikStockData.js";
 
 export const UNSUPPORTED_KONK_CODE = "UNSUPPORTED_KONK";
 
@@ -24,6 +25,7 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
   sharte: getSharteStockData,
   perfect: getPerfectStockData,
   svbum: getSvbumStockData,
+  dojdevik: getDojdevikStockData,
 };
 
 /**

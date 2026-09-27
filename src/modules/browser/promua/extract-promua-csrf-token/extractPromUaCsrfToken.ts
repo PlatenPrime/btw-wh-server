@@ -1,4 +1,4 @@
-export const BALUN_CSRF_COOKIE_NAME = "csrf_token_company_site";
+export const PROMUA_CSRF_COOKIE_NAME = "csrf_token_company_site";
 
 const HTML_CSRF_PATTERNS = [
   /<meta[^>]+name=["']csrf-token["'][^>]+content=["']([^"']+)["']/i,
@@ -29,7 +29,7 @@ export function getCookieValue(
 /**
  * CSRF для `x-csrftoken`: сначала HTML (meta / JSON), иначе cookie `csrf_token_company_site`.
  */
-export function extractBalunCsrfToken(
+export function extractPromUaCsrfToken(
   html: string,
   cookieHeader: string
 ): string | undefined {
@@ -38,5 +38,5 @@ export function extractBalunCsrfToken(
     const token = match?.[1]?.trim();
     if (token) return token;
   }
-  return getCookieValue(cookieHeader, BALUN_CSRF_COOKIE_NAME);
+  return getCookieValue(cookieHeader, PROMUA_CSRF_COOKIE_NAME);
 }

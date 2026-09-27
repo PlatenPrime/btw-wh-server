@@ -1,0 +1,10 @@
+import { z } from "zod";
+
+export const getDojdevikGroupPagesProductsSchema = z.object({
+  groupUrl: z.string().min(1, "groupUrl is required").url("Invalid URL"),
+  maxPages: z.number().int().min(1).max(200).optional(),
+});
+
+export type GetDojdevikGroupPagesProductsInput = z.infer<
+  typeof getDojdevikGroupPagesProductsSchema
+>;
