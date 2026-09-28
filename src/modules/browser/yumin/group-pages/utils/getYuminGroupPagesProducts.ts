@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { browserGet } from "../../../utils/browserRequest.js";
 import { sleep } from "../../../utils/sleep.js";
 import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupPagesThrottle.js";
@@ -6,29 +5,13 @@ import {
   getYuminGroupPagesProductsSchema,
   type GetYuminGroupPagesProductsInput,
 } from "./getYuminGroupPagesProductsSchema.js";
-
-const yuminProductsPageSchema = z.object({
-  data: z.array(
-    z.object({
-      id: z.number(),
-      name: z.string(),
-      url_key: z.string(),
-      base_image: z
-        .object({
-          large_image_url: z.string().optional(),
-          medium_image_url: z.string().optional(),
-          original_image_url: z.string().optional(),
-        })
-        .nullable()
-        .optional(),
-    })
-  ),
-  links: z
-    .object({
-      next: z.string().nullable().optional(),
-    })
-    .optional(),
-});
+import { buildYuminProductPageUrl } from "./build-yumin-product-page-url/buildYuminProductPageUrl.js";
+import { normalizeYuminListingStartUrl } from "./normalize-yumin-listing-start-url/normalizeYuminListingStartUrl.js";
+import { pickYuminListingImageUrl } from "./pick-yumin-listing-image-url/pickYuminListingImageUrl.js";
+import {
+  parseYuminProductsPage,
+  yuminProductsPageSchema,
+} from "./parse-yumin-products-page/parseYuminProductsPage.js";
 
 export type YuminGroupPageProduct = {
   productId: string;
@@ -36,48 +19,6 @@ export type YuminGroupPageProduct = {
   url: string;
   imageUrl: string;
 };
-
-function normalizeListingStartUrl(groupUrl: string): string {
-  const u = new URL(groupUrl);
-  u.searchParams.delete("page");
-  return u.toString();
-}
-
-function buildProductPageUrl(listingPageUrl: string, urlKey: string): string {
-  const origin = new URL(listingPageUrl).origin;
-  const path = urlKey.replace(/^\/+/, "");
-  return new URL(`/${path}`, origin).toString();
-}
-
-function pickImageUrl(
-  baseImage:
-    | {
-        large_image_url?: string;
-        medium_image_url?: string;
-        original_image_url?: string;
-      }
-    | null
-    | undefined
-): string | null {
-  const large = baseImage?.large_image_url?.trim();
-  if (large) {
-    return large;
-  }
-  const medium = baseImage?.medium_image_url?.trim();
-  if (medium) {
-    return medium;
-  }
-  const original = baseImage?.original_image_url?.trim();
-  return original || null;
-}
-
-function parseYuminProductsPage(raw: string, pageUrl: string): unknown {
-  try {
-    return JSON.parse(raw) as unknown;
-  } catch {
-    throw new Error(`Invalid JSON in Yumin listing response: ${pageUrl}`);
-  }
-}
 
 export async function getYuminGroupPagesProducts(
   input: GetYuminGroupPagesProductsInput
@@ -92,7 +33,7 @@ export async function getYuminGroupPagesProducts(
   const visited = new Set<string>();
   const products = new Map<string, YuminGroupPageProduct>();
 
-  let currentUrl: string | null = normalizeListingStartUrl(groupUrl);
+  let currentUrl: string | null = normalizeYuminListingStartUrl(groupUrl);
   let fetchedPages = 0;
 
   while (currentUrl) {
@@ -119,7 +60,7 @@ export async function getYuminGroupPagesProducts(
     }
 
     for (const item of data) {
-      const imageUrl = pickImageUrl(item.base_image);
+      const imageUrl = pickYuminListingImageUrl(item.base_image);
       if (!imageUrl) {
         continue;
       }
@@ -127,7 +68,7 @@ export async function getYuminGroupPagesProducts(
       if (!title) {
         continue;
       }
-      const url = buildProductPageUrl(currentUrl, item.url_key);
+      const url = buildYuminProductPageUrl(currentUrl, item.url_key);
       const productId = String(item.id);
       products.set(productId, {
         productId,

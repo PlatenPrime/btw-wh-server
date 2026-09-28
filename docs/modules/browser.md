@@ -58,11 +58,13 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 Платформенный слой [`browser/promua/`](../../src/modules/browser/promua/) — общий для company site на Prom.ua (сейчас balun и dojdevik): GraphQL `/bfg/graphql` (`AddProductToCart` → `CartChangeProductQuantity`), CSRF (`csrf_token_company_site` / meta), productId из URL `/p{digits}`, probe qty `10_000_000_000` (чтобы кламп срабатывал и при миллионных остатках). Origin передаётся параметром в `postPromUaGraphql`.
 
+Общий оркестратор стока — `fetchPromUaCompanySiteStock`: GET HTML → cookies/CSRF → add → change probe → `resolvePromUaUnitPrice` → `normalizeOutcome`. Конкуренты передают hooks: `parseHtmlContext` / `resolveHtmlPrice` / `normalizeOutcome` и свой `origin`.
+
 Число остатка на карточке больше не лежит в HTML-аналитике Facebook. Актуальный источник — GraphQL: анонимная сессия с GET карточки (`Set-Cookie`), add, затем change с probe. Prom отвечает union `RequestedQuantityRecalculatedType` и клампит qty до склада (`recalculatedQuantity`, reason `EXCEEDS_AMOUNT_OF_PRODUCT_IN_STOCK`). Если qty приняли как есть (`RequestedQuantitySet`), точное число склада неизвестно — сентинель `-1`. Товар, который нельзя заказать (`ProductNotOrderableError` / удалён), даёт stock `0` при живой цене.
 
-**Balun:** цена с HTML `data-analytics` (`clerk.price_original`), иначе unit selling из корзины; stock = `recalculatedQuantity` в единицах продажи сайта. `getBalunStockData` использует `getBrowserAxios` + `promua`.
+**Balun:** цена с HTML `data-analytics` (`clerk.price_original`), иначе unit selling из корзины; stock = `recalculatedQuantity` в единицах продажи сайта. Тонкий `getBalunStockData` → runner + `parseBalunHtmlPrice` / `normalizeBalunOutcome`.
 
-**Dojdevik:** цена упаковки с DOM `[data-qaid="product_price"]`, иначе unit selling; packSize из характеристики с «кількість» в `attribute_name` (`attribute_value`) или из описания «Кількість в упаковці N шт» (fallback 1); наружу — цена за штуку (`packagePrice / packSize`, 2 знака) и stock в штуках (`packs × packSize`). Обход групп — shared `parsePromUaGroupListingProducts`. Гайд для UI: [frontend: dojdevik](../frontend/dojdevik.md).
+**Dojdevik:** цена упаковки с DOM `[data-qaid="product_price"]`, иначе unit selling; packSize из характеристики с «кількість» в `attribute_name` (`attribute_value`) или из описания «Кількість в упаковці N шт» (fallback 1); наружу — цена за штуку (`packagePrice / packSize`, 2 знака) и stock в штуках (`packs × packSize`) через `normalizeDojdevikOutcome`. Обход групп — shared `parsePromUaGroupListingProducts`. Гайд для UI: [frontend: dojdevik](../frontend/dojdevik.md).
 
 CSRF для add: токен из HTML, иначе cookie `csrf_token_company_site` в `x-csrftoken`. Сессия эфемерная, корзину после замера не чистим.
 
@@ -98,18 +100,44 @@ Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/
 
 При недоступности данных парсеры возвращают `stock: -1`, `price: -1`. Это общий контракт срезов (см. модуль [`slices`](slices.md)): `-1` означает «данных нет». Компенсирующий cron пытается перезапросить такие позиции у конкурентов, не исключённых из compensation (Air — нет; хвост через client-ingest). Cloudflare `ORIGIN_BLOCKED` при сборе среза не превращается в массовые `-1` по хвосту — цикл обрывается.
 
-### Shared utils
+### Shared utils (каталог)
 
-Переиспользуемые примитивы в [`browser/utils/`](../../src/modules/browser/utils/):
+Перед новым хелпером — проверить этот каталог. Cross-konk / инфраструктура → `browser/utils/` или `browser/promua/`. Один konk → `<konk>/utils/<kebab>/`. Оркестратор (`get*StockData`) не содержит локальных `function`.
 
-- разбор HTML-сущностей, относительных ссылок;
-- безопасный парсинг JSON из атрибутов;
-- извлечение чисел из «грязных» строк (`parseStrippedDecimal`);
-- `sleep`, merge cookies, resolve href, `HttpsProxyAgent` для HTTP(S) proxy;
-- multi-transport: `resolveBrowserTransport`, `fetchPageHtml`, `impitGet`, `playwrightGet`;
-- rate-limited `logBrowserStockResult`.
+#### `browser/utils/`
 
-### Group pages (обход листингов)
+| Утилита | Путь | Когда брать |
+|---------|------|-------------|
+| `toMoney` | `utils/to-money/` | Округление цены до 2 знаков (pack→piece и любые денежные поля) |
+| `parseStrippedDecimal` | `utils/parse-stripped-decimal/` | Число из «грязной» строки цены |
+| `decodeHtmlEntities` | `utils/decode-html-entities/` | HTML-entities в title/тексте |
+| `parseJsonHtmlAttribute` | `utils/parse-json-html-attribute/` | JSON из HTML-атрибута |
+| `tryParseJsonRecord` | `utils/try-parse-json-record/` | Безопасный parse в plain object |
+| `resolveHrefAgainstBase` | `utils/resolve-href-against-base/` | Относительный href → absolute |
+| `resolveLazyListingImage` | `utils/resolve-lazy-listing-image/` | Картинка листинга (lazy placeholder / srcset / data-src) |
+| `mergeResponseCookies` | `utils/merge-response-cookies/` | Merge `Set-Cookie` / Cookie header |
+| `parseHttpProxyUrl` | `utils/parse-http-proxy-url/` | Proxy URL → axios proxy config |
+| `createHttpsProxyAgent` | `utils/create-https-proxy-agent/` | `HttpsProxyAgent` из proxy URL |
+| `sleep` | `utils/sleep.ts` | Async delay |
+| `browserRequest` | `utils/browserRequest.ts` | Shared axios, `browserGet`, `logBrowserError` |
+| `fetchPageHtml` | `utils/fetchPageHtml.ts` | Multi-transport HTML GET |
+| `resolveBrowserTransport` | `utils/resolveBrowserTransport.ts` | Выбор http/impit/playwright |
+| `impitGet` / `playwrightGet` | `utils/impitGet.ts`, `utils/playwrightGet.ts` | Транспортные GET |
+| `admToolsChallenge` | `utils/adm-tools-challenge/` | Detect/solve adm.tools challenge |
+| `logBrowserStockResult` | `utils/logBrowserStockResult.ts` | Rate-limited stock result log |
+| `browserOriginBlockedError` | `utils/browserOriginBlockedError.ts` | CF 520–526 / ORIGIN_BLOCKED |
+
+#### `browser/promua/`
+
+| Утилита | Путь | Когда брать |
+|---------|------|-------------|
+| `extractPromUaProductId` | `promua/extract-promua-product-id/` | productId из `/p{digits}` |
+| `extractPromUaCsrfToken` | `promua/extract-promua-csrf-token/` | CSRF из HTML/cookie |
+| GraphQL queries / post / parse | `promua/cart/` | Add/Change cart GraphQL |
+| `resolvePromUaUnitPrice` | `promua/resolve-promua-unit-price/` | HTML-цена vs GraphQL unit selling |
+| `fetchPromUaCompanySiteStock` | `promua/fetch-promua-company-site-stock/` | Общий stock pipeline company site |
+
+#### Group pages
 
 [`group-pages/`](../../src/modules/browser/group-pages/) — инфраструктура постраничного crawl HTML-листингов:
 

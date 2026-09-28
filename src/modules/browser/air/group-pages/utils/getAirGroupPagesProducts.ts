@@ -6,8 +6,8 @@ import { getGroupPagesThrottleDelayMs } from "../../../group-pages/config/groupP
 import { fetchPageHtml } from "../../../utils/fetchPageHtml.js";
 import { createLogger } from "../../../../../logging/createLogger.js";
 import { isOriginBlockedError } from "../../../utils/browserOriginBlockedError.js";
-import { getAirHttpProxyUrl } from "../../utils/getAirHttpProxyUrl.js";
-import { resolveAirWarmUpUrl } from "../../utils/getAirStockData.js";
+import { resolveAirWarmUpUrl } from "../../utils/resolve-air-warm-up-url/resolveAirWarmUpUrl.js";
+import { airListingFetchOptions } from "../../utils/air-listing-fetch-options/airListingFetchOptions.js";
 import { AIR_IDLE_MODE } from "../../utils/airIdleMode.js";
 import { AirServerIdleError } from "../../utils/airServerIdleError.js";
 import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
@@ -23,23 +23,6 @@ import {
 export type { AirGroupPageProduct } from "./parseAirGroupListingPage.js";
 
 const airLog = createLogger({ module: "browser" });
-
-function airListingFetchOptions(warmUpUrl: string | undefined) {
-  const proxyUrl = getAirHttpProxyUrl();
-  return {
-    konkName: "air" as const,
-    transport: "impit" as const,
-    proxyUrl,
-    ...(warmUpUrl
-      ? {
-          headers: {
-            Referer: warmUpUrl,
-            "Sec-Fetch-Site": "same-origin",
-          },
-        }
-      : {}),
-  };
-}
 
 /**
  * Crawl HTML-листинга air (категория): Impit + cookie jar + adm.tools solver.

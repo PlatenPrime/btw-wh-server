@@ -1,3 +1,4 @@
+import { toMoney } from "../../../utils/to-money/toMoney.js";
 import type { PerfectProductInfo } from "./perfectProductInfo.js";
 import { resolvePackCount } from "../perfect-pack-count/perfectPackCount.js";
 
@@ -19,7 +20,7 @@ export function toStockAndPrice(
 
   return {
     stock: stockPacks * packCount,
-    price: Number((packPrice / packCount).toFixed(2)),
+    price: toMoney(packPrice / packCount),
     ...(title && { title }),
   };
 }

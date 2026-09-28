@@ -2,6 +2,7 @@ import * as cheerio from "cheerio";
 import type { BrowserCheerio } from "../../../utils/cheerioTypes.js";
 import { decodeHtmlEntities } from "../../../utils/decode-html-entities/decodeHtmlEntities.js";
 import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
+import { resolveLazyListingImage } from "../../../utils/resolve-lazy-listing-image/resolveLazyListingImage.js";
 import { getNextPageUrlFromLinkRelNext } from "../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 
 export type AirGroupPageProduct = {
@@ -17,7 +18,6 @@ export type ParseAirGroupListingPageResult = {
   hasListingMarkup: boolean;
 };
 
-const LAZY_IMAGE_MARKER = "lazy-image.svg";
 const GRID_CARDS_SEL =
   "#us-category-products div.product-layout[data-pid], .us-category-products div.product-layout[data-pid]";
 const GRID_SEL = "#us-category-products, .us-category-products";
@@ -28,36 +28,6 @@ function pickProductCards($: cheerio.CheerioAPI): BrowserCheerio {
     return fromGrid;
   }
   return $("#content div.product-layout[data-pid]");
-}
-
-function extractImageUrl($img: BrowserCheerio, baseUrl: string): string | null {
-  const src = $img.attr("src")?.trim();
-  const dataSrcset = $img.attr("data-srcset")?.trim();
-  const dataSrc = $img.attr("data-src")?.trim();
-
-  if (src && !src.includes(LAZY_IMAGE_MARKER)) {
-    return resolveHrefAgainstBase(src, baseUrl);
-  }
-
-  if (dataSrcset) {
-    const firstPart = dataSrcset.split(/\s+/)[0]?.trim();
-    if (firstPart) {
-      const resolved = resolveHrefAgainstBase(firstPart, baseUrl);
-      if (resolved) {
-        return resolved;
-      }
-    }
-  }
-
-  if (dataSrc) {
-    return resolveHrefAgainstBase(dataSrc, baseUrl);
-  }
-
-  if (src) {
-    return resolveHrefAgainstBase(src, baseUrl);
-  }
-
-  return null;
 }
 
 /**
@@ -77,7 +47,9 @@ export function parseAirGroupListingProductsMap(
     }
 
     const $img = $card.find(".us-module-img img").first();
-    const imageUrl = $img.length ? extractImageUrl($img, currentPageUrl) : null;
+    const imageUrl = $img.length
+      ? resolveLazyListingImage($img, currentPageUrl, { preferDataSrc: true })
+      : null;
 
     const $titleLink = $card.find(".us-module-title a").first();
     const rawTitle = $titleLink.text().trim();

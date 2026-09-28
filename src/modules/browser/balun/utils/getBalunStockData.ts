@@ -1,72 +1,19 @@
-import * as cheerio from "cheerio";
-import { getBrowserAxios, logBrowserError } from "../../utils/browserRequest.js";
+import { fetchPromUaCompanySiteStock } from "../../promua/fetch-promua-company-site-stock/fetchPromUaCompanySiteStock.js";
 import {
-  mergeCookies,
-  pickHeaderCaseInsensitive,
-} from "../../utils/merge-response-cookies/mergeResponseCookies.js";
-import { parseJsonHtmlAttribute } from "../../utils/parse-json-html-attribute/parseJsonHtmlAttribute.js";
-import { parseStrippedDecimal } from "../../utils/parse-stripped-decimal/parseStrippedDecimal.js";
-import {
-  ADD_PRODUCT_TO_CART_QUERY,
-  CART_CHANGE_PRODUCT_QUANTITY_QUERY,
-  PROMUA_CART_PROBE_QUANTITY,
-} from "../../promua/cart/promUaCartGraphqlQueries.js";
-import {
-  parsePromUaAddProductResponse,
-  parsePromUaChangeQuantityResponse,
-} from "../../promua/cart/parsePromUaCartGraphql.js";
-import {
-  BROWSER_TEXT_CONFIG,
-  postPromUaGraphql,
-} from "../../promua/cart/postPromUaGraphql.js";
-import { extractPromUaCsrfToken } from "../../promua/extract-promua-csrf-token/extractPromUaCsrfToken.js";
-import { extractPromUaProductId } from "../../promua/extract-promua-product-id/extractPromUaProductId.js";
+  BALUN_NEGATIVE_OUTCOME,
+  BALUN_ORIGIN,
+  type BalunProductInfo,
+} from "./balun-product-types/balunProductInfo.js";
+import { normalizeBalunOutcome } from "./balun-normalize-outcome/normalizeBalunOutcome.js";
+import { parseBalunHtmlPrice } from "./parse-balun-html-price/parseBalunHtmlPrice.js";
 
-export const BALUN_ORIGIN = "https://balun.com.ua";
+export type { BalunProductInfo } from "./balun-product-types/balunProductInfo.js";
+export { BALUN_ORIGIN } from "./balun-product-types/balunProductInfo.js";
+export { parseBalunHtmlPrice } from "./parse-balun-html-price/parseBalunHtmlPrice.js";
 
-export interface BalunProductInfo {
-  stock: number;
-  price: number;
-}
-
-interface AnalyticsData {
-  clerk?: { price_original?: string };
-}
-
-const NEGATIVE_OUTCOME: BalunProductInfo = { stock: -1, price: -1 };
-
-/**
- * Цена со страницы: data-analytics → clerk.price_original.
- */
-export function parseBalunHtmlPrice(html: string): number | undefined {
-  const $ = cheerio.load(html);
-  const analyticsAttr = $("[data-analytics]").first().attr("data-analytics");
-  const analyticsData = parseJsonHtmlAttribute(analyticsAttr) as
-    | AnalyticsData
-    | undefined;
-  const priceOriginal = analyticsData?.clerk?.price_original;
-  if (priceOriginal === undefined || priceOriginal === "") {
-    return undefined;
-  }
-  const price = parseStrippedDecimal(String(priceOriginal));
-  return price === null ? undefined : price;
-}
-
-function resolvePrice(
-  htmlPrice: number | undefined,
-  graphqlPrice: number | null | undefined
-): number | undefined {
-  if (htmlPrice !== undefined) return htmlPrice;
-  if (graphqlPrice != null && Number.isFinite(graphqlPrice) && graphqlPrice >= 0) {
-    return graphqlPrice;
-  }
-  return undefined;
-}
-
-function withPrice(stock: number, price: number | undefined): BalunProductInfo {
-  if (price === undefined) return NEGATIVE_OUTCOME;
-  return { stock, price };
-}
+type BalunHtmlContext = {
+  htmlPrice: number | undefined;
+};
 
 /**
  * Остаток и цена карточки Balun.
@@ -86,95 +33,14 @@ export async function getBalunStockData(
     throw new Error("Link is required and must be a string");
   }
 
-  try {
-    const productId = extractPromUaProductId(productUrl);
-    if (!productId) {
-      return NEGATIVE_OUTCOME;
-    }
-
-    const client = getBrowserAxios();
-    const htmlResponse = await client.get<string>(productUrl, BROWSER_TEXT_CONFIG);
-    const html = String(htmlResponse.data ?? "");
-    if (!html.trim()) {
-      return NEGATIVE_OUTCOME;
-    }
-
-    const htmlHeaders =
-      (htmlResponse as { headers?: Record<string, unknown> }).headers ?? {};
-    let cookieHeader = mergeCookies(
-      "",
-      pickHeaderCaseInsensitive(htmlHeaders, "set-cookie")
-    );
-    const csrfToken = extractPromUaCsrfToken(html, cookieHeader);
-    const htmlPrice = parseBalunHtmlPrice(html);
-
-    const addResp = await postPromUaGraphql(client, {
-      origin: BALUN_ORIGIN,
-      operationName: "AddProductToCart",
-      query: ADD_PRODUCT_TO_CART_QUERY,
-      variables: {
-        payload: {
-          productId,
-          quantity: 1,
-          source: "COMPANY_SITE",
-        },
-        viewerSource: "COMPANY_SITE",
-      },
-      productUrl,
-      cookieHeader,
-      csrfToken,
-    });
-    cookieHeader = addResp.cookieHeader;
-
-    if (addResp.status >= 400) {
-      return NEGATIVE_OUTCOME;
-    }
-
-    const addResult = parsePromUaAddProductResponse(addResp.body, productId);
-    if (addResult.kind === "notOrderable") {
-      return withPrice(0, htmlPrice);
-    }
-    if (addResult.kind !== "success") {
-      return NEGATIVE_OUTCOME;
-    }
-
-    const changeResp = await postPromUaGraphql(client, {
-      origin: BALUN_ORIGIN,
-      operationName: "CartChangeProductQuantity",
-      query: CART_CHANGE_PRODUCT_QUANTITY_QUERY,
-      variables: {
-        payload: {
-          productId,
-          quantity: PROMUA_CART_PROBE_QUANTITY,
-          source: "COMPANY_SITE",
-        },
-        cartId: addResult.cartId,
-        source: "COMPANY_SITE",
-      },
-      productUrl,
-      cookieHeader,
-      csrfToken,
-    });
-
-    if (changeResp.status >= 400) {
-      return NEGATIVE_OUTCOME;
-    }
-
-    const changeResult = parsePromUaChangeQuantityResponse(
-      changeResp.body,
-      productId
-    );
-    if (changeResult.kind !== "recalculated") {
-      return NEGATIVE_OUTCOME;
-    }
-
-    const price = resolvePrice(
-      htmlPrice,
-      changeResult.unitSellingPrice ?? addResult.unitSellingPrice
-    );
-    return withPrice(changeResult.quantity, price);
-  } catch (error) {
-    logBrowserError("Error fetching data from balun product page:", error);
-    return NEGATIVE_OUTCOME;
-  }
+  return fetchPromUaCompanySiteStock<BalunHtmlContext, BalunProductInfo>({
+    origin: BALUN_ORIGIN,
+    productUrl,
+    negativeOutcome: BALUN_NEGATIVE_OUTCOME,
+    logLabel: "balun",
+    parseHtmlContext: (html) => ({ htmlPrice: parseBalunHtmlPrice(html) }),
+    resolveHtmlPrice: (ctx) => ctx.htmlPrice,
+    normalizeOutcome: ({ quantity, unitPrice }) =>
+      normalizeBalunOutcome(quantity, unitPrice),
+  });
 }

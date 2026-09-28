@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { toMoney } from "../../../utils/to-money/toMoney.js";
 import type { YuminProductInfo } from "../yumin-product-types/yuminProductInfo.js";
 import { YUMIN_NEGATIVE_OUTCOME } from "../yumin-product-types/yuminProductInfo.js";
 import { extractPieceCountFromTitle } from "../yumin-piece-count-from-title/extractPieceCountFromTitle.js";
@@ -34,7 +35,7 @@ export function parseYuminProductHtml(html: string): YuminProductInfo {
   let price = basePrice;
 
   if (pieceCount !== null && pieceCount > 0) {
-    price = Number((basePrice / pieceCount).toFixed(2));
+    price = toMoney(basePrice / pieceCount);
     stock = options.flatQty * pieceCount;
   }
 

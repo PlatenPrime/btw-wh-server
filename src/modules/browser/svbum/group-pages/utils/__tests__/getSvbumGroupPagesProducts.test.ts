@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as cheerio from "cheerio";
 import {
   getSvbumGroupPagesProducts,
-  getSvbumNextPageUrl,
 } from "../getSvbumGroupPagesProducts.js";
 import { fetchPageHtml } from "../../../../utils/fetchPageHtml.js";
 import { sleep } from "../../../../utils/sleep.js";
@@ -61,53 +59,6 @@ function pageHtml(opts: {
 <div class="row"><div class="col-xs-12 text-center">${forward}</div></div>
 </body></html>`;
 }
-
-describe("getSvbumNextPageUrl", () => {
-  it("prefers link rel=next over pagination Вперед", () => {
-    const $ = cheerio.load(
-      pageHtml({
-        product: {
-          productId: "1",
-          href: "https://sviatobum.ua/p/1",
-          title: "One",
-          imageSrc: "https://sviatobum.ua/img/1.webp",
-        },
-        nextHref: PAGE2_NO_OCF,
-        forwardHref: PAGE3_WITH_OCF,
-      })
-    );
-    expect(getSvbumNextPageUrl($, GROUP_URL)).toBe(PAGE2_NO_OCF);
-  });
-
-  it("falls back to pagination Вперед when rel=next is absent", () => {
-    const $ = cheerio.load(
-      pageHtml({
-        product: {
-          productId: "1",
-          href: "https://sviatobum.ua/p/1",
-          title: "One",
-          imageSrc: "https://sviatobum.ua/img/1.webp",
-        },
-        forwardHref: PAGE3_WITH_OCF,
-      })
-    );
-    expect(getSvbumNextPageUrl($, GROUP_URL)).toBe(PAGE3_WITH_OCF);
-  });
-
-  it("returns null on last page without next or Вперед", () => {
-    const $ = cheerio.load(
-      pageHtml({
-        product: {
-          productId: "1",
-          href: "https://sviatobum.ua/p/1",
-          title: "One",
-          imageSrc: "https://sviatobum.ua/img/1.webp",
-        },
-      })
-    );
-    expect(getSvbumNextPageUrl($, GROUP_URL)).toBeNull();
-  });
-});
 
 describe("getSvbumGroupPagesProducts", () => {
   beforeEach(() => {

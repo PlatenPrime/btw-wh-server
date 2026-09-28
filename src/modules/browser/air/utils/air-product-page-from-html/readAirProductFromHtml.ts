@@ -1,7 +1,6 @@
 import * as cheerio from "cheerio";
 import type { AirProductInfo } from "../air-product-types/airProductInfo.js";
-
-const NEGATIVE_OUTCOME: AirProductInfo = { stock: -1, price: -1 };
+import { AIR_NEGATIVE_OUTCOME } from "../air-product-types/airProductInfo.js";
 
 /**
  * Читает остаток и цену со страницы товара Air (HTML).
@@ -16,7 +15,7 @@ export function readAirProductFromHtml(html: string): AirProductInfo {
   } else {
     const parsed = parseInt(quantityValue, 10);
     if (Number.isNaN(parsed) || parsed < 0) {
-      return NEGATIVE_OUTCOME;
+      return AIR_NEGATIVE_OUTCOME;
     }
     stock = parsed;
   }
@@ -25,12 +24,12 @@ export function readAirProductFromHtml(html: string): AirProductInfo {
     $(".us-price-actual").first().text().trim() ||
     $(".us-price-new").first().text().trim();
   if (!priceRaw) {
-    return NEGATIVE_OUTCOME;
+    return AIR_NEGATIVE_OUTCOME;
   }
   const priceStr = priceRaw.replace(/[^\d.,]/g, "").replace(/,/g, ".");
   const price = parseFloat(priceStr);
   if (Number.isNaN(price) || price < 0) {
-    return NEGATIVE_OUTCOME;
+    return AIR_NEGATIVE_OUTCOME;
   }
 
   return { stock, price };

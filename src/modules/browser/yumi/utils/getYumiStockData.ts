@@ -1,5 +1,6 @@
 import * as cheerio from "cheerio";
 import { browserGet } from "../../utils/browserRequest.js";
+import { toMoney } from "../../utils/to-money/toMoney.js";
 import type { YumiProductInfo } from "./yumi-product-types/yumiProductInfo.js";
 import { YUMI_NEGATIVE_OUTCOME } from "./yumi-product-types/yumiProductInfo.js";
 import { extractPackCount } from "./yumi-pack-count-from-title/extractPackCount.js";
@@ -34,9 +35,7 @@ export async function getYumiStockData(link: string): Promise<YumiProductInfo> {
 
     const packCount = extractPackCount(title);
     const finalPrice =
-      packCount && packCount > 1
-        ? Number((basePrice / packCount).toFixed(2))
-        : basePrice;
+      packCount && packCount > 1 ? toMoney(basePrice / packCount) : basePrice;
 
     if (packCount && packCount > 1 && stock > 0) {
       stock = stock * packCount;

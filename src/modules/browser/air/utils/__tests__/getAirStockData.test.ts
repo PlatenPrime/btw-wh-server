@@ -28,24 +28,7 @@ vi.mock("../../../../../logging/createLogger.js", () => ({
   }),
 }));
 
-import {
-  getAirStockData,
-  resolveAirWarmUpUrl,
-} from "../getAirStockData.js";
-
-describe("resolveAirWarmUpUrl", () => {
-  it("возвращает origin + /", () => {
-    expect(
-      resolveAirWarmUpUrl(
-        "https://airballoons.com.ua/ua/product/shar-metalik"
-      )
-    ).toBe("https://airballoons.com.ua/");
-  });
-
-  it("undefined при невалидном URL", () => {
-    expect(resolveAirWarmUpUrl("not-a-url")).toBeUndefined();
-  });
-});
+import { getAirStockData } from "../getAirStockData.js";
 
 describe("getAirStockData", () => {
   const originalProxy = process.env.AIR_HTTP_PROXY_URL;

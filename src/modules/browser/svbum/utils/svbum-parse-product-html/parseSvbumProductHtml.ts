@@ -3,6 +3,7 @@ import type {
   BrowserCheerio,
   BrowserCheerioAPI,
 } from "../../../utils/cheerioTypes.js";
+import { toMoney } from "../../../utils/to-money/toMoney.js";
 import { extractSvbumPackCount } from "../svbum-pack-count/extractSvbumPackCount.js";
 import type { SvbumProductInfo } from "../svbum-product-types/svbumProductInfo.js";
 import { SVBUM_NEGATIVE_OUTCOME } from "../svbum-product-types/svbumProductInfo.js";
@@ -12,10 +13,6 @@ type PackOffer = {
   qty: number;
   perPiece: number;
 };
-
-function toMoney(value: number): number {
-  return Number(value.toFixed(2));
-}
 
 function parseAttrNumber(raw: string | undefined): number | null {
   if (raw === undefined || raw === "") {

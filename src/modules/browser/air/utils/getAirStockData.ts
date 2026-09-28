@@ -4,26 +4,18 @@ import { isOriginBlockedError } from "../../utils/browserOriginBlockedError.js";
 import { fetchPageHtml } from "../../utils/fetchPageHtml.js";
 import { logBrowserStockResult } from "../../utils/logBrowserStockResult.js";
 import type { AirProductInfo } from "./air-product-types/airProductInfo.js";
+import { AIR_NEGATIVE_OUTCOME } from "./air-product-types/airProductInfo.js";
 import { readAirProductFromHtml } from "./air-product-page-from-html/readAirProductFromHtml.js";
 import { getAirHttpProxyUrl } from "./getAirHttpProxyUrl.js";
 import { summarizeAirHtmlForLog } from "./summarize-air-html-for-log/summarizeAirHtmlForLog.js";
 import { AIR_IDLE_MODE } from "./airIdleMode.js";
+import { resolveAirWarmUpUrl } from "./resolve-air-warm-up-url/resolveAirWarmUpUrl.js";
 
 export type { AirProductInfo } from "./air-product-types/airProductInfo.js";
 export { AIR_IDLE_MODE } from "./airIdleMode.js";
+export { resolveAirWarmUpUrl } from "./resolve-air-warm-up-url/resolveAirWarmUpUrl.js";
 
-const NEGATIVE_OUTCOME: AirProductInfo = { stock: -1, price: -1 };
 const airLog = createLogger({ module: "browser" });
-
-/**
- * Origin + "/" для Impit warm-up (cookies в jar до product GET).
- */
-export function resolveAirWarmUpUrl(productUrl: string): string | undefined {
-  if (!URL.canParse(productUrl)) {
-    return undefined;
-  }
-  return `${new URL(productUrl).origin}/`;
-}
 
 /**
  * Получает данные о количестве и цене товара со страницы товара сайта air по ссылке.
@@ -42,7 +34,7 @@ export async function getAirStockData(
   link: string
 ): Promise<AirProductInfo> {
   if (AIR_IDLE_MODE) {
-    return NEGATIVE_OUTCOME;
+    return AIR_NEGATIVE_OUTCOME;
   }
 
   if (!link || typeof link !== "string") {
@@ -91,6 +83,6 @@ export async function getAirStockData(
       throw error;
     }
     logBrowserError("Error fetching data from air product page:", error);
-    return NEGATIVE_OUTCOME;
+    return AIR_NEGATIVE_OUTCOME;
   }
 }
