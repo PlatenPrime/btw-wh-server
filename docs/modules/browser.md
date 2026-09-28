@@ -62,7 +62,7 @@ Air **group listing** (наполнение SKU) при выключенном i
 
 **Balun:** цена с HTML `data-analytics` (`clerk.price_original`), иначе unit selling из корзины; stock = `recalculatedQuantity` в единицах продажи сайта. `getBalunStockData` использует `getBrowserAxios` + `promua`.
 
-**Dojdevik:** цена упаковки с DOM `[data-qaid="product_price"]`, иначе unit selling; packSize из характеристики «Кількість в пачці» (`attribute_value`) или из описания «Кількість в упаковці N шт» (fallback 1); наружу — цена за штуку (`packagePrice / packSize`, 2 знака) и stock в штуках (`packs × packSize`). Обход групп — shared `parsePromUaGroupListingProducts`. Гайд для UI: [frontend: dojdevik](../frontend/dojdevik.md).
+**Dojdevik:** цена упаковки с DOM `[data-qaid="product_price"]`, иначе unit selling; packSize из характеристики с «кількість» в `attribute_name` (`attribute_value`) или из описания «Кількість в упаковці N шт» (fallback 1); наружу — цена за штуку (`packagePrice / packSize`, 2 знака) и stock в штуках (`packs × packSize`). Обход групп — shared `parsePromUaGroupListingProducts`. Гайд для UI: [frontend: dojdevik](../frontend/dojdevik.md).
 
 CSRF для add: токен из HTML, иначе cookie `csrf_token_company_site` в `x-csrftoken`. Сессия эфемерная, корзину после замера не чистим.
 

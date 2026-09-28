@@ -11,8 +11,9 @@ function parsePositiveInt(raw: string | undefined): number | null {
 
 /**
  * Размер пачки из HTML карточки dojdevik.
- * Приоритет: характеристика «Кількість в пачці» (`data-qaid="attribute_value"`),
- * затем описание «Кількість в упаковці N шт». Fallback — 1.
+ * Приоритет: любая характеристика с «кількість» в `attribute_name`
+ * (значение из соседнего `attribute_value`), затем описание
+ * «Кількість в упаковці N шт». Fallback — 1.
  */
 export function extractDojdevikPackCount(html: string): number {
   if (!html) {
@@ -20,7 +21,7 @@ export function extractDojdevikPackCount(html: string): number {
   }
 
   const fromAttrs = html.match(
-    /Кількість\s+в\s+пачці\.?\s*<\/td>\s*<td[^>]*data-qaid=["']attribute_value["'][^>]*>\s*(\d+)\s*</i
+    /data-qaid=["']attribute_name["'][^>]*>[^<]*кількість[^<]*<\/td>\s*<td[^>]*data-qaid=["']attribute_value["'][^>]*>\s*(\d+)\s*</i
   );
   const attrsCount = parsePositiveInt(fromAttrs?.[1]);
   if (attrsCount !== null) {

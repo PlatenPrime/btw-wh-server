@@ -9,13 +9,30 @@ const fixturesDir = join(
   "../../../sku-pages"
 );
 
+function attrRow(name: string, value: string): string {
+  return (
+    `<td class="b-product-info__cell" data-qaid="attribute_name">${name}</td>` +
+    `<td class="b-product-info__cell" data-qaid="attribute_value">${value}</td>`
+  );
+}
+
 describe("extractDojdevikPackCount", () => {
   it("reads pack size from characteristics attribute_value", () => {
+    expect(extractDojdevikPackCount(attrRow("Кількість в пачці.", "100"))).toBe(
+      100
+    );
+  });
+
+  it("reads pack size from attribute named кількість в упаковці", () => {
     expect(
-      extractDojdevikPackCount(
-        `Кількість в пачці.</td><td class="b-product-info__cell" data-qaid="attribute_value">100</td>`
-      )
+      extractDojdevikPackCount(attrRow("кількість в упаковці", "100"))
     ).toBe(100);
+  });
+
+  it("reads pack size from lowercase attribute name with кількість", () => {
+    expect(
+      extractDojdevikPackCount(attrRow("кількість в пачці.", "50"))
+    ).toBe(50);
   });
 
   it("reads pack size from description heading", () => {
@@ -27,7 +44,7 @@ describe("extractDojdevikPackCount", () => {
   it("prefers characteristics over description", () => {
     expect(
       extractDojdevikPackCount(
-        `Кількість в пачці.</td><td data-qaid="attribute_value">50</td>` +
+        attrRow("Кількість в пачці.", "50") +
           `<h3>Кількість в упаковці 100 шт.</h3>`
       )
     ).toBe(50);
@@ -43,10 +60,11 @@ describe("extractDojdevikPackCount", () => {
     expect(extractDojdevikPackCount("")).toBe(1);
     expect(extractDojdevikPackCount("<html></html>")).toBe(1);
     expect(extractDojdevikPackCount("Кількість в упаковці 0 шт")).toBe(1);
+    expect(extractDojdevikPackCount(attrRow("Кількість в пачці.", "0"))).toBe(
+      1
+    );
     expect(
-      extractDojdevikPackCount(
-        `Кількість в пачці.</td><td data-qaid="attribute_value">0</td>`
-      )
+      extractDojdevikPackCount(attrRow("Кількість в наявності", "Є на складі"))
     ).toBe(1);
   });
 
