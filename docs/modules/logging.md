@@ -20,7 +20,7 @@
 
 ## Связи
 
-- `index.ts` подключает HTTP/slow/error middleware и process handlers
+- `createApp` подключает HTTP/slow/error middleware; `index.ts` регистрирует process handlers и вызывает `startServer`
 - Cron-джобы и утилиты срезов создают child logger с `module` + `job`
 - Browser-модуль логирует внешние HTTP-ошибки через child `module: browser` и `logBrowserError`
 - Telegram-уведомления cron остаются отдельным каналом (алерты, не логи)
