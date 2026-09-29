@@ -12,9 +12,10 @@ export type PatchSkuSliceByDateResult = {
   stock: number;
   price: number;
   previous: ISkuSliceDataItem | null;
+  created: boolean;
 };
 
-function readPreviousPoint(item: unknown): ISkuSliceDataItem | null {
+export function readPreviousPoint(item: unknown): ISkuSliceDataItem | null {
   if (item === null || typeof item !== "object") return null;
   const o = item as Record<string, unknown>;
   if (typeof o.stock !== "number" || !Number.isFinite(o.stock)) return null;
@@ -23,8 +24,8 @@ function readPreviousPoint(item: unknown): ISkuSliceDataItem | null {
 }
 
 /**
- * Перезаписывает stock/price SKU в существующем документе SkuSlice на дату.
- * Документ дня не создаётся.
+ * Перезаписывает stock/price SKU в документе SkuSlice на дату.
+ * Документ дня создаётся (upsert), если отсутствовал.
  */
 export async function patchSkuSliceByDateUtil(
   input: PatchSkuSliceByDateInput
@@ -38,26 +39,26 @@ export async function patchSkuSliceByDateUtil(
   if (!productId) return null;
 
   const sliceDate = toSliceDate(input.date);
-  const slice = await SkuSlice.findOne({
-    konkName: sku.konkName,
-    date: sliceDate,
-  })
-    .select("data")
-    .lean();
-  if (!slice) return null;
-
-  const previous = readPreviousPoint(
-    (slice.data as Record<string, unknown> | undefined)?.[productId]
-  );
   const nextItem: ISkuSliceDataItem = {
     stock: input.stock,
     price: input.price,
   };
 
-  await SkuSlice.updateOne(
-    { _id: slice._id },
-    { $set: { [`data.${productId}`]: nextItem } }
-  );
+  const before = await SkuSlice.findOneAndUpdate(
+    { konkName: sku.konkName, date: sliceDate },
+    {
+      $set: { [`data.${productId}`]: nextItem },
+      $setOnInsert: { konkName: sku.konkName, date: sliceDate },
+    },
+    { upsert: true, new: false }
+  ).lean();
+
+  const created = before == null;
+  const previous = created
+    ? null
+    : readPreviousPoint(
+        (before.data as Record<string, unknown> | undefined)?.[productId]
+      );
 
   return {
     productId,
@@ -65,5 +66,6 @@ export async function patchSkuSliceByDateUtil(
     stock: nextItem.stock,
     price: nextItem.price,
     previous,
+    created,
   };
 }

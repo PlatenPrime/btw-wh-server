@@ -114,17 +114,24 @@
 
 ### PATCH `/api/sku-slices/sku/:skuId`
 
-Ручная запись `stock`/`price` SKU в существующий документ среза на дату. Документ дня не создаётся. Ключ `data[productId]` создаётся или перезаписывается. `0` и `-1` допустимы.
+Ручная запись `stock`/`price` SKU в документ среза. Режим XOR: либо одна дата `date`, либо диапазон `dateFrom`+`dateTo` (не вместе). Документ дня создаётся (upsert), если отсутствовал. Ключ `data[productId]` создаётся или перезаписывается. `0` и `-1` допустимы. Диапазон: `dateFrom` ≤ `dateTo`, максимум 366 календарных дней.
 
 **Path:** `skuId` — валидный ObjectId.
 
-**Body:**
+**Body (один день):**
 
 - `date` (string, YYYY-MM-DD, обязательно)
 - `stock` (number, finite, обязательно)
 - `price` (number, finite, обязательно)
 
-**Ответ 200:**
+**Body (диапазон):**
+
+- `dateFrom` (string, YYYY-MM-DD, обязательно)
+- `dateTo` (string, YYYY-MM-DD, обязательно)
+- `stock` (number, finite, обязательно)
+- `price` (number, finite, обязательно)
+
+**Ответ 200 (один день):**
 
 ```text
 {
@@ -134,14 +141,65 @@
     date: Date (ISO),
     stock: number,
     price: number,
-    previous: { stock: number, price: number } | null
+    previous: { stock: number, price: number } | null,
+    created: boolean
   }
 }
 ```
 
-`previous` — прежняя точка, если ключ уже был; `null`, если ключ создан.
+`previous` — прежняя точка, если ключ уже был; `null`, если ключ создан. `created` — `true`, если документ дня создан этим запросом.
 
-**Ошибки:** 400, 401, 403, 404 (нет SKU / нет productId / нет документа среза на дату), 500.
+**Ответ 200 (диапазон):**
+
+```text
+{
+  message: string,
+  data: {
+    productId: string,
+    stock: number,
+    price: number,
+    dateFrom: Date (ISO),
+    dateTo: Date (ISO),
+    updatedCount: number,
+    days: Array<{
+      date: Date (ISO),
+      previous: { stock: number, price: number } | null,
+      created: boolean
+    }>
+  }
+}
+```
+
+**Ошибки:** 400, 401, 403, 404 (нет SKU / нет productId), 500.
+
+---
+
+### POST `/api/sku-slices/skugr/:skugrId/run-today`
+
+Ручной scrape всех SKU из товарной группы (`Skugr.skus`) за сегодняшний календарный день `Europe/Kiev`. Документ `SkuSlice` на сегодня создаётся при необходимости. Точки всегда перезаписываются (включая уже заполненные). Rotation и `isSliced` не учитываются — берутся SKU из состава группы. Синхронный ответ после завершения. Повторный запуск той же группы, пока идёт предыдущий — 409.
+
+**Path:** `skugrId` — валидный ObjectId группы.
+
+**Body:** пустой.
+
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    skugrId: string,
+    konkName: string,
+    sliceDate: string (YYYY-MM-DD),
+    total: number,
+    count: number,
+    invalid: number,
+    errors: number
+  }
+}
+```
+
+**Ошибки:** 400, 401, 403, 404 (группа не найдена), 409 (уже выполняется), 500.
 
 ---
 

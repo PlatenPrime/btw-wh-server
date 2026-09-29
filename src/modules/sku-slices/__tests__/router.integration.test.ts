@@ -6,6 +6,7 @@ import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
 import { Sku } from "../../skus/models/Sku.js";
+import { Skugr } from "../../skugrs/models/Skugr.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
@@ -22,6 +23,7 @@ const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
 describe("Sku-slices router integration", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
+    await Skugr.deleteMany({});
     await SkuSlice.deleteMany({});
   });
 
@@ -64,6 +66,19 @@ describe("Sku-slices router integration", () => {
         .patch("/api/sku-slices/sku/507f1f77bcf86cd799439011")
         .set(createAuthHeader(RoleType.USER))
         .send({ date: "2026-09-20", stock: 3, price: 110 })
+        .expect(403);
+    });
+
+    it("POST /api/sku-slices/skugr/:skugrId/run-today returns 401 without token", async () => {
+      await request(app)
+        .post("/api/sku-slices/skugr/507f1f77bcf86cd799439011/run-today")
+        .expect(401);
+    });
+
+    it("POST /api/sku-slices/skugr/:skugrId/run-today returns 403 for USER role", async () => {
+      await request(app)
+        .post("/api/sku-slices/skugr/507f1f77bcf86cd799439011/run-today")
+        .set(createAuthHeader(RoleType.USER))
         .expect(403);
     });
   });
@@ -207,7 +222,7 @@ describe("Sku-slices router integration", () => {
       expect(response.body.message).toBe("Validation error");
     });
 
-    it("404 when slice document is missing", async () => {
+    it("200 creates slice document when missing", async () => {
       const sku = await Sku.create({
         konkName: "r-k",
         prodName: "p",
@@ -216,11 +231,19 @@ describe("Sku-slices router integration", () => {
         url: "https://e.com/1",
       });
 
-      await request(app)
+      const response = await request(app)
         .patch(`/api/sku-slices/sku/${sku._id.toString()}`)
         .set(createAuthHeader())
         .send({ date: "2026-09-20", stock: 3, price: 110 })
-        .expect(404);
+        .expect(200);
+
+      expect(response.body.data).toMatchObject({
+        productId: "r-k-missing",
+        stock: 3,
+        price: 110,
+        previous: null,
+        created: true,
+      });
     });
 
     it("200 updates slice point for ADMIN", async () => {
@@ -251,6 +274,70 @@ describe("Sku-slices router integration", () => {
         stock: 3,
         price: 110,
         previous: { stock: 60, price: 5.5 },
+        created: false,
+      });
+    });
+
+    it("200 updates date range for ADMIN", async () => {
+      const sku = await Sku.create({
+        konkName: "r-k",
+        prodName: "p",
+        productId: "r-k-range",
+        title: "One",
+        url: "https://e.com/1",
+      });
+
+      const response = await request(app)
+        .patch(`/api/sku-slices/sku/${sku._id.toString()}`)
+        .set(createAuthHeader())
+        .send({
+          dateFrom: "2026-09-20",
+          dateTo: "2026-09-21",
+          stock: 3,
+          price: 110,
+        })
+        .expect(200);
+
+      expect(response.body.message).toBe(
+        "Sku slice by date range updated successfully"
+      );
+      expect(response.body.data.updatedCount).toBe(2);
+      expect(response.body.data.days).toHaveLength(2);
+    });
+  });
+
+  describe("POST /api/sku-slices/skugr/:skugrId/run-today", () => {
+    it("404 when skugr missing", async () => {
+      await request(app)
+        .post("/api/sku-slices/skugr/507f1f77bcf86cd799439011/run-today")
+        .set(createAuthHeader())
+        .expect(404);
+    });
+
+    it("200 for empty skugr without scraping", async () => {
+      const skugr = await Skugr.create({
+        konkName: "r-k",
+        prodName: "p",
+        title: "Empty group",
+        url: "https://e.com/g",
+        skus: [],
+      });
+
+      const response = await request(app)
+        .post(`/api/sku-slices/skugr/${skugr._id.toString()}/run-today`)
+        .set(createAuthHeader())
+        .expect(200);
+
+      expect(response.body.message).toBe(
+        "Skugr sku slices for today completed"
+      );
+      expect(response.body.data).toMatchObject({
+        skugrId: skugr._id.toString(),
+        konkName: "r-k",
+        total: 0,
+        count: 0,
+        invalid: 0,
+        errors: 0,
       });
     });
   });

@@ -37,6 +37,7 @@ describe("patchSkuSliceByDateUtil", () => {
       stock: 3,
       price: 110,
       previous: { stock: 60, price: 5.5 },
+      created: false,
     });
 
     const stored = await SkuSlice.findOne({
@@ -69,6 +70,7 @@ describe("patchSkuSliceByDateUtil", () => {
     });
 
     expect(result?.previous).toBeNull();
+    expect(result?.created).toBe(false);
     expect(result?.stock).toBe(0);
     expect(result?.price).toBe(-1);
 
@@ -80,17 +82,7 @@ describe("patchSkuSliceByDateUtil", () => {
     expect(stored?.data["perfect-other"]).toEqual({ stock: 1, price: 2 });
   });
 
-  it("returns null when sku is missing", async () => {
-    const result = await patchSkuSliceByDateUtil({
-      skuId: "69a2de17f8a2a9cb9a8a75df",
-      date: new Date("2026-09-20T00:00:00.000Z"),
-      stock: 1,
-      price: 2,
-    });
-    expect(result).toBeNull();
-  });
-
-  it("returns null when slice document for date is missing", async () => {
+  it("upserts slice document when missing for date", async () => {
     const sku = await Sku.create({
       konkName: "perfect",
       prodName: "pd",
@@ -99,8 +91,33 @@ describe("patchSkuSliceByDateUtil", () => {
       url: "https://perfect.example/1",
     });
 
+    const date = new Date("2026-09-20T00:00:00.000Z");
     const result = await patchSkuSliceByDateUtil({
       skuId: sku._id.toString(),
+      date,
+      stock: 1,
+      price: 2,
+    });
+
+    expect(result).toEqual({
+      productId: "perfect-1",
+      date,
+      stock: 1,
+      price: 2,
+      previous: null,
+      created: true,
+    });
+
+    const stored = await SkuSlice.findOne({
+      konkName: "perfect",
+      date,
+    }).lean();
+    expect(stored?.data["perfect-1"]).toEqual({ stock: 1, price: 2 });
+  });
+
+  it("returns null when sku is missing", async () => {
+    const result = await patchSkuSliceByDateUtil({
+      skuId: "69a2de17f8a2a9cb9a8a75df",
       date: new Date("2026-09-20T00:00:00.000Z"),
       stock: 1,
       price: 2,

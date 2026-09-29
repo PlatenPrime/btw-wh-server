@@ -45,7 +45,7 @@ const excelJobSchema = new Schema<IExcelJob>(
     filePath: { type: String },
     sizeBytes: { type: Number },
     error: { type: String },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true },
   },
   { timestamps: true },
 );

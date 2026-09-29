@@ -10,6 +10,7 @@ import {
   getSkuSliceRangeController,
   patchSkuSliceByDateController,
   putAirClientSkuSliceController,
+  runSkugrSlicesTodayController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -37,6 +38,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getPackFlipReviewController),
+);
+router.post(
+  "/skugr/:skugrId/run-today",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(runSkugrSlicesTodayController),
 );
 router.get(
   "/sku/:skuId/range",

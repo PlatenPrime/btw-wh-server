@@ -36,7 +36,8 @@ API системы управления складом предоставляе�
 - [API Skus](skus.md) — `/api/skus` — товары конкурентов (sku)
 - [API Skugrs](skugrs.md) — `/api/skugrs` — группы товаров конкурента
 - [API Sku Slices](sku-slices.md) — `/api/sku-slices` — сырые ежедневные срезы остатков и цен
-- [Фронтенд: правка точки SkuSlice](../frontend/patch-sku-slice.md) — PATCH stock/price за дату
+- [Фронтенд: правка точки SkuSlice](../frontend/patch-sku-slice.md) — PATCH stock/price за дату или диапазон
+- [Фронтенд: scrape срезов группы на сегодня](../frontend/run-skugr-slices-today.md) — POST run-today по Skugr
 - [API Slice Compensation](slice-compensation.md) — `/api/slice-compensation` — внеочередной compensating refetch по конкуренту
 - [API Grabo Skus](grabo-skus.md) — `/api/grabo-skus` — каталог производителя Grabo: список, карточка, ручной срез; Excel — 410 → excel-jobs
 - [API Sku Excel Reports](sku-excel-reports.md) — `/api/sku-excel-reports` — 410, миграция на excel-jobs

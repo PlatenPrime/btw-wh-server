@@ -415,6 +415,7 @@
 | GET | `/sku/:skuId/range` | JWT | ≥ ADMIN |
 | GET | `/sku/:skuId` | JWT | ≥ ADMIN |
 | PATCH | `/sku/:skuId` | JWT | ≥ ADMIN |
+| POST | `/skugr/:skugrId/run-today` | JWT | ≥ ADMIN |
 
 ---
 

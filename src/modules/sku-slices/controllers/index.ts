@@ -5,3 +5,4 @@ export { getSkuSliceRangeController } from "./get-sku-slice-range/getSkuSliceRan
 export { getPackFlipReviewController } from "./get-pack-flip-review/getPackFlipReviewController.js";
 export { getAirClientPendingController } from "./get-air-client-pending/getAirClientPendingController.js";
 export { putAirClientSkuSliceController } from "./put-air-client-sku-slice/putAirClientSkuSliceController.js";
+export { runSkugrSlicesTodayController } from "./run-skugr-slices-today/runSkugrSlicesTodayController.js";
