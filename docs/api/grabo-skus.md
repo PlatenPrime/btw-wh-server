@@ -71,34 +71,7 @@
 
 ## POST `/sync`
 
-Ручной полный срез каталога Grabo. Захватывает in-memory lock и сразу возвращает 202; работа идёт в фоне. По завершении — analytics-отчёт.
-
-### Request
-
-Тело не требуется.
-
-### Responses
-
-**202** — принято
-
-```
-{
-  message: string,
-  data: { accepted: true }
-}
-```
-
-**401** — нет/невалидный JWT
-
-**403** — роль ниже ADMIN
-
-**409** — срез уже выполняется на этом инстансе
-
-```
-{
-  message: "Grabo SKU sync already running"
-}
-```
+**410** `API_TASKS_MIGRATED`, kind `grabo-skus.sync`. Запуск: [apitasks](apitasks.md). Params: `{}`.
 
 ## GET `/excel`
 

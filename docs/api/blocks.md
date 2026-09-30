@@ -118,12 +118,4 @@
 
 ### POST `/api/blocks/recalculate-zones-sectors`
 
-Пересчёт секторов зон по позициям блоков и зон.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** без тела.
-
-**Ответ 200:** сообщение или результат.
-
-**Ошибки:** 401, 403, 500.
+**410** `API_TASKS_MIGRATED`, kind `blocks.recalculate-zones-sectors`. Запуск: [apitasks](apitasks.md). Params: `{}`.

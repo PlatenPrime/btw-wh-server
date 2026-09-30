@@ -16,6 +16,7 @@ import defsRoute from "./modules/defs/router.js";
 import delsRoute from "./modules/dels/router.js";
 import eventsRoute from "./modules/events/router.js";
 import excelJobsRoute from "./modules/excel-jobs/router.js";
+import apiTasksRoute from "./modules/apitasks/router.js";
 import graboSkusRoute from "./modules/grabo-skus/router.js";
 import kasksRoute from "./modules/kasks/router.js";
 import konksRoute from "./modules/konks/router.js";
@@ -54,6 +55,7 @@ export const API_ROUTES: ReadonlyArray<readonly [string, RequestHandler]> = [
   ["/api/constants", constantsRoute],
   ["/api/events", eventsRoute],
   ["/api/excel-jobs", excelJobsRoute],
+  ["/api/apitasks", apiTasksRoute],
   ["/api/konks", konksRoute],
   ["/api/prods", prodsRoute],
   ["/api/skus", skusRoute],

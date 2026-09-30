@@ -78,41 +78,7 @@
 
 ### POST `/api/skugrs/id/:id/fill-skus`
 
-Заполнение массива `skus` группы по данным парсера страниц группы в модуле `browser`. Для `konkName` выбирается реализация: `yumi`, `yumin`, `air`, `sharte`, `balun`, `perfect`, `svbum`, `dojdevik`; для неподдерживаемого конкурента — **400**. Для **air** при активном `AIR_IDLE_MODE` — **400** `{ code: "CLIENT_INGEST_REQUIRED" }`; refill через `POST /api/skugrs/client/air/id/:id/fill-page`. Для **svbum** `url` группы должен сохранять query-фильтр `ocf`, иначе пагинация уйдёт на нефильтрованный листинг.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Параметры пути:** `id` — ObjectId группы.
-
-**Body (JSON, опционально):**
-
-- `maxPages?: number` — лимит страниц пагинации для парсера (1–200), для конкурентов с постраничным обходом листинга (в т.ч. Yumi, Balun, Perfect, Svbum и др.).
-
-**Ответ 200:**
-
-```json
-{
-  "message": "Skugr skus filled from browser successfully",
-  "data": {
-    /* Skugr DTO после обновления */
-  },
-  "stats": {
-    "fetched": 0,
-    "dedupedByUrl": 0,
-    "skippedAlreadyInGroup": 0,
-    "skippedNoProductId": 0,
-    "skippedProductIdConflict": 0,
-    "skippedNonNewskuManufacturer": 0,
-    "promotedFromNewsku": 0,
-    "linkedExisting": 0,
-    "created": 0
-  }
-}
-```
-
-Поле `stats`: сколько позиций вернул парсер (`fetched`); сколько отброшено из‑за дубликата `url` в выдаче (`dedupedByUrl`); сколько URL уже были в группе (`skippedAlreadyInGroup`); без идентификатора товара в выдаче (`skippedNoProductId`); конфликт по занятому другим URL `productId` (`skippedProductIdConflict`); для группы с производителем-заглушкой `newsku` — сколько существующих по URL SKU не добавлено, потому что у них уже другой `prodName` (`skippedNonNewskuManufacturer`); для группы с любым другим `prodName` — сколько существующих по URL SKU имели `prodName: "newsku"` и получили обновление на `prodName` текущей группы (`promotedFromNewsku`); сколько существующих SKU только добавлено в группу (`linkedExisting`); сколько создано новых документов SKU (`created`). У **новых** SKU при создании заполняются `title`, `url` и `imageUrl` из ответа парсера. У уже существующих SKU поля обычно не меняются, кроме случая промоута с `newsku` на `prodName` парсируемой группы (см. модуль Skugrs).
-
-**Ошибки:** 400 (валидация, неподдерживаемый `konkName`, или `CLIENT_INGEST_REQUIRED` для air при idle), 404 (группа не найдена), 401, 403, 500.
+**410** `API_TASKS_MIGRATED`, kind `skugrs.fill-skus`. Запуск: [apitasks](apitasks.md). Params: `{ skugrId, maxPages? }`. Для air при idle по-прежнему клиентский `fill-page`.
 
 ---
 

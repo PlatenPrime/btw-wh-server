@@ -27,6 +27,8 @@ type SkuIdLean = { _id: { toString(): string } };
 export type RunCompensatingSkuSlicesOptions = {
   /** Если задан — только документ этого konk (ожидается уже нормализованное имя). */
   konkName?: string;
+  onProgress?: (done: number, total: number, message?: string) => void;
+  signal?: AbortSignal;
 };
 
 /**
@@ -52,7 +54,9 @@ export async function runCompensatingSkuSlices(
     shouldRefetchSkuSliceItem
   );
 
-  return runCompensatingSliceRefetchLoop(queue, async ({ konkName, dataKey }) => {
+  return runCompensatingSliceRefetchLoop(
+    queue,
+    async ({ konkName, dataKey }) => {
     const productKey = dataKey;
     try {
       const sku = (await Sku.findOne({ konkName, productId: productKey })
@@ -110,5 +114,10 @@ export async function runCompensatingSkuSlices(
       });
       return { refetched: 0, updated: 0 };
     }
-  });
+  },
+    {
+      onProgress: options?.onProgress,
+      signal: options?.signal,
+    }
+  );
 }

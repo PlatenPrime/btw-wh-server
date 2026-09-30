@@ -5,6 +5,7 @@ const connectionOn = vi.fn();
 const mongooseConnect = vi.fn();
 const startCronOperations = vi.fn();
 const startExcelJobRuntime = vi.fn();
+const startApiTaskRuntime = vi.fn();
 const logServerEgressGeo = vi.fn();
 const getMongoUri = vi.fn(() => "mongodb://test");
 const bootLog = {
@@ -33,6 +34,10 @@ vi.mock("../modules/excel-jobs/utils/startExcelJobRuntime.js", () => ({
   startExcelJobRuntime: () => startExcelJobRuntime(),
 }));
 
+vi.mock("../modules/apitasks/utils/startApiTaskRuntime.js", () => ({
+  startApiTaskRuntime: () => startApiTaskRuntime(),
+}));
+
 vi.mock("../utils/server-egress-geo/logServerEgressGeo.js", () => ({
   logServerEgressGeo: (...args: unknown[]) => logServerEgressGeo(...args),
 }));
@@ -57,10 +62,11 @@ describe("startServer", () => {
     vi.clearAllMocks();
     mongooseConnect.mockResolvedValue(undefined);
     startExcelJobRuntime.mockResolvedValue(undefined);
+    startApiTaskRuntime.mockResolvedValue(undefined);
     getMongoUri.mockReturnValue("mongodb://test");
   });
 
-  it("подключает mongo, стартует cron/excel и слушает порт", async () => {
+  it("подключает mongo, стартует cron/excel/apitasks и слушает порт", async () => {
     await startServer(app, { port: 4000 });
 
     expect(connectionOn).toHaveBeenCalledWith("connected", expect.any(Function));
@@ -72,6 +78,7 @@ describe("startServer", () => {
     expect(mongooseConnect).toHaveBeenCalledWith("mongodb://test");
     expect(startCronOperations).toHaveBeenCalledOnce();
     expect(startExcelJobRuntime).toHaveBeenCalledOnce();
+    expect(startApiTaskRuntime).toHaveBeenCalledOnce();
     expect(listen).toHaveBeenCalledWith(4000, expect.any(Function));
     expect(bootLog.info).toHaveBeenCalledWith(
       { port: 4000 },

@@ -92,4 +92,4 @@
 - **POST `/api/pallet-groups/set-pallets`** — установка точного состава паллет группы.
 - **POST `/api/pallet-groups/unlink-pallet`** — отвязка одной паллеты от группы.
 - **POST `/api/pallet-groups/reset-pallets-sectors`** — сброс секторов всех паллет.
-- **POST `/api/pallet-groups/recalculate-pallets-sectors`** — перерасчёт секторов по текущим группам.
+- **POST `/api/pallet-groups/recalculate-pallets-sectors`** — **410** `API_TASKS_MIGRATED`, kind `pallet-groups.recalculate-pallets-sectors` → [apitasks](../api/apitasks.md).

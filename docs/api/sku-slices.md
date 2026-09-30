@@ -176,30 +176,7 @@
 
 ### POST `/api/sku-slices/skugr/:skugrId/run-today`
 
-Ручной scrape всех SKU из товарной группы (`Skugr.skus`) за сегодняшний календарный день `Europe/Kiev`. Документ `SkuSlice` на сегодня создаётся при необходимости. Точки всегда перезаписываются (включая уже заполненные). Rotation и `isSliced` не учитываются — берутся SKU из состава группы. Синхронный ответ после завершения. Повторный запуск той же группы, пока идёт предыдущий — 409.
-
-**Path:** `skugrId` — валидный ObjectId группы.
-
-**Body:** пустой.
-
-**Ответ 200:**
-
-```text
-{
-  message: string,
-  data: {
-    skugrId: string,
-    konkName: string,
-    sliceDate: string (YYYY-MM-DD),
-    total: number,
-    count: number,
-    invalid: number,
-    errors: number
-  }
-}
-```
-
-**Ошибки:** 400, 401, 403, 404 (группа не найдена), 409 (уже выполняется), 500.
+**410** `API_TASKS_MIGRATED`, kind `sku-slices.skugr-run-today`. Запуск: [apitasks](apitasks.md). Params: `{ skugrId }`.
 
 ---
 

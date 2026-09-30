@@ -92,15 +92,7 @@
 
 ### POST `/api/dels/:id/artikuls/update-all`
 
-Запуск фонового обновления `stock` всех артикулов поставки (sharik.ua).
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** path `id` — MongoDB ObjectId.
-
-**Ответ 202:** `{ message: string }`.
-
-**Ошибки:** 400, 401, 403, 404, 500.
+**410** `API_TASKS_MIGRATED`, kind `dels.artikuls-update-all`. Запуск: [apitasks](apitasks.md). Params: `{ delId }`.
 
 ## Формат Del
 

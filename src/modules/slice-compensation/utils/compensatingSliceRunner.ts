@@ -48,16 +48,42 @@ export type CompensatingSliceJitterOverride = {
  * Пауза перед следующим item резолвится по его konkName (air — 2000–5000 мс),
  * если не передан явный jitterOverride (тесты / ручной форс).
  */
+export type CompensatingSliceRefetchLoopOptions = {
+  jitterOverride?: CompensatingSliceJitterOverride;
+  onProgress?: (done: number, total: number, message?: string) => void;
+  signal?: AbortSignal;
+};
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    const err = new Error("Aborted");
+    err.name = "AbortError";
+    throw err;
+  }
+}
+
 export async function runCompensatingSliceRefetchLoop(
   queue: CompensatingDataKeyWork[],
   processItem: (
     work: CompensatingDataKeyWork
   ) => Promise<CompensatingSliceRefetchStats>,
-  jitterOverride?: CompensatingSliceJitterOverride
+  jitterOverrideOrOptions?:
+    | CompensatingSliceJitterOverride
+    | CompensatingSliceRefetchLoopOptions
 ): Promise<CompensatingSliceRefetchStats> {
+  const options: CompensatingSliceRefetchLoopOptions =
+    jitterOverrideOrOptions &&
+    ("minMs" in jitterOverrideOrOptions || "maxMs" in jitterOverrideOrOptions)
+      ? { jitterOverride: jitterOverrideOrOptions as CompensatingSliceJitterOverride }
+      : ((jitterOverrideOrOptions as CompensatingSliceRefetchLoopOptions | undefined) ??
+        {});
+
   let refetched = 0;
   let updated = 0;
+  const progressTotal = Math.max(queue.length, 1);
+  options.onProgress?.(0, progressTotal, "Starting compensating refetch");
   for (let i = 0; i < queue.length; i++) {
+    throwIfAborted(options.signal);
     const work = queue[i]!;
     logModuleInfo("slice-compensation", "compensating slice refetch item start", {
       index: i + 1,
@@ -76,10 +102,16 @@ export async function runCompensatingSliceRefetchLoop(
     });
     refetched += stats.refetched;
     updated += stats.updated;
+    options.onProgress?.(
+      i + 1,
+      progressTotal,
+      `Item ${i + 1}/${queue.length}`
+    );
     if (i < queue.length - 1) {
+      throwIfAborted(options.signal);
       const next = queue[i + 1]!;
       const range =
-        jitterOverride ?? resolveSkuSliceRequestJitterMs(next.konkName);
+        options.jitterOverride ?? resolveSkuSliceRequestJitterMs(next.konkName);
       await delay(jitterMs(range.minMs, range.maxMs));
     }
   }

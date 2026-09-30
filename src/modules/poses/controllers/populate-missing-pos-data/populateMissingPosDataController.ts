@@ -1,35 +1,9 @@
-import { Request, Response } from "express";
-import { createEventUtil } from "../../../events/utils/createEventUtil.js";
-import { populateMissingPosDataUtil } from "./utils/populateMissingPosDataUtil.js";
+import { createMigratedApiTaskController } from "../../../apitasks/utils/sendApiTasksMigrated.js";
 
-export const populateMissingPosDataController = async (
-  req: Request,
-  res: Response
-) => {
-  try {
-    // 1. Выполняем заполнение данных
-    const result = await populateMissingPosDataUtil();
-
-    if (req.user?.id) {
-      await createEventUtil({
-        userId: req.user.id,
-        department: "poses",
-        type: "other",
-        description: `Заповнено відсутні дані позицій: оновлено ${result.updated}, помилок ${result.errors}`,
-      });
-    }
-
-    // 2. HTTP ответ
-    res.status(200).json({
-      updated: result.updated,
-      errors: result.errors,
-      errorDetails: result.errorDetails,
-    });
-  } catch (error) {
-    // 3. Обработка ошибок
-    res.status(500).json({
-      error: error instanceof Error ? error.message : "Internal server error",
-    });
-  }
-};
-
+/**
+ * @deprecated Migrated to POST /api/apitasks kind=poses.populate-missing-data
+ * @route   POST /api/poses/populate-missing-data
+ */
+export const populateMissingPosDataController = createMigratedApiTaskController(
+  "poses.populate-missing-data",
+);

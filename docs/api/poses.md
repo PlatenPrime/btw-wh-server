@@ -104,15 +104,7 @@
 
 ### POST `/api/poses/populate-missing-data`
 
-Заполнение недостающих данных в позициях.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** без тела или по схеме контроллера.
-
-**Ответ 200:** сообщение или результат.
-
-**Ошибки:** 401, 403, 500.
+**410** `API_TASKS_MIGRATED`, kind `poses.populate-missing-data`. Запуск: [apitasks](apitasks.md). Params: `{}`.
 
 ---
 

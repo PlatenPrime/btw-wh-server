@@ -1,41 +1,9 @@
-import type { Request, Response } from "express";
-import { deleteKonkInvalidSkusParamsSchema } from "./schemas/deleteKonkInvalidSkusSchema.js";
-import { deleteKonkInvalidSkusUtil } from "./utils/deleteKonkInvalidSkusUtil.js";
-import { createEventUtil } from "../../../events/utils/createEventUtil.js";
+import { createMigratedApiTaskController } from "../../../apitasks/utils/sendApiTasksMigrated.js";
 
 /**
- * @desc    Видалити всі SKU з isInvalid=true для конкурента :konkName або для всіх конкурентів, якщо :konkName === "all"
+ * @deprecated Migrated to POST /api/apitasks kind=skus.delete-konk-invalid
  * @route   DELETE /api/skus/konk/:konkName/invalid
- * @access  PRIME
  */
-export const deleteKonkInvalidSkusController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  const paramsResult = deleteKonkInvalidSkusParamsSchema.safeParse(req.params);
-  if (!paramsResult.success) {
-    res.status(400).json({
-      message: "Validation error",
-      errors: paramsResult.error.errors,
-    });
-    return;
-  }
-
-  const { deletedCount } = await deleteKonkInvalidSkusUtil(
-    paramsResult.data.konkName,
-  );
-
-  if (req.user?.id) {
-    await createEventUtil({
-      userId: req.user.id,
-      department: "skus",
-      type: "delete",
-      description: `Видалено невалідні sku для конкурента ${paramsResult.data.konkName}: ${deletedCount} шт.`,
-    });
-  }
-
-  res.status(200).json({
-    message: "Invalid skus deleted",
-    deletedCount,
-  });
-};
+export const deleteKonkInvalidSkusController = createMigratedApiTaskController(
+  "skus.delete-konk-invalid",
+);

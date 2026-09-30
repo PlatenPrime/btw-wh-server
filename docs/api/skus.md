@@ -84,29 +84,19 @@ Excel по каталогу (новинки, invalid) перенесён в [API
 
 ### DELETE `/api/skus/konk/:konkName/invalid`
 
-Удаление **всех** SKU с `isInvalid: true`: либо только для конкурента с ключом `konkName`, либо для **всех** конкурентов, если в пути передано зарезервированное **`all`** (в БД не должен существовать конкурент с `name: "all"`).
-
-**Доступ:** checkAuth + checkRoles(PRIME).
-
-**Параметры пути:** `konkName` или `all`.
-
-**Ответ 200:** `{ message: string, deletedCount: number }`.
-
-**Ошибки:** 400, 401, 403, 500.
+**410** `API_TASKS_MIGRATED`, kind `skus.delete-konk-invalid`. Запуск: [apitasks](apitasks.md). Params: `{ konkName }` (`all` допустим).
 
 ---
 
 ### DELETE `/api/skus/not-in-any-skugr`
 
-Удаление всех SKU, которые **ни в одной** товарной группе не указаны в `skugr.skus`. Опционально можно сузить выборку теми же query-полями, что и у `GET /api/skus`, **кроме** пагинации: `konkName`, `prodName`, `search`, `isInvalid`, `createdFrom`. Условие «не входит ни в одну группу» к отбору применяется всегда.
+**410** `API_TASKS_MIGRATED`, kind `skus.delete-not-in-any-skugr`. Запуск: [apitasks](apitasks.md). Params: опциональные фильтры списка SKU без page/limit.
 
-**Доступ:** checkAuth + checkRoles(PRIME).
+---
 
-**Query:** необязательные строковые фильтры в том же формате, что у `GET /api/skus` для перечисленных полей; `page` и `limit` не используются.
+### POST `/api/skus/fix-incorrect-sku-data`
 
-**Ответ 200:** `{ message: string, deletedCount: number }`.
-
-**Ошибки:** 400 (невалидные query), 401, 403, 500.
+**410** `API_TASKS_MIGRATED`, kind `skus.fix-incorrect-sku-data`. Запуск: [apitasks](apitasks.md). Params: `{ filter, updates }` как раньше в body.
 
 ---
 

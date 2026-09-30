@@ -25,6 +25,8 @@ export type RunGraboSkuSyncDeps = {
   getSkuData?: (url: string) => Promise<GraboSkuData>;
   delayMs?: () => number;
   now?: () => Date;
+  onProgress?: (done: number, total: number, message?: string) => void;
+  signal?: AbortSignal;
 };
 
 async function delayIfNeeded(delayMs: () => number, isFirst: boolean) {
@@ -34,6 +36,14 @@ async function delayIfNeeded(delayMs: () => number, isFirst: boolean) {
   const ms = delayMs();
   if (ms > 0) {
     await sleep(ms);
+  }
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    const err = new Error("Aborted");
+    err.name = "AbortError";
+    throw err;
   }
 }
 
@@ -48,13 +58,16 @@ export async function runGraboSkuSyncUtil(
   const delayMs = deps.delayMs ?? getGraboSkuSyncJitterDelayMs;
   const now = deps.now ?? (() => new Date());
 
+  throwIfAborted(deps.signal);
   log.info("grabo sku sync started");
+  deps.onProgress?.(0, 1, "Collecting catalog");
 
   const catalog = await collectCatalog({
     delayBeforeNextMs: delayMs,
     delayBetweenCategoriesMs: delayMs,
   });
 
+  throwIfAborted(deps.signal);
   const catalogComplete = catalog.failedCategoryUrls.length === 0;
   const stats: GraboSkuSyncStats = {
     categoryCount: catalog.categoryUrls.length,
@@ -78,6 +91,7 @@ export async function runGraboSkuSyncUtil(
   );
 
   for (let i = 0; i < catalog.productUrls.length; i++) {
+    throwIfAborted(deps.signal);
     const url = catalog.productUrls[i]!;
     const index = i + 1;
     await delayIfNeeded(delayMs, i === 0);
@@ -127,8 +141,14 @@ export async function runGraboSkuSyncUtil(
         "grabo sku product fetch failed"
       );
     }
+    deps.onProgress?.(
+      index,
+      Math.max(stats.listed, 1),
+      `Product ${index}/${stats.listed}`
+    );
   }
 
+  throwIfAborted(deps.signal);
   if (catalogComplete && catalog.productUrls.length > 0) {
     log.info({ listed: stats.listed }, "grabo sku absent-pass start");
     stats.markedOffSite = await markGraboSkusOffSiteUtil(catalog.productUrls);

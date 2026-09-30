@@ -24,6 +24,8 @@ type AnalogIdLean = { _id: { toString(): string } };
 export type RunCompensatingSlicesOptions = {
   /** Если задан — только документ этого konk (ожидается уже нормализованное имя). */
   konkName?: string;
+  onProgress?: (done: number, total: number, message?: string) => void;
+  signal?: AbortSignal;
 };
 
 /**
@@ -49,7 +51,9 @@ export async function runCompensatingAnalogSlices(
     isFullMinusOneSliceItem
   );
 
-  return runCompensatingSliceRefetchLoop(queue, async ({ konkName, dataKey }) => {
+  return runCompensatingSliceRefetchLoop(
+    queue,
+    async ({ konkName, dataKey }) => {
     const artikulKey = dataKey;
     try {
       const analog = (await Analog.findOne({ konkName, artikul: artikulKey })
@@ -103,5 +107,10 @@ export async function runCompensatingAnalogSlices(
       });
       return { refetched: 0, updated: 0 };
     }
-  });
+  },
+    {
+      onProgress: options?.onProgress,
+      signal: options?.signal,
+    }
+  );
 }

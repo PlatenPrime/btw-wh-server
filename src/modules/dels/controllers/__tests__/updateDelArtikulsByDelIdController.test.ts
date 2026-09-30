@@ -1,80 +1,12 @@
-import { Request, Response } from "express";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createTestUser } from "../../../../test/setup.js";
-import { getCachedSharikProductRestsMap } from "../../../browser/sharik/utils/product-rests/index.js";
-import { Event } from "../../../events/models/Event.js";
-import { Del } from "../../models/Del.js";
+import { describe, it } from "vitest";
+import { assertMigratedApiTaskController } from "../../../apitasks/test/assertMigratedApiTaskController.js";
 import { updateDelArtikulsByDelIdController } from "../update-del-artikuls-by-del-id/updateDelArtikulsByDelIdController.js";
 
-vi.mock("../../../browser/sharik/utils/product-rests/index.js", () => ({
-  getCachedSharikProductRestsMap: vi.fn(),
-}));
-
 describe("updateDelArtikulsByDelIdController", () => {
-  let res: Response;
-  let responseJson: Record<string, unknown>;
-  let responseStatus: { code?: number };
-
-  beforeEach(async () => {
-    vi.clearAllMocks();
-    vi.mocked(getCachedSharikProductRestsMap).mockResolvedValue(new Map());
-    await Del.deleteMany({});
-    await Event.deleteMany({});
-    responseJson = {};
-    responseStatus = {};
-    res = {
-      status(code: number) {
-        responseStatus.code = code;
-        return this;
-      },
-      json(data: unknown) {
-        responseJson = data as Record<string, unknown>;
-        return this;
-      },
-      headersSent: false,
-    } as unknown as Response;
-  });
-
-  it("404 when del not found", async () => {
-    const req = {
-      params: { id: "000000000000000000000000" },
-    } as unknown as Request;
-    await updateDelArtikulsByDelIdController(req, res);
-    expect(responseStatus.code).toBe(404);
-  });
-
-  it("202 when del found and process started", async () => {
-    const del = await Del.create({
-      title: "Del",
-      prodName: "prod1",
-      prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
-      artikuls: { A1: { quant: 0 } },
-    });
-    const req = { params: { id: del._id.toString() } } as unknown as Request;
-    await updateDelArtikulsByDelIdController(req, res);
-    expect(responseStatus.code).toBe(202);
-    expect(responseJson.message).toContain("started");
-  });
-
-  it("202 creates audit event when req.user is present", async () => {
-    const user = await createTestUser({ username: `del-artikuls-event-${Date.now()}` });
-    const del = await Del.create({
-      title: "Del with artikuls",
-      prodName: "prod1",
-      prod: { title: "P1", imageUrl: "https://example.com/p1.png" },
-      artikuls: { A1: { quant: 0 } },
-    });
-    const req = {
-      user: { id: String(user._id), role: "ADMIN" },
-      params: { id: del._id.toString() },
-    } as unknown as Request;
-    await updateDelArtikulsByDelIdController(req, res);
-    expect(responseStatus.code).toBe(202);
-    const events = await Event.find({ department: "dels" });
-    expect(events).toHaveLength(1);
-    expect(events[0].userId.toString()).toBe(String(user._id));
-    expect(events[0].description).toBe(
-      `Запущено оновлення всіх артикулів поставки "Del with artikuls" (id: ${del._id})`
+  it("returns 410 API_TASKS_MIGRATED", async () => {
+    await assertMigratedApiTaskController(
+      updateDelArtikulsByDelIdController,
+      "dels.artikuls-update-all",
     );
   });
 });

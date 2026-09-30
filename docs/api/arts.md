@@ -118,15 +118,7 @@
 
 ### POST `/api/arts/btrade-stock/update-all`
 
-Фоновое обновление btradeStock для всех артикулов.
-
-**Доступ:** checkAuth + checkRoles(ADMIN).
-
-**Запрос:** без тела.
-
-**Ответ 202:** объект с сообщением о запуске процесса.
-
-**Ошибки:** 400, 401, 403, 500.
+**410** `API_TASKS_MIGRATED`, kind `arts.btrade-stock-update-all`. Запуск: [apitasks](apitasks.md). Params: `{}`.
 
 ---
 
@@ -150,12 +142,4 @@
 
 ### DELETE `/api/arts/without-latest-marker`
 
-Удаление всех артикулов без последнего актуального маркера.
-
-**Доступ:** checkAuth + checkRoles(PRIME).
-
-**Запрос:** без тела.
-
-**Ответ 200:** `{ message: string, result: { deletedCount: number, latestMarker: string } }`.
-
-**Ошибки:** 400, 401, 403, 500.
+**410** `API_TASKS_MIGRATED`, kind `arts.delete-without-latest-marker`. Запуск: [apitasks](apitasks.md). Params: `{}`.

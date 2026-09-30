@@ -24,6 +24,19 @@ export type RunSkuSliceForSkugrTodayResult = {
   errors: number;
 };
 
+export type RunSkuSliceForSkugrTodayOptions = {
+  onProgress?: (done: number, total: number, message?: string) => void;
+  signal?: AbortSignal;
+};
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    const err = new Error("Aborted");
+    err.name = "AbortError";
+    throw err;
+  }
+}
+
 async function fetchSkuStockWithRetry(
   konkName: string,
   productKey: string,
@@ -61,8 +74,10 @@ async function fetchSkuStockWithRetry(
  * Rotation и skip filled не применяются. Документ дня создаётся при необходимости.
  */
 export async function runSkuSliceForSkugrTodayUtil(
-  input: RunSkugrSlicesTodayInput
+  input: RunSkugrSlicesTodayInput,
+  options?: RunSkuSliceForSkugrTodayOptions
 ): Promise<RunSkuSliceForSkugrTodayResult | null> {
+  throwIfAborted(options?.signal);
   const skugr = await Skugr.findById(input.skugrId)
     .select("konkName skus")
     .lean();
@@ -96,8 +111,11 @@ export async function runSkuSliceForSkugrTodayUtil(
   counters.invalid += total - withPid.length;
 
   const log = createLogger({ module: "sku-slices", konkName });
+  const progressTotal = Math.max(withPid.length, 1);
+  options?.onProgress?.(0, progressTotal, "Starting skugr slice scrape");
 
   for (let i = 0; i < withPid.length; i++) {
+    throwIfAborted(options?.signal);
     const sku = withPid[i]!;
     const productKey = sku.productId!.trim();
     const skuId = sku._id.toString();
@@ -155,7 +173,14 @@ export async function runSkuSliceForSkugrTodayUtil(
       );
     }
 
+    options?.onProgress?.(
+      i + 1,
+      progressTotal,
+      `SKU ${i + 1}/${withPid.length}`
+    );
+
     if (i < withPid.length - 1) {
+      throwIfAborted(options?.signal);
       const { minMs, maxMs } = resolveSkuSliceRequestJitterMs(konkName);
       await delay(jitterMs(minMs, maxMs));
     }

@@ -1,49 +1,9 @@
-import { Request, Response } from "express";
-import { deleteSkusNotInAnySkugrQuerySchema } from "./schemas/deleteSkusNotInAnySkugrQuerySchema.js";
-import { deleteSkusNotInAnySkugrUtil } from "./utils/deleteSkusNotInAnySkugrUtil.js";
-import { logModuleError } from "../../../../logging/logModuleError.js";
-import { createEventUtil } from "../../../events/utils/createEventUtil.js";
+import { createMigratedApiTaskController } from "../../../apitasks/utils/sendApiTasksMigrated.js";
 
 /**
- * @desc    Удалить все Sku, не входящие ни в одну товарную группу (опционально сузить query)
+ * @deprecated Migrated to POST /api/apitasks kind=skus.delete-not-in-any-skugr
  * @route   DELETE /api/skus/not-in-any-skugr
  */
-export const deleteSkusNotInAnySkugrController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
-  try {
-    const parseResult = deleteSkusNotInAnySkugrQuerySchema.safeParse(req.query);
-    if (!parseResult.success) {
-      res.status(400).json({
-        message: "Validation error",
-        errors: parseResult.error.errors,
-      });
-      return;
-    }
-
-    const result = await deleteSkusNotInAnySkugrUtil(parseResult.data);
-
-    if (req.user?.id) {
-      await createEventUtil({
-        userId: req.user.id,
-        department: "skus",
-        type: "delete",
-        description: `Видалено sku, що не входять до жодної товарної групи: ${result.deletedCount} шт.`,
-      });
-    }
-
-    res.status(200).json({
-      message: "Skus not in any skugr deleted successfully",
-      deletedCount: result.deletedCount,
-    });
-  } catch (error) {
-    logModuleError("skus", error, "Error deleting skus not in any skugr:");
-    if (!res.headersSent) {
-      res.status(500).json({
-        message: "Server error",
-        error: process.env.NODE_ENV === "development" ? error : undefined,
-      });
-    }
-  }
-};
+export const deleteSkusNotInAnySkugrController = createMigratedApiTaskController(
+  "skus.delete-not-in-any-skugr",
+);

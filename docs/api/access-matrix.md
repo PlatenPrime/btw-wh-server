@@ -450,6 +450,19 @@
 
 ---
 
+## `/api/apitasks`
+
+| Метод | Путь | Аутентификация | Доступ |
+|-------|------|----------------|--------|
+| POST | `/` | JWT | ≥ EDITOR на роутере; create дополнительно проверяет minRole kind (EDITOR/ADMIN/PRIME) |
+| GET | `/` | JWT | ≥ EDITOR, только свои задачи |
+| GET | `/:id` | JWT | ≥ EDITOR, только своя задача |
+| DELETE | `/:id` | JWT | ≥ EDITOR, только своя задача |
+
+Старые action-URL (run-today, compensating run, fill-skus, grabo sync, btrade/dels update-all, sector recalc, populate, batch fix/delete) отвечают **410** `API_TASKS_MIGRATED` — см. [apitasks.md](apitasks.md).
+
+---
+
 ## `/api/sku-excel-reports`
 
 | Метод | Путь | Аутентификация | Доступ |

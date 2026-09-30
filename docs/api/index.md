@@ -23,6 +23,8 @@ API системы управления складом предоставляе�
 - [API Events](events.md) — `/api/events` — журнал действий пользователей (аудит)
 - [API Excel Jobs](excel-jobs.md) — `/api/excel-jobs` — постановка, прогресс и скачивание XLSX
 - [Excel Jobs для фронтенда](excel-jobs-frontend.md) — UX: подготовка vs download, 410, token
+- [API ApiTasks](apitasks.md) — `/api/apitasks` — долгие action-задачи: срезы, sync, пересчёты
+- [ApiTasks для фронтенда](apitasks-frontend.md) — UX: 202, poll, cancel, 410
 - [API Segs](segs.md) — `/api/segs` — сегменты
 - [API Zones](zones.md) — `/api/zones` — зоны
 - [API Rows](rows.md) — `/api/rows` — ряды

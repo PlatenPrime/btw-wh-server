@@ -1,76 +1,12 @@
-import { Request, Response } from "express";
-import { beforeEach, describe, expect, it } from "vitest";
-import { createTestUser } from "../../../../../test/setup.js";
-import { Event } from "../../../../events/models/Event.js";
-import { Block } from "../../../models/Block.js";
-import { Seg } from "../../../../segs/models/Seg.js";
-import { Zone } from "../../../../zones/models/Zone.js";
+import { describe, it } from "vitest";
+import { assertMigratedApiTaskController } from "../../../../apitasks/test/assertMigratedApiTaskController.js";
 import { recalculateZonesSectors } from "../recalculateZonesSectors.js";
 
 describe("recalculateZonesSectorsController", () => {
-  let res: Response;
-  let responseJson: any;
-  let responseStatus: any;
-
-  beforeEach(() => {
-    responseJson = {};
-    responseStatus = {};
-    res = {
-      status: function (code: number) {
-        responseStatus.code = code;
-        return this;
-      },
-      json: function (data: any) {
-        responseJson = data;
-        return this;
-      },
-    } as unknown as Response;
-  });
-
-  it("200: recalculates zones sectors successfully", async () => {
-    const block = await Block.create({ title: "Block 1", order: 1, segs: [] });
-    const zone = await Zone.create({ title: "42-1-1", bar: 420101, sector: 0 });
-    await Seg.create({
-      block: block._id,
-      blockData: { _id: block._id, title: block.title },
-      order: 1,
-      sector: 0,
-      zones: [{ _id: zone._id, title: zone.title }],
-    });
-
-    const req = {} as unknown as Request;
-
-    await recalculateZonesSectors(req, res);
-
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.message).toBe("Zones sectors recalculated successfully");
-    expect(responseJson.data.blocksProcessed).toBe(1);
-    expect(responseJson.data.updatedZones).toBeGreaterThan(0);
-
-    const updatedZone = await Zone.findById(zone._id).lean().exec();
-    expect(updatedZone?.sector).toBe(1001);
-  });
-
-  it("200: handles empty database", async () => {
-    const req = {} as unknown as Request;
-
-    await recalculateZonesSectors(req, res);
-
-    expect(responseStatus.code).toBe(200);
-    expect(responseJson.data.blocksProcessed).toBe(0);
-    expect(responseJson.data.updatedZones).toBe(0);
-  });
-
-  it("200: creates audit event when req.user is present", async () => {
-    const user = await createTestUser({
-      username: `recalc-zones-sectors-event-${Date.now()}`,
-    });
-    const req = { user: { id: user._id.toString(), role: "ADMIN" } } as unknown as Request;
-
-    await recalculateZonesSectors(req, res);
-
-    expect(responseStatus.code).toBe(200);
-    const events = await Event.find({ department: "blocks" });
-    expect(events).toHaveLength(1);
+  it("returns 410 API_TASKS_MIGRATED", async () => {
+    await assertMigratedApiTaskController(
+      recalculateZonesSectors,
+      "blocks.recalculate-zones-sectors",
+    );
   });
 });
