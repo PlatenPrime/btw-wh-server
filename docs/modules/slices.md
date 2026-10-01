@@ -14,6 +14,8 @@
 | [`config/sliceRotationByKonk.ts`](../../src/modules/slices/config/sliceRotationByKonk.ts) | Per-konk цикл среза (rotation): сколько дней и какой bucket сегодня |
 | [`config/competitorScrapeProfiles.ts`](../../src/modules/slices/config/competitorScrapeProfiles.ts) | Throttle-профили скрапинга по konk и типу run |
 | [`config/packFlipAutoApplyKonks.ts`](../../src/modules/slices/config/packFlipAutoApplyKonks.ts) | Конкуренты, для которых sku-slices cron делает pack-flip review с записью |
+| [`config/balunFakeStockSentinel.ts`](../../src/modules/slices/config/balunFakeStockSentinel.ts) | Inclusive диапазон фейкового остатка balun (`9950–10000`), lookback и имя konk для post-pass коррекции |
+| [`config/svbumFakeStockThreshold.ts`](../../src/modules/slices/config/svbumFakeStockThreshold.ts) | Порог фейкового остатка svbum (`> 900000`), trailing grace, lookback и имя konk |
 | [`utils/sliceRotation.ts`](../../src/modules/slices/utils/sliceRotation.ts) | Bucket по `productId`, dayIndex по дате среза |
 | [`utils/competitorScrapeThrottle.ts`](../../src/modules/slices/utils/competitorScrapeThrottle.ts) | Resolve профилей и задержки между unit/page/group |
 | [`utils/enumerateSliceDates.ts`](../../src/modules/slices/utils/enumerateSliceDates.ts) | Перечисление UTC-дней в диапазоне `from…to` |

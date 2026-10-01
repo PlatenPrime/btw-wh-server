@@ -11,6 +11,8 @@ import { toNextKyivSliceDate } from "../../../utils/sliceDate.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { packFlipAutoApplyKonks } from "../../slices/config/packFlipAutoApplyKonks.js";
 import { runSkuSliceForKonkUtil } from "../utils/runSkuSliceForKonkUtil.js";
+import { correctBalunFakeStockSpikesUtil } from "../utils/correctBalunFakeStockSpikesUtil.js";
+import { correctSvbumFakeStockSpikesUtil } from "../utils/correctSvbumFakeStockSpikesUtil.js";
 import {
   packFlipReviewDatesForSliceDay,
   reviewPackFlipsUtil,
@@ -21,6 +23,40 @@ import {
 } from "../../slices/config/excludedCompetitors.js";
 
 const log = createLogger({ module: "sku-slices", job: "cron" });
+
+async function correctBalunFakeStockAfterSlices(
+  sliceDate: Date
+): Promise<void> {
+  try {
+    await correctBalunFakeStockSpikesUtil({
+      daysBack: 1,
+      asOf: sliceDate,
+      apply: true,
+    });
+  } catch (error) {
+    log.error({ err: error }, "balun fake stock correction failed");
+    await sendCronAnalyticsReport(
+      formatCronErrorReport("Balun fake stock correction", error)
+    );
+  }
+}
+
+async function correctSvbumFakeStockAfterSlices(
+  sliceDate: Date
+): Promise<void> {
+  try {
+    await correctSvbumFakeStockSpikesUtil({
+      daysBack: 14,
+      asOf: sliceDate,
+      apply: true,
+    });
+  } catch (error) {
+    log.error({ err: error }, "svbum fake stock correction failed");
+    await sendCronAnalyticsReport(
+      formatCronErrorReport("Svbum fake stock correction", error)
+    );
+  }
+}
 
 async function reviewPackFlipsAfterSlices(sliceDate: Date): Promise<void> {
   const dates = packFlipReviewDatesForSliceDay(sliceDate);
@@ -45,7 +81,9 @@ async function reviewPackFlipsAfterSlices(sliceDate: Date): Promise<void> {
  * Ежедневно в 20:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
  * Ключ дня среза — следующий календарный день в Киеве (как при старом запуске в полночь).
  * TG: отдельное сообщение после каждого konk (+ excluded в начале, если есть).
- * После всех срезов — pack-flip review по packFlipAutoApplyKonks (3 дня, авто-рескейл инверсий).
+ * После всех срезов — коррекция фейкового stock 9950–10000 у balun, затем
+ * обнуление stock > 900000 у svbum (14 дней, сэндвич + trailing grace), затем pack-flip review
+ * по packFlipAutoApplyKonks (3 дня, авто-рескейл инверсий).
  */
 export function startSkuSlicesCron(): CronJob {
   const job = new CronJob(
@@ -99,6 +137,8 @@ export function startSkuSlicesCron(): CronJob {
           })
         );
         log.info({ results }, "sku slices completed");
+        await correctBalunFakeStockAfterSlices(sliceDate);
+        await correctSvbumFakeStockAfterSlices(sliceDate);
         await reviewPackFlipsAfterSlices(sliceDate);
       } catch (error) {
         log.error({ err: error }, "sku slices cron failed");
