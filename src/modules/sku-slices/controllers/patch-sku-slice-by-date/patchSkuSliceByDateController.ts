@@ -1,13 +1,15 @@
 import { Request, Response } from "express";
 import {
+  isPatchSkuSlicePeriodsInput,
   isPatchSkuSliceRangeInput,
   patchSkuSliceByDateSchema,
 } from "./schemas/patchSkuSliceByDateSchema.js";
+import { patchSkuSliceByDatePeriodsUtil } from "./utils/patchSkuSliceByDatePeriodsUtil.js";
 import { patchSkuSliceByDateRangeUtil } from "./utils/patchSkuSliceByDateRangeUtil.js";
 import { patchSkuSliceByDateUtil } from "./utils/patchSkuSliceByDateUtil.js";
 
 /**
- * @desc    Ручная запись stock/price SKU в срез на дату или диапазон дат
+ * @desc    Ручная запись stock/price SKU в срез на дату, диапазон или массив периодов
  * @route   PATCH /api/sku-slices/sku/:skuId
  */
 export const patchSkuSliceByDateController = async (
@@ -23,12 +25,29 @@ export const patchSkuSliceByDateController = async (
   if (body.date !== undefined) payload.date = body.date;
   if (body.dateFrom !== undefined) payload.dateFrom = body.dateFrom;
   if (body.dateTo !== undefined) payload.dateTo = body.dateTo;
+  if (body.periods !== undefined) payload.periods = body.periods;
 
   const parseResult = patchSkuSliceByDateSchema.safeParse(payload);
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
       errors: parseResult.error.errors,
+    });
+    return;
+  }
+
+  if (isPatchSkuSlicePeriodsInput(parseResult.data)) {
+    const result = await patchSkuSliceByDatePeriodsUtil(parseResult.data);
+    if (!result) {
+      res.status(404).json({
+        message: "Sku not found or sku has no productId",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      message: "Sku slice by date periods updated successfully",
+      data: result,
     });
     return;
   }

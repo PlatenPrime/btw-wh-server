@@ -150,4 +150,52 @@ describe("patchSkuSliceByDateController", () => {
     expect(data.updatedCount).toBe(2);
     expect(data.days).toHaveLength(2);
   });
+
+  it("400 when date mixed with periods", async () => {
+    const req = {
+      params: { skuId: "507f1f77bcf86cd799439011" },
+      body: {
+        date: "2026-09-20",
+        periods: [{ dateFrom: "2026-09-20", dateTo: "2026-09-21" }],
+        stock: 3,
+        price: 110,
+      },
+    } as unknown as Request;
+    await patchSkuSliceByDateController(req, res);
+    expect(responseStatus.code).toBe(400);
+  });
+
+  it("200 updates periods and returns days", async () => {
+    const sku = await Sku.create({
+      konkName: "perfect",
+      prodName: "pd",
+      productId: "perfect-ctrl-periods",
+      title: "T",
+      url: "https://e.com/t",
+    });
+    const req = {
+      params: { skuId: sku._id.toString() },
+      body: {
+        periods: [
+          { dateFrom: "2026-09-20", dateTo: "2026-09-21" },
+          { dateFrom: "2026-09-25", dateTo: "2026-09-25" },
+        ],
+        stock: 3,
+        price: 110,
+      },
+    } as unknown as Request;
+    await patchSkuSliceByDateController(req, res);
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.message).toBe(
+      "Sku slice by date periods updated successfully"
+    );
+    const data = responseJson.data as {
+      updatedCount: number;
+      days: unknown[];
+      periods: unknown[];
+    };
+    expect(data.updatedCount).toBe(3);
+    expect(data.days).toHaveLength(3);
+    expect(data.periods).toHaveLength(2);
+  });
 });

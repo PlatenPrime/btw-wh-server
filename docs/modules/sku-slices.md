@@ -38,7 +38,7 @@ Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/con
 - `GET /api/sku-slices` — срез по konk+date с пагинацией
 - `GET /api/sku-slices/pack-flips` — проверка pack-flip за диапазон (без записи)
 - `GET /api/sku-slices/sku/:skuId` — точка на дату
-- `PATCH /api/sku-slices/sku/:skuId` — ручная запись stock/price на дату или диапазон (upsert дневного документа)
+- `PATCH /api/sku-slices/sku/:skuId` — ручная запись stock/price на дату, диапазон или массив периодов (upsert дневного документа)
 - `POST /api/sku-slices/skugr/:skugrId/run-today` — ручной scrape SKU группы за сегодня с полной перезаписью
 - `GET /api/sku-slices/sku/:skuId/range` — плотный ряд stock/price с forward-fill (без расчёта sales)
 - `GET /api/sku-slices/client/air/pending` — очередь client-ingest

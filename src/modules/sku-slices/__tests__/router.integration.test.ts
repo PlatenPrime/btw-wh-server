@@ -6,7 +6,6 @@ import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
 import { Sku } from "../../skus/models/Sku.js";
-import { Skugr } from "../../skugrs/models/Skugr.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
@@ -23,7 +22,6 @@ const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
 describe("Sku-slices router integration", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await Skugr.deleteMany({});
     await SkuSlice.deleteMany({});
   });
 
@@ -304,41 +302,47 @@ describe("Sku-slices router integration", () => {
       expect(response.body.data.updatedCount).toBe(2);
       expect(response.body.data.days).toHaveLength(2);
     });
-  });
 
-  describe("POST /api/sku-slices/skugr/:skugrId/run-today", () => {
-    it("404 when skugr missing", async () => {
-      await request(app)
-        .post("/api/sku-slices/skugr/507f1f77bcf86cd799439011/run-today")
-        .set(createAuthHeader())
-        .expect(404);
-    });
-
-    it("200 for empty skugr without scraping", async () => {
-      const skugr = await Skugr.create({
+    it("200 updates date periods for ADMIN", async () => {
+      const sku = await Sku.create({
         konkName: "r-k",
         prodName: "p",
-        title: "Empty group",
-        url: "https://e.com/g",
-        skus: [],
+        productId: "r-k-periods",
+        title: "One",
+        url: "https://e.com/1",
       });
 
       const response = await request(app)
-        .post(`/api/sku-slices/skugr/${skugr._id.toString()}/run-today`)
+        .patch(`/api/sku-slices/sku/${sku._id.toString()}`)
         .set(createAuthHeader())
+        .send({
+          periods: [
+            { dateFrom: "2026-09-20", dateTo: "2026-09-21" },
+            { dateFrom: "2026-09-25", dateTo: "2026-09-25" },
+          ],
+          stock: 3,
+          price: 110,
+        })
         .expect(200);
 
       expect(response.body.message).toBe(
-        "Skugr sku slices for today completed"
+        "Sku slice by date periods updated successfully"
       );
-      expect(response.body.data).toMatchObject({
-        skugrId: skugr._id.toString(),
-        konkName: "r-k",
-        total: 0,
-        count: 0,
-        invalid: 0,
-        errors: 0,
-      });
+      expect(response.body.data.updatedCount).toBe(3);
+      expect(response.body.data.days).toHaveLength(3);
+      expect(response.body.data.periods).toHaveLength(2);
+    });
+  });
+
+  describe("POST /api/sku-slices/skugr/:skugrId/run-today", () => {
+    it("410 migrated to apitasks", async () => {
+      const response = await request(app)
+        .post("/api/sku-slices/skugr/507f1f77bcf86cd799439011/run-today")
+        .set(createAuthHeader())
+        .expect(410);
+
+      expect(response.body.code).toBe("API_TASKS_MIGRATED");
+      expect(response.body.kind).toBe("sku-slices.skugr-run-today");
     });
   });
 });

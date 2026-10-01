@@ -114,7 +114,7 @@
 
 ### PATCH `/api/sku-slices/sku/:skuId`
 
-Ручная запись `stock`/`price` SKU в документ среза. Режим XOR: либо одна дата `date`, либо диапазон `dateFrom`+`dateTo` (не вместе). Документ дня создаётся (upsert), если отсутствовал. Ключ `data[productId]` создаётся или перезаписывается. `0` и `-1` допустимы. Диапазон: `dateFrom` ≤ `dateTo`, максимум 366 календарных дней.
+Ручная запись `stock`/`price` SKU в документ среза. Режим XOR: либо одна дата `date`, либо диапазон `dateFrom`+`dateTo`, либо массив периодов `periods` (не вместе). Документ дня создаётся (upsert), если отсутствовал. Ключ `data[productId]` создаётся или перезаписывается. `0` и `-1` допустимы. Диапазон / каждый период: `dateFrom` ≤ `dateTo`, максимум 366 календарных дней; для `periods` — суммарно уникальных дней ≤ 366. Пересечения периодов допустимы (дни дедуплицируются).
 
 **Path:** `skuId` — валидный ObjectId.
 
@@ -128,6 +128,12 @@
 
 - `dateFrom` (string, YYYY-MM-DD, обязательно)
 - `dateTo` (string, YYYY-MM-DD, обязательно)
+- `stock` (number, finite, обязательно)
+- `price` (number, finite, обязательно)
+
+**Body (массив периодов):**
+
+- `periods` (array, min 1, обязательно) — элементы `{ dateFrom, dateTo }` (YYYY-MM-DD)
 - `stock` (number, finite, обязательно)
 - `price` (number, finite, обязательно)
 
@@ -169,6 +175,28 @@
   }
 }
 ```
+
+**Ответ 200 (массив периодов):**
+
+```text
+{
+  message: string,
+  data: {
+    productId: string,
+    stock: number,
+    price: number,
+    periods: Array<{ dateFrom: Date (ISO), dateTo: Date (ISO) }>,
+    updatedCount: number,
+    days: Array<{
+      date: Date (ISO),
+      previous: { stock: number, price: number } | null,
+      created: boolean
+    }>
+  }
+}
+```
+
+`updatedCount` / `days` — по уникальным дням после дедупликации пересечений.
 
 **Ошибки:** 400, 401, 403, 404 (нет SKU / нет productId), 500.
 
