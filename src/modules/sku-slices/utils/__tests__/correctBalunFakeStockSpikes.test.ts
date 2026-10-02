@@ -31,6 +31,18 @@ describe("isAdequateBalunStock / isBalunFakeStock", () => {
     expect(isAdequateBalunStock(9949)).toBe(true);
     expect(isAdequateBalunStock(0)).toBe(true);
   });
+
+  it("treats inclusive 4990–5000 spike range as fake", () => {
+    expect(isBalunFakeStock(4990)).toBe(true);
+    expect(isBalunFakeStock(4995)).toBe(true);
+    expect(isBalunFakeStock(5000)).toBe(true);
+    expect(isBalunFakeStock(4989)).toBe(false);
+    expect(isBalunFakeStock(5001)).toBe(false);
+    expect(isAdequateBalunStock(4990)).toBe(false);
+    expect(isAdequateBalunStock(5000)).toBe(false);
+    expect(isAdequateBalunStock(4989)).toBe(true);
+    expect(isAdequateBalunStock(5001)).toBe(true);
+  });
 });
 
 describe("computeBalunFakeStockPatchesForSeries", () => {
@@ -79,7 +91,7 @@ describe("computeBalunFakeStockPatchesForSeries", () => {
     ]);
   });
 
-  it("skips fake stock when no adequate left", () => {
+  it("uses nearest right adequate when no left", () => {
     const series = [day(D0, 10000), day(D1, 50)];
     const { patches, skipped } = computeBalunFakeStockPatchesForSeries(
       "balun-1",
@@ -87,9 +99,9 @@ describe("computeBalunFakeStockPatchesForSeries", () => {
       D0,
       D1
     );
-    expect(patches).toEqual([]);
-    expect(skipped).toEqual([
-      { productId: "balun-1", dateMs: D0, reason: "no-adequate-left" },
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([
+      { productId: "balun-1", dateMs: D0, from: 10000, to: 50 },
     ]);
   });
 
@@ -107,7 +119,7 @@ describe("computeBalunFakeStockPatchesForSeries", () => {
     ]);
   });
 
-  it("does not treat -1 as lastAdequate", () => {
+  it("does not treat -1 as adequate neighbor", () => {
     const series = [day(D0, -1), day(D1, 10000)];
     const { patches, skipped } = computeBalunFakeStockPatchesForSeries(
       "balun-1",
@@ -117,7 +129,36 @@ describe("computeBalunFakeStockPatchesForSeries", () => {
     );
     expect(patches).toEqual([]);
     expect(skipped).toEqual([
-      { productId: "balun-1", dateMs: D1, reason: "no-adequate-left" },
+      { productId: "balun-1", dateMs: D1, reason: "no-adequate-neighbor" },
+    ]);
+  });
+
+  it("skips when no adequate neighbor on either side", () => {
+    const series = [day(D0, 5000)];
+    const { patches, skipped } = computeBalunFakeStockPatchesForSeries(
+      "balun-1",
+      series,
+      D0,
+      D0
+    );
+    expect(patches).toEqual([]);
+    expect(skipped).toEqual([
+      { productId: "balun-1", dateMs: D0, reason: "no-adequate-neighbor" },
+    ]);
+  });
+
+  it("replaces leading consecutive 5000 with nearest right adequate", () => {
+    const series = [day(D0, 5000), day(D1, 5000), day(D2, 4)];
+    const { patches, skipped } = computeBalunFakeStockPatchesForSeries(
+      "balun-1",
+      series,
+      D0,
+      D2
+    );
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([
+      { productId: "balun-1", dateMs: D0, from: 5000, to: 4 },
+      { productId: "balun-1", dateMs: D1, from: 5000, to: 4 },
     ]);
   });
 
@@ -157,6 +198,64 @@ describe("computeBalunFakeStockPatchesForSeries", () => {
     );
     expect(patches).toEqual([
       { productId: "balun-1", dateMs: D2, from: 10000, to: 10 },
+    ]);
+  });
+
+  it("replaces spike-range mid value with left adequate", () => {
+    const series = [day(D0, 4), day(D1, 4995), day(D2, 4)];
+    const { patches, skipped } = computeBalunFakeStockPatchesForSeries(
+      "balun-1",
+      series,
+      D0,
+      D2
+    );
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([
+      { productId: "balun-1", dateMs: D1, from: 4995, to: 4 },
+    ]);
+  });
+
+  it("replaces exact 5000 spike with left adequate", () => {
+    const series = [day(D0, 4), day(D1, 5000), day(D2, 4)];
+    const { patches, skipped } = computeBalunFakeStockPatchesForSeries(
+      "balun-1",
+      series,
+      D0,
+      D2
+    );
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([
+      { productId: "balun-1", dateMs: D1, from: 5000, to: 4 },
+    ]);
+  });
+
+  it("replaces consecutive spike-range values with the same left adequate", () => {
+    const series = [day(D0, 4), day(D1, 4990), day(D2, 5000)];
+    const { patches, skipped } = computeBalunFakeStockPatchesForSeries(
+      "balun-1",
+      series,
+      D0,
+      D2
+    );
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([
+      { productId: "balun-1", dateMs: D1, from: 4990, to: 4 },
+      { productId: "balun-1", dateMs: D2, from: 5000, to: 4 },
+    ]);
+  });
+
+  it("replaces mixed spike-range and clamp fake with left adequate", () => {
+    const series = [day(D0, 100), day(D1, 4992), day(D2, 10000)];
+    const { patches, skipped } = computeBalunFakeStockPatchesForSeries(
+      "balun-1",
+      series,
+      D0,
+      D2
+    );
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([
+      { productId: "balun-1", dateMs: D1, from: 4992, to: 100 },
+      { productId: "balun-1", dateMs: D2, from: 10000, to: 100 },
     ]);
   });
 });

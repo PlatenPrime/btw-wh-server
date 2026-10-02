@@ -125,7 +125,7 @@ describe("correctBalunFakeStockSpikesUtil", () => {
     expect(air?.data?.["air-1"]).toEqual({ stock: 10000, price: 5 });
   });
 
-  it("skips when no adequate left inside lookback", async () => {
+  it("skips when no adequate neighbor inside lookback", async () => {
     await seedBalun([
       { date: D1, data: { "balun-1": { stock: 10000, price: 1 } } },
     ]);
@@ -142,7 +142,7 @@ describe("correctBalunFakeStockSpikesUtil", () => {
       {
         productId: "balun-1",
         date: "2026-09-14",
-        reason: "no-adequate-left",
+        reason: "no-adequate-neighbor",
       },
     ]);
   });
@@ -168,5 +168,52 @@ describe("correctBalunFakeStockSpikesUtil", () => {
 
     const d2 = await SkuSlice.findOne({ konkName: "balun", date: D2 }).lean();
     expect(d2?.data?.["balun-1"]).toEqual({ stock: 40, price: 2 });
+  });
+
+  it("applies patches for spike-range fake stock and keeps price", async () => {
+    await seedBalun([
+      { date: D0, data: { "balun-1": { stock: 4, price: 15.53 } } },
+      { date: D1, data: { "balun-1": { stock: 4995, price: 15.53 } } },
+      { date: D2, data: { "balun-1": { stock: 4, price: 15.53 } } },
+    ]);
+
+    const result = await correctBalunFakeStockSpikesUtil({
+      daysBack: 3,
+      asOf: D2,
+      apply: true,
+    });
+
+    expect(result.patched).toEqual([
+      { productId: "balun-1", date: "2026-09-14", from: 4995, to: 4 },
+    ]);
+
+    const mid = await SkuSlice.findOne({ konkName: "balun", date: D1 }).lean();
+    expect(mid?.data?.["balun-1"]).toEqual({ stock: 4, price: 15.53 });
+    const end = await SkuSlice.findOne({ konkName: "balun", date: D2 }).lean();
+    expect(end?.data?.["balun-1"]).toEqual({ stock: 4, price: 15.53 });
+  });
+
+  it("applies leading 5000 using nearest right adequate", async () => {
+    await seedBalun([
+      { date: D0, data: { "balun-1": { stock: 5000, price: 15.53 } } },
+      { date: D1, data: { "balun-1": { stock: 5000, price: 15.53 } } },
+      { date: D2, data: { "balun-1": { stock: 4, price: 15.53 } } },
+    ]);
+
+    const result = await correctBalunFakeStockSpikesUtil({
+      daysBack: 3,
+      asOf: D2,
+      apply: true,
+    });
+
+    expect(result.patched).toEqual([
+      { productId: "balun-1", date: "2026-09-13", from: 5000, to: 4 },
+      { productId: "balun-1", date: "2026-09-14", from: 5000, to: 4 },
+    ]);
+
+    const d0 = await SkuSlice.findOne({ konkName: "balun", date: D0 }).lean();
+    const d1 = await SkuSlice.findOne({ konkName: "balun", date: D1 }).lean();
+    expect(d0?.data?.["balun-1"]).toEqual({ stock: 4, price: 15.53 });
+    expect(d1?.data?.["balun-1"]).toEqual({ stock: 4, price: 15.53 });
   });
 });

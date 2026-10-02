@@ -37,7 +37,7 @@ export type BalunFakeStockFinding = {
 export type BalunFakeStockSkippedFinding = {
   productId: string;
   date: string;
-  reason: "no-adequate-left";
+  reason: "no-adequate-neighbor";
 };
 
 export type CorrectBalunFakeStockSpikesResult = {
@@ -151,9 +151,10 @@ function toSkippedFindings(
 }
 
 /**
- * Коррекция фейкового stock в диапазоне 9950–10000 у balun
+ * Коррекция фейкового stock у balun (диапазоны 4990–5000 ∪ 9950–10000)
  * за окно [asOf-(daysBack-1) .. asOf].
- * Lookback слева от окна нужен, чтобы найти адекватный остаток.
+ * Замена: ближайший адекватный слева, иначе справа.
+ * Lookback слева от окна нужен, чтобы найти адекватный остаток слева.
  */
 export async function correctBalunFakeStockSpikesUtil(
   input: CorrectBalunFakeStockSpikesInput
