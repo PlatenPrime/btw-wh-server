@@ -495,6 +495,7 @@
 | Метод | Путь | Аутентификация | Доступ |
 |-------|------|----------------|--------|
 | GET | `/konk-prod/manufacturers-pie` | JWT | ≥ ADMIN |
+| GET | `/prod/konks-pie` | JWT | ≥ ADMIN |
 | GET | `/konk-prod/stock` | JWT | ≥ ADMIN |
 | GET | `/konk-prod/sales` | JWT | ≥ ADMIN |
 

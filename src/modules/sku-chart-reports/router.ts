@@ -6,6 +6,7 @@ import {
   getKonkProdManufacturersPieDataController,
   getKonkProdSkuSalesChartDataController,
   getKonkProdSkuStockChartDataController,
+  getProdKonksPieDataController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -15,6 +16,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkProdManufacturersPieDataController),
+);
+router.get(
+  "/prod/konks-pie",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getProdKonksPieDataController),
 );
 router.get(
   "/konk-prod/stock",

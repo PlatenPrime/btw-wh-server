@@ -33,3 +33,15 @@ Pie-агрегация продаж по производителям конку
 **Query:** `konk`, `dateFrom`, `dateTo`; опционально `skugrIds`.
 
 **Ответ 200:** `{ message: string, data: Record<prodName, { title, salesPcs, salesUah }>, all: { title, salesPcs, salesUah } }`.
+
+---
+
+### GET `/api/sku-chart-reports/prod/konks-pie`
+
+Pie-агрегация продаж по всем конкурентам и Btrade для одного производителя.
+
+**Query:** `prod`, `dateFrom`, `dateTo`; опционально `skugrIds`.
+
+**Ответ 200:** `{ message: string, data: Record<konkName | "btrade", { title, salesPcs, salesUah }>, all: { title, salesPcs, salesUah } }`.
+
+Ключ `btrade` присутствует, если есть артикулы Art с этим `prodName`; `all` включает сумму всех сегментов, в том числе Btrade.

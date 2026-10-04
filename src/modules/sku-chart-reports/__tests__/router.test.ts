@@ -8,6 +8,7 @@ describe("sku-chart-reports router", () => {
       .map((layer) => layer.route!.path);
 
     expect(paths).toContain("/konk-prod/manufacturers-pie");
+    expect(paths).toContain("/prod/konks-pie");
     expect(paths).toContain("/konk-prod/stock");
     expect(paths).toContain("/konk-prod/sales");
   });
