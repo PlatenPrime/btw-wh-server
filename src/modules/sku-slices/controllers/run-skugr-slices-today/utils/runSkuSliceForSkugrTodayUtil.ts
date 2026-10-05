@@ -13,6 +13,7 @@ import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { resolveSkuSliceRequestJitterMs } from "../../../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import { SkuSlice } from "../../../models/SkuSlice.js";
 import type { RunSkugrSlicesTodayInput } from "../schemas/runSkugrSlicesTodaySchema.js";
+import { afterSkuSliceStockMutation } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 export type RunSkuSliceForSkugrTodayResult = {
   skugrId: string;
@@ -185,6 +186,11 @@ export async function runSkuSliceForSkugrTodayUtil(
       await delay(jitterMs(minMs, maxMs));
     }
   }
+
+  await afterSkuSliceStockMutation({
+    konkName,
+    dayD: sliceDate,
+  });
 
   return {
     skugrId: input.skugrId,

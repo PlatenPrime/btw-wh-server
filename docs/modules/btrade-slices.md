@@ -14,6 +14,10 @@
 
 **Важно:** в срезах Btrade поле остатка называется `quantity`, тогда как в `analog-slices` и `sku-slices` используется `stock`.
 
+Срез — сырьё без derived sales. После upsert дневного среза `calculateBtradeSlice` пересчитывает плоский manufacturer rollup `BtradeManufacturerDaySales` в [sku-reporting](sku-reporting.md) за `D`+`D+1` (формула `-1` → 0, без coalesce). Period/pie/chart sales по производителю читают rollup, не Mixed.
+
+Backfill: `npx tsx src/modules/btrade-slices/scripts/runBackfillBtradeManufacturerSales.ts --from YYYY-MM-DD --to YYYY-MM-DD [--apply]`. Legacy Mixed salesPcs/salesUah снять: `npx tsx src/modules/sku-slices/scripts/runUnsetMixedSliceSales.ts --from … --to … [--apply]`.
+
 ## Связи между сущностями
 
 - **Art:** список артикулов для среза формируется из distinct `artikul` коллекции `Art` (`getUniqueArtikulsFromArtsUtil`).

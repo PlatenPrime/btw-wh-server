@@ -16,6 +16,7 @@ import {
   logModuleInfo,
   logModuleWarn,
 } from "../../../logging/logModuleError.js";
+import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 type SkuSliceLean = {
   konkName: string;
@@ -54,70 +55,94 @@ export async function runCompensatingSkuSlices(
     shouldRefetchSkuSliceItem
   );
 
-  return runCompensatingSliceRefetchLoop(
+  const updatedByKonk = new Map<string, Set<string>>();
+
+  const stats = await runCompensatingSliceRefetchLoop(
     queue,
     async ({ konkName, dataKey }) => {
-    const productKey = dataKey;
-    try {
-      const sku = (await Sku.findOne({ konkName, productId: productKey })
-        .select("_id")
-        .lean()) as SkuIdLean | null;
-      if (!sku) {
-        logModuleWarn(
-          "slice-compensation",
-          "compensating sku: entity not found, skip",
-          { konkName, productKey }
-        );
-        return { refetched: 0, updated: 0 };
-      }
-      const result = await getSkuStockDataUtil(sku._id.toString());
-      if (!result) {
-        logModuleInfo("slice-compensation", "compensating sku refetch empty", {
+      const productKey = dataKey;
+      try {
+        const sku = (await Sku.findOne({ konkName, productId: productKey })
+          .select("_id")
+          .lean()) as SkuIdLean | null;
+        if (!sku) {
+          logModuleWarn(
+            "slice-compensation",
+            "compensating sku: entity not found, skip",
+            { konkName, productKey }
+          );
+          return { refetched: 0, updated: 0 };
+        }
+        const result = await getSkuStockDataUtil(sku._id.toString());
+        if (!result) {
+          logModuleInfo("slice-compensation", "compensating sku refetch empty", {
+            konkName,
+            productKey,
+            kind: "sku",
+          });
+          return { refetched: 0, updated: 0 };
+        }
+        let updated = 0;
+        if (!isFullMinusOneSliceStockResult(result)) {
+          const dataItem = { stock: result.stock, price: result.price };
+          await SkuSlice.findOneAndUpdate(
+            { konkName, date: sliceDate },
+            { $set: { [`data.${productKey}`]: dataItem } }
+          );
+          updated = 1;
+          const set = updatedByKonk.get(konkName) ?? new Set<string>();
+          set.add(productKey);
+          updatedByKonk.set(konkName, set);
+        }
+        logModuleInfo("slice-compensation", "compensating sku refetch result", {
           konkName,
           productKey,
           kind: "sku",
+          stock: result.stock,
+          price: result.price,
+          updated: updated === 1,
         });
-        return { refetched: 0, updated: 0 };
-      }
-      let updated = 0;
-      if (!isFullMinusOneSliceStockResult(result)) {
-        const dataItem = { stock: result.stock, price: result.price };
-        await SkuSlice.findOneAndUpdate(
-          { konkName, date: sliceDate },
-          { $set: { [`data.${productKey}`]: dataItem } }
+        return { refetched: 1, updated };
+      } catch (err) {
+        const e = err as Error & { code?: string };
+        if (e.code === UNSUPPORTED_KONK_CODE) {
+          logModuleWarn(
+            "slice-compensation",
+            "unsupported konk, skipping refetch",
+            {
+              konkName,
+              productKey,
+            }
+          );
+          return { refetched: 0, updated: 0 };
+        }
+        const msg = err instanceof Error ? err.message : String(err);
+        logModuleError(
+          "slice-compensation",
+          err,
+          "compensating sku slice refetch failed",
+          {
+            konkName,
+            productKey,
+            message: msg,
+          }
         );
-        updated = 1;
-      }
-      logModuleInfo("slice-compensation", "compensating sku refetch result", {
-        konkName,
-        productKey,
-        kind: "sku",
-        stock: result.stock,
-        price: result.price,
-        updated: updated === 1,
-      });
-      return { refetched: 1, updated };
-    } catch (err) {
-      const e = err as Error & { code?: string };
-      if (e.code === UNSUPPORTED_KONK_CODE) {
-        logModuleWarn("slice-compensation", "unsupported konk, skipping refetch", {
-          konkName,
-          productKey,
-        });
         return { refetched: 0, updated: 0 };
       }
-      const msg = err instanceof Error ? err.message : String(err);
-      logModuleError("slice-compensation", err, "compensating sku slice refetch failed", {
-        konkName,
-        productKey,
-        message: msg,
-      });
-      return { refetched: 0, updated: 0 };
-    }
-  },
+    },
     {
       onProgress: options?.onProgress,
       signal: options?.signal,
     }
   );
+
+  for (const [konkName, productIds] of updatedByKonk) {
+    await afterSkuSliceStockMutation({
+      konkName,
+      dayD: sliceDate,
+      productIds: [...productIds],
+    });
+  }
+
+  return stats;
 }

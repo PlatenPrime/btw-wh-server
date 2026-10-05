@@ -3,6 +3,7 @@ import {
   coalesceSkuSliceItemsAlongDates,
   isValidSkuSliceMetricValue,
   sliceDateMinusDays,
+  sliceDatePlusDays,
 } from "../coalesceSkuSliceItemsForReporting.js";
 
 describe("isValidSkuSliceMetricValue", () => {
@@ -25,6 +26,21 @@ describe("sliceDateMinusDays", () => {
     const d = new Date("2025-04-03T00:00:00.000Z");
     const prev = sliceDateMinusDays(d, 1);
     expect(prev.toISOString()).toBe("2025-04-02T00:00:00.000Z");
+  });
+});
+
+describe("sliceDatePlusDays", () => {
+  it("adds UTC days", () => {
+    const d = new Date("2025-04-03T00:00:00.000Z");
+    const next = sliceDatePlusDays(d, 1);
+    expect(next.toISOString()).toBe("2025-04-04T00:00:00.000Z");
+  });
+
+  it("is inverse of sliceDateMinusDays", () => {
+    const d = new Date("2025-04-03T00:00:00.000Z");
+    expect(sliceDatePlusDays(sliceDateMinusDays(d, 2), 2).toISOString()).toBe(
+      d.toISOString(),
+    );
   });
 });
 

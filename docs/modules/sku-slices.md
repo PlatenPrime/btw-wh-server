@@ -12,6 +12,12 @@
 
 Поля: `konkName`, `date` (UTC-сутки), `data: Record<productId, { stock, price }>`. Уникальный индекс `(konkName, date)`.
 
+Срез — **сырьё** остатков/цен. Derived sales в Mixed не хранятся (эксперимент materialize-in-Mixed откатан: поля раздували документы и не ускоряли `$group`).
+
+После scrape / compensation / patch / air ingest / post-corrections (balun/svbum/pack-flip) вызывается `afterSkuSliceStockMutation`: пересчёт плоского manufacturer rollup (`SkuManufacturerDaySales` в [sku-reporting](sku-reporting.md)) за день `D` и `D+1`. Формула rollup: `stock === -1` → продажи дня = 0; рост остатка = поставка = 0; иначе `max(0, prev − curr)`; затем `Konk.recountDays`. Без forward-fill.
+
+Backfill rollup: `npx tsx src/modules/sku-slices/scripts/runBackfillSkuSliceSales.ts --from YYYY-MM-DD --to YYYY-MM-DD [--konk name] [--apply]` (без `--apply` — dry-run). Снятие legacy `salesPcs`/`salesUah` из уже раздутых Mixed: `npx tsx src/modules/sku-slices/scripts/runUnsetMixedSliceSales.ts --from … --to … [--konk] [--apply]`. Смена `recountDays` требует повторного backfill rollup по konk.
+
 ## Связи
 
 - **Sku** — ключи в `data` совпадают с `Sku.productId`.

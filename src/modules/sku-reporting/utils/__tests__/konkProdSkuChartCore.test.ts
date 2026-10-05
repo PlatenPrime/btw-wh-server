@@ -3,6 +3,8 @@ import { Art } from "../../../arts/models/Art.js";
 import { BtradeSlice } from "../../../btrade-slices/models/BtradeSlice.js";
 import { Sku } from "../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../sku-slices/models/SkuSlice.js";
+import { SkuManufacturerDaySales } from "../../models/SkuManufacturerDaySales.js";
+import { BtradeManufacturerDaySales } from "../../models/BtradeManufacturerDaySales.js";
 import { loadKonkProdSkuChartSeries } from "../konkProdSkuChartCore.js";
 
 describe("loadKonkProdSkuChartSeries", () => {
@@ -11,6 +13,8 @@ describe("loadKonkProdSkuChartSeries", () => {
     await SkuSlice.deleteMany({});
     await BtradeSlice.deleteMany({});
     await Art.deleteMany({});
+    await SkuManufacturerDaySales.deleteMany({});
+    await BtradeManufacturerDaySales.deleteMany({});
   });
 
   it("returns ok false when no skus for konk/prod", async () => {
@@ -23,7 +27,7 @@ describe("loadKonkProdSkuChartSeries", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("loads competitor and btrade series for matching prod", async () => {
+  it("loads competitor sales from rollup and stock from Mixed", async () => {
     const konk = "core-k";
     const prod = "core-p";
     const btArt = "CORE-BT-1";
@@ -57,6 +61,26 @@ describe("loadKonkProdSkuChartSeries", () => {
         data: { [`${konk}-1`]: { stock: 7, price: 2 } },
       },
     ]);
+    await SkuManufacturerDaySales.insertMany([
+      {
+        konkName: konk,
+        date: d1,
+        prodName: prod,
+        salesPcs: 3,
+        salesUah: 6,
+      },
+      {
+        konkName: konk,
+        date: d2,
+        prodName: prod,
+        salesPcs: 3,
+        salesUah: 6,
+      },
+    ]);
+    await BtradeManufacturerDaySales.insertMany([
+      { date: d1, prodName: prod.toLowerCase(), salesPcs: 5, salesUah: 50 },
+      { date: d2, prodName: prod.toLowerCase(), salesPcs: 5, salesUah: 50 },
+    ]);
     await BtradeSlice.insertMany([
       {
         date: d0,
@@ -83,9 +107,59 @@ describe("loadKonkProdSkuChartSeries", () => {
     if (!result.ok) return;
     expect(result.dayCount).toBe(2);
     expect(result.competitorSales).toEqual([3, 3]);
+    expect(result.competitorRevenue).toEqual([6, 6]);
+    expect(result.competitorStock).toEqual([10, 7]);
     expect(result.btradeStock[0]).toBe(40);
     expect(result.btradeStock[1]).toBe(35);
     expect(result.btradeSales[0]).toBe(5);
     expect(result.btradeSales[1]).toBe(5);
+    expect(result.btradeRevenue[0]).toBe(50);
+    expect(result.btradeRevenue[1]).toBe(50);
+  });
+
+  it("with prod=all sums rollup manufacturers for sales", async () => {
+    const konk = "core-all";
+    const d1 = new Date("2026-09-10T00:00:00.000Z");
+
+    await Sku.insertMany([
+      {
+        konkName: konk,
+        prodName: "A",
+        productId: `${konk}-a`,
+        title: "A",
+        url: "https://e.com/a",
+      },
+      {
+        konkName: konk,
+        prodName: "B",
+        productId: `${konk}-b`,
+        title: "B",
+        url: "https://e.com/b",
+      },
+    ]);
+    await SkuSlice.create({
+      konkName: konk,
+      date: d1,
+      data: {
+        [`${konk}-a`]: { stock: 5, price: 1 },
+        [`${konk}-b`]: { stock: 8, price: 1 },
+      },
+    });
+    await SkuManufacturerDaySales.insertMany([
+      { konkName: konk, date: d1, prodName: "A", salesPcs: 2, salesUah: 2 },
+      { konkName: konk, date: d1, prodName: "B", salesPcs: 4, salesUah: 4 },
+    ]);
+
+    const result = await loadKonkProdSkuChartSeries({
+      konk,
+      prod: "all",
+      dateFrom: d1,
+      dateTo: d1,
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.competitorSales).toEqual([6]);
+    expect(result.competitorRevenue).toEqual([6]);
+    expect(result.competitorStock).toEqual([13]);
   });
 });

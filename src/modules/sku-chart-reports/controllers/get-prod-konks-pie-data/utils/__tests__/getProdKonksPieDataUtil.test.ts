@@ -5,6 +5,8 @@ import { Konk } from "../../../../../konks/models/Konk.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
+import { SkuManufacturerDaySales } from "../../../../../sku-reporting/models/SkuManufacturerDaySales.js";
+import { BtradeManufacturerDaySales } from "../../../../../sku-reporting/models/BtradeManufacturerDaySales.js";
 import { getProdKonksPieDataUtil } from "../getProdKonksPieDataUtil.js";
 
 describe("getProdKonksPieDataUtil", () => {
@@ -15,6 +17,8 @@ describe("getProdKonksPieDataUtil", () => {
     await Sku.deleteMany({});
     await SkuSlice.deleteMany({});
     await BtradeSlice.deleteMany({});
+    await SkuManufacturerDaySales.deleteMany({});
+    await BtradeManufacturerDaySales.deleteMany({});
   });
 
   it("returns ok false when no sku and no arts", async () => {
@@ -70,42 +74,15 @@ describe("getProdKonksPieDataUtil", () => {
     ]);
     await Art.create({ artikul: btArt, prodName: prod, zone: "Z" });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: k1,
-        date: d0,
-        data: { [`${k1}-a`]: { stock: 12, price: 10 } },
-      },
-      {
-        konkName: k1,
-        date: d1,
-        data: { [`${k1}-a`]: { stock: 10, price: 10 } },
-      },
-      {
-        konkName: k1,
-        date: d2,
-        data: { [`${k1}-a`]: { stock: 9, price: 10 } },
-      },
-      {
-        konkName: k2,
-        date: d0,
-        data: { [`${k2}-b`]: { stock: 8, price: 20 } },
-      },
-      {
-        konkName: k2,
-        date: d1,
-        data: { [`${k2}-b`]: { stock: 7, price: 20 } },
-      },
-      {
-        konkName: k2,
-        date: d2,
-        data: { [`${k2}-b`]: { stock: 5, price: 20 } },
-      },
+    await SkuManufacturerDaySales.insertMany([
+      { konkName: k1, date: d1, prodName: prod, salesPcs: 2, salesUah: 20 },
+      { konkName: k1, date: d2, prodName: prod, salesPcs: 1, salesUah: 10 },
+      { konkName: k2, date: d1, prodName: prod, salesPcs: 1, salesUah: 20 },
+      { konkName: k2, date: d2, prodName: prod, salesPcs: 2, salesUah: 40 },
     ]);
-    await BtradeSlice.insertMany([
-      { date: d0, data: { [btArt]: { quantity: 45, price: 10 } } },
-      { date: d1, data: { [btArt]: { quantity: 40, price: 10 } } },
-      { date: d2, data: { [btArt]: { quantity: 35, price: 10 } } },
+    await BtradeManufacturerDaySales.insertMany([
+      { date: d1, prodName: prod.toLowerCase(), salesPcs: 5, salesUah: 50 },
+      { date: d2, prodName: prod.toLowerCase(), salesPcs: 5, salesUah: 50 },
     ]);
 
     const result = await getProdKonksPieDataUtil({
@@ -142,14 +119,15 @@ describe("getProdKonksPieDataUtil", () => {
   it("returns only btrade when no competitor skus", async () => {
     const prod = "OnlyBt";
     const btArt = "ONLY-BT";
-    const d0 = new Date("2026-11-09T00:00:00.000Z");
     const d1 = new Date("2026-11-10T00:00:00.000Z");
 
     await Art.create({ artikul: btArt, prodName: prod, zone: "Z" });
-    await BtradeSlice.insertMany([
-      { date: d0, data: { [btArt]: { quantity: 20, price: 5 } } },
-      { date: d1, data: { [btArt]: { quantity: 15, price: 5 } } },
-    ]);
+    await BtradeManufacturerDaySales.create({
+      date: d1,
+      prodName: prod.toLowerCase(),
+      salesPcs: 5,
+      salesUah: 25,
+    });
 
     const result = await getProdKonksPieDataUtil({
       prod,
@@ -255,7 +233,7 @@ describe("getProdKonksPieDataUtil", () => {
     void sku2;
   });
 
-  it("applies recount days per konk", async () => {
+  it("reads recount-baked rollup totals per konk", async () => {
     const prod = "RecProd";
     const konk = "pie-rec-k";
     await Konk.create({
@@ -265,21 +243,13 @@ describe("getProdKonksPieDataUtil", () => {
       imageUrl: "https://e.com/k.png",
       recountDays: ["2026-12-22"],
     });
-    const d0 = new Date("2026-12-21T00:00:00.000Z");
     const d1 = new Date("2026-12-22T00:00:00.000Z");
     const d2 = new Date("2026-12-23T00:00:00.000Z");
 
-    await Sku.create({
-      konkName: konk,
-      prodName: prod,
-      productId: `${konk}-x`,
-      title: "X",
-      url: "https://e.com/rec-x",
-    });
-    await SkuSlice.insertMany([
-      { konkName: konk, date: d0, data: { [`${konk}-x`]: { stock: 10, price: 5 } } },
-      { konkName: konk, date: d1, data: { [`${konk}-x`]: { stock: 7, price: 5 } } },
-      { konkName: konk, date: d2, data: { [`${konk}-x`]: { stock: 4, price: 5 } } },
+    // write-path уже обнулил recount-день в rollup
+    await SkuManufacturerDaySales.insertMany([
+      { konkName: konk, date: d1, prodName: prod, salesPcs: 0, salesUah: 0 },
+      { konkName: konk, date: d2, prodName: prod, salesPcs: 3, salesUah: 15 },
     ]);
 
     const result = await getProdKonksPieDataUtil({
@@ -290,7 +260,6 @@ describe("getProdKonksPieDataUtil", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    // d1 recount => 0 sales, d2 => 3
     expect(result.data[konk]).toEqual({
       title: "Rec Konk",
       salesPcs: 3,

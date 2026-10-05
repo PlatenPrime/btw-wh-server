@@ -5,6 +5,7 @@ import {
   SVBUM_FAKE_STOCK_LOOKBACK_DAYS,
 } from "../../slices/config/svbumFakeStockThreshold.js";
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
+import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 import {
   computeSvbumFakeStockPatches,
@@ -189,6 +190,19 @@ export async function correctSvbumFakeStockSpikesUtil(
 
   if (apply && patches.length > 0) {
     await applyPatches(slices, patches);
+    const byDay = new Map<number, Set<string>>();
+    for (const patch of patches) {
+      const set = byDay.get(patch.dateMs) ?? new Set<string>();
+      set.add(patch.productId);
+      byDay.set(patch.dateMs, set);
+    }
+    for (const [dateMs, productIds] of byDay) {
+      await afterSkuSliceStockMutation({
+        konkName: SVBUM_FAKE_STOCK_KONK_NAME,
+        dayD: new Date(dateMs),
+        productIds: [...productIds],
+      });
+    }
   }
 
   const result: CorrectSvbumFakeStockSpikesResult = {

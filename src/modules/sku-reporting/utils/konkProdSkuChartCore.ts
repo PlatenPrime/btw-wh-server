@@ -11,6 +11,8 @@ import {
 } from "../../btrade-slices/utils/btradeSliceAggregationStages.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "./aggregateDailySkuSliceMetricsForSkus.js";
+import { dailyBtradeManufacturerSales } from "./aggregateBtradeManufacturerDaySales.js";
+import { dailyManufacturerSales } from "./aggregateManufacturerDaySales.js";
 import { resolveKonkProdSkus } from "./resolveKonkProdSkus.js";
 import { enumerateReportingDates } from "./skugrReporting.js";
 import { sliceDateMinusDays } from "./coalesceSkuSliceItemsForReporting.js";
@@ -44,19 +46,10 @@ type SkuLean = {
 };
 
 /**
- * Конкурент: SKU с `konkName` + `prodName` из query (точное совпадение `prodName`),
- * срезы SkuSlice. Btrade: артикулы из Art, у которых `prodName` (trim, без учёта регистра)
- * совпадает с query `prod`; по ним — BtradeSlice. Поле Sku.btradeAnalog не используется.
- *
- * Если задан непустой `skugrIds`, конкурентский набор SKU собирается через
- * `resolveKonkProdSkus` (фильтр по выбранным товарным группам, дедуп по `productId`,
- * порядок групп — порядок присланного `skugrIds`); Btrade — артикулы из Art,
- * у которых `prodName` совпадает с одним из `prodName` отрезолвленных SKU
- * (case-insensitive по trim). Без skugrIds логика прежняя: режим `prod === "all"`
- * — все SKU конкурента и все непустые `artikul` из Art.
- *
- * При очень большом числе артикулов при необходимости можно батчить
- * `sliceDataProjectForArtikulList` по чанкам и суммировать в памяти.
+ * Конкурент stock: SkuSlice Mixed (daily sum valid stock).
+ * Конкурент sales/revenue без skugrIds: SkuManufacturerDaySales.
+ * Btrade sales/revenue без skugrIds: BtradeManufacturerDaySales; stock — Mixed.
+ * С skugrIds: competitor+btrade sales из Mixed (productId/artikul subset).
  */
 export async function loadKonkProdSkuChartSeries(
   input: KonkProdSkuChartRangeInput,
@@ -117,8 +110,20 @@ export async function loadKonkProdSkuChartSeries(
 
   const dateIso = compMetrics.data.map((d) => d.date);
   const competitorStock = compMetrics.data.map((d) => d.stock);
-  const competitorSales = compMetrics.data.map((d) => d.sales);
-  const competitorRevenue = compMetrics.data.map((d) => d.revenue);
+
+  let competitorSales = compMetrics.data.map((d) => d.sales);
+  let competitorRevenue = compMetrics.data.map((d) => d.revenue);
+
+  if (!hasSkugrFilter) {
+    const rollupDaily = await dailyManufacturerSales({
+      konkName: input.konk,
+      prodName: isAllProd ? "all" : input.prod,
+      dateFrom,
+      dateTo,
+    });
+    competitorSales = rollupDaily.map((d) => d.salesPcs);
+    competitorRevenue = rollupDaily.map((d) => d.salesUah);
+  }
 
   const artFilter = hasSkugrFilter
     ? prodNamesForBtrade.size === 0
@@ -179,6 +184,20 @@ export async function loadKonkProdSkuChartSeries(
   const fullDates = enumerateReportingDates(warmupStart, dateTo);
   const reportOffset = fullDates.length - dayCount;
 
+  if (!hasSkugrFilter) {
+    const rollupDaily = await dailyBtradeManufacturerSales({
+      dateFrom,
+      dateTo,
+      ...(isAllProd
+        ? { prodName: "all" }
+        : { prodName: input.prod.trim().toLowerCase() }),
+    });
+    for (let d = 0; d < dayCount; d++) {
+      btradeSales[d] = rollupDaily[d]?.salesPcs ?? 0;
+      btradeRevenue[d] = rollupDaily[d]?.salesUah ?? 0;
+    }
+  }
+
   if (allowedArtikuls.length > 0) {
     const sliceRows = await aggregateBtradeSlices<{
       date: Date;
@@ -208,16 +227,20 @@ export async function loadKonkProdSkuChartSeries(
         return typeof q === "number" && Number.isFinite(q) ? q : null;
       });
 
-      const salesSeq = computeSalesFromStockSequence(stocksFull).slice(reportOffset);
+      const salesSeq = hasSkugrFilter
+        ? computeSalesFromStockSequence(stocksFull).slice(reportOffset)
+        : null;
 
       for (let d = 0; d < dayCount; d++) {
         const item = byDate.get(toSliceDate(dates[d]!).getTime())?.[artikul];
-        const sales = salesSeq[d]!.sales;
-        const price = item?.price;
-        const p =
-          typeof price === "number" && Number.isFinite(price) ? price : null;
-        btradeSales[d] += sales;
-        btradeRevenue[d] += computeRevenueForDay(sales, p);
+        if (hasSkugrFilter && salesSeq) {
+          const sales = salesSeq[d]!.sales;
+          const price = item?.price;
+          const p =
+            typeof price === "number" && Number.isFinite(price) ? price : null;
+          btradeSales[d] += sales;
+          btradeRevenue[d] += computeRevenueForDay(sales, p);
+        }
         const q = item?.quantity;
         if (typeof q === "number" && Number.isFinite(q)) {
           btradeStock[d] += q;

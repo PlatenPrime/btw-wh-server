@@ -23,6 +23,11 @@ export function sliceDateMinusDays(sliceDate: Date, days: number): Date {
   return d;
 }
 
+/** Следующий календарный день ключа среза (UTC-сутки как в хранилище). */
+export function sliceDatePlusDays(sliceDate: Date, days: number): Date {
+  return sliceDateMinusDays(sliceDate, -days);
+}
+
 /**
  * Forward-fill для отчётов: -1 и пропуски не обновляют carry; в точке дня отдаём последний валидный stock/price слева.
  */

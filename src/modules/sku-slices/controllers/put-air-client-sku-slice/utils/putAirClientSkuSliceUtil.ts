@@ -7,6 +7,7 @@ import { SkuSlice } from "../../../models/SkuSlice.js";
 import { AIR_CLIENT_SLICE_KONK } from "../../../constants/airClientSlice.js";
 import { urlsMatchForClientIngest } from "../../../utils/urlsMatchForClientIngest.js";
 import type { PutAirClientSkuSliceInput } from "../schemas/putAirClientSkuSliceSchema.js";
+import { afterSkuSliceStockMutation } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 export type PutAirClientSkuSliceStatus = "saved" | "skipped";
 
@@ -145,6 +146,12 @@ export async function putAirClientSkuSliceUtil(
       price: current?.price ?? dataItem.price,
     };
   }
+
+  await afterSkuSliceStockMutation({
+    konkName: AIR_CLIENT_SLICE_KONK,
+    dayD: sliceDate,
+    productIds: [productId],
+  });
 
   return {
     ok: true,

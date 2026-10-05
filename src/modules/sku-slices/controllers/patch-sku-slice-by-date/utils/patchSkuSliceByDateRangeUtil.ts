@@ -7,6 +7,10 @@ import { enumerateSliceDates } from "../../../../slices/utils/enumerateSliceDate
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { PatchSkuSliceByDateRangeInput } from "../schemas/patchSkuSliceByDateSchema.js";
 import { readPreviousPoint } from "./patchSkuSliceByDateUtil.js";
+import {
+  materializeSkuSliceSalesDateRange,
+  sliceDatePlusDays,
+} from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 export type PatchSkuSliceByDateRangeDayResult = {
   date: Date;
@@ -68,6 +72,14 @@ export async function patchSkuSliceByDateRangeUtil(
 
     days.push({ date: sliceDate, previous, created });
   }
+
+  await materializeSkuSliceSalesDateRange({
+    konkName: sku.konkName,
+    fromDate: dateFrom,
+    toDate: sliceDatePlusDays(dateTo, 1),
+    productIds: [productId],
+    apply: true,
+  });
 
   return {
     productId,

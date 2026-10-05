@@ -1,4 +1,5 @@
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
+import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import {
@@ -227,6 +228,20 @@ export async function reviewPackFlipsUtil(
 
   if (input.apply && patched.length > 0) {
     await applyInversePatches(slices, patched);
+    const byDay = new Map<string, Set<string>>();
+    for (const finding of patched) {
+      if (!finding.date) continue;
+      const set = byDay.get(finding.date) ?? new Set<string>();
+      set.add(finding.productId);
+      byDay.set(finding.date, set);
+    }
+    for (const [ymd, productIds] of byDay) {
+      await afterSkuSliceStockMutation({
+        konkName,
+        dayD: new Date(`${ymd}T00:00:00.000Z`),
+        productIds: [...productIds],
+      });
+    }
   }
 
   return {

@@ -5,6 +5,7 @@ import { BtradeSlice } from "../models/BtradeSlice.js";
 import type { IBtradeSliceDataItem } from "../models/BtradeSlice.js";
 import { getUniqueArtikulsFromArtsUtil } from "./getUniqueArtikulsFromArtsUtil.js";
 import { logModuleInfo } from "../../../logging/logModuleError.js";
+import { afterBtradeSliceStockMutation } from "../../sku-reporting/utils/materializeBtradeManufacturerSalesUtil.js";
 
 const MISSING_SLICE_SENTINEL: IBtradeSliceDataItem = { price: -1, quantity: -1 };
 
@@ -60,6 +61,8 @@ export async function calculateBtradeSlice(): Promise<{
     { $set: { date: sliceDate, data } },
     { upsert: true }
   );
+
+  await afterBtradeSliceStockMutation({ dayD: sliceDate });
 
   logModuleInfo("btrade-slices", "btrade slice completed", {
     fromProductRests,

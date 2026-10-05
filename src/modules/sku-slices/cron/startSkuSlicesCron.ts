@@ -21,6 +21,7 @@ import {
   getExcludedCompetitorSet,
   normalizeCompetitorName,
 } from "../../slices/config/excludedCompetitors.js";
+import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 const log = createLogger({ module: "sku-slices", job: "cron" });
 
@@ -140,6 +141,11 @@ export function startSkuSlicesCron(): CronJob {
         await correctBalunFakeStockAfterSlices(sliceDate);
         await correctSvbumFakeStockAfterSlices(sliceDate);
         await reviewPackFlipsAfterSlices(sliceDate);
+        await Promise.all(
+          konkNames.map((k) =>
+            afterSkuSliceStockMutation({ konkName: k, dayD: sliceDate }),
+          ),
+        );
       } catch (error) {
         log.error({ err: error }, "sku slices cron failed");
         await sendCronAnalyticsReport(formatCronErrorReport("SKU slices", error));

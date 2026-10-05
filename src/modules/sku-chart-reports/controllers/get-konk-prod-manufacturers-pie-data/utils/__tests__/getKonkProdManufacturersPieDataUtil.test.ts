@@ -4,7 +4,22 @@ import { Prod } from "../../../../../prods/models/Prod.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
+import { SkuManufacturerDaySales } from "../../../../../sku-reporting/models/SkuManufacturerDaySales.js";
+import { materializeSkuSliceSalesDateRange } from "../../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 import { getKonkProdManufacturersPieDataUtil } from "../getKonkProdManufacturersPieDataUtil.js";
+
+async function seedRollup(
+  konk: string,
+  from: Date,
+  to: Date,
+): Promise<void> {
+  await materializeSkuSliceSalesDateRange({
+    konkName: konk,
+    fromDate: from,
+    toDate: to,
+    apply: true,
+  });
+}
 
 describe("getKonkProdManufacturersPieDataUtil", () => {
   beforeEach(async () => {
@@ -13,9 +28,10 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     await Skugr.deleteMany({});
     await Sku.deleteMany({});
     await SkuSlice.deleteMany({});
+    await SkuManufacturerDaySales.deleteMany({});
   });
 
-  it("returns ok false when no sku for konk", async () => {
+  it("returns ok false when no rollup rows", async () => {
     const result = await getKonkProdManufacturersPieDataUtil({
       konk: "no-konk",
       dateFrom: new Date("2026-11-01T00:00:00.000Z"),
@@ -25,7 +41,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     expect(result.ok).toBe(false);
   });
 
-  it("aggregates multiple sku rows of one manufacturer", async () => {
+  it("aggregates multiple sku rows of one manufacturer from rollup", async () => {
     const konk = "pie-konk-1";
     const prod = "Acme";
     const d0 = new Date("2026-11-09T00:00:00.000Z");
@@ -80,6 +96,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
         },
       },
     ]);
+    await seedRollup(konk, d1, d2);
 
     const result = await getKonkProdManufacturersPieDataUtil({
       konk,
@@ -142,6 +159,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
         },
       },
     ]);
+    await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({
       konk,
@@ -162,7 +180,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     });
   });
 
-  it("normalizes -1 and missing values via carry before sales calculation", async () => {
+  it("zeros sales on -1 stock day (no coalesce) and next day with prev -1", async () => {
     const konk = "pie-konk-3";
     const prod = "Carry Maker";
     const d0 = new Date("2026-12-09T00:00:00.000Z");
@@ -200,6 +218,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
         },
       },
     ]);
+    await seedRollup(konk, d1, d2);
 
     const result = await getKonkProdManufacturersPieDataUtil({
       konk,
@@ -207,19 +226,13 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       dateTo: d2,
     });
 
+    // d1: -1 → 0; d2: prev -1 → 0. Buckets exist with zeros → still ok if rows present.
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-
-    // d1 carries 10/5, d2 stock drops 10->6 => sales 4 with day price 4
     expect(result.data[prod]).toEqual({
       title: prod,
-      salesPcs: 4,
-      salesUah: 16,
-    });
-    expect(result.all).toEqual({
-      title: "Всі виробники",
-      salesPcs: 4,
-      salesUah: 16,
+      salesPcs: 0,
+      salesUah: 0,
     });
   });
 
@@ -253,6 +266,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
         },
       },
     ]);
+    await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({
       konk,
@@ -300,6 +314,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       { konkName: konk, date: d1, data: { [`${konk}-x`]: { stock: 8, price: 5 } } },
       { konkName: konk, date: d2, data: { [`${konk}-x`]: { stock: 6, price: 5 } } },
     ]);
+    await seedRollup(konk, d1, d2);
 
     const result = await getKonkProdManufacturersPieDataUtil({
       konk,
@@ -320,7 +335,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     });
   });
 
-  it("with skugrIds aggregates only SKU inside chosen Skugr groups", async () => {
+  it("with skugrIds aggregates only manufacturers of SKU inside chosen Skugr", async () => {
     const konk = "pie-konk-skugr";
     const prodIn = "Maker-In";
     const prodOut = "Maker-Out";
@@ -369,6 +384,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
         },
       },
     ]);
+    await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({
       konk,

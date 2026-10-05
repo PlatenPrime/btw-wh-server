@@ -5,6 +5,7 @@ import {
 } from "../../../models/SkuSlice.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { PatchSkuSliceByDateInput } from "../schemas/patchSkuSliceByDateSchema.js";
+import { afterSkuSliceStockMutation } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 export type PatchSkuSliceByDateResult = {
   productId: string;
@@ -59,6 +60,12 @@ export async function patchSkuSliceByDateUtil(
     : readPreviousPoint(
         (before.data as Record<string, unknown> | undefined)?.[productId]
       );
+
+  await afterSkuSliceStockMutation({
+    konkName: sku.konkName,
+    dayD: sliceDate,
+    productIds: [productId],
+  });
 
   return {
     productId,

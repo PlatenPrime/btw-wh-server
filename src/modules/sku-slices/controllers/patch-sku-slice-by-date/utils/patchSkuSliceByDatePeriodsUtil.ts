@@ -8,6 +8,10 @@ import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { PatchSkuSliceByDatePeriodsInput } from "../schemas/patchSkuSliceByDateSchema.js";
 import { readPreviousPoint } from "./patchSkuSliceByDateUtil.js";
 import type { PatchSkuSliceByDateRangeDayResult } from "./patchSkuSliceByDateRangeUtil.js";
+import {
+  materializeSkuSliceSalesDateRange,
+  sliceDatePlusDays,
+} from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 export type PatchSkuSliceByDatePeriodsResult = {
   productId: string;
@@ -73,6 +77,18 @@ export async function patchSkuSliceByDatePeriodsUtil(
         );
 
     days.push({ date: sliceDate, previous, created });
+  }
+
+  if (dates.length > 0) {
+    const first = dates[0]!;
+    const last = dates[dates.length - 1]!;
+    await materializeSkuSliceSalesDateRange({
+      konkName: sku.konkName,
+      fromDate: first,
+      toDate: sliceDatePlusDays(last, 1),
+      productIds: [productId],
+      apply: true,
+    });
   }
 
   return {
