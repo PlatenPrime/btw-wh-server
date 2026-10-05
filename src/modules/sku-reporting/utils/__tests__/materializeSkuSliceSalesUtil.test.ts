@@ -56,8 +56,9 @@ describe("materializeSkuSliceSalesUtil", () => {
     expect(result.rollupDocs).toBe(2);
 
     const mid = await SkuSlice.findOne({ konkName, date: d1 }).lean();
-    expect(mid?.data.p1.salesPcs).toBeUndefined();
-    expect(mid?.data.p1.salesUah).toBeUndefined();
+    const item = mid?.data.p1 as Record<string, unknown> | undefined;
+    expect(item?.salesPcs).toBeUndefined();
+    expect(item?.salesUah).toBeUndefined();
 
     const rollups = await SkuManufacturerDaySales.find({ konkName })
       .sort({ date: 1 })
