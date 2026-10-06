@@ -40,8 +40,8 @@ Pie-агрегация продаж по производителям конку
 
 Pie-агрегация продаж по всем конкурентам и Btrade для одного производителя.
 
-**Query:** `prod`, `dateFrom`, `dateTo`; опционально `skugrIds`.
+**Query:** `prod`, `dateFrom`, `dateTo`; опционально `excludeKonks` (массив или CSV имён `konkName`; значение `btrade` исключает сегмент Btrade).
 
 **Ответ 200:** `{ message: string, data: Record<konkName | "btrade", { title, salesPcs, salesUah }>, all: { title, salesPcs, salesUah } }`.
 
-Ключ `btrade` присутствует, если есть артикулы Art с этим `prodName`; `all` включает сумму всех сегментов, в том числе Btrade.
+Ключ `btrade` присутствует, если есть артикулы Art с этим `prodName` и `btrade` не в `excludeKonks`; `all` — сумма оставшихся сегментов.

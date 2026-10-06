@@ -9,7 +9,7 @@ function firstQuery(q: Request["query"], key: string): string | undefined {
 
 /**
  * @desc    Pie по производителю: продажи всех конкурентов + Btrade в шт/грн; итог в `all`
- * @route   GET /api/sku-chart-reports/prod/konks-pie?prod=&dateFrom=&dateTo=
+ * @route   GET /api/sku-chart-reports/prod/konks-pie?prod=&dateFrom=&dateTo=&excludeKonks=
  */
 export const getProdKonksPieDataController = async (
   req: Request,
@@ -20,7 +20,7 @@ export const getProdKonksPieDataController = async (
     prod: firstQuery(q, "prod"),
     dateFrom: firstQuery(q, "dateFrom"),
     dateTo: firstQuery(q, "dateTo"),
-    skugrIds: q.skugrIds,
+    excludeKonks: q.excludeKonks,
   });
 
   if (!parseResult.success) {

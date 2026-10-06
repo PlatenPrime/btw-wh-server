@@ -74,4 +74,50 @@ describe("getProdKonksPieDataController", () => {
     expect(responseJson.data).toBeDefined();
     expect(responseJson.all).toBeDefined();
   });
+
+  it("200 forwards excludeKonks array to util", async () => {
+    vi.mocked(getProdKonksPieDataUtil).mockResolvedValue({
+      ok: true,
+      data: { air: { title: "Air", salesPcs: 1, salesUah: 10 } },
+      all: { title: "Всі конкуренти", salesPcs: 1, salesUah: 10 },
+    });
+    const req = {
+      query: {
+        prod: "Acme",
+        dateFrom: "2026-06-01",
+        dateTo: "2026-06-02",
+        excludeKonks: ["sharik", "balun"],
+      },
+    } as unknown as Request;
+    await getProdKonksPieDataController(req, res);
+    expect(responseStatus.code).toBe(200);
+    expect(getProdKonksPieDataUtil).toHaveBeenCalledWith(
+      expect.objectContaining({
+        excludeKonks: ["sharik", "balun"],
+      }),
+    );
+  });
+
+  it("200 forwards CSV excludeKonks to util", async () => {
+    vi.mocked(getProdKonksPieDataUtil).mockResolvedValue({
+      ok: true,
+      data: { air: { title: "Air", salesPcs: 1, salesUah: 10 } },
+      all: { title: "Всі конкуренти", salesPcs: 1, salesUah: 10 },
+    });
+    const req = {
+      query: {
+        prod: "Acme",
+        dateFrom: "2026-06-01",
+        dateTo: "2026-06-02",
+        excludeKonks: "sharik,balun",
+      },
+    } as unknown as Request;
+    await getProdKonksPieDataController(req, res);
+    expect(responseStatus.code).toBe(200);
+    expect(getProdKonksPieDataUtil).toHaveBeenCalledWith(
+      expect.objectContaining({
+        excludeKonks: ["sharik", "balun"],
+      }),
+    );
+  });
 });

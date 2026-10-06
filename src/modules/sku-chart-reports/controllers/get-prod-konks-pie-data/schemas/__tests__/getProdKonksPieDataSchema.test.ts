@@ -11,6 +11,18 @@ describe("getProdKonksPieDataSchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("parses excludeKonks CSV", () => {
+    const result = getProdKonksPieDataSchema.safeParse({
+      prod: "Acme",
+      dateFrom: "2026-06-01",
+      dateTo: "2026-06-03",
+      excludeKonks: "air,sharik",
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.excludeKonks).toEqual(["air", "sharik"]);
+  });
+
   it("rejects missing prod", () => {
     const result = getProdKonksPieDataSchema.safeParse({
       dateFrom: "2026-06-01",

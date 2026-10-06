@@ -80,6 +80,7 @@ export async function sumManufacturerSalesByKonkName(params: {
   dateFrom: Date;
   dateTo: Date;
   konkNames?: string[];
+  excludeKonkNames?: string[];
 }): Promise<ManufacturerSalesByKeyRow[]> {
   const dateFrom = toSliceDate(params.dateFrom);
   const dateTo = toSliceDate(params.dateTo);
@@ -92,6 +93,14 @@ export async function sumManufacturerSalesByKonkName(params: {
   };
   if (params.konkNames?.length) {
     match.konkName = { $in: params.konkNames };
+  }
+  if (params.excludeKonkNames?.length) {
+    match.konkName = {
+      ...(typeof match.konkName === "object" && match.konkName !== null
+        ? (match.konkName as Record<string, unknown>)
+        : {}),
+      $nin: params.excludeKonkNames,
+    };
   }
 
   const rows = await SkuManufacturerDaySales.aggregate<AggKeyRow>([

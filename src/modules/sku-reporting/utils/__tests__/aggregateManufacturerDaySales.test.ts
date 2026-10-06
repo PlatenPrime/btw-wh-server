@@ -129,6 +129,22 @@ describe("aggregateManufacturerDaySales", () => {
     expect(rows).toEqual([{ key: "k1", salesPcs: 2, salesUah: 10 }]);
   });
 
+  it("sumManufacturerSalesByKonkName excludes konkNames via $nin", async () => {
+    await SkuManufacturerDaySales.insertMany([
+      { konkName: "k1", date: d1, prodName: "P", salesPcs: 2, salesUah: 20 },
+      { konkName: "k2", date: d1, prodName: "P", salesPcs: 5, salesUah: 50 },
+      { konkName: "k3", date: d1, prodName: "P", salesPcs: 1, salesUah: 10 },
+    ]);
+    const rows = await sumManufacturerSalesByKonkName({
+      prodName: "P",
+      dateFrom: d1,
+      dateTo: d1,
+      excludeKonkNames: ["k2", "k3"],
+    });
+    expect(rows).toEqual([{ key: "k1", salesPcs: 2, salesUah: 20 }]);
+  });
+
+
   it("dailyManufacturerSales fills missing days with zeros", async () => {
     await SkuManufacturerDaySales.insertMany([
       {

@@ -7,7 +7,7 @@ JSON для графиков: сравнение агрегата SKU конку
 Потребители manufacturer rollup (нужен backfill/materialize за период):
 
 - **manufacturers-pie** — `SkuManufacturerDaySales`;
-- **prod-konks-pie** — competitor из Sku rollup (без `skugrIds`); Btrade из `BtradeManufacturerDaySales`;
+- **prod-konks-pie** — competitor из Sku rollup (без `skugrIds`); Btrade из `BtradeManufacturerDaySales`; опционально `excludeKonks` вычитает konk/`btrade` из расчёта;
 - **konk-prod/sales** — competitor + btrade sales/revenue без `skugrIds` из соответствующих rollup; stock — из сырых срезов.
 
 С `skugrIds` и stock-chart sales-rollup не используется (нужен productId/artikul subset / stock).
