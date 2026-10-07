@@ -42,6 +42,12 @@ vi.mock("../../utils/correctBalunFakeStockSpikesUtil.js", () => ({
 vi.mock("../../utils/correctSvbumFakeStockSpikesUtil.js", () => ({
   correctSvbumFakeStockSpikesUtil: vi.fn(),
 }));
+vi.mock(
+  "../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js",
+  () => ({
+    afterSkuSliceStockMutation: vi.fn(),
+  })
+);
 
 import { Sku } from "../../../skus/models/Sku.js";
 import { runSkuSliceForKonkUtil } from "../../utils/runSkuSliceForKonkUtil.js";
@@ -51,6 +57,7 @@ import { sendCronAnalyticsReport } from "../../../../cron/analytics-notification
 import { reviewPackFlipsUtil } from "../../utils/reviewPackFlipsUtil.js";
 import { correctBalunFakeStockSpikesUtil } from "../../utils/correctBalunFakeStockSpikesUtil.js";
 import { correctSvbumFakeStockSpikesUtil } from "../../utils/correctSvbumFakeStockSpikesUtil.js";
+import { afterSkuSliceStockMutation } from "../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 const emptyReview = {
   konkName: "perfect",
@@ -64,7 +71,7 @@ const emptyReview = {
 const emptyBalunFix = {
   konkName: "balun",
   apply: true,
-  daysBack: 1,
+  daysBack: 7,
   windowDates: ["2026-04-03"],
   patched: [],
   skipped: [],
@@ -108,6 +115,13 @@ describe("startSkuSlicesCron", () => {
     vi.mocked(reviewPackFlipsUtil).mockResolvedValue(emptyReview);
     vi.mocked(correctBalunFakeStockSpikesUtil).mockResolvedValue(emptyBalunFix);
     vi.mocked(correctSvbumFakeStockSpikesUtil).mockResolvedValue(emptySvbumFix);
+    vi.mocked(afterSkuSliceStockMutation).mockResolvedValue({
+      konkName: "air",
+      keysUpdated: 0,
+      rollupDocs: 0,
+      daysTouched: [],
+      apply: true,
+    });
   });
 
   it("creates CronJob with expected schedule", () => {
@@ -148,7 +162,7 @@ describe("startSkuSlicesCron", () => {
       expect(d1.toISOString()).toBe("2026-04-03T00:00:00.000Z");
 
       expect(correctBalunFakeStockSpikesUtil).toHaveBeenCalledWith({
-        daysBack: 1,
+        daysBack: 7,
         asOf: new Date("2026-04-03T00:00:00.000Z"),
         apply: true,
       });
@@ -186,6 +200,15 @@ describe("startSkuSlicesCron", () => {
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku:balun");
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith("pack-flip:ok");
       expect(sendCronAnalyticsReport).toHaveBeenCalledTimes(4);
+      expect(afterSkuSliceStockMutation).toHaveBeenCalledTimes(2);
+      expect(afterSkuSliceStockMutation).toHaveBeenCalledWith({
+        konkName: "air",
+        dayD: new Date("2026-04-03T00:00:00.000Z"),
+      });
+      expect(afterSkuSliceStockMutation).toHaveBeenCalledWith({
+        konkName: "balun",
+        dayD: new Date("2026-04-03T00:00:00.000Z"),
+      });
     } finally {
       vi.useRealTimers();
     }

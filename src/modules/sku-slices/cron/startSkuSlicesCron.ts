@@ -11,6 +11,7 @@ import { toNextKyivSliceDate } from "../../../utils/sliceDate.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { packFlipAutoApplyKonks } from "../../slices/config/packFlipAutoApplyKonks.js";
 import { runSkuSliceForKonkUtil } from "../utils/runSkuSliceForKonkUtil.js";
+import { BALUN_FAKE_STOCK_CRON_DAYS_BACK } from "../../slices/config/balunFakeStockSentinel.js";
 import { correctBalunFakeStockSpikesUtil } from "../utils/correctBalunFakeStockSpikesUtil.js";
 import { correctSvbumFakeStockSpikesUtil } from "../utils/correctSvbumFakeStockSpikesUtil.js";
 import {
@@ -30,7 +31,7 @@ async function correctBalunFakeStockAfterSlices(
 ): Promise<void> {
   try {
     await correctBalunFakeStockSpikesUtil({
-      daysBack: 1,
+      daysBack: BALUN_FAKE_STOCK_CRON_DAYS_BACK,
       asOf: sliceDate,
       apply: true,
     });
@@ -82,7 +83,7 @@ async function reviewPackFlipsAfterSlices(sliceDate: Date): Promise<void> {
  * Ежедневно в 20:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
  * Ключ дня среза — следующий календарный день в Киеве (как при старом запуске в полночь).
  * TG: отдельное сообщение после каждого konk (+ excluded в начале, если есть).
- * После всех срезов — коррекция фейкового stock 9950–10000 у balun, затем
+ * После всех срезов — коррекция фейкового stock у balun (7 дней ключа среза), затем
  * обнуление stock > 900000 у svbum (14 дней, сэндвич + trailing grace), затем pack-flip review
  * по packFlipAutoApplyKonks (3 дня, авто-рескейл инверсий).
  */
