@@ -6,6 +6,7 @@ import {
 } from "../../../../sku-slices/utils/sliceDataAggregationStages.js";
 import {
   coalesceSkuSliceItemsAlongDates,
+  isValidSkuSliceMetricValue,
   sliceDateMinusDays,
 } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
 import {
@@ -25,8 +26,60 @@ export type SkuSalesByDateResult = {
   isDeliveryDay: boolean;
 };
 
+const LOOKBACK_DAYS_WHEN_HOLE = 31;
+
+async function loadSliceDataForProduct(
+  konkName: string,
+  productKey: string,
+  date: Date,
+): Promise<Record<string, ISkuSliceDataItem>> {
+  const rows = await aggregateSkuSlices([
+    { $match: { konkName, date } },
+    { $limit: 1 },
+    sliceDataProjectForSingleProductId(productKey),
+  ]);
+  return (rows[0]?.data ?? {}) as Record<string, ISkuSliceDataItem>;
+}
+
+async function loadSliceDataRangeForProduct(
+  konkName: string,
+  productKey: string,
+  dateFrom: Date,
+  dateTo: Date,
+): Promise<Map<number, Record<string, ISkuSliceDataItem>>> {
+  const rangeRows = await aggregateSkuSlices([
+    {
+      $match: {
+        konkName,
+        date: { $gte: dateFrom, $lte: dateTo },
+      },
+    },
+    { $sort: { date: 1 } },
+    sliceDataProjectForSingleProductId(productKey),
+  ]);
+
+  const byDate = new Map<number, Record<string, ISkuSliceDataItem>>();
+  for (const doc of rangeRows) {
+    byDate.set(
+      toSliceDate(doc.date).getTime(),
+      (doc.data ?? {}) as Record<string, ISkuSliceDataItem>,
+    );
+  }
+  return byDate;
+}
+
+function needsHoleLookback(
+  prevItem: ISkuSliceDataItem | undefined,
+  currItem: ISkuSliceDataItem,
+): boolean {
+  if (!isValidSkuSliceMetricValue(prevItem?.stock)) return true;
+  if (!isValidSkuSliceMetricValue(currItem.stock)) return true;
+  if (!isValidSkuSliceMetricValue(currItem.price)) return true;
+  return false;
+}
+
 export async function getSkuSalesByDateUtil(
-  input: GetSkuSalesByDateInput
+  input: GetSkuSalesByDateInput,
 ): Promise<SkuSalesByDateResult | null> {
   const sku = await Sku.findById(input.skuId).select("konkName productId").lean();
 
@@ -41,35 +94,35 @@ export async function getSkuSalesByDateUtil(
 
   const sliceDate = toSliceDate(input.date);
   const prevDate = sliceDateMinusDays(sliceDate, 1);
-  const warmStart = sliceDateMinusDays(sliceDate, 31);
 
-  const currRows = await aggregateSkuSlices([
-    { $match: { konkName: sku.konkName, date: sliceDate } },
-    { $limit: 1 },
-    sliceDataProjectForSingleProductId(productKey),
-  ]);
-
-  const currDoc = currRows[0];
-  const currData = (currDoc?.data ?? {}) as Record<string, ISkuSliceDataItem>;
+  const currData = await loadSliceDataForProduct(
+    sku.konkName,
+    productKey,
+    sliceDate,
+  );
   const currItem = currData[productKey];
   if (!currItem) return null;
 
-  const rangeRows = await aggregateSkuSlices([
-    {
-      $match: {
-        konkName: sku.konkName,
-        date: { $gte: warmStart, $lte: sliceDate },
-      },
-    },
-    { $sort: { date: 1 } },
-    sliceDataProjectForSingleProductId(productKey),
+  const prevData = await loadSliceDataForProduct(
+    sku.konkName,
+    productKey,
+    prevDate,
+  );
+  const prevItem = prevData[productKey];
+
+  let warmStart = prevDate;
+  let byDate = new Map<number, Record<string, ISkuSliceDataItem>>([
+    [prevDate.getTime(), prevData],
+    [sliceDate.getTime(), currData],
   ]);
 
-  const byDate = new Map<number, Record<string, ISkuSliceDataItem>>();
-  for (const doc of rangeRows) {
-    byDate.set(
-      toSliceDate(doc.date).getTime(),
-      (doc.data ?? {}) as Record<string, ISkuSliceDataItem>
+  if (needsHoleLookback(prevItem, currItem)) {
+    warmStart = sliceDateMinusDays(sliceDate, LOOKBACK_DAYS_WHEN_HOLE);
+    byDate = await loadSliceDataRangeForProduct(
+      sku.konkName,
+      productKey,
+      warmStart,
+      sliceDate,
     );
   }
 

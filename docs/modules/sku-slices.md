@@ -12,11 +12,19 @@
 
 Поля: `konkName`, `date` (UTC-сутки), `data: Record<productId, { stock, price }>`. Уникальный индекс `(konkName, date)`.
 
-Срез — **сырьё** остатков/цен. Derived sales в Mixed не хранятся (эксперимент materialize-in-Mixed откатан: поля раздували документы и не ускоряли `$group`).
+Срез — **сырьё** остатков/цен. Derived sales в Mixed не хранятся (эксперимент materialize-in-Mixed откатан: поля раздували документы и не ускоряли `$group`). Runtime отчёты и cron по-прежнему читают/пишут этот документ.
 
 После scrape / compensation / patch / air ingest / post-corrections (balun/svbum/pack-flip) вызывается `afterSkuSliceStockMutation`: пересчёт плоского manufacturer rollup (`SkuManufacturerDaySales` в [sku-reporting](sku-reporting.md)) за день `D` и `D+1`. Формула rollup: `stock === -1` → продажи дня = 0; рост остатка = поставка = 0; иначе `max(0, prev − curr)`; затем `Konk.recountDays`. Без forward-fill.
 
 Backfill rollup: `npx tsx src/modules/sku-slices/scripts/runBackfillSkuSliceSales.ts --from YYYY-MM-DD --to YYYY-MM-DD [--konk name] [--apply]` (без `--apply` — dry-run). Снятие legacy `salesPcs`/`salesUah` из уже раздутых Mixed: `npx tsx src/modules/sku-slices/scripts/runUnsetMixedSliceSales.ts --from … --to … [--konk] [--apply]`. Смена `recountDays` требует повторного backfill rollup по konk.
+
+### SkuSliceMonth
+
+Параллельная месячная проекция ключей `SkuSlice.data`: один документ на `(konkName, productId, month)`, где `month` — UTC midnight 1-го числа, а `days` — карта `YYYY-MM-DD → { stock, price }`. Коллекция `sku_slice_months` не заменяет Mixed и не подключена к runtime-чтению отчётов — целевая форма для будущего точечного доступа по SKU без разворота дневного Mixed.
+
+`--days-back` считает календарные дни срезов, не число месяцев: окно из 30 дней, пересекающее границу месяца, пишет до двух month-документов на productId; в `days` попадают только дни из окна. Backfill читает `SkuSlice`, upsert'ит ключи дней (`$set days.YYYY-MM-DD`); `SkuSlice` не мутируется, дни вне окна в уже существующем month-доке не чистятся. Откат — drop коллекции `sku_slice_months`.
+
+Backfill: `npx tsx src/modules/sku-slices/scripts/runMaterializeSkuSliceMonths.ts --days-back 30 [--as-of YYYY-MM-DD] [--konk name] [--apply]` (без `--apply` — dry-run; в консоль пишется прогресс по каждому срезу).
 
 ## Связи
 

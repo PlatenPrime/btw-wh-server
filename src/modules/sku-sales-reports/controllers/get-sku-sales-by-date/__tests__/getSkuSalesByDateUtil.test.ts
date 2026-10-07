@@ -109,4 +109,73 @@ describe("getSkuSalesByDateUtil", () => {
     expect(result!.sales).toBe(0);
     expect(result!.revenue).toBe(0);
   });
+
+  it("carries stock across a hole when prev day is missing", async () => {
+    const sku = await Sku.create({
+      konkName: "air",
+      prodName: "gemar",
+      productId: "air-hole",
+      title: "T",
+      url: "https://example.com/hole",
+    });
+    const olderDate = new Date("2026-02-25T00:00:00.000Z");
+    const currDate = new Date("2026-03-01T00:00:00.000Z");
+    await SkuSlice.insertMany([
+      {
+        konkName: "air",
+        date: olderDate,
+        data: { "air-hole": { stock: 10, price: 5 } },
+      },
+      {
+        konkName: "air",
+        date: currDate,
+        data: { "air-hole": { stock: 6, price: 5 } },
+      },
+    ]);
+
+    const result = await getSkuSalesByDateUtil({
+      skuId: sku._id.toString(),
+      date: currDate,
+    });
+
+    expect(result).not.toBeNull();
+    expect(result!.sales).toBe(4);
+    expect(result!.revenue).toBe(20);
+    expect(result!.price).toBe(5);
+  });
+
+  it("expands lookback when curr stock is -1 and carries previous valid stock", async () => {
+    const sku = await Sku.create({
+      konkName: "air",
+      prodName: "gemar",
+      productId: "air-neg",
+      title: "T",
+      url: "https://example.com/neg",
+    });
+    const prevDate = new Date("2026-02-28T00:00:00.000Z");
+    const currDate = new Date("2026-03-01T00:00:00.000Z");
+    await SkuSlice.insertMany([
+      {
+        konkName: "air",
+        date: prevDate,
+        data: { "air-neg": { stock: 10, price: 5 } },
+      },
+      {
+        konkName: "air",
+        date: currDate,
+        data: { "air-neg": { stock: -1, price: 5 } },
+      },
+    ]);
+
+    const result = await getSkuSalesByDateUtil({
+      skuId: sku._id.toString(),
+      date: currDate,
+    });
+
+    expect(result).not.toBeNull();
+    // coalesced curr stock = 10 (carry), sales vs prev 10 → 0
+    expect(result!.sales).toBe(0);
+    expect(result!.price).toBe(5);
+    expect(result!.revenue).toBe(0);
+  });
 });
