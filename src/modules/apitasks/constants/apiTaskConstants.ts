@@ -20,6 +20,7 @@ export type ApiTaskPhase = (typeof API_TASK_PHASES)[number];
 
 export const API_TASK_KIND_IDS = [
   "sku-slices.skugr-run-today",
+  "sku-slices.post-corrections.run",
   "slice-compensation.run",
   "skugrs.fill-skus",
   "grabo-skus.sync",

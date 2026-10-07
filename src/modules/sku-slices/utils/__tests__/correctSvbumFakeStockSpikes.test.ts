@@ -45,16 +45,34 @@ describe("computeSvbumFakeStockPatchesForSeries", () => {
     ]);
   });
 
-  it("does not zero trailing spike before grace days", () => {
-    const series = [day(D0, 6_000_000), day(D1, 10_000)];
+  it("does not zero trailing spike with no day to the right", () => {
+    const series = [day(D0, 50), day(D1, 6_000_000)];
     const { patches } = computeSvbumFakeStockPatchesForSeries(
       "svbum-1",
       series,
       D0,
       D1,
-      2
+      1
     );
     expect(patches).toEqual([]);
+  });
+
+  it("zeros needle spike between normals after one day to the right", () => {
+    const series = [
+      day(D0, 12),
+      day(D1, 1_000_000),
+      day(D2, 12),
+    ];
+    const { patches } = computeSvbumFakeStockPatchesForSeries(
+      "svbum-1",
+      series,
+      D0,
+      D2,
+      1
+    );
+    expect(patches).toEqual([
+      { productId: "svbum-1", dateMs: D1, from: 1_000_000, to: 0 },
+    ]);
   });
 
   it("zeros lone spike after grace days, not the following normals", () => {
@@ -62,14 +80,13 @@ describe("computeSvbumFakeStockPatchesForSeries", () => {
       day(D0, 6_000_000),
       day(D1, 100),
       day(D2, 100),
-      day(D3, 100),
     ];
     const { patches } = computeSvbumFakeStockPatchesForSeries(
       "svbum-1",
       series,
       D0,
-      D3,
-      2
+      D2,
+      1
     );
     expect(patches).toEqual([
       { productId: "svbum-1", dateMs: D0, from: 6_000_000, to: 0 },
@@ -83,7 +100,7 @@ describe("computeSvbumFakeStockPatchesForSeries", () => {
       series,
       D0,
       D3,
-      2
+      1
     );
     expect(patches).toEqual([]);
   });
@@ -151,7 +168,7 @@ describe("computeSvbumFakeStockPatches", () => {
       ["b", [day(D0, 50), day(D1, 50), day(D2, 50), day(D3, 50), day(D4, 2_000_000)]],
     ]);
     // b has trailing spike at end with 0 days after — no patch for b
-    const { patches } = computeSvbumFakeStockPatches(map, D0, D4, 2);
+    const { patches } = computeSvbumFakeStockPatches(map, D0, D4, 1);
     expect(patches.map((p) => p.productId).sort()).toEqual(["a", "a", "a"]);
   });
 });

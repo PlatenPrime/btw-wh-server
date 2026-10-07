@@ -6,3 +6,4 @@ export { getPackFlipReviewController } from "./get-pack-flip-review/getPackFlipR
 export { getAirClientPendingController } from "./get-air-client-pending/getAirClientPendingController.js";
 export { putAirClientSkuSliceController } from "./put-air-client-sku-slice/putAirClientSkuSliceController.js";
 export { runSkugrSlicesTodayController } from "./run-skugr-slices-today/runSkugrSlicesTodayController.js";
+export { postSkuSlicePostCorrectionsController } from "./post-sku-slice-post-corrections/postSkuSlicePostCorrectionsController.js";

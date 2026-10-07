@@ -283,3 +283,21 @@
 `dates` — UTC YYYY-MM-DD, inclusive. Пустые массивы findings — скачков нет, не ошибка. Поле `patched` у finding — предлагаемый рескейл, не записан. `skuId` — Mongo `_id` документа Sku (пустая строка, если Sku нет). `imageUrl` — из документа Sku. `url` — страница конкурента.
 
 **Ошибки:** 400, 401, 403, 500.
+
+---
+
+### POST `/api/sku-slices/post-corrections/run`
+
+Постановка фоновой задачи post-pass коррекций за календарный диапазон (balun/svbum fake stock, pack-flip auto-apply konks, manufacturer rollup). Синхронно не выполняет коррекцию — создаёт ApiTask `sku-slices.post-corrections.run`; статус и результат — через [apitasks](apitasks.md).
+
+**Тело:**
+
+| Поле | Тип | Обязательно | Описание |
+|------|-----|-------------|----------|
+| dateFrom | string | да | YYYY-MM-DD, UTC-сутки, inclusive |
+| dateTo | string | да | YYYY-MM-DD, inclusive, не раньше dateFrom; диапазон ≤ 31 день |
+| apply | boolean | нет, default false | true — запись в SkuSlice и rollup; false — dry-run |
+
+**Ответ 202:** как `POST /api/apitasks` (`message`, `data.taskId`, `data.kind`, `data.status`, `data.pollIntervalMs`, …).
+
+**Ошибки:** 400 валидация; 401; 403; 409 параллельная задача на тот же диапазон; 429 лимит активных задач пользователя; 500.

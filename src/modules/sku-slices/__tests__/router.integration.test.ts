@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
+import { ApiTask } from "../../apitasks/models/ApiTask.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { SkuSlice } from "../models/SkuSlice.js";
 
@@ -343,6 +344,41 @@ describe("Sku-slices router integration", () => {
 
       expect(response.body.code).toBe("API_TASKS_MIGRATED");
       expect(response.body.kind).toBe("sku-slices.skugr-run-today");
+    });
+  });
+
+  describe("POST /api/sku-slices/post-corrections/run", () => {
+    beforeEach(async () => {
+      await ApiTask.deleteMany({});
+    });
+
+    it("401 without token", async () => {
+      await request(app)
+        .post("/api/sku-slices/post-corrections/run")
+        .send({ dateFrom: "2026-04-01", dateTo: "2026-04-03" })
+        .expect(401);
+    });
+
+    it("202 enqueues apitask for ADMIN", async () => {
+      const response = await request(app)
+        .post("/api/sku-slices/post-corrections/run")
+        .set(createAuthHeader())
+        .send({
+          dateFrom: "2026-04-01",
+          dateTo: "2026-04-03",
+          apply: false,
+        })
+        .expect(202);
+
+      expect(response.body.message).toBe("Api task accepted");
+      expect(response.body.data.kind).toBe("sku-slices.post-corrections.run");
+      expect(response.body.data.taskId).toBeTruthy();
+
+      const task = await ApiTask.findById(response.body.data.taskId).lean();
+      expect(task?.kind).toBe("sku-slices.post-corrections.run");
+      expect(task?.params).toMatchObject({
+        apply: false,
+      });
     });
   });
 });

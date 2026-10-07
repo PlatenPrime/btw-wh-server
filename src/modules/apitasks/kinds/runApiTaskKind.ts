@@ -7,6 +7,7 @@ import {
 } from "./apiTaskRunTypes.js";
 import {
   runSkugrsFillSkus,
+  runSkuSlicesPostCorrectionsRun,
   runSkuSlicesSkugrRunToday,
   runSliceCompensationRun,
 } from "./runners/runTier1ApiTaskKinds.js";
@@ -27,6 +28,7 @@ import {
 
 const RUNNERS: Record<ApiTaskKind, ApiTaskKindRunner> = {
   "sku-slices.skugr-run-today": runSkuSlicesSkugrRunToday,
+  "sku-slices.post-corrections.run": runSkuSlicesPostCorrectionsRun,
   "slice-compensation.run": runSliceCompensationRun,
   "skugrs.fill-skus": runSkugrsFillSkus,
   "grabo-skus.sync": runGraboSkusSync,

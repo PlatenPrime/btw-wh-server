@@ -1,5 +1,7 @@
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { runSkuSliceForSkugrTodayUtil } from "../../../sku-slices/controllers/run-skugr-slices-today/utils/runSkuSliceForSkugrTodayUtil.js";
+import { runSkuSlicePostCorrectionsUtil } from "../../../sku-slices/utils/runSkuSlicePostCorrectionsUtil.js";
+import { postSkuSlicePostCorrectionsSchema } from "../../../sku-slices/controllers/post-sku-slice-post-corrections/schemas/postSkuSlicePostCorrectionsSchema.js";
 import { runCompensatingSlicesForKonk } from "../../../slice-compensation/utils/runCompensatingSlicesForKonk.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../../skugrs/utils/fillSkugrSkusFromBrowserUtil.js";
 import { toSkugrDto } from "../../../skugrs/utils/toSkugrDto.js";
@@ -14,6 +16,36 @@ import {
   type ApiTaskKindRunner,
 } from "../apiTaskRunTypes.js";
 import { fillSkugrsApiTaskParamsSchema } from "../apiTaskKindDefinitions.js";
+
+export const runSkuSlicesPostCorrectionsRun: ApiTaskKindRunner = async (
+  params,
+  options,
+) => {
+  const parsed = postSkuSlicePostCorrectionsSchema.safeParse(params);
+  if (!parsed.success) {
+    return failApiTaskRun("Invalid params for sku-slices.post-corrections.run");
+  }
+  throwIfAborted(options?.signal);
+  const result = await runSkuSlicePostCorrectionsUtil({
+    ...parsed.data,
+    onProgress: options?.onProgress,
+    signal: options?.signal,
+  });
+  if (options?.userId) {
+    await createEventUtil({
+      userId: options.userId,
+      department: "sku-slices",
+      type: "other",
+      description:
+        "Post-corrections sku-slices " +
+        result.dateFrom +
+        "…" +
+        result.dateTo +
+        (result.apply ? " (apply)" : " (dry-run)"),
+    });
+  }
+  return okApiTaskRun({ ...result });
+};
 
 export const runSkuSlicesSkugrRunToday: ApiTaskKindRunner = async (
   params,

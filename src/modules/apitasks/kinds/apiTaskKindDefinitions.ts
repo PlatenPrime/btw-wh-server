@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { z } from "zod";
 import { RoleType } from "../../../constants/roles.js";
 import { runCompensatingSliceSchema } from "../../slice-compensation/controllers/run-compensating-slice/schemas/runCompensatingSliceSchema.js";
+import { postSkuSlicePostCorrectionsSchema } from "../../sku-slices/controllers/post-sku-slice-post-corrections/schemas/postSkuSlicePostCorrectionsSchema.js";
 import { runSkugrSlicesTodaySchema } from "../../sku-slices/controllers/run-skugr-slices-today/schemas/runSkugrSlicesTodaySchema.js";
 import { fixIncorrectSkuDataSchema } from "../../skus/controllers/fix-incorrect-sku-data/schemas/fixIncorrectSkuDataSchema.js";
 import { deleteKonkInvalidSkusParamsSchema } from "../../skus/controllers/delete-konk-invalid-skus/schemas/deleteKonkInvalidSkusSchema.js";
@@ -47,6 +48,20 @@ export const API_TASK_KIND_DEFINITIONS: Record<
     oldPath: "POST /api/sku-slices/skugr/:skugrId/run-today",
     getResourceKey: (params) =>
       typeof params.skugrId === "string" ? `skugr:${params.skugrId}` : undefined,
+  },
+  "sku-slices.post-corrections.run": {
+    kind: "sku-slices.post-corrections.run",
+    minRole: RoleType.ADMIN,
+    schema: postSkuSlicePostCorrectionsSchema,
+    oldPath: "POST /api/sku-slices/post-corrections/run",
+    getResourceKey: (params) => {
+      const from = params.dateFrom;
+      const to = params.dateTo;
+      if (from instanceof Date && to instanceof Date) {
+        return `post-corrections:${from.toISOString().slice(0, 10)}:${to.toISOString().slice(0, 10)}`;
+      }
+      return undefined;
+    },
   },
   "slice-compensation.run": {
     kind: "slice-compensation.run",

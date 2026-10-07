@@ -9,83 +9,20 @@ import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/s
 import { createLogger } from "../../../logging/createLogger.js";
 import { toNextKyivSliceDate } from "../../../utils/sliceDate.js";
 import { Sku } from "../../skus/models/Sku.js";
-import { packFlipAutoApplyKonks } from "../../slices/config/packFlipAutoApplyKonks.js";
 import { runSkuSliceForKonkUtil } from "../utils/runSkuSliceForKonkUtil.js";
-import { BALUN_FAKE_STOCK_CRON_DAYS_BACK } from "../../slices/config/balunFakeStockSentinel.js";
-import { correctBalunFakeStockSpikesUtil } from "../utils/correctBalunFakeStockSpikesUtil.js";
-import { correctSvbumFakeStockSpikesUtil } from "../utils/correctSvbumFakeStockSpikesUtil.js";
-import {
-  packFlipReviewDatesForSliceDay,
-  reviewPackFlipsUtil,
-} from "../utils/reviewPackFlipsUtil.js";
+import { runSkuSlicePostCorrectionsUtil } from "../utils/runSkuSlicePostCorrectionsUtil.js";
 import {
   getExcludedCompetitorSet,
   normalizeCompetitorName,
 } from "../../slices/config/excludedCompetitors.js";
-import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 const log = createLogger({ module: "sku-slices", job: "cron" });
-
-async function correctBalunFakeStockAfterSlices(
-  sliceDate: Date
-): Promise<void> {
-  try {
-    await correctBalunFakeStockSpikesUtil({
-      daysBack: BALUN_FAKE_STOCK_CRON_DAYS_BACK,
-      asOf: sliceDate,
-      apply: true,
-    });
-  } catch (error) {
-    log.error({ err: error }, "balun fake stock correction failed");
-    await sendCronAnalyticsReport(
-      formatCronErrorReport("Balun fake stock correction", error)
-    );
-  }
-}
-
-async function correctSvbumFakeStockAfterSlices(
-  sliceDate: Date
-): Promise<void> {
-  try {
-    await correctSvbumFakeStockSpikesUtil({
-      daysBack: 14,
-      asOf: sliceDate,
-      apply: true,
-    });
-  } catch (error) {
-    log.error({ err: error }, "svbum fake stock correction failed");
-    await sendCronAnalyticsReport(
-      formatCronErrorReport("Svbum fake stock correction", error)
-    );
-  }
-}
-
-async function reviewPackFlipsAfterSlices(sliceDate: Date): Promise<void> {
-  const dates = packFlipReviewDatesForSliceDay(sliceDate);
-  for (const konkName of packFlipAutoApplyKonks) {
-    try {
-      const review = await reviewPackFlipsUtil({
-        dates,
-        apply: true,
-        konkName,
-      });
-      await sendCronAnalyticsReport(formatPackFlipReport(review));
-    } catch (reviewError) {
-      log.error({ err: reviewError, konkName }, "pack-flip review failed");
-      await sendCronAnalyticsReport(
-        formatCronErrorReport(`Pack-flip review (${konkName})`, reviewError)
-      );
-    }
-  }
-}
 
 /**
  * Ежедневно в 20:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
  * Ключ дня среза — следующий календарный день в Киеве (как при старом запуске в полночь).
  * TG: отдельное сообщение после каждого konk (+ excluded в начале, если есть).
- * После всех срезов — коррекция фейкового stock у balun (7 дней ключа среза), затем
- * обнуление stock > 900000 у svbum (14 дней, сэндвич + trailing grace), затем pack-flip review
- * по packFlipAutoApplyKonks (3 дня, авто-рескейл инверсий).
+ * После всех срезов — post-pass (balun/svbum fake stock, pack-flip, manufacturer rollup).
  */
 export function startSkuSlicesCron(): CronJob {
   const job = new CronJob(
@@ -139,14 +76,38 @@ export function startSkuSlicesCron(): CronJob {
           })
         );
         log.info({ results }, "sku slices completed");
-        await correctBalunFakeStockAfterSlices(sliceDate);
-        await correctSvbumFakeStockAfterSlices(sliceDate);
-        await reviewPackFlipsAfterSlices(sliceDate);
-        await Promise.all(
-          konkNames.map((k) =>
-            afterSkuSliceStockMutation({ konkName: k, dayD: sliceDate }),
-          ),
-        );
+        await runSkuSlicePostCorrectionsUtil({
+          dateFrom: sliceDate,
+          dateTo: sliceDate,
+          apply: true,
+          rollupKonkNames: konkNames,
+          hooks: {
+            onBalunError: async (error) => {
+              log.error({ err: error }, "balun fake stock correction failed");
+              await sendCronAnalyticsReport(
+                formatCronErrorReport("Balun fake stock correction", error)
+              );
+            },
+            onSvbumError: async (error) => {
+              log.error({ err: error }, "svbum fake stock correction failed");
+              await sendCronAnalyticsReport(
+                formatCronErrorReport("Svbum fake stock correction", error)
+              );
+            },
+            onPackFlipSuccess: async (review) => {
+              await sendCronAnalyticsReport(formatPackFlipReport(review));
+            },
+            onPackFlipError: async (konkName, reviewError) => {
+              log.error({ err: reviewError, konkName }, "pack-flip review failed");
+              await sendCronAnalyticsReport(
+                formatCronErrorReport(
+                  `Pack-flip review (${konkName})`,
+                  reviewError
+                )
+              );
+            },
+          },
+        });
       } catch (error) {
         log.error({ err: error }, "sku slices cron failed");
         await sendCronAnalyticsReport(formatCronErrorReport("SKU slices", error));

@@ -5,7 +5,6 @@ import { correctSvbumFakeStockSpikesUtil } from "../correctSvbumFakeStockSpikesU
 const D0 = new Date("2026-09-13T00:00:00.000Z");
 const D1 = new Date("2026-09-14T00:00:00.000Z");
 const D2 = new Date("2026-09-15T00:00:00.000Z");
-const D3 = new Date("2026-09-16T00:00:00.000Z");
 
 async function seedSvbum(
   rows: Array<{
@@ -79,10 +78,10 @@ describe("correctSvbumFakeStockSpikesUtil", () => {
     expect(d2?.data?.["svbum-1"]).toEqual({ stock: 0, price: 99 });
   });
 
-  it("does not zero trailing spike before grace", async () => {
+  it("does not zero trailing spike on asOf with no day to the right", async () => {
     await seedSvbum([
-      { date: D0, data: { "svbum-1": { stock: 6_000_000, price: 1 } } },
-      { date: D1, data: { "svbum-1": { stock: 100, price: 1 } } },
+      { date: D0, data: { "svbum-1": { stock: 100, price: 1 } } },
+      { date: D1, data: { "svbum-1": { stock: 6_000_000, price: 1 } } },
     ]);
 
     const result = await correctSvbumFakeStockSpikesUtil({
@@ -93,21 +92,44 @@ describe("correctSvbumFakeStockSpikesUtil", () => {
     });
 
     expect(result.patched).toEqual([]);
+    const d1 = await SkuSlice.findOne({ konkName: "svbum", date: D1 }).lean();
+    expect(d1?.data?.["svbum-1"]).toEqual({ stock: 6_000_000, price: 1 });
+  });
+
+  it("zeros needle spike between normals after one day to the right", async () => {
+    await seedSvbum([
+      { date: D0, data: { "svbum-1": { stock: 12, price: 1 } } },
+      { date: D1, data: { "svbum-1": { stock: 1_000_000, price: 1 } } },
+      { date: D2, data: { "svbum-1": { stock: 12, price: 1 } } },
+    ]);
+
+    const result = await correctSvbumFakeStockSpikesUtil({
+      daysBack: 3,
+      asOf: D2,
+      apply: true,
+      lookbackDays: 0,
+    });
+
+    expect(result.patched).toEqual([
+      { productId: "svbum-1", date: "2026-09-14", from: 1_000_000, to: 0 },
+    ]);
     const d0 = await SkuSlice.findOne({ konkName: "svbum", date: D0 }).lean();
-    expect(d0?.data?.["svbum-1"]).toEqual({ stock: 6_000_000, price: 1 });
+    const d1 = await SkuSlice.findOne({ konkName: "svbum", date: D1 }).lean();
+    const d2 = await SkuSlice.findOne({ konkName: "svbum", date: D2 }).lean();
+    expect(d0?.data?.["svbum-1"]).toEqual({ stock: 12, price: 1 });
+    expect(d1?.data?.["svbum-1"]).toEqual({ stock: 0, price: 1 });
+    expect(d2?.data?.["svbum-1"]).toEqual({ stock: 12, price: 1 });
   });
 
   it("zeros lone spike after grace days", async () => {
     await seedSvbum([
       { date: D0, data: { "svbum-1": { stock: 6_000_000, price: 1 } } },
       { date: D1, data: { "svbum-1": { stock: 100, price: 1 } } },
-      { date: D2, data: { "svbum-1": { stock: 100, price: 1 } } },
-      { date: D3, data: { "svbum-1": { stock: 100, price: 1 } } },
     ]);
 
     const result = await correctSvbumFakeStockSpikesUtil({
-      daysBack: 4,
-      asOf: D3,
+      daysBack: 2,
+      asOf: D1,
       apply: true,
       lookbackDays: 0,
     });

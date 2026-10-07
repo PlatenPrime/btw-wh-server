@@ -87,6 +87,7 @@ TTL результата: 24 часа после `completed`.
 | kind | Старый URL | params | minRole |
 |------|------------|--------|---------|
 | sku-slices.skugr-run-today | POST `/api/sku-slices/skugr/:skugrId/run-today` | `skugrId` ObjectId string | ADMIN |
+| sku-slices.post-corrections.run | POST `/api/sku-slices/post-corrections/run` | `dateFrom`, `dateTo` string YYYY-MM-DD (inclusive, max 31 days); `apply?` boolean default false | ADMIN |
 | slice-compensation.run | POST `/api/slice-compensation/run` | `konkName` string | ADMIN |
 | skugrs.fill-skus | POST `/api/skugrs/id/:id/fill-skus` | `skugrId` string, `maxPages?` 1–200 | ADMIN |
 | grabo-skus.sync | POST `/api/grabo-skus/sync` | `{}` | ADMIN |
