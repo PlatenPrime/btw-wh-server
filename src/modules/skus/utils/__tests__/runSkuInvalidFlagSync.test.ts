@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { SkuSlice } from "../../../sku-slices/models/SkuSlice.js";
+import { SkuSliceMonth } from "../../../sku-slices/models/SkuSliceMonth.js";
+import { seedSkuSliceMonthDay } from "../../../sku-slices/utils/seedSkuSliceMonthDay.js";
 import { Sku } from "../../models/Sku.js";
 import { runSkuInvalidFlagSync } from "../runSkuInvalidFlagSync.js";
 
 describe("runSkuInvalidFlagSync", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("sets isInvalid true only when 7 consecutive days have -1/-1 for productId", async () => {
@@ -28,10 +29,8 @@ describe("runSkuInvalidFlagSync", () => {
     });
 
     for (const d of days) {
-      await SkuSlice.create({
-        konkName: "air",
-        date: d,
-        data: { "air-x": { stock: -1, price: -1 } },
+      await seedSkuSliceMonthDay("air", d, {
+        "air-x": { stock: -1, price: -1 },
       });
     }
 
@@ -40,7 +39,7 @@ describe("runSkuInvalidFlagSync", () => {
     expect(fresh?.isInvalid).toBe(true);
   });
 
-  it("sets isInvalid false when one day in window has no slice doc", async () => {
+  it("sets isInvalid false when one day in window has no slice point", async () => {
     const ref = new Date("2026-03-10T12:00:00.000Z");
     const windowEnd = new Date("2026-03-09T00:00:00.000Z");
     const days: Date[] = [];
@@ -61,10 +60,8 @@ describe("runSkuInvalidFlagSync", () => {
     for (let i = 0; i < days.length; i++) {
       if (i === 3) continue;
       const d = days[i]!;
-      await SkuSlice.create({
-        konkName: "air",
-        date: d,
-        data: { "air-y": { stock: -1, price: -1 } },
+      await seedSkuSliceMonthDay("air", d, {
+        "air-y": { stock: -1, price: -1 },
       });
     }
 
@@ -94,12 +91,10 @@ describe("runSkuInvalidFlagSync", () => {
     for (let i = 0; i < days.length; i++) {
       const d = days[i]!;
       const bad = i === days.length - 1;
-      await SkuSlice.create({
-        konkName: "air",
-        date: d,
-        data: {
-          "air-z": bad ? { stock: 5, price: 10 } : { stock: -1, price: -1 },
-        },
+      await seedSkuSliceMonthDay("air", d, {
+        "air-z": bad
+          ? { stock: -1, price: -1 }
+          : { stock: 1, price: 2 },
       });
     }
 

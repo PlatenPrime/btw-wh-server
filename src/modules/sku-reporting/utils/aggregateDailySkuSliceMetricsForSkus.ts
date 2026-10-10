@@ -5,11 +5,7 @@ import {
 } from "../../slices/utils/salesComparisonUtils.js";
 import { Konk } from "../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-import {
-  aggregateSkuSlices,
-  type SliceAggregateRowWithKonk,
-  sliceDataProjectForProductIdList,
-} from "../../sku-slices/utils/sliceDataAggregationStages.js";
+import { loadSkuSliceRowsForKonksProducts } from "../../sku-slices/utils/sliceDataAggregationStages.js";
 import {
   coalesceSkuSliceItemsAlongDates,
   sliceDateMinusDays,
@@ -45,19 +41,14 @@ export async function aggregateDailySkuSliceMetricsForSkus(
   if (skus.length === 0) return { ok: false };
 
   const konkNames = [...new Set(skus.map((s) => s.konkName))];
-  const allowedProductIds = [...new Set(skus.map((s) => s.productId))];
 
   const warmupStart = sliceDateMinusDays(dateFrom, 1);
 
-  const sliceDocs = await aggregateSkuSlices<SliceAggregateRowWithKonk>([
-    {
-      $match: {
-        konkName: { $in: konkNames },
-        date: { $gte: warmupStart, $lte: dateTo },
-      },
-    },
-    sliceDataProjectForProductIdList(allowedProductIds),
-  ]);
+  const sliceDocs = await loadSkuSliceRowsForKonksProducts(
+    skus,
+    warmupStart,
+    dateTo,
+  );
 
   const maps = buildSliceMapsByKonk(sliceDocs);
   const datesFull = enumerateReportingDates(warmupStart, dateTo);

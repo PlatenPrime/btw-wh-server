@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Art } from "../../../../../arts/models/Art.js";
-import { BtradeSlice } from "../../../../models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../../../models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../../../../utils/seedBtradeSliceMonthDay.js";
 import { getBtradeSliceRangeUtil } from "../getBtradeSliceRangeUtil.js";
 
 describe("getBtradeSliceRangeUtil", () => {
   beforeEach(async () => {
     await Art.deleteMany({});
-    await BtradeSlice.deleteMany({});
+    await BtradeSliceMonth.deleteMany({});
   });
 
   it("returns ok false when art missing", async () => {
@@ -21,9 +22,8 @@ describe("getBtradeSliceRangeUtil", () => {
   it("returns range items for existing slice data", async () => {
     await Art.create({ artikul: "ART-1", zone: "A" });
     const d1 = new Date("2026-03-01T00:00:00.000Z");
-    await BtradeSlice.create({
-      date: d1,
-      data: { "ART-1": { quantity: 5, price: 100 } },
+    await seedBtradeSliceMonthDay(d1, {
+      "ART-1": { quantity: 5, price: 100 },
     });
 
     const r = await getBtradeSliceRangeUtil({

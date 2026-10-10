@@ -1,4 +1,6 @@
 export { getSkuSliceController } from "./get-sku-slice/getSkuSliceController.js";
+export { getSkuSliceDayStatusController } from "./get-sku-slice-day-status/getSkuSliceDayStatusController.js";
+export { getSkuSliceDayInvalidController } from "./get-sku-slice-day-invalid/getSkuSliceDayInvalidController.js";
 export { getSkuSliceByDateController } from "./get-sku-slice-by-date/getSkuSliceByDateController.js";
 export { patchSkuSliceByDateController } from "./patch-sku-slice-by-date/patchSkuSliceByDateController.js";
 export { getSkuSliceRangeController } from "./get-sku-slice-range/getSkuSliceRangeController.js";

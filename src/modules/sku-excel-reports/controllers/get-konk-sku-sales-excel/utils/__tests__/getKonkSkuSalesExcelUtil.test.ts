@@ -3,15 +3,16 @@ import ExcelJS from "exceljs";
 import { Prod } from "../../../../../prods/models/Prod.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
 import { formatExcelDateHeaderUk } from "../../../../../../lib/excel/formatExcelDateHeaderUk.js";
 import { getKonkSkuSalesExcelUtil } from "../getKonkSkuSalesExcelUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getKonkSkuSalesExcelUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns ok false when no skus for konk/prod", async () => {
@@ -62,24 +63,14 @@ describe("getKonkSkuSalesExcelUtil", () => {
 
     const d1 = new Date("2026-03-01T00:00:00.000Z");
     const d2 = new Date("2026-03-02T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: d1,
-        data: {
+    await seedSkuSliceMonthDay("air", d1, {
           "air-sales-k-1": { stock: 5, price: 3 },
           "air-sales-k-2": { stock: 7, price: 4 },
-        },
-      },
-      {
-        konkName: "air",
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay("air", d2, {
           "air-sales-k-1": { stock: 4, price: 3 },
           "air-sales-k-2": { stock: 2, price: 4 },
-        },
-      },
-    ]);
+        });
 
     const result = await getKonkSkuSalesExcelUtil({
       konk: "air",
@@ -115,32 +106,18 @@ describe("getKonkSkuSalesExcelUtil", () => {
       title: "Z",
       url: "https://e.com/z",
     });
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: warm,
-        data: {
+    await seedSkuSliceMonthDay("air", warm, {
           "aaa-many-sales": { stock: 100, price: 1 },
           "zzz-high-revenue": { stock: 20, price: 50 },
-        },
-      },
-      {
-        konkName: "air",
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay("air", d1, {
           "aaa-many-sales": { stock: 80, price: 1 },
           "zzz-high-revenue": { stock: 19, price: 50 },
-        },
-      },
-      {
-        konkName: "air",
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay("air", d2, {
           "aaa-many-sales": { stock: 70, price: 1 },
           "zzz-high-revenue": { stock: 18, price: 50 },
-        },
-      },
-    ]);
+        });
 
     const result = await getKonkSkuSalesExcelUtil({
       konk: "air",
@@ -178,32 +155,18 @@ describe("getKonkSkuSalesExcelUtil", () => {
       title: "A",
       url: "https://e.com/a",
     });
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: warm,
-        data: {
+    await seedSkuSliceMonthDay("air", warm, {
           "aaa-low-sales": { stock: 10, price: 5 },
           "zzz-high-sales": { stock: 100, price: 2 },
-        },
-      },
-      {
-        konkName: "air",
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay("air", d1, {
           "aaa-low-sales": { stock: 9, price: 5 },
           "zzz-high-sales": { stock: 50, price: 2 },
-        },
-      },
-      {
-        konkName: "air",
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay("air", d2, {
           "aaa-low-sales": { stock: 8, price: 5 },
           "zzz-high-sales": { stock: 40, price: 2 },
-        },
-      },
-    ]);
+        });
 
     const result = await getKonkSkuSalesExcelUtil({
       konk: "air",
@@ -254,26 +217,16 @@ describe("getKonkSkuSalesExcelUtil", () => {
 
     const d1 = new Date("2026-06-01T00:00:00.000Z");
     const d2 = new Date("2026-06-02T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: d1,
-        data: {
+    await seedSkuSliceMonthDay("air", d1, {
           "air-skugr-a": { stock: 5, price: 3 },
           "air-skugr-b": { stock: 4, price: 4 },
           "air-skugr-c": { stock: 9, price: 1 },
-        },
-      },
-      {
-        konkName: "air",
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay("air", d2, {
           "air-skugr-a": { stock: 4, price: 3 },
           "air-skugr-b": { stock: 1, price: 4 },
           "air-skugr-c": { stock: 8, price: 1 },
-        },
-      },
-    ]);
+        });
 
     const result = await getKonkSkuSalesExcelUtil({
       konk: "air",
@@ -310,18 +263,8 @@ describe("getKonkSkuSalesExcelUtil", () => {
       url: "https://e.com/warmup",
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: warm,
-        data: { "air-first-day-delta": { stock: 10, price: 5 } },
-      },
-      {
-        konkName: "air",
-        date: d1,
-        data: { "air-first-day-delta": { stock: 7, price: 5 } },
-      },
-    ]);
+    await seedSkuSliceMonthDay("air", warm, { "air-first-day-delta": { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay("air", d1, { "air-first-day-delta": { stock: 7, price: 5 } });
 
     const result = await getKonkSkuSalesExcelUtil({
       konk: "air",
@@ -389,24 +332,14 @@ describe("getKonkSkuSalesExcelUtil", () => {
 
     const d1 = new Date("2026-08-01T00:00:00.000Z");
     const d2 = new Date("2026-08-02T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: d1,
-        data: {
+    await seedSkuSliceMonthDay("air", d1, {
           "air-all-p1": { stock: 5, price: 3 },
           "air-all-p2": { stock: 4, price: 4 },
-        },
-      },
-      {
-        konkName: "air",
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay("air", d2, {
           "air-all-p1": { stock: 4, price: 3 },
           "air-all-p2": { stock: 1, price: 4 },
-        },
-      },
-    ]);
+        });
 
     const result = await getKonkSkuSalesExcelUtil({
       konk: "air",

@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { shouldRefetchSkuSliceItem } from "../../../../slice-compensation/utils/shouldRefetchSkuSliceItem.js";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
+import { SkuSliceMonth } from "../../../models/SkuSliceMonth.js";
+import { seedSkuSliceMonthDay } from "../../../utils/seedSkuSliceMonthDay.js";
 import { getSkuSliceUtil } from "../utils/getSkuSliceUtil.js";
 
 const baseQuery = {
@@ -11,16 +12,14 @@ const baseQuery = {
 
 describe("getSkuSliceUtil", () => {
   beforeEach(async () => {
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     await Sku.deleteMany({});
   });
 
   it("returns slice when found by konkName and date", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date,
-      data: { "air-1": { stock: 10, price: 100 } },
+    await seedSkuSliceMonthDay("air", date, {
+      "air-1": { stock: 10, price: 100 },
     });
 
     const result = await getSkuSliceUtil({
@@ -59,10 +58,8 @@ describe("getSkuSliceUtil", () => {
       title: "T",
       url: "https://example.com/p1",
     });
-    await SkuSlice.create({
-      konkName: "air",
-      date,
-      data: { "air-1": { stock: 2, price: 5 } },
+    await seedSkuSliceMonthDay("air", date, {
+      "air-1": { stock: 2, price: 5 },
     });
 
     const result = await getSkuSliceUtil({
@@ -79,14 +76,10 @@ describe("getSkuSliceUtil", () => {
 
   it("paginates sorted entries by productId", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date,
-      data: {
-        "air-b": { stock: 1, price: 1 },
-        "air-a": { stock: 2, price: 2 },
-        "air-c": { stock: 3, price: 3 },
-      },
+    await seedSkuSliceMonthDay("air", date, {
+      "air-b": { stock: 1, price: 1 },
+      "air-a": { stock: 2, price: 2 },
+      "air-c": { stock: 3, price: 3 },
     });
 
     const page1 = await getSkuSliceUtil({
@@ -109,25 +102,23 @@ describe("getSkuSliceUtil", () => {
     expect(page2!.pagination.hasPrev).toBe(true);
   });
 
-  it("returns null when no slice for given konkName and date", async () => {
+  it("returns empty items when no points for given konkName and date", async () => {
     const result = await getSkuSliceUtil({
       ...baseQuery,
       konkName: "air",
       date: new Date("2025-03-01T00:00:00.000Z"),
     });
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
+    expect(result!.items).toEqual([]);
+    expect(result!.pagination.total).toBe(0);
   });
 
   it("with isInvalid true returns only refetch-like rows and total matches filter", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date,
-      data: {
-        "air-ok": { stock: 10, price: 100 },
-        "air-bad-full": { stock: -1, price: -1 },
-        "air-bad-price": { stock: 1, price: -5 },
-      },
+    await seedSkuSliceMonthDay("air", date, {
+      "air-ok": { stock: 10, price: 100 },
+      "air-bad-full": { stock: -1, price: -1 },
+      "air-bad-price": { stock: 1, price: -5 },
     });
 
     const result = await getSkuSliceUtil({
@@ -144,19 +135,17 @@ describe("getSkuSliceUtil", () => {
       "air-bad-price",
     ]);
     for (const row of result!.items) {
-      expect(shouldRefetchSkuSliceItem({ stock: row.stock, price: row.price })).toBe(
-        true
-      );
+      expect(
+        shouldRefetchSkuSliceItem({ stock: row.stock, price: row.price }),
+      ).toBe(true);
     }
     expect(shouldRefetchSkuSliceItem({ stock: 10, price: 100 })).toBe(false);
   });
 
   it("with isInvalid true and all valid entries yields total 0 and empty items", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date,
-      data: { "air-1": { stock: 1, price: 2 } },
+    await seedSkuSliceMonthDay("air", date, {
+      "air-1": { stock: 1, price: 2 },
     });
 
     const result = await getSkuSliceUtil({
@@ -173,15 +162,11 @@ describe("getSkuSliceUtil", () => {
 
   it("paginates invalid-only rows by productId", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date,
-      data: {
-        "air-ok": { stock: 1, price: 1 },
-        "air-bad-b": { stock: -1, price: -1 },
-        "air-bad-a": { stock: 1 },
-        "air-bad-c": { stock: 2, price: -1 },
-      },
+    await seedSkuSliceMonthDay("air", date, {
+      "air-ok": { stock: 1, price: 1 },
+      "air-bad-b": { stock: -1, price: -1 },
+      "air-bad-a": { stock: 1, price: -1 },
+      "air-bad-c": { stock: 2, price: -1 },
     });
 
     const page1 = await getSkuSliceUtil({

@@ -18,7 +18,7 @@ Sku — документ, описывающий единицу товара к�
 - `title`: string — название товара
 - `url`: string — ссылка на страницу товара у конкурента (уникальная)
 - `imageUrl`: string — URL изображения товара (по умолчанию `""`)
-- `isInvalid`: boolean — по умолчанию `false`; `true`, если в последнем недельном прогоне крона за **7 подряд** календарных дней среза (ключ даты как у `SkuSlice`) для этого `konkName` и `productId` в каждом из дней есть документ среза и в `data[productId]` одновременно `stock === -1` и `price === -1`. Если в один из дней документа среза нет — условие не выполняется, флаг сбрасывается в `false`.
+- `isInvalid`: boolean — по умолчанию `false`; `true`, если в последнем недельном прогоне крона за **7 подряд** календарных дней среза (ключ даты как у `SkuSliceMonth`) для этого `konkName` и `productId` в каждом из дней есть точка в `days[YYYY-MM-DD]` с одновременно `stock === -1` и `price === -1`. Если в один из дней точки нет — условие не выполняется, флаг сбрасывается в `false`.
 - `_id`, `createdAt`, `updatedAt`: системные поля MongoDB
 
 ## Связи между сущностями
@@ -68,7 +68,7 @@ Sku — документ, описывающий единицу товара к�
 
 ### Live-остаток и цена
 
-Эндпоинт **GET `/api/skus/id/:id/stock`** по запросу опрашивает сайт конкурента: по `konkName` выбирается скрапер, по `url` карточки читаются актуальные `stock` и `price`. Это не данные из `SkuSlice` и не Btrade — только live-снимок для карточки SKU на фронте. Поддерживаются air, balun, yumi, yumin, sharte, perfect, svbum, dojdevik. Для ручного дозаполнения срезов Air остаётся [frontend: air-client-sku-slices](../frontend/air-client-sku-slices.md). Подробности live UX — [frontend: sku-live-stock](../frontend/sku-live-stock.md).
+Эндпоинт **GET `/api/skus/id/:id/stock`** по запросу опрашивает сайт конкурента: по `konkName` выбирается скрапер, по `url` карточки читаются актуальные `stock` и `price`. Это не данные из `SkuSliceMonth` и не Btrade — только live-снимок для карточки SKU на фронте. Поддерживаются air, balun, yumi, yumin, sharte, perfect, svbum, dojdevik. Для ручного дозаполнения срезов Air остаётся [frontend: air-client-sku-slices](../frontend/air-client-sku-slices.md). Подробности live UX — [frontend: sku-live-stock](../frontend/sku-live-stock.md).
 
 ## API эндпоинты
 

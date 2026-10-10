@@ -1,5 +1,5 @@
 import { Sku } from "../../../../skus/models/Sku.js";
-import type { ISkuSliceDataItem } from "../../../../sku-slices/models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../../../sku-slices/models/skuSliceTypes.js";
 import {
   aggregateSkuSlices,
   sliceDataProjectForSingleProductId,

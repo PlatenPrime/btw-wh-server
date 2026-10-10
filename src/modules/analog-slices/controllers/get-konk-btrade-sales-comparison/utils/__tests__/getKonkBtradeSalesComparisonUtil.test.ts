@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Analog } from "../../../../../analogs/models/Analog.js";
 import { AnalogSlice } from "../../../../models/AnalogSlice.js";
-import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../../../../btrade-slices/models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../../../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { Konk } from "../../../../../konks/models/Konk.js";
 import { getKonkBtradeSalesComparisonUtil } from "../getKonkBtradeSalesComparisonUtil.js";
 
@@ -9,7 +10,7 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
   beforeEach(async () => {
     await Analog.deleteMany({});
     await AnalogSlice.deleteMany({});
-    await BtradeSlice.deleteMany({});
+    await BtradeSliceMonth.deleteMany({});
     await Konk.deleteMany({});
   });
 
@@ -82,29 +83,18 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
       },
     ]);
 
-    await BtradeSlice.insertMany([
-      {
-        date: d1,
-        data: {
-          [artikul1]: { quantity: 200, price: 12 },
-          [artikul2]: { quantity: 100, price: 22 },
-        },
-      },
-      {
-        date: d2,
-        data: {
-          [artikul1]: { quantity: 185, price: 12 },
-          [artikul2]: { quantity: 90, price: 22 },
-        },
-      },
-      {
-        date: d3,
-        data: {
-          [artikul1]: { quantity: 170, price: 12 },
-          [artikul2]: { quantity: 80, price: 22 },
-        },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul1]: { quantity: 200, price: 12 },
+      [artikul2]: { quantity: 100, price: 22 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul1]: { quantity: 185, price: 12 },
+      [artikul2]: { quantity: 90, price: 22 },
+    });
+    await seedBtradeSliceMonthDay(d3, {
+      [artikul1]: { quantity: 170, price: 12 },
+      [artikul2]: { quantity: 80, price: 22 },
+    });
 
     const result = await getKonkBtradeSalesComparisonUtil({
       konk: "air",
@@ -181,10 +171,12 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
     ]);
 
     // Btrade has sales
-    await BtradeSlice.insertMany([
-      { date: d1, data: { [artikul]: { quantity: 100, price: 12 } } },
-      { date: d2, data: { [artikul]: { quantity: 90, price: 12 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul]: { quantity: 100, price: 12 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul]: { quantity: 90, price: 12 },
+    });
 
     const result = await getKonkBtradeSalesComparisonUtil({
       konk: "air",
@@ -214,10 +206,12 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
     const d2 = new Date("2026-03-02T00:00:00.000Z");
 
     // Competitor: no slices at all (null stock => 0 sales => 0 revenue)
-    await BtradeSlice.insertMany([
-      { date: d1, data: { [artikul]: { quantity: 100, price: 12 } } },
-      { date: d2, data: { [artikul]: { quantity: 85, price: 12 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul]: { quantity: 100, price: 12 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul]: { quantity: 85, price: 12 },
+    });
 
     const result = await getKonkBtradeSalesComparisonUtil({
       konk: "air",
@@ -255,10 +249,12 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
       { konkName: "air", date: d1, data: { [artikul]: { stock: 10, price: 10 } } },
       { konkName: "air", date: d2, data: { [artikul]: { stock: 5, price: 10 } } },
     ]);
-    await BtradeSlice.insertMany([
-      { date: d1, data: { [artikul]: { quantity: 10, price: 10 } } },
-      { date: d2, data: { [artikul]: { quantity: 7, price: 10 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul]: { quantity: 10, price: 10 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul]: { quantity: 7, price: 10 },
+    });
 
     const result = await getKonkBtradeSalesComparisonUtil({
       konk: "air",
@@ -291,11 +287,15 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
       { konkName: "air", date: d1, data: { [artikul]: { stock: 7, price: 10 } } },
       { konkName: "air", date: d2, data: { [artikul]: { stock: 6, price: 10 } } },
     ]);
-    await BtradeSlice.insertMany([
-      { date: warm, data: { [artikul]: { quantity: 20, price: 8 } } },
-      { date: d1, data: { [artikul]: { quantity: 19, price: 8 } } },
-      { date: d2, data: { [artikul]: { quantity: 17, price: 8 } } },
-    ]);
+    await seedBtradeSliceMonthDay(warm, {
+      [artikul]: { quantity: 20, price: 8 },
+    });
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul]: { quantity: 19, price: 8 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul]: { quantity: 17, price: 8 },
+    });
 
     const result = await getKonkBtradeSalesComparisonUtil({
       konk: "air",

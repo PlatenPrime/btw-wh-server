@@ -1,10 +1,8 @@
 import { Analog } from "../../../../analogs/models/Analog.js";
 import { Art } from "../../../../arts/models/Art.js";
 import { Prod } from "../../../../prods/models/Prod.js";
-import {
-  BtradeSlice,
-  type IBtradeSliceDataItem,
-} from "../../../../btrade-slices/models/BtradeSlice.js";
+import type { IBtradeSliceDataItem } from "../../../../btrade-slices/models/btradeSliceTypes.js";
+import { loadPointsForArtikulsRange } from "../../../../btrade-slices/utils/btradeSliceMonthStore.js";
 import {
   AnalogSlice,
   type IAnalogSliceDataItem,
@@ -157,27 +155,23 @@ export async function getKonkBtradeComparisonRangeUtil(
     }
   }
 
-  const btradeSlices = await BtradeSlice.find({
-    date: { $gte: warmStart, $lte: dateTo },
-  })
-    .select("date data")
-    .lean();
-
-  const btradeByArtikulAndDate = new Map<string, Map<number, IBtradeSliceDataItem>>();
-  for (const slice of btradeSlices) {
-    const normalizedDate = toSliceDate(slice.date);
-    const dateKey = normalizedDate.getTime();
-    const dataRecord = (slice.data ?? {}) as Record<string, IBtradeSliceDataItem>;
-
-    for (const [artikul, item] of Object.entries(dataRecord)) {
-      if (!artikulSet.has(artikul)) continue;
-      let byDate = btradeByArtikulAndDate.get(artikul);
-      if (!byDate) {
-        byDate = new Map<number, IBtradeSliceDataItem>();
-        btradeByArtikulAndDate.set(artikul, byDate);
-      }
-      byDate.set(dateKey, item);
+  const btradePoints = await loadPointsForArtikulsRange(
+    [...artikulSet],
+    warmStart,
+    dateTo,
+  );
+  const btradeByArtikulAndDate = new Map<
+    string,
+    Map<number, IBtradeSliceDataItem>
+  >();
+  for (const point of btradePoints) {
+    if (!artikulSet.has(point.artikul)) continue;
+    let byDate = btradeByArtikulAndDate.get(point.artikul);
+    if (!byDate) {
+      byDate = new Map<number, IBtradeSliceDataItem>();
+      btradeByArtikulAndDate.set(point.artikul, byDate);
     }
+    byDate.set(toSliceDate(point.date).getTime(), point.item);
   }
 
   const dateKeys: number[] = [];

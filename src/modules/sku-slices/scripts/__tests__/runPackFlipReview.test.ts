@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import mongoose from "mongoose";
-import { SkuSlice } from "../../models/SkuSlice.js";
 import {
   executePackFlipReviewCli,
   resolvePackFlipCliDates,
   runPackFlipReviewConnected,
 } from "../runPackFlipReview.js";
+import { seedSkuSliceMonthDay } from "../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../../utils/skuSliceMonthStore.js";
 
 describe("resolvePackFlipCliDates", () => {
   it("uses explicit from/to range", () => {
@@ -54,7 +56,7 @@ describe("resolvePackFlipCliDates", () => {
 
 describe("executePackFlipReviewCli", () => {
   beforeEach(async () => {
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     vi.restoreAllMocks();
   });
 
@@ -63,21 +65,9 @@ describe("executePackFlipReviewCli", () => {
     const d0 = new Date("2026-09-13T00:00:00.000Z");
     const d1 = new Date("2026-09-14T00:00:00.000Z");
     const d2 = new Date("2026-09-15T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: d0,
-      data: { "perfect-1": { stock: 100, price: 100 } },
-    });
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: d1,
-      data: { "perfect-1": { stock: 10000, price: 1 } },
-    });
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: d2,
-      data: { "perfect-1": { stock: 100, price: 100 } },
-    });
+    await seedSkuSliceMonthDay("perfect", d0, { "perfect-1": { stock: 100, price: 100 } });
+    await seedSkuSliceMonthDay("perfect", d1, { "perfect-1": { stock: 10000, price: 1 } });
+    await seedSkuSliceMonthDay("perfect", d2, { "perfect-1": { stock: 100, price: 100 } });
 
     const result = await executePackFlipReviewCli([
       "--from",
@@ -89,8 +79,7 @@ describe("executePackFlipReviewCli", () => {
 
     expect(result.patched).toHaveLength(1);
     expect(log).toHaveBeenCalledOnce();
-    const mid = await SkuSlice.findOne({ konkName: "perfect", date: d1 }).lean();
-    expect(mid?.data["perfect-1"]).toEqual({ stock: 100, price: 100 });
+    expect(await getDayPoint("perfect", "perfect-1", d1)).toEqual({ stock: 100, price: 100 });
   });
 });
 

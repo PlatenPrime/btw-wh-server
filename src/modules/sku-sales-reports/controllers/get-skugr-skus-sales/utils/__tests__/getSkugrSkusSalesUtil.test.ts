@@ -2,15 +2,16 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../../../konks/models/Konk.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
 import { getSkugrSkusSalesUtil } from "../getSkugrSkusSalesUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getSkugrSkusSalesUtil", () => {
   beforeEach(async () => {
     await Konk.deleteMany({});
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns ok false when skugr missing", async () => {
@@ -81,32 +82,18 @@ describe("getSkugrSkusSalesUtil", () => {
       skus: [skuA._id, skuB._id],
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-a`]: { stock: 10, price: 5 },
           [`${konk}-b`]: { stock: 20, price: 2 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-a`]: { stock: 7, price: 5 },
           [`${konk}-b`]: { stock: 18, price: 2 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d2, {
           [`${konk}-a`]: { stock: 5, price: 5 },
           [`${konk}-b`]: { stock: 15, price: 2 },
-        },
-      },
-    ]);
+        });
 
     const result = await getSkugrSkusSalesUtil({
       skugrId: skugr._id.toString(),
@@ -181,32 +168,18 @@ describe("getSkugrSkusSalesUtil", () => {
       skus: [skuFlat._id, skuSold._id],
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-flat`]: { stock: 10, price: 5 },
           [`${konk}-sold`]: { stock: 10, price: 5 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-flat`]: { stock: 10, price: 5 },
           [`${konk}-sold`]: { stock: 7, price: 5 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d2, {
           [`${konk}-flat`]: { stock: 10, price: 5 },
           [`${konk}-sold`]: { stock: 5, price: 5 },
-        },
-      },
-    ]);
+        });
 
     const result = await getSkugrSkusSalesUtil({
       skugrId: skugr._id.toString(),

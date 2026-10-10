@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { toSliceDate } from "../../../../../../utils/sliceDate.js";
+import { seedSkuSliceMonthDay } from "../../../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../../../../utils/skuSliceMonthStore.js";
 
 vi.mock("../../../../../skus/utils/getSkuStockDataUtil.js", () => ({
   getSkuStockDataUtil: vi.fn(),
@@ -15,14 +18,13 @@ vi.mock("../../../../../../utils/jitterMs.js", () => ({
 import { getSkuStockDataUtil } from "../../../../../skus/utils/getSkuStockDataUtil.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { runSkuSliceForSkugrTodayUtil } from "../runSkuSliceForSkugrTodayUtil.js";
 
 describe("runSkuSliceForSkugrTodayUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     vi.mocked(getSkuStockDataUtil).mockReset();
   });
 
@@ -55,12 +57,6 @@ describe("runSkuSliceForSkugrTodayUtil", () => {
       errors: 0,
     });
     expect(result!.sliceDate).toEqual(toSliceDate(new Date()));
-
-    const slice = await SkuSlice.findOne({
-      konkName: "perfect",
-      date: result!.sliceDate,
-    }).lean();
-    expect(slice).not.toBeNull();
   });
 
   it("scrapes and overwrites existing points", async () => {
@@ -79,11 +75,7 @@ describe("runSkuSliceForSkugrTodayUtil", () => {
       skus: [sku._id],
     });
     const today = toSliceDate(new Date());
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: today,
-      data: { "perfect-ow": { stock: 1, price: 2 } },
-    });
+    await seedSkuSliceMonthDay("perfect", today, { "perfect-ow": { stock: 1, price: 2 } });
 
     vi.mocked(getSkuStockDataUtil).mockResolvedValue({
       stock: 10,
@@ -102,11 +94,9 @@ describe("runSkuSliceForSkugrTodayUtil", () => {
     });
     expect(getSkuStockDataUtil).toHaveBeenCalledWith(sku._id.toString());
 
-    const stored = await SkuSlice.findOne({
-      konkName: "perfect",
-      date: today,
-    }).lean();
-    expect(stored?.data["perfect-ow"]).toEqual({ stock: 10, price: 99 });
+    expect(
+      await getDayPoint("perfect", "perfect-ow", result!.sliceDate),
+    ).toEqual({ stock: 10, price: 99 });
   });
 
   it("counts invalid when stock is -1", async () => {
@@ -141,11 +131,9 @@ describe("runSkuSliceForSkugrTodayUtil", () => {
       errors: 0,
     });
 
-    const stored = await SkuSlice.findOne({
-      konkName: "perfect",
-      date: result!.sliceDate,
-    }).lean();
-    expect(stored?.data["perfect-inv"]).toEqual({ stock: -1, price: -1 });
+    expect(
+      await getDayPoint("perfect", "perfect-inv", result!.sliceDate),
+    ).toEqual({ stock: -1, price: -1 });
   });
 
   it("counts sku without productId as invalid", async () => {

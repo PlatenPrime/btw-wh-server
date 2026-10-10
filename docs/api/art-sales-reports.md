@@ -1,6 +1,6 @@
 # API JSON-отчётов продаж артикула Btrade
 
-Базовый путь: `/api/art-sales-reports`. Продажи и выручка по одному `Art.artikul` из `BtradeSlice`. Нормализация `-1` — через [art-reporting](../modules/art-reporting.md).
+Базовый путь: `/api/art-sales-reports`. Продажи и выручка по одному `Art.artikul` из `btrade_slice_months`. Нормализация `-1` — через [art-reporting](../modules/art-reporting.md).
 
 Доступ: checkAuth + checkRoles(ADMIN).
 

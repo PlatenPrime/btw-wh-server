@@ -1,6 +1,6 @@
 # API графиков SKU vs Btrade
 
-Базовый путь: `/api/sku-chart-reports`. JSON для chart-data и pie по конкуренту и производителю. Сравнение с Btrade через Art и BtradeSlice (см. [миграцию](sku-api-migration.md)).
+Базовый путь: `/api/sku-chart-reports`. JSON для chart-data и pie по конкуренту и производителю. Сравнение с Btrade через Art и `btrade_slice_months` (см. [миграцию](sku-api-migration.md)).
 
 Доступ: checkAuth + checkRoles(ADMIN).
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Analog } from "../../../../../analogs/models/Analog.js";
 import { AnalogSlice } from "../../../../models/AnalogSlice.js";
-import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
+import { seedBtradeSliceMonthDay } from "../../../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { getKonkBtradeStockComparisonUtil } from "../getKonkBtradeStockComparisonUtil.js";
 
 describe("getKonkBtradeStockComparisonUtil", () => {
@@ -74,29 +74,18 @@ describe("getKonkBtradeStockComparisonUtil", () => {
       },
     ]);
 
-    await BtradeSlice.insertMany([
-      {
-        date: d1,
-        data: {
-          [artikul1]: { quantity: 200, price: 12 },
-          [artikul2]: { quantity: 100, price: 22 },
-        },
-      },
-      {
-        date: d2,
-        data: {
-          [artikul1]: { quantity: 185, price: 12 },
-          [artikul2]: { quantity: 90, price: 22 },
-        },
-      },
-      {
-        date: d3,
-        data: {
-          [artikul1]: { quantity: 170, price: 12 },
-          [artikul2]: { quantity: 80, price: 22 },
-        },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul1]: { quantity: 200, price: 12 },
+      [artikul2]: { quantity: 100, price: 22 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul1]: { quantity: 185, price: 12 },
+      [artikul2]: { quantity: 90, price: 22 },
+    });
+    await seedBtradeSliceMonthDay(d3, {
+      [artikul1]: { quantity: 170, price: 12 },
+      [artikul2]: { quantity: 80, price: 22 },
+    });
 
     const result = await getKonkBtradeStockComparisonUtil({
       konk: "air",
@@ -157,10 +146,12 @@ describe("getKonkBtradeStockComparisonUtil", () => {
     const d2 = new Date("2026-03-02T00:00:00.000Z");
 
     // No AnalogSlice data => analogStock will be null => treated as 0
-    await BtradeSlice.insertMany([
-      { date: d1, data: { [artikul]: { quantity: 100, price: 12 } } },
-      { date: d2, data: { [artikul]: { quantity: 90, price: 12 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul]: { quantity: 100, price: 12 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul]: { quantity: 90, price: 12 },
+    });
 
     const result = await getKonkBtradeStockComparisonUtil({
       konk: "air",
@@ -192,10 +183,12 @@ describe("getKonkBtradeStockComparisonUtil", () => {
     const d2 = new Date("2026-03-02T00:00:00.000Z");
 
     // No competitor slices at all => competitor stock = 0 => pct = null
-    await BtradeSlice.insertMany([
-      { date: d1, data: { [artikul]: { quantity: 100, price: 12 } } },
-      { date: d2, data: { [artikul]: { quantity: 90, price: 12 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul]: { quantity: 100, price: 12 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul]: { quantity: 90, price: 12 },
+    });
 
     const result = await getKonkBtradeStockComparisonUtil({
       konk: "air",

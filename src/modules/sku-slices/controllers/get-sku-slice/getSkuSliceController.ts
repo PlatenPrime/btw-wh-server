@@ -1,35 +1,22 @@
 import { Request, Response } from "express";
-import { getSkuSliceQuerySchema } from "./schemas/getSkuSliceQuerySchema.js";
-import { getSkuSliceUtil } from "./utils/getSkuSliceUtil.js";
 
 /**
- * @desc    Срез SKU по конкуренту и дате (пагинация, строки с маппингом на Sku)
- * @route   GET /api/sku-slices?konkName=&date=&page=&limit=&isInvalid=
+ * @desc    Legacy дамп дневного Mixed — снят. Используй day-status / day-invalid.
+ * @route   GET /api/sku-slices
  */
 export const getSkuSliceController = async (
-  req: Request,
-  res: Response
+  _req: Request,
+  res: Response,
 ): Promise<void> => {
-  const parseResult = getSkuSliceQuerySchema.safeParse(req.query);
-  if (!parseResult.success) {
-    res.status(400).json({
-      message: "Validation error",
-      errors: parseResult.error.errors,
-    });
-    return;
-  }
-
-  const result = await getSkuSliceUtil(parseResult.data);
-  if (!result) {
-    res.status(404).json({ message: "Sku slice not found" });
-    return;
-  }
-
-  const { items, pagination, konkName, date } = result;
-
-  res.status(200).json({
-    message: "Sku slice retrieved successfully",
-    data: { konkName, date, items },
-    pagination,
+  res.status(410).json({
+    message:
+      "GET /api/sku-slices removed. Use GET /api/sku-slices/day-status and GET /api/sku-slices/day-invalid",
+    errors: [
+      {
+        code: "SKU_SLICE_DAY_LIST_GONE",
+        dayStatus: "/api/sku-slices/day-status?konkName=&date=",
+        dayInvalid: "/api/sku-slices/day-invalid?konkName=&date=&page=&limit=",
+      },
+    ],
   });
 };

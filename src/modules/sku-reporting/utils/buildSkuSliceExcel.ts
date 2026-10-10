@@ -10,7 +10,7 @@ import {
 import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
 import { enumerateSliceDates } from "../../slices/utils/enumerateSliceDates.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-import type { ISkuSliceDataItem } from "../../sku-slices/models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../sku-slices/models/skuSliceTypes.js";
 import {
   coalesceSkuSliceItemsAlongDates,
   sliceDateMinusDays,

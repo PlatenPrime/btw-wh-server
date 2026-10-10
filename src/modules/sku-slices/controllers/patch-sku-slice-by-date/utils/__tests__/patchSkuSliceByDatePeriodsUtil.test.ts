@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { patchSkuSliceByDatePeriodsUtil } from "../patchSkuSliceByDatePeriodsUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../../../../utils/skuSliceMonthStore.js";
 
 describe("patchSkuSliceByDatePeriodsUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("writes same values across multiple periods", async () => {
@@ -20,11 +22,7 @@ describe("patchSkuSliceByDatePeriodsUtil", () => {
     const d1 = new Date("2026-09-20T00:00:00.000Z");
     const d2 = new Date("2026-09-21T00:00:00.000Z");
     const d10 = new Date("2026-09-30T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: d2,
-      data: { "perfect-periods": { stock: 60, price: 5.5 } },
-    });
+    await seedSkuSliceMonthDay("perfect", d2, { "perfect-periods": { stock: 60, price: 5.5 } });
 
     const result = await patchSkuSliceByDatePeriodsUtil({
       skuId: sku._id.toString(),
@@ -58,11 +56,7 @@ describe("patchSkuSliceByDatePeriodsUtil", () => {
     });
 
     for (const date of [d1, d2, d10]) {
-      const stored = await SkuSlice.findOne({
-        konkName: "perfect",
-        date,
-      }).lean();
-      expect(stored?.data["perfect-periods"]).toEqual({
+      expect(await getDayPoint("perfect", "perfect-periods", date)).toEqual({
         stock: 3,
         price: 110,
       });

@@ -1,16 +1,24 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Art } from "../../../../../arts/models/Art.js";
-import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../../../../btrade-slices/models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../../../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
 import { getKonkProdSkuSalesChartDataUtil } from "../getKonkProdSkuSalesChartDataUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
+import { SkuManufacturerDaySales } from "../../../../../sku-reporting/models/SkuManufacturerDaySales.js";
+import { BtradeManufacturerDaySales } from "../../../../../sku-reporting/models/BtradeManufacturerDaySales.js";
+import { afterSkuSliceStockMutation } from "../../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
+import { afterBtradeSliceStockMutation } from "../../../../../sku-reporting/utils/materializeBtradeManufacturerSalesUtil.js";
 
 describe("getKonkProdSkuSalesChartDataUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
-    await BtradeSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
+    await BtradeSliceMonth.deleteMany({});
     await Art.deleteMany({});
+    await SkuManufacturerDaySales.deleteMany({});
+    await BtradeManufacturerDaySales.deleteMany({});
   });
 
   it("sums competitor sales across skus and btrade sales across all Art artikuls for prod", async () => {
@@ -44,41 +52,26 @@ describe("getKonkProdSkuSalesChartDataUtil", () => {
     const d1 = new Date("2026-09-01T00:00:00.000Z");
     const d2 = new Date("2026-09-02T00:00:00.000Z");
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d1,
-        data: {
-          [`${konk}-a`]: { stock: 10, price: 2 },
-          [`${konk}-b`]: { stock: 4, price: 3 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: {
-          [`${konk}-a`]: { stock: 7, price: 2 },
-          [`${konk}-b`]: { stock: 2, price: 3 },
-        },
-      },
-    ]);
+    await seedSkuSliceMonthDay(konk, d1, {
+      [`${konk}-a`]: { stock: 10, price: 2 },
+      [`${konk}-b`]: { stock: 4, price: 3 },
+    });
+    await seedSkuSliceMonthDay(konk, d2, {
+      [`${konk}-a`]: { stock: 7, price: 2 },
+      [`${konk}-b`]: { stock: 2, price: 3 },
+    });
 
-    await BtradeSlice.insertMany([
-      {
-        date: d1,
-        data: {
-          [btA]: { quantity: 40, price: 10 },
-          [btB]: { quantity: 20, price: 11 },
-        },
-      },
-      {
-        date: d2,
-        data: {
-          [btA]: { quantity: 35, price: 10 },
-          [btB]: { quantity: 18, price: 11 },
-        },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [btA]: { quantity: 40, price: 10 },
+      [btB]: { quantity: 20, price: 11 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [btA]: { quantity: 35, price: 10 },
+      [btB]: { quantity: 18, price: 11 },
+    });
+
+    await afterSkuSliceStockMutation({ konkName: konk, dayD: d1 });
+    await afterBtradeSliceStockMutation({ dayD: d1 });
 
     const r = await getKonkProdSkuSalesChartDataUtil({
       konk,
@@ -136,41 +129,26 @@ describe("getKonkProdSkuSalesChartDataUtil", () => {
     const d1 = new Date("2026-10-10T00:00:00.000Z");
     const d2 = new Date("2026-10-11T00:00:00.000Z");
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d1,
-        data: {
-          [`${konk}-a`]: { stock: 10, price: 2 },
-          [`${konk}-b`]: { stock: 6, price: 3 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: {
-          [`${konk}-a`]: { stock: 7, price: 2 },
-          [`${konk}-b`]: { stock: 3, price: 3 },
-        },
-      },
-    ]);
+    await seedSkuSliceMonthDay(konk, d1, {
+      [`${konk}-a`]: { stock: 10, price: 2 },
+      [`${konk}-b`]: { stock: 6, price: 3 },
+    });
+    await seedSkuSliceMonthDay(konk, d2, {
+      [`${konk}-a`]: { stock: 7, price: 2 },
+      [`${konk}-b`]: { stock: 3, price: 3 },
+    });
 
-    await BtradeSlice.insertMany([
-      {
-        date: d1,
-        data: {
-          [bt1]: { quantity: 40, price: 10 },
-          [bt2]: { quantity: 24, price: 10 },
-        },
-      },
-      {
-        date: d2,
-        data: {
-          [bt1]: { quantity: 35, price: 10 },
-          [bt2]: { quantity: 20, price: 10 },
-        },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [bt1]: { quantity: 40, price: 10 },
+      [bt2]: { quantity: 24, price: 10 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [bt1]: { quantity: 35, price: 10 },
+      [bt2]: { quantity: 20, price: 10 },
+    });
+
+    await afterSkuSliceStockMutation({ konkName: konk, dayD: d1 });
+    await afterBtradeSliceStockMutation({ dayD: d1 });
 
     const oneProd = await getKonkProdSkuSalesChartDataUtil({
       konk,

@@ -4,7 +4,8 @@ import mongoose from "mongoose";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getMongoUri } from "../../../config/getMongoUri.js";
-import { SkuSlice } from "../models/SkuSlice.js";
+import { SkuSliceMonth } from "../models/SkuSliceMonth.js";
+import { toSliceMonthDate } from "../utils/skuSliceMonthKeys.js";
 import { materializeSkuSliceSalesDateRange } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 import { parseBackfillSkuSliceSalesCliArgs } from "./parseBackfillSkuSliceSalesCliArgs.js";
 
@@ -33,9 +34,11 @@ export async function executeBackfillSkuSliceSalesCli(
   );
 
   const konkFilter = args.konkName ? { konkName: args.konkName } : {};
-  const konkNames = await SkuSlice.distinct("konkName", {
+  const monthFrom = toSliceMonthDate(args.from);
+  const monthTo = toSliceMonthDate(args.to);
+  const konkNames = await SkuSliceMonth.distinct("konkName", {
     ...konkFilter,
-    date: { $gte: args.from, $lte: args.to },
+    month: { $gte: monthFrom, $lte: monthTo },
   });
   const sorted = konkNames.sort();
   console.log(`[backfill-sku-rollup] konks=${sorted.length}`);

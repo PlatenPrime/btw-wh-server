@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
 import "../../../../../test/setup.js";
-import { BtradeSlice } from "../../../models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../../models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../../../utils/seedBtradeSliceMonthDay.js";
 import { getBtradeSliceController } from "../getBtradeSliceController.js";
 
 describe("getBtradeSliceController", () => {
@@ -9,7 +10,8 @@ describe("getBtradeSliceController", () => {
   let responseJson: Record<string, unknown>;
   let responseStatus: { code?: number };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await BtradeSliceMonth.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -26,9 +28,8 @@ describe("getBtradeSliceController", () => {
 
   it("200: returns slice for valid date query", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await BtradeSlice.create({
-      date,
-      data: { "ART-1": { price: 100, quantity: 5 } },
+    await seedBtradeSliceMonthDay(date, {
+      "ART-1": { price: 100, quantity: 5 },
     });
 
     const req = { query: { date: "2025-03-01" } } as unknown as Request;

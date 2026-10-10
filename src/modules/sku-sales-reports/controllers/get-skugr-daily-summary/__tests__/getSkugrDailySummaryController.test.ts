@@ -2,8 +2,9 @@ import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../../../../sku-slices/models/SkuSlice.js";
 import { getSkugrDailySummaryController } from "../getSkugrDailySummaryController.js";
+import { seedSkuSliceMonthDay } from "../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getSkugrDailySummaryController", () => {
   let res: Response;
@@ -13,7 +14,7 @@ describe("getSkugrDailySummaryController", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     responseStatus = {};
     responseJson = {};
     res = {
@@ -54,11 +55,7 @@ describe("getSkugrDailySummaryController", () => {
       skus: [sku._id],
     });
     const d = new Date("2026-07-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "dc-k",
-      date: d,
-      data: { "dc-1": { stock: 7, price: 3 } },
-    });
+    await seedSkuSliceMonthDay("dc-k", d, { "dc-1": { stock: 7, price: 3 } });
 
     const req = {
       params: { skugrId: skugr._id.toString() },

@@ -7,7 +7,8 @@ import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
 import { ApiTask } from "../../apitasks/models/ApiTask.js";
 import { Sku } from "../../skus/models/Sku.js";
-import { SkuSlice } from "../models/SkuSlice.js";
+import { seedSkuSliceMonthDay } from "../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../models/SkuSliceMonth.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
   const secret =
@@ -23,7 +24,7 @@ const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
 describe("Sku-slices router integration", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   describe("auth guards", () => {
@@ -83,41 +84,14 @@ describe("Sku-slices router integration", () => {
   });
 
   describe("GET /api/sku-slices", () => {
-    it("400 when query validation fails", async () => {
+    it("410 gone with migration pointers", async () => {
       const response = await request(app)
         .get("/api/sku-slices")
         .set(createAuthHeader())
-        .query({ date: "2026-06-01" })
-        .expect(400);
+        .query({ konkName: "air", date: "2026-06-01" })
+        .expect(410);
 
-      expect(response.body.message).toBe("Validation error");
-    });
-
-    it("200 returns slice list for ADMIN", async () => {
-      const konk = "router-k";
-      const date = new Date("2026-06-01T00:00:00.000Z");
-      await Sku.create({
-        konkName: konk,
-        prodName: "p",
-        productId: `${konk}-1`,
-        title: "Item",
-        url: "https://e.com/i",
-      });
-      await SkuSlice.create({
-        konkName: konk,
-        date,
-        data: { [`${konk}-1`]: { stock: 2, price: 5 } },
-      });
-
-      const response = await request(app)
-        .get("/api/sku-slices")
-        .set(createAuthHeader())
-        .query({ konkName: konk, date: "2026-06-01" })
-        .expect(200);
-
-      expect(response.body.message).toBe("Sku slice retrieved successfully");
-      expect(response.body.data.konkName).toBe(konk);
-      expect(response.body.data.items.length).toBeGreaterThan(0);
+      expect(response.body.errors?.[0]?.code).toBe("SKU_SLICE_DAY_LIST_GONE");
     });
   });
 
@@ -140,21 +114,9 @@ describe("Sku-slices router integration", () => {
         title: "Balloon",
         url: "https://perfect.example/1",
       });
-      await SkuSlice.create({
-        konkName: "perfect",
-        date: new Date("2026-09-13T00:00:00.000Z"),
-        data: { "perfect-1": { stock: 100, price: 100 } },
-      });
-      await SkuSlice.create({
-        konkName: "perfect",
-        date: new Date("2026-09-14T00:00:00.000Z"),
-        data: { "perfect-1": { stock: 10000, price: 1 } },
-      });
-      await SkuSlice.create({
-        konkName: "perfect",
-        date: new Date("2026-09-15T00:00:00.000Z"),
-        data: { "perfect-1": { stock: 100, price: 100 } },
-      });
+      await seedSkuSliceMonthDay("perfect", new Date("2026-09-13T00:00:00.000Z"), { "perfect-1": { stock: 100, price: 100 } });
+      await seedSkuSliceMonthDay("perfect", new Date("2026-09-14T00:00:00.000Z"), { "perfect-1": { stock: 10000, price: 1 } });
+      await seedSkuSliceMonthDay("perfect", new Date("2026-09-15T00:00:00.000Z"), { "perfect-1": { stock: 100, price: 100 } });
 
       const response = await request(app)
         .get("/api/sku-slices/pack-flips")
@@ -192,11 +154,7 @@ describe("Sku-slices router integration", () => {
         title: "One",
         url: "https://e.com/1",
       });
-      await SkuSlice.create({
-        konkName: "r-k",
-        date: new Date("2026-06-02T00:00:00.000Z"),
-        data: { "r-k-1": { stock: 4, price: 6 } },
-      });
+      await seedSkuSliceMonthDay("r-k", new Date("2026-06-02T00:00:00.000Z"), { "r-k-1": { stock: 4, price: 6 } });
 
       const response = await request(app)
         .get(`/api/sku-slices/sku/${sku._id.toString()}`)
@@ -253,11 +211,7 @@ describe("Sku-slices router integration", () => {
         title: "One",
         url: "https://e.com/1",
       });
-      await SkuSlice.create({
-        konkName: "r-k",
-        date: new Date("2026-09-20T00:00:00.000Z"),
-        data: { "r-k-patch": { stock: 60, price: 5.5 } },
-      });
+      await seedSkuSliceMonthDay("r-k", new Date("2026-09-20T00:00:00.000Z"), { "r-k-patch": { stock: 60, price: 5.5 } });
 
       const response = await request(app)
         .patch(`/api/sku-slices/sku/${sku._id.toString()}`)

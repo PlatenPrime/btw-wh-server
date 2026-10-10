@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import mongoose from "mongoose";
 import { SVBUM_FAKE_STOCK_CRON_DAYS_BACK } from "../../../slices/config/svbumFakeStockThreshold.js";
-import { SkuSlice } from "../../models/SkuSlice.js";
 import {
   executeCorrectSvbumFakeStockCli,
   resolveCorrectSvbumFakeStockCliInput,
   runCorrectSvbumFakeStockConnected,
 } from "../runCorrectSvbumFakeStock.js";
+import { seedSkuSliceMonthDay } from "../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../../utils/skuSliceMonthStore.js";
 
 describe("resolveCorrectSvbumFakeStockCliInput", () => {
   it("defaults to cron daysBack dry-run", () => {
@@ -38,7 +40,7 @@ describe("resolveCorrectSvbumFakeStockCliInput", () => {
 
 describe("executeCorrectSvbumFakeStockCli", () => {
   beforeEach(async () => {
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     vi.restoreAllMocks();
   });
 
@@ -47,21 +49,9 @@ describe("executeCorrectSvbumFakeStockCli", () => {
     const d0 = new Date("2026-10-05T00:00:00.000Z");
     const d1 = new Date("2026-10-06T00:00:00.000Z");
     const d2 = new Date("2026-10-07T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "svbum",
-      date: d0,
-      data: { "svbum-1": { stock: 6_000_000, price: 10 } },
-    });
-    await SkuSlice.create({
-      konkName: "svbum",
-      date: d1,
-      data: { "svbum-1": { stock: 10_000, price: 10 } },
-    });
-    await SkuSlice.create({
-      konkName: "svbum",
-      date: d2,
-      data: { "svbum-1": { stock: 6_000_000, price: 10 } },
-    });
+    await seedSkuSliceMonthDay("svbum", d0, { "svbum-1": { stock: 6_000_000, price: 10 } });
+    await seedSkuSliceMonthDay("svbum", d1, { "svbum-1": { stock: 10_000, price: 10 } });
+    await seedSkuSliceMonthDay("svbum", d2, { "svbum-1": { stock: 6_000_000, price: 10 } });
 
     const result = await executeCorrectSvbumFakeStockCli([
       "--days-back",
@@ -92,8 +82,7 @@ describe("executeCorrectSvbumFakeStockCli", () => {
       },
     ]);
     expect(log).toHaveBeenCalledOnce();
-    const mid = await SkuSlice.findOne({ konkName: "svbum", date: d1 }).lean();
-    expect(mid?.data?.["svbum-1"]).toEqual({ stock: 0, price: 10 });
+    expect(await getDayPoint("svbum", "svbum-1", d1)).toEqual({ stock: 0, price: 10 });
   });
 
   it("dry-run does not write patches", async () => {
@@ -101,21 +90,9 @@ describe("executeCorrectSvbumFakeStockCli", () => {
     const d0 = new Date("2026-10-05T00:00:00.000Z");
     const d1 = new Date("2026-10-06T00:00:00.000Z");
     const d2 = new Date("2026-10-07T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "svbum",
-      date: d0,
-      data: { "svbum-1": { stock: 6_000_000, price: 10 } },
-    });
-    await SkuSlice.create({
-      konkName: "svbum",
-      date: d1,
-      data: { "svbum-1": { stock: 10_000, price: 10 } },
-    });
-    await SkuSlice.create({
-      konkName: "svbum",
-      date: d2,
-      data: { "svbum-1": { stock: 6_000_000, price: 10 } },
-    });
+    await seedSkuSliceMonthDay("svbum", d0, { "svbum-1": { stock: 6_000_000, price: 10 } });
+    await seedSkuSliceMonthDay("svbum", d1, { "svbum-1": { stock: 10_000, price: 10 } });
+    await seedSkuSliceMonthDay("svbum", d2, { "svbum-1": { stock: 6_000_000, price: 10 } });
 
     const result = await executeCorrectSvbumFakeStockCli([
       "--days-back",
@@ -126,8 +103,7 @@ describe("executeCorrectSvbumFakeStockCli", () => {
 
     expect(result.apply).toBe(false);
     expect(result.patched).toHaveLength(3);
-    const mid = await SkuSlice.findOne({ konkName: "svbum", date: d1 }).lean();
-    expect(mid?.data?.["svbum-1"]).toEqual({ stock: 10_000, price: 10 });
+    expect(await getDayPoint("svbum", "svbum-1", d1)).toEqual({ stock: 10_000, price: 10 });
   });
 });
 

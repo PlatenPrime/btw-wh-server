@@ -1,11 +1,12 @@
 import { Sku } from "../../../../skus/models/Sku.js";
-import {
-  SkuSlice,
-  type ISkuSliceDataItem,
-} from "../../../models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../../models/skuSliceTypes.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { PatchSkuSliceByDateInput } from "../schemas/patchSkuSliceByDateSchema.js";
 import { afterSkuSliceStockMutation } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
+import {
+  getDayPoint,
+  upsertDayPoint,
+} from "../../../utils/skuSliceMonthStore.js";
 
 export type PatchSkuSliceByDateResult = {
   productId: string;
@@ -25,11 +26,11 @@ export function readPreviousPoint(item: unknown): ISkuSliceDataItem | null {
 }
 
 /**
- * Перезаписывает stock/price SKU в документе SkuSlice на дату.
- * Документ дня создаётся (upsert), если отсутствовал.
+ * Перезаписывает stock/price SKU в SkuSliceMonth на дату.
+ * `created` — true, если ключа дня раньше не было.
  */
 export async function patchSkuSliceByDateUtil(
-  input: PatchSkuSliceByDateInput
+  input: PatchSkuSliceByDateInput,
 ): Promise<PatchSkuSliceByDateResult | null> {
   const sku = await Sku.findById(input.skuId)
     .select("konkName productId")
@@ -45,21 +46,9 @@ export async function patchSkuSliceByDateUtil(
     price: input.price,
   };
 
-  const before = await SkuSlice.findOneAndUpdate(
-    { konkName: sku.konkName, date: sliceDate },
-    {
-      $set: { [`data.${productId}`]: nextItem },
-      $setOnInsert: { konkName: sku.konkName, date: sliceDate },
-    },
-    { upsert: true, new: false }
-  ).lean();
-
-  const created = before == null;
-  const previous = created
-    ? null
-    : readPreviousPoint(
-        (before.data as Record<string, unknown> | undefined)?.[productId]
-      );
+  const previous = await getDayPoint(sku.konkName, productId, sliceDate);
+  const created = previous == null;
+  await upsertDayPoint(sku.konkName, productId, sliceDate, nextItem);
 
   await afterSkuSliceStockMutation({
     konkName: sku.konkName,

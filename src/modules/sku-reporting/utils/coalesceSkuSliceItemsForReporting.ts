@@ -1,4 +1,4 @@
-import type { ISkuSliceDataItem } from "../../sku-slices/models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../sku-slices/models/skuSliceTypes.js";
 import {
   isValidSliceMetricValue,
   isValidSliceMetricValue as isValidSkuSliceMetricValue,

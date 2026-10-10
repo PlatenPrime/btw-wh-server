@@ -1,17 +1,17 @@
 import { Sku } from "../../../../skus/models/Sku.js";
-import {
-  SkuSlice,
-  type ISkuSliceDataItem,
-} from "../../../models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../../models/skuSliceTypes.js";
 import { enumerateSliceDates } from "../../../../slices/utils/enumerateSliceDates.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { PatchSkuSliceByDatePeriodsInput } from "../schemas/patchSkuSliceByDateSchema.js";
-import { readPreviousPoint } from "./patchSkuSliceByDateUtil.js";
 import type { PatchSkuSliceByDateRangeDayResult } from "./patchSkuSliceByDateRangeUtil.js";
 import {
   materializeSkuSliceSalesDateRange,
   sliceDatePlusDays,
 } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
+import {
+  getDayPoint,
+  upsertDayPoint,
+} from "../../../utils/skuSliceMonthStore.js";
 
 export type PatchSkuSliceByDatePeriodsResult = {
   productId: string;
@@ -23,11 +23,10 @@ export type PatchSkuSliceByDatePeriodsResult = {
 };
 
 /**
- * Пишет одинаковые stock/price SKU на каждый уникальный день из массива периодов.
- * Пересечения периодов дедуплицируются. Отсутствующие дневные документы создаются (upsert).
+ * Пишет одинаковые stock/price SKU на каждый уникальный день из массива периодов в months.
  */
 export async function patchSkuSliceByDatePeriodsUtil(
-  input: PatchSkuSliceByDatePeriodsInput
+  input: PatchSkuSliceByDatePeriodsInput,
 ): Promise<PatchSkuSliceByDatePeriodsResult | null> {
   const sku = await Sku.findById(input.skuId)
     .select("konkName productId")
@@ -49,7 +48,7 @@ export async function patchSkuSliceByDatePeriodsUtil(
     }
   }
   const dates = [...uniqueByTime.values()].sort(
-    (a, b) => a.getTime() - b.getTime()
+    (a, b) => a.getTime() - b.getTime(),
   );
 
   const nextItem: ISkuSliceDataItem = {
@@ -60,22 +59,9 @@ export async function patchSkuSliceByDatePeriodsUtil(
   const days: PatchSkuSliceByDateRangeDayResult[] = [];
 
   for (const sliceDate of dates) {
-    const before = await SkuSlice.findOneAndUpdate(
-      { konkName: sku.konkName, date: sliceDate },
-      {
-        $set: { [`data.${productId}`]: nextItem },
-        $setOnInsert: { konkName: sku.konkName, date: sliceDate },
-      },
-      { upsert: true, new: false }
-    ).lean();
-
-    const created = before == null;
-    const previous = created
-      ? null
-      : readPreviousPoint(
-          (before.data as Record<string, unknown> | undefined)?.[productId]
-        );
-
+    const previous = await getDayPoint(sku.konkName, productId, sliceDate);
+    const created = previous == null;
+    await upsertDayPoint(sku.konkName, productId, sliceDate, nextItem);
     days.push({ date: sliceDate, previous, created });
   }
 

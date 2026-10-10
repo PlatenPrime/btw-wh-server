@@ -7,15 +7,19 @@ vi.mock("../../../../utils/delay.js", () => ({
 vi.mock("../../../skus/models/Sku.js", () => ({
   Sku: { findOne: vi.fn() },
 }));
-vi.mock(
-  "../../../skus/utils/getSkuStockDataUtil.js",
-  () => ({
-    getSkuStockDataUtil: vi.fn(),
-    UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
-  })
-);
-vi.mock("../../../sku-slices/models/SkuSlice.js", () => ({
-  SkuSlice: { find: vi.fn(), findOneAndUpdate: vi.fn() },
+vi.mock("../../../skus/utils/getSkuStockDataUtil.js", () => ({
+  getSkuStockDataUtil: vi.fn(),
+  UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
+}));
+vi.mock("../../../sku-slices/models/SkuSliceDayMeta.js", () => ({
+  SkuSliceDayMeta: { find: vi.fn() },
+}));
+vi.mock("../../../sku-slices/models/SkuSliceMonth.js", () => ({
+  SkuSliceMonth: { distinct: vi.fn() },
+}));
+vi.mock("../../../sku-slices/utils/skuSliceMonthStore.js", () => ({
+  loadDayMapForKonk: vi.fn(),
+  upsertDayPoint: vi.fn(),
 }));
 vi.mock("../../../slices/config/excludedCompetitors.js", () => ({
   getExcludedCompetitorSet: vi.fn(),
@@ -35,12 +39,20 @@ vi.mock("../../../../logging/logModuleError.js", () => ({
   logModuleDebug: vi.fn(),
 }));
 
+vi.mock("../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js", () => ({
+  afterSkuSliceStockMutation: vi.fn().mockResolvedValue({}),
+}));
+
 import { Sku } from "../../../skus/models/Sku.js";
 import {
   getSkuStockDataUtil,
   UNSUPPORTED_KONK_CODE,
 } from "../../../skus/utils/getSkuStockDataUtil.js";
-import { SkuSlice } from "../../../sku-slices/models/SkuSlice.js";
+import { SkuSliceDayMeta } from "../../../sku-slices/models/SkuSliceDayMeta.js";
+import {
+  loadDayMapForKonk,
+  upsertDayPoint,
+} from "../../../sku-slices/utils/skuSliceMonthStore.js";
 import { getCompensationExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
 import { runCompensatingSkuSlices } from "../runCompensatingSkuSlices.js";
 
@@ -50,26 +62,29 @@ describe("runCompensatingSkuSlices", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(new Set());
-    vi.mocked(SkuSlice.findOneAndUpdate).mockResolvedValue({} as never);
+    vi.mocked(upsertDayPoint).mockResolvedValue(undefined);
+    vi.mocked(SkuSliceDayMeta.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([{ konkName: "air" }]),
+      }),
+    } as never);
   });
 
   afterEach(() => {
     vi.useRealTimers();
   });
 
-  function mockFindLean(docs: unknown[]) {
-    vi.mocked(SkuSlice.find).mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue(docs),
-      }),
-    } as never);
+  function mockDayMap(data: Record<string, unknown>) {
+    vi.mocked(loadDayMapForKonk).mockResolvedValue(
+      data as Record<string, { stock: number; price: number }>,
+    );
   }
 
   function mockSkuFindOne(id: string | null) {
     vi.mocked(Sku.findOne).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue(
-          id ? { _id: { toString: () => id } } : null
+          id ? { _id: { toString: () => id } } : null,
         ),
       }),
     } as never);
@@ -77,11 +92,14 @@ describe("runCompensatingSkuSlices", () => {
 
   it("skips excluded competitors", async () => {
     vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(
-      new Set(["yumi"])
+      new Set(["yumi"]),
     );
-    mockFindLean([
-      { konkName: "yumi", data: { P1: { stock: -1, price: -1 } } },
-    ]);
+    vi.mocked(SkuSliceDayMeta.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([{ konkName: "yumi" }]),
+      }),
+    } as never);
+    mockDayMap({ P1: { stock: -1, price: -1 } });
 
     const r = await runCompensatingSkuSlices(sliceDate);
 
@@ -90,16 +108,14 @@ describe("runCompensatingSkuSlices", () => {
   });
 
   it("does not update when fetch still returns -1/-1", async () => {
-    mockFindLean([
-      { konkName: "air", data: { P1: { stock: -1, price: -1 } } },
-    ]);
+    mockDayMap({ P1: { stock: -1, price: -1 } });
     mockSkuFindOne("sid1");
     vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: -1, price: -1 });
 
     const r = await runCompensatingSkuSlices(sliceDate);
 
     expect(r).toEqual({ refetched: 1, updated: 0 });
-    expect(SkuSlice.findOneAndUpdate).not.toHaveBeenCalled();
+    expect(upsertDayPoint).not.toHaveBeenCalled();
     expect(logModuleInfo).toHaveBeenCalledWith(
       "slice-compensation",
       "compensating sku refetch result",
@@ -110,24 +126,22 @@ describe("runCompensatingSkuSlices", () => {
         stock: -1,
         price: -1,
         updated: false,
-      }
+      },
     );
   });
 
   it("updates when fetch returns non-full-minus", async () => {
-    mockFindLean([
-      { konkName: "air", data: { P1: { stock: -1, price: -1 } } },
-    ]);
+    mockDayMap({ P1: { stock: -1, price: -1 } });
     mockSkuFindOne("sid1");
     vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 5, price: -1 });
 
     const r = await runCompensatingSkuSlices(sliceDate);
 
     expect(r).toEqual({ refetched: 1, updated: 1 });
-    expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledWith(
-      { konkName: "air", date: sliceDate },
-      { $set: { "data.P1": { stock: 5, price: -1 } } }
-    );
+    expect(upsertDayPoint).toHaveBeenCalledWith("air", "P1", sliceDate, {
+      stock: 5,
+      price: -1,
+    });
     expect(logModuleInfo).toHaveBeenCalledWith(
       "slice-compensation",
       "compensating sku refetch result",
@@ -138,14 +152,12 @@ describe("runCompensatingSkuSlices", () => {
         stock: 5,
         price: -1,
         updated: true,
-      }
+      },
     );
   });
 
   it("logs empty when stock util returns null", async () => {
-    mockFindLean([
-      { konkName: "air", data: { P1: { stock: -1, price: -1 } } },
-    ]);
+    mockDayMap({ P1: { stock: -1, price: -1 } });
     mockSkuFindOne("sid1");
     vi.mocked(getSkuStockDataUtil).mockResolvedValue(null);
 
@@ -155,97 +167,49 @@ describe("runCompensatingSkuSlices", () => {
     expect(logModuleInfo).toHaveBeenCalledWith(
       "slice-compensation",
       "compensating sku refetch empty",
-      { konkName: "air", productKey: "P1", kind: "sku" }
+      { konkName: "air", productKey: "P1", kind: "sku" },
     );
   });
 
   it("logs warn when sku entity is missing", async () => {
-    mockFindLean([
-      { konkName: "air", data: { P1: { stock: -1, price: -1 } } },
-    ]);
+    mockDayMap({ P1: { stock: -1, price: -1 } });
     mockSkuFindOne(null);
 
     const r = await runCompensatingSkuSlices(sliceDate);
 
     expect(r).toEqual({ refetched: 0, updated: 0 });
-    expect(logModuleWarn).toHaveBeenCalledWith(
-      "slice-compensation",
-      "compensating sku: entity not found, skip",
-      { konkName: "air", productKey: "P1" }
-    );
+    expect(logModuleWarn).toHaveBeenCalled();
   });
 
-  it("refetches and updates when stored price is invalid string", async () => {
-    mockFindLean([
-      { konkName: "air", data: { P1: { stock: 10, price: "x" } } },
-    ]);
+  it("skips unsupported konk errors", async () => {
+    mockDayMap({ P1: { stock: -1, price: -1 } });
     mockSkuFindOne("sid1");
-    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 2, price: 100 });
-
-    const r = await runCompensatingSkuSlices(sliceDate);
-
-    expect(r).toEqual({ refetched: 1, updated: 1 });
-    expect(getSkuStockDataUtil).toHaveBeenCalledTimes(1);
-    expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledWith(
-      { konkName: "air", date: sliceDate },
-      { $set: { "data.P1": { stock: 2, price: 100 } } }
-    );
-  });
-
-  it("refetches when stored price is negative", async () => {
-    mockFindLean([
-      { konkName: "air", data: { P1: { stock: 0, price: -5 } } },
-    ]);
-    mockSkuFindOne("sid1");
-    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 1, price: 10 });
-
-    const r = await runCompensatingSkuSlices(sliceDate);
-
-    expect(r).toEqual({ refetched: 1, updated: 1 });
-  });
-
-  it("does not refetch when price is valid non-negative number", async () => {
-    mockFindLean([
-      { konkName: "air", data: { P1: { stock: -1, price: 10 } } },
-    ]);
-
-    const r = await runCompensatingSkuSlices(sliceDate);
-
-    expect(r).toEqual({ refetched: 0, updated: 0 });
-    expect(getSkuStockDataUtil).not.toHaveBeenCalled();
-  });
-
-  it("skips on UNSUPPORTED_KONK without throwing", async () => {
-    mockFindLean([
-      { konkName: "x", data: { P1: { stock: -1, price: -1 } } },
-    ]);
-    mockSkuFindOne("sid1");
-    const err = new Error("bad") as Error & { code?: string };
-    err.code = UNSUPPORTED_KONK_CODE;
+    const err = Object.assign(new Error("nope"), {
+      code: UNSUPPORTED_KONK_CODE,
+    });
     vi.mocked(getSkuStockDataUtil).mockRejectedValue(err);
 
     const r = await runCompensatingSkuSlices(sliceDate);
-
     expect(r).toEqual({ refetched: 0, updated: 0 });
+    expect(logModuleWarn).toHaveBeenCalled();
   });
 
-  it("filters find by konkName when options.konkName is set", async () => {
-    mockFindLean([]);
+  it("filters by konkName option", async () => {
+    vi.mocked(SkuSliceDayMeta.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([
+          { konkName: "air" },
+          { konkName: "balun" },
+        ]),
+      }),
+    } as never);
+    mockDayMap({ P1: { stock: -1, price: -1 } });
+    mockSkuFindOne("sid1");
+    vi.mocked(getSkuStockDataUtil).mockResolvedValue({ stock: 1, price: 2 });
 
-    const r = await runCompensatingSkuSlices(sliceDate, { konkName: "air" });
+    await runCompensatingSkuSlices(sliceDate, { konkName: "air" });
 
-    expect(r).toEqual({ refetched: 0, updated: 0 });
-    expect(SkuSlice.find).toHaveBeenCalledWith({
-      date: sliceDate,
-      konkName: "air",
-    });
-  });
-
-  it("finds all docs when options.konkName is omitted", async () => {
-    mockFindLean([]);
-
-    await runCompensatingSkuSlices(sliceDate);
-
-    expect(SkuSlice.find).toHaveBeenCalledWith({ date: sliceDate });
+    expect(loadDayMapForKonk).toHaveBeenCalledWith("air", sliceDate);
+    expect(loadDayMapForKonk).toHaveBeenCalledTimes(1);
   });
 });

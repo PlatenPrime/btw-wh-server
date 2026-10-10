@@ -26,7 +26,7 @@
 | `utils/aggregateManufacturerDaySales` | Read-path Sku rollup: by prodName / by konkName / daily |
 | `utils/aggregateBtradeManufacturerDaySales` | Read-path Btrade rollup: period sum / daily |
 | `utils/buildSkuSliceExcel` | Сборка XLSX по срезам |
-| `utils/konkProdSkuChartCore` | Stock из Mixed; sales/revenue без skugrIds из Sku+Btrade rollup |
+| `utils/konkProdSkuChartCore` | Stock из SkuSliceMonth; sales/revenue без skugrIds из Sku+Btrade rollup |
 | `utils/prodDisplayTitles` | Заголовки производителей из Prod |
 | `constants/skuSliceRequestJitterMs` | Пауза между HTTP при сборе/компенсации срезов |
 
@@ -49,8 +49,8 @@ CLI:
 
 ## Связи
 
-- **sku-slices** — модель `SkuSlice`, хуки `afterSkuSliceStockMutation`
-- **btrade-slices** — сырые срезы + хук `afterBtradeSliceStockMutation` → Btrade rollup
+- **sku-slices** — `SkuSliceMonth` (точки) + `SkuSliceDayMeta` (прогон), хуки `afterSkuSliceStockMutation`
+- **btrade-slices** — `BtradeSliceMonth` (точки) + хук `afterBtradeSliceStockMutation` → Btrade rollup
 - **skus / skugrs / konks / prods / arts** — доменные сущности для отчётов
 - **slices** — математика продаж (delta / recount / revenue)
 

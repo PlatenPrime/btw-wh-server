@@ -6,7 +6,7 @@ import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
 import { Art } from "../../arts/models/Art.js";
-import { BtradeSlice } from "../../btrade-slices/models/BtradeSlice.js";
+import { seedBtradeSliceMonthDay } from "../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
   const secret =
@@ -24,10 +24,12 @@ describe("art-sales-reports router integration", () => {
     await Art.create({ artikul: "ART-INT", zone: "A" });
     const d0 = new Date("2026-03-01T00:00:00.000Z");
     const d1 = new Date("2026-03-02T00:00:00.000Z");
-    await BtradeSlice.insertMany([
-      { date: d0, data: { "ART-INT": { quantity: 10, price: 2 } } },
-      { date: d1, data: { "ART-INT": { quantity: 7, price: 2 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d0, {
+      "ART-INT": { quantity: 10, price: 2 },
+    });
+    await seedBtradeSliceMonthDay(d1, {
+      "ART-INT": { quantity: 7, price: 2 },
+    });
 
     const response = await request(app)
       .get("/api/art-sales-reports/artikul/ART-INT/range")

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import "../../../../test/setup.js";
-import { BtradeSlice } from "../../models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../seedBtradeSliceMonthDay.js";
 import {
   aggregateBtradeSlices,
   sliceDataProjectForArtikulList,
@@ -8,18 +9,15 @@ import {
 
 describe("btradeSliceAggregationStages", () => {
   beforeEach(async () => {
-    await BtradeSlice.deleteMany({});
+    await BtradeSliceMonth.deleteMany({});
   });
 
   it("sliceDataProjectForArtikulList filters data keys", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await BtradeSlice.create({
-      date,
-      data: {
-        "ART-1": { price: 100, quantity: 5 },
-        "ART-2": { price: 200, quantity: 10 },
-        "ART-3": { price: 300, quantity: 15 },
-      },
+    await seedBtradeSliceMonthDay(date, {
+      "ART-1": { price: 100, quantity: 5 },
+      "ART-2": { price: 200, quantity: 10 },
+      "ART-3": { price: 300, quantity: 15 },
     });
 
     const pipeline = [

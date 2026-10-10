@@ -1,5 +1,5 @@
 import { Art } from "../../arts/models/Art.js";
-import type { IBtradeSliceDataItem } from "../../btrade-slices/models/BtradeSlice.js";
+import type { IBtradeSliceDataItem } from "../../btrade-slices/models/btradeSliceTypes.js";
 import {
   aggregateBtradeSlices,
   sliceDataProjectForArtikulList,

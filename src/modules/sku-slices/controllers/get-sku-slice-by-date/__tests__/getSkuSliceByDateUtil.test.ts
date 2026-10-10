@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
+import { SkuSliceMonth } from "../../../models/SkuSliceMonth.js";
+import { seedSkuSliceMonthDay } from "../../../utils/seedSkuSliceMonthDay.js";
 import { getSkuSliceByDateUtil } from "../utils/getSkuSliceByDateUtil.js";
 
 describe("getSkuSliceByDateUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns stock and price when sku and slice exist", async () => {
@@ -18,10 +19,8 @@ describe("getSkuSliceByDateUtil", () => {
       url: "https://example.com/p1",
     });
     const date = new Date("2026-03-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date,
-      data: { "air-99": { stock: 3, price: 12.5 } },
+    await seedSkuSliceMonthDay("air", date, {
+      "air-99": { stock: 3, price: 12.5 },
     });
 
     const result = await getSkuSliceByDateUtil({
@@ -48,13 +47,11 @@ describe("getSkuSliceByDateUtil", () => {
       url: "https://example.com/p2",
     });
     const date = new Date("2026-03-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date,
-      data: { "other-key": { stock: 1, price: 2 } },
+    await seedSkuSliceMonthDay("air", date, {
+      "other-key": { stock: 1, price: 2 },
     });
     expect(
-      await getSkuSliceByDateUtil({ skuId: sku._id.toString(), date })
+      await getSkuSliceByDateUtil({ skuId: sku._id.toString(), date }),
     ).toBeNull();
   });
 });

@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../skus/models/Sku.js";
-import { SkuSlice } from "../../models/SkuSlice.js";
 import {
   addUtcDays,
   defaultPackFlipReviewDates,
@@ -8,6 +7,9 @@ import {
   reviewPackFlipsUtil,
   toUtcYmd,
 } from "../reviewPackFlipsUtil.js";
+import { seedSkuSliceMonthDay } from "../seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../skuSliceMonthStore.js";
 
 const D0 = new Date("2026-09-13T00:00:00.000Z");
 const D1 = new Date("2026-09-14T00:00:00.000Z");
@@ -17,11 +19,7 @@ async function seedSlices(
   data: Array<{ date: Date; pid: Record<string, { stock: number; price: number }> }>
 ): Promise<void> {
   for (const row of data) {
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: row.date,
-      data: row.pid,
-    });
+    await seedSkuSliceMonthDay("perfect", row.date, row.pid);
   }
 }
 
@@ -58,7 +56,7 @@ describe("packFlip date helpers", () => {
 
 describe("reviewPackFlipsUtil", () => {
   beforeEach(async () => {
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     await Sku.deleteMany({});
   });
 
@@ -94,8 +92,7 @@ describe("reviewPackFlipsUtil", () => {
       patched: { stock: 100, price: 100 },
     });
 
-    const mid = await SkuSlice.findOne({ konkName: "perfect", date: D1 }).lean();
-    expect(mid?.data["perfect-1"]).toEqual({ stock: 10000, price: 1 });
+    expect(await getDayPoint("perfect", "perfect-1", D1)).toEqual({ stock: 10000, price: 1 });
   });
 
   it("apply rescales the anomalous day in one update", async () => {
@@ -114,10 +111,8 @@ describe("reviewPackFlipsUtil", () => {
     expect(result.apply).toBe(true);
     expect(result.patched).toHaveLength(1);
 
-    const mid = await SkuSlice.findOne({ konkName: "perfect", date: D1 }).lean();
-    expect(mid?.data["perfect-1"]).toEqual({ stock: 100, price: 100 });
-    const today = await SkuSlice.findOne({ konkName: "perfect", date: D2 }).lean();
-    expect(today?.data["perfect-1"]).toEqual({ stock: 100, price: 100 });
+    expect(await getDayPoint("perfect", "perfect-1", D1)).toEqual({ stock: 100, price: 100 });
+    expect(await getDayPoint("perfect", "perfect-1", D2)).toEqual({ stock: 100, price: 100 });
   });
 
   it("patches today's spike when yesterday matches d-2", async () => {
@@ -133,8 +128,7 @@ describe("reviewPackFlipsUtil", () => {
       konkName: "perfect",
     });
 
-    const today = await SkuSlice.findOne({ konkName: "perfect", date: D2 }).lean();
-    expect(today?.data["perfect-1"]).toEqual({ stock: 500, price: 200 });
+    expect(await getDayPoint("perfect", "perfect-1", D2)).toEqual({ stock: 500, price: 200 });
   });
 
   it("does not rescale today's return to normal", async () => {
@@ -150,8 +144,7 @@ describe("reviewPackFlipsUtil", () => {
       konkName: "perfect",
     });
 
-    const today = await SkuSlice.findOne({ konkName: "perfect", date: D2 }).lean();
-    expect(today?.data["perfect-1"]).toEqual({ stock: 100, price: 100 });
+    expect(await getDayPoint("perfect", "perfect-1", D2)).toEqual({ stock: 100, price: 100 });
   });
 
   it("reports price-only without writing", async () => {
@@ -175,8 +168,7 @@ describe("reviewPackFlipsUtil", () => {
         factor: 100,
       }),
     ]);
-    const today = await SkuSlice.findOne({ konkName: "perfect", date: D2 }).lean();
-    expect(today?.data["perfect-1"]).toEqual({ stock: 95, price: 1 });
+    expect(await getDayPoint("perfect", "perfect-1", D2)).toEqual({ stock: 95, price: 1 });
   });
 
   it("scopes by konkName and ignores other competitors", async () => {
@@ -185,21 +177,9 @@ describe("reviewPackFlipsUtil", () => {
       { date: D1, pid: { "perfect-1": { stock: 10000, price: 1 } } },
       { date: D2, pid: { "perfect-1": { stock: 100, price: 100 } } },
     ]);
-    await SkuSlice.create({
-      konkName: "air",
-      date: D0,
-      data: { "air-1": { stock: 50, price: 20 } },
-    });
-    await SkuSlice.create({
-      konkName: "air",
-      date: D1,
-      data: { "air-1": { stock: 100, price: 10 } },
-    });
-    await SkuSlice.create({
-      konkName: "air",
-      date: D2,
-      data: { "air-1": { stock: 50, price: 20 } },
-    });
+    await seedSkuSliceMonthDay("air", D0, { "air-1": { stock: 50, price: 20 } });
+    await seedSkuSliceMonthDay("air", D1, { "air-1": { stock: 100, price: 10 } });
+    await seedSkuSliceMonthDay("air", D2, { "air-1": { stock: 50, price: 20 } });
 
     const result = await reviewPackFlipsUtil({
       dates: [D0, D1, D2],

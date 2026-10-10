@@ -1,5 +1,5 @@
 import type { Types } from "mongoose";
-import type { ISkuSliceDataItem } from "../../sku-slices/models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../sku-slices/models/skuSliceTypes.js";
 import { Skugr } from "../../skugrs/models/Skugr.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";

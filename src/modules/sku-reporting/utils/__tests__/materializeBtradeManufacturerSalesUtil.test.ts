@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import "../../../../test/setup.js";
 import { Art } from "../../../arts/models/Art.js";
-import { BtradeSlice } from "../../../btrade-slices/models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../../btrade-slices/models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { BtradeManufacturerDaySales } from "../../models/BtradeManufacturerDaySales.js";
 import {
   afterBtradeSliceStockMutation,
@@ -16,7 +17,7 @@ describe("materializeBtradeManufacturerSalesUtil", () => {
 
   beforeEach(async () => {
     await Art.deleteMany({});
-    await BtradeSlice.deleteMany({});
+    await BtradeSliceMonth.deleteMany({});
     await BtradeManufacturerDaySales.deleteMany({});
     await Art.create({ artikul: "A1", prodName: "Gemar", zone: "Z" });
     await Art.create({ artikul: "A2", prodName: "Gemar", zone: "Z" });
@@ -24,32 +25,21 @@ describe("materializeBtradeManufacturerSalesUtil", () => {
   });
 
   it("writes rollup by lowercased prodName for D and D+1", async () => {
-    await BtradeSlice.insertMany([
-      {
-        date: d0,
-        data: {
-          A1: { quantity: 10, price: 5 },
-          A2: { quantity: 20, price: 2 },
-          B1: { quantity: 8, price: 3 },
-        },
-      },
-      {
-        date: d1,
-        data: {
-          A1: { quantity: 7, price: 5 },
-          A2: { quantity: 18, price: 2 },
-          B1: { quantity: 6, price: 3 },
-        },
-      },
-      {
-        date: d2,
-        data: {
-          A1: { quantity: 5, price: 5 },
-          A2: { quantity: 15, price: 2 },
-          B1: { quantity: 5, price: 3 },
-        },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d0, {
+      A1: { quantity: 10, price: 5 },
+      A2: { quantity: 20, price: 2 },
+      B1: { quantity: 8, price: 3 },
+    });
+    await seedBtradeSliceMonthDay(d1, {
+      A1: { quantity: 7, price: 5 },
+      A2: { quantity: 18, price: 2 },
+      B1: { quantity: 6, price: 3 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      A1: { quantity: 5, price: 5 },
+      A2: { quantity: 15, price: 2 },
+      B1: { quantity: 5, price: 3 },
+    });
 
     const r = await materializeBtradeManufacturerSalesForDays({
       dayD: d1,
@@ -74,10 +64,8 @@ describe("materializeBtradeManufacturerSalesUtil", () => {
   });
 
   it("zeros sales when quantity is -1", async () => {
-    await BtradeSlice.insertMany([
-      { date: d0, data: { A1: { quantity: 10, price: 5 } } },
-      { date: d1, data: { A1: { quantity: -1, price: -1 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d0, { A1: { quantity: 10, price: 5 } });
+    await seedBtradeSliceMonthDay(d1, { A1: { quantity: -1, price: -1 } });
     await afterBtradeSliceStockMutation({ dayD: d1 });
     const row = await BtradeManufacturerDaySales.findOne({
       date: d1,
@@ -87,10 +75,8 @@ describe("materializeBtradeManufacturerSalesUtil", () => {
   });
 
   it("dry-run does not write", async () => {
-    await BtradeSlice.insertMany([
-      { date: d0, data: { A1: { quantity: 10, price: 5 } } },
-      { date: d1, data: { A1: { quantity: 7, price: 5 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d0, { A1: { quantity: 10, price: 5 } });
+    await seedBtradeSliceMonthDay(d1, { A1: { quantity: 7, price: 5 } });
     const r = await materializeBtradeManufacturerSalesForDays({
       dayD: d1,
       apply: false,
@@ -100,11 +86,9 @@ describe("materializeBtradeManufacturerSalesUtil", () => {
   });
 
   it("dateRange calls onProgress", async () => {
-    await BtradeSlice.insertMany([
-      { date: d0, data: { A1: { quantity: 10, price: 5 } } },
-      { date: d1, data: { A1: { quantity: 7, price: 5 } } },
-      { date: d2, data: { A1: { quantity: 4, price: 5 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d0, { A1: { quantity: 10, price: 5 } });
+    await seedBtradeSliceMonthDay(d1, { A1: { quantity: 7, price: 5 } });
+    await seedBtradeSliceMonthDay(d2, { A1: { quantity: 4, price: 5 } });
     const progress: string[] = [];
     await materializeBtradeManufacturerSalesDateRange({
       fromDate: d1,

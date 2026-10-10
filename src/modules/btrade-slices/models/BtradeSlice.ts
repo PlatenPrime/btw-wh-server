@@ -1,13 +1,12 @@
 import { Document, Model, Schema, Types } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
+import type { IBtradeSliceDataItem } from "./btradeSliceTypes.js";
 
-export interface IBtradeSliceDataItem {
-  price: number;
-  quantity: number;
-}
+export type { IBtradeSliceDataItem } from "./btradeSliceTypes.js";
 
 /**
- * Документ ежедневного среза цен и остатков Btrade (Sharik) по артикулам из analogs
+ * Legacy daily Mixed: `(date)` + `data[artikul]`.
+ * Runtime stock/price — в BtradeSliceMonth; эта коллекция только для migrate/verify.
  */
 export interface IBtradeSlice extends Document {
   _id: Types.ObjectId;
@@ -25,7 +24,7 @@ const btradeSliceSchema = new Schema<IBtradeSlice>(
       default: {},
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const BtradeSlice: Model<IBtradeSlice> = getOrCreateModel<IBtradeSlice>(

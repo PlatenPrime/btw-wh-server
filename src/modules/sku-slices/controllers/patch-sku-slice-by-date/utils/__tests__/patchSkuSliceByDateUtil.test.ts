@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../models/SkuSlice.js";
+import { SkuSliceMonth } from "../../../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../../../../utils/skuSliceMonthStore.js";
+import { seedSkuSliceMonthDay } from "../../../../utils/seedSkuSliceMonthDay.js";
 import { patchSkuSliceByDateUtil } from "../patchSkuSliceByDateUtil.js";
 
 describe("patchSkuSliceByDateUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("overwrites existing point and returns previous", async () => {
@@ -18,10 +20,8 @@ describe("patchSkuSliceByDateUtil", () => {
       url: "https://perfect.example/9710",
     });
     const date = new Date("2026-09-20T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "perfect",
-      date,
-      data: { "perfect-9710": { stock: 60, price: 5.5 } },
+    await seedSkuSliceMonthDay("perfect", date, {
+      "perfect-9710": { stock: 60, price: 5.5 },
     });
 
     const result = await patchSkuSliceByDateUtil({
@@ -40,14 +40,13 @@ describe("patchSkuSliceByDateUtil", () => {
       created: false,
     });
 
-    const stored = await SkuSlice.findOne({
-      konkName: "perfect",
-      date,
-    }).lean();
-    expect(stored?.data["perfect-9710"]).toEqual({ stock: 3, price: 110 });
+    expect(await getDayPoint("perfect", "perfect-9710", date)).toEqual({
+      stock: 3,
+      price: 110,
+    });
   });
 
-  it("creates missing productId key when slice document exists", async () => {
+  it("creates missing productId key when other keys exist", async () => {
     const sku = await Sku.create({
       konkName: "perfect",
       prodName: "pd",
@@ -56,10 +55,8 @@ describe("patchSkuSliceByDateUtil", () => {
       url: "https://perfect.example/1",
     });
     const date = new Date("2026-09-20T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "perfect",
-      date,
-      data: { "perfect-other": { stock: 1, price: 2 } },
+    await seedSkuSliceMonthDay("perfect", date, {
+      "perfect-other": { stock: 1, price: 2 },
     });
 
     const result = await patchSkuSliceByDateUtil({
@@ -70,19 +67,21 @@ describe("patchSkuSliceByDateUtil", () => {
     });
 
     expect(result?.previous).toBeNull();
-    expect(result?.created).toBe(false);
+    expect(result?.created).toBe(true);
     expect(result?.stock).toBe(0);
     expect(result?.price).toBe(-1);
 
-    const stored = await SkuSlice.findOne({
-      konkName: "perfect",
-      date,
-    }).lean();
-    expect(stored?.data["perfect-1"]).toEqual({ stock: 0, price: -1 });
-    expect(stored?.data["perfect-other"]).toEqual({ stock: 1, price: 2 });
+    expect(await getDayPoint("perfect", "perfect-1", date)).toEqual({
+      stock: 0,
+      price: -1,
+    });
+    expect(await getDayPoint("perfect", "perfect-other", date)).toEqual({
+      stock: 1,
+      price: 2,
+    });
   });
 
-  it("upserts slice document when missing for date", async () => {
+  it("upserts month day when missing for date", async () => {
     const sku = await Sku.create({
       konkName: "perfect",
       prodName: "pd",
@@ -108,11 +107,10 @@ describe("patchSkuSliceByDateUtil", () => {
       created: true,
     });
 
-    const stored = await SkuSlice.findOne({
-      konkName: "perfect",
-      date,
-    }).lean();
-    expect(stored?.data["perfect-1"]).toEqual({ stock: 1, price: 2 });
+    expect(await getDayPoint("perfect", "perfect-1", date)).toEqual({
+      stock: 1,
+      price: 2,
+    });
   });
 
   it("returns null when sku is missing", async () => {

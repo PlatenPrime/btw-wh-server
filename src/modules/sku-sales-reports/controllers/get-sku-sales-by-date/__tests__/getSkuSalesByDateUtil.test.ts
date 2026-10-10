@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../sku-slices/models/SkuSlice.js";
 import { getSkuSalesByDateUtil } from "../utils/getSkuSalesByDateUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getSkuSalesByDateUtil", () => {
   beforeEach(async () => {
     await Konk.deleteMany({});
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns null when sku not found", async () => {
@@ -46,18 +47,8 @@ describe("getSkuSalesByDateUtil", () => {
     });
     const prevDate = new Date("2026-02-28T00:00:00.000Z");
     const currDate = new Date("2026-03-01T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: prevDate,
-        data: { "air-s2": { stock: 10, price: 5 } },
-      },
-      {
-        konkName: "air",
-        date: currDate,
-        data: { "air-s2": { stock: 7, price: 5 } },
-      },
-    ]);
+    await seedSkuSliceMonthDay("air", prevDate, { "air-s2": { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay("air", currDate, { "air-s2": { stock: 7, price: 5 } });
 
     const result = await getSkuSalesByDateUtil({
       skuId: sku._id.toString(),
@@ -88,18 +79,8 @@ describe("getSkuSalesByDateUtil", () => {
     });
     const prevDate = new Date("2026-02-28T00:00:00.000Z");
     const currDate = new Date("2026-03-01T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: prevDate,
-        data: { "air-s3": { stock: 10, price: 5 } },
-      },
-      {
-        konkName: "air",
-        date: currDate,
-        data: { "air-s3": { stock: 7, price: 5 } },
-      },
-    ]);
+    await seedSkuSliceMonthDay("air", prevDate, { "air-s3": { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay("air", currDate, { "air-s3": { stock: 7, price: 5 } });
 
     const result = await getSkuSalesByDateUtil({
       skuId: sku._id.toString(),
@@ -120,18 +101,8 @@ describe("getSkuSalesByDateUtil", () => {
     });
     const olderDate = new Date("2026-02-25T00:00:00.000Z");
     const currDate = new Date("2026-03-01T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: olderDate,
-        data: { "air-hole": { stock: 10, price: 5 } },
-      },
-      {
-        konkName: "air",
-        date: currDate,
-        data: { "air-hole": { stock: 6, price: 5 } },
-      },
-    ]);
+    await seedSkuSliceMonthDay("air", olderDate, { "air-hole": { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay("air", currDate, { "air-hole": { stock: 6, price: 5 } });
 
     const result = await getSkuSalesByDateUtil({
       skuId: sku._id.toString(),
@@ -154,18 +125,8 @@ describe("getSkuSalesByDateUtil", () => {
     });
     const prevDate = new Date("2026-02-28T00:00:00.000Z");
     const currDate = new Date("2026-03-01T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      {
-        konkName: "air",
-        date: prevDate,
-        data: { "air-neg": { stock: 10, price: 5 } },
-      },
-      {
-        konkName: "air",
-        date: currDate,
-        data: { "air-neg": { stock: -1, price: 5 } },
-      },
-    ]);
+    await seedSkuSliceMonthDay("air", prevDate, { "air-neg": { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay("air", currDate, { "air-neg": { stock: -1, price: 5 } });
 
     const result = await getSkuSalesByDateUtil({
       skuId: sku._id.toString(),

@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { Art } from "../../../../arts/models/Art.js";
 import { isInvalidSliceStockPriceItem } from "../../../../slices/utils/isInvalidSliceStockPriceItem.js";
 import "../../../../../test/setup.js";
-import { BtradeSlice } from "../../../models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../../models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../../../utils/seedBtradeSliceMonthDay.js";
 import { getBtradeSliceUtil } from "../utils/getBtradeSliceUtil.js";
 
 const baseQuery = {
@@ -12,15 +13,14 @@ const baseQuery = {
 
 describe("getBtradeSliceUtil", () => {
   beforeEach(async () => {
-    await BtradeSlice.deleteMany({});
+    await BtradeSliceMonth.deleteMany({});
     await Art.deleteMany({});
   });
 
   it("returns slice when found by date", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await BtradeSlice.create({
-      date,
-      data: { "ART-1": { price: 100, quantity: 5 } },
+    await seedBtradeSliceMonthDay(date, {
+      "ART-1": { price: 100, quantity: 5 },
     });
 
     const result = await getBtradeSliceUtil({
@@ -55,9 +55,8 @@ describe("getBtradeSliceUtil", () => {
       zone: "A",
       nameukr: "Test",
     });
-    await BtradeSlice.create({
-      date,
-      data: { "ART-1": { price: 100, quantity: 5 } },
+    await seedBtradeSliceMonthDay(date, {
+      "ART-1": { price: 100, quantity: 5 },
     });
 
     const result = await getBtradeSliceUtil({
@@ -73,13 +72,10 @@ describe("getBtradeSliceUtil", () => {
 
   it("paginates sorted entries by artikul", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await BtradeSlice.create({
-      date,
-      data: {
-        "ART-b": { price: 1, quantity: 1 },
-        "ART-a": { price: 2, quantity: 2 },
-        "ART-c": { price: 3, quantity: 3 },
-      },
+    await seedBtradeSliceMonthDay(date, {
+      "ART-b": { price: 1, quantity: 1 },
+      "ART-a": { price: 2, quantity: 2 },
+      "ART-c": { price: 3, quantity: 3 },
     });
 
     const page1 = await getBtradeSliceUtil({
@@ -111,13 +107,10 @@ describe("getBtradeSliceUtil", () => {
 
   it("with isInvalid true returns only invalid rows and total matches filter", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await BtradeSlice.create({
-      date,
-      data: {
-        "ART-ok": { price: 100, quantity: 10 },
-        "ART-bad-full": { price: -1, quantity: -1 },
-        "ART-bad-price": { price: -5, quantity: 1 },
-      },
+    await seedBtradeSliceMonthDay(date, {
+      "ART-ok": { price: 100, quantity: 10 },
+      "ART-bad-full": { price: -1, quantity: -1 },
+      "ART-bad-price": { price: -5, quantity: 1 },
     });
 
     const result = await getBtradeSliceUtil({
@@ -142,9 +135,8 @@ describe("getBtradeSliceUtil", () => {
 
   it("with isInvalid true and all valid entries yields total 0 and empty items", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await BtradeSlice.create({
-      date,
-      data: { "ART-1": { price: 2, quantity: 1 } },
+    await seedBtradeSliceMonthDay(date, {
+      "ART-1": { price: 2, quantity: 1 },
     });
 
     const result = await getBtradeSliceUtil({
@@ -160,14 +152,12 @@ describe("getBtradeSliceUtil", () => {
 
   it("paginates invalid-only rows by artikul", async () => {
     const date = new Date("2025-03-01T00:00:00.000Z");
-    await BtradeSlice.create({
-      date,
-      data: {
-        "ART-ok": { price: 1, quantity: 1 },
-        "ART-bad-b": { price: -1, quantity: -1 },
-        "ART-bad-a": { quantity: 1 },
-        "ART-bad-c": { price: -1, quantity: 2 },
-      },
+    await seedBtradeSliceMonthDay(date, {
+      "ART-ok": { price: 1, quantity: 1 },
+      "ART-bad-b": { price: -1, quantity: -1 },
+      // months store требует оба числа; invalid = отрицательная price (не -1/-1)
+      "ART-bad-a": { quantity: 1, price: -5 },
+      "ART-bad-c": { price: -1, quantity: 2 },
     });
 
     const page1 = await getBtradeSliceUtil({

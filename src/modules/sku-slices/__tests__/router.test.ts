@@ -9,6 +9,8 @@ describe("sku-slices router", () => {
 
     expect(paths).toEqual([
       "/",
+      "/day-status",
+      "/day-invalid",
       "/client/air/pending",
       "/client/air/sku/:skuId",
       "/pack-flips",

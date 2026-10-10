@@ -1,8 +1,8 @@
 import { Analog } from "../../../../analogs/models/Analog.js";
 import { Art } from "../../../../arts/models/Art.js";
 import { Prod } from "../../../../prods/models/Prod.js";
-import { BtradeSlice } from "../../../../btrade-slices/models/BtradeSlice.js";
-import type { IBtradeSliceDataItem } from "../../../../btrade-slices/models/BtradeSlice.js";
+import type { IBtradeSliceDataItem } from "../../../../btrade-slices/models/btradeSliceTypes.js";
+import { loadPointsForArtikulsRange } from "../../../../btrade-slices/utils/btradeSliceMonthStore.js";
 import { AnalogSlice } from "../../../models/AnalogSlice.js";
 import type { IAnalogSliceDataItem } from "../../../models/AnalogSlice.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
@@ -85,20 +85,14 @@ export async function getAnalogBtradeComparisonRangeUtil(
     analogByDate.set(normalizedDate.getTime(), item);
   }
 
-  // Загружаем документы срезов Btrade за диапазон
-  const btradeDocs = await BtradeSlice.find({
-    date: { $gte: dateFrom, $lte: dateTo },
-  })
-    .select("date data")
-    .lean();
-
+  const btradePoints = await loadPointsForArtikulsRange(
+    [artikulKey],
+    dateFrom,
+    dateTo,
+  );
   const btradeByDate = new Map<number, IBtradeSliceDataItem>();
-  for (const doc of btradeDocs) {
-    const normalizedDate = toSliceDate(doc.date);
-    const dataRecord = (doc.data ?? {}) as Record<string, IBtradeSliceDataItem>;
-    const item = dataRecord[artikulKey];
-    if (!item) continue;
-    btradeByDate.set(normalizedDate.getTime(), item);
+  for (const point of btradePoints) {
+    btradeByDate.set(toSliceDate(point.date).getTime(), point.item);
   }
 
   const data: AnalogBtradeCompareItem[] = [];

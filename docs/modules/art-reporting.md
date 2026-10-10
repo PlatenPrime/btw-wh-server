@@ -10,12 +10,12 @@ Shared domain-модуль без HTTP и cron. Общая логика отчё
 |---------|------------|
 | `schemas/` | Общие Zod-схемы: `artikul`, диапазоны дат |
 | `utils/coalesceBtradeSliceItemsForReporting` | Forward-fill `-1` для quantity/price |
-| `utils/loadArtBtradeSliceSeries` | Загрузка рядов BtradeSlice по artikul с warm day |
+| `utils/loadArtBtradeSliceSeries` | Загрузка рядов Btrade из `btrade_slice_months` по artikul с warm day |
 | `utils/buildArtStockExcel`, `buildArtSalesExcel` | Сборка XLSX по одному артикулу |
 
 ## Связи
 
-- **btrade-slices** — модель `BtradeSlice`, агрегация `aggregateBtradeSlices`
+- **btrade-slices** — SoT `BtradeSliceMonth`, чтение через `aggregateBtradeSlices` / store
 - **arts** — проверка существования артикула в каталоге
 - **slices** — расчёт продаж из остатков
 - **sku-reporting** — перечисление дат отчётности

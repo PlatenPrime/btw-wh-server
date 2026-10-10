@@ -3,7 +3,6 @@ import {
   UNSUPPORTED_KONK_CODE,
 } from "../../skus/utils/getSkuStockDataUtil.js";
 import { isInvalidSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
-import { SkuSlice } from "../models/SkuSlice.js";
 import { createLogger } from "../../../logging/createLogger.js";
 import { delay } from "../../../utils/delay.js";
 import { jitterMs } from "../../../utils/jitterMs.js";
@@ -30,7 +29,15 @@ import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors
 import { loadSlicedSkusForKonk } from "./loadSlicedSkusForKonk.js";
 import { filterSlicedSkusForRotation } from "./filterSlicedSkusForRotation.js";
 import { isSkuSliceDataKeyFilled } from "./isSkuSliceDataKeyFilled.js";
-import type { ISkuSliceRotationMeta } from "../models/SkuSlice.js";
+import type { ISkuSliceRotationMeta } from "../models/skuSliceTypes.js";
+import {
+  ensureSkuSliceDayMeta,
+  upsertSkuSliceDayMeta,
+} from "./skuSliceDayMetaStore.js";
+import {
+  loadDayPointsForProductIds,
+  upsertDayPoint,
+} from "./skuSliceMonthStore.js";
 
 type SliceCounters = {
   count: number;
@@ -233,10 +240,7 @@ async function processOneSkuForSlice(args: {
     }
 
     const dataItem = { stock: result.stock, price: result.price };
-    await SkuSlice.findOneAndUpdate(
-      { konkName, date: sliceDate },
-      { $set: { [`data.${productKey}`]: dataItem } }
-    );
+    await upsertDayPoint(konkName, productKey, sliceDate, dataItem);
     sliceData[productKey] = dataItem;
 
     if (isInvalidSliceStockResult(result)) {
@@ -314,12 +318,13 @@ async function runAirSkuSliceWithChunks(args: {
   const { konkName, sliceDate, withPid, counters } = args;
   const log = createLogger({ module: "sku-slices", konkName });
 
-  const sliceDoc = await SkuSlice.findOne({ konkName, date: sliceDate })
-    .select("data")
-    .lean();
-  const sliceData: Record<string, unknown> = {
-    ...(sliceDoc?.data ?? {}),
-  };
+  const productIds = withPid.map((s) => s.productId!.trim());
+  const existingPoints = await loadDayPointsForProductIds(
+    konkName,
+    productIds,
+    sliceDate,
+  );
+  const sliceData: Record<string, unknown> = { ...existingPoints };
 
   const pendingAtStart = countPendingSkuFetches(withPid, 0, sliceData);
   log.info(
@@ -485,11 +490,7 @@ export async function runSkuSliceForKonkUtil(
   const sliceDate = toSliceDate(date);
   const skus = await loadSlicedSkusForKonk(konkName, "_id productId");
 
-  await SkuSlice.findOneAndUpdate(
-    { konkName, date: sliceDate },
-    { $setOnInsert: { konkName, date: sliceDate, data: {} } },
-    { upsert: true }
-  );
+  await ensureSkuSliceDayMeta(konkName, sliceDate);
 
   const counters: SliceCounters = { count: 0, invalid: 0, errors: 0 };
   const total = skus.length;
@@ -511,10 +512,6 @@ export async function runSkuSliceForKonkUtil(
       dayIndex: rotation.dayIndex,
       dueCount: withPid.length,
     };
-    await SkuSlice.findOneAndUpdate(
-      { konkName, date: sliceDate },
-      { $set: { rotationMeta } }
-    );
     log.info(
       {
         rotationDayIndex: rotation.dayIndex,
@@ -543,6 +540,19 @@ export async function runSkuSliceForKonkUtil(
       counters,
     });
   }
+
+  await upsertSkuSliceDayMeta({
+    konkName,
+    date: sliceDate,
+    rotationMeta: rotationMeta ?? null,
+    stats: {
+      filled: counters.count,
+      invalid: counters.invalid,
+      errorCount: counters.errors,
+      ...(rotationMeta ? { dueTotal: rotationMeta.dueCount } : {}),
+      ...(abortReason !== null ? { abortReason } : {}),
+    },
+  });
 
   const result: SkuSliceKonkResult = {
     saved: true,

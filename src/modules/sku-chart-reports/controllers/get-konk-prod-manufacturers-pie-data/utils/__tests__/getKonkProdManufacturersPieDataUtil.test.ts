@@ -3,10 +3,11 @@ import { Konk } from "../../../../../konks/models/Konk.js";
 import { Prod } from "../../../../../prods/models/Prod.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
 import { SkuManufacturerDaySales } from "../../../../../sku-reporting/models/SkuManufacturerDaySales.js";
 import { materializeSkuSliceSalesDateRange } from "../../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 import { getKonkProdManufacturersPieDataUtil } from "../getKonkProdManufacturersPieDataUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
 
 async function seedRollup(
   konk: string,
@@ -27,7 +28,7 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     await Prod.deleteMany({});
     await Skugr.deleteMany({});
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     await SkuManufacturerDaySales.deleteMany({});
   });
 
@@ -70,32 +71,18 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       imageUrl: "https://e.com/prod-acme.png",
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-a`]: { stock: 12, price: 10 },
           [`${konk}-b`]: { stock: 8, price: 20 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-a`]: { stock: 10, price: 10 },
           [`${konk}-b`]: { stock: 7, price: 20 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d2, {
           [`${konk}-a`]: { stock: 9, price: 10 },
           [`${konk}-b`]: { stock: 5, price: 20 },
-        },
-      },
-    ]);
+        });
     await seedRollup(konk, d1, d2);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -141,24 +128,14 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       },
     ]);
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-a`]: { stock: 6, price: 5 },
           [`${konk}-b`]: { stock: 9, price: 4 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-a`]: { stock: 4, price: 5 },
           [`${konk}-b`]: { stock: 8, price: 4 },
-        },
-      },
-    ]);
+        });
     await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -195,29 +172,15 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       url: "https://e.com/pie3-x",
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-x`]: { stock: 10, price: 5 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-x`]: { stock: -1, price: -1 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d2, {
           [`${konk}-x`]: { stock: 6, price: 4 },
-        },
-      },
-    ]);
+        });
     await seedRollup(konk, d1, d2);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -250,22 +213,12 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       url: "https://e.com/pie4-x",
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-fallback`]: { stock: 5, price: 2 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-fallback`]: { stock: 3, price: 2 },
-        },
-      },
-    ]);
+        });
     await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -309,11 +262,9 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       title: "X",
       url: "https://e.com/x",
     });
-    await SkuSlice.insertMany([
-      { konkName: konk, date: d0, data: { [`${konk}-x`]: { stock: 10, price: 5 } } },
-      { konkName: konk, date: d1, data: { [`${konk}-x`]: { stock: 8, price: 5 } } },
-      { konkName: konk, date: d2, data: { [`${konk}-x`]: { stock: 6, price: 5 } } },
-    ]);
+    await seedSkuSliceMonthDay(konk, d0, { [`${konk}-x`]: { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay(konk, d1, { [`${konk}-x`]: { stock: 8, price: 5 } });
+    await seedSkuSliceMonthDay(konk, d2, { [`${konk}-x`]: { stock: 6, price: 5 } });
     await seedRollup(konk, d1, d2);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -366,24 +317,14 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
       skus: [sIn._id],
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-in`]: { stock: 10, price: 5 },
           [`${konk}-out`]: { stock: 50, price: 5 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-in`]: { stock: 6, price: 5 },
           [`${konk}-out`]: { stock: 30, price: 5 },
-        },
-      },
-    ]);
+        });
     await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({

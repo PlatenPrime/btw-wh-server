@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { Analog } from "../../../../../analogs/models/Analog.js";
 import { Art } from "../../../../../arts/models/Art.js";
 import { AnalogSlice } from "../../../../models/AnalogSlice.js";
-import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
+import { seedBtradeSliceMonthDay } from "../../../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { getKonkBtradeComparisonRangeUtil } from "../getKonkBtradeComparisonRangeUtil.js";
 
 describe("getKonkBtradeComparisonRangeUtil", () => {
@@ -76,20 +76,12 @@ describe("getKonkBtradeComparisonRangeUtil", () => {
       },
     ]);
 
-    await BtradeSlice.insertMany([
-      {
-        date: d2,
-        data: {
-          [artikul1]: { quantity: 10, price: 2.0 },
-        },
-      },
-      {
-        date: d3,
-        data: {
-          [artikul2]: { quantity: 20, price: 2.2 },
-        },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul1]: { quantity: 10, price: 2.0 },
+    });
+    await seedBtradeSliceMonthDay(d3, {
+      [artikul2]: { quantity: 20, price: 2.2 },
+    });
 
     const result = await getKonkBtradeComparisonRangeUtil({
       konk: "air",
@@ -181,12 +173,9 @@ describe("getKonkBtradeComparisonRangeUtil", () => {
         [artikulA]: { stock: 2, price: 2 },
       },
     });
-    await BtradeSlice.create({
-      date: d1,
-      data: {
-        [artikulB]: { quantity: 10, price: 1 },
-        [artikulA]: { quantity: 20, price: 2 },
-      },
+    await seedBtradeSliceMonthDay(d1, {
+      [artikulB]: { quantity: 10, price: 1 },
+      [artikulA]: { quantity: 20, price: 2 },
     });
 
     const result = await getKonkBtradeComparisonRangeUtil({
@@ -237,12 +226,9 @@ describe("getKonkBtradeComparisonRangeUtil", () => {
         [artikul50]: { stock: 2, price: 2 },
       },
     });
-    await BtradeSlice.create({
-      date: d1,
-      data: {
-        [artikul101]: { quantity: 10, price: 1 },
-        [artikul50]: { quantity: 20, price: 2 },
-      },
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul101]: { quantity: 10, price: 1 },
+      [artikul50]: { quantity: 20, price: 2 },
     });
 
     const result = await getKonkBtradeComparisonRangeUtil({
@@ -323,10 +309,10 @@ describe("getKonkBtradeComparisonRangeUtil", () => {
       data[artikul] = { stock: 1, price: 1 };
     }
     await AnalogSlice.create({ konkName: "air", date: d1, data });
-    await BtradeSlice.create({
-      date: d1,
-      data: Object.fromEntries(artikuls.map((a) => [a, { quantity: 1, price: 1 }])),
-    });
+    await seedBtradeSliceMonthDay(
+      d1,
+      Object.fromEntries(artikuls.map((a) => [a, { quantity: 1, price: 1 }])),
+    );
 
     const result = await getKonkBtradeComparisonRangeUtil({
       konk: "air",

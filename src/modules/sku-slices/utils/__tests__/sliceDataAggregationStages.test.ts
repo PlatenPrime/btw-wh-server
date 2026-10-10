@@ -1,67 +1,71 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { SkuSlice } from "../../models/SkuSlice.js";
+import "../../../../test/setup.js";
+import { SkuSliceMonth } from "../../models/SkuSliceMonth.js";
+import { seedSkuSliceMonthDay } from "../seedSkuSliceMonthDay.js";
 import {
   aggregateSkuSlices,
+  loadSkuSliceRowsForKonksProducts,
+  loadSkuSliceRowsForProduct,
   sliceDataProjectForProductIdList,
   sliceDataProjectForSingleProductId,
 } from "../sliceDataAggregationStages.js";
 
 describe("sliceDataAggregationStages", () => {
   beforeEach(async () => {
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
-  it("sliceDataProjectForSingleProductId returns pipeline stage shape", () => {
-    const stage = sliceDataProjectForSingleProductId("air-1");
-    expect(stage).toHaveProperty("$project");
-    expect((stage as { $project: Record<string, unknown> }).$project.date).toBe(1);
+  it("sliceDataProject helpers keep legacy shape", () => {
+    expect(sliceDataProjectForSingleProductId("air-1").$project).toBeDefined();
+    expect(sliceDataProjectForProductIdList(["a", "b"]).$project.konkName).toBe(
+      1,
+    );
   });
 
-  it("sliceDataProjectForProductIdList includes konkName in projection", () => {
-    const stage = sliceDataProjectForProductIdList(["a", "b"]);
-    expect((stage as { $project: Record<string, unknown> }).$project.konkName).toBe(1);
-  });
-
-  it("aggregateSkuSlices filters data to single productId", async () => {
-    const date = new Date("2026-05-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "agg-k",
-      date,
-      data: {
-        "agg-k-1": { stock: 5, price: 10 },
-        "agg-k-2": { stock: 9, price: 11 },
-      },
+  it("loadSkuSliceRowsForProduct returns day rows", async () => {
+    const d = new Date("2026-10-09T00:00:00.000Z");
+    await seedSkuSliceMonthDay("air", d, {
+      "agg-k-1": { stock: 3, price: 4 },
+      other: { stock: 9, price: 9 },
     });
-
-    const rows = await aggregateSkuSlices([
-      { $match: { konkName: "agg-k", date } },
-      sliceDataProjectForSingleProductId("agg-k-1"),
-    ]);
-
+    const rows = await loadSkuSliceRowsForProduct(
+      "air",
+      "agg-k-1",
+      d,
+      d,
+    );
     expect(rows).toHaveLength(1);
-    expect(rows[0]!.data).toEqual({ "agg-k-1": { stock: 5, price: 10 } });
+    expect(rows[0]?.data).toEqual({ "agg-k-1": { stock: 3, price: 4 } });
   });
 
-  it("aggregateSkuSlices filters data to product id list", async () => {
-    const date = new Date("2026-05-02T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "agg-k2",
-      date,
-      data: {
-        "p1": { stock: 1, price: 2 },
-        "p2": { stock: 3, price: 4 },
-        "p3": { stock: 5, price: 6 },
-      },
+  it("loadSkuSliceRowsForKonksProducts filters to requested skus", async () => {
+    const d = new Date("2026-10-09T00:00:00.000Z");
+    await seedSkuSliceMonthDay("air", d, {
+      p1: { stock: 1, price: 1 },
+      p2: { stock: 2, price: 2 },
+      p3: { stock: 3, price: 3 },
     });
+    const rows = await loadSkuSliceRowsForKonksProducts(
+      [
+        { konkName: "air", productId: "p1" },
+        { konkName: "air", productId: "p3" },
+      ],
+      d,
+      d,
+    );
+    expect(rows).toHaveLength(1);
+    expect(Object.keys(rows[0]!.data!).sort()).toEqual(["p1", "p3"]);
+  });
 
+  it("aggregateSkuSlices shim loads from months", async () => {
+    const d = new Date("2026-10-09T00:00:00.000Z");
+    await seedSkuSliceMonthDay("air", d, { x: { stock: 1, price: 2 } });
     const rows = await aggregateSkuSlices([
-      { $match: { konkName: "agg-k2", date } },
-      sliceDataProjectForProductIdList(["p1", "p3"]),
+      { $match: { konkName: "air", date: d } },
     ]);
-
-    expect(rows[0]!.data).toEqual({
-      p1: { stock: 1, price: 2 },
-      p3: { stock: 5, price: 6 },
+    expect(rows).toHaveLength(1);
+    expect((rows[0] as { data?: Record<string, unknown> }).data).toEqual({
+      x: { stock: 1, price: 2 },
     });
   });
 });

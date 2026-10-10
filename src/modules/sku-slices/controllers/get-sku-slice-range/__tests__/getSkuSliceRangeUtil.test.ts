@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { getSkuSliceRangeUtil } from "../utils/getSkuSliceRangeUtil.js";
+import { seedSkuSliceMonthDay } from "../../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../models/SkuSliceMonth.js";
 
 describe("getSkuSliceRangeUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns dense range with forward-fill when only one day scraped", async () => {
@@ -20,9 +21,7 @@ describe("getSkuSliceRangeUtil", () => {
     const d1 = new Date("2026-03-01T00:00:00.000Z");
     const d2 = new Date("2026-03-02T00:00:00.000Z");
     const d3 = new Date("2026-03-03T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      { konkName: "air", date: d1, data: { "air-range-1": { stock: 1, price: 10 } } },
-    ]);
+    await seedSkuSliceMonthDay("air", d1, { "air-range-1": { stock: 1, price: 10 } });
 
     const result = await getSkuSliceRangeUtil({
       skuId: sku._id.toString(),
@@ -61,10 +60,8 @@ describe("getSkuSliceRangeUtil", () => {
     });
     const d1 = new Date("2026-03-01T00:00:00.000Z");
     const d2 = new Date("2026-03-02T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      { konkName: "air", date: d1, data: { "air-range-1": { stock: 1, price: 10 } } },
-      { konkName: "air", date: d2, data: { "air-range-1": { stock: 2, price: 11 } } },
-    ]);
+    await seedSkuSliceMonthDay("air", d1, { "air-range-1": { stock: 1, price: 10 } });
+    await seedSkuSliceMonthDay("air", d2, { "air-range-1": { stock: 2, price: 11 } });
 
     const result = await getSkuSliceRangeUtil({
       skuId: sku._id.toString(),

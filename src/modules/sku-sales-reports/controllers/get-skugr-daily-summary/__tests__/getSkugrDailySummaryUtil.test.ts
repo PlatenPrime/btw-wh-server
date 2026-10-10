@@ -2,15 +2,16 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../../../../sku-slices/models/SkuSlice.js";
 import { getSkugrDailySummaryUtil } from "../utils/getSkugrDailySummaryUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getSkugrDailySummaryUtil", () => {
   beforeEach(async () => {
     await Konk.deleteMany({});
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("zeros sales on recount day in skugr summary", async () => {
@@ -38,10 +39,8 @@ describe("getSkugrDailySummaryUtil", () => {
     });
     const d1 = new Date("2026-06-01T00:00:00.000Z");
     const d2 = new Date("2026-06-02T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      { konkName: "agg-k-rec", date: d1, data: { "agg-k-rec-a": { stock: 10, price: 2 } } },
-      { konkName: "agg-k-rec", date: d2, data: { "agg-k-rec-a": { stock: 8, price: 2 } } },
-    ]);
+    await seedSkuSliceMonthDay("agg-k-rec", d1, { "agg-k-rec-a": { stock: 10, price: 2 } });
+    await seedSkuSliceMonthDay("agg-k-rec", d2, { "agg-k-rec-a": { stock: 8, price: 2 } });
     const result = await getSkugrDailySummaryUtil({
       skugrId: skugr._id.toString(),
       dateFrom: d1,
@@ -79,24 +78,14 @@ describe("getSkugrDailySummaryUtil", () => {
 
     const d1 = new Date("2026-06-01T00:00:00.000Z");
     const d2 = new Date("2026-06-02T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      {
-        konkName: "agg-k",
-        date: d1,
-        data: {
+    await seedSkuSliceMonthDay("agg-k", d1, {
           "agg-k-a": { stock: 10, price: 2 },
           "agg-k-b": { stock: 5, price: 4 },
-        },
-      },
-      {
-        konkName: "agg-k",
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay("agg-k", d2, {
           "agg-k-a": { stock: 8, price: 2 },
           "agg-k-b": { stock: 3, price: 4 },
-        },
-      },
-    ]);
+        });
 
     const result = await getSkugrDailySummaryUtil({
       skugrId: skugr._id.toString(),

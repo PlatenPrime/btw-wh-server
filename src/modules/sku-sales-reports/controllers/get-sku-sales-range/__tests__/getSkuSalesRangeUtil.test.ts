@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../sku-slices/models/SkuSlice.js";
 import { getSkuSalesRangeUtil } from "../utils/getSkuSalesRangeUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getSkuSalesRangeUtil", () => {
   beforeEach(async () => {
     await Konk.deleteMany({});
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns ok false when sku missing", async () => {
@@ -30,10 +31,8 @@ describe("getSkuSalesRangeUtil", () => {
     });
     const d1 = new Date("2026-03-01T00:00:00.000Z");
     const d2 = new Date("2026-03-02T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      { konkName: "air", date: d1, data: { "air-sr1": { stock: 5, price: 2 } } },
-      { konkName: "air", date: d2, data: { "air-sr1": { stock: 3, price: 2 } } },
-    ]);
+    await seedSkuSliceMonthDay("air", d1, { "air-sr1": { stock: 5, price: 2 } });
+    await seedSkuSliceMonthDay("air", d2, { "air-sr1": { stock: 3, price: 2 } });
 
     const result = await getSkuSalesRangeUtil({
       skuId: sku._id.toString(),
@@ -68,11 +67,9 @@ describe("getSkuSalesRangeUtil", () => {
     const d0 = new Date("2026-03-01T00:00:00.000Z");
     const d1 = new Date("2026-03-02T00:00:00.000Z");
     const d2 = new Date("2026-03-03T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      { konkName: "air", date: d0, data: { "air-sr2": { stock: 10, price: 2 } } },
-      { konkName: "air", date: d1, data: { "air-sr2": { stock: 8, price: 2 } } },
-      { konkName: "air", date: d2, data: { "air-sr2": { stock: 6, price: 2 } } },
-    ]);
+    await seedSkuSliceMonthDay("air", d0, { "air-sr2": { stock: 10, price: 2 } });
+    await seedSkuSliceMonthDay("air", d1, { "air-sr2": { stock: 8, price: 2 } });
+    await seedSkuSliceMonthDay("air", d2, { "air-sr2": { stock: 6, price: 2 } });
 
     const result = await getSkuSalesRangeUtil({
       skuId: sku._id.toString(),

@@ -11,9 +11,10 @@ import { delay } from "../../../../../utils/delay.js";
 import { jitterMs } from "../../../../../utils/jitterMs.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { resolveSkuSliceRequestJitterMs } from "../../../../sku-reporting/constants/skuSliceRequestJitterMs.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import type { RunSkugrSlicesTodayInput } from "../schemas/runSkugrSlicesTodaySchema.js";
 import { afterSkuSliceStockMutation } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
+import { ensureSkuSliceDayMeta } from "../../../utils/skuSliceDayMetaStore.js";
+import { upsertDayPoint } from "../../../utils/skuSliceMonthStore.js";
 
 export type RunSkuSliceForSkugrTodayResult = {
   skugrId: string;
@@ -100,11 +101,7 @@ export async function runSkuSliceForSkugrTodayUtil(
           .select("_id productId")
           .lean();
 
-  await SkuSlice.findOneAndUpdate(
-    { konkName, date: sliceDate },
-    { $setOnInsert: { konkName, date: sliceDate, data: {} } },
-    { upsert: true }
-  );
+  await ensureSkuSliceDayMeta(konkName, sliceDate);
 
   const counters = { count: 0, invalid: 0, errors: 0 };
   const total = skus.length;
@@ -128,10 +125,7 @@ export async function runSkuSliceForSkugrTodayUtil(
         log.warn({ productKey, skugrId: input.skugrId }, "skugr slice item invalid");
       } else {
         const dataItem = { stock: result.stock, price: result.price };
-        await SkuSlice.findOneAndUpdate(
-          { konkName, date: sliceDate },
-          { $set: { [`data.${productKey}`]: dataItem } }
-        );
+        await upsertDayPoint(konkName, productKey, sliceDate, dataItem);
 
         if (isInvalidSliceStockResult(result)) {
           counters.invalid += 1;

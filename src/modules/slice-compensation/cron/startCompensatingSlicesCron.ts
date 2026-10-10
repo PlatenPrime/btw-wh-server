@@ -11,7 +11,7 @@ const log = createLogger({ module: "slice-compensation", job: "cron" });
 
 /**
  * Компенсирующие срезы: ежедневно в 10:30 Europe/Kiev — повторный опрос позиций
- * с недостоверными данными в сегодняшних AnalogSlice и SkuSlice.
+ * с недостоверными данными в сегодняшних AnalogSlice и SkuSliceMonth.
  */
 export function startCompensatingSlicesCron(): CronJob {
   const job = new CronJob(

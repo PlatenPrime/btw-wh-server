@@ -3,7 +3,17 @@ import {
   getSkuStockDataUtil,
   UNSUPPORTED_KONK_CODE,
 } from "../../skus/utils/getSkuStockDataUtil.js";
-import { SkuSlice } from "../../sku-slices/models/SkuSlice.js";
+import { SkuSliceDayMeta } from "../../sku-slices/models/SkuSliceDayMeta.js";
+import { SkuSliceMonth } from "../../sku-slices/models/SkuSliceMonth.js";
+import {
+  loadDayMapForKonk,
+  upsertDayPoint,
+} from "../../sku-slices/utils/skuSliceMonthStore.js";
+import {
+  toSliceMonthDate,
+  toSliceMonthDayKey,
+} from "../../sku-slices/utils/skuSliceMonthKeys.js";
+import { toSliceDate } from "../../../utils/sliceDate.js";
 import { getCompensationExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
 import {
   buildCompensatingDataKeyQueue,
@@ -18,41 +28,61 @@ import {
 } from "../../../logging/logModuleError.js";
 import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
-type SkuSliceLean = {
-  konkName: string;
-  data?: Record<string, unknown>;
-};
-
 type SkuIdLean = { _id: { toString(): string } };
 
 export type RunCompensatingSkuSlicesOptions = {
-  /** Если задан — только документ этого konk (ожидается уже нормализованное имя). */
+  /** Если задан — только этот konk (ожидается уже нормализованное имя). */
   konkName?: string;
   onProgress?: (done: number, total: number, message?: string) => void;
   signal?: AbortSignal;
 };
 
+async function resolveKonkNamesForDay(
+  sliceDate: Date,
+  konkName?: string,
+): Promise<string[]> {
+  if (konkName) return [konkName];
+
+  const metas = await SkuSliceDayMeta.find({ date: sliceDate })
+    .select("konkName")
+    .lean();
+  if (metas.length > 0) {
+    return metas
+      .map((m) => m.konkName)
+      .filter((k): k is string => typeof k === "string" && k.length > 0);
+  }
+
+  const month = toSliceMonthDate(sliceDate);
+  const dayKey = toSliceMonthDayKey(sliceDate);
+  const konks = await SkuSliceMonth.distinct("konkName", {
+    month,
+    [`days.${dayKey}`]: { $exists: true },
+  });
+  return konks.filter((k): k is string => typeof k === "string" && k.length > 0);
+}
+
 /**
- * Повторный опрос позиций SkuSlice за sliceDate: -1/-1 или цена не конечное неотрицательное число.
- * Если ответ опроса не в режиме полного -1/-1, перезаписывает ключ в том же документе.
+ * Повторный опрос позиций SkuSliceMonth за sliceDate: -1/-1 или цена не конечное неотрицательное число.
+ * Если ответ опроса не в режиме полного -1/-1, перезаписывает ключ дня в months.
  */
 export async function runCompensatingSkuSlices(
   sliceDate: Date,
-  options?: RunCompensatingSkuSlicesOptions
+  options?: RunCompensatingSkuSlicesOptions,
 ): Promise<{ refetched: number; updated: number }> {
+  const day = toSliceDate(sliceDate);
   const excluded = getCompensationExcludedCompetitorSet("skuSlices");
-  const filter: { date: Date; konkName?: string } = { date: sliceDate };
-  if (options?.konkName) {
-    filter.konkName = options.konkName;
+  const konkNames = await resolveKonkNamesForDay(day, options?.konkName);
+
+  const docs: Array<{ konkName: string; data?: Record<string, unknown> }> = [];
+  for (const konkName of konkNames) {
+    const data = await loadDayMapForKonk(konkName, day);
+    docs.push({ konkName, data });
   }
-  const docs = (await SkuSlice.find(filter)
-    .select("konkName data")
-    .lean()) as SkuSliceLean[];
 
   const queue = buildCompensatingDataKeyQueue(
     docs,
     excluded,
-    shouldRefetchSkuSliceItem
+    shouldRefetchSkuSliceItem,
   );
 
   const updatedByKonk = new Map<string, Set<string>>();
@@ -69,7 +99,7 @@ export async function runCompensatingSkuSlices(
           logModuleWarn(
             "slice-compensation",
             "compensating sku: entity not found, skip",
-            { konkName, productKey }
+            { konkName, productKey },
           );
           return { refetched: 0, updated: 0 };
         }
@@ -85,10 +115,7 @@ export async function runCompensatingSkuSlices(
         let updated = 0;
         if (!isFullMinusOneSliceStockResult(result)) {
           const dataItem = { stock: result.stock, price: result.price };
-          await SkuSlice.findOneAndUpdate(
-            { konkName, date: sliceDate },
-            { $set: { [`data.${productKey}`]: dataItem } }
-          );
+          await upsertDayPoint(konkName, productKey, day, dataItem);
           updated = 1;
           const set = updatedByKonk.get(konkName) ?? new Set<string>();
           set.add(productKey);
@@ -112,7 +139,7 @@ export async function runCompensatingSkuSlices(
             {
               konkName,
               productKey,
-            }
+            },
           );
           return { refetched: 0, updated: 0 };
         }
@@ -125,7 +152,7 @@ export async function runCompensatingSkuSlices(
             konkName,
             productKey,
             message: msg,
-          }
+          },
         );
         return { refetched: 0, updated: 0 };
       }
@@ -133,13 +160,13 @@ export async function runCompensatingSkuSlices(
     {
       onProgress: options?.onProgress,
       signal: options?.signal,
-    }
+    },
   );
 
   for (const [konkName, productIds] of updatedByKonk) {
     await afterSkuSliceStockMutation({
       konkName,
-      dayD: sliceDate,
+      dayD: day,
       productIds: [...productIds],
     });
   }

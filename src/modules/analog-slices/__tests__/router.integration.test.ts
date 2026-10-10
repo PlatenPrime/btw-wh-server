@@ -6,7 +6,7 @@ import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
 import { Analog } from "../../analogs/models/Analog.js";
-import { BtradeSlice } from "../../btrade-slices/models/BtradeSlice.js";
+import { seedBtradeSliceMonthDay } from "../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { AnalogSlice } from "../models/AnalogSlice.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
@@ -47,16 +47,12 @@ describe("Analog-slices router integration", () => {
       },
     ]);
 
-    await BtradeSlice.insertMany([
-      {
-        date: d1,
-        data: { [artikul]: { quantity: 200, price: 12 } },
-      },
-      {
-        date: d2,
-        data: { [artikul]: { quantity: 185, price: 12 } },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d1, {
+      [artikul]: { quantity: 200, price: 12 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul]: { quantity: 185, price: 12 },
+    });
 
     return analog;
   }

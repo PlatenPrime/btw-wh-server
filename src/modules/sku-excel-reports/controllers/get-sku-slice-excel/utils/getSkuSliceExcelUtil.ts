@@ -2,7 +2,7 @@ import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBui
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
-import type { ISkuSliceDataItem } from "../../../../sku-slices/models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../../../sku-slices/models/skuSliceTypes.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
 import {

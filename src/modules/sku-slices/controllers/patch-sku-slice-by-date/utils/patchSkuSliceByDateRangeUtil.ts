@@ -1,16 +1,16 @@
 import { Sku } from "../../../../skus/models/Sku.js";
-import {
-  SkuSlice,
-  type ISkuSliceDataItem,
-} from "../../../models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../../models/skuSliceTypes.js";
 import { enumerateSliceDates } from "../../../../slices/utils/enumerateSliceDates.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { PatchSkuSliceByDateRangeInput } from "../schemas/patchSkuSliceByDateSchema.js";
-import { readPreviousPoint } from "./patchSkuSliceByDateUtil.js";
 import {
   materializeSkuSliceSalesDateRange,
   sliceDatePlusDays,
 } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
+import {
+  getDayPoint,
+  upsertDayPoint,
+} from "../../../utils/skuSliceMonthStore.js";
 
 export type PatchSkuSliceByDateRangeDayResult = {
   date: Date;
@@ -29,11 +29,10 @@ export type PatchSkuSliceByDateRangeResult = {
 };
 
 /**
- * Пишет одинаковые stock/price SKU на каждый день диапазона (включительно).
- * Отсутствующие дневные документы создаются (upsert).
+ * Пишет одинаковые stock/price SKU на каждый день диапазона (включительно) в months.
  */
 export async function patchSkuSliceByDateRangeUtil(
-  input: PatchSkuSliceByDateRangeInput
+  input: PatchSkuSliceByDateRangeInput,
 ): Promise<PatchSkuSliceByDateRangeResult | null> {
   const sku = await Sku.findById(input.skuId)
     .select("konkName productId")
@@ -54,22 +53,9 @@ export async function patchSkuSliceByDateRangeUtil(
   const days: PatchSkuSliceByDateRangeDayResult[] = [];
 
   for (const sliceDate of dates) {
-    const before = await SkuSlice.findOneAndUpdate(
-      { konkName: sku.konkName, date: sliceDate },
-      {
-        $set: { [`data.${productId}`]: nextItem },
-        $setOnInsert: { konkName: sku.konkName, date: sliceDate },
-      },
-      { upsert: true, new: false }
-    ).lean();
-
-    const created = before == null;
-    const previous = created
-      ? null
-      : readPreviousPoint(
-          (before.data as Record<string, unknown> | undefined)?.[productId]
-        );
-
+    const previous = await getDayPoint(sku.konkName, productId, sliceDate);
+    const created = previous == null;
+    await upsertDayPoint(sku.konkName, productId, sliceDate, nextItem);
     days.push({ date: sliceDate, previous, created });
   }
 

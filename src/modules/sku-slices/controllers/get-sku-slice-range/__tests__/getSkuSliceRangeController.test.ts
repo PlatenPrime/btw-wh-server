@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { getSkuSliceRangeController } from "../getSkuSliceRangeController.js";
+import { seedSkuSliceMonthDay } from "../../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../models/SkuSliceMonth.js";
 
 describe("getSkuSliceRangeController", () => {
   let res: Response;
@@ -11,7 +12,7 @@ describe("getSkuSliceRangeController", () => {
 
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -53,16 +54,8 @@ describe("getSkuSliceRangeController", () => {
       title: "T",
       url: "https://e.com/r",
     });
-    await SkuSlice.create({
-      konkName: "air",
-      date: new Date("2026-03-01T00:00:00.000Z"),
-      data: { "air-range-1": { stock: 1, price: 2 } },
-    });
-    await SkuSlice.create({
-      konkName: "air",
-      date: new Date("2026-03-02T00:00:00.000Z"),
-      data: { "air-range-1": { stock: 3, price: 2 } },
-    });
+    await seedSkuSliceMonthDay("air", new Date("2026-03-01T00:00:00.000Z"), { "air-range-1": { stock: 1, price: 2 } });
+    await seedSkuSliceMonthDay("air", new Date("2026-03-02T00:00:00.000Z"), { "air-range-1": { stock: 3, price: 2 } });
     const req = {
       params: { skuId: sku._id.toString() },
       query: { dateFrom: "2026-03-01", dateTo: "2026-03-02" },

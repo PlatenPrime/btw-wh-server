@@ -1,8 +1,10 @@
+import { seedSkuSliceMonthDay } from "../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../sku-slices/models/SkuSliceMonth.js";
 ﻿import { beforeEach, describe, expect, it } from "vitest";
 import { Art } from "../../../arts/models/Art.js";
-import { BtradeSlice } from "../../../btrade-slices/models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../../btrade-slices/models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { Sku } from "../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../sku-slices/models/SkuSlice.js";
 import { SkuManufacturerDaySales } from "../../models/SkuManufacturerDaySales.js";
 import { BtradeManufacturerDaySales } from "../../models/BtradeManufacturerDaySales.js";
 import { loadKonkProdSkuChartSeries } from "../konkProdSkuChartCore.js";
@@ -10,8 +12,8 @@ import { loadKonkProdSkuChartSeries } from "../konkProdSkuChartCore.js";
 describe("loadKonkProdSkuChartSeries", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
-    await BtradeSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
+    await BtradeSliceMonth.deleteMany({});
     await Art.deleteMany({});
     await SkuManufacturerDaySales.deleteMany({});
     await BtradeManufacturerDaySales.deleteMany({});
@@ -44,23 +46,9 @@ describe("loadKonkProdSkuChartSeries", () => {
     });
     await Art.create({ artikul: btArt, prodName: prod, zone: "Z" });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: { [`${konk}-1`]: { stock: 13, price: 2 } },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: { [`${konk}-1`]: { stock: 10, price: 2 } },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: { [`${konk}-1`]: { stock: 7, price: 2 } },
-      },
-    ]);
+    await seedSkuSliceMonthDay(konk, d0, { [`${konk}-1`]: { stock: 13, price: 2 } });
+    await seedSkuSliceMonthDay(konk, d1, { [`${konk}-1`]: { stock: 10, price: 2 } });
+    await seedSkuSliceMonthDay(konk, d2, { [`${konk}-1`]: { stock: 7, price: 2 } });
     await SkuManufacturerDaySales.insertMany([
       {
         konkName: konk,
@@ -81,20 +69,15 @@ describe("loadKonkProdSkuChartSeries", () => {
       { date: d1, prodName: prod.toLowerCase(), salesPcs: 5, salesUah: 50 },
       { date: d2, prodName: prod.toLowerCase(), salesPcs: 5, salesUah: 50 },
     ]);
-    await BtradeSlice.insertMany([
-      {
-        date: d0,
-        data: { [btArt]: { quantity: 45, price: 10 } },
-      },
-      {
-        date: d1,
-        data: { [btArt]: { quantity: 40, price: 10 } },
-      },
-      {
-        date: d2,
-        data: { [btArt]: { quantity: 35, price: 10 } },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d0, {
+      [btArt]: { quantity: 45, price: 10 },
+    });
+    await seedBtradeSliceMonthDay(d1, {
+      [btArt]: { quantity: 40, price: 10 },
+    });
+    await seedBtradeSliceMonthDay(d2, {
+      [btArt]: { quantity: 35, price: 10 },
+    });
 
     const result = await loadKonkProdSkuChartSeries({
       konk,
@@ -137,14 +120,10 @@ describe("loadKonkProdSkuChartSeries", () => {
         url: "https://e.com/b",
       },
     ]);
-    await SkuSlice.create({
-      konkName: konk,
-      date: d1,
-      data: {
+    await seedSkuSliceMonthDay(konk, d1, {
         [`${konk}-a`]: { stock: 5, price: 1 },
         [`${konk}-b`]: { stock: 8, price: 1 },
-      },
-    });
+      });
     await SkuManufacturerDaySales.insertMany([
       { konkName: konk, date: d1, prodName: "A", salesPcs: 2, salesUah: 2 },
       { konkName: konk, date: d1, prodName: "B", salesPcs: 4, salesUah: 4 },

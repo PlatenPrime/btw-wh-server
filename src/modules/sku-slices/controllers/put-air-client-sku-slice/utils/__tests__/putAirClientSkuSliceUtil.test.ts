@@ -6,7 +6,7 @@ vi.mock(
   "../../../../../browser/air/utils/air-product-page-from-html/readAirProductFromHtml.js",
   () => ({
     readAirProductFromHtml: vi.fn(),
-  })
+  }),
 );
 vi.mock("../../../../../skus/models/Sku.js", () => ({
   Sku: { findById: vi.fn() },
@@ -14,17 +14,33 @@ vi.mock("../../../../../skus/models/Sku.js", () => ({
 vi.mock("../../../../../skugrs/models/Skugr.js", () => ({
   Skugr: { exists: vi.fn() },
 }));
-vi.mock("../../../../models/SkuSlice.js", () => ({
-  SkuSlice: {
-    findOneAndUpdate: vi.fn(),
-    findOne: vi.fn(),
-  },
+vi.mock("../../../../utils/skuSliceMonthStore.js", () => ({
+  getDayPoint: vi.fn(),
+  upsertDayPoint: vi.fn(),
 }));
+vi.mock("../../../../utils/skuSliceDayMetaStore.js", () => ({
+  ensureSkuSliceDayMeta: vi.fn(),
+}));
+vi.mock(
+  "../../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js",
+  () => ({
+    afterSkuSliceStockMutation: vi.fn().mockResolvedValue({
+      upserted: 0,
+      modified: 0,
+      matched: 0,
+    }),
+  }),
+);
 
 import { readAirProductFromHtml } from "../../../../../browser/air/utils/air-product-page-from-html/readAirProductFromHtml.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../../../../models/SkuSlice.js";
+import {
+  getDayPoint,
+  upsertDayPoint,
+} from "../../../../utils/skuSliceMonthStore.js";
+import { ensureSkuSliceDayMeta } from "../../../../utils/skuSliceDayMetaStore.js";
+import { afterSkuSliceStockMutation } from "../../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 describe("putAirClientSkuSliceUtil", () => {
   const now = new Date("2026-07-26T12:00:00.000Z");
@@ -53,11 +69,9 @@ describe("putAirClientSkuSliceUtil", () => {
       stock: 12,
       price: 2.1,
     });
-    vi.mocked(SkuSlice.findOneAndUpdate)
-      .mockResolvedValueOnce({} as never)
-      .mockResolvedValueOnce({
-        data: { "air-1": { stock: 12, price: 2.1 } },
-      } as never);
+    vi.mocked(ensureSkuSliceDayMeta).mockResolvedValue(undefined);
+    vi.mocked(getDayPoint).mockResolvedValue(null);
+    vi.mocked(upsertDayPoint).mockResolvedValue(undefined);
   });
 
   it("returns SKU_NOT_FOUND", async () => {
@@ -101,7 +115,7 @@ describe("putAirClientSkuSliceUtil", () => {
   it("returns URL_MISMATCH", async () => {
     const result = await putAirClientSkuSliceUtil(
       { ...input, sourceUrl: "https://airballoons.com.ua/ua/product/other" },
-      now
+      now,
     );
     expect(result).toMatchObject({ ok: false, code: "URL_MISMATCH" });
   });
@@ -127,21 +141,20 @@ describe("putAirClientSkuSliceUtil", () => {
       stock: 12,
       price: 2.1,
     });
-    expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(2);
+    expect(ensureSkuSliceDayMeta).toHaveBeenCalledWith("air", sliceDate);
+    expect(upsertDayPoint).toHaveBeenCalledWith("air", "air-1", sliceDate, {
+      stock: 12,
+      price: 2.1,
+    });
+    expect(afterSkuSliceStockMutation).toHaveBeenCalledWith({
+      konkName: "air",
+      dayD: sliceDate,
+      productIds: ["air-1"],
+    });
   });
 
   it("skips when valid value already exists", async () => {
-    vi.mocked(SkuSlice.findOneAndUpdate)
-      .mockReset()
-      .mockResolvedValueOnce({} as never)
-      .mockResolvedValueOnce(null);
-    vi.mocked(SkuSlice.findOne).mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue({
-          data: { "air-1": { stock: 9, price: 1.5 } },
-        }),
-      }),
-    } as never);
+    vi.mocked(getDayPoint).mockResolvedValue({ stock: 9, price: 1.5 });
 
     const result = await putAirClientSkuSliceUtil(input, now);
 
@@ -153,5 +166,6 @@ describe("putAirClientSkuSliceUtil", () => {
       stock: 9,
       price: 1.5,
     });
+    expect(upsertDayPoint).not.toHaveBeenCalled();
   });
 });

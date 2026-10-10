@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import "../../../../test/setup.js";
 import { Konk } from "../../../konks/models/Konk.js";
 import { Sku } from "../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../sku-slices/models/SkuSlice.js";
+import { SkuSliceMonth } from "../../../sku-slices/models/SkuSliceMonth.js";
+import { seedSkuSliceMonthDay } from "../../../sku-slices/utils/seedSkuSliceMonthDay.js";
 import { SkuManufacturerDaySales } from "../../models/SkuManufacturerDaySales.js";
 import {
   afterSkuSliceStockMutation,
@@ -18,7 +19,7 @@ describe("materializeSkuSliceSalesUtil", () => {
   const d3 = new Date("2026-06-04T00:00:00.000Z");
 
   beforeEach(async () => {
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     await SkuManufacturerDaySales.deleteMany({});
     await Sku.deleteMany({});
     await Konk.deleteMany({});
@@ -38,13 +39,11 @@ describe("materializeSkuSliceSalesUtil", () => {
     });
   });
 
-  it("writes manufacturer rollup for D and D+1, not Mixed sales fields", async () => {
-    await SkuSlice.create([
-      { konkName, date: d0, data: { p1: { stock: 10, price: 5 } } },
-      { konkName, date: d1, data: { p1: { stock: 7, price: 5 } } },
-      { konkName, date: d2, data: { p1: { stock: 4, price: 5 } } },
-      { konkName, date: d3, data: { p1: { stock: 3, price: 5 } } },
-    ]);
+  it("writes manufacturer rollup for D and D+1 from months", async () => {
+    await seedSkuSliceMonthDay(konkName, d0, { p1: { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay(konkName, d1, { p1: { stock: 7, price: 5 } });
+    await seedSkuSliceMonthDay(konkName, d2, { p1: { stock: 4, price: 5 } });
+    await seedSkuSliceMonthDay(konkName, d3, { p1: { stock: 3, price: 5 } });
 
     const result = await materializeSkuSliceSalesForKonkDays({
       konkName,
@@ -54,11 +53,6 @@ describe("materializeSkuSliceSalesUtil", () => {
 
     expect(result.daysTouched).toEqual(["2026-06-02", "2026-06-03"]);
     expect(result.rollupDocs).toBe(2);
-
-    const mid = await SkuSlice.findOne({ konkName, date: d1 }).lean();
-    const item = mid?.data.p1 as Record<string, unknown> | undefined;
-    expect(item?.salesPcs).toBeUndefined();
-    expect(item?.salesUah).toBeUndefined();
 
     const rollups = await SkuManufacturerDaySales.find({ konkName })
       .sort({ date: 1 })
@@ -77,10 +71,10 @@ describe("materializeSkuSliceSalesUtil", () => {
   });
 
   it("zeros rollup sales when stock is -1", async () => {
-    await SkuSlice.create([
-      { konkName, date: d0, data: { p1: { stock: 10, price: 5 } } },
-      { konkName, date: d1, data: { p1: { stock: -1, price: -1 } } },
-    ]);
+    await seedSkuSliceMonthDay(konkName, d0, { p1: { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay(konkName, d1, {
+      p1: { stock: -1, price: -1 },
+    });
 
     await afterSkuSliceStockMutation({ konkName, dayD: d1 });
     const row = await SkuManufacturerDaySales.findOne({
@@ -96,10 +90,8 @@ describe("materializeSkuSliceSalesUtil", () => {
       { name: konkName },
       { $set: { recountDays: ["2026-06-02"] } },
     );
-    await SkuSlice.create([
-      { konkName, date: d0, data: { p1: { stock: 10, price: 5 } } },
-      { konkName, date: d1, data: { p1: { stock: 7, price: 5 } } },
-    ]);
+    await seedSkuSliceMonthDay(konkName, d0, { p1: { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay(konkName, d1, { p1: { stock: 7, price: 5 } });
 
     await afterSkuSliceStockMutation({ konkName, dayD: d1 });
     const row = await SkuManufacturerDaySales.findOne({
@@ -110,10 +102,8 @@ describe("materializeSkuSliceSalesUtil", () => {
   });
 
   it("dry-run does not write rollup", async () => {
-    await SkuSlice.create([
-      { konkName, date: d0, data: { p1: { stock: 10, price: 5 } } },
-      { konkName, date: d1, data: { p1: { stock: 7, price: 5 } } },
-    ]);
+    await seedSkuSliceMonthDay(konkName, d0, { p1: { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay(konkName, d1, { p1: { stock: 7, price: 5 } });
 
     const result = await materializeSkuSliceSalesForKonkDays({
       konkName,
@@ -126,11 +116,9 @@ describe("materializeSkuSliceSalesUtil", () => {
   });
 
   it("materializeSkuSliceSalesDateRange calls onProgress and replaces day", async () => {
-    await SkuSlice.create([
-      { konkName, date: d0, data: { p1: { stock: 10, price: 5 } } },
-      { konkName, date: d1, data: { p1: { stock: 7, price: 5 } } },
-      { konkName, date: d2, data: { p1: { stock: 4, price: 5 } } },
-    ]);
+    await seedSkuSliceMonthDay(konkName, d0, { p1: { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay(konkName, d1, { p1: { stock: 7, price: 5 } });
+    await seedSkuSliceMonthDay(konkName, d2, { p1: { stock: 4, price: 5 } });
 
     const progress: Array<{ day: string; dayIndex: number; dayTotal: number }> =
       [];
@@ -160,32 +148,25 @@ describe("materializeSkuSliceSalesUtil", () => {
       title: "P2",
       url: "https://example.com/p2",
     });
-    await SkuSlice.create([
-      {
-        konkName,
-        date: d0,
-        data: {
-          p1: { stock: 10, price: 5 },
-          p2: { stock: 20, price: 2 },
-        },
-      },
-      {
-        konkName,
-        date: d1,
-        data: {
-          p1: { stock: 7, price: 5 },
-          p2: { stock: 18, price: 2 },
-        },
-      },
-    ]);
+    await seedSkuSliceMonthDay(konkName, d0, {
+      p1: { stock: 10, price: 5 },
+      p2: { stock: 20, price: 2 },
+    });
+    await seedSkuSliceMonthDay(konkName, d1, {
+      p1: { stock: 7, price: 5 },
+      p2: { stock: 18, price: 2 },
+    });
 
     await afterSkuSliceStockMutation({ konkName, dayD: d1 });
-    const rows = await SkuManufacturerDaySales.find({ konkName, date: d1 }).lean();
+    const rows = await SkuManufacturerDaySales.find({
+      konkName,
+      date: d1,
+    }).lean();
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       prodName: "MakerX",
-      salesPcs: 5, // 3+2
-      salesUah: 19, // 15+4
+      salesPcs: 5,
+      salesUah: 19,
     });
   });
 });

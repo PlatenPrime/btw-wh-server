@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Analog } from "../../../../../analogs/models/Analog.js";
 import { AnalogSlice } from "../../../../models/AnalogSlice.js";
-import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
+import { seedBtradeSliceMonthDay } from "../../../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { getAnalogBtradeComparisonRangeUtil } from "../getAnalogBtradeComparisonRangeUtil.js";
 
 describe("getAnalogBtradeComparisonRangeUtil", () => {
@@ -58,16 +58,12 @@ describe("getAnalogBtradeComparisonRangeUtil", () => {
       },
     ]);
 
-    await BtradeSlice.insertMany([
-      {
-        date: d2,
-        data: { [artikul]: { quantity: 10, price: 2.0 } },
-      },
-      {
-        date: d3,
-        data: { [artikul]: { quantity: 20, price: 2.2 } },
-      },
-    ]);
+    await seedBtradeSliceMonthDay(d2, {
+      [artikul]: { quantity: 10, price: 2.0 },
+    });
+    await seedBtradeSliceMonthDay(d3, {
+      [artikul]: { quantity: 20, price: 2.2 },
+    });
 
     const result = await getAnalogBtradeComparisonRangeUtil({
       analogId: analog._id.toString(),

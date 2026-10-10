@@ -1,4 +1,4 @@
-import type { IBtradeSliceDataItem } from "../models/BtradeSlice.js";
+import type { IBtradeSliceDataItem } from "../models/btradeSliceTypes.js";
 
 export type BtradeSliceRangeItem = {
   date: string;

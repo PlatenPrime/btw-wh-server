@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
 import { getSkuSliceExcelUtil } from "../getSkuSliceExcelUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getSkuSliceExcelUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns ok false when sku missing", async () => {
@@ -28,10 +29,8 @@ describe("getSkuSliceExcelUtil", () => {
     });
     const d1 = new Date("2026-03-01T00:00:00.000Z");
     const d2 = new Date("2026-03-02T00:00:00.000Z");
-    await SkuSlice.insertMany([
-      { konkName: "air", date: d1, data: { "air-xls-1": { stock: 4, price: 9 } } },
-      { konkName: "air", date: d2, data: { "air-xls-1": { stock: 2, price: 9 } } },
-    ]);
+    await seedSkuSliceMonthDay("air", d1, { "air-xls-1": { stock: 4, price: 9 } });
+    await seedSkuSliceMonthDay("air", d2, { "air-xls-1": { stock: 2, price: 9 } });
 
     const r = await getSkuSliceExcelUtil({
       skuId: sku._id.toString(),

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { SkuSlice } from "../../models/SkuSlice.js";
+import { SkuSliceMonth } from "../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../skuSliceMonthStore.js";
+import { seedSkuSliceMonthDay } from "../seedSkuSliceMonthDay.js";
 import { correctBalunFakeStockSpikesUtil } from "../correctBalunFakeStockSpikesUtil.js";
 
 const D0 = new Date("2026-09-13T00:00:00.000Z");
@@ -11,20 +13,16 @@ async function seedBalun(
   rows: Array<{
     date: Date;
     data: Record<string, { stock: number; price: number }>;
-  }>
+  }>,
 ): Promise<void> {
   for (const row of rows) {
-    await SkuSlice.create({
-      konkName: "balun",
-      date: row.date,
-      data: row.data,
-    });
+    await seedSkuSliceMonthDay("balun", row.date, row.data);
   }
 }
 
 describe("correctBalunFakeStockSpikesUtil", () => {
   beforeEach(async () => {
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("rejects daysBack < 1", async () => {
@@ -53,8 +51,10 @@ describe("correctBalunFakeStockSpikesUtil", () => {
       { productId: "balun-1", date: "2026-09-15", from: 10000, to: 543 },
     ]);
 
-    const mid = await SkuSlice.findOne({ konkName: "balun", date: D1 }).lean();
-    expect(mid?.data?.["balun-1"]).toEqual({ stock: 10000, price: 10 });
+    expect(await getDayPoint("balun", "balun-1", D1)).toEqual({
+      stock: 10000,
+      price: 10,
+    });
   });
 
   it("applies patches for mid-range fake stock and keeps price", async () => {
@@ -74,10 +74,14 @@ describe("correctBalunFakeStockSpikesUtil", () => {
       { productId: "balun-1", date: "2026-09-14", from: 9975, to: 543 },
     ]);
 
-    const mid = await SkuSlice.findOne({ konkName: "balun", date: D1 }).lean();
-    expect(mid?.data?.["balun-1"]).toEqual({ stock: 543, price: 99 });
-    const end = await SkuSlice.findOne({ konkName: "balun", date: D2 }).lean();
-    expect(end?.data?.["balun-1"]).toEqual({ stock: 200, price: 12 });
+    expect(await getDayPoint("balun", "balun-1", D1)).toEqual({
+      stock: 543,
+      price: 99,
+    });
+    expect(await getDayPoint("balun", "balun-1", D2)).toEqual({
+      stock: 200,
+      price: 12,
+    });
   });
 
   it("uses lookback outside the window", async () => {
@@ -100,15 +104,15 @@ describe("correctBalunFakeStockSpikesUtil", () => {
       { productId: "balun-1", date: "2026-09-15", from: 10000, to: 777 },
     ]);
 
-    const left = await SkuSlice.findOne({ konkName: "balun", date: D0 }).lean();
-    expect(left?.data?.["balun-1"]).toEqual({ stock: 777, price: 1 });
+    expect(await getDayPoint("balun", "balun-1", D0)).toEqual({
+      stock: 777,
+      price: 1,
+    });
   });
 
   it("does not touch other competitors", async () => {
-    await SkuSlice.create({
-      konkName: "air",
-      date: D1,
-      data: { "air-1": { stock: 10000, price: 5 } },
+    await seedSkuSliceMonthDay("air", D1, {
+      "air-1": { stock: 10000, price: 5 },
     });
     await seedBalun([
       { date: D0, data: { "balun-1": { stock: 10, price: 1 } } },
@@ -121,8 +125,10 @@ describe("correctBalunFakeStockSpikesUtil", () => {
       apply: true,
     });
 
-    const air = await SkuSlice.findOne({ konkName: "air", date: D1 }).lean();
-    expect(air?.data?.["air-1"]).toEqual({ stock: 10000, price: 5 });
+    expect(await getDayPoint("air", "air-1", D1)).toEqual({
+      stock: 10000,
+      price: 5,
+    });
   });
 
   it("skips when no adequate neighbor inside lookback", async () => {
@@ -166,8 +172,10 @@ describe("correctBalunFakeStockSpikesUtil", () => {
       { productId: "balun-1", date: "2026-09-16", from: 10000, to: 40 },
     ]);
 
-    const d2 = await SkuSlice.findOne({ konkName: "balun", date: D2 }).lean();
-    expect(d2?.data?.["balun-1"]).toEqual({ stock: 40, price: 2 });
+    expect(await getDayPoint("balun", "balun-1", D2)).toEqual({
+      stock: 40,
+      price: 2,
+    });
   });
 
   it("applies patches for spike-range fake stock and keeps price", async () => {
@@ -187,10 +195,14 @@ describe("correctBalunFakeStockSpikesUtil", () => {
       { productId: "balun-1", date: "2026-09-14", from: 4995, to: 4 },
     ]);
 
-    const mid = await SkuSlice.findOne({ konkName: "balun", date: D1 }).lean();
-    expect(mid?.data?.["balun-1"]).toEqual({ stock: 4, price: 15.53 });
-    const end = await SkuSlice.findOne({ konkName: "balun", date: D2 }).lean();
-    expect(end?.data?.["balun-1"]).toEqual({ stock: 4, price: 15.53 });
+    expect(await getDayPoint("balun", "balun-1", D1)).toEqual({
+      stock: 4,
+      price: 15.53,
+    });
+    expect(await getDayPoint("balun", "balun-1", D2)).toEqual({
+      stock: 4,
+      price: 15.53,
+    });
   });
 
   it("applies leading 5000 using nearest right adequate", async () => {
@@ -211,9 +223,13 @@ describe("correctBalunFakeStockSpikesUtil", () => {
       { productId: "balun-1", date: "2026-09-14", from: 5000, to: 4 },
     ]);
 
-    const d0 = await SkuSlice.findOne({ konkName: "balun", date: D0 }).lean();
-    const d1 = await SkuSlice.findOne({ konkName: "balun", date: D1 }).lean();
-    expect(d0?.data?.["balun-1"]).toEqual({ stock: 4, price: 15.53 });
-    expect(d1?.data?.["balun-1"]).toEqual({ stock: 4, price: 15.53 });
+    expect(await getDayPoint("balun", "balun-1", D0)).toEqual({
+      stock: 4,
+      price: 15.53,
+    });
+    expect(await getDayPoint("balun", "balun-1", D1)).toEqual({
+      stock: 4,
+      price: 15.53,
+    });
   });
 });

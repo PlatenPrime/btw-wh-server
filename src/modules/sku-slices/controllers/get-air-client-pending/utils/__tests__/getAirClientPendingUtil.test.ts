@@ -5,14 +5,12 @@ import { getAirClientPendingUtil } from "../getAirClientPendingUtil.js";
 vi.mock("../../../../utils/loadSlicedSkusForKonk.js", () => ({
   loadSlicedSkusForKonk: vi.fn(),
 }));
-vi.mock("../../../../models/SkuSlice.js", () => ({
-  SkuSlice: {
-    findOne: vi.fn(),
-  },
+vi.mock("../../../../utils/skuSliceMonthStore.js", () => ({
+  loadDayPointsForProductIds: vi.fn(),
 }));
 
 import { loadSlicedSkusForKonk } from "../../../../utils/loadSlicedSkusForKonk.js";
-import { SkuSlice } from "../../../../models/SkuSlice.js";
+import { loadDayPointsForProductIds } from "../../../../utils/skuSliceMonthStore.js";
 
 describe("getAirClientPendingUtil", () => {
   const now = new Date("2026-07-26T12:00:00.000Z");
@@ -26,7 +24,7 @@ describe("getAirClientPendingUtil", () => {
     vi.useRealTimers();
   });
 
-  it("treats missing slice document as all sliced skus pending", async () => {
+  it("treats missing day points as all sliced skus pending", async () => {
     vi.mocked(loadSlicedSkusForKonk).mockResolvedValue([
       {
         _id: { toString: () => "s1" },
@@ -47,11 +45,7 @@ describe("getAirClientPendingUtil", () => {
         url: "https://airballoons.com.ua/ua/product/3",
       },
     ]);
-    vi.mocked(SkuSlice.findOne).mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue(null),
-      }),
-    } as never);
+    vi.mocked(loadDayPointsForProductIds).mockResolvedValue({});
 
     const result = await getAirClientPendingUtil(now);
 
@@ -91,16 +85,10 @@ describe("getAirClientPendingUtil", () => {
         url: "https://airballoons.com.ua/ua/product/4",
       },
     ]);
-    vi.mocked(SkuSlice.findOne).mockReturnValue({
-      select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue({
-          data: {
-            "air-valid": { stock: 10, price: 2.1 },
-            "air-minus": { stock: -1, price: -1 },
-          },
-        }),
-      }),
-    } as never);
+    vi.mocked(loadDayPointsForProductIds).mockResolvedValue({
+      "air-valid": { stock: 10, price: 2.1 },
+      "air-minus": { stock: -1, price: -1 },
+    });
 
     const result = await getAirClientPendingUtil(now);
 

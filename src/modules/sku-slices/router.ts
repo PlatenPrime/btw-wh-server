@@ -7,6 +7,8 @@ import {
   getPackFlipReviewController,
   getSkuSliceByDateController,
   getSkuSliceController,
+  getSkuSliceDayInvalidController,
+  getSkuSliceDayStatusController,
   getSkuSliceRangeController,
   patchSkuSliceByDateController,
   postSkuSlicePostCorrectionsController,
@@ -21,6 +23,18 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkuSliceController),
+);
+router.get(
+  "/day-status",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuSliceDayStatusController),
+);
+router.get(
+  "/day-invalid",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSkuSliceDayInvalidController),
 );
 router.get(
   "/client/air/pending",

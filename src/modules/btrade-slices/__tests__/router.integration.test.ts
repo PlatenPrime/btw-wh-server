@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
-import { BtradeSlice } from "../models/BtradeSlice.js";
+import { seedBtradeSliceMonthDay } from "../utils/seedBtradeSliceMonthDay.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
   const secret =
@@ -55,9 +55,8 @@ describe("Btrade slices router integration", () => {
 
     it("200 returns slice for ADMIN", async () => {
       const date = new Date("2025-03-01T00:00:00.000Z");
-      await BtradeSlice.create({
-        date,
-        data: { "ART-1": { price: 100, quantity: 5 } },
+      await seedBtradeSliceMonthDay(date, {
+        "ART-1": { price: 100, quantity: 5 },
       });
 
       const response = await request(app)
@@ -91,9 +90,8 @@ describe("Btrade slices router integration", () => {
       const { Art } = await import("../../arts/models/Art.js");
       await Art.create({ artikul: "ART-RNG", zone: "A" });
       const d1 = new Date("2026-03-01T00:00:00.000Z");
-      await BtradeSlice.create({
-        date: d1,
-        data: { "ART-RNG": { quantity: 4, price: 99 } },
+      await seedBtradeSliceMonthDay(d1, {
+        "ART-RNG": { quantity: 4, price: 99 },
       });
 
       const response = await request(app)

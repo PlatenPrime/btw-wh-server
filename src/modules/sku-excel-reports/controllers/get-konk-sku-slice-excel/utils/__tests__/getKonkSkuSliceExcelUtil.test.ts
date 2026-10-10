@@ -3,14 +3,15 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { Prod } from "../../../../../prods/models/Prod.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
 import { getKonkSkuSliceExcelUtil } from "../getKonkSkuSliceExcelUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getKonkSkuSliceExcelUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns ok false when no skus for konk prod", async () => {
@@ -39,14 +40,10 @@ describe("getKonkSkuSliceExcelUtil", () => {
       url: "https://e.com/b",
     });
     const d = new Date("2026-03-01T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date: d,
-      data: {
+    await seedSkuSliceMonthDay("air", d, {
         "air-k-1": { stock: 1, price: 2 },
         "air-k-2": { stock: 3, price: 4 },
-      },
-    });
+      });
 
     const r = await getKonkSkuSliceExcelUtil({
       konk: "air",
@@ -90,14 +87,10 @@ describe("getKonkSkuSliceExcelUtil", () => {
     });
 
     const d = new Date("2026-03-15T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date: d,
-      data: {
+    await seedSkuSliceMonthDay("air", d, {
         "air-slice-skugr-a": { stock: 4, price: 5 },
         "air-slice-skugr-b": { stock: 6, price: 7 },
-      },
-    });
+      });
 
     const r = await getKonkSkuSliceExcelUtil({
       konk: "air",
@@ -166,14 +159,10 @@ describe("getKonkSkuSliceExcelUtil", () => {
     });
 
     const d = new Date("2026-03-20T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "air",
-      date: d,
-      data: {
+    await seedSkuSliceMonthDay("air", d, {
         "air-slice-all-p1": { stock: 4, price: 5 },
         "air-slice-all-p2": { stock: 6, price: 7 },
-      },
-    });
+      });
 
     const r = await getKonkSkuSliceExcelUtil({
       konk: "air",

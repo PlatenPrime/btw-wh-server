@@ -5,6 +5,8 @@ describe("sku-slices controllers index", () => {
   it("re-exports all controller handlers as functions", () => {
     const expected = [
       "getSkuSliceController",
+      "getSkuSliceDayStatusController",
+      "getSkuSliceDayInvalidController",
       "getSkuSliceByDateController",
       "patchSkuSliceByDateController",
       "getSkuSliceRangeController",

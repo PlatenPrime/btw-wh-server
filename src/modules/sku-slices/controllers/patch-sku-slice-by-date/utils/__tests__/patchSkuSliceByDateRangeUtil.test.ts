@@ -1,12 +1,14 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { patchSkuSliceByDateRangeUtil } from "../patchSkuSliceByDateRangeUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../../../../utils/skuSliceMonthStore.js";
 
 describe("patchSkuSliceByDateRangeUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("writes same values across range, creating missing days and overwriting existing", async () => {
@@ -20,11 +22,7 @@ describe("patchSkuSliceByDateRangeUtil", () => {
     const d1 = new Date("2026-09-20T00:00:00.000Z");
     const d2 = new Date("2026-09-21T00:00:00.000Z");
     const d3 = new Date("2026-09-22T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: d2,
-      data: { "perfect-range": { stock: 60, price: 5.5 } },
-    });
+    await seedSkuSliceMonthDay("perfect", d2, { "perfect-range": { stock: 60, price: 5.5 } });
 
     const result = await patchSkuSliceByDateRangeUtil({
       skuId: sku._id.toString(),
@@ -55,8 +53,10 @@ describe("patchSkuSliceByDateRangeUtil", () => {
     });
 
     for (const date of [d1, d2, d3]) {
-      const stored = await SkuSlice.findOne({ konkName: "perfect", date }).lean();
-      expect(stored?.data["perfect-range"]).toEqual({ stock: 3, price: 110 });
+      expect(await getDayPoint("perfect", "perfect-range", date)).toEqual({
+        stock: 3,
+        price: 110,
+      });
     }
   });
 

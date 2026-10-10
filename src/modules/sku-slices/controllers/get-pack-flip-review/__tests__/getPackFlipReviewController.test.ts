@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { getPackFlipReviewController } from "../getPackFlipReviewController.js";
+import { seedSkuSliceMonthDay } from "../../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../models/SkuSliceMonth.js";
 
 describe("getPackFlipReviewController", () => {
   let res: Response;
@@ -11,7 +12,7 @@ describe("getPackFlipReviewController", () => {
 
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -56,21 +57,9 @@ describe("getPackFlipReviewController", () => {
       url: "https://perfect.example/1",
       imageUrl: "https://cdn.example/balloon.webp",
     });
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: new Date("2026-09-13T00:00:00.000Z"),
-      data: { "perfect-1": { stock: 100, price: 100 } },
-    });
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: new Date("2026-09-14T00:00:00.000Z"),
-      data: { "perfect-1": { stock: 10000, price: 1 } },
-    });
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: new Date("2026-09-15T00:00:00.000Z"),
-      data: { "perfect-1": { stock: 100, price: 100 } },
-    });
+    await seedSkuSliceMonthDay("perfect", new Date("2026-09-13T00:00:00.000Z"), { "perfect-1": { stock: 100, price: 100 } });
+    await seedSkuSliceMonthDay("perfect", new Date("2026-09-14T00:00:00.000Z"), { "perfect-1": { stock: 10000, price: 1 } });
+    await seedSkuSliceMonthDay("perfect", new Date("2026-09-15T00:00:00.000Z"), { "perfect-1": { stock: 100, price: 100 } });
 
     const req = {
       query: {

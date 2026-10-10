@@ -3,11 +3,16 @@ import { isInvalidSliceStockResult } from "../../../../slices/utils/isInvalidSli
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { AIR_CLIENT_SLICE_KONK } from "../../../constants/airClientSlice.js";
 import { urlsMatchForClientIngest } from "../../../utils/urlsMatchForClientIngest.js";
 import type { PutAirClientSkuSliceInput } from "../schemas/putAirClientSkuSliceSchema.js";
 import { afterSkuSliceStockMutation } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
+import { isSkuSliceDataKeyFilled } from "../../../utils/isSkuSliceDataKeyFilled.js";
+import {
+  getDayPoint,
+  upsertDayPoint,
+} from "../../../utils/skuSliceMonthStore.js";
+import { ensureSkuSliceDayMeta } from "../../../utils/skuSliceDayMetaStore.js";
 
 export type PutAirClientSkuSliceStatus = "saved" | "skipped";
 
@@ -33,12 +38,12 @@ export type PutAirClientSkuSliceResult =
     };
 
 /**
- * Парсит HTML Air-страницы и идемпотентно дозаполняет сегодняшний SkuSlice
+ * Парсит HTML Air-страницы и идемпотентно дозаполняет сегодняшний SkuSliceMonth
  * только если ключ отсутствует или содержит -1.
  */
 export async function putAirClientSkuSliceUtil(
   input: PutAirClientSkuSliceInput,
-  now: Date = new Date()
+  now: Date = new Date(),
 ): Promise<PutAirClientSkuSliceResult> {
   const sku = await Sku.findById(input.skuId)
     .select("konkName productId url")
@@ -103,49 +108,25 @@ export async function putAirClientSkuSliceUtil(
   const sliceDate = toSliceDate(now);
   const dataItem = { stock: parsed.stock, price: parsed.price };
 
-  await SkuSlice.findOneAndUpdate(
-    { konkName: AIR_CLIENT_SLICE_KONK, date: sliceDate },
-    {
-      $setOnInsert: {
-        konkName: AIR_CLIENT_SLICE_KONK,
-        date: sliceDate,
-        data: {},
-      },
-    },
-    { upsert: true }
-  );
+  await ensureSkuSliceDayMeta(AIR_CLIENT_SLICE_KONK, sliceDate);
 
-  const updated = await SkuSlice.findOneAndUpdate(
-    {
-      konkName: AIR_CLIENT_SLICE_KONK,
-      date: sliceDate,
-      $or: [
-        { [`data.${productId}`]: { $exists: false } },
-        { [`data.${productId}.stock`]: -1 },
-        { [`data.${productId}.price`]: -1 },
-      ],
-    },
-    { $set: { [`data.${productId}`]: dataItem } },
-    { new: true }
+  const existing = await getDayPoint(
+    AIR_CLIENT_SLICE_KONK,
+    productId,
+    sliceDate,
   );
-
-  if (!updated) {
-    const existing = await SkuSlice.findOne({
-      konkName: AIR_CLIENT_SLICE_KONK,
-      date: sliceDate,
-    })
-      .select("data")
-      .lean();
-    const current = existing?.data?.[productId];
+  if (isSkuSliceDataKeyFilled(existing)) {
     return {
       ok: true,
       status: "skipped",
       date: sliceDate,
       productId,
-      stock: current?.stock ?? dataItem.stock,
-      price: current?.price ?? dataItem.price,
+      stock: existing!.stock,
+      price: existing!.price,
     };
   }
+
+  await upsertDayPoint(AIR_CLIENT_SLICE_KONK, productId, sliceDate, dataItem);
 
   await afterSkuSliceStockMutation({
     konkName: AIR_CLIENT_SLICE_KONK,

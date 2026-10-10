@@ -1,12 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import mongoose from "mongoose";
 import { BALUN_FAKE_STOCK_CRON_DAYS_BACK } from "../../../slices/config/balunFakeStockSentinel.js";
-import { SkuSlice } from "../../models/SkuSlice.js";
 import {
   executeCorrectBalunFakeStockCli,
   resolveCorrectBalunFakeStockCliInput,
   runCorrectBalunFakeStockConnected,
 } from "../runCorrectBalunFakeStock.js";
+import { seedSkuSliceMonthDay } from "../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../../utils/skuSliceMonthStore.js";
 
 describe("resolveCorrectBalunFakeStockCliInput", () => {
   it("defaults to cron daysBack dry-run", () => {
@@ -38,7 +40,7 @@ describe("resolveCorrectBalunFakeStockCliInput", () => {
 
 describe("executeCorrectBalunFakeStockCli", () => {
   beforeEach(async () => {
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     vi.restoreAllMocks();
   });
 
@@ -47,21 +49,9 @@ describe("executeCorrectBalunFakeStockCli", () => {
     const d0 = new Date("2026-10-05T00:00:00.000Z");
     const d1 = new Date("2026-10-06T00:00:00.000Z");
     const d2 = new Date("2026-10-07T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "balun",
-      date: d0,
-      data: { "balun-1": { stock: -1, price: 10 } },
-    });
-    await SkuSlice.create({
-      konkName: "balun",
-      date: d1,
-      data: { "balun-1": { stock: 10000, price: 10 } },
-    });
-    await SkuSlice.create({
-      konkName: "balun",
-      date: d2,
-      data: { "balun-1": { stock: 3, price: 10 } },
-    });
+    await seedSkuSliceMonthDay("balun", d0, { "balun-1": { stock: -1, price: 10 } });
+    await seedSkuSliceMonthDay("balun", d1, { "balun-1": { stock: 10000, price: 10 } });
+    await seedSkuSliceMonthDay("balun", d2, { "balun-1": { stock: 3, price: 10 } });
 
     const result = await executeCorrectBalunFakeStockCli([
       "--days-back",
@@ -80,24 +70,15 @@ describe("executeCorrectBalunFakeStockCli", () => {
       },
     ]);
     expect(log).toHaveBeenCalledOnce();
-    const mid = await SkuSlice.findOne({ konkName: "balun", date: d1 }).lean();
-    expect(mid?.data?.["balun-1"]).toEqual({ stock: 3, price: 10 });
+    expect(await getDayPoint("balun", "balun-1", d1)).toEqual({ stock: 3, price: 10 });
   });
 
   it("dry-run does not write patches", async () => {
     vi.spyOn(console, "log").mockImplementation(() => undefined);
     const d1 = new Date("2026-10-06T00:00:00.000Z");
     const d2 = new Date("2026-10-07T00:00:00.000Z");
-    await SkuSlice.create({
-      konkName: "balun",
-      date: d1,
-      data: { "balun-1": { stock: 10000, price: 10 } },
-    });
-    await SkuSlice.create({
-      konkName: "balun",
-      date: d2,
-      data: { "balun-1": { stock: 3, price: 10 } },
-    });
+    await seedSkuSliceMonthDay("balun", d1, { "balun-1": { stock: 10000, price: 10 } });
+    await seedSkuSliceMonthDay("balun", d2, { "balun-1": { stock: 3, price: 10 } });
 
     const result = await executeCorrectBalunFakeStockCli([
       "--days-back",
@@ -108,8 +89,7 @@ describe("executeCorrectBalunFakeStockCli", () => {
 
     expect(result.apply).toBe(false);
     expect(result.patched).toHaveLength(1);
-    const mid = await SkuSlice.findOne({ konkName: "balun", date: d1 }).lean();
-    expect(mid?.data?.["balun-1"]).toEqual({ stock: 10000, price: 10 });
+    expect(await getDayPoint("balun", "balun-1", d1)).toEqual({ stock: 10000, price: 10 });
   });
 });
 

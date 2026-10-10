@@ -1,12 +1,13 @@
+import { seedSkuSliceMonthDay } from "../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../sku-slices/models/SkuSliceMonth.js";
 ﻿import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../konks/models/Konk.js";
-import { SkuSlice } from "../../../sku-slices/models/SkuSlice.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "../aggregateDailySkuSliceMetricsForSkus.js";
 
 describe("aggregateDailySkuSliceMetricsForSkus", () => {
   beforeEach(async () => {
     await Konk.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("treats -1 as carry-forward so sales are zero when stock is frozen", async () => {
@@ -14,23 +15,9 @@ describe("aggregateDailySkuSliceMetricsForSkus", () => {
     const d1 = new Date("2026-04-02T00:00:00.000Z");
     const d2 = new Date("2026-04-03T00:00:00.000Z");
 
-    await SkuSlice.insertMany([
-      {
-        konkName: "k",
-        date: d0,
-        data: { "k-a": { stock: 10, price: 5 } },
-      },
-      {
-        konkName: "k",
-        date: d1,
-        data: { "k-a": { stock: -1, price: -1 } },
-      },
-      {
-        konkName: "k",
-        date: d2,
-        data: { "k-a": { stock: -1, price: -1 } },
-      },
-    ]);
+    await seedSkuSliceMonthDay("k", d0, { "k-a": { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay("k", d1, { "k-a": { stock: -1, price: -1 } });
+    await seedSkuSliceMonthDay("k", d2, { "k-a": { stock: -1, price: -1 } });
 
     const r = await aggregateDailySkuSliceMetricsForSkus(
       [{ konkName: "k", productId: "k-a" }],
@@ -62,11 +49,9 @@ describe("aggregateDailySkuSliceMetricsForSkus", () => {
       recountDays: ["2026-04-02"],
     });
 
-    await SkuSlice.insertMany([
-      { konkName: "k-recount", date: d0, data: { "p-1": { stock: 10, price: 5 } } },
-      { konkName: "k-recount", date: d1, data: { "p-1": { stock: 7, price: 5 } } },
-      { konkName: "k-recount", date: d2, data: { "p-1": { stock: 5, price: 5 } } },
-    ]);
+    await seedSkuSliceMonthDay("k-recount", d0, { "p-1": { stock: 10, price: 5 } });
+    await seedSkuSliceMonthDay("k-recount", d1, { "p-1": { stock: 7, price: 5 } });
+    await seedSkuSliceMonthDay("k-recount", d2, { "p-1": { stock: 5, price: 5 } });
 
     const r = await aggregateDailySkuSliceMetricsForSkus(
       [{ konkName: "k-recount", productId: "p-1" }],

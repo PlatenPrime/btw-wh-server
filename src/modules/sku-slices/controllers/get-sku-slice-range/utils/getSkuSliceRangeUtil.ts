@@ -4,10 +4,7 @@ import {
   type SliceRangeItem,
 } from "../../../../slices/utils/mapSliceDocsToRangeItems.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
-import {
-  aggregateSkuSlices,
-  sliceDataProjectForSingleProductId,
-} from "../../../utils/sliceDataAggregationStages.js";
+import { loadSkuSliceRowsForProduct } from "../../../utils/sliceDataAggregationStages.js";
 import type { GetSkuSliceRangeInput } from "../schemas/getSkuSliceRangeSchema.js";
 
 export type SkuSliceRangeItem = SliceRangeItem;
@@ -23,7 +20,7 @@ function sliceDateMinusDays(sliceDate: Date, days: number): Date {
 }
 
 export async function getSkuSliceRangeUtil(
-  input: GetSkuSliceRangeInput
+  input: GetSkuSliceRangeInput,
 ): Promise<GetSkuSliceRangeResult> {
   const sku = await Sku.findById(input.skuId).select("konkName productId").lean();
 
@@ -36,16 +33,12 @@ export async function getSkuSliceRangeUtil(
   const dateTo = toSliceDate(input.dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
 
-  const docs = await aggregateSkuSlices([
-    {
-      $match: {
-        konkName: sku.konkName,
-        date: { $gte: warmStart, $lte: dateTo },
-      },
-    },
-    { $sort: { date: 1 } },
-    sliceDataProjectForSingleProductId(productKey),
-  ]);
+  const docs = await loadSkuSliceRowsForProduct(
+    sku.konkName,
+    productKey,
+    warmStart,
+    dateTo,
+  );
 
   return {
     ok: true,

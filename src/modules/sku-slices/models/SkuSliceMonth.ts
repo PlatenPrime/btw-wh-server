@@ -1,10 +1,10 @@
 import { Document, Model, Schema, Types } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
-import type { ISkuSliceDataItem } from "./SkuSlice.js";
+import type { ISkuSliceDataItem } from "./skuSliceTypes.js";
 
 /**
- * Месячный срез по одному SKU: дни месяца в `days` с ключами YYYY-MM-DD.
- * Параллельная проекция ключей `SkuSlice.data`; runtime отчёты пока читают Mixed.
+ * Source of truth по точкам stock/price: один документ на (konkName, productId, month),
+ * дни месяца в `days` с ключами YYYY-MM-DD.
  */
 export interface ISkuSliceMonth extends Document {
   _id: Types.ObjectId;
@@ -35,6 +35,9 @@ skuSliceMonthSchema.index(
   { konkName: 1, productId: 1, month: 1 },
   { unique: true },
 );
+
+/** Day-wide scan по konk+month без productId. */
+skuSliceMonthSchema.index({ konkName: 1, month: 1 });
 
 export const SkuSliceMonth: Model<ISkuSliceMonth> =
   getOrCreateModel<ISkuSliceMonth>(

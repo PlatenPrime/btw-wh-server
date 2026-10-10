@@ -1,14 +1,15 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
 import { getSkugrSliceExcelUtil } from "../getSkugrSliceExcelUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getSkugrSliceExcelUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns ok false when skugr has no skus", async () => {
@@ -45,11 +46,7 @@ describe("getSkugrSliceExcelUtil", () => {
       isSliced: true,
       skus: [sku._id],
     });
-    await SkuSlice.create({
-      konkName: "slice-gr",
-      date: new Date("2026-06-01T00:00:00.000Z"),
-      data: { "slice-gr-1": { stock: 3, price: 7 } },
-    });
+    await seedSkuSliceMonthDay("slice-gr", new Date("2026-06-01T00:00:00.000Z"), { "slice-gr-1": { stock: 3, price: 7 } });
 
     const result = await getSkugrSliceExcelUtil({
       skugrId: skugr._id.toString(),

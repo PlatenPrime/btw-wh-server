@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../../models/SkuSlice.js";
 import { getPackFlipReviewUtil } from "../getPackFlipReviewUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../models/SkuSliceMonth.js";
+import { getDayPoint } from "../../../../utils/skuSliceMonthStore.js";
 
 const D0 = new Date("2026-09-13T00:00:00.000Z");
 const D1 = new Date("2026-09-14T00:00:00.000Z");
@@ -10,7 +12,7 @@ const D2 = new Date("2026-09-15T00:00:00.000Z");
 describe("getPackFlipReviewUtil", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns dry-run findings without apply and without writing", async () => {
@@ -21,21 +23,9 @@ describe("getPackFlipReviewUtil", () => {
       title: "Balloon",
       url: "https://perfect.example/1",
     });
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: D0,
-      data: { "perfect-1": { stock: 100, price: 100 } },
-    });
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: D1,
-      data: { "perfect-1": { stock: 10000, price: 1 } },
-    });
-    await SkuSlice.create({
-      konkName: "perfect",
-      date: D2,
-      data: { "perfect-1": { stock: 100, price: 100 } },
-    });
+    await seedSkuSliceMonthDay("perfect", D0, { "perfect-1": { stock: 100, price: 100 } });
+    await seedSkuSliceMonthDay("perfect", D1, { "perfect-1": { stock: 10000, price: 1 } });
+    await seedSkuSliceMonthDay("perfect", D2, { "perfect-1": { stock: 100, price: 100 } });
 
     const result = await getPackFlipReviewUtil({
       konkName: "perfect",
@@ -52,8 +42,7 @@ describe("getPackFlipReviewUtil", () => {
       patched: { stock: 100, price: 100 },
     });
 
-    const mid = await SkuSlice.findOne({ konkName: "perfect", date: D1 }).lean();
-    expect(mid?.data["perfect-1"]).toEqual({ stock: 10000, price: 1 });
+    expect(await getDayPoint("perfect", "perfect-1", D1)).toEqual({ stock: 10000, price: 1 });
   });
 
   it("returns empty findings for a konk with no slices", async () => {

@@ -12,8 +12,8 @@
 
 Полный формат: [`docs/api/sku-slices.md`](../api/sku-slices.md). Auth: JWT, роль ≥ ADMIN.
 
-1. `GET /api/sku-slices/client/air/pending` — очередь `{ date, items: [{ skuId, productId, title, url }] }` для sliced Air SKU без валидной точки сегодня (missing или `stock/price === -1`). Нет документа среза = все sliced pending.
-2. `PUT /api/sku-slices/client/air/sku/:skuId` — body `{ sourceUrl, html }`. Backend парсит HTML, пишет в сегодняшний `SkuSlice` только если ключ отсутствует/невалиден; иначе `status: "skipped"`.
+1. `GET /api/sku-slices/client/air/pending` — очередь `{ date, items: [{ skuId, productId, title, url }] }` для sliced Air SKU без валидной точки сегодня в `SkuSliceMonth` (missing или `stock/price === -1`). Нет точки дня = pending.
+2. `PUT /api/sku-slices/client/air/sku/:skuId` — body `{ sourceUrl, html }`. Backend парсит HTML, пишет в сегодняшний `SkuSliceMonth` только если ключ отсутствует/невалиден; иначе `status: "skipped"`.
 
 ## UX / поток
 
@@ -25,7 +25,7 @@
    - frontend делает PUT с `sourceUrl = url` и `html`;
    - показать статус строки: saved / skipped / error.
 4. После 422 (невалидный HTML / «Захищена сторінка») — retry этой позиции позже или вручную; не затирать очередь целиком.
-5. После серии — инвалидировать кэш `GET /api/sku-slices` за `data.date`.
+5. После серии — инвалидировать кэш `GET /api/sku-slices/day-status` и `day-invalid` за дату ответа PUT (`data.date`). Legacy `GET /api/sku-slices` → 410.
 
 ## После ответа PUT
 

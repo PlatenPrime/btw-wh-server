@@ -8,15 +8,65 @@
 
 ### GET `/api/sku-slices`
 
-Срез по конкуренту и дате: постраничная выдача записей из поля `data` документа среза. Каждая запись сопоставляется с документом **Sku** по `productId`.
+**410 Gone.** Legacy дамп дневного Mixed снят. Мониторинг:
 
-**Query:**
+- `GET /api/sku-slices/day-status`
+- `GET /api/sku-slices/day-invalid`
 
-- `konkName` (string, обязательно)
-- `date` (string, YYYY-MM-DD, обязательно)
-- `page` (string, опционально) — по умолчанию `1`
-- `limit` (string, опционально) — по умолчанию `10`, максимум `100`
-- `isInvalid` (string, опционально) — `"true"` / `"false"`; при `true` только позиции для компенсирующих срезов
+**Ответ 410:**
+
+```text
+{
+  message: string,
+  errors: Array<{
+    code: "SKU_SLICE_DAY_LIST_GONE",
+    dayStatus: string,
+    dayInvalid: string
+  }>
+}
+```
+
+---
+
+### GET `/api/sku-slices/day-status`
+
+Статус дневного прогона: DayMeta (rotation/stats) + счётчики точек в `sku_slice_months`.
+
+**Query:** `konkName` (string), `date` (YYYY-MM-DD).
+
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    konkName: string,
+    date: Date (ISO),
+    rotationMeta: { cycleDays, dayIndex, dueCount } | null,
+    stats: {
+      filled: number,
+      invalid: number,
+      errorCount: number,
+      dueTotal?: number,
+      abortReason?: string
+    } | null,
+    pointsTotal: number,
+    pointsInvalid: number,
+    createdAt?: Date,
+    updatedAt?: Date
+  }
+}
+```
+
+**Ошибки:** 400, 401, 403, 500.
+
+---
+
+### GET `/api/sku-slices/day-invalid`
+
+Пагинация invalid точек дня из months + join Sku (замена `isInvalid=true` на старом GET `/`).
+
+**Query:** `konkName`, `date` (YYYY-MM-DD), `page` (default 1), `limit` (default 10, max 100).
 
 **Ответ 200:**
 
@@ -37,13 +87,13 @@
 }
 ```
 
-**Ошибки:** 400, 401, 403, 404, 500.
+**Ошибки:** 400, 401, 403, 500.
 
 ---
 
 ### GET `/api/sku-slices/client/air/pending`
 
-Очередь Air SKU для клиентского дозаполнения сегодняшнего среза (календарный день `Europe/Kiev`). В выборку попадают только SKU из групп `Skugr` с `isSliced: true`. Позиция pending, если в `SkuSlice` за сегодня нет ключа `productId` или `stock === -1` / `price === -1`. Отсутствие документа среза = все sliced Air SKU pending.
+Очередь Air SKU для клиентского дозаполнения сегодняшнего среза (календарный день `Europe/Kiev`). В выборку попадают только SKU из групп `Skugr` с `isSliced: true`. Позиция pending, если в `SkuSliceMonth` за сегодня нет ключа дня или `stock === -1` / `price === -1`.
 
 **Ответ 200:**
 
@@ -68,7 +118,7 @@
 
 ### PUT `/api/sku-slices/client/air/sku/:skuId`
 
-Идемпотентная запись точки сегодняшнего Air `SkuSlice` из HTML first-party страницы товара. Backend парсит HTML тем же контрактом, что `readAirProductFromHtml`. Канал параллелен серверному scrape: сервер к сайту Air при этом PUT не ходит.
+Идемпотентная запись точки сегодняшнего Air в `SkuSliceMonth` из HTML first-party страницы товара. Backend парсит HTML тем же контрактом, что `readAirProductFromHtml`. Канал параллелен серверному scrape: сервер к сайту Air при этом PUT не ходит.
 
 **Path:** `skuId` — валидный ObjectId.
 
@@ -114,7 +164,7 @@
 
 ### PATCH `/api/sku-slices/sku/:skuId`
 
-Ручная запись `stock`/`price` SKU в документ среза. Режим XOR: либо одна дата `date`, либо диапазон `dateFrom`+`dateTo`, либо массив периодов `periods` (не вместе). Документ дня создаётся (upsert), если отсутствовал. Ключ `data[productId]` создаётся или перезаписывается. `0` и `-1` допустимы. Диапазон / каждый период: `dateFrom` ≤ `dateTo`, максимум 366 календарных дней; для `periods` — суммарно уникальных дней ≤ 366. Пересечения периодов допустимы (дни дедуплицируются).
+Ручная запись `stock`/`price` SKU в `SkuSliceMonth`. Режим XOR: либо одна дата `date`, либо диапазон `dateFrom`+`dateTo`, либо массив периодов `periods` (не вместе). Точка дня `days[YYYY-MM-DD]` создаётся или перезаписывается (upsert month-дока при необходимости). `0` и `-1` допустимы. Диапазон / каждый период: `dateFrom` ≤ `dateTo`, максимум 366 календарных дней; для `periods` — суммарно уникальных дней ≤ 366. Пересечения периодов допустимы (дни дедуплицируются).
 
 **Path:** `skuId` — валидный ObjectId.
 
@@ -153,7 +203,7 @@
 }
 ```
 
-`previous` — прежняя точка, если ключ уже был; `null`, если ключ создан. `created` — `true`, если документ дня создан этим запросом.
+`previous` — прежняя точка, если ключ дня уже был; `null`, если точка создана. `created` — `true`, если точка дня создана этим запросом.
 
 **Ответ 200 (диапазон):**
 
@@ -296,7 +346,7 @@
 |------|-----|-------------|----------|
 | dateFrom | string | да | YYYY-MM-DD, UTC-сутки, inclusive |
 | dateTo | string | да | YYYY-MM-DD, inclusive, не раньше dateFrom; диапазон ≤ 31 день |
-| apply | boolean | нет, default false | true — запись в SkuSlice и rollup; false — dry-run |
+| apply | boolean | нет, default false | true — запись в SkuSliceMonth и rollup; false — dry-run |
 
 **Ответ 202:** как `POST /api/apitasks` (`message`, `data.taskId`, `data.kind`, `data.status`, `data.pollIntervalMs`, …).
 

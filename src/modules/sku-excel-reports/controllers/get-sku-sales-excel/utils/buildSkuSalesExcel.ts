@@ -4,7 +4,7 @@ import {
   applyHeaderStyle,
 } from "../../../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../../../lib/excel/formatExcelDateHeaderUk.js";
-import type { ISkuSliceDataItem } from "../../../../sku-slices/models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../../../sku-slices/models/skuSliceTypes.js";
 import {
   notifyExcelBuildProgress,
   type ExcelBuildProgressHandler,

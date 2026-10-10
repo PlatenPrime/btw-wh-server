@@ -9,10 +9,11 @@ import {
   type SeriesDay,
   type SlicePoint,
 } from "../../slices/utils/detectPackFlipSpike.js";
+import type { ISkuSliceDataItem } from "../models/skuSliceTypes.js";
 import {
-  SkuSlice,
-  type ISkuSliceDataItem,
-} from "../models/SkuSlice.js";
+  loadDayMapsForKonkDates,
+  upsertDayPoint,
+} from "./skuSliceMonthStore.js";
 
 export type PackFlipFinding = {
   productId: string;
@@ -43,17 +44,15 @@ export type ReviewPackFlipsInput = {
   konkName: string;
 };
 
-type LeanSlice = {
-  _id: unknown;
-  date: Date;
-  data?: Record<string, unknown>;
-};
-
 type SkuMeta = { skuId: string; title: string; url: string; imageUrl: string };
 
 export function addUtcDays(date: Date, delta: number): Date {
   return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + delta)
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate() + delta,
+    ),
   );
 }
 
@@ -74,7 +73,7 @@ export function packFlipReviewDatesForSliceDay(sliceDate: Date): Date[] {
 function emptyResult(
   konkName: string,
   apply: boolean,
-  dates: Date[]
+  dates: Date[],
 ): PackFlipReviewResult {
   return {
     konkName,
@@ -87,7 +86,7 @@ function emptyResult(
 }
 
 function collectProductIds(
-  dataByDate: Map<number, Record<string, unknown>>
+  dataByDate: Map<number, Record<string, unknown>>,
 ): string[] {
   const ids = new Set<string>();
   for (const data of dataByDate.values()) {
@@ -102,7 +101,7 @@ function toFinding(
   productId: string,
   meta: SkuMeta | undefined,
   dates: Date[],
-  decision: PackFlipSeriesDecision
+  decision: PackFlipSeriesDecision,
 ): PackFlipFinding {
   const date = dates[decision.index];
   const neighbor = dates[decision.neighborIndex];
@@ -122,7 +121,7 @@ function toFinding(
 }
 
 async function loadSkuMetaByProductId(
-  konkName: string
+  konkName: string,
 ): Promise<Map<string, SkuMeta>> {
   const rows = await Sku.find({ konkName })
     .select("_id productId title url imageUrl")
@@ -147,39 +146,25 @@ async function loadSkuMetaByProductId(
 }
 
 async function applyInversePatches(
-  slices: LeanSlice[],
-  findings: PackFlipFinding[]
+  konkName: string,
+  findings: PackFlipFinding[],
 ): Promise<void> {
-  const byDate = new Map<string, PackFlipFinding[]>();
   for (const finding of findings) {
-    if (!finding.patched) continue;
-    const list = byDate.get(finding.date) ?? [];
-    list.push(finding);
-    byDate.set(finding.date, list);
-  }
-
-  for (const slice of slices) {
-    const ymd = toUtcYmd(slice.date);
-    const dayFindings = byDate.get(ymd);
-    if (!dayFindings?.length) continue;
-
-    const nextData: Record<string, ISkuSliceDataItem> = {
-      ...((slice.data ?? {}) as Record<string, ISkuSliceDataItem>),
-    };
-    for (const finding of dayFindings) {
-      if (!finding.patched) continue;
-      nextData[finding.productId] = finding.patched;
-    }
-
-    await SkuSlice.updateOne({ _id: slice._id }, { $set: { data: nextData } });
-    slice.data = nextData;
+    if (!finding.patched || !finding.date) continue;
+    const item: ISkuSliceDataItem = finding.patched;
+    await upsertDayPoint(
+      konkName,
+      finding.productId,
+      new Date(`${finding.date}T00:00:00.000Z`),
+      item,
+    );
   }
 }
 
 function buildFindings(
   dates: Date[],
   dataByDate: Map<number, Record<string, unknown>>,
-  skuMeta: Map<string, SkuMeta>
+  skuMeta: Map<string, SkuMeta>,
 ): PackFlipFinding[] {
   const findings: PackFlipFinding[] = [];
   for (const productId of collectProductIds(dataByDate)) {
@@ -189,14 +174,16 @@ function buildFindings(
     }));
     const decisions = decidePackFlipPatchesForSeries(series);
     for (const decision of decisions) {
-      findings.push(toFinding(productId, skuMeta.get(productId), dates, decision));
+      findings.push(
+        toFinding(productId, skuMeta.get(productId), dates, decision),
+      );
     }
   }
   return findings;
 }
 
 export async function reviewPackFlipsUtil(
-  input: ReviewPackFlipsInput
+  input: ReviewPackFlipsInput,
 ): Promise<PackFlipReviewResult> {
   const konkName = input.konkName;
   const dates = [...input.dates]
@@ -207,16 +194,10 @@ export async function reviewPackFlipsUtil(
     return emptyResult(konkName, input.apply, dates);
   }
 
-  const slices = (await SkuSlice.find({ konkName, date: { $in: dates } })
-    .select("date data")
-    .lean()) as LeanSlice[];
-
+  const maps = await loadDayMapsForKonkDates(konkName, dates);
   const dataByDate = new Map<number, Record<string, unknown>>();
   for (const date of dates) {
-    dataByDate.set(date.getTime(), {});
-  }
-  for (const slice of slices) {
-    dataByDate.set(addUtcDays(slice.date, 0).getTime(), slice.data ?? {});
+    dataByDate.set(date.getTime(), maps.get(date.getTime()) ?? {});
   }
 
   const skuMeta = await loadSkuMetaByProductId(konkName);
@@ -227,7 +208,7 @@ export async function reviewPackFlipsUtil(
   const ambiguous = findings.filter((f) => f.kind === "ambiguous");
 
   if (input.apply && patched.length > 0) {
-    await applyInversePatches(slices, patched);
+    await applyInversePatches(konkName, patched);
     const byDay = new Map<string, Set<string>>();
     for (const finding of patched) {
       if (!finding.date) continue;

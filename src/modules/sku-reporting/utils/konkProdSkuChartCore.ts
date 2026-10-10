@@ -4,7 +4,7 @@ import {
 } from "../../slices/utils/salesComparisonUtils.js";
 import { Art } from "../../arts/models/Art.js";
 import { Sku } from "../../skus/models/Sku.js";
-import type { IBtradeSliceDataItem } from "../../btrade-slices/models/BtradeSlice.js";
+import type { IBtradeSliceDataItem } from "../../btrade-slices/models/btradeSliceTypes.js";
 import {
   aggregateBtradeSlices,
   sliceDataProjectForArtikulList,

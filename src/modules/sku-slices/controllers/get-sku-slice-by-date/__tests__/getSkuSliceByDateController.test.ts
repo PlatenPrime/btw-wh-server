@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../skus/models/Sku.js";
-import { SkuSlice } from "../../../models/SkuSlice.js";
 import { getSkuSliceByDateController } from "../getSkuSliceByDateController.js";
+import { seedSkuSliceMonthDay } from "../../../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../models/SkuSliceMonth.js";
 
 describe("getSkuSliceByDateController", () => {
   let res: Response;
@@ -11,7 +12,7 @@ describe("getSkuSliceByDateController", () => {
 
   beforeEach(async () => {
     await Sku.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
     responseJson = {};
     responseStatus = {};
     res = {
@@ -53,11 +54,7 @@ describe("getSkuSliceByDateController", () => {
       title: "T",
       url: "https://e.com/t",
     });
-    await SkuSlice.create({
-      konkName: "air",
-      date: new Date("2026-03-01T00:00:00.000Z"),
-      data: { "air-by-date-1": { stock: 7, price: 11 } },
-    });
+    await seedSkuSliceMonthDay("air", new Date("2026-03-01T00:00:00.000Z"), { "air-by-date-1": { stock: 7, price: 11 } });
     const req = {
       params: { skuId: sku._id.toString() },
       query: { date: "2026-03-01" },

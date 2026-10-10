@@ -12,18 +12,17 @@ vi.mock("../../../skugrs/models/Skugr.js", () => ({
     find: vi.fn(),
   },
 }));
-vi.mock(
-  "../../../skus/utils/getSkuStockDataUtil.js",
-  () => ({
-    getSkuStockDataUtil: vi.fn(),
-    UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
-  })
-);
-vi.mock("../../models/SkuSlice.js", () => ({
-  SkuSlice: {
-    findOneAndUpdate: vi.fn(),
-    findOne: vi.fn(),
-  },
+vi.mock("../../../skus/utils/getSkuStockDataUtil.js", () => ({
+  getSkuStockDataUtil: vi.fn(),
+  UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
+}));
+vi.mock("../skuSliceMonthStore.js", () => ({
+  loadDayPointsForProductIds: vi.fn(),
+  upsertDayPoint: vi.fn(),
+}));
+vi.mock("../skuSliceDayMetaStore.js", () => ({
+  ensureSkuSliceDayMeta: vi.fn(),
+  upsertSkuSliceDayMeta: vi.fn(),
 }));
 vi.mock("../../../browser/utils/impitGet.js", () => ({
   resetImpitClientCache: vi.fn(),
@@ -37,27 +36,40 @@ vi.mock("../../../../utils/jitterMs.js", () => ({
 vi.mock("../filterSlicedSkusForRotation.js", () => ({
   filterSlicedSkusForRotation: vi.fn(
     <T extends { _id: { toString(): string }; productId?: string }>(
-      skus: T[]
+      skus: T[],
     ) => ({
       skus,
       rotation: null,
-    })
+    }),
   ),
 }));
 
 import { Sku } from "../../../skus/models/Sku.js";
 import { Skugr } from "../../../skugrs/models/Skugr.js";
 import { getSkuStockDataUtil } from "../../../skus/utils/getSkuStockDataUtil.js";
-import { SkuSlice } from "../../models/SkuSlice.js";
 import { delay } from "../../../../utils/delay.js";
 import { resetImpitClientCache } from "../../../browser/utils/impitGet.js";
-import { filterSlicedSkusForRotation, type SlicedSkuWithProductId } from "../filterSlicedSkusForRotation.js";
+import {
+  filterSlicedSkusForRotation,
+  type SlicedSkuWithProductId,
+} from "../filterSlicedSkusForRotation.js";
 import { type SliceRotationInfo } from "../../../slices/utils/sliceRotation.js";
-import { AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS, AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS } from "../../../sku-reporting/constants/skuSliceRequestJitterMs.js";
+import {
+  AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS,
+  AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS,
+} from "../../../sku-reporting/constants/skuSliceRequestJitterMs.js";
 import {
   BrowserOriginBlockedError,
   ORIGIN_BLOCKED_CODE,
 } from "../../../browser/utils/browserOriginBlockedError.js";
+import {
+  loadDayPointsForProductIds,
+  upsertDayPoint,
+} from "../skuSliceMonthStore.js";
+import {
+  ensureSkuSliceDayMeta,
+  upsertSkuSliceDayMeta,
+} from "../skuSliceDayMetaStore.js";
 
 function mockAirSkus(count: number) {
   return Array.from({ length: count }, (_, i) => ({
@@ -66,16 +78,14 @@ function mockAirSkus(count: number) {
   }));
 }
 
-function mockSliceFindOne(data: Record<string, unknown> = {}) {
-  vi.mocked(SkuSlice.findOne).mockReturnValue({
-    select: vi.fn().mockReturnValue({
-      lean: vi.fn().mockResolvedValue({ data }),
-    }),
-  } as any);
+function mockExistingPoints(data: Record<string, unknown> = {}) {
+  vi.mocked(loadDayPointsForProductIds).mockResolvedValue(
+    data as Record<string, { stock: number; price: number }>,
+  );
 }
 
 function passThroughRotationMock<T extends SlicedSkuWithProductId>(
-  skus: T[]
+  skus: T[],
 ): { skus: T[]; rotation: SliceRotationInfo | null } {
   return { skus, rotation: null };
 }
@@ -85,10 +95,12 @@ describe("runSkuSliceForKonkUtil", () => {
 
   beforeEach(() => {
     vi.mocked(filterSlicedSkusForRotation).mockImplementation(
-      passThroughRotationMock
+      passThroughRotationMock,
     );
-    vi.mocked(SkuSlice.findOneAndUpdate).mockResolvedValue({} as any);
-    mockSliceFindOne({});
+    vi.mocked(upsertDayPoint).mockResolvedValue(undefined);
+    vi.mocked(ensureSkuSliceDayMeta).mockResolvedValue(undefined);
+    vi.mocked(upsertSkuSliceDayMeta).mockResolvedValue({} as never);
+    mockExistingPoints({});
     vi.mocked(Skugr.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue([
@@ -116,12 +128,12 @@ describe("runSkuSliceForKonkUtil", () => {
   });
 
   it(
-    "upserts slice then sets data per productId",
+    "upserts day meta then sets points per productId",
     async () => {
       vi.useFakeTimers();
       const resultPromise = runSkuSliceForKonkUtil(
         "air",
-        new Date("2025-03-01T12:00:00.000Z")
+        new Date("2025-03-01T12:00:00.000Z"),
       );
       await vi.runAllTimersAsync();
       const result = await resultPromise;
@@ -135,27 +147,38 @@ describe("runSkuSliceForKonkUtil", () => {
         errors: 0,
       });
 
-      expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(3);
-      expect(Skugr.find).toHaveBeenCalledWith({ konkName: "air", isSliced: true });
+      expect(ensureSkuSliceDayMeta).toHaveBeenCalledWith("air", sliceDate);
+      expect(upsertDayPoint).toHaveBeenCalledTimes(2);
+      expect(Skugr.find).toHaveBeenCalledWith({
+        konkName: "air",
+        isSliced: true,
+      });
       expect(Sku.find).toHaveBeenCalledWith({
         konkName: "air",
         _id: { $in: ["id1", "id2"] },
       });
-      const calls = vi.mocked(SkuSlice.findOneAndUpdate).mock.calls;
-
-      expect(calls[0]![0]).toEqual({ konkName: "air", date: sliceDate });
-      expect(calls[0]![1]).toEqual({
-        $setOnInsert: { konkName: "air", date: sliceDate, data: {} },
-      });
-
-      expect(calls[1]![1]).toEqual({
-        $set: { "data.air-1": { stock: 10, price: 100 } },
-      });
-      expect(calls[2]![1]).toEqual({
-        $set: { "data.air-2": { stock: 5, price: 200 } },
+      expect(upsertDayPoint).toHaveBeenNthCalledWith(
+        1,
+        "air",
+        "air-1",
+        sliceDate,
+        { stock: 10, price: 100 },
+      );
+      expect(upsertDayPoint).toHaveBeenNthCalledWith(
+        2,
+        "air",
+        "air-2",
+        sliceDate,
+        { stock: 5, price: 200 },
+      );
+      expect(upsertSkuSliceDayMeta).toHaveBeenCalledWith({
+        konkName: "air",
+        date: sliceDate,
+        rotationMeta: null,
+        stats: { filled: 2, invalid: 0, errorCount: 0 },
       });
     },
-    10000
+    10000,
   );
 
   it("skips skus without productId", async () => {
@@ -172,7 +195,7 @@ describe("runSkuSliceForKonkUtil", () => {
     vi.useFakeTimers();
     const resultPromise = runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
     await vi.runAllTimersAsync();
     const result = await resultPromise;
@@ -204,7 +227,7 @@ describe("runSkuSliceForKonkUtil", () => {
     vi.useFakeTimers();
     const resultPromise = runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
     await vi.runAllTimersAsync();
     await resultPromise;
@@ -230,7 +253,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result).toEqual({
@@ -241,11 +264,13 @@ describe("runSkuSliceForKonkUtil", () => {
       errors: 0,
     });
     expect(getSkuStockDataUtil).not.toHaveBeenCalled();
-    expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
+    expect(ensureSkuSliceDayMeta).toHaveBeenCalledTimes(1);
+    expect(upsertDayPoint).not.toHaveBeenCalled();
+    expect(upsertSkuSliceDayMeta).toHaveBeenCalledTimes(1);
     expect(Sku.find).not.toHaveBeenCalled();
   });
 
-  it("writes -1/-1 to data but counts as invalid not success", async () => {
+  it("writes -1/-1 to day point but counts as invalid not success", async () => {
     vi.mocked(Sku.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue([
@@ -258,7 +283,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result).toEqual({
@@ -268,15 +293,14 @@ describe("runSkuSliceForKonkUtil", () => {
       invalid: 1,
       errors: 0,
     });
-    expect(SkuSlice.findOneAndUpdate).toHaveBeenCalledTimes(2);
-    expect(SkuSlice.findOneAndUpdate).toHaveBeenNthCalledWith(
-      2,
-      { konkName: "air", date: sliceDate },
-      { $set: { "data.air-1": { stock: -1, price: -1 } } }
-    );
+    expect(upsertDayPoint).toHaveBeenCalledTimes(1);
+    expect(upsertDayPoint).toHaveBeenCalledWith("air", "air-1", sliceDate, {
+      stock: -1,
+      price: -1,
+    });
   });
 
-  it("writes partial -1 price to data but counts as invalid", async () => {
+  it("writes partial -1 price to day point but counts as invalid", async () => {
     vi.mocked(Sku.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue([
@@ -289,7 +313,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result).toEqual({
@@ -318,12 +342,12 @@ describe("runSkuSliceForKonkUtil", () => {
         new BrowserOriginBlockedError("cf 520", {
           httpStatus: 520,
           retryAfterSec: 60,
-        })
+        }),
       );
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result).toEqual({
@@ -335,16 +359,10 @@ describe("runSkuSliceForKonkUtil", () => {
       abortReason: "origin_blocked",
     });
     expect(getSkuStockDataUtil).toHaveBeenCalledTimes(2);
-    const dataSets = vi
-      .mocked(SkuSlice.findOneAndUpdate)
-      .mock.calls.filter((c) => {
-        const update = c[1] as { $set?: Record<string, unknown> };
-        if (!update.$set) return false;
-        return Object.keys(update.$set).some((key) => key.startsWith("data."));
-      });
-    expect(dataSets).toHaveLength(1);
-    expect(dataSets[0]![1]).toEqual({
-      $set: { "data.air-1": { stock: 10, price: 1 } },
+    expect(upsertDayPoint).toHaveBeenCalledTimes(1);
+    expect(upsertDayPoint).toHaveBeenCalledWith("air", "air-1", sliceDate, {
+      stock: 10,
+      price: 1,
     });
     expect(ORIGIN_BLOCKED_CODE).toBe("ORIGIN_BLOCKED");
   });
@@ -365,7 +383,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result.count).toBe(11);
@@ -389,17 +407,16 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result.count).toBe(101);
     const delayMs = vi.mocked(delay).mock.calls.map((c) => c[0]);
-    expect(delayMs.filter((ms) => ms === AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS)).toHaveLength(
-      1
-    );
-    // На 100 — только block, без cluster 20s в тот же момент
+    expect(
+      delayMs.filter((ms) => ms === AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS),
+    ).toHaveLength(1);
     const idxAfter100Jitter = delayMs.findIndex(
-      (ms, i) => ms === AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS && i > 0
+      (ms, i) => ms === AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS && i > 0,
     );
     expect(idxAfter100Jitter).toBeGreaterThan(0);
     expect(delayMs[idxAfter100Jitter - 1]).toBe(2000);
@@ -419,7 +436,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result).toEqual({
@@ -437,13 +454,13 @@ describe("runSkuSliceForKonkUtil", () => {
     expect(interChunkPauses).toHaveLength(1);
   });
 
-  it("air: valid keys in data skip fetch quota", async () => {
+  it("air: valid keys in months skip fetch quota", async () => {
     const skus = mockAirSkus(1500);
     const prefilled: Record<string, { stock: number; price: number }> = {};
     for (let i = 1; i <= 500; i++) {
       prefilled[`air-${i}`] = { stock: 10, price: 100 };
     }
-    mockSliceFindOne(prefilled);
+    mockExistingPoints(prefilled);
     vi.mocked(Sku.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue(skus),
@@ -454,7 +471,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result.count).toBe(1000);
@@ -474,7 +491,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result).toEqual({
@@ -500,7 +517,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result).toEqual({
@@ -530,7 +547,7 @@ describe("runSkuSliceForKonkUtil", () => {
 
     const result = await runSkuSliceForKonkUtil(
       "air",
-      new Date("2025-03-01T12:00:00.000Z")
+      new Date("2025-03-01T12:00:00.000Z"),
     );
 
     expect(result.abortReason).toBeUndefined();
@@ -565,12 +582,12 @@ describe("runSkuSliceForKonkUtil", () => {
     expect(result.rotationMeta).toBeUndefined();
     expect(result.count).toBe(9);
     expect(getSkuStockDataUtil).toHaveBeenCalledTimes(9);
-    expect(SkuSlice.findOneAndUpdate).not.toHaveBeenCalledWith(
-      { konkName: "air", date: runSliceDate },
-      expect.objectContaining({
-        $set: expect.objectContaining({ rotationMeta: expect.anything() }),
-      })
-    );
+    expect(upsertSkuSliceDayMeta).toHaveBeenCalledWith({
+      konkName: "air",
+      date: runSliceDate,
+      rotationMeta: null,
+      stats: { filled: 9, invalid: 0, errorCount: 0 },
+    });
   });
 
   it("balun: no chunk loop or resetImpit", async () => {
@@ -588,6 +605,6 @@ describe("runSkuSliceForKonkUtil", () => {
     await runSkuSliceForKonkUtil("balun", new Date("2025-03-01T12:00:00.000Z"));
 
     expect(resetImpitClientCache).not.toHaveBeenCalled();
-    expect(SkuSlice.findOne).not.toHaveBeenCalled();
+    expect(loadDayPointsForProductIds).not.toHaveBeenCalled();
   });
 });

@@ -2,15 +2,16 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../../../konks/models/Konk.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../../../../../sku-slices/models/SkuSlice.js";
 import { getKonkProdSkugrGroupsSalesUtil } from "../getKonkProdSkugrGroupsSalesUtil.js";
+import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
 
 describe("getKonkProdSkugrGroupsSalesUtil", () => {
   beforeEach(async () => {
     await Konk.deleteMany({});
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   it("returns ok false when no skugr for konk/prod", async () => {
@@ -94,32 +95,18 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
       skus: [skuB._id],
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-a`]: { stock: 10, price: 5 },
           [`${konk}-b`]: { stock: 20, price: 2 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-a`]: { stock: 7, price: 5 },
           [`${konk}-b`]: { stock: 18, price: 2 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d2, {
           [`${konk}-a`]: { stock: 5, price: 5 },
           [`${konk}-b`]: { stock: 15, price: 2 },
-        },
-      },
-    ]);
+        });
 
     const result = await getKonkProdSkugrGroupsSalesUtil({
       konk,
@@ -203,35 +190,21 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
       skus: [skuShared._id],
     });
 
-    await SkuSlice.insertMany([
-      {
-        konkName: konk,
-        date: d0,
-        data: {
+    await seedSkuSliceMonthDay(konk, d0, {
           [`${konk}-shared`]: { stock: 20, price: 3 },
           [`${konk}-a`]: { stock: 10, price: 2 },
           [`${konk}-all-only`]: { stock: 8, price: 4 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d1,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d1, {
           [`${konk}-shared`]: { stock: 15, price: 3 },
           [`${konk}-a`]: { stock: 8, price: 2 },
           [`${konk}-all-only`]: { stock: 6, price: 4 },
-        },
-      },
-      {
-        konkName: konk,
-        date: d2,
-        data: {
+        });
+    await seedSkuSliceMonthDay(konk, d2, {
           [`${konk}-shared`]: { stock: 10, price: 3 },
           [`${konk}-a`]: { stock: 7, price: 2 },
           [`${konk}-all-only`]: { stock: 5, price: 4 },
-        },
-      },
-    ]);
+        });
 
     const result = await getKonkProdSkugrGroupsSalesUtil({
       konk,
@@ -290,11 +263,9 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
       isSliced: true,
       skus: [sku._id],
     });
-    await SkuSlice.insertMany([
-      { konkName: konk, date: d0, data: { [`${konk}-a`]: { stock: 10, price: 2 } } },
-      { konkName: konk, date: d1, data: { [`${konk}-a`]: { stock: 8, price: 2 } } },
-      { konkName: konk, date: d2, data: { [`${konk}-a`]: { stock: 6, price: 2 } } },
-    ]);
+    await seedSkuSliceMonthDay(konk, d0, { [`${konk}-a`]: { stock: 10, price: 2 } });
+    await seedSkuSliceMonthDay(konk, d1, { [`${konk}-a`]: { stock: 8, price: 2 } });
+    await seedSkuSliceMonthDay(konk, d2, { [`${konk}-a`]: { stock: 6, price: 2 } });
     const result = await getKonkProdSkugrGroupsSalesUtil({
       konk,
       prod,

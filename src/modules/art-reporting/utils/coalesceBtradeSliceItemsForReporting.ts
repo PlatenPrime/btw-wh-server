@@ -1,4 +1,4 @@
-import type { IBtradeSliceDataItem } from "../../btrade-slices/models/BtradeSlice.js";
+import type { IBtradeSliceDataItem } from "../../btrade-slices/models/btradeSliceTypes.js";
 
 export type BtradeReportingCoalescedPoint = {
   quantity: number | null;

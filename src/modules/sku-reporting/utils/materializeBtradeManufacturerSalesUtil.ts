@@ -1,6 +1,6 @@
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { Art } from "../../arts/models/Art.js";
-import { BtradeSlice } from "../../btrade-slices/models/BtradeSlice.js";
+import { loadDayMap } from "../../btrade-slices/utils/btradeSliceMonthStore.js";
 import { BtradeManufacturerDaySales } from "../models/BtradeManufacturerDaySales.js";
 import {
   sliceDateMinusDays,
@@ -84,7 +84,7 @@ async function replaceBtradeManufacturerDayRollup(params: {
 
 /**
  * Materialize Btrade sales → BtradeManufacturerDaySales за D и D+1.
- * В Mixed BtradeSlice.data ничего не пишет.
+ * Читает точки из btrade_slice_months.
  */
 export async function materializeBtradeManufacturerSalesForDays(params: {
   dayD: Date;
@@ -97,34 +97,21 @@ export async function materializeBtradeManufacturerSalesForDays(params: {
 
   const prodNameByArtikul = await loadProdNameByArtikul();
 
-  const docs = await BtradeSlice.find({
-    date: { $in: [dayPrev, dayD, dayNext] },
-  })
-    .select("date data")
-    .lean();
-
-  const byTime = new Map(
-    docs.map((doc) => [toSliceDate(doc.date).getTime(), doc]),
-  );
-  const prevDoc = byTime.get(dayPrev.getTime());
-  const dDoc = byTime.get(dayD.getTime());
-  const nextDoc = byTime.get(dayNext.getTime());
+  const [prevData, dData, nextData] = await Promise.all([
+    loadDayMap(dayPrev),
+    loadDayMap(dayD),
+    loadDayMap(dayNext),
+  ]);
 
   let keysUpdated = 0;
   let rollupDocs = 0;
   const daysTouched: string[] = [];
 
-  if (dDoc?.data) {
+  if (Object.keys(dData).length > 0) {
     const r = await replaceBtradeManufacturerDayRollup({
       day: dayD,
-      prevData: prevDoc?.data as Record<
-        string,
-        { quantity?: number; price?: number }
-      >,
-      currData: dDoc.data as Record<
-        string,
-        { quantity?: number; price?: number }
-      >,
+      prevData,
+      currData: dData,
       prodNameByArtikul,
       apply,
     });
@@ -133,17 +120,11 @@ export async function materializeBtradeManufacturerSalesForDays(params: {
     daysTouched.push(dayD.toISOString().slice(0, 10));
   }
 
-  if (nextDoc?.data) {
+  if (Object.keys(nextData).length > 0) {
     const r = await replaceBtradeManufacturerDayRollup({
       day: dayNext,
-      prevData: dDoc?.data as Record<
-        string,
-        { quantity?: number; price?: number }
-      >,
-      currData: nextDoc.data as Record<
-        string,
-        { quantity?: number; price?: number }
-      >,
+      prevData: dData,
+      currData: nextData,
       prodNameByArtikul,
       apply,
     });
@@ -200,17 +181,11 @@ export async function materializeBtradeManufacturerSalesDateRange(params: {
     dayIndex += 1;
     const dayPrev = sliceDateMinusDays(d, 1);
     const dayKey = d.toISOString().slice(0, 10);
-    const docs = await BtradeSlice.find({
-      date: { $in: [dayPrev, d] },
-    })
-      .select("date data")
-      .lean();
-    const byTime = new Map(
-      docs.map((doc) => [toSliceDate(doc.date).getTime(), doc]),
-    );
-    const prevDoc = byTime.get(dayPrev.getTime());
-    const dDoc = byTime.get(d.getTime());
-    if (!dDoc?.data) {
+    const [prevData, dData] = await Promise.all([
+      loadDayMap(dayPrev),
+      loadDayMap(d),
+    ]);
+    if (Object.keys(dData).length === 0) {
       params.onProgress?.({
         day: dayKey,
         dayIndex,
@@ -223,14 +198,8 @@ export async function materializeBtradeManufacturerSalesDateRange(params: {
 
     const r = await replaceBtradeManufacturerDayRollup({
       day: d,
-      prevData: prevDoc?.data as Record<
-        string,
-        { quantity?: number; price?: number }
-      >,
-      currData: dDoc.data as Record<
-        string,
-        { quantity?: number; price?: number }
-      >,
+      prevData,
+      currData: dData,
       prodNameByArtikul,
       apply,
     });

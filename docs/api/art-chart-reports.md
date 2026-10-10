@@ -1,6 +1,6 @@
 # API графиков артикула Btrade
 
-Базовый путь: `/api/art-chart-reports`. JSON chart-data по одному артикулу из `BtradeSlice`.
+Базовый путь: `/api/art-chart-reports`. JSON chart-data по одному артикулу из `btrade_slice_months`.
 
 Доступ: checkAuth + checkRoles(ADMIN).
 

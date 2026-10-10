@@ -1,20 +1,15 @@
 import { Document, Model, Schema, Types } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
+import type {
+  ISkuSliceDataItem,
+  ISkuSliceRotationMeta,
+} from "./skuSliceTypes.js";
 
-export interface ISkuSliceDataItem {
-  stock: number;
-  price: number;
-}
-
-/** Мета rotation-среза (observability; логика due — hash productId). */
-export interface ISkuSliceRotationMeta {
-  cycleDays: number;
-  dayIndex: number;
-  dueCount: number;
-}
+export type { ISkuSliceDataItem, ISkuSliceRotationMeta } from "./skuSliceTypes.js";
 
 /**
- * Ежедневный срез остатков и цен SKU конкурента; ключи в data — Sku.productId.
+ * Legacy дневной Mixed-срез. Runtime stock/price больше не пишет сюда —
+ * только migrate/verify CLI. Observability — SkuSliceDayMeta; точки — SkuSliceMonth.
  */
 export interface ISkuSlice extends Document {
   _id: Types.ObjectId;
@@ -43,7 +38,7 @@ const skuSliceSchema = new Schema<ISkuSlice>(
       required: false,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 skuSliceSchema.index({ konkName: 1, date: 1 }, { unique: true });

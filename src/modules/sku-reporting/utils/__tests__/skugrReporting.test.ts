@@ -1,5 +1,5 @@
 ﻿import { describe, expect, it } from "vitest";
-import type { ISkuSliceDataItem } from "../../../sku-slices/models/SkuSlice.js";
+import type { ISkuSliceDataItem } from "../../../sku-slices/models/skuSliceTypes.js";
 import { buildSliceMapsByKonk, getSliceItem } from "../skugrReporting.js";
 
 describe("skugrReporting slice maps", () => {

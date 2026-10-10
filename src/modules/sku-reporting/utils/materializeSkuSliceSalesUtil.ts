@@ -1,7 +1,7 @@
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { Konk } from "../../konks/models/Konk.js";
 import { Sku } from "../../skus/models/Sku.js";
-import { SkuSlice } from "../../sku-slices/models/SkuSlice.js";
+import { loadDayMapForKonk } from "../../sku-slices/utils/skuSliceMonthStore.js";
 import { SkuManufacturerDaySales } from "../models/SkuManufacturerDaySales.js";
 import {
   sliceDateMinusDays,
@@ -144,7 +144,7 @@ async function replaceManufacturerDayRollup(params: {
 
 /**
  * Materialize sales → SkuManufacturerDaySales за D и D+1 (каскад).
- * В Mixed SkuSlice.data ничего не пишет.
+ * Читает точки из SkuSliceMonth.
  */
 export async function materializeSkuSliceSalesForKonkDays(params: {
   konkName: string;
@@ -159,37 +159,25 @@ export async function materializeSkuSliceSalesForKonkDays(params: {
   const dayPrev = sliceDateMinusDays(dayD, 1);
   const apply = params.apply !== false;
 
-  const [recountDays, prodNameByProductId] = await Promise.all([
-    loadRecountDays(konkName),
-    loadProdNameByProductId(konkName),
-  ]);
-
-  const docs = await SkuSlice.find({
-    konkName,
-    date: { $in: [dayPrev, dayD, dayNext] },
-  })
-    .select("date data")
-    .lean();
-
-  const byTime = new Map<number, (typeof docs)[number]>();
-  for (const doc of docs) {
-    byTime.set(toSliceDate(doc.date).getTime(), doc);
-  }
-
-  const prevDoc = byTime.get(dayPrev.getTime());
-  const dDoc = byTime.get(dayD.getTime());
-  const nextDoc = byTime.get(dayNext.getTime());
+  const [recountDays, prodNameByProductId, prevData, dData, nextData] =
+    await Promise.all([
+      loadRecountDays(konkName),
+      loadProdNameByProductId(konkName),
+      loadDayMapForKonk(konkName, dayPrev),
+      loadDayMapForKonk(konkName, dayD),
+      loadDayMapForKonk(konkName, dayNext),
+    ]);
 
   let keysUpdated = 0;
   let rollupDocs = 0;
   const daysTouched: string[] = [];
 
-  if (dDoc?.data) {
+  if (Object.keys(dData).length > 0) {
     const r = await replaceManufacturerDayRollup({
       konkName,
       day: dayD,
-      prevData: prevDoc?.data as Record<string, { stock?: number; price?: number }>,
-      currData: dDoc.data as Record<string, { stock?: number; price?: number }>,
+      prevData,
+      currData: dData,
       recountDays,
       prodNameByProductId,
       apply,
@@ -199,12 +187,12 @@ export async function materializeSkuSliceSalesForKonkDays(params: {
     daysTouched.push(dayD.toISOString().slice(0, 10));
   }
 
-  if (nextDoc?.data) {
+  if (Object.keys(nextData).length > 0) {
     const r = await replaceManufacturerDayRollup({
       konkName,
       day: dayNext,
-      prevData: dDoc?.data as Record<string, { stock?: number; price?: number }>,
-      currData: nextDoc.data as Record<string, { stock?: number; price?: number }>,
+      prevData: dData,
+      currData: nextData,
       recountDays,
       prodNameByProductId,
       apply,
@@ -272,18 +260,11 @@ export async function materializeSkuSliceSalesDateRange(params: {
     dayIndex += 1;
     const dayPrev = sliceDateMinusDays(d, 1);
     const dayKey = d.toISOString().slice(0, 10);
-    const docs = await SkuSlice.find({
-      konkName: params.konkName,
-      date: { $in: [dayPrev, d] },
-    })
-      .select("date data")
-      .lean();
-    const byTime = new Map(
-      docs.map((doc) => [toSliceDate(doc.date).getTime(), doc]),
-    );
-    const prevDoc = byTime.get(dayPrev.getTime());
-    const dDoc = byTime.get(d.getTime());
-    if (!dDoc?.data) {
+    const [prevData, currData] = await Promise.all([
+      loadDayMapForKonk(params.konkName, dayPrev),
+      loadDayMapForKonk(params.konkName, d),
+    ]);
+    if (Object.keys(currData).length === 0) {
       params.onProgress?.({
         konkName: params.konkName,
         day: dayKey,
@@ -298,8 +279,8 @@ export async function materializeSkuSliceSalesDateRange(params: {
     const r = await replaceManufacturerDayRollup({
       konkName: params.konkName,
       day: d,
-      prevData: prevDoc?.data as Record<string, { stock?: number; price?: number }>,
-      currData: dDoc.data as Record<string, { stock?: number; price?: number }>,
+      prevData,
+      currData,
       recountDays,
       prodNameByProductId,
       apply,

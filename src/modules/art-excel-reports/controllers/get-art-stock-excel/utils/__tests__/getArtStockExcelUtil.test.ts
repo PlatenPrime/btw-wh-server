@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Art } from "../../../../../arts/models/Art.js";
-import { BtradeSlice } from "../../../../../btrade-slices/models/BtradeSlice.js";
+import { BtradeSliceMonth } from "../../../../../btrade-slices/models/BtradeSliceMonth.js";
+import { seedBtradeSliceMonthDay } from "../../../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 import { getArtStockExcelUtil } from "../getArtStockExcelUtil.js";
 
 describe("getArtStockExcelUtil", () => {
   beforeEach(async () => {
     await Art.deleteMany({});
-    await BtradeSlice.deleteMany({});
+    await BtradeSliceMonth.deleteMany({});
   });
 
   it("returns ok false when art missing", async () => {
@@ -22,10 +23,8 @@ describe("getArtStockExcelUtil", () => {
     await Art.create({ artikul: "ART-1", zone: "A" });
     const d0 = new Date("2026-02-28T00:00:00.000Z");
     const d1 = new Date("2026-03-01T00:00:00.000Z");
-    await BtradeSlice.insertMany([
-      { date: d0, data: { "ART-1": { quantity: 10, price: 2 } } },
-      { date: d1, data: { "ART-1": { quantity: 8, price: 2 } } },
-    ]);
+    await seedBtradeSliceMonthDay(d0, { "ART-1": { quantity: 10, price: 2 } });
+    await seedBtradeSliceMonthDay(d1, { "ART-1": { quantity: 8, price: 2 } });
 
     const r = await getArtStockExcelUtil({
       artikul: "ART-1",

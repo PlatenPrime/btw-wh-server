@@ -10,14 +10,14 @@
 
 ### GET `/api/btrade-slices`
 
-Срез Btrade по дате: постраничная выдача записей из поля `data` документа среза. Каждая запись сопоставляется с документом **Art** по `artikul` (ключ в `data` среза совпадает с `Art.artikul`). Порядок строк на всех страницах — лексикографическая сортировка по `artikul`.
+Срез Btrade по дате: постраничная выдача точек из `btrade_slice_months` за день. Каждая запись сопоставляется с документом **Art** по `artikul`. Порядок строк на всех страницах — лексикографическая сортировка по `artikul`.
 
 **Query:**
 
 - `date` (string, YYYY-MM-DD, обязательно)
 - `page` (string в query, опционально) — номер страницы, по умолчанию `1`, после разбора целое число > 0
 - `limit` (string в query, опционально) — размер страницы, по умолчанию `10`, после разбора целое от 1 до 100 включительно
-- `isInvalid` (string в query, опционально) — только `"true"` или `"false"`. При **`isInvalid=true`** в `items` попадают только позиции из `data`, у которых полный `-1` в `quantity` и `price`, цена не является конечным неотрицательным числом, либо запись является sentinel missing после cron (артикул не найден в bulk `product_rests`). Те же правила, что у `GET /api/sku-slices` для `stock`/`price`. Если параметр не передан или **`false`**, выдаётся весь `data` (включая sentinel missing).
+- `isInvalid` (string в query, опционально) — только `"true"` или `"false"`. При **`isInvalid=true`** в `items` попадают только invalid точки дня (`quantity`/`price` по тем же правилам sentinel `-1`, что у SKU stock/price). Если параметр не передан или **`false`**, выдаются все точки дня (включая sentinel missing).
 
 **Ответ 200:**
 
@@ -36,7 +36,7 @@
   pagination: {
     page: number,
     limit: number,
-    total: number,       // число ключей в data среза; при isInvalid=true — только число «невалидных» позиций
+    total: number,       // число точек дня в months; при isInvalid=true — только число «невалидных» позиций
     totalPages: number,
     hasNext: boolean,
     hasPrev: boolean
@@ -56,6 +56,6 @@
 
 **Query:** `dateFrom`, `dateTo` (YYYY-MM-DD), `dateFrom` ≤ `dateTo`.
 
-**Ответ 200:** `{ message: string, data: Array<{ date: string, quantity: number, price: number }> }`. В массив попадают только даты, по которым есть запись для артикула в `BtradeSlice`.
+**Ответ 200:** `{ message: string, data: Array<{ date: string, quantity: number, price: number }> }`. В массив попадают только даты, по которым есть точка артикула в `btrade_slice_months`.
 
 **Ошибки:** 400, 401, 403, 404 (артикул не найден в `Art`), 500.

@@ -6,7 +6,10 @@ import {
 } from "../../slices/config/svbumFakeStockThreshold.js";
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
 import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
-import { SkuSlice } from "../models/SkuSlice.js";
+import {
+  loadDayMapsForKonkDates,
+  upsertDayStockOnly,
+} from "./skuSliceMonthStore.js";
 import {
   computeSvbumFakeStockPatches,
   type SvbumFakeStockPatch,
@@ -42,16 +45,10 @@ export type CorrectSvbumFakeStockSpikesResult = {
   patched: SvbumFakeStockFinding[];
 };
 
-type LeanSlice = {
-  _id: unknown;
-  date: Date;
-  data?: Record<string, { stock?: number; price?: number } | unknown>;
-};
-
 function emptyResult(
   apply: boolean,
   daysBack: number,
-  windowDates: Date[]
+  windowDates: Date[],
 ): CorrectSvbumFakeStockSpikesResult {
   return {
     konkName: SVBUM_FAKE_STOCK_KONK_NAME,
@@ -71,7 +68,7 @@ function readStock(raw: unknown): number | undefined {
 }
 
 function collectProductIds(
-  dataByDate: Map<number, Record<string, unknown>>
+  dataByDate: Map<number, Record<string, unknown>>,
 ): string[] {
   const ids = new Set<string>();
   for (const data of dataByDate.values()) {
@@ -84,7 +81,7 @@ function collectProductIds(
 
 function buildSeriesByProductId(
   loadDates: Date[],
-  dataByDate: Map<number, Record<string, unknown>>
+  dataByDate: Map<number, Record<string, unknown>>,
 ): Map<string, SvbumStockDay[]> {
   const productIds = collectProductIds(dataByDate);
   const map = new Map<string, SvbumStockDay[]>();
@@ -98,28 +95,14 @@ function buildSeriesByProductId(
   return map;
 }
 
-async function applyPatches(
-  slices: LeanSlice[],
-  patches: SvbumFakeStockPatch[]
-): Promise<void> {
-  const byDate = new Map<string, SvbumFakeStockPatch[]>();
+async function applyPatches(patches: SvbumFakeStockPatch[]): Promise<void> {
   for (const patch of patches) {
-    const ymd = toUtcYmd(new Date(patch.dateMs));
-    const list = byDate.get(ymd) ?? [];
-    list.push(patch);
-    byDate.set(ymd, list);
-  }
-
-  for (const slice of slices) {
-    const ymd = toUtcYmd(slice.date);
-    const dayPatches = byDate.get(ymd);
-    if (!dayPatches?.length) continue;
-
-    const $set: Record<string, number> = {};
-    for (const patch of dayPatches) {
-      $set[`data.${patch.productId}.stock`] = patch.to;
-    }
-    await SkuSlice.updateOne({ _id: slice._id }, { $set });
+    await upsertDayStockOnly(
+      SVBUM_FAKE_STOCK_KONK_NAME,
+      patch.productId,
+      new Date(patch.dateMs),
+      patch.to,
+    );
   }
 }
 
@@ -134,10 +117,10 @@ function toFindings(patches: SvbumFakeStockPatch[]): SvbumFakeStockFinding[] {
 
 /**
  * Коррекция фейкового stock > 900_000 у svbum (обнуление + сэндвич)
- * за окно [asOf-(daysBack-1) .. asOf].
+ * за окно [asOf-(daysBack-1) .. asOf]. Пишет в SkuSliceMonth.
  */
 export async function correctSvbumFakeStockSpikesUtil(
-  input: CorrectSvbumFakeStockSpikesInput
+  input: CorrectSvbumFakeStockSpikesInput,
 ): Promise<CorrectSvbumFakeStockSpikesResult> {
   const daysBack = Math.floor(input.daysBack);
   if (!Number.isFinite(daysBack) || daysBack < 1) {
@@ -145,11 +128,10 @@ export async function correctSvbumFakeStockSpikesUtil(
   }
 
   const apply = input.apply !== false;
-  const lookbackDays =
-    input.lookbackDays ?? SVBUM_FAKE_STOCK_LOOKBACK_DAYS;
+  const lookbackDays = input.lookbackDays ?? SVBUM_FAKE_STOCK_LOOKBACK_DAYS;
   if (!Number.isFinite(lookbackDays) || lookbackDays < 0) {
     throw new Error(
-      "correctSvbumFakeStockSpikesUtil: lookbackDays must be >= 0"
+      "correctSvbumFakeStockSpikesUtil: lookbackDays must be >= 0",
     );
   }
 
@@ -163,33 +145,24 @@ export async function correctSvbumFakeStockSpikesUtil(
     return emptyResult(apply, daysBack, windowDates);
   }
 
-  const slices = (await SkuSlice.find({
-    konkName: SVBUM_FAKE_STOCK_KONK_NAME,
-    date: { $gte: loadStart, $lte: asOf },
-  })
-    .select("date data")
-    .lean()) as LeanSlice[];
-
+  const maps = await loadDayMapsForKonkDates(
+    SVBUM_FAKE_STOCK_KONK_NAME,
+    loadDates,
+  );
   const dataByDate = new Map<number, Record<string, unknown>>();
   for (const date of loadDates) {
-    dataByDate.set(date.getTime(), {});
-  }
-  for (const slice of slices) {
-    dataByDate.set(
-      addUtcDays(slice.date, 0).getTime(),
-      (slice.data ?? {}) as Record<string, unknown>
-    );
+    dataByDate.set(date.getTime(), maps.get(date.getTime()) ?? {});
   }
 
   const seriesByProductId = buildSeriesByProductId(loadDates, dataByDate);
   const { patches } = computeSvbumFakeStockPatches(
     seriesByProductId,
     windowStart.getTime(),
-    asOf.getTime()
+    asOf.getTime(),
   );
 
   if (apply && patches.length > 0) {
-    await applyPatches(slices, patches);
+    await applyPatches(patches);
     const byDay = new Map<number, Set<string>>();
     for (const patch of patches) {
       const set = byDay.get(patch.dateMs) ?? new Set<string>();
@@ -220,7 +193,7 @@ export async function correctSvbumFakeStockSpikesUtil(
         daysBack,
         asOf: toUtcYmd(asOf),
       },
-      "svbum fake stock correction"
+      "svbum fake stock correction",
     );
   }
 

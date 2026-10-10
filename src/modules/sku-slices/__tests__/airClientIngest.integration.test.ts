@@ -8,7 +8,9 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import app from "../../../test/utils/testApp.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { Skugr } from "../../skugrs/models/Skugr.js";
-import { SkuSlice } from "../models/SkuSlice.js";
+import { seedSkuSliceMonthDay } from "../utils/seedSkuSliceMonthDay.js";
+import { SkuSliceMonth } from "../models/SkuSliceMonth.js";
+import { getDayPoint } from "../utils/skuSliceMonthStore.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
   const secret =
@@ -35,7 +37,7 @@ describe("Sku-slices air client ingestion integration", () => {
   beforeEach(async () => {
     await Sku.deleteMany({});
     await Skugr.deleteMany({});
-    await SkuSlice.deleteMany({});
+    await SkuSliceMonth.deleteMany({});
   });
 
   describe("GET /api/sku-slices/client/air/pending", () => {
@@ -88,14 +90,10 @@ describe("Sku-slices air client ingestion integration", () => {
         isSliced: false,
         skus: [unsliced._id],
       });
-      await SkuSlice.create({
-        konkName: "air",
-        date: toSliceDate(new Date()),
-        data: {
+      await seedSkuSliceMonthDay("air", toSliceDate(new Date()), {
           "air-valid": { stock: 5, price: 1.2 },
           "air-pending": { stock: -1, price: -1 },
-        },
-      });
+        });
 
       const response = await request(app)
         .get("/api/sku-slices/client/air/pending")
@@ -241,11 +239,9 @@ describe("Sku-slices air client ingestion integration", () => {
         price: 2.1,
       });
 
-      const doc = await SkuSlice.findOne({
-        konkName: "air",
-        date: toSliceDate(new Date()),
-      }).lean();
-      expect(doc?.data?.["air-save"]).toEqual({ stock: 10, price: 2.1 });
+      expect(
+        await getDayPoint("air", "air-save", toSliceDate(new Date())),
+      ).toEqual({ stock: 10, price: 2.1 });
     });
   });
 });
