@@ -320,6 +320,64 @@ describe("buildSkuSliceExcelForSkus skugr column", () => {
     const ws = wb.getWorksheet(SKU_SLICE_EXCEL_SHEET_NAME);
     expect(ws!.getRow(2).getCell(5).value).toBe("");
   });
+
+  it("writes only stock metric row when metrics=[stock]", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSliceExcelForSkus(
+      [
+        {
+          title: "N",
+          url: "https://x.com",
+          productId: "air-1",
+          konkName: "air",
+          prodName: "p",
+        },
+      ],
+      from,
+      to,
+      () => ({ stock: 10, price: 5 }),
+      TITLES,
+      { metrics: ["stock"], includeTotalsRow: true },
+    );
+
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
+    const ws = wb.getWorksheet(SKU_SLICE_EXCEL_SHEET_NAME);
+    expect(ws).toBeDefined();
+    expect(ws!.getRow(2).getCell(7).value).toBe(SKU_SLICE_EXCEL_METRIC_LABELS[0]);
+    expect(ws!.getRow(3).getCell(7).value).not.toBe(SKU_SLICE_EXCEL_METRIC_LABELS[1]);
+    expect(ws!.getRow(3).getCell(1).value).toBe("Підсумок");
+  });
+
+  it("writes only price metric row when metrics=[price] and skips stock totals", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSliceExcelForSkus(
+      [
+        {
+          title: "N",
+          url: "https://x.com",
+          productId: "air-1",
+          konkName: "air",
+          prodName: "p",
+        },
+      ],
+      from,
+      to,
+      () => ({ stock: 10, price: 5 }),
+      TITLES,
+      { metrics: ["price"], includeTotalsRow: true },
+    );
+
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
+    const ws = wb.getWorksheet(SKU_SLICE_EXCEL_SHEET_NAME);
+    expect(ws).toBeDefined();
+    expect(ws!.getRow(2).getCell(7).value).toBe(SKU_SLICE_EXCEL_METRIC_LABELS[1]);
+    expect(ws!.getRow(3).getCell(7).value).not.toBe(SKU_SLICE_EXCEL_METRIC_LABELS[0]);
+    expect(ws!.getRow(3).getCell(1).value).not.toBe("Підсумок");
+  });
 });
 
 describe("buildSkuSliceExcel helpers", () => {

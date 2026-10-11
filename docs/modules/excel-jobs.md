@@ -33,6 +33,7 @@ Excel-job — это отложенная выгрузка одного файл
 - Старые Excel GET/POST сохранены как 410 с `kind`, чтобы фронт мог мигрировать по месту клика.
 - Charts и JSON sales-reports не входят в модуль и не меняют контракт.
 - У SKU sales kinds (`sku-one-sales`, `sku-skugr-sales`, `sku-konk-sales`) params могут включать `metrics` — выбор строк метрик в XLSX; схема та же, что у старых sales Excel-роутов.
+- У SKU stock kinds (`sku-one-stock`, `sku-skugr-stock`, `sku-konk-stock`) — тот же param `metrics` со значениями `stock` / `price`.
 
 ## Ограничения
 

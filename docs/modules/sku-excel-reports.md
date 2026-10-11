@@ -6,4 +6,6 @@ Sales/slice excel читают `SkuSliceMonth` точечно по нужным 
 
 Sales Excel (one / skugr / konk) собирает блок строк метрик на SKU: Продажі, Ціна, Виручка. Клиент может сузить набор через param `metrics` (`sales` / `price` / `revenue`); без param остаются все три строки в каноническом порядке. Итоговые summary-строки продаж и выручки пишутся только для выбранных соответствующих метрик.
 
+Stock Excel (one / skugr / konk) — блок Залишок / Ціна; param `metrics` (`stock` / `price`), без param — обе строки. Підсумок по остаткам пишется только если выбран `stock`.
+
 Роли: ADMIN.

@@ -4,7 +4,7 @@
 
 Доступ: checkAuth + checkRoles(ADMIN).
 
-Все маршруты отвечают **410** с `code: EXCEL_JOBS_MIGRATED` и полем `kind`. Выгрузка: [excel-jobs](excel-jobs.md), UX: [excel-jobs-frontend](excel-jobs-frontend.md). Params kinds — в таблице excel-jobs; у sales kinds (`sku-one-sales`, `sku-skugr-sales`, `sku-konk-sales`) опционально `metrics`: `sales` \| `price` \| `revenue`.
+Все маршруты отвечают **410** с `code: EXCEL_JOBS_MIGRATED` и полем `kind`. Выгрузка: [excel-jobs](excel-jobs.md), UX: [excel-jobs-frontend](excel-jobs-frontend.md). Params kinds — в таблице excel-jobs; у sales kinds опционально `metrics`: `sales` \| `price` \| `revenue`; у stock kinds — `stock` \| `price`.
 
 | Путь | kind |
 |------|------|

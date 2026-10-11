@@ -15,6 +15,10 @@ import {
   coalesceSkuSliceItemsAlongDates,
   sliceDateMinusDays,
 } from "./coalesceSkuSliceItemsForReporting.js";
+import {
+  SKU_STOCK_EXCEL_METRICS,
+  type SkuStockExcelMetric,
+} from "../schemas/skuStockExcelMetricsSchema.js";
 
 /** Заливка комірки «Залишок»: день створення SKU (календар Kyiv). */
 export const SKU_SLICE_EXCEL_STOCK_NEW_SKU_FILL_ARGB = "FFC8E6C9";
@@ -35,9 +39,12 @@ export const SKU_SLICE_EXCEL_HEADER_LABELS = [
 export const SKU_SLICE_EXCEL_METRIC_LABELS = ["Залишок", "Ціна"] as const;
 
 const HEADER_LABELS = SKU_SLICE_EXCEL_HEADER_LABELS;
-const METRIC_LABELS = SKU_SLICE_EXCEL_METRIC_LABELS;
+const METRIC_LABEL_BY_KEY: Record<SkuStockExcelMetric, string> = {
+  stock: SKU_SLICE_EXCEL_METRIC_LABELS[0],
+  price: SKU_SLICE_EXCEL_METRIC_LABELS[1],
+};
+const DEFAULT_METRICS: readonly SkuStockExcelMetric[] = SKU_STOCK_EXCEL_METRICS;
 
-const ROWS_PER_SKU_BLOCK = 2;
 const META_COL_COUNT = HEADER_LABELS.length;
 const METRIC_LABEL_COL = META_COL_COUNT + 1;
 
@@ -74,6 +81,8 @@ export type SkuSliceExcelTitles = {
 export type SkuSliceExcelOptions = {
   includeTotalsRow?: boolean;
   totalsRowLabel?: string;
+  /** Подмножество строк метрик; без значения — stock + price. */
+  metrics?: readonly SkuStockExcelMetric[];
   onProgress?: ExcelBuildProgressHandler;
 };
 
@@ -261,6 +270,13 @@ export async function buildSkuSliceExcelForSkus(
 
   applyHeaderStyle(sheet, columnCount);
 
+  const selectedMetrics =
+    options.metrics && options.metrics.length > 0
+      ? options.metrics
+      : DEFAULT_METRICS;
+  const rowsPerSkuBlock = selectedMetrics.length;
+  const includeStock = selectedMetrics.includes("stock");
+
   let totalDiff = 0;
   let totalFirstStock = 0;
   let startRow = 2;
@@ -274,59 +290,62 @@ export async function buildSkuSliceExcelForSkus(
     const stocks = forReport.map((c) => c.stock);
     const prices = forReport.map((c) => c.price);
 
-    const stockRow = sheet.getRow(startRow);
-    const priceRow = sheet.getRow(startRow + 1);
+    const firstRow = sheet.getRow(startRow);
+    firstRow.getCell(1).value = sku.productId;
+    firstRow.getCell(2).value = sku.title;
+    firstRow.getCell(3).value = titles.competitorTitle;
+    firstRow.getCell(4).value = sku.producerName ?? titles.producerName;
+    firstRow.getCell(5).value = sku.skugrTitle ?? "";
+    firstRow.getCell(6).value = sku.url;
 
-    stockRow.getCell(1).value = sku.productId;
-    stockRow.getCell(2).value = sku.title;
-    stockRow.getCell(3).value = titles.competitorTitle;
-    stockRow.getCell(4).value = sku.producerName ?? titles.producerName;
-    stockRow.getCell(5).value = sku.skugrTitle ?? "";
-    stockRow.getCell(6).value = sku.url;
+    for (let m = 0; m < selectedMetrics.length; m++) {
+      const metric = selectedMetrics[m]!;
+      const row = sheet.getRow(startRow + m);
+      row.getCell(METRIC_LABEL_COL).value = METRIC_LABEL_BY_KEY[metric];
+      const values = metric === "stock" ? stocks : prices;
 
-    stockRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[0];
-    priceRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[1];
+      for (let i = 0; i < dateCount; i++) {
+        row.getCell(dataStartCol + i).value = values[i] ?? null;
+      }
 
-    for (let i = 0; i < dateCount; i++) {
-      const col = dataStartCol + i;
-      const st = stocks[i];
-      const pr = prices[i];
-      stockRow.getCell(col).value = st ?? null;
-      priceRow.getCell(col).value = pr ?? null;
+      applyRowDiffAndPct(row, values, dataStartCol, diffCol, diffPctCol);
+
+      if (metric === "price") {
+        highlightPriceChanges(row, dataStartCol, dateCount);
+      } else {
+        applyStockDayCellHighlights(row, dataStartCol, dates, sku.createdAt);
+      }
     }
 
-    for (let c = 1; c <= META_COL_COUNT; c++) {
-      sheet.mergeCells(startRow, c, startRow + 1, c);
-      setMergedMetaAlignment(stockRow.getCell(c));
+    const endRow = startRow + rowsPerSkuBlock - 1;
+    if (rowsPerSkuBlock > 1) {
+      for (let c = 1; c <= META_COL_COUNT; c++) {
+        sheet.mergeCells(startRow, c, endRow, c);
+        setMergedMetaAlignment(firstRow.getCell(c));
+      }
+    } else {
+      for (let c = 1; c <= META_COL_COUNT; c++) {
+        setMergedMetaAlignment(firstRow.getCell(c));
+      }
     }
 
-    applyRowDiffAndPct(stockRow, stocks, dataStartCol, diffCol, diffPctCol);
-    applyRowDiffAndPct(priceRow, prices, dataStartCol, diffCol, diffPctCol);
-
-    highlightPriceChanges(priceRow, dataStartCol, dateCount);
-
-    for (let r = startRow; r <= startRow + 1; r++) {
+    for (let r = startRow; r <= endRow; r++) {
       applyDataRowStyle(sheet, r, columnCount);
     }
 
-    applyStockDayCellHighlights(
-      stockRow,
-      dataStartCol,
-      dates,
-      sku.createdAt
-    );
-
-    const stockBounds = getFirstAndLastNumeric(stocks);
-    if (stockBounds) {
-      totalDiff += stockBounds.last - stockBounds.first;
-      totalFirstStock += stockBounds.first;
+    if (includeStock) {
+      const stockBounds = getFirstAndLastNumeric(stocks);
+      if (stockBounds) {
+        totalDiff += stockBounds.last - stockBounds.first;
+        totalFirstStock += stockBounds.first;
+      }
     }
 
-    startRow += ROWS_PER_SKU_BLOCK;
+    startRow += rowsPerSkuBlock;
     notifyExcelBuildProgress(options.onProgress, s + 1, skuTotal);
   }
 
-  if (options.includeTotalsRow) {
+  if (options.includeTotalsRow && includeStock) {
     const totalsRow = sheet.getRow(startRow);
     totalsRow.getCell(1).value = options.totalsRowLabel ?? "Підсумок";
     totalsRow.getCell(diffCol).value = totalDiff;

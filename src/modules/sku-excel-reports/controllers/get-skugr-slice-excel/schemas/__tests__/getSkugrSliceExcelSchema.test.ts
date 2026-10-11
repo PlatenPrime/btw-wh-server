@@ -21,4 +21,16 @@ describe("getSkugrSliceExcelSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts optional metrics", () => {
+    const result = getSkugrSliceExcelSchema.safeParse({
+      skugrId: VALID_SKUGR_ID,
+      dateFrom: "2026-06-01",
+      dateTo: "2026-06-02",
+      metrics: ["stock"],
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.metrics).toEqual(["stock"]);
+  });
 });

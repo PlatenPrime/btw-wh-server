@@ -10,7 +10,7 @@
 
 | Область | Назначение |
 |---------|------------|
-| `schemas/` | Общие Zod-схемы: даты, диапазоны konk+prod, skugrIds, metrics sales Excel |
+| `schemas/` | Общие Zod-схемы: даты, диапазоны konk+prod, skugrIds, metrics sales/stock Excel |
 | `models/SkuManufacturerDaySales` | Плоский дневной rollup продаж конкурента по `(konkName, date, prodName)` |
 | `models/BtradeManufacturerDaySales` | Плоский дневной rollup продаж Btrade по `(date, prodName)` (prodName lowercased) |
 | `utils/resolveKonkProdSkus` | Выборка SKU для konk-prod отчётов с опциональным skugrIds |

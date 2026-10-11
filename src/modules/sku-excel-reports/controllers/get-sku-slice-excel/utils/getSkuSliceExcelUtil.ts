@@ -58,7 +58,7 @@ export async function getSkuSliceExcelUtil(
     dateTo,
     (kn, pid, d) => getSliceItem(maps, kn, pid, d),
     titles,
-    { onProgress: progress.onProgress },
+    { metrics: input.metrics, onProgress: progress.onProgress },
   );
 
   return { ok: true, buffer, fileName };

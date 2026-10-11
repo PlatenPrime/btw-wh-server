@@ -21,4 +21,16 @@ describe("getSkuSliceExcelSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts optional metrics", () => {
+    const result = getSkuSliceExcelSchema.safeParse({
+      skuId: VALID_SKU_ID,
+      dateFrom: "2026-06-01",
+      dateTo: "2026-06-05",
+      metrics: "price",
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.metrics).toEqual(["price"]);
+  });
 });

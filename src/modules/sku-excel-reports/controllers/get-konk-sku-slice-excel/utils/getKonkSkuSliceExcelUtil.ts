@@ -67,6 +67,7 @@ export async function getKonkSkuSliceExcelUtil(
     {
       includeTotalsRow: true,
       totalsRowLabel: "Підсумок",
+      metrics: input.metrics,
       onProgress: progress.onProgress,
     },
   );
