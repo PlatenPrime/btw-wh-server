@@ -8,8 +8,8 @@ function firstQuery(q: Request["query"], key: string): string | undefined {
 }
 
 /**
- * @desc    Итоги продаж (шт., грн) по товарным группам Skugr с данными konkName/prodName за период
- * @route   GET /api/sku-slices/konk-prod/skugr-groups-sales?konk=&prod=&dateFrom=&dateTo=
+ * @desc    Итоги продаж (шт., грн) по товарным группам Skugr konk/prod за период; all — сумма строк data
+ * @route   GET /api/sku-sales-reports/konk-prod/skugr-groups-sales?konk=&prod=&dateFrom=&dateTo=
  */
 export const getKonkProdSkugrGroupsSalesController = async (
   req: Request,

@@ -137,7 +137,7 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
     });
   });
 
-  it("calculates all from full konk/prod sku base without skugr duplication", async () => {
+  it("all equals sum of group rows; shared sku counted in each group", async () => {
     const konk = "ggs-konk-overlap";
     const prod = "ggs-prod-overlap";
     const d0 = new Date("2026-10-01T00:00:00.000Z");
@@ -158,19 +158,13 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
       title: "A",
       url: "https://e.com/a",
     });
-    const skuOnlyInAll = await Sku.create({
-      konkName: konk,
-      prodName: prod,
-      productId: `${konk}-all-only`,
-      title: "All only",
-      url: "https://e.com/all-only",
-    });
+    // SKU вне групп не влияет на all (summary = сумма строк data)
     await Sku.create({
       konkName: konk,
       prodName: prod,
-      productId: ` ${konk}-all-only `,
-      title: "All only duplicate",
-      url: "https://e.com/all-only-dup",
+      productId: `${konk}-outside`,
+      title: "Outside",
+      url: "https://e.com/outside",
     });
 
     await Skugr.create({
@@ -191,20 +185,20 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
     });
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-shared`]: { stock: 20, price: 3 },
-          [`${konk}-a`]: { stock: 10, price: 2 },
-          [`${konk}-all-only`]: { stock: 8, price: 4 },
-        });
+      [`${konk}-shared`]: { stock: 20, price: 3 },
+      [`${konk}-a`]: { stock: 10, price: 2 },
+      [`${konk}-outside`]: { stock: 8, price: 4 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-shared`]: { stock: 15, price: 3 },
-          [`${konk}-a`]: { stock: 8, price: 2 },
-          [`${konk}-all-only`]: { stock: 6, price: 4 },
-        });
+      [`${konk}-shared`]: { stock: 15, price: 3 },
+      [`${konk}-a`]: { stock: 8, price: 2 },
+      [`${konk}-outside`]: { stock: 6, price: 4 },
+    });
     await seedSkuSliceMonthDay(konk, d2, {
-          [`${konk}-shared`]: { stock: 10, price: 3 },
-          [`${konk}-a`]: { stock: 7, price: 2 },
-          [`${konk}-all-only`]: { stock: 5, price: 4 },
-        });
+      [`${konk}-shared`]: { stock: 10, price: 3 },
+      [`${konk}-a`]: { stock: 7, price: 2 },
+      [`${konk}-outside`]: { stock: 5, price: 4 },
+    });
 
     const result = await getKonkProdSkugrGroupsSalesUtil({
       konk,
@@ -221,18 +215,14 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
     expect(groupA).toMatchObject({ salesPcs: 13, salesUah: 36 });
     expect(groupB).toMatchObject({ salesPcs: 10, salesUah: 30 });
 
-    // all = unique sku base for konk/prod: shared + a + all-only (without duplication from groups/sku docs)
+    const groupsSumPcs = result.data.reduce((acc, row) => acc + row.salesPcs, 0);
+    const groupsSumUah = result.data.reduce((acc, row) => acc + row.salesUah, 0);
+    expect(groupsSumPcs).toBe(23);
     expect(result.all).toEqual({
       title: "Всі групи",
-      salesPcs: 16,
-      salesUah: 48,
+      salesPcs: groupsSumPcs,
+      salesUah: Math.round(groupsSumUah * 100) / 100,
     });
-
-    const groupsSumPcs = result.data.reduce((acc, row) => acc + row.salesPcs, 0);
-    expect(groupsSumPcs).toBe(23);
-    expect(result.all.salesPcs).not.toBe(groupsSumPcs);
-
-    expect(skuOnlyInAll.productId).toBe(`${konk}-all-only`);
   });
 
   it("applies recount days to skugr totals and all total", async () => {

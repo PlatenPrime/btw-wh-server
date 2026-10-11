@@ -101,6 +101,82 @@ export async function loadSkugrWithOrderedSkus(
   return { skugr, skus };
 }
 
+/** Минимальная ссылка SKU для period/daily slice metrics. */
+export type SkuSliceRef = {
+  konkName: string;
+  productId: string;
+};
+
+export type SkugrWithSkuRefs = {
+  skugrId: string;
+  title: string;
+  skus: SkuSliceRef[];
+};
+
+type SkugrLeanWithSkus = {
+  _id: Types.ObjectId;
+  title: string;
+  skus: Types.ObjectId[];
+};
+
+type SkuLeanSliceRef = {
+  _id: Types.ObjectId;
+  konkName: string;
+  productId: string;
+};
+
+/**
+ * Все Skugr пары konk/prod + SKU-refs одним batch (порядок skus внутри группы сохраняется).
+ * Сортировка групп: title, затем skugrId.
+ */
+export async function loadSkugrsWithSkuRefsForKonkProd(
+  konkName: string,
+  prodName: string,
+): Promise<SkugrWithSkuRefs[]> {
+  const skugrs = await Skugr.find({ konkName, prodName })
+    .select("_id title skus")
+    .lean<SkugrLeanWithSkus[]>();
+
+  if (skugrs.length === 0) return [];
+
+  skugrs.sort((a, b) => {
+    const titleCmp = (a.title ?? "").localeCompare(b.title ?? "");
+    if (titleCmp !== 0) return titleCmp;
+    return a._id.toString().localeCompare(b._id.toString());
+  });
+
+  const allIds = [
+    ...new Set(
+      skugrs.flatMap((g) => (g.skus ?? []).map((id) => id.toString())),
+    ),
+  ];
+
+  const found =
+    allIds.length === 0
+      ? []
+      : await Sku.find({ _id: { $in: allIds } })
+          .select("konkName productId")
+          .lean<SkuLeanSliceRef[]>();
+
+  const byId = new Map(found.map((s) => [s._id.toString(), s]));
+
+  return skugrs.map((g) => {
+    const skus: SkuSliceRef[] = [];
+    for (const id of g.skus ?? []) {
+      const s = byId.get(id.toString());
+      if (!s) continue;
+      const productId = (s.productId ?? "").trim();
+      if (!productId) continue;
+      skus.push({ konkName: s.konkName, productId });
+    }
+    return {
+      skugrId: g._id.toString(),
+      title: (g.title ?? "").trim(),
+      skus,
+    };
+  });
+}
+
 export function uniqueKonkNamesFromSkus(skus: SkuReportingLean[]): string[] {
   return [...new Set(skus.map((s) => s.konkName))];
 }

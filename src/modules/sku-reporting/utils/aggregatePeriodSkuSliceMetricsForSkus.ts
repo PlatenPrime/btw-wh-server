@@ -3,24 +3,37 @@ import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../slices/utils/salesComparisonUtils.js";
-import { Konk } from "../../konks/models/Konk.js";
-import { toSliceDate } from "../../../utils/sliceDate.js";
-import { loadSkuSliceRowsForKonksProducts } from "../../sku-slices/utils/sliceDataAggregationStages.js";
+import { coalesceSkuSliceItemsAlongDates } from "./coalesceSkuSliceItemsForReporting.js";
 import {
-  coalesceSkuSliceItemsAlongDates,
-  sliceDateMinusDays,
-} from "./coalesceSkuSliceItemsForReporting.js";
-import type { SkuRowForSliceMetrics } from "./aggregateDailySkuSliceMetricsForSkus.js";
-import {
-  buildSliceMapsByKonk,
-  enumerateReportingDates,
-  getSliceItem,
-} from "./skugrReporting.js";
+  loadSkuSliceSalesComputeContext,
+  type SkuRowForSliceMetrics,
+} from "./loadSkuSliceSalesComputeContext.js";
+import { getSliceItem } from "./skugrReporting.js";
 
 export type PeriodSkuSliceMetricsItem = {
   salesPcs: number;
   salesUah: number;
 };
+
+/** Ключ для Map period-метрик: konkName + productId. */
+export function skuSliceMetricsKey(konkName: string, productId: string): string {
+  return `${konkName}\0${productId}`;
+}
+
+export function uniqueSkuRowsForSliceMetrics(
+  skus: SkuRowForSliceMetrics[],
+): SkuRowForSliceMetrics[] {
+  const map = new Map<string, SkuRowForSliceMetrics>();
+  for (const s of skus) {
+    const productId = (s.productId ?? "").trim();
+    if (!productId) continue;
+    const key = skuSliceMetricsKey(s.konkName, productId);
+    if (!map.has(key)) {
+      map.set(key, { konkName: s.konkName, productId });
+    }
+  }
+  return [...map.values()];
+}
 
 /**
  * Периодные итоги продаж/выручки по каждому SKU (порядок = входной массив).
@@ -33,33 +46,9 @@ export async function aggregatePeriodSkuSliceMetricsForSkus(
 ): Promise<
   { ok: true; data: PeriodSkuSliceMetricsItem[] } | { ok: false }
 > {
-  if (skus.length === 0) return { ok: false };
-
-  const konkNames = [...new Set(skus.map((s) => s.konkName))];
-
-  const warmupStart = sliceDateMinusDays(dateFrom, 1);
-
-  const sliceDocs = await loadSkuSliceRowsForKonksProducts(
-    skus,
-    warmupStart,
-    dateTo,
-  );
-
-  const maps = buildSliceMapsByKonk(sliceDocs);
-  const datesFull = enumerateReportingDates(warmupStart, dateTo);
-  const indexStart = datesFull.findIndex(
-    (d) => toSliceDate(d).getTime() >= toSliceDate(dateFrom).getTime(),
-  );
-  if (indexStart < 0 || indexStart >= datesFull.length) return { ok: false };
-
-  const dates = datesFull.slice(indexStart);
-  const konkDocs = await Konk.find({ name: { $in: konkNames } })
-    .select("name recountDays")
-    .lean();
-  const recountDaysByKonk = new Map<string, Set<string>>();
-  for (const doc of konkDocs) {
-    recountDaysByKonk.set(doc.name, new Set((doc.recountDays ?? []).map(String)));
-  }
+  const loaded = await loadSkuSliceSalesComputeContext(skus, dateFrom, dateTo);
+  if (!loaded.ok) return { ok: false };
+  const { maps, datesFull, indexStart, dates, recountDaysByKonk } = loaded.ctx;
 
   const data: PeriodSkuSliceMetricsItem[] = [];
 
@@ -93,4 +82,32 @@ export async function aggregatePeriodSkuSliceMetricsForSkus(
   }
 
   return { ok: true, data };
+}
+
+/**
+ * Period-метрики по unique (konkName, productId) — один load для batch-отчётов.
+ */
+export async function aggregatePeriodSkuSliceMetricsBySkuKey(
+  skus: SkuRowForSliceMetrics[],
+  dateFrom: Date,
+  dateTo: Date,
+): Promise<
+  { ok: true; byKey: Map<string, PeriodSkuSliceMetricsItem> } | { ok: false }
+> {
+  const unique = uniqueSkuRowsForSliceMetrics(skus);
+  if (unique.length === 0) return { ok: false };
+
+  const period = await aggregatePeriodSkuSliceMetricsForSkus(
+    unique,
+    dateFrom,
+    dateTo,
+  );
+  if (!period.ok) return { ok: false };
+
+  const byKey = new Map<string, PeriodSkuSliceMetricsItem>();
+  for (let i = 0; i < unique.length; i++) {
+    const sku = unique[i]!;
+    byKey.set(skuSliceMetricsKey(sku.konkName, sku.productId), period.data[i]!);
+  }
+  return { ok: true, byKey };
 }

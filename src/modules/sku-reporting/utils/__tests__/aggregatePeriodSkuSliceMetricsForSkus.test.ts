@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../konks/models/Konk.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "../aggregateDailySkuSliceMetricsForSkus.js";
-import { aggregatePeriodSkuSliceMetricsForSkus } from "../aggregatePeriodSkuSliceMetricsForSkus.js";
+import {
+  aggregatePeriodSkuSliceMetricsBySkuKey,
+  aggregatePeriodSkuSliceMetricsForSkus,
+  skuSliceMetricsKey,
+  uniqueSkuRowsForSliceMetrics,
+} from "../aggregatePeriodSkuSliceMetricsForSkus.js";
 import { seedSkuSliceMonthDay } from "../../../sku-slices/utils/seedSkuSliceMonthDay.js";
 import { SkuSliceMonth } from "../../../sku-slices/models/SkuSliceMonth.js";
 
@@ -109,5 +114,56 @@ describe("aggregatePeriodSkuSliceMetricsForSkus", () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.data[0]).toEqual({ salesPcs: 0, salesUah: 0 });
+  });
+
+  it("uniqueSkuRowsForSliceMetrics dedupes and drops empty productId", () => {
+    expect(
+      uniqueSkuRowsForSliceMetrics([
+        { konkName: "k", productId: "a" },
+        { konkName: "k", productId: " a " },
+        { konkName: "k", productId: "b" },
+        { konkName: "k", productId: "   " },
+        { konkName: "k2", productId: "a" },
+      ]),
+    ).toEqual([
+      { konkName: "k", productId: "a" },
+      { konkName: "k", productId: "b" },
+      { konkName: "k2", productId: "a" },
+    ]);
+  });
+
+  it("aggregatePeriodSkuSliceMetricsBySkuKey returns map by key", async () => {
+    const d0 = new Date("2026-05-01T00:00:00.000Z");
+    const d1 = new Date("2026-05-02T00:00:00.000Z");
+
+    await seedSkuSliceMonthDay("k", d0, {
+      "p-a": { stock: 10, price: 5 },
+      "p-b": { stock: 4, price: 2 },
+    });
+    await seedSkuSliceMonthDay("k", d1, {
+      "p-a": { stock: 7, price: 5 },
+      "p-b": { stock: 3, price: 2 },
+    });
+
+    const r = await aggregatePeriodSkuSliceMetricsBySkuKey(
+      [
+        { konkName: "k", productId: "p-a" },
+        { konkName: "k", productId: "p-b" },
+        { konkName: "k", productId: "p-a" },
+      ],
+      d1,
+      d1,
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.byKey.size).toBe(2);
+    expect(r.byKey.get(skuSliceMetricsKey("k", "p-a"))).toEqual({
+      salesPcs: 3,
+      salesUah: 15,
+    });
+    expect(r.byKey.get(skuSliceMetricsKey("k", "p-b"))).toEqual({
+      salesPcs: 1,
+      salesUah: 2,
+    });
   });
 });

@@ -1,9 +1,9 @@
-import type { Types } from "mongoose";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
-import { Sku } from "../../../../skus/models/Sku.js";
-import { Skugr } from "../../../../skugrs/models/Skugr.js";
-import { aggregateDailySkuSliceMetricsForSkus } from "../../../../sku-reporting/utils/aggregateDailySkuSliceMetricsForSkus.js";
-import { loadSkugrWithOrderedSkus } from "../../../../sku-reporting/utils/skugrReporting.js";
+import {
+  aggregatePeriodSkuSliceMetricsBySkuKey,
+  skuSliceMetricsKey,
+} from "../../../../sku-reporting/utils/aggregatePeriodSkuSliceMetricsForSkus.js";
+import { loadSkugrsWithSkuRefsForKonkProd } from "../../../../sku-reporting/utils/skugrReporting.js";
 import type { GetKonkProdSkugrGroupsSalesInput } from "../schemas/getKonkProdSkugrGroupsSalesSchema.js";
 
 export type SkugrGroupSalesRow = {
@@ -25,123 +25,66 @@ export type GetKonkProdSkugrGroupsSalesResult =
   | { ok: true; data: SkugrGroupSalesRow[]; all: SkugrGroupsTotal }
   | { ok: false };
 
-type SkugrLean = {
-  _id: Types.ObjectId;
-  title: string;
-};
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
 
-type SkuLean = {
-  konkName: string;
-  productId: string;
-};
-
+/**
+ * Итоги продаж по Skugr konk/prod за период.
+ * Batch: один load групп+SKU, один period-aggregate по unique productId.
+ * `all` — сумма строк `data` (summary отчёта).
+ */
 export async function getKonkProdSkugrGroupsSalesUtil(
   input: GetKonkProdSkugrGroupsSalesInput,
 ): Promise<GetKonkProdSkugrGroupsSalesResult> {
-  const skugrs = await Skugr.find({
-    konkName: input.konk,
-    prodName: input.prod,
-  })
-    .select("_id title")
-    .lean<SkugrLean[]>();
-
-  if (skugrs.length === 0) return { ok: false };
-
-  skugrs.sort((a, b) => {
-    const titleCmp = (a.title ?? "").localeCompare(b.title ?? "");
-    if (titleCmp !== 0) return titleCmp;
-    return a._id.toString().localeCompare(b._id.toString());
-  });
+  const groups = await loadSkugrsWithSkuRefsForKonkProd(input.konk, input.prod);
+  if (groups.length === 0) return { ok: false };
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
 
-  const data: SkugrGroupSalesRow[] = [];
+  const allSkuRefs = groups.flatMap((g) => g.skus);
+  const metricsByKey =
+    allSkuRefs.length === 0
+      ? null
+      : await aggregatePeriodSkuSliceMetricsBySkuKey(
+          allSkuRefs,
+          dateFrom,
+          dateTo,
+        );
 
-  for (const row of skugrs) {
-    const skugrId = row._id.toString();
-    const title = (row.title ?? "").trim();
-
-    const loaded = await loadSkugrWithOrderedSkus(skugrId);
-    if (!loaded) {
-      data.push({ skugrId, title, salesPcs: 0, salesUah: 0 });
-      continue;
-    }
-
-    if (loaded.skus.length === 0) {
-      data.push({ skugrId, title: loaded.skugr.title ?? title, salesPcs: 0, salesUah: 0 });
-      continue;
-    }
-
-    const metrics = await aggregateDailySkuSliceMetricsForSkus(
-      loaded.skus.map((s) => ({ konkName: s.konkName, productId: s.productId })),
-      dateFrom,
-      dateTo,
-    );
-
-    if (!metrics.ok) {
-      data.push({
-        skugrId,
-        title: loaded.skugr.title ?? title,
-        salesPcs: 0,
-        salesUah: 0,
-      });
-      continue;
-    }
-
+  const data: SkugrGroupSalesRow[] = groups.map((g) => {
     let salesPcs = 0;
     let salesUah = 0;
-    for (const day of metrics.data) {
-      salesPcs += day.sales;
-      salesUah += day.revenue;
+    if (metricsByKey?.ok) {
+      for (const sku of g.skus) {
+        const m = metricsByKey.byKey.get(
+          skuSliceMetricsKey(sku.konkName, sku.productId),
+        );
+        if (!m) continue;
+        salesPcs += m.salesPcs;
+        salesUah += m.salesUah;
+      }
     }
-    salesUah = Math.round(salesUah * 100) / 100;
-
-    data.push({
-      skugrId,
-      title: loaded.skugr.title ?? title,
+    return {
+      skugrId: g.skugrId,
+      title: g.title,
       salesPcs,
-      salesUah,
-    });
-  }
-
-  const producerSkus = await Sku.find({
-    konkName: input.konk,
-    prodName: input.prod,
-  })
-    .select("konkName productId")
-    .lean<SkuLean[]>();
-
-  const allSkuRows = [...new Map(
-    producerSkus
-      .map((sku) => ({
-        konkName: sku.konkName,
-        productId: (sku.productId ?? "").trim(),
-      }))
-      .filter((sku) => sku.productId !== "")
-      .map((sku) => [sku.productId, sku] as const),
-  ).values()];
+      salesUah: round2(salesUah),
+    };
+  });
 
   let totalSalesPcs = 0;
   let totalSalesUah = 0;
-  if (allSkuRows.length > 0) {
-    const allMetrics = await aggregateDailySkuSliceMetricsForSkus(
-      allSkuRows,
-      dateFrom,
-      dateTo,
-    );
-    if (allMetrics.ok) {
-      for (const day of allMetrics.data) {
-        totalSalesPcs += day.sales;
-        totalSalesUah += day.revenue;
-      }
-    }
+  for (const row of data) {
+    totalSalesPcs += row.salesPcs;
+    totalSalesUah += row.salesUah;
   }
 
   const all: SkugrGroupsTotal = {
     title: ALL_SKUGR_GROUPS_TITLE,
     salesPcs: totalSalesPcs,
-    salesUah: Math.round(totalSalesUah * 100) / 100,
+    salesUah: round2(totalSalesUah),
   };
 
   return { ok: true, data, all };

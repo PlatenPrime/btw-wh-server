@@ -61,3 +61,5 @@
 **Query:** `konk`, `prod`, `dateFrom`, `dateTo`.
 
 **Ответ 200:** `{ message: string, data: Array<{ skugrId, title, salesPcs, salesUah }>, all: { title, salesPcs, salesUah } }`.
+
+`all` — итог по строкам `data` (сумма товарных групп отчёта), не отдельная агрегация по всем SKU производителя.

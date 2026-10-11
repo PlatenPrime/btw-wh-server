@@ -3,29 +3,22 @@ import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../slices/utils/salesComparisonUtils.js";
-import { Konk } from "../../konks/models/Konk.js";
-import { toSliceDate } from "../../../utils/sliceDate.js";
-import { loadSkuSliceRowsForKonksProducts } from "../../sku-slices/utils/sliceDataAggregationStages.js";
 import {
   coalesceSkuSliceItemsAlongDates,
-  sliceDateMinusDays,
 } from "./coalesceSkuSliceItemsForReporting.js";
 import {
-  buildSliceMapsByKonk,
-  enumerateReportingDates,
-  getSliceItem,
-} from "./skugrReporting.js";
+  loadSkuSliceSalesComputeContext,
+  type SkuRowForSliceMetrics,
+} from "./loadSkuSliceSalesComputeContext.js";
+import { getSliceItem } from "./skugrReporting.js";
+
+export type { SkuRowForSliceMetrics };
 
 export type DailySkuCompetitorMetricsItem = {
   date: string;
   stock: number;
   sales: number;
   revenue: number;
-};
-
-export type SkuRowForSliceMetrics = {
-  konkName: string;
-  productId: string;
 };
 
 /**
@@ -38,33 +31,9 @@ export async function aggregateDailySkuSliceMetricsForSkus(
 ): Promise<
   { ok: true; data: DailySkuCompetitorMetricsItem[] } | { ok: false }
 > {
-  if (skus.length === 0) return { ok: false };
-
-  const konkNames = [...new Set(skus.map((s) => s.konkName))];
-
-  const warmupStart = sliceDateMinusDays(dateFrom, 1);
-
-  const sliceDocs = await loadSkuSliceRowsForKonksProducts(
-    skus,
-    warmupStart,
-    dateTo,
-  );
-
-  const maps = buildSliceMapsByKonk(sliceDocs);
-  const datesFull = enumerateReportingDates(warmupStart, dateTo);
-  const indexStart = datesFull.findIndex(
-    (d) => toSliceDate(d).getTime() >= toSliceDate(dateFrom).getTime(),
-  );
-  if (indexStart < 0 || indexStart >= datesFull.length) return { ok: false };
-
-  const dates = datesFull.slice(indexStart);
-  const konkDocs = await Konk.find({ name: { $in: konkNames } })
-    .select("name recountDays")
-    .lean();
-  const recountDaysByKonk = new Map<string, Set<string>>();
-  for (const doc of konkDocs) {
-    recountDaysByKonk.set(doc.name, new Set((doc.recountDays ?? []).map(String)));
-  }
+  const loaded = await loadSkuSliceSalesComputeContext(skus, dateFrom, dateTo);
+  if (!loaded.ok) return { ok: false };
+  const { maps, datesFull, indexStart, dates, recountDaysByKonk } = loaded.ctx;
 
   const perSku: {
     stocks: (number | null)[];
