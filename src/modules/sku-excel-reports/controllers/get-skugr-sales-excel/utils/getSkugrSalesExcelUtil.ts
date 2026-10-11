@@ -4,20 +4,14 @@ import { Prod } from "../../../../prods/models/Prod.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
 import {
-  aggregateSkuSlices,
-  type SliceAggregateRowWithKonk,
-  sliceDataProjectForProductIdList,
-} from "../../../../sku-slices/utils/sliceDataAggregationStages.js";
-import {
   formatDateHeader,
   safeFilePart,
 } from "../../../../sku-reporting/utils/buildSkuSliceExcel.js";
 import {
-  buildSliceMapsByKonk,
   getSliceItem,
   loadSkugrWithOrderedSkus,
-  uniqueKonkNamesFromSkus,
 } from "../../../../sku-reporting/utils/skugrReporting.js";
+import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForSkus.js";
 import {
   buildSkuSalesExcelForSkus,
   type SkuSalesExcelSkuRow,
@@ -41,18 +35,11 @@ export async function getSkugrSalesExcelUtil(
   const dateTo = toSliceDate(input.dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
 
-  const allowedProductIds = [...new Set(skus.map((s) => s.productId))];
-  const slices = await aggregateSkuSlices<SliceAggregateRowWithKonk>([
-    {
-      $match: {
-        konkName: { $in: uniqueKonkNamesFromSkus(skus) },
-        date: { $gte: warmStart, $lte: dateTo },
-      },
-    },
-    sliceDataProjectForProductIdList(allowedProductIds),
-  ]);
-
-  const maps = buildSliceMapsByKonk(slices);
+  const maps = await loadExcelSliceMapsForSkus(
+    skus.map((s) => ({ konkName: s.konkName, productId: s.productId })),
+    warmStart,
+    dateTo,
+  );
 
   const [konkDoc, prodDoc] = await Promise.all([
     Konk.findOne({ name: skugr.konkName }).select("title recountDays").lean(),

@@ -1,12 +1,6 @@
 import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import { Konk } from "../../../../konks/models/Konk.js";
-import type { ISkuSliceDataItem } from "../../../../sku-slices/models/skuSliceTypes.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
-import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
-import {
-  aggregateSkuSlices,
-  sliceDataProjectForProductIdList,
-} from "../../../../sku-slices/utils/sliceDataAggregationStages.js";
 import {
   buildSkuSliceExcelForSkus,
   formatDateHeader,
@@ -15,6 +9,8 @@ import {
 } from "../../../../sku-reporting/utils/buildSkuSliceExcel.js";
 import { loadProdDisplayTitlesByName } from "../../../../sku-reporting/utils/prodDisplayTitles.js";
 import { resolveKonkProdSkus } from "../../../../sku-reporting/utils/resolveKonkProdSkus.js";
+import { getSliceItem } from "../../../../sku-reporting/utils/skugrReporting.js";
+import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForSkus.js";
 import type { GetKonkSkuSliceExcelInput } from "../schemas/getKonkSkuSliceExcelSchema.js";
 
 export type GetKonkSkuSliceExcelResult =
@@ -49,29 +45,14 @@ export async function getKonkSkuSliceExcelUtil(
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
-  const warmStart = sliceDateMinusDays(dateFrom, 1);
 
-  const allowedProductIds = rows.map((r) => r.productId);
-  const slices = await aggregateSkuSlices([
-    {
-      $match: {
-        konkName: input.konk,
-        date: { $gte: warmStart, $lte: dateTo },
-      },
-    },
-    { $sort: { date: 1 } },
-    sliceDataProjectForProductIdList(allowedProductIds),
-  ]);
+  const maps = await loadExcelSliceMapsForSkus(
+    resolved.map((r) => ({ konkName: r.konkName, productId: r.productId })),
+    dateFrom,
+    dateTo,
+  );
 
-  const byDate = new Map<number, Record<string, ISkuSliceDataItem>>();
-  for (const sl of slices) {
-    const t = toSliceDate(sl.date).getTime();
-    byDate.set(t, (sl.data ?? {}) as Record<string, ISkuSliceDataItem>);
-  }
-
-  const [konkDoc] = await Promise.all([
-    Konk.findOne({ name: input.konk }).select("title").lean(),
-  ]);
+  const konkDoc = await Konk.findOne({ name: input.konk }).select("title").lean();
   const titles = {
     competitorTitle: (konkDoc?.title ?? "").trim(),
     producerName: "",
@@ -81,17 +62,13 @@ export async function getKonkSkuSliceExcelUtil(
     rows,
     dateFrom,
     dateTo,
-    (kn, pid, d) => {
-      if (kn !== input.konk) return undefined;
-      const rec = byDate.get(toSliceDate(d).getTime());
-      return rec?.[pid];
-    },
+    (kn, pid, d) => getSliceItem(maps, kn, pid, d),
     titles,
     {
       includeTotalsRow: true,
       totalsRowLabel: "Підсумок",
       onProgress: progress.onProgress,
-    }
+    },
   );
 
   const fileName = `sku_slice_konk_${safeFilePart(input.konk)}_${safeFilePart(input.prod)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;

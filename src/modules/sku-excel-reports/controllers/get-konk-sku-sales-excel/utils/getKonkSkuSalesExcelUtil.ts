@@ -1,17 +1,14 @@
 import { Konk } from "../../../../konks/models/Konk.js";
-import type { ISkuSliceDataItem } from "../../../../sku-slices/models/skuSliceTypes.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
-import {
-  aggregateSkuSlices,
-  sliceDataProjectForProductIdList,
-} from "../../../../sku-slices/utils/sliceDataAggregationStages.js";
 import {
   formatDateHeader,
   safeFilePart,
 } from "../../../../sku-reporting/utils/buildSkuSliceExcel.js";
 import { loadProdDisplayTitlesByName } from "../../../../sku-reporting/utils/prodDisplayTitles.js";
 import { resolveKonkProdSkus } from "../../../../sku-reporting/utils/resolveKonkProdSkus.js";
+import { getSliceItem } from "../../../../sku-reporting/utils/skugrReporting.js";
+import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForSkus.js";
 import type { GetKonkSkuSalesExcelInput } from "../schemas/getKonkSkuSalesExcelSchema.js";
 import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import {
@@ -40,25 +37,11 @@ export async function getKonkSkuSalesExcelUtil(
   const dateTo = toSliceDate(input.dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
 
-  const allowedProductIds = resolved.map((r) => r.productId);
-  const slices = await aggregateSkuSlices([
-    {
-      $match: {
-        konkName: input.konk,
-        date: { $gte: warmStart, $lte: dateTo },
-      },
-    },
-    { $sort: { date: 1 } },
-    sliceDataProjectForProductIdList(allowedProductIds),
-  ]);
-
-  const byDate = new Map<number, Record<string, ISkuSliceDataItem>>();
-  for (const sl of slices) {
-    byDate.set(
-      toSliceDate(sl.date).getTime(),
-      (sl.data ?? {}) as Record<string, ISkuSliceDataItem>
-    );
-  }
+  const maps = await loadExcelSliceMapsForSkus(
+    resolved.map((r) => ({ konkName: r.konkName, productId: r.productId })),
+    warmStart,
+    dateTo,
+  );
 
   const [konkDoc, prodTitleByName] = await Promise.all([
     Konk.findOne({ name: input.konk }).select("title recountDays").lean(),
@@ -78,43 +61,44 @@ export async function getKonkSkuSalesExcelUtil(
     skugrTitle: r.skugrTitle,
   }));
 
-  const getSliceItem = (
-    kn: string,
-    pid: string,
-    d: Date
-  ): ISkuSliceDataItem | undefined => {
-    if (kn !== input.konk) return undefined;
-    const rec = byDate.get(toSliceDate(d).getTime());
-    return rec?.[pid];
-  };
+  const lookup = (kn: string, pid: string, d: Date) =>
+    getSliceItem(maps, kn, pid, d);
 
   let rowsOrdered: SkuSalesExcelSkuRow[] = rows;
   if (input.sortBy === "sales" || input.sortBy === "revenue") {
     const metric = input.sortBy;
-    rowsOrdered = sortSkuSalesExcelRowsByScore(rows, (row) => {
+    const scoreByProductId = new Map<string, number>();
+    for (const row of rows) {
       const computed = computeSkuSalesPeriodMetrics(
         row,
         dateFrom,
         dateTo,
-        getSliceItem,
+        lookup,
         recountDaysSet,
       );
-      return metric === "sales" ? computed.totalSales : computed.totalRevenue;
-    });
+      scoreByProductId.set(
+        row.productId,
+        metric === "sales" ? computed.totalSales : computed.totalRevenue,
+      );
+    }
+    rowsOrdered = sortSkuSalesExcelRowsByScore(
+      rows,
+      (row) => scoreByProductId.get(row.productId) ?? 0,
+    );
   }
 
   const { buffer } = await buildSkuSalesExcelForSkus(
     rowsOrdered,
     dateFrom,
     dateTo,
-    getSliceItem,
+    lookup,
     {
       summaryMode: "bottomOnly",
       summarySalesLabel: "Загальні продажі, шт",
       summaryRevenueLabel: "Загальна виручка, грн",
       recountDays,
       onProgress: progress.onProgress,
-    }
+    },
   );
 
   const fileName = `sku_sales_konk_${safeFilePart(input.konk)}_${safeFilePart(input.prod)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;

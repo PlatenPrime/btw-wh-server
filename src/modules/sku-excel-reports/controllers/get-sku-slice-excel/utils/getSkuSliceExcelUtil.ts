@@ -2,17 +2,13 @@ import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBui
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { Sku } from "../../../../skus/models/Sku.js";
-import type { ISkuSliceDataItem } from "../../../../sku-slices/models/skuSliceTypes.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
-import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
-import {
-  aggregateSkuSlices,
-  sliceDataProjectForSingleProductId,
-} from "../../../../sku-slices/utils/sliceDataAggregationStages.js";
 import {
   buildSkuSliceExcelForSkus,
   type SkuSliceExcelSkuRow,
 } from "../../../../sku-reporting/utils/buildSkuSliceExcel.js";
+import { getSliceItem } from "../../../../sku-reporting/utils/skugrReporting.js";
+import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForSkus.js";
 import type { GetSkuSliceExcelInput } from "../schemas/getSkuSliceExcelSchema.js";
 
 export type GetSkuSliceExcelResult =
@@ -31,24 +27,12 @@ export async function getSkuSliceExcelUtil(
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
-  const warmStart = sliceDateMinusDays(dateFrom, 1);
 
-  const slices = await aggregateSkuSlices([
-    {
-      $match: {
-        konkName: sku.konkName,
-        date: { $gte: warmStart, $lte: dateTo },
-      },
-    },
-    { $sort: { date: 1 } },
-    sliceDataProjectForSingleProductId(productKey),
-  ]);
-
-  const byDate = new Map<number, Record<string, ISkuSliceDataItem>>();
-  for (const sl of slices) {
-    const t = toSliceDate(sl.date).getTime();
-    byDate.set(t, (sl.data ?? {}) as Record<string, ISkuSliceDataItem>);
-  }
+  const maps = await loadExcelSliceMapsForSkus(
+    [{ konkName: sku.konkName, productId: productKey }],
+    dateFrom,
+    dateTo,
+  );
 
   const row: SkuSliceExcelSkuRow = {
     title: sku.title,
@@ -72,11 +56,7 @@ export async function getSkuSliceExcelUtil(
     [row],
     dateFrom,
     dateTo,
-    (kn, pid, d) => {
-      if (kn !== sku.konkName || pid !== productKey) return undefined;
-      const rec = byDate.get(toSliceDate(d).getTime());
-      return rec?.[pid];
-    },
+    (kn, pid, d) => getSliceItem(maps, kn, pid, d),
     titles,
     { onProgress: progress.onProgress },
   );
