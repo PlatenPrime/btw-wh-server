@@ -38,4 +38,18 @@ describe("getKonkSkuSalesExcelSchema", () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it("accepts optional metrics with sortBy", () => {
+    const result = getKonkSkuSalesExcelSchema.safeParse({
+      konk: "k",
+      prod: "p",
+      dateFrom: "2026-06-01",
+      dateTo: "2026-06-02",
+      sortBy: "sales",
+      metrics: "revenue",
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.metrics).toEqual(["revenue"]);
+  });
 });

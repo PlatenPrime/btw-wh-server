@@ -62,6 +62,7 @@ export async function getSkuSalesExcelUtil(
     {
       summaryMode: "perSku",
       recountDays: (konkDoc?.recountDays ?? []).map(String),
+      metrics: input.metrics,
       onProgress: progress.onProgress,
     },
   );

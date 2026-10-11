@@ -100,11 +100,11 @@ TTL готового файла: 30 минут после `ready`. Download-toke
 | sku-catalog-new-since | GET `/api/sku-excel-reports/catalog/new-since` | `konk` string (`all` допустим), `since` YYYY-MM-DD |
 | sku-catalog-invalid | GET `/api/sku-excel-reports/catalog/invalid` | `konk` string (`all` допустим) |
 | sku-konk-stock | GET `/api/sku-excel-reports/konk/stock` | `konk`, `prod`, `dateFrom`, `dateTo`; опционально `skugrIds` |
-| sku-konk-sales | GET `/api/sku-excel-reports/konk/sales` | как stock; опционально `sortBy`: `sales` \| `revenue` |
+| sku-konk-sales | GET `/api/sku-excel-reports/konk/sales` | как stock; опционально `sortBy`: `sales` \| `revenue`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три) |
 | sku-skugr-stock | GET `/api/sku-excel-reports/skugr/:skugrId/stock` | `skugrId`, `dateFrom`, `dateTo` |
-| sku-skugr-sales | GET `/api/sku-excel-reports/skugr/:skugrId/sales` | `skugrId`, `dateFrom`, `dateTo` |
+| sku-skugr-sales | GET `/api/sku-excel-reports/skugr/:skugrId/sales` | `skugrId`, `dateFrom`, `dateTo`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три) |
 | sku-one-stock | GET `/api/sku-excel-reports/sku/:skuId/stock` | `skuId`, `dateFrom`, `dateTo` |
-| sku-one-sales | GET `/api/sku-excel-reports/sku/:skuId/sales` | `skuId`, `dateFrom`, `dateTo` |
+| sku-one-sales | GET `/api/sku-excel-reports/sku/:skuId/sales` | `skuId`, `dateFrom`, `dateTo`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три) |
 | art-stock | GET `/api/art-excel-reports/artikul/:artikul/stock` | `artikul`, `dateFrom`, `dateTo` |
 | art-sales | GET `/api/art-excel-reports/artikul/:artikul/sales` | `artikul`, `dateFrom`, `dateTo` |
 | analog-comparison | GET `/api/analog-slices/analog/:analogId/comparison-excel` | `analogId`, `dateFrom`, `dateTo` |

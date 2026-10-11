@@ -12,4 +12,16 @@ describe("getSkugrSalesExcelSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("accepts optional metrics", () => {
+    const result = getSkugrSalesExcelSchema.safeParse({
+      skugrId: VALID_SKUGR_ID,
+      dateFrom: "2026-06-01",
+      dateTo: "2026-06-02",
+      metrics: ["sales"],
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.metrics).toEqual(["sales"]);
+  });
 });

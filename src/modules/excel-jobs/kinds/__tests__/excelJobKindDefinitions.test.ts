@@ -29,6 +29,20 @@ describe("excelJobKindDefinitions", () => {
     expect(parsed.success).toBe(true);
   });
 
+  it("parses sku-konk-sales metrics param", () => {
+    const def = getExcelJobKindDefinition("sku-konk-sales");
+    const parsed = def!.schema.safeParse({
+      konk: "air",
+      prod: "gemar",
+      dateFrom: "2026-06-01",
+      dateTo: "2026-06-02",
+      metrics: "revenue,sales",
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data.metrics).toEqual(["sales", "revenue"]);
+  });
+
   it("rejects invalid sku-konk-sales params", () => {
     const def = getExcelJobKindDefinition("sku-konk-sales");
     const parsed = def!.schema.safeParse({ konk: "air" });

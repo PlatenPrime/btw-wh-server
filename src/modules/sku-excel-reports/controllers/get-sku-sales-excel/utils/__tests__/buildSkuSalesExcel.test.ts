@@ -81,4 +81,82 @@ describe("buildSkuSalesExcelForSkus", () => {
     );
     expect(calls).toEqual([[1, 1]]);
   });
+
+  it("writes only revenue metric row when metrics=[revenue]", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSalesExcelForSkus(
+      [SKU],
+      from,
+      to,
+      (_kn, pid, d) => {
+        if (pid !== "air-1") return undefined;
+        const t = d.getTime();
+        if (t === new Date("2026-01-09T00:00:00.000Z").getTime())
+          return { stock: 4, price: 5 };
+        if (t === from.getTime()) return { stock: 2, price: 5 };
+        if (t === to.getTime()) return { stock: 1, price: 6 };
+        return undefined;
+      },
+      { metrics: ["revenue"], summaryMode: "bottomOnly" },
+    );
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(
+      buffer as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]
+    );
+    const sheet = workbook.getWorksheet("Продажі");
+    expect(sheet).toBeDefined();
+    expect(sheet!.getRow(2).getCell(7).value).toBe("Виручка");
+    expect(sheet!.getRow(3).getCell(7).value).not.toBe("Продажі");
+    expect(sheet!.getRow(3).getCell(7).value).not.toBe("Ціна");
+    expect(sheet!.getRow(3).getCell(1).value).toBe("Виручка конкурента (всього), грн");
+  });
+
+  it("writes sales and price rows when metrics=[sales,price]", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSalesExcelForSkus(
+      [SKU],
+      from,
+      to,
+      () => ({ stock: 1, price: 10 }),
+      { metrics: ["sales", "price"], summaryMode: "bottomOnly" },
+    );
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(
+      buffer as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]
+    );
+    const sheet = workbook.getWorksheet("Продажі");
+    expect(sheet).toBeDefined();
+    expect(sheet!.getRow(2).getCell(7).value).toBe("Продажі");
+    expect(sheet!.getRow(3).getCell(7).value).toBe("Ціна");
+    expect(sheet!.getRow(4).getCell(7).value).not.toBe("Виручка");
+    expect(sheet!.getRow(4).getCell(1).value).toBe("Продажі конкурента (всього), шт");
+    expect(sheet!.getRow(5).getCell(1).value).not.toBe(
+      "Виручка конкурента (всього), грн",
+    );
+  });
+
+  it("writes all three metric rows by default", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-11T00:00:00.000Z");
+    const { buffer } = await buildSkuSalesExcelForSkus(
+      [SKU],
+      from,
+      to,
+      () => ({ stock: 1, price: 10 }),
+    );
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(
+      buffer as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]
+    );
+    const sheet = workbook.getWorksheet("Продажі");
+    expect(sheet).toBeDefined();
+    expect(sheet!.getRow(2).getCell(7).value).toBe("Продажі");
+    expect(sheet!.getRow(3).getCell(7).value).toBe("Ціна");
+    expect(sheet!.getRow(4).getCell(7).value).toBe("Виручка");
+  });
 });

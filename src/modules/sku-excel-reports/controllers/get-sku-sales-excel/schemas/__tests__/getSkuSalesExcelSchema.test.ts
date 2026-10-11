@@ -12,4 +12,16 @@ describe("getSkuSalesExcelSchema", () => {
     });
     expect(result.success).toBe(true);
   });
+
+  it("accepts optional metrics", () => {
+    const result = getSkuSalesExcelSchema.safeParse({
+      skuId: VALID_SKU_ID,
+      dateFrom: "2026-06-01",
+      dateTo: "2026-06-02",
+      metrics: "revenue,price",
+    });
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.metrics).toEqual(["price", "revenue"]);
+  });
 });

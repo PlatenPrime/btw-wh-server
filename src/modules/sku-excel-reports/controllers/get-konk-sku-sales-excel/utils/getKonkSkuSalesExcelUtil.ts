@@ -97,6 +97,7 @@ export async function getKonkSkuSalesExcelUtil(
       summarySalesLabel: "Загальні продажі, шт",
       summaryRevenueLabel: "Загальна виручка, грн",
       recountDays,
+      metrics: input.metrics,
       onProgress: progress.onProgress,
     },
   );

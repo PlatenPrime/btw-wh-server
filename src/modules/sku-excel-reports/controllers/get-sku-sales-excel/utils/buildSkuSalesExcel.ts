@@ -20,6 +20,10 @@ import {
   coalesceSkuSliceItemsAlongDates,
   sliceDateMinusDays,
 } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
+import {
+  SKU_SALES_EXCEL_METRICS,
+  type SkuSalesExcelMetric,
+} from "../../../../sku-reporting/schemas/skuSalesExcelMetricsSchema.js";
 
 const HEADER_LABELS = [
   "Ідентифікатор товару",
@@ -30,11 +34,15 @@ const HEADER_LABELS = [
   "Посилання",
 ] as const;
 
-const METRIC_LABELS = ["Продажі", "Ціна", "Виручка"] as const;
-const ROWS_PER_SKU_BLOCK = 3;
+const METRIC_LABEL_BY_KEY: Record<SkuSalesExcelMetric, string> = {
+  sales: "Продажі",
+  price: "Ціна",
+  revenue: "Виручка",
+};
 const META_COL_COUNT = HEADER_LABELS.length;
 const METRIC_LABEL_COL = META_COL_COUNT + 1;
 const RECOUNT_DAY_PURPLE_FILL_ARGB = "FF800080";
+const DEFAULT_METRICS: readonly SkuSalesExcelMetric[] = SKU_SALES_EXCEL_METRICS;
 
 export type SkuSalesExcelSkuRow = {
   title: string;
@@ -52,9 +60,10 @@ export type SkuSalesExcelOptions = {
   summarySalesLabel?: string;
   summaryRevenueLabel?: string;
   recountDays?: string[];
+  /** Подмножество строк метрик; без значения — все три. */
+  metrics?: readonly SkuSalesExcelMetric[];
   onProgress?: ExcelBuildProgressHandler;
 };
-
 export type SkuSalesPeriodMetrics = {
   salesByDay: number[];
   revenueByDay: number[];
@@ -134,6 +143,28 @@ function writeSummaryRow(
   row.getCell(1).font = { ...(row.getCell(1).font ?? {}), bold: true };
 }
 
+function writeSelectedSummaryRows(
+  sheet: ExcelJS.Worksheet,
+  startRow: number,
+  includeSales: boolean,
+  includeRevenue: boolean,
+  summarySalesLabel: string,
+  summaryRevenueLabel: string,
+  salesValue: number,
+  revenueValue: number,
+): number {
+  let row = startRow;
+  if (includeSales) {
+    writeSummaryRow(sheet, row, summarySalesLabel, salesValue);
+    row += 1;
+  }
+  if (includeRevenue) {
+    writeSummaryRow(sheet, row, summaryRevenueLabel, revenueValue);
+    row += 1;
+  }
+  return row;
+}
+
 function applyRevenueRowBold(
   sheet: ExcelJS.Worksheet,
   rowIndex: number,
@@ -185,6 +216,13 @@ export async function buildSkuSalesExcelForSkus(
   const summaryRevenueLabel =
     options.summaryRevenueLabel ?? "Виручка конкурента (всього), грн";
   const recountDays = new Set((options.recountDays ?? []).map(String));
+  const selectedMetrics =
+    options.metrics && options.metrics.length > 0
+      ? options.metrics
+      : DEFAULT_METRICS;
+  const rowsPerSkuBlock = selectedMetrics.length;
+  const includeSales = selectedMetrics.includes("sales");
+  const includeRevenue = selectedMetrics.includes("revenue");
 
   let grandTotalSales = 0;
   let grandTotalRevenue = 0;
@@ -210,65 +248,104 @@ export async function buildSkuSalesExcelForSkus(
     grandTotalSales += totalSales;
     grandTotalRevenue += totalRevenue;
 
-    const salesRow = sheet.getRow(startRow);
-    const priceRow = sheet.getRow(startRow + 1);
-    const revenueRow = sheet.getRow(startRow + 2);
+    const firstRow = sheet.getRow(startRow);
+    firstRow.getCell(1).value = sku.productId;
+    firstRow.getCell(2).value = sku.title;
+    firstRow.getCell(3).value = sku.competitorTitle;
+    firstRow.getCell(4).value = sku.producerName;
+    firstRow.getCell(5).value = sku.skugrTitle ?? "";
+    firstRow.getCell(6).value = sku.url;
 
-    salesRow.getCell(1).value = sku.productId;
-    salesRow.getCell(2).value = sku.title;
-    salesRow.getCell(3).value = sku.competitorTitle;
-    salesRow.getCell(4).value = sku.producerName;
-    salesRow.getCell(5).value = sku.skugrTitle ?? "";
-    salesRow.getCell(6).value = sku.url;
+    for (let m = 0; m < selectedMetrics.length; m++) {
+      const metric = selectedMetrics[m]!;
+      const row = sheet.getRow(startRow + m);
+      row.getCell(METRIC_LABEL_COL).value = METRIC_LABEL_BY_KEY[metric];
 
-    salesRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[0];
-    priceRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[1];
-    revenueRow.getCell(METRIC_LABEL_COL).value = METRIC_LABELS[2];
-
-    for (let i = 0; i < dateCount; i++) {
-      const col = dataStartCol + i;
-      const salesCell = salesRow.getCell(col);
-      salesCell.value = salesByDay[i] ?? null;
-      if (isRecountDayByDay[i]) {
-        salesCell.fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: RECOUNT_DAY_PURPLE_FILL_ARGB },
-        };
+      for (let i = 0; i < dateCount; i++) {
+        const col = dataStartCol + i;
+        const cell = row.getCell(col);
+        if (metric === "sales") {
+          cell.value = salesByDay[i] ?? null;
+          if (isRecountDayByDay[i]) {
+            cell.fill = {
+              type: "pattern",
+              pattern: "solid",
+              fgColor: { argb: RECOUNT_DAY_PURPLE_FILL_ARGB },
+            };
+          }
+        } else if (metric === "price") {
+          cell.value = prices[i] ?? null;
+        } else {
+          cell.value = revenueByDay[i] ?? null;
+        }
       }
-      priceRow.getCell(col).value = prices[i] ?? null;
-      revenueRow.getCell(col).value = revenueByDay[i] ?? null;
+
+      if (metric === "sales") {
+        row.getCell(totalCol).value = totalSales;
+      } else if (metric === "price") {
+        row.getCell(totalCol).value = null;
+      } else {
+        row.getCell(totalCol).value = totalRevenue;
+      }
     }
 
-    salesRow.getCell(totalCol).value = totalSales;
-    priceRow.getCell(totalCol).value = null;
-    revenueRow.getCell(totalCol).value = totalRevenue;
-
-    for (let c = 1; c <= META_COL_COUNT; c++) {
-      sheet.mergeCells(startRow, c, startRow + 2, c);
-      setMergedMetaAlignment(salesRow.getCell(c));
+    const endRow = startRow + rowsPerSkuBlock - 1;
+    if (rowsPerSkuBlock > 1) {
+      for (let c = 1; c <= META_COL_COUNT; c++) {
+        sheet.mergeCells(startRow, c, endRow, c);
+        setMergedMetaAlignment(firstRow.getCell(c));
+      }
+    } else {
+      for (let c = 1; c <= META_COL_COUNT; c++) {
+        setMergedMetaAlignment(firstRow.getCell(c));
+      }
     }
 
-    for (let r = startRow; r <= startRow + 2; r++) {
+    for (let r = startRow; r <= endRow; r++) {
       applyDataRowStyle(sheet, r, columnCount);
     }
-    applyRevenueRowBold(sheet, startRow + 2, METRIC_LABEL_COL, totalCol);
+    const revenueOffset = selectedMetrics.indexOf("revenue");
+    if (revenueOffset >= 0) {
+      applyRevenueRowBold(
+        sheet,
+        startRow + revenueOffset,
+        METRIC_LABEL_COL,
+        totalCol,
+      );
+    }
 
-    startRow += ROWS_PER_SKU_BLOCK;
+    startRow += rowsPerSkuBlock;
 
     if (summaryMode === "perSku") {
-      writeSummaryRow(sheet, startRow, summarySalesLabel, totalSales);
-      writeSummaryRow(sheet, startRow + 1, summaryRevenueLabel, totalRevenue);
-      startRow += 3;
+      const afterSummary = writeSelectedSummaryRows(
+        sheet,
+        startRow,
+        includeSales,
+        includeRevenue,
+        summarySalesLabel,
+        summaryRevenueLabel,
+        totalSales,
+        totalRevenue,
+      );
+      // Как раньше при двух summary-строках: +1 пустая между блоками.
+      startRow =
+        afterSummary > startRow ? afterSummary + 1 : afterSummary;
     }
     notifyExcelBuildProgress(options.onProgress, skuIndex + 1, skuTotal);
   }
 
   if (summaryMode === "bottomOnly") {
-    writeSummaryRow(sheet, startRow, summarySalesLabel, grandTotalSales);
-    writeSummaryRow(sheet, startRow + 1, summaryRevenueLabel, grandTotalRevenue);
+    writeSelectedSummaryRows(
+      sheet,
+      startRow,
+      includeSales,
+      includeRevenue,
+      summarySalesLabel,
+      summaryRevenueLabel,
+      grandTotalSales,
+      grandTotalRevenue,
+    );
   }
-
   for (let c = 1; c <= columnCount; c++) {
     sheet.getColumn(c).width = c >= dataStartCol && c < totalCol ? 22 : 14;
   }

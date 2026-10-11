@@ -4,4 +4,6 @@ HTTP-модуль-заглушка: бывшие XLSX-маршруты SKU от�
 
 Sales/slice excel читают `SkuSliceMonth` точечно по нужным `productId` (`loadExcelSliceMapsForSkus` → `loadSkuSliceRowsForKonksProducts`), без full-konk day maps. Catalog (invalid / new-since) срезы не трогает.
 
+Sales Excel (one / skugr / konk) собирает блок строк метрик на SKU: Продажі, Ціна, Виручка. Клиент может сузить набор через param `metrics` (`sales` / `price` / `revenue`); без param остаются все три строки в каноническом порядке. Итоговые summary-строки продаж и выручки пишутся только для выбранных соответствующих метрик.
+
 Роли: ADMIN.

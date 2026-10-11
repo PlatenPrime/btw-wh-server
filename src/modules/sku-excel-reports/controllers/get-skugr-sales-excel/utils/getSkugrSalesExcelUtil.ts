@@ -68,6 +68,7 @@ export async function getSkugrSalesExcelUtil(
       summarySalesLabel: "Загальні продажі, шт",
       summaryRevenueLabel: "Загальна виручка, грн",
       recountDays: (konkDoc?.recountDays ?? []).map(String),
+      metrics: input.metrics,
       onProgress: progress.onProgress,
     },
   );
