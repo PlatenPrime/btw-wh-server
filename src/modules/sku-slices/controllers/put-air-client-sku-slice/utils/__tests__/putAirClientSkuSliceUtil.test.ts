@@ -22,13 +22,9 @@ vi.mock("../../../../utils/skuSliceDayMetaStore.js", () => ({
   ensureSkuSliceDayMeta: vi.fn(),
 }));
 vi.mock(
-  "../../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js",
+  "../../../../../sku-reporting/utils/scheduleAfterSkuSliceStockMutation.js",
   () => ({
-    afterSkuSliceStockMutation: vi.fn().mockResolvedValue({
-      upserted: 0,
-      modified: 0,
-      matched: 0,
-    }),
+    scheduleAfterSkuSliceStockMutation: vi.fn(),
   }),
 );
 
@@ -40,7 +36,7 @@ import {
   upsertDayPoint,
 } from "../../../../utils/skuSliceMonthStore.js";
 import { ensureSkuSliceDayMeta } from "../../../../utils/skuSliceDayMetaStore.js";
-import { afterSkuSliceStockMutation } from "../../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
+import { scheduleAfterSkuSliceStockMutation } from "../../../../../sku-reporting/utils/scheduleAfterSkuSliceStockMutation.js";
 
 describe("putAirClientSkuSliceUtil", () => {
   const now = new Date("2026-07-26T12:00:00.000Z");
@@ -146,10 +142,9 @@ describe("putAirClientSkuSliceUtil", () => {
       stock: 12,
       price: 2.1,
     });
-    expect(afterSkuSliceStockMutation).toHaveBeenCalledWith({
+    expect(scheduleAfterSkuSliceStockMutation).toHaveBeenCalledWith({
       konkName: "air",
       dayD: sliceDate,
-      productIds: ["air-1"],
     });
   });
 
@@ -167,5 +162,6 @@ describe("putAirClientSkuSliceUtil", () => {
       price: 1.5,
     });
     expect(upsertDayPoint).not.toHaveBeenCalled();
+    expect(scheduleAfterSkuSliceStockMutation).not.toHaveBeenCalled();
   });
 });

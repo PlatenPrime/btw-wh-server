@@ -6,7 +6,7 @@ import { Skugr } from "../../../../skugrs/models/Skugr.js";
 import { AIR_CLIENT_SLICE_KONK } from "../../../constants/airClientSlice.js";
 import { urlsMatchForClientIngest } from "../../../utils/urlsMatchForClientIngest.js";
 import type { PutAirClientSkuSliceInput } from "../schemas/putAirClientSkuSliceSchema.js";
-import { afterSkuSliceStockMutation } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
+import { scheduleAfterSkuSliceStockMutation } from "../../../../sku-reporting/utils/scheduleAfterSkuSliceStockMutation.js";
 import { isSkuSliceDataKeyFilled } from "../../../utils/isSkuSliceDataKeyFilled.js";
 import {
   getDayPoint,
@@ -128,10 +128,11 @@ export async function putAirClientSkuSliceUtil(
 
   await upsertDayPoint(AIR_CLIENT_SLICE_KONK, productId, sliceDate, dataItem);
 
-  await afterSkuSliceStockMutation({
+  // Full-day rematerialize не ждём: coalesce в фоне, иначе каждый saved PUT
+  // тянет O(весь каталог Air) и батч client-ingest уходит в slow request.
+  scheduleAfterSkuSliceStockMutation({
     konkName: AIR_CLIENT_SLICE_KONK,
     dayD: sliceDate,
-    productIds: [productId],
   });
 
   return {

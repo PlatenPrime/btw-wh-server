@@ -18,6 +18,7 @@
 | `utils/coalesceSkuSliceItemsForReporting` | Forward-fill `-1` для stock/price в Excel/range; helpers дат |
 | `utils/persistedSliceSalesUtils` | Формула sales на write-path rollup: `-1` → 0, delivery → 0, delta |
 | `utils/materializeSkuSliceSalesUtil` | Пересчёт Sku manufacturer rollup за `D`+`D+1` / диапазон |
+| `utils/scheduleAfterSkuSliceStockMutation` | Неблокирующий coalesce full-day rematerialize (dirty + singleflight + trailing); для высокочастотного air client ingest |
 | `utils/materializeBtradeManufacturerSalesUtil` | Пересчёт Btrade manufacturer rollup за `D`+`D+1` / диапазон |
 | `utils/stripMixedSliceSalesUtil` | Откат: снять legacy `salesPcs`/`salesUah` из Mixed data срезов |
 | `utils/aggregateDailySkuSliceMetricsForSkus` | Дневные суммы: Node compute из stock (coalesce) |
@@ -49,7 +50,7 @@ CLI:
 
 ## Связи
 
-- **sku-slices** — `SkuSliceMonth` (точки) + `SkuSliceDayMeta` (прогон), хуки `afterSkuSliceStockMutation`
+- **sku-slices** — `SkuSliceMonth` (точки) + `SkuSliceDayMeta` (прогон), хуки `afterSkuSliceStockMutation` / `scheduleAfterSkuSliceStockMutation` (air client PUT)
 - **btrade-slices** — `BtradeSliceMonth` (точки) + хук `afterBtradeSliceStockMutation` → Btrade rollup
 - **skus / skugrs / konks / prods / arts** — доменные сущности для отчётов
 - **slices** — математика продаж (delta / recount / revenue)

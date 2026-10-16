@@ -12,7 +12,7 @@
 
 Один документ на `(konkName, productId, month)`, где `month` — UTC midnight 1-го числа, `days` — карта `YYYY-MM-DD → { stock, price }` (включая sentinel `-1`). Уникальный индекс `(konkName, productId, month)`; дополнительный `(konkName, month)` для day-wide scan.
 
-Все write-пути (scrape, compensation, air ingest, PATCH, balun/svbum, pack-flip) и read-пути отчётов/API точек идут через store-слой months. После мутаций stock/price вызывается `afterSkuSliceStockMutation`: пересчёт manufacturer rollup (`SkuManufacturerDaySales` в [sku-reporting](sku-reporting.md)) за день `D` и `D+1`. Формула rollup: `stock === -1` → продажи дня = 0; рост остатка = поставка = 0; иначе `max(0, prev − curr)`; затем `Konk.recountDays`. Без forward-fill.
+Все write-пути (scrape, compensation, air ingest, PATCH, balun/svbum, pack-flip) и read-пути отчётов/API точек идут через store-слой months. После мутаций stock/price пересчитывается manufacturer rollup (`SkuManufacturerDaySales` в [sku-reporting](sku-reporting.md)) за день `D` и `D+1`. Обычные write-пути ждут `afterSkuSliceStockMutation` синхронно. Air client PUT ставит `scheduleAfterSkuSliceStockMutation`: dirty-flag + singleflight + trailing coalesce в фоне, чтобы батч ingest не делал полный rematerialize на каждый SKU; у manufacturer sales краткое окно eventual consistency. Формула rollup: `stock === -1` → продажи дня = 0; рост остатка = поставка = 0; иначе `max(0, prev − curr)`; затем `Konk.recountDays`. Без forward-fill.
 
 Backfill rollup: `npx tsx src/modules/sku-slices/scripts/runBackfillSkuSliceSales.ts --from YYYY-MM-DD --to YYYY-MM-DD [--konk name] [--apply]`.
 
@@ -43,7 +43,7 @@ Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/con
 ### Client-ingestion для Air
 
 1. `GET /client/air/pending` — очередь missing/`-1` среди sliced Air SKU по сегодняшним точкам в months;
-2. `PUT /client/air/sku/:skuId` — HTML → запись в months только если ключ отсутствует или `-1`.
+2. `PUT /client/air/sku/:skuId` — HTML → запись в months только если ключ отсутствует или `-1`; rollup manufacturer sales после `saved` — асинхронный coalesce (ответ PUT не ждёт full-day rematerialize).
 
 Гайд: [frontend: air-client-sku-slices](../frontend/air-client-sku-slices.md).
 

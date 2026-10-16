@@ -13,7 +13,7 @@
 Полный формат: [`docs/api/sku-slices.md`](../api/sku-slices.md). Auth: JWT, роль ≥ ADMIN.
 
 1. `GET /api/sku-slices/client/air/pending` — очередь `{ date, items: [{ skuId, productId, title, url }] }` для sliced Air SKU без валидной точки сегодня в `SkuSliceMonth` (missing или `stock/price === -1`). Нет точки дня = pending.
-2. `PUT /api/sku-slices/client/air/sku/:skuId` — body `{ sourceUrl, html }`. Backend парсит HTML, пишет в сегодняшний `SkuSliceMonth` только если ключ отсутствует/невалиден; иначе `status: "skipped"`.
+2. `PUT /api/sku-slices/client/air/sku/:skuId` — body `{ sourceUrl, html }`. Backend парсит HTML, пишет в сегодняшний `SkuSliceMonth` только если ключ отсутствует/невалиден; иначе `status: "skipped"`. После `saved` manufacturer rollup пересчитывается в фоне (coalesce по дню), ответ PUT его не ждёт — краткое окно eventual consistency для отчётов по prodName.
 
 ## UX / поток
 
@@ -31,7 +31,7 @@
 
 | Статус | UI |
 |--------|-----|
-| 200 `saved` | Точка записана; убрать из локальной pending-очереди |
+| 200 `saved` | Точка записана (months); убрать из локальной pending-очереди. Rollup sales — async, не блокирует ответ |
 | 200 `skipped` | Уже было валидное значение; не ошибка |
 | 400 `URL_MISMATCH` / `NOT_AIR` / `NOT_SLICED` | Toast + код; проверить карточку SKU / группу |
 | 404 | SKU удалён |
