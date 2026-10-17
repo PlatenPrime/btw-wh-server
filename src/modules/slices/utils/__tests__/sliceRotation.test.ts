@@ -57,7 +57,7 @@ describe("filterProductsForSliceRotation", () => {
     expect(rotation).toBeNull();
   });
 
-  it("filters air to roughly one third", () => {
+  it("returns all items for air when rotation is disabled", () => {
     const sliceDate = toSliceDate(new Date("2026-06-10T00:00:00.000Z"));
     const items = Array.from({ length: 300 }, (_, i) => ({
       productId: `air-${i}`,
@@ -67,23 +67,15 @@ describe("filterProductsForSliceRotation", () => {
       sliceDate,
       "air"
     );
-    expect(rotation).toEqual({
-      cycleDays: 3,
-      dayIndex: getSliceRotationDayIndex(sliceDate, 3),
-    });
-    expect(filtered.length).toBeGreaterThan(80);
-    expect(filtered.length).toBeLessThan(120);
+    expect(filtered).toEqual(items);
+    expect(rotation).toBeNull();
   });
 });
 
 describe("resolveSliceRotationInfo", () => {
-  it("returns config for air", () => {
+  it("returns null for air when rotation is disabled", () => {
     const sliceDate = toSliceDate(new Date("2026-01-01T00:00:00.000Z"));
-    const info = resolveSliceRotationInfo("air", sliceDate);
-    expect(info).toEqual({
-      cycleDays: 3,
-      dayIndex: getSliceRotationDayIndex(sliceDate, 3),
-    });
+    expect(resolveSliceRotationInfo("air", sliceDate)).toBeNull();
   });
 
   it("returns null for unknown konk", () => {

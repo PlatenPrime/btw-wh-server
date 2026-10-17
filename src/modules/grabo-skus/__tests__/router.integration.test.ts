@@ -85,12 +85,13 @@ describe("grabo-skus router integration", () => {
       .expect(403);
   });
 
-  it("202 for ADMIN on POST /sync", async () => {
+  it("410 migrated to apitasks on POST /sync", async () => {
     const response = await request(app)
       .post("/api/grabo-skus/sync")
       .set(createAuthHeader(RoleType.ADMIN))
-      .expect(202);
+      .expect(410);
 
-    expect(response.body.data.accepted).toBe(true);
+    expect(response.body.code).toBe("API_TASKS_MIGRATED");
+    expect(response.body.kind).toBe("grabo-skus.sync");
   });
 });

@@ -107,15 +107,7 @@ describe("Skus router integration", () => {
   });
 
   describe("POST /api/skus/fix-incorrect-sku-data", () => {
-    it("200 fixes sku by filter", async () => {
-      await Sku.create({
-        konkName: "k-fix",
-        prodName: "p1",
-        productId: "k-fix-int",
-        title: "Before",
-        url: "https://k-fix.com/int",
-      });
-
+    it("410 migrated to apitasks", async () => {
       const response = await request(app)
         .post("/api/skus/fix-incorrect-sku-data")
         .set(createAuthHeader(RoleType.ADMIN))
@@ -123,9 +115,10 @@ describe("Skus router integration", () => {
           filter: { konkName: "k-fix" },
           updates: { title: "After integration" },
         })
-        .expect(200);
+        .expect(410);
 
-      expect(response.body.data.modifiedCount).toBe(1);
+      expect(response.body.code).toBe("API_TASKS_MIGRATED");
+      expect(response.body.kind).toBe("skus.fix-incorrect-sku-data");
     });
   });
 
@@ -165,22 +158,14 @@ describe("Skus router integration", () => {
   });
 
   describe("DELETE /api/skus/konk/:konkName/invalid", () => {
-    it("200 deletes invalid skus for PRIME", async () => {
-      await Sku.create({
-        konkName: "air",
-        prodName: "p",
-        productId: "air-inv",
-        title: "Invalid",
-        url: "https://ex.com/inv",
-        isInvalid: true,
-      });
-
+    it("410 migrated to apitasks", async () => {
       const response = await request(app)
         .delete("/api/skus/konk/air/invalid")
         .set(createAuthHeader(RoleType.PRIME))
-        .expect(200);
+        .expect(410);
 
-      expect(response.body.deletedCount).toBe(1);
+      expect(response.body.code).toBe("API_TASKS_MIGRATED");
+      expect(response.body.kind).toBe("skus.delete-konk-invalid");
     });
   });
 });

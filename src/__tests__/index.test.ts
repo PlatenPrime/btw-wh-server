@@ -2,6 +2,12 @@ import { beforeAll, describe, expect, it, vi } from "vitest";
 
 const mockConnect = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const mockStartCronOperations = vi.hoisted(() => vi.fn());
+const mockStartExcelJobRuntime = vi.hoisted(() =>
+  vi.fn().mockResolvedValue(undefined)
+);
+const mockStartApiTaskRuntime = vi.hoisted(() =>
+  vi.fn().mockResolvedValue(undefined)
+);
 const mockLogServerEgressGeo = vi.hoisted(() =>
   vi.fn().mockResolvedValue(undefined)
 );
@@ -42,6 +48,14 @@ vi.mock("../logging/httpLogger.js", () => ({
 
 vi.mock("../cron/startCronOperations.js", () => ({
   startCronOperations: mockStartCronOperations,
+}));
+
+vi.mock("../modules/excel-jobs/utils/startExcelJobRuntime.js", () => ({
+  startExcelJobRuntime: mockStartExcelJobRuntime,
+}));
+
+vi.mock("../modules/apitasks/utils/startApiTaskRuntime.js", () => ({
+  startApiTaskRuntime: mockStartApiTaskRuntime,
 }));
 
 vi.mock("../utils/server-egress-geo/logServerEgressGeo.js", () => ({
@@ -100,6 +114,8 @@ describe("index bootstrap", () => {
       expect.stringContaining("test-db")
     );
     expect(mockStartCronOperations).toHaveBeenCalledOnce();
+    expect(mockStartExcelJobRuntime).toHaveBeenCalledOnce();
+    expect(mockStartApiTaskRuntime).toHaveBeenCalledOnce();
     expect(mockListen).toHaveBeenCalledWith("3999", expect.any(Function));
     expect(mockLogServerEgressGeo).toHaveBeenCalledWith("startup");
   });

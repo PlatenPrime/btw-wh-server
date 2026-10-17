@@ -182,29 +182,14 @@ describe("Blocks router integration", () => {
   });
 
   describe("POST /api/blocks/recalculate-zones-sectors", () => {
-    it("200 recalculates zone sectors", async () => {
-      const block = await Block.create({ title: "Block 1", order: 1, segs: [] });
-      const zone = await Zone.create({ title: "42-2-1", bar: 420201, sector: 0 });
-      await Seg.create({
-        block: block._id,
-        blockData: { _id: block._id, title: block.title },
-        order: 1,
-        sector: 0,
-        zones: [{ _id: zone._id, title: zone.title }],
-      });
-
+    it("410 migrated to apitasks", async () => {
       const response = await request(app)
         .post("/api/blocks/recalculate-zones-sectors")
         .set(createAuthHeader(RoleType.ADMIN))
-        .expect(200);
+        .expect(410);
 
-      expect(response.body.message).toBe(
-        "Zones sectors recalculated successfully"
-      );
-      expect(response.body.data.blocksProcessed).toBe(1);
-
-      const updatedZone = await Zone.findById(zone._id).lean().exec();
-      expect(updatedZone?.sector).toBe(1001);
+      expect(response.body.code).toBe("API_TASKS_MIGRATED");
+      expect(response.body.kind).toBe("blocks.recalculate-zones-sectors");
     });
   });
 });

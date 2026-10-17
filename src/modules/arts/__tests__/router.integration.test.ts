@@ -99,13 +99,14 @@ describe("Arts router integration", () => {
         .expect(403);
     });
 
-    it("202 starts update for ADMIN", async () => {
+    it("410 migrated to apitasks", async () => {
       const response = await request(app)
         .post("/api/arts/btrade-stock/update-all")
         .set(createAuthHeader(RoleType.ADMIN))
-        .expect(202);
+        .expect(410);
 
-      expect(response.body.message).toBe("BtradeStock update process started");
+      expect(response.body.code).toBe("API_TASKS_MIGRATED");
+      expect(response.body.kind).toBe("arts.btrade-stock-update-all");
     });
   });
 
@@ -117,20 +118,14 @@ describe("Arts router integration", () => {
         .expect(403);
     });
 
-    it("200 deletes outdated arts for PRIME", async () => {
-      await createTestArt({ artikul: "OLD-001", zone: "A1", marker: "20250101" });
-      await createTestArt({ artikul: "NEW-001", zone: "A1", marker: "20991231" });
-
+    it("410 migrated to apitasks", async () => {
       const response = await request(app)
         .delete("/api/arts/without-latest-marker")
         .set(createAuthHeader(RoleType.PRIME))
-        .expect(200);
+        .expect(410);
 
-      expect(response.body.message).toBe(
-        "Arts without latest marker deleted successfully"
-      );
-      expect(await Art.findOne({ artikul: "OLD-001" })).toBeNull();
-      expect(await Art.findOne({ artikul: "NEW-001" })).toBeTruthy();
+      expect(response.body.code).toBe("API_TASKS_MIGRATED");
+      expect(response.body.kind).toBe("arts.delete-without-latest-marker");
     });
   });
 });

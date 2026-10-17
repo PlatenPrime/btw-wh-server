@@ -55,32 +55,15 @@ describe("slice-compensation router integration", () => {
       .expect(403);
   });
 
-  it("POST /api/slice-compensation/run returns 400 when body invalid", async () => {
-    const response = await request(app)
-      .post("/api/slice-compensation/run")
-      .set(createAuthHeader())
-      .send({})
-      .expect(400);
-
-    expect(response.body.message).toBe("Validation error");
-  });
-
-  it("POST /api/slice-compensation/run returns 200 for ADMIN", async () => {
+  it("POST /api/slice-compensation/run returns 410 migrated to apitasks", async () => {
     const response = await request(app)
       .post("/api/slice-compensation/run")
       .set(createAuthHeader())
       .send({ konkName: "Air" })
-      .expect(200);
+      .expect(410);
 
-    expect(runCompensatingSlicesForKonk).toHaveBeenCalledWith("air");
-    expect(response.body).toEqual({
-      message: "Compensating slice completed",
-      data: {
-        konkName: "air",
-        sliceDate: "2026-07-14",
-        analog: { refetched: 1, updated: 1 },
-        sku: { refetched: 0, updated: 0 },
-      },
-    });
+    expect(response.body.code).toBe("API_TASKS_MIGRATED");
+    expect(response.body.kind).toBe("slice-compensation.run");
+    expect(runCompensatingSlicesForKonk).not.toHaveBeenCalled();
   });
 });

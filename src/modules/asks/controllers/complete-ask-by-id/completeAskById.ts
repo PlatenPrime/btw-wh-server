@@ -53,7 +53,7 @@ export const completeAskById = async (req: Request, res: Response) => {
         userId: req.user.id,
         department: "asks",
         type: "edit",
-        description: `Завершено заявку на артикул ${existingAsk.artikul} `,
+        description: `Завершено заявку на артикул ${existingAsk.artikul} (виконавець: ${solver.fullname})`,
       });
     }
 

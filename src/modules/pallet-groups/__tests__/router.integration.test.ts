@@ -221,23 +221,16 @@ describe("Pallet groups router integration", () => {
   });
 
   describe("POST /api/pallet-groups/recalculate-pallets-sectors", () => {
-    it("200 recalculates pallet sectors", async () => {
-      const pallet = await createPallet("P1");
-      await PalletGroup.create({
-        title: "Group 1",
-        order: 1,
-        pallets: [pallet._id],
-      });
-
+    it("410 migrated to apitasks", async () => {
       const response = await request(app)
         .post("/api/pallet-groups/recalculate-pallets-sectors")
         .set(createAuthHeader(RoleType.ADMIN))
-        .expect(200);
+        .expect(410);
 
-      expect(response.body.message).toBe(
-        "Pallets sectors recalculated successfully",
+      expect(response.body.code).toBe("API_TASKS_MIGRATED");
+      expect(response.body.kind).toBe(
+        "pallet-groups.recalculate-pallets-sectors",
       );
-      expect(response.body.data.groupsProcessed).toBe(1);
     });
   });
 

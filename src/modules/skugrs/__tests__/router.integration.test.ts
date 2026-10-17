@@ -240,8 +240,8 @@ describe("Skugrs router integration", () => {
     });
   });
 
-  describe("POST /api/skugrs/id/:id/fill-skus air idle", () => {
-    it("400 CLIENT_INGEST_REQUIRED for air", async () => {
+  describe("POST /api/skugrs/id/:id/fill-skus", () => {
+    it("410 migrated to apitasks", async () => {
       const skugr = await Skugr.create({
         konkName: "air",
         prodName: "p",
@@ -254,9 +254,10 @@ describe("Skugrs router integration", () => {
         .post(`/api/skugrs/id/${skugr._id.toString()}/fill-skus`)
         .set(createAuthHeader())
         .send({})
-        .expect(400);
+        .expect(410);
 
-      expect(response.body.code).toBe("CLIENT_INGEST_REQUIRED");
+      expect(response.body.code).toBe("API_TASKS_MIGRATED");
+      expect(response.body.kind).toBe("skugrs.fill-skus");
     });
   });
 });
