@@ -9,14 +9,10 @@ import {
 describe("groupPagesThrottle", () => {
   it("returns value within default jitter range", () => {
     vi.spyOn(Math, "random").mockReturnValue(0);
-    expect(getGroupPagesThrottleDelayMs()).toBe(
-      GROUP_PAGES_THROTTLE_MIN_DELAY_MS
-    );
+    expect(getGroupPagesThrottleDelayMs()).toBe(GROUP_PAGES_THROTTLE_MIN_DELAY_MS);
 
     vi.spyOn(Math, "random").mockReturnValue(0.999999);
-    expect(getGroupPagesThrottleDelayMs()).toBe(
-      GROUP_PAGES_THROTTLE_MAX_DELAY_MS
-    );
+    expect(getGroupPagesThrottleDelayMs()).toBe(GROUP_PAGES_THROTTLE_MAX_DELAY_MS);
   });
 
   it("returns air-specific slower page delay", () => {

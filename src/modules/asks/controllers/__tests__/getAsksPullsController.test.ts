@@ -27,7 +27,7 @@ describe("getAsksPullsController", () => {
 
   it("200: успешно получает все позиции для снятия", async () => {
     // Создаем несколько активных заявок
-    const ask1 = await createTestAsk({
+    await createTestAsk({
       artikul: "ART-1",
       quant: 10,
       pullQuant: 0,
@@ -35,7 +35,7 @@ describe("getAsksPullsController", () => {
       sklad: "pogrebi",
     });
 
-    const ask2 = await createTestAsk({
+    await createTestAsk({
       artikul: "ART-2",
       quant: 5,
       pullQuant: 0,
@@ -89,7 +89,7 @@ describe("getAsksPullsController", () => {
   });
 
   it("200: группирует позиции по секторам", async () => {
-    const ask = await createTestAsk({
+    await createTestAsk({
       artikul: "ART-GROUP",
       quant: 10,
       pullQuant: 0,
@@ -124,13 +124,11 @@ describe("getAsksPullsController", () => {
   });
 
   it("200: фоновое завершение готовых заявок выполняется асинхронно", async () => {
-    const asker = await import("../../../../test/setup.js").then(
-      (m) => m.createTestUser
-    );
+    const asker = await import("../../../../test/setup.js").then((m) => m.createTestUser);
     const user = await asker();
 
     // Создаем заявку со статусом processing, которая готова к завершению
-    const ask = await createTestAsk({
+    await createTestAsk({
       artikul: "ART-READY",
       quant: 10,
       pullQuant: 10, // Уже все снято
@@ -155,10 +153,10 @@ describe("getAsksPullsController", () => {
   it("500: обработка ошибок сервера", async () => {
     // Создаем ситуацию, которая вызовет ошибку
     // В реальном тесте нужно использовать vi.mock для мокирования утилит
-    const req = {} as unknown as Request;
+    const _req = {} as unknown as Request;
+    void _req;
 
     // Этот тест показывает что контроллер должен обрабатывать ошибки
     // Полный тест требует мокирования зависимостей getAsksPullsUtil
   });
 });
-

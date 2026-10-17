@@ -58,20 +58,12 @@ describe("loadArtBtradeSliceSeries", () => {
       { quantity: 10, price: 2 },
       { quantity: 7, price: 2 },
     ];
-    const points = computeArtSalesPointsFromSeries(
-      [d1, d2],
-      coalescedFull,
-      1,
-    );
+    const points = computeArtSalesPointsFromSeries([d1, d2], coalescedFull, 1);
     expect(points[0]!.sales).toBe(0);
     expect(points[1]!.sales).toBe(3);
     expect(points[1]!.revenue).toBe(6);
 
-    const singleDay = computeArtSalesPointsFromSeries(
-      [d2],
-      coalescedFull,
-      2,
-    );
+    const singleDay = computeArtSalesPointsFromSeries([d2], coalescedFull, 2);
     expect(singleDay[0]!.sales).toBe(3);
   });
 

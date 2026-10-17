@@ -9,9 +9,7 @@ import type { GetSkuSliceRangeInput } from "../schemas/getSkuSliceRangeSchema.js
 
 export type SkuSliceRangeItem = SliceRangeItem;
 
-export type GetSkuSliceRangeResult =
-  | { ok: true; data: SkuSliceRangeItem[] }
-  | { ok: false };
+export type GetSkuSliceRangeResult = { ok: true; data: SkuSliceRangeItem[] } | { ok: false };
 
 function sliceDateMinusDays(sliceDate: Date, days: number): Date {
   const d = new Date(sliceDate);
@@ -33,12 +31,7 @@ export async function getSkuSliceRangeUtil(
   const dateTo = toSliceDate(input.dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
 
-  const docs = await loadSkuSliceRowsForProduct(
-    sku.konkName,
-    productKey,
-    warmStart,
-    dateTo,
-  );
+  const docs = await loadSkuSliceRowsForProduct(sku.konkName, productKey, warmStart, dateTo);
 
   return {
     ok: true,

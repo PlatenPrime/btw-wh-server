@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import {
-  createTestPallet,
-  createTestRow,
-} from "../../../../../../test/utils/testHelpers.js";
+import { createTestPallet, createTestRow } from "../../../../../../test/utils/testHelpers.js";
 import { Pallet } from "../../../../models/Pallet.js";
 import { updatePalletUtil } from "../updatePalletUtil.js";
 

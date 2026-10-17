@@ -43,13 +43,13 @@ describe("deleteRowUtil", () => {
       const row = await Row.create({ title: "Cascade Row" });
       const pallet = await Pallet.create({
         title: "Cascade Pallet",
-        row: { _id: row._id, title: row.title },
+        row: row._id,
         rowData: { _id: row._id, title: row.title },
         poses: [],
       });
       const pos = await Pos.create({
-        pallet: { _id: pallet._id, title: pallet.title },
-        row: { _id: row._id, title: row.title },
+        pallet: pallet._id,
+        row: row._id,
         palletData: { _id: pallet._id, title: pallet.title },
         rowData: { _id: row._id, title: row.title },
         palletTitle: pallet.title,
@@ -81,19 +81,19 @@ describe("deleteRowUtil", () => {
       const row = await Row.create({ title: "Multiple Cascade Row" });
       const pallet1 = await Pallet.create({
         title: "Pallet 1",
-        row: { _id: row._id, title: row.title },
+        row: row._id,
         rowData: { _id: row._id, title: row.title },
         poses: [],
       });
       const pallet2 = await Pallet.create({
         title: "Pallet 2",
-        row: { _id: row._id, title: row.title },
+        row: row._id,
         rowData: { _id: row._id, title: row.title },
         poses: [],
       });
       const pos1 = await Pos.create({
-        pallet: { _id: pallet1._id, title: pallet1.title },
-        row: { _id: row._id, title: row.title },
+        pallet: pallet1._id,
+        row: row._id,
         palletData: { _id: pallet1._id, title: pallet1.title },
         rowData: { _id: row._id, title: row.title },
         palletTitle: pallet1.title,
@@ -103,8 +103,8 @@ describe("deleteRowUtil", () => {
         boxes: 1,
       });
       const pos2 = await Pos.create({
-        pallet: { _id: pallet2._id, title: pallet2.title },
-        row: { _id: row._id, title: row.title },
+        pallet: pallet2._id,
+        row: row._id,
         palletData: { _id: pallet2._id, title: pallet2.title },
         rowData: { _id: row._id, title: row.title },
         palletTitle: pallet2.title,
@@ -134,4 +134,3 @@ describe("deleteRowUtil", () => {
     await session.endSession();
   });
 });
-

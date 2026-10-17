@@ -26,9 +26,7 @@ describe("summarizePlaywrightErrorBody", () => {
     const html = `<html><head><title>  429\nBlocked  </title></head><body>${"z".repeat(500)}</body></html>`;
     const out = summarizePlaywrightErrorBody(html);
     expect(out.title).toBe("429 Blocked");
-    expect(out.snippet.length).toBeLessThanOrEqual(
-      PLAYWRIGHT_ERROR_BODY_SNIPPET_MAX
-    );
+    expect(out.snippet.length).toBeLessThanOrEqual(PLAYWRIGHT_ERROR_BODY_SNIPPET_MAX);
     expect(out.htmlLength).toBe(html.length);
   });
 
@@ -111,7 +109,7 @@ describe("playwrightGet", () => {
     const pageClose = vi.fn(async () => undefined);
     const content = vi.fn(
       async () =>
-        "<html><head><title>Too Many Requests</title></head><body>rate limited by stormwall</body></html>"
+        "<html><head><title>Too Many Requests</title></head><body>rate limited by stormwall</body></html>",
     );
     const newPage = vi.fn(async () => ({
       goto: vi.fn(async () => ({ status: () => 429 })),
@@ -132,7 +130,7 @@ describe("playwrightGet", () => {
 
     const url = "https://airballoons.com.ua/ua/product/x";
     await expect(playwrightGet(url)).rejects.toThrow(
-      /Playwright GET HTTP 429: .*title="Too Many Requests".*body=.*stormwall/
+      /Playwright GET HTTP 429: .*title="Too Many Requests".*body=.*stormwall/,
     );
     expect(content).toHaveBeenCalled();
     expect(mockWarn).toHaveBeenCalledWith(
@@ -142,7 +140,7 @@ describe("playwrightGet", () => {
         httpStatus: 429,
         title: "Too Many Requests",
       }),
-      "playwright http error body"
+      "playwright http error body",
     );
     expect(pageClose).toHaveBeenCalled();
   });
@@ -169,24 +167,19 @@ describe("playwrightGet", () => {
       })),
     }));
 
-    const html = await playwrightGet(
-      "https://airballoons.com.ua/ua/product/x",
-      { warmUpUrl: "https://airballoons.com.ua/" }
-    );
+    const html = await playwrightGet("https://airballoons.com.ua/ua/product/x", {
+      warmUpUrl: "https://airballoons.com.ua/",
+    });
 
     expect(html).toBe("<html>product</html>");
     expect(goto).toHaveBeenNthCalledWith(1, "https://airballoons.com.ua/", {
       timeout: 30_000,
       waitUntil: "domcontentloaded",
     });
-    expect(goto).toHaveBeenNthCalledWith(
-      2,
-      "https://airballoons.com.ua/ua/product/x",
-      {
-        timeout: 30_000,
-        waitUntil: "domcontentloaded",
-      }
-    );
+    expect(goto).toHaveBeenNthCalledWith(2, "https://airballoons.com.ua/ua/product/x", {
+      timeout: 30_000,
+      waitUntil: "domcontentloaded",
+    });
   });
 
   it("warm-up 4xx — warn и всё равно идём на target", async () => {
@@ -220,7 +213,7 @@ describe("playwrightGet", () => {
         context: "Playwright warm-up non-2xx, continue to target",
         httpStatus: 429,
       }),
-      "playwright warmup http error"
+      "playwright warmup http error",
     );
   });
 
@@ -246,7 +239,7 @@ describe("playwrightGet", () => {
     }));
 
     await expect(playwrightGet("https://example.com/fail")).rejects.toThrow(
-      /Playwright GET https:\/\/example.com\/fail failed: Navigation timeout/
+      /Playwright GET https:\/\/example.com\/fail failed: Navigation timeout/,
     );
     expect(pageClose).toHaveBeenCalled();
   });

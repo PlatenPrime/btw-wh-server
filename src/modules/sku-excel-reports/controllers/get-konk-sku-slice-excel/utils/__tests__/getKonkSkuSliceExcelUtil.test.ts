@@ -41,9 +41,9 @@ describe("getKonkSkuSliceExcelUtil", () => {
     });
     const d = new Date("2026-03-01T00:00:00.000Z");
     await seedSkuSliceMonthDay("air", d, {
-        "air-k-1": { stock: 1, price: 2 },
-        "air-k-2": { stock: 3, price: 4 },
-      });
+      "air-k-1": { stock: 1, price: 2 },
+      "air-k-2": { stock: 3, price: 4 },
+    });
 
     const r = await getKonkSkuSliceExcelUtil({
       konk: "air",
@@ -88,9 +88,9 @@ describe("getKonkSkuSliceExcelUtil", () => {
 
     const d = new Date("2026-03-15T00:00:00.000Z");
     await seedSkuSliceMonthDay("air", d, {
-        "air-slice-skugr-a": { stock: 4, price: 5 },
-        "air-slice-skugr-b": { stock: 6, price: 7 },
-      });
+      "air-slice-skugr-a": { stock: 4, price: 5 },
+      "air-slice-skugr-b": { stock: 6, price: 7 },
+    });
 
     const r = await getKonkSkuSliceExcelUtil({
       konk: "air",
@@ -160,9 +160,9 @@ describe("getKonkSkuSliceExcelUtil", () => {
 
     const d = new Date("2026-03-20T00:00:00.000Z");
     await seedSkuSliceMonthDay("air", d, {
-        "air-slice-all-p1": { stock: 4, price: 5 },
-        "air-slice-all-p2": { stock: 6, price: 7 },
-      });
+      "air-slice-all-p1": { stock: 4, price: 5 },
+      "air-slice-all-p2": { stock: 6, price: 7 },
+    });
 
     const r = await getKonkSkuSliceExcelUtil({
       konk: "air",

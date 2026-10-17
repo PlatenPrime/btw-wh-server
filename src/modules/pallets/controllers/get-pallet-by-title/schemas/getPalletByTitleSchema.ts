@@ -5,11 +5,3 @@ export const getPalletByTitleSchema = z.object({
 });
 
 export type GetPalletByTitleInput = z.infer<typeof getPalletByTitleSchema>;
-
-
-
-
-
-
-
-

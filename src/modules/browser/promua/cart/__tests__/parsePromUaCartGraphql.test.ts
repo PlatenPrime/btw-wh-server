@@ -62,8 +62,8 @@ describe("parsePromUaAddProductResponse", () => {
             cartAddProduct: { __typename: "ProductNotOrderableError" },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "notOrderable" });
     expect(
       parsePromUaAddProductResponse(
@@ -74,8 +74,8 @@ describe("parsePromUaAddProductResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "notOrderable" });
   });
 
@@ -83,8 +83,8 @@ describe("parsePromUaAddProductResponse", () => {
     expect(
       parsePromUaAddProductResponse(
         { data: { cartAddProduct: { __typename: "AuthenticationError" } } },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "error" });
     expect(
       parsePromUaAddProductResponse(
@@ -93,8 +93,8 @@ describe("parsePromUaAddProductResponse", () => {
             cartAddProduct: { __typename: "ProductAlreadyInCartError" },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "error" });
     expect(parsePromUaAddProductResponse("not-json", PRODUCT_ID)).toEqual({
       kind: "error",
@@ -112,8 +112,8 @@ describe("parsePromUaAddProductResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "error" });
     expect(
       parsePromUaAddProductResponse(
@@ -125,8 +125,8 @@ describe("parsePromUaAddProductResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "error" });
     expect(parsePromUaAddProductResponse([], PRODUCT_ID)).toEqual({
       kind: "error",
@@ -187,8 +187,8 @@ describe("parsePromUaAddProductResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({
       kind: "success",
       cartId: "c1",
@@ -239,8 +239,8 @@ describe("parsePromUaChangeQuantityResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({
       kind: "recalculated",
       quantity: 371,
@@ -258,8 +258,8 @@ describe("parsePromUaChangeQuantityResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "set" });
   });
 
@@ -275,8 +275,8 @@ describe("parsePromUaChangeQuantityResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "error" });
     expect(
       parsePromUaChangeQuantityResponse(
@@ -289,8 +289,8 @@ describe("parsePromUaChangeQuantityResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "error" });
     expect(
       parsePromUaChangeQuantityResponse(
@@ -301,8 +301,8 @@ describe("parsePromUaChangeQuantityResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "error" });
     expect(parsePromUaChangeQuantityResponse({}, PRODUCT_ID)).toEqual({
       kind: "error",
@@ -318,8 +318,8 @@ describe("parsePromUaChangeQuantityResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({ kind: "error" });
   });
 
@@ -342,8 +342,8 @@ describe("parsePromUaChangeQuantityResponse", () => {
             },
           },
         },
-        PRODUCT_ID
-      )
+        PRODUCT_ID,
+      ),
     ).toEqual({
       kind: "recalculated",
       quantity: 10,

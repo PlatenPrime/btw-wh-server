@@ -118,13 +118,13 @@ describe("sendCreateAskMesUtil", () => {
       sendCreateAskMesUtil({
         message: "Test message",
         askerData,
-      })
+      }),
     ).resolves.not.toThrow();
 
     expect(logModuleError).toHaveBeenCalledWith(
       "asks",
       error,
-      "Failed to send Telegram notification:"
+      "Failed to send Telegram notification:",
     );
   });
 

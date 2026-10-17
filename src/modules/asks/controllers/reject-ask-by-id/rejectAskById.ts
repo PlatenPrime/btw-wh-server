@@ -21,7 +21,7 @@ export const rejectAskById = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       return res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
     }
 
@@ -75,10 +75,7 @@ export const rejectAskById = async (req: Request, res: Response) => {
     if (!res.headersSent) {
       if (error instanceof Error && error.message === "Ask not found") {
         res.status(404).json({ message: "Ask not found" });
-      } else if (
-        error instanceof Error &&
-        error.message === "Solver user not found"
-      ) {
+      } else if (error instanceof Error && error.message === "Solver user not found") {
         res.status(404).json({ message: "Solver user not found" });
       } else {
         res.status(500).json({ message: "Server error", error });
@@ -88,4 +85,3 @@ export const rejectAskById = async (req: Request, res: Response) => {
     await session.endSession();
   }
 };
-

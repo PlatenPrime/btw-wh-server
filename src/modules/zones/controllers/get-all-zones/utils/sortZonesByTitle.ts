@@ -12,10 +12,7 @@ type SortOrder = "asc" | "desc";
  * sortZonesByTitle([{title: "42-11-2"}, {title: "42-8-1"}], "asc")
  * // [{title: "42-8-1"}, {title: "42-11-2"}] - 8 < 11
  */
-export function sortZonesByTitle(
-  zones: IZone[],
-  sortOrder: SortOrder = "asc"
-): IZone[] {
+export function sortZonesByTitle(zones: IZone[], sortOrder: SortOrder = "asc"): IZone[] {
   return zones.sort((a, b) => {
     const partsA = a.title.split("-");
     const partsB = b.title.split("-");
@@ -39,4 +36,3 @@ export function sortZonesByTitle(
     return 0;
   });
 }
-

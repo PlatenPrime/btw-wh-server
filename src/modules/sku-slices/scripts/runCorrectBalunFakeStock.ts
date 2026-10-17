@@ -12,21 +12,19 @@ import {
 import { parseCorrectBalunFakeStockCliArgs } from "./parseCorrectBalunFakeStockCliArgs.js";
 
 export function resolveCorrectBalunFakeStockCliInput(
-  argv: string[]
+  argv: string[],
 ): CorrectBalunFakeStockSpikesInput {
   const args = parseCorrectBalunFakeStockCliArgs(argv);
   return {
     daysBack: args.daysBack,
     apply: args.apply,
     ...(args.asOf ? { asOf: args.asOf } : {}),
-    ...(args.lookbackDays !== undefined
-      ? { lookbackDays: args.lookbackDays }
-      : {}),
+    ...(args.lookbackDays !== undefined ? { lookbackDays: args.lookbackDays } : {}),
   };
 }
 
 export async function executeCorrectBalunFakeStockCli(
-  argv: string[]
+  argv: string[],
 ): Promise<CorrectBalunFakeStockSpikesResult> {
   const input = resolveCorrectBalunFakeStockCliInput(argv);
   const result = await correctBalunFakeStockSpikesUtil(input);
@@ -34,9 +32,7 @@ export async function executeCorrectBalunFakeStockCli(
   return result;
 }
 
-export async function runCorrectBalunFakeStockConnected(
-  argv: string[]
-): Promise<void> {
+export async function runCorrectBalunFakeStockConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executeCorrectBalunFakeStockCli(argv);

@@ -11,9 +11,7 @@ describe("getSkugrByIdUtil", () => {
   });
 
   it("returns null when skugr not found", async () => {
-    const result = await getSkugrByIdUtil(
-      new mongoose.Types.ObjectId().toString(),
-    );
+    const result = await getSkugrByIdUtil(new mongoose.Types.ObjectId().toString());
     expect(result).toBeNull();
   });
 

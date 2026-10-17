@@ -14,9 +14,7 @@ const DAY_LOG_EVERY = 7;
  *
  * npx tsx src/modules/btrade-slices/scripts/runBackfillBtradeManufacturerSales.ts --from YYYY-MM-DD --to YYYY-MM-DD [--apply]
  */
-export async function executeBackfillBtradeManufacturerSalesCli(
-  argv: string[],
-): Promise<{
+export async function executeBackfillBtradeManufacturerSalesCli(argv: string[]): Promise<{
   apply: boolean;
   daysTouched: string[];
   keysUpdated: number;
@@ -27,9 +25,7 @@ export async function executeBackfillBtradeManufacturerSalesCli(
   const fromKey = args.from.toISOString().slice(0, 10);
   const toKey = args.to.toISOString().slice(0, 10);
 
-  console.log(
-    `[backfill-btrade-rollup] start mode=${mode} range=${fromKey}..${toKey}`,
-  );
+  console.log(`[backfill-btrade-rollup] start mode=${mode} range=${fromKey}..${toKey}`);
 
   const started = Date.now();
   const r = await materializeBtradeManufacturerSalesDateRange({
@@ -64,9 +60,7 @@ export async function executeBackfillBtradeManufacturerSalesCli(
   return payload;
 }
 
-export async function runBackfillBtradeManufacturerSalesConnected(
-  argv: string[],
-): Promise<void> {
+export async function runBackfillBtradeManufacturerSalesConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executeBackfillBtradeManufacturerSalesCli(argv);
@@ -82,11 +76,9 @@ function isExecutedAsCli(): boolean {
 }
 
 if (isExecutedAsCli()) {
-  runBackfillBtradeManufacturerSalesConnected(process.argv.slice(2)).catch(
-    (err) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error(message);
-      process.exitCode = 1;
-    },
-  );
+  runBackfillBtradeManufacturerSalesConnected(process.argv.slice(2)).catch((err) => {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(message);
+    process.exitCode = 1;
+  });
 }

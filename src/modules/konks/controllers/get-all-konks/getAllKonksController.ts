@@ -6,10 +6,7 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить всех конкурентов
  * @route   GET /api/konks
  */
-export const getAllKonksController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAllKonksController = async (req: Request, res: Response): Promise<void> => {
   try {
     const list = await getAllKonksUtil();
     res.status(200).json({

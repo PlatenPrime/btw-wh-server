@@ -1,9 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as getServerEgressGeoModule from "../getServerEgressGeo.js";
-import {
-  isServerEgressGeoLogEnabled,
-  logServerEgressGeo,
-} from "../logServerEgressGeo.js";
+import { isServerEgressGeoLogEnabled, logServerEgressGeo } from "../logServerEgressGeo.js";
 
 const mockLogger = vi.hoisted(() => ({
   info: vi.fn(),
@@ -29,13 +26,10 @@ describe("isServerEgressGeoLogEnabled", () => {
     expect(isServerEgressGeoLogEnabled()).toBe(true);
   });
 
-  it.each(["0", "false", "no", "off"])(
-    "false когда SERVER_EGRESS_GEO_LOG=%s",
-    (value) => {
-      process.env.SERVER_EGRESS_GEO_LOG = value;
-      expect(isServerEgressGeoLogEnabled()).toBe(false);
-    }
-  );
+  it.each(["0", "false", "no", "off"])("false когда SERVER_EGRESS_GEO_LOG=%s", (value) => {
+    process.env.SERVER_EGRESS_GEO_LOG = value;
+    expect(isServerEgressGeoLogEnabled()).toBe(false);
+  });
 });
 
 describe("logServerEgressGeo", () => {
@@ -79,20 +73,18 @@ describe("logServerEgressGeo", () => {
           city: "Ashburn",
         },
       },
-      "server egress geo"
+      "server egress geo",
     );
   });
 
   it("warn при отсутствии geo", async () => {
-    vi.spyOn(getServerEgressGeoModule, "getServerEgressGeo").mockResolvedValue(
-      null
-    );
+    vi.spyOn(getServerEgressGeoModule, "getServerEgressGeo").mockResolvedValue(null);
 
     await logServerEgressGeo("createRow");
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
       { context: "createRow" },
-      "server egress geo unavailable"
+      "server egress geo unavailable",
     );
   });
 });

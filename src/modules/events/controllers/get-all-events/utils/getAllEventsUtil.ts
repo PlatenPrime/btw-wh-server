@@ -1,4 +1,4 @@
-import { FilterQuery } from "mongoose";
+import { QueryFilter } from "mongoose";
 import { Event, IEvent } from "../../../models/Event.js";
 import { GetAllEventsQuery } from "../schemas/getAllEventsSchema.js";
 
@@ -21,7 +21,7 @@ export const getAllEventsUtil = async ({
   from,
   to,
 }: GetAllEventsQuery): Promise<GetAllEventsResult> => {
-  const filter: FilterQuery<IEvent> = {};
+  const filter: QueryFilter<IEvent> = {};
 
   if (department) {
     filter.department = department;

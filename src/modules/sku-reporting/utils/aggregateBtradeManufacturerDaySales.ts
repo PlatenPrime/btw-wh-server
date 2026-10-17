@@ -28,9 +28,7 @@ export async function sumBtradeManufacturerSalesForPeriod(params: {
   const dateFrom = toSliceDate(params.dateFrom);
   const dateTo = toSliceDate(params.dateTo);
   const prodNames = [
-    ...new Set(
-      params.prodNamesLower.map(normalizeProdName).filter((s) => s.length > 0),
-    ),
+    ...new Set(params.prodNamesLower.map(normalizeProdName).filter((s) => s.length > 0)),
   ];
   if (prodNames.length === 0) return null;
 

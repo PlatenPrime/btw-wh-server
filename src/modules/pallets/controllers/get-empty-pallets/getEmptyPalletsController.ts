@@ -2,10 +2,7 @@ import { Request, Response } from "express";
 import { Pallet } from "../../models/Pallet.js";
 import { sortPalletsByTitle } from "../../utils/sortPalletsByTitle.js";
 
-export const getEmptyPalletsController = async (
-  req: Request,
-  res: Response
-) => {
+export const getEmptyPalletsController = async (req: Request, res: Response) => {
   try {
     const pallets = await Pallet.find({
       $or: [{ poses: { $exists: false } }, { poses: { $size: 0 } }],
@@ -28,11 +25,3 @@ export const getEmptyPalletsController = async (
     }
   }
 };
-
-
-
-
-
-
-
-

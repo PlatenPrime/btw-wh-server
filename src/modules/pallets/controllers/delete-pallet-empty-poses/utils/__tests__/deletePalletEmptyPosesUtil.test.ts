@@ -66,12 +66,8 @@ describe("deletePalletEmptyPosesUtil", () => {
       expect(result.affectedPoseIds.length).toBe(2);
       expect(result.palletTitle).toBe(pallet.title);
 
-      const deletedEmpty1 = await Pos.findById(emptyPos1._id).session(
-        session
-      );
-      const deletedEmpty2 = await Pos.findById(emptyPos2._id).session(
-        session
-      );
+      const deletedEmpty1 = await Pos.findById(emptyPos1._id).session(session);
+      const deletedEmpty2 = await Pos.findById(emptyPos2._id).session(session);
       const keptFilled = await Pos.findById(filledPos._id).session(session);
 
       expect(deletedEmpty1).toBeNull();
@@ -80,9 +76,7 @@ describe("deletePalletEmptyPosesUtil", () => {
 
       const updatedPallet = await Pallet.findById(pallet._id).session(session);
       expect(updatedPallet?.poses.length).toBe(1);
-      expect(updatedPallet?.poses[0].toString()).toBe(
-        String(filledPos._id)
-      );
+      expect(updatedPallet?.poses[0].toString()).toBe(String(filledPos._id));
     });
     await session.endSession();
   });
@@ -126,11 +120,9 @@ describe("deletePalletEmptyPosesUtil", () => {
         deletePalletEmptyPosesUtil({
           palletId: new mongoose.Types.ObjectId().toString(),
           session,
-        })
+        }),
       ).rejects.toThrow("Pallet not found");
     });
     await session.endSession();
   });
 });
-
-

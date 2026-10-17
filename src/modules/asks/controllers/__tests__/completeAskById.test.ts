@@ -31,9 +31,23 @@ describe("completeAskById", () => {
   });
 
   it("200: завершает заявку", async () => {
-    const asker = await createTestUser({ telegram: "123", username: `asker-${Date.now()}-${Math.random()}` });
-    const ask = await createTestAsk({ asker: asker._id, askerData: { _id: asker._id, fullname: asker.fullname, telegram: asker.telegram, photo: asker.photo } });
-    const solver = await createTestUser({ fullname: "Solver", username: `solver-${Date.now()}-${Math.random()}` });
+    const asker = await createTestUser({
+      telegram: "123",
+      username: `asker-${Date.now()}-${Math.random()}`,
+    });
+    const ask = await createTestAsk({
+      asker: asker._id,
+      askerData: {
+        _id: asker._id,
+        fullname: asker.fullname,
+        telegram: asker.telegram,
+        photo: asker.photo,
+      },
+    });
+    const solver = await createTestUser({
+      fullname: "Solver",
+      username: `solver-${Date.now()}-${Math.random()}`,
+    });
 
     const req = {
       params: { id: String(ask._id) },
@@ -48,10 +62,28 @@ describe("completeAskById", () => {
   });
 
   it("200: создаёт audit-событие, когда есть req.user", async () => {
-    const asker = await createTestUser({ telegram: "123", username: `asker-${Date.now()}-${Math.random()}` });
-    const ask = await createTestAsk({ artikul: "ART-COMPLETE", asker: asker._id, askerData: { _id: asker._id, fullname: asker.fullname, telegram: asker.telegram, photo: asker.photo } });
-    const solver = await createTestUser({ fullname: "Solver", username: `solver-${Date.now()}-${Math.random()}` });
-    const actor = await createTestUser({ fullname: "Actor", username: `actor-${Date.now()}-${Math.random()}` });
+    const asker = await createTestUser({
+      telegram: "123",
+      username: `asker-${Date.now()}-${Math.random()}`,
+    });
+    const ask = await createTestAsk({
+      artikul: "ART-COMPLETE",
+      asker: asker._id,
+      askerData: {
+        _id: asker._id,
+        fullname: asker.fullname,
+        telegram: asker.telegram,
+        photo: asker.photo,
+      },
+    });
+    const solver = await createTestUser({
+      fullname: "Solver",
+      username: `solver-${Date.now()}-${Math.random()}`,
+    });
+    const actor = await createTestUser({
+      fullname: "Actor",
+      username: `actor-${Date.now()}-${Math.random()}`,
+    });
 
     const req = {
       user: { id: String(actor._id), role: "editor" },
@@ -66,7 +98,7 @@ describe("completeAskById", () => {
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(actor._id));
     expect(events[0].description).toBe(
-      "Завершено заявку на артикул ART-COMPLETE (виконавець: Solver)"
+      "Завершено заявку на артикул ART-COMPLETE (виконавець: Solver)",
     );
   });
 
@@ -101,5 +133,3 @@ describe("completeAskById", () => {
     expect(responseJson.message).toBe("Validation error");
   });
 });
-
-

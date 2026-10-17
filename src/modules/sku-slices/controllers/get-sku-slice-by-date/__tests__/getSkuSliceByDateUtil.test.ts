@@ -50,8 +50,6 @@ describe("getSkuSliceByDateUtil", () => {
     await seedSkuSliceMonthDay("air", date, {
       "other-key": { stock: 1, price: 2 },
     });
-    expect(
-      await getSkuSliceByDateUtil({ skuId: sku._id.toString(), date }),
-    ).toBeNull();
+    expect(await getSkuSliceByDateUtil({ skuId: sku._id.toString(), date })).toBeNull();
   });
 });

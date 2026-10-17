@@ -21,7 +21,7 @@ describe("getAirGroupPagesProducts — AIR_IDLE_MODE", () => {
       getAirGroupPagesProducts({
         groupUrl: "https://airballoons.com.ua/ua/category",
         maxPages: 1,
-      })
+      }),
     ).rejects.toMatchObject({
       name: "AirServerIdleError",
       code: AIR_SERVER_IDLE_CODE,

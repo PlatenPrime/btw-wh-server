@@ -36,7 +36,7 @@ describe("getPerfectStockData", () => {
 
   function mockRefreshMissThenCart(
     cart: { status?: number; data: unknown; headers?: Record<string, unknown> },
-    deleteResp: { data?: unknown } = {}
+    deleteResp: { data?: unknown } = {},
   ): void {
     mockPost
       .mockResolvedValueOnce({ status: 200, data: "{}" })
@@ -61,8 +61,7 @@ describe("getPerfectStockData", () => {
   }
 
   it("returns stock and price per piece when title has pack count", async () => {
-    const productUrl =
-      "https://perfectparty.in.ua/bez-malyunku-po-10-sht20-sht/16467-product.html";
+    const productUrl = "https://perfectparty.in.ua/bez-malyunku-po-10-sht20-sht/16467-product.html";
     mockGet.mockResolvedValueOnce({
       data: inStockPageHtml(),
       headers: {
@@ -100,7 +99,7 @@ describe("getPerfectStockData", () => {
         headers: expect.objectContaining({
           Cookie: expect.stringContaining("PHPSESSID=abc"),
         }),
-      })
+      }),
     );
   });
 
@@ -202,9 +201,7 @@ describe("getPerfectStockData", () => {
       },
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/path/16467-item.html"
-    );
+    const result = await getPerfectStockData("https://perfectparty.in.ua/path/16467-item.html");
     expect(result.stock).toBe(3);
     expect(result.price).toBe(99.9);
     expect(result.source).toBe("cart");
@@ -244,7 +241,7 @@ describe("getPerfectStockData", () => {
         headers: expect.objectContaining({
           Cookie: expect.stringContaining("PHPSESSID=abc"),
         }),
-      })
+      }),
     );
     expectRefreshThenCartDelete(productUrl);
   });
@@ -260,9 +257,7 @@ describe("getPerfectStockData", () => {
         headers: {},
       });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/path/16467-item.html"
-    );
+    const result = await getPerfectStockData("https://perfectparty.in.ua/path/16467-item.html");
 
     expect(result).toEqual({ stock: -1, price: -1, source: "unavailable" });
     expect(mockPost).not.toHaveBeenCalled();
@@ -296,9 +291,7 @@ describe("getPerfectStockData", () => {
       headers: {},
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/path/16467-item.html"
-    );
+    const result = await getPerfectStockData("https://perfectparty.in.ua/path/16467-item.html");
 
     expect(result).toEqual({
       stock: 0,
@@ -324,9 +317,7 @@ describe("getPerfectStockData", () => {
       headers: {},
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/path/16467-item.html"
-    );
+    const result = await getPerfectStockData("https://perfectparty.in.ua/path/16467-item.html");
 
     expect(result).toEqual({
       stock: 0,
@@ -411,7 +402,7 @@ describe("getPerfectStockData", () => {
     });
 
     const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/x/12115-3651-product.html"
+      "https://perfectparty.in.ua/x/12115-3651-product.html",
     );
 
     expect(result).toEqual({
@@ -440,7 +431,7 @@ describe("getPerfectStockData", () => {
     });
 
     const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/x/10276-3315-product.html"
+      "https://perfectparty.in.ua/x/10276-3315-product.html",
     );
 
     expect(result).toEqual({
@@ -468,9 +459,7 @@ describe("getPerfectStockData", () => {
       headers: {},
     });
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/x/12115-product.html"
-    );
+    const result = await getPerfectStockData("https://perfectparty.in.ua/x/12115-product.html");
 
     expect(result).toEqual({
       stock: 4,
@@ -498,7 +487,7 @@ describe("getPerfectStockData", () => {
     });
 
     const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/x/12115-3651-product.html"
+      "https://perfectparty.in.ua/x/12115-3651-product.html",
     );
 
     expect(result).toEqual({
@@ -579,9 +568,7 @@ describe("getPerfectStockData", () => {
     const result = await getPerfectStockData(productUrl);
 
     expect(result).toEqual({ stock: -1, price: -1, source: "unavailable" });
-    const deleteCall = mockPost.mock.calls.find((call) =>
-      String(call[1]).includes("delete=1")
-    );
+    const deleteCall = mockPost.mock.calls.find((call) => String(call[1]).includes("delete=1"));
     expect(deleteCall?.[0]).toBe(CART_URL);
   });
 
@@ -603,7 +590,7 @@ describe("getPerfectStockData", () => {
     mockGet.mockResolvedValueOnce({ status: 500, data: "" });
 
     const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/x/12115-3651-product.html"
+      "https://perfectparty.in.ua/x/12115-3651-product.html",
     );
 
     expect(result).toEqual({ stock: -1, price: -1, source: "unavailable" });
@@ -613,16 +600,12 @@ describe("getPerfectStockData", () => {
   it("returns negative outcome on request failure", async () => {
     mockGet.mockRejectedValueOnce(new Error("Network error"));
 
-    const result = await getPerfectStockData(
-      "https://perfectparty.in.ua/path/16467-item.html"
-    );
+    const result = await getPerfectStockData("https://perfectparty.in.ua/path/16467-item.html");
 
     expect(result).toEqual({ stock: -1, price: -1, source: "unavailable" });
   });
 
   it("throws on empty link", async () => {
-    await expect(getPerfectStockData("")).rejects.toThrow(
-      "Link is required and must be a string"
-    );
+    await expect(getPerfectStockData("")).rejects.toThrow("Link is required and must be a string");
   });
 });

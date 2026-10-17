@@ -11,10 +11,7 @@ function firstQuery(q: Request["query"], key: string): string | undefined {
  * @desc    Продажи и выручка по артикулу на дату
  * @route   GET /api/art-sales-reports/artikul/:artikul/by-date?date=
  */
-export const getArtSalesByDateController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const getArtSalesByDateController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getArtSalesByDateSchema.safeParse({
     artikul: req.params.artikul,
     date: firstQuery(req.query, "date"),
@@ -23,7 +20,7 @@ export const getArtSalesByDateController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }
@@ -31,8 +28,7 @@ export const getArtSalesByDateController = async (
   const result = await getArtSalesByDateUtil(parseResult.data);
   if (!result) {
     res.status(404).json({
-      message:
-        "Art not found for provided artikul, or no slice data for this date",
+      message: "Art not found for provided artikul, or no slice data for this date",
     });
     return;
   }

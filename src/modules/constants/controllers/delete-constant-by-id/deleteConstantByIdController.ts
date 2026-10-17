@@ -9,17 +9,14 @@ import { deleteConstantByIdUtil } from "./utils/deleteConstantByIdUtil.js";
  * @route   DELETE /api/constants/id/:id
  * @access  PRIME
  */
-export const deleteConstantByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const deleteConstantByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = deleteConstantByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

@@ -10,8 +10,6 @@ describe("runSkugrSlicesTodaySchema", () => {
   });
 
   it("rejects invalid skugrId", () => {
-    expect(
-      runSkugrSlicesTodaySchema.safeParse({ skugrId: "bad" }).success
-    ).toBe(false);
+    expect(runSkugrSlicesTodaySchema.safeParse({ skugrId: "bad" }).success).toBe(false);
   });
 });

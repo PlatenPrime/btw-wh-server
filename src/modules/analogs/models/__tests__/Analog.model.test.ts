@@ -84,7 +84,7 @@ describe("Analog Model", () => {
           konkName: "k2",
           prodName: "p",
           url,
-        })
+        }),
       ).rejects.toThrow();
       const count = await Analog.countDocuments();
       expect(count).toBe(1);

@@ -2,17 +2,14 @@ import { Request, Response } from "express";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 
-export const resetPalletsSectorsController = async (
-  req: Request,
-  res: Response
-) => {
+export const resetPalletsSectorsController = async (req: Request, res: Response) => {
   try {
     const result = await Pallet.updateMany(
       {},
       {
         $set: { sector: 0 },
         $unset: { palgr: "" },
-      }
+      },
     );
 
     if (req.user?.id) {
@@ -37,4 +34,3 @@ export const resetPalletsSectorsController = async (
     });
   }
 };
-

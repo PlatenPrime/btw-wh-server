@@ -15,9 +15,9 @@ describe("updateDelArtikulsByDelIdUtil", () => {
   });
 
   it("throws when del not found", async () => {
-    await expect(
-      updateDelArtikulsByDelIdUtil("000000000000000000000000")
-    ).rejects.toThrow("Del not found");
+    await expect(updateDelArtikulsByDelIdUtil("000000000000000000000000")).rejects.toThrow(
+      "Del not found",
+    );
   });
 
   it("updates stock from actualQuantity and nameukr from Art", async () => {
@@ -33,7 +33,7 @@ describe("updateDelArtikulsByDelIdUtil", () => {
       new Map([
         ["A1", { actualQuantity: 10, sliceQuantity: 11, price: 0 }],
         ["A2", { actualQuantity: 20, sliceQuantity: 21, price: 0 }],
-      ])
+      ]),
     );
     const result = await updateDelArtikulsByDelIdUtil(del._id.toString());
     expect(result).toEqual({
@@ -43,10 +43,7 @@ describe("updateDelArtikulsByDelIdUtil", () => {
       notFound: 0,
     });
     const found = await Del.findById(del._id);
-    const a = found?.artikuls as Record<
-      string,
-      { quant: number; stock: number; nameukr?: string }
-    >;
+    const a = found?.artikuls as Record<string, { quant: number; stock: number; nameukr?: string }>;
     expect(a["A1"]).toEqual({ quant: 3, stock: 10, nameukr: "Name1" });
     expect(a["A2"]).toEqual({ quant: 7, stock: 20, nameukr: "Name2" });
   });
@@ -62,17 +59,14 @@ describe("updateDelArtikulsByDelIdUtil", () => {
       },
     });
     vi.mocked(getCachedSharikProductRestsMap).mockResolvedValue(
-      new Map([["A1", { actualQuantity: 10, sliceQuantity: 10, price: 0 }]])
+      new Map([["A1", { actualQuantity: 10, sliceQuantity: 10, price: 0 }]]),
     );
     const result = await updateDelArtikulsByDelIdUtil(del._id.toString());
     expect(result.total).toBe(2);
     expect(result.updated).toBe(1);
     expect(result.notFound).toBe(1);
     const found = await Del.findById(del._id);
-    const a = found?.artikuls as Record<
-      string,
-      { quant: number; stock?: number }
-    >;
+    const a = found?.artikuls as Record<string, { quant: number; stock?: number }>;
     expect(a["A1"].stock).toBe(10);
     expect(a["A2"].stock).toBe(8);
   });

@@ -36,8 +36,6 @@ describe("sendMessageToBTWChat", () => {
     const error = new Error("Test error");
     mockSendMessageToTGChat.mockRejectedValueOnce(error);
 
-    await expect(sendMessageToBTWChat("Test message")).rejects.toThrow(
-      "Test error"
-    );
+    await expect(sendMessageToBTWChat("Test message")).rejects.toThrow("Test error");
   });
 });

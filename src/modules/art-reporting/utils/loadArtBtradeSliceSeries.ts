@@ -27,9 +27,7 @@ export type ArtBtradeSliceSeriesLoad = {
   coalescedFull: BtradeReportingCoalescedPoint[];
 };
 
-export type LoadArtBtradeSliceSeriesResult =
-  | ArtBtradeSliceSeriesLoad
-  | { ok: false };
+export type LoadArtBtradeSliceSeriesResult = ArtBtradeSliceSeriesLoad | { ok: false };
 
 export type ArtBtradeSalesPoint = {
   date: string;
@@ -51,26 +49,22 @@ export async function loadArtBtradeSliceSeries(
   const artikulKey = input.artikul.trim();
   if (!artikulKey) return { ok: false };
 
-  const artDoc = await Art.findOne({ artikul: artikulKey })
-    .select("nameukr")
-    .lean();
+  const artDoc = await Art.findOne({ artikul: artikulKey }).select("nameukr").lean();
   if (!artDoc) return { ok: false };
 
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
   const warmStart = btradeSliceDateMinusDays(dateFrom, 1);
 
-  const sliceRows = await aggregateBtradeSlices<{ date: Date; data?: unknown }>(
-    [
-      {
-        $match: {
-          date: { $gte: warmStart, $lte: dateTo },
-        },
+  const sliceRows = await aggregateBtradeSlices<{ date: Date; data?: unknown }>([
+    {
+      $match: {
+        date: { $gte: warmStart, $lte: dateTo },
       },
-      { $sort: { date: 1 } },
-      sliceDataProjectForArtikulList([artikulKey]),
-    ],
-  );
+    },
+    { $sort: { date: 1 } },
+    sliceDataProjectForArtikulList([artikulKey]),
+  ]);
 
   const byDate = new Map<number, Record<string, IBtradeSliceDataItem>>();
   for (const row of sliceRows) {
@@ -119,8 +113,7 @@ export function computeArtSalesPointsFromSeries(
     const priceVal = coalescedFull[idx]!.price;
     const sales = dayResult.sales;
     const revenue = computeRevenueForDay(sales, priceVal);
-    const price =
-      typeof priceVal === "number" && Number.isFinite(priceVal) ? priceVal : 0;
+    const price = typeof priceVal === "number" && Number.isFinite(priceVal) ? priceVal : 0;
     return {
       date: d.toISOString(),
       sales,

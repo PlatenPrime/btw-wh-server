@@ -1,8 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  ANALOG_SLICE_KONK_NAMES,
-  calculateAnalogSlice,
-} from "../calculateAnalogSlice.js";
+import { ANALOG_SLICE_KONK_NAMES, calculateAnalogSlice } from "../calculateAnalogSlice.js";
 import { runAnalogSliceForKonkUtil } from "../runAnalogSliceForKonkUtil.js";
 
 vi.mock("../runAnalogSliceForKonkUtil.js");

@@ -3,9 +3,7 @@ import { toStockAndPrice } from "../perfectPerPieceStock.js";
 
 describe("toStockAndPrice", () => {
   it("multiplies stock by pack from title", () => {
-    expect(
-      toStockAndPrice(9, 45, "Кулька 10 шт. в уп.", "<html></html>")
-    ).toEqual({
+    expect(toStockAndPrice(9, 45, "Кулька 10 шт. в уп.", "<html></html>")).toEqual({
       stock: 90,
       price: 4.5,
       title: "Кулька 10 шт. в уп.",
@@ -14,9 +12,7 @@ describe("toStockAndPrice", () => {
 
   it("uses HTML pack when title has no шт", () => {
     const html = "<p>Штук в упаковці: 100</p>";
-    expect(
-      toStockAndPrice(1, 275, "Кулька Gemar пастель", html)
-    ).toEqual({
+    expect(toStockAndPrice(1, 275, "Кулька Gemar пастель", html)).toEqual({
       stock: 100,
       price: 2.75,
       title: "Кулька Gemar пастель",
@@ -29,14 +25,7 @@ describe("toStockAndPrice", () => {
         <div class="infoblock"><p class="infoblock_pp">Штук в упаковці: 1</p></div>
         <div class="product-description">100 мл концентрату додати 400 мл води.</div>
       </section>`;
-    expect(
-      toStockAndPrice(
-        489,
-        89,
-        "Концентровні бульбашки, 100 мл. (1:4)",
-        html
-      )
-    ).toEqual({
+    expect(toStockAndPrice(489, 89, "Концентровні бульбашки, 100 мл. (1:4)", html)).toEqual({
       stock: 489,
       price: 89,
       title: "Концентровні бульбашки, 100 мл. (1:4)",

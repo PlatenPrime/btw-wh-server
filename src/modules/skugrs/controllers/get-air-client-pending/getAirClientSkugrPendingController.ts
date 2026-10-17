@@ -7,7 +7,7 @@ import { getAirClientSkugrPendingUtil } from "./utils/getAirClientSkugrPendingUt
  */
 export const getAirClientSkugrPendingController = async (
   _req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const result = await getAirClientSkugrPendingUtil();
 

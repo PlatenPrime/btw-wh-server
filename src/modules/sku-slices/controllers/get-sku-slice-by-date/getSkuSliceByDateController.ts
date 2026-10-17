@@ -6,10 +6,7 @@ import { getSkuSliceByDateUtil } from "./utils/getSkuSliceByDateUtil.js";
  * @desc    Срез по SKU на дату (stock, price)
  * @route   GET /api/sku-slices/sku/:skuId?date=
  */
-export const getSkuSliceByDateController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getSkuSliceByDateController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getSkuSliceByDateSchema.safeParse({
     skuId: req.params.skuId,
     date: req.query.date,
@@ -17,7 +14,7 @@ export const getSkuSliceByDateController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }
@@ -25,8 +22,7 @@ export const getSkuSliceByDateController = async (
   const result = await getSkuSliceByDateUtil(parseResult.data);
   if (!result) {
     res.status(404).json({
-      message:
-        "Sku not found, sku has no productId, or no slice data for this date",
+      message: "Sku not found, sku has no productId, or no slice data for this date",
     });
     return;
   }

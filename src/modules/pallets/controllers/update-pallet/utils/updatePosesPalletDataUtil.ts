@@ -32,8 +32,6 @@ export const updatePosesPalletDataUtil = async ({
   }
 
   if (Object.keys(updateFields).length > 0) {
-    await Pos.updateMany({ pallet: palletId }, { $set: updateFields }).session(
-      session,
-    );
+    await Pos.updateMany({ pallet: palletId }, { $set: updateFields }).session(session);
   }
 };

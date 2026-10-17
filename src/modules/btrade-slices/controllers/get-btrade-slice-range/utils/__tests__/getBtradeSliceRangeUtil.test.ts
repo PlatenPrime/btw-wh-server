@@ -34,9 +34,7 @@ describe("getBtradeSliceRangeUtil", () => {
 
     expect(r.ok).toBe(true);
     if (r.ok) {
-      expect(r.data).toEqual([
-        { date: d1.toISOString(), quantity: 5, price: 100 },
-      ]);
+      expect(r.data).toEqual([{ date: d1.toISOString(), quantity: 5, price: 100 }]);
     }
   });
 });

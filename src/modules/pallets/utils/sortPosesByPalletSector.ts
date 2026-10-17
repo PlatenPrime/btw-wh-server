@@ -23,4 +23,3 @@ export function sortPosesByPalletSector(poses: PosWithPalletData[]) {
     return 0;
   });
 }
-

@@ -17,9 +17,7 @@ describe("sliceDataAggregationStages", () => {
 
   it("sliceDataProject helpers keep legacy shape", () => {
     expect(sliceDataProjectForSingleProductId("air-1").$project).toBeDefined();
-    expect(sliceDataProjectForProductIdList(["a", "b"]).$project.konkName).toBe(
-      1,
-    );
+    expect(sliceDataProjectForProductIdList(["a", "b"]).$project.konkName).toBe(1);
   });
 
   it("loadSkuSliceRowsForProduct returns day rows", async () => {
@@ -28,12 +26,7 @@ describe("sliceDataAggregationStages", () => {
       "agg-k-1": { stock: 3, price: 4 },
       other: { stock: 9, price: 9 },
     });
-    const rows = await loadSkuSliceRowsForProduct(
-      "air",
-      "agg-k-1",
-      d,
-      d,
-    );
+    const rows = await loadSkuSliceRowsForProduct("air", "agg-k-1", d, d);
     expect(rows).toHaveLength(1);
     expect(rows[0]?.data).toEqual({ "agg-k-1": { stock: 3, price: 4 } });
   });
@@ -60,9 +53,7 @@ describe("sliceDataAggregationStages", () => {
   it("aggregateSkuSlices shim loads from months", async () => {
     const d = new Date("2026-10-09T00:00:00.000Z");
     await seedSkuSliceMonthDay("air", d, { x: { stock: 1, price: 2 } });
-    const rows = await aggregateSkuSlices([
-      { $match: { konkName: "air", date: d } },
-    ]);
+    const rows = await aggregateSkuSlices([{ $match: { konkName: "air", date: d } }]);
     expect(rows).toHaveLength(1);
     expect((rows[0] as { data?: Record<string, unknown> }).data).toEqual({
       x: { stock: 1, price: 2 },

@@ -17,4 +17,3 @@ export const createVariantSchema = z.object({
 export type CreateVariantInput = z.infer<typeof createVariantSchema>;
 /** Input type for callers that may omit optional/default fields (e.g. tests) */
 export type CreateVariantInputOptional = z.input<typeof createVariantSchema>;
-

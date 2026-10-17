@@ -1,9 +1,4 @@
-export type PerfectStockSource =
-  | "data-product"
-  | "refresh"
-  | "cart"
-  | "html-oos"
-  | "unavailable";
+export type PerfectStockSource = "data-product" | "refresh" | "cart" | "html-oos" | "unavailable";
 
 export interface PerfectProductInfo {
   stock: number;

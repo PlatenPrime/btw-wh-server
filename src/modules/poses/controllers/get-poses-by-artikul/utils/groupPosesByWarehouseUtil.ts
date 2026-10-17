@@ -9,9 +9,7 @@ type GroupedPoses = {
 /**
  * Группирует позиции по складам (pogrebi, merezhi, other)
  */
-export const groupPosesByWarehouseUtil = (
-  poses: IPos[]
-): GroupedPoses => {
+export const groupPosesByWarehouseUtil = (poses: IPos[]): GroupedPoses => {
   const pogrebi: IPos[] = [];
   const merezhi: IPos[] = [];
   const other: IPos[] = [];
@@ -29,4 +27,3 @@ export const groupPosesByWarehouseUtil = (
 
   return { pogrebi, merezhi, other };
 };
-

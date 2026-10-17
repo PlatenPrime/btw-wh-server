@@ -2,16 +2,12 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Row } from "../../../rows/models/Row.js";
-import { Pallet } from "../../models/Pallet.js";
 import { updatePalletSchema } from "./schemas/updatePalletSchema.js";
 import { updatePalletUtil } from "./utils/updatePalletUtil.js";
 import { updatePosesPalletDataUtil } from "./utils/updatePosesPalletDataUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const updatePalletController = async (
-  req: Request,
-  res: Response
-) => {
+export const updatePalletController = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
 
   try {
@@ -23,7 +19,7 @@ export const updatePalletController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -97,11 +93,3 @@ export const updatePalletController = async (
     await session.endSession();
   }
 };
-
-
-
-
-
-
-
-

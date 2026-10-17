@@ -5,10 +5,7 @@ import { deleteAskUtil } from "./utils/deleteAskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
-export const deleteAskById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const deleteAskById = async (req: Request, res: Response): Promise<void> => {
   const session = await mongoose.startSession();
 
   try {
@@ -19,7 +16,7 @@ export const deleteAskById = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -66,4 +63,3 @@ export const deleteAskById = async (
     await session.endSession();
   }
 };
-

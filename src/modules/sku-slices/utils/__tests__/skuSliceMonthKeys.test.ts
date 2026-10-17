@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  toSliceMonthDate,
-  toSliceMonthDayKey,
-} from "../skuSliceMonthKeys.js";
+import { toSliceMonthDate, toSliceMonthDayKey } from "../skuSliceMonthKeys.js";
 
 describe("skuSliceMonthKeys", () => {
   it("toSliceMonthDate normalizes to UTC midnight of the 1st", () => {
@@ -15,8 +12,6 @@ describe("skuSliceMonthKeys", () => {
   });
 
   it("toSliceMonthDayKey returns YYYY-MM-DD", () => {
-    expect(toSliceMonthDayKey(new Date("2026-10-07T12:00:00.000Z"))).toBe(
-      "2026-10-07",
-    );
+    expect(toSliceMonthDayKey(new Date("2026-10-07T12:00:00.000Z"))).toBe("2026-10-07");
   });
 });

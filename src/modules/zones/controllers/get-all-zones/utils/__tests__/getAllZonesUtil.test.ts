@@ -78,4 +78,3 @@ describe("getAllZonesUtil", () => {
     expect(result.pagination.total).toBe(0);
   });
 });
-

@@ -6,10 +6,7 @@ import { getAnalogSalesRangeUtil } from "./utils/getAnalogSalesRangeUtil.js";
  * @desc    Получить массив продаж и выручки по аналогу за период дат (для графиков)
  * @route   GET /api/analog-slices/analog/:analogId/sales-range?dateFrom=2026-03-01&dateTo=2026-03-31
  */
-export const getAnalogSalesRangeController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAnalogSalesRangeController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getAnalogSalesRangeSchema.safeParse({
     analogId: req.params.analogId,
     dateFrom: req.query.dateFrom,
@@ -18,7 +15,7 @@ export const getAnalogSalesRangeController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

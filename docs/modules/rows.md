@@ -35,9 +35,11 @@
 Получение всех рядов.
 
 **Запрос:**
+
 - Query параметры отсутствуют
 
 **Ответ:**
+
 - 200: `Array<Row>`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -48,9 +50,11 @@
 Получение ряда по идентификатору.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `Row`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - ряд не найден
@@ -63,9 +67,11 @@
 Получение ряда по названию.
 
 **Запрос:**
+
 - Path параметры: `title` (string)
 
 **Ответ:**
+
 - 200: `Row`
 - 400: `{ message: string, errors?: array }` - название не указано
 - 404: `{ message: string }` - ряд не найден
@@ -78,9 +84,11 @@
 Создание нового ряда.
 
 **Запрос:**
+
 - Body: `{ title: string }`
 
 **Ответ:**
+
 - 201: `Row`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 409: `{ message: string }` - ряд с таким названием уже существует
@@ -93,10 +101,12 @@
 Обновление ряда.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 - Body: `{ title?: string }` (поле опционально)
 
 **Ответ:**
+
 - 200: `Row`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - ряд не найден
@@ -110,9 +120,11 @@
 Удаление ряда.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `Row`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - ряд не найден
@@ -158,4 +170,3 @@
   updatedAt?: Date;
 }
 ```
-

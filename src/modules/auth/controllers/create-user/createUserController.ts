@@ -7,10 +7,7 @@ import { createUserUtil } from "../registrate-user/utils/createUserUtil.js";
 import { getUserWithoutPasswordUtil } from "../../utils/getUserWithoutPasswordUtil.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
-export const createUserController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createUserController = async (req: Request, res: Response): Promise<void> => {
   const session = await mongoose.startSession();
 
   try {
@@ -33,7 +30,7 @@ export const createUserController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

@@ -11,7 +11,7 @@ import { groupPosesByWarehouseUtil } from "./groupPosesByWarehouseUtil.js";
  * @returns Ответ с обработанными данными по позициям
  */
 export const processPosesByArtikulUtil = async (
-  artikul: string
+  artikul: string,
 ): Promise<GetPosesByArtikulResponse> => {
   // Получаем позиции
   const poses = await getPosesByArtikulUtil(artikul);
@@ -28,8 +28,7 @@ export const processPosesByArtikulUtil = async (
   }
 
   // Группируем по складам
-  const { pogrebi: pogrebiPoses, merezhi: merezhiPoses } =
-    groupPosesByWarehouseUtil(poses);
+  const { pogrebi: pogrebiPoses, merezhi: merezhiPoses } = groupPosesByWarehouseUtil(poses);
 
   // Сортируем по сектору паллеты
   sortPosesByPalletSector(pogrebiPoses);

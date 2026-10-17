@@ -6,19 +6,17 @@ describe("getDojdevikGroupPagesProductsSchema", () => {
     expect(
       getDojdevikGroupPagesProductsSchema.safeParse({
         groupUrl: "https://dojdevik.com.ua/ua/g1",
-      }).success
+      }).success,
     ).toBe(true);
   });
 
   it("rejects invalid groupUrl or maxPages", () => {
-    expect(
-      getDojdevikGroupPagesProductsSchema.safeParse({ groupUrl: "" }).success
-    ).toBe(false);
+    expect(getDojdevikGroupPagesProductsSchema.safeParse({ groupUrl: "" }).success).toBe(false);
     expect(
       getDojdevikGroupPagesProductsSchema.safeParse({
         groupUrl: "https://dojdevik.com.ua/ua/g1",
         maxPages: 0,
-      }).success
+      }).success,
     ).toBe(false);
   });
 });

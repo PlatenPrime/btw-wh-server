@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Block } from "../../../../blocks/models/Block.js";
 import { Seg } from "../../../models/Seg.js";

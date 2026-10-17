@@ -15,9 +15,7 @@ type CalculatePalletsSectorsOptions = {
  * where palletIndex starts from 1 inside group.pallets array.
  * Pallets not belonging to any group get sector = 0 and palgr unset.
  */
-export const calculatePalletsSectorsUtil = async (
-  options: CalculatePalletsSectorsOptions = {},
-) => {
+export const calculatePalletsSectorsUtil = async (options: CalculatePalletsSectorsOptions = {}) => {
   const { groupIds } = options;
 
   const groupQuery = groupIds ? { _id: { $in: groupIds } } : {};
@@ -125,8 +123,7 @@ export const calculatePalletsSectorsUtil = async (
       const posBulkWriteResult = await Pos.bulkWrite(posOperations);
 
       updatedPositions =
-        (posBulkWriteResult as unknown as { modifiedCount?: number })
-          .modifiedCount ?? 0;
+        (posBulkWriteResult as unknown as { modifiedCount?: number }).modifiedCount ?? 0;
     }
   }
 

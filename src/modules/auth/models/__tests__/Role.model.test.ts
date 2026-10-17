@@ -20,9 +20,7 @@ describe("Role Model", () => {
     it("should enforce unique value", async () => {
       await Role.create({ value: "USER", name: "User" });
 
-      await expect(
-        Role.create({ value: "USER", name: "Duplicate" })
-      ).rejects.toThrow();
+      await expect(Role.create({ value: "USER", name: "Duplicate" })).rejects.toThrow();
     });
 
     it("should default value to USER when omitted", async () => {

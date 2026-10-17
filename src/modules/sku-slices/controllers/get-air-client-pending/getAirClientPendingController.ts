@@ -7,7 +7,7 @@ import { getAirClientPendingUtil } from "./utils/getAirClientPendingUtil.js";
  */
 export const getAirClientPendingController = async (
   _req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const result = await getAirClientPendingUtil();
 

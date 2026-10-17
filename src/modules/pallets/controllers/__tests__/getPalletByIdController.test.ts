@@ -60,11 +60,3 @@ describe("getPalletByIdController", () => {
     expect(responseJson.message).toBe("Validation error");
   });
 });
-
-
-
-
-
-
-
-

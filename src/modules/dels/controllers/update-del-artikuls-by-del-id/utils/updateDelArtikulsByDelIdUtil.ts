@@ -20,7 +20,7 @@ const isDelArtikulValue = (v: unknown): v is IDelArtikulValue =>
  * nameukr — из Art одним bulk-запросом. quant сохраняется.
  */
 export const updateDelArtikulsByDelIdUtil = async (
-  delId: string
+  delId: string,
 ): Promise<UpdateDelArtikulsByDelIdResult> => {
   const del = await Del.findById(delId);
   if (!del) {
@@ -46,9 +46,7 @@ export const updateDelArtikulsByDelIdUtil = async (
   const arts = await Art.find({ artikul: { $in: artikulKeys } })
     .select("artikul nameukr")
     .lean();
-  const nameukrByArtikul = new Map(
-    arts.map((a) => [a.artikul, (a.nameukr ?? "").trim()] as const)
-  );
+  const nameukrByArtikul = new Map(arts.map((a) => [a.artikul, (a.nameukr ?? "").trim()] as const));
 
   for (const artikul of artikulKeys) {
     const previous = artikulsObj[artikul];

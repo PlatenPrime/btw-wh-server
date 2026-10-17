@@ -1,22 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AxiosInstance } from "axios";
-import {
-  buildPromUaGraphqlUrl,
-  postPromUaGraphql,
-} from "../postPromUaGraphql.js";
+import { buildPromUaGraphqlUrl, postPromUaGraphql } from "../postPromUaGraphql.js";
 
 const ORIGIN = "https://balun.com.ua";
 
 describe("buildPromUaGraphqlUrl", () => {
   it("builds company-site GraphQL URL with operation name", () => {
     expect(buildPromUaGraphqlUrl(ORIGIN, "AddProductToCart")).toBe(
-      `${ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`
+      `${ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`,
     );
   });
 
   it("strips trailing slash from origin", () => {
     expect(buildPromUaGraphqlUrl(`${ORIGIN}/`, "AddProductToCart")).toBe(
-      `${ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`
+      `${ORIGIN}/bfg/graphql?operation_name=AddProductToCart&source=COMPANY_SITE`,
     );
   });
 });
@@ -60,7 +57,7 @@ describe("postPromUaGraphql", () => {
           "X-Language": "uk",
           "X-Requested-With": "XMLHttpRequest",
         }),
-      })
+      }),
     );
   });
 

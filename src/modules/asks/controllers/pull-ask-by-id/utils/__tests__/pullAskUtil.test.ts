@@ -7,10 +7,7 @@ vi.mock("../../../../../../utils/getCurrentFormattedDateTime.js", () => ({
 
 import { pullAskUtil } from "../pullAskUtil.js";
 import { mapUserToAskUserData } from "../../../../utils/askEventsUtil.js";
-import {
-  createTestAsk,
-  createTestUser,
-} from "../../../../../../test/setup.js";
+import { createTestAsk, createTestUser } from "../../../../../../test/setup.js";
 
 describe("pullAskUtil", () => {
   beforeEach(() => {
@@ -79,4 +76,3 @@ describe("pullAskUtil", () => {
     expect(latestEvent.pullDetails?.palletData.title).toBe("Pallet B");
   });
 });
-

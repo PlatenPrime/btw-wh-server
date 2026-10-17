@@ -11,12 +11,8 @@ vi.mock("../../../utils/telegram/sendMessageToBTWChat.js", () => ({
   sendMessageToBTWChat: vi.fn(),
 }));
 
-const createAuthHeader = (
-  role: RoleType = RoleType.USER,
-  userId?: string
-) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+const createAuthHeader = (role: RoleType = RoleType.USER, userId?: string) => {
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
   const id = userId ?? new mongoose.Types.ObjectId().toString();
   const token = jwt.sign({ id, role }, secret, { expiresIn: "1h" });
   return { Authorization: `Bearer ${token}`, userId: id };
@@ -29,10 +25,7 @@ describe("Asks router integration", () => {
 
   describe("POST /api/asks", () => {
     it("401 without auth token", async () => {
-      await request(app)
-        .post("/api/asks")
-        .send({ artikul: "ART-001", askerId: "1" })
-        .expect(401);
+      await request(app).post("/api/asks").send({ artikul: "ART-001", askerId: "1" }).expect(401);
     });
 
     it("201 creates ask for authenticated USER", async () => {

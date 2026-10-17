@@ -3,10 +3,7 @@ import { loginUserSchema } from "./schemas/loginUserSchema.js";
 import { validateUserCredentialsUtil } from "./utils/validateUserCredentialsUtil.js";
 import { getLoginResponseUtil } from "./utils/getLoginResponseUtil.js";
 
-export const loginUserController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const loginUserController = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.body) {
       res.status(400).json({ message: "Invalid request body" });
@@ -20,7 +17,7 @@ export const loginUserController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -52,4 +49,3 @@ export const loginUserController = async (
     }
   }
 };
-

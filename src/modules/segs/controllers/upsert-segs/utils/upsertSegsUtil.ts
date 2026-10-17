@@ -27,9 +27,7 @@ const ensureUniqueZones = (segments: NormalizedSeg[]) => {
       const zoneKey = zoneId.toString();
       const existingSegId = usageMap.get(zoneKey);
       if (existingSegId && existingSegId !== seg.segId.toString()) {
-        throw new Error(
-          `Zone ${zoneKey} is referenced by multiple segments in payload`
-        );
+        throw new Error(`Zone ${zoneKey} is referenced by multiple segments in payload`);
       }
       usageMap.set(zoneKey, seg.segId.toString());
     }
@@ -43,16 +41,12 @@ export const upsertSegsUtil = async ({
   processedSegs: ISeg[];
 }> => {
   const normalizedSegs: NormalizedSeg[] = segs.map((seg) => {
-    const segId = seg._id
-      ? new mongoose.Types.ObjectId(seg._id)
-      : new mongoose.Types.ObjectId();
+    const segId = seg._id ? new mongoose.Types.ObjectId(seg._id) : new mongoose.Types.ObjectId();
     const blockId = new mongoose.Types.ObjectId(seg.blockId);
     const uniqueZones = Array.from(new Set(seg.zones));
 
     if (uniqueZones.length !== seg.zones.length) {
-      throw new Error(
-        `Segment ${segId.toString()} contains duplicate zone references`
-      );
+      throw new Error(`Segment ${segId.toString()} contains duplicate zone references`);
     }
 
     return {
@@ -74,9 +68,9 @@ export const upsertSegsUtil = async ({
     segIdSet.add(segKey);
   });
 
-  const blockIds = Array.from(
-    new Set(normalizedSegs.map((seg) => seg.blockId.toString()))
-  ).map((id) => new mongoose.Types.ObjectId(id));
+  const blockIds = Array.from(new Set(normalizedSegs.map((seg) => seg.blockId.toString()))).map(
+    (id) => new mongoose.Types.ObjectId(id),
+  );
 
   const blocks = await Block.find({
     _id: { $in: blockIds },
@@ -92,9 +86,7 @@ export const upsertSegsUtil = async ({
   blocks.forEach((block) => blockMap.set(block._id.toString(), block));
 
   const allZoneIds = Array.from(
-    new Set(
-      normalizedSegs.flatMap((seg) => seg.zoneIds.map((zoneId) => zoneId.toString()))
-    )
+    new Set(normalizedSegs.flatMap((seg) => seg.zoneIds.map((zoneId) => zoneId.toString()))),
   ).map((id) => new mongoose.Types.ObjectId(id));
 
   const existingZones = await Zone.find({
@@ -125,17 +117,12 @@ export const upsertSegsUtil = async ({
     const existingSeg = await Seg.findById(segInput.segId).session(session).exec();
 
     if (existingSeg && existingSeg.block.toString() !== segInput.blockId.toString()) {
-      throw new Error(
-        `Segment ${segIdString} cannot change block reference`
-      );
+      throw new Error(`Segment ${segIdString} cannot change block reference`);
     }
 
     const zonesToRemove =
       existingSeg?.zones.filter(
-        (zone) =>
-          !segInput.zoneIds.some((inputZoneId) =>
-            inputZoneId.equals(zone._id)
-          )
+        (zone) => !segInput.zoneIds.some((inputZoneId) => inputZoneId.equals(zone._id)),
       ) ?? [];
 
     if (zonesToRemove.length > 0) {
@@ -145,16 +132,13 @@ export const upsertSegsUtil = async ({
           $unset: { seg: "" },
           $set: { sector: 0 },
         },
-        { session }
+        { session },
       );
     }
 
     const zonesToAdd = existingSeg
       ? segInput.zoneIds.filter(
-          (zoneId) =>
-            !existingSeg.zones.some((existingZone) =>
-              zoneId.equals(existingZone._id)
-            )
+          (zoneId) => !existingSeg.zones.some((existingZone) => zoneId.equals(existingZone._id)),
         )
       : segInput.zoneIds;
 
@@ -170,7 +154,7 @@ export const upsertSegsUtil = async ({
         throw new Error(
           `Zones already belong to other segments: ${conflictingZones
             .map((zone) => zone._id.toString())
-            .join(", ")}`
+            .join(", ")}`,
         );
       }
     }
@@ -185,7 +169,7 @@ export const upsertSegsUtil = async ({
             sector,
           },
         },
-        { session }
+        { session },
       );
     }
 
@@ -209,7 +193,7 @@ export const upsertSegsUtil = async ({
       zones: zonesData,
     };
 
-    let segDoc: ISeg | null = null;
+    let segDoc: ISeg | null;
 
     if (existingSeg) {
       segDoc = await Seg.findByIdAndUpdate(segInput.segId, payload, {
@@ -223,11 +207,7 @@ export const upsertSegsUtil = async ({
       segDoc = createdSeg;
     }
 
-    await Block.updateOne(
-      { _id: block._id },
-      { $addToSet: { segs: segInput.segId } },
-      { session }
-    );
+    await Block.updateOne({ _id: block._id }, { $addToSet: { segs: segInput.segId } }, { session });
 
     if (!segDoc) {
       throw new Error("Failed to persist segment");
@@ -238,5 +218,3 @@ export const upsertSegsUtil = async ({
 
   return { processedSegs };
 };
-
-

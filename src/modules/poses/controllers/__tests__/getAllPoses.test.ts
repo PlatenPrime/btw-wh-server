@@ -79,11 +79,9 @@ describe("getAllPoses Controller", () => {
     });
     const res = createMockResponse();
     await getAllPoses(req as any, res as any);
-    expect(
-      res.body.data.every(
-        (p: any) => p.pallet._id.toString() === pallet._id.toString()
-      )
-    ).toBe(true);
+    expect(res.body.data.every((p: any) => p.pallet._id.toString() === pallet._id.toString())).toBe(
+      true,
+    );
   });
 
   it("should return empty array if no poses", async () => {

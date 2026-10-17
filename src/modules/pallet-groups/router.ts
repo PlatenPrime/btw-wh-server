@@ -19,34 +19,14 @@ import {
 const router = Router();
 
 // GET routes - available for all authenticated users
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllPalletGroups),
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllPalletGroups));
 
-router.get(
-  "/free-pallets",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getFreePallets),
-);
+router.get("/free-pallets", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getFreePallets));
 
-router.get(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getPalletGroupById),
-);
+router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getPalletGroupById));
 
 // POST routes - ADMIN only
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createPalletGroup),
-);
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createPalletGroup));
 
 // PATCH / PUT routes - ADMIN only
 router.patch(
@@ -56,20 +36,10 @@ router.patch(
   asyncHandler(reorderPalletGroups),
 );
 
-router.put(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(updatePalletGroup),
-);
+router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updatePalletGroup));
 
 // DELETE routes - PRIME only
-router.delete(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.PRIME]),
-  asyncHandler(deletePalletGroup),
-);
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deletePalletGroup));
 
 // Sector operations - ADMIN only
 router.post(
@@ -87,18 +57,8 @@ router.post(
 );
 
 // Membership operations - ADMIN only
-router.post(
-  "/set-pallets",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(setPallets),
-);
+router.post("/set-pallets", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(setPallets));
 
-router.post(
-  "/unlink-pallet",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(unlinkPallet),
-);
+router.post("/unlink-pallet", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(unlinkPallet));
 
 export default router;

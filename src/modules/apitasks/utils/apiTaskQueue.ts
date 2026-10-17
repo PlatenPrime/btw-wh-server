@@ -47,9 +47,7 @@ export function removeApiTaskFromQueue(taskId: string): boolean {
   return true;
 }
 
-export async function requestApiTaskCancel(
-  taskId: string,
-): Promise<"queued" | "running" | "none"> {
+export async function requestApiTaskCancel(taskId: string): Promise<"queued" | "running" | "none"> {
   if (removeApiTaskFromQueue(taskId)) {
     return "queued";
   }

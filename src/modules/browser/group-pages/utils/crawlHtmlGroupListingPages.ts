@@ -9,10 +9,7 @@ export type ResolveListingHref = (href: string, baseUrl: string) => string | nul
  * Для Prom.ua/Balun: `<link rel="next">` часто указывает на URL без строки запроса, хотя первая
  * страница открыта с фильтром в query (`csbss*`, `product_items_per_page` и т.д.).
  */
-export function mergeSearchParamsFromSource(
-  targetUrl: string,
-  sourceUrl: string
-): string {
+export function mergeSearchParamsFromSource(targetUrl: string, sourceUrl: string): string {
   const target = new URL(targetUrl);
   const source = new URL(sourceUrl);
   for (const [key, value] of source.searchParams) {
@@ -27,7 +24,7 @@ export function mergeSearchParamsFromSource(
 export function getNextPageUrlFromLinkRelNext(
   $: cheerio.CheerioAPI,
   currentPageUrl: string,
-  resolveUrl: ResolveListingHref
+  resolveUrl: ResolveListingHref,
 ): string | null {
   const nextHref = $('link[rel="next"]').first().attr("href")?.trim();
   if (!nextHref) {
@@ -39,10 +36,7 @@ export function getNextPageUrlFromLinkRelNext(
 export type CrawlHtmlGroupListingPagesOptions<T> = {
   startUrl: string;
   maxPages: number;
-  parseProductsFromPage: (
-    $: cheerio.CheerioAPI,
-    pageUrl: string
-  ) => Map<string, T>;
+  parseProductsFromPage: ($: cheerio.CheerioAPI, pageUrl: string) => Map<string, T>;
   getNextPageUrl: ($: cheerio.CheerioAPI, pageUrl: string) => string | null;
   /** Прервать обход, если парсер вернул пустую страницу (air, sharte). */
   stopOnEmptyPage?: boolean;
@@ -59,7 +53,7 @@ export type CrawlHtmlGroupListingPagesOptions<T> = {
  * Общий цикл: visited, maxPages, browserGet + cheerio, merge в Map, переход по next URL.
  */
 export async function crawlHtmlGroupListingPages<T>(
-  options: CrawlHtmlGroupListingPagesOptions<T>
+  options: CrawlHtmlGroupListingPagesOptions<T>,
 ): Promise<T[]> {
   const {
     startUrl,
@@ -105,9 +99,7 @@ export async function crawlHtmlGroupListingPages<T>(
     }
 
     const delayMs =
-      typeof delayBeforeNextMs === "function"
-        ? delayBeforeNextMs()
-        : delayBeforeNextMs;
+      typeof delayBeforeNextMs === "function" ? delayBeforeNextMs() : delayBeforeNextMs;
     if (delayMs > 0) {
       await sleep(delayMs);
     }

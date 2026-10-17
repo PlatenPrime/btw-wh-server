@@ -8,7 +8,7 @@ import { getAnalogSalesByDateUtil } from "./utils/getAnalogSalesByDateUtil.js";
  */
 export const getAnalogSalesByDateController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const parseResult = getAnalogSalesByDateSchema.safeParse({
     analogId: req.params.analogId,
@@ -17,7 +17,7 @@ export const getAnalogSalesByDateController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }
@@ -25,8 +25,7 @@ export const getAnalogSalesByDateController = async (
   const result = await getAnalogSalesByDateUtil(parseResult.data);
   if (!result) {
     res.status(404).json({
-      message:
-        "Analog not found, analog has no artikul, or no slice data for this date",
+      message: "Analog not found, analog has no artikul, or no slice data for this date",
     });
     return;
   }

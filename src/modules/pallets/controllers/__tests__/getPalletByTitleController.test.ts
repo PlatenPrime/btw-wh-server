@@ -24,7 +24,7 @@ describe("getPalletByTitleController", () => {
   });
 
   it("200: возвращает exists=true и данные при наличии паллеты", async () => {
-    const pallet = await createTestPallet({ title: "Pallet-Test" });
+    await createTestPallet({ title: "Pallet-Test" });
     const req = {
       params: { title: "Pallet-Test" },
     } as unknown as Request;
@@ -50,11 +50,3 @@ describe("getPalletByTitleController", () => {
     expect(responseJson.data).toBeNull();
   });
 });
-
-
-
-
-
-
-
-

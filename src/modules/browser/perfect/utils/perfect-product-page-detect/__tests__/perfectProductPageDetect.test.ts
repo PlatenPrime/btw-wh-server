@@ -8,9 +8,7 @@ describe("isPerfectProductPageHtml", () => {
   });
 
   it("detects product page by add-to-cart form", () => {
-    expect(isPerfectProductPageHtml('<form id="add-to-cart-or-refresh"></form>')).toBe(
-      true
-    );
+    expect(isPerfectProductPageHtml('<form id="add-to-cart-or-refresh"></form>')).toBe(true);
   });
 
   it("returns false for empty or unrelated HTML", () => {

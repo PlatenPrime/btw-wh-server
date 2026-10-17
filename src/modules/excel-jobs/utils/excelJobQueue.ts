@@ -49,9 +49,7 @@ export function removeExcelJobFromQueue(jobId: string): boolean {
   return true;
 }
 
-export async function requestExcelJobCancel(
-  jobId: string,
-): Promise<"queued" | "running" | "none"> {
+export async function requestExcelJobCancel(jobId: string): Promise<"queued" | "running" | "none"> {
   if (removeExcelJobFromQueue(jobId)) {
     return "queued";
   }

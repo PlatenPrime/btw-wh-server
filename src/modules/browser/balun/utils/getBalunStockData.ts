@@ -21,9 +21,7 @@ type BalunHtmlContext = {
  * Price — `data-analytics.clerk.price_original`, иначе unit.selling из корзины.
  * Негативный исход — `{ stock: -1, price: -1 }`.
  */
-export async function getBalunStockData(
-  link: string
-): Promise<BalunProductInfo> {
+export async function getBalunStockData(link: string): Promise<BalunProductInfo> {
   if (!link || typeof link !== "string") {
     throw new Error("Link is required and must be a string");
   }
@@ -40,7 +38,6 @@ export async function getBalunStockData(
     logLabel: "balun",
     parseHtmlContext: (html) => ({ htmlPrice: parseBalunHtmlPrice(html) }),
     resolveHtmlPrice: (ctx) => ctx.htmlPrice,
-    normalizeOutcome: ({ quantity, unitPrice }) =>
-      normalizeBalunOutcome(quantity, unitPrice),
+    normalizeOutcome: ({ quantity, unitPrice }) => normalizeBalunOutcome(quantity, unitPrice),
   });
 }

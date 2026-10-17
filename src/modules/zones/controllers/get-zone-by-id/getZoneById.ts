@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
 import { getZoneByIdSchema } from "./schemas/getZoneByIdSchema.js";
 import { getZoneByIdUtil } from "./utils/getZoneByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
@@ -13,7 +12,7 @@ export const getZoneById = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid zone ID format",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -44,5 +43,3 @@ export const getZoneById = async (req: Request, res: Response) => {
     }
   }
 };
-
-

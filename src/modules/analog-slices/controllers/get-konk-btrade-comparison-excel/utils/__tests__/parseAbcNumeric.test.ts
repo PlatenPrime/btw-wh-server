@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  getAbcLetterOrder,
-  parseAbcNumeric,
-} from "../getKonkBtradeComparisonRangeUtil.js";
+import { getAbcLetterOrder, parseAbcNumeric } from "../getKonkBtradeComparisonRangeUtil.js";
 
 describe("getAbcLetterOrder", () => {
   it('returns 0 for A (e.g. "50A")', () => {
@@ -34,7 +31,7 @@ describe("parseAbcNumeric", () => {
     expect(parseAbcNumeric("50A")).toBe(50);
   });
 
-  it('returns 0 for empty string', () => {
+  it("returns 0 for empty string", () => {
     expect(parseAbcNumeric("")).toBe(0);
   });
 
@@ -42,20 +39,20 @@ describe("parseAbcNumeric", () => {
     expect(parseAbcNumeric(null)).toBe(0);
   });
 
-  it('returns 0 when only letter (no leading digits)', () => {
+  it("returns 0 when only letter (no leading digits)", () => {
     expect(parseAbcNumeric("B")).toBe(0);
     expect(parseAbcNumeric("A")).toBe(0);
   });
 
-  it('extracts number when only digits', () => {
+  it("extracts number when only digits", () => {
     expect(parseAbcNumeric("999")).toBe(999);
   });
 
-  it('ignores digits after non-digit (takes leading segment only)', () => {
+  it("ignores digits after non-digit (takes leading segment only)", () => {
     expect(parseAbcNumeric("101B50")).toBe(101);
   });
 
-  it('handles whitespace by trimming', () => {
+  it("handles whitespace by trimming", () => {
     expect(parseAbcNumeric("  202C  ")).toBe(202);
   });
 });

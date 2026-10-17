@@ -10,7 +10,7 @@ describe("calculateZonesSectorsUtil", () => {
   const usedTitles = new Set<string>();
 
   const createZone = async (
-    overrides: Partial<{ title: string; bar: number; sector: number }> = {}
+    overrides: Partial<{ title: string; bar: number; sector: number }> = {},
   ) => {
     let title = overrides.title;
 
@@ -26,9 +26,7 @@ describe("calculateZonesSectorsUtil", () => {
         // Защита от бесконечного цикла (на случай если все комбинации заняты)
         if (attempt > 10000) {
           // Используем timestamp как fallback
-          title = `42-${(Date.now() % 99) + 1}-${
-            Math.floor(Math.random() * 99) + 1
-          }`;
+          title = `42-${(Date.now() % 99) + 1}-${Math.floor(Math.random() * 99) + 1}`;
           break;
         }
       } while (usedTitles.has(title));
@@ -37,9 +35,7 @@ describe("calculateZonesSectorsUtil", () => {
     } else {
       // Если title передан явно, тоже проверяем уникальность
       if (usedTitles.has(title)) {
-        throw new Error(
-          `Zone with title "${title}" already exists in this test`
-        );
+        throw new Error(`Zone with title "${title}" already exists in this test`);
       }
       usedTitles.add(title);
     }
@@ -133,7 +129,7 @@ describe("calculateZonesSectorsUtil", () => {
     const zoneWithoutSeg = await createZone({ sector: 5000 });
 
     // Создаем сегмент только для одной зоны
-    const seg = await Seg.create({
+    await Seg.create({
       block: block._id,
       blockData: { _id: block._id, title: block.title },
       order: 1,
@@ -148,15 +144,11 @@ describe("calculateZonesSectorsUtil", () => {
     expect(result.updatedZones).toBe(2); // обе зоны обновлены
 
     // Проверяем, что зона с сегментом получила правильный сектор
-    const updatedZoneWithSeg = await Zone.findById(zoneWithSeg._id)
-      .lean()
-      .exec();
+    const updatedZoneWithSeg = await Zone.findById(zoneWithSeg._id).lean().exec();
     expect(updatedZoneWithSeg?.sector).toBe(1001);
 
     // Проверяем, что зона без сегмента получила sector = 0
-    const updatedZoneWithoutSeg = await Zone.findById(zoneWithoutSeg._id)
-      .lean()
-      .exec();
+    const updatedZoneWithoutSeg = await Zone.findById(zoneWithoutSeg._id).lean().exec();
     expect(updatedZoneWithoutSeg?.sector).toBe(0);
   });
 
@@ -215,7 +207,7 @@ describe("calculateZonesSectorsUtil", () => {
       order: 1,
       segs: [],
     });
-    const blockWithoutSeg = await Block.create({
+    await Block.create({
       title: "Block Without Seg",
       order: 2,
       segs: [],
@@ -269,7 +261,7 @@ describe("calculateZonesSectorsUtil", () => {
 
   it("правильно сортирует блоки и сегменты по order", async () => {
     // Создаем блоки в неправильном порядке
-    const block3 = await Block.create({ title: "Block 3", order: 3, segs: [] });
+    await Block.create({ title: "Block 3", order: 3, segs: [] });
     const block1 = await Block.create({ title: "Block 1", order: 1, segs: [] });
     const block2 = await Block.create({ title: "Block 2", order: 2, segs: [] });
 

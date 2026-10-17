@@ -39,5 +39,3 @@ describe("getPalletByTitleUtil", () => {
     expect(result).toBeNull();
   });
 });
-
-

@@ -7,27 +7,19 @@ import { RoleType } from "../../../constants/roles.js";
 import app from "../../../test/utils/testApp.js";
 import { ExcelJob } from "../models/ExcelJob.js";
 import { getExcelJobFilePath } from "../utils/excelJobFilePaths.js";
-import {
-  resetExcelJobQueueForTests,
-  setExcelJobExecutor,
-} from "../utils/excelJobQueue.js";
+import { resetExcelJobQueueForTests, setExcelJobExecutor } from "../utils/excelJobQueue.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN, userId?: string) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: userId ?? new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: userId ?? new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
 async function waitForJobReady(jobId: string, headers: Record<string, string>) {
   for (let i = 0; i < 40; i++) {
-    const response = await request(app)
-      .get(`/api/excel-jobs/${jobId}`)
-      .set(headers);
+    const response = await request(app).get(`/api/excel-jobs/${jobId}`).set(headers);
     if (response.status === 200 && response.body.data.status === "ready") {
       return response.body.data as {
         status: string;
@@ -128,8 +120,7 @@ describe("excel-jobs router", () => {
       progress: 0,
       expiresAt: new Date(Date.now() + 60_000),
     });
-    const secret =
-      process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+    const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
     const token = jwt.sign(
       { typ: "excel-dl", jobId: String(job._id), userId: job.userId },
       secret,
@@ -143,10 +134,7 @@ describe("excel-jobs router", () => {
 
   it("401 on download with garbage token", async () => {
     const id = new mongoose.Types.ObjectId().toString();
-    await request(app)
-      .get(`/api/excel-jobs/${id}/file`)
-      .query({ token: "bad" })
-      .expect(401);
+    await request(app).get(`/api/excel-jobs/${id}/file`).query({ token: "bad" }).expect(401);
   });
 
   it("cancels a queued job", async () => {
@@ -169,10 +157,7 @@ describe("excel-jobs router", () => {
       .set(headers)
       .send({ kind: "grabo-skus" })
       .expect(202);
-    await request(app)
-      .delete(`/api/excel-jobs/${second.body.data.jobId}`)
-      .set(headers)
-      .expect(200);
+    await request(app).delete(`/api/excel-jobs/${second.body.data.jobId}`).set(headers).expect(200);
     const cancelled = await ExcelJob.findById(second.body.data.jobId);
     expect(cancelled?.status).toBe("cancelled");
     release();
@@ -187,9 +172,6 @@ describe("excel-jobs router", () => {
       .send({ kind: "grabo-skus" })
       .expect(202);
     const other = createAuthHeader(RoleType.ADMIN, new mongoose.Types.ObjectId().toString());
-    await request(app)
-      .get(`/api/excel-jobs/${created.body.data.jobId}`)
-      .set(other)
-      .expect(403);
+    await request(app).get(`/api/excel-jobs/${created.body.data.jobId}`).set(other).expect(403);
   });
 });

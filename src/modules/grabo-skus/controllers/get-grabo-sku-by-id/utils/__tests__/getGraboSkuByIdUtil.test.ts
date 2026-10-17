@@ -19,15 +19,11 @@ describe("getGraboSkuByIdUtil", () => {
   });
 
   it("returns null for a missing id", async () => {
-    await expect(
-      getGraboSkuByIdUtil("000000000000000000000000")
-    ).resolves.toBeNull();
+    await expect(getGraboSkuByIdUtil("000000000000000000000000")).resolves.toBeNull();
   });
 
   it("returns the document without __v", async () => {
-    const saved = await GraboSku.create(
-      graboSkuDoc({ productId: "G72274", title: "Pink Ribbon" })
-    );
+    const saved = await GraboSku.create(graboSkuDoc({ productId: "G72274", title: "Pink Ribbon" }));
 
     const result = await getGraboSkuByIdUtil(saved._id.toString());
     expect(result).not.toBeNull();

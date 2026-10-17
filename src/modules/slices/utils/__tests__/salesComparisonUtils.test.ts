@@ -9,9 +9,7 @@ import {
 describe("salesComparisonUtils", () => {
   describe("toUtcDateKey", () => {
     it("returns YYYY-MM-DD from ISO string", () => {
-      expect(toUtcDateKey(new Date("2026-03-15T12:00:00.000Z"))).toBe(
-        "2026-03-15",
-      );
+      expect(toUtcDateKey(new Date("2026-03-15T12:00:00.000Z"))).toBe("2026-03-15");
     });
   });
 

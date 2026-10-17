@@ -83,8 +83,6 @@ describe("createConstantController", () => {
     const events = await Event.find({ department: "constants" });
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(user._id.toString());
-    expect(events[0].description).toBe(
-      "Створено константу name=audited, title=Audited"
-    );
+    expect(events[0].description).toBe("Створено константу name=audited, title=Audited");
   });
 });

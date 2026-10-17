@@ -30,25 +30,18 @@ export function startCollectionsBackupCron(): CronJob {
           await fs.unlink(backupFilePath);
           log.info({ backupFilePath }, "temporary backup file deleted");
         } catch (deleteError) {
-          log.warn(
-            { err: deleteError, backupFilePath },
-            "failed to delete temporary backup file"
-          );
+          log.warn({ err: deleteError, backupFilePath }, "failed to delete temporary backup file");
         }
       } catch (error) {
         log.error({ err: error }, "collections backup failed");
 
         try {
-          const errorMessage =
-            error instanceof Error ? error.message : "Unknown error";
+          const errorMessage = error instanceof Error ? error.message : "Unknown error";
           await sendMessageToPlaten(
-            `❌ Помилка під час створення бэкапу колекцій:\n${errorMessage}`
+            `❌ Помилка під час створення бэкапу колекцій:\n${errorMessage}`,
           );
         } catch (notificationError) {
-          log.error(
-            { err: notificationError },
-            "failed to send backup error notification"
-          );
+          log.error({ err: notificationError }, "failed to send backup error notification");
         }
 
         if (backupFilePath) {
@@ -62,7 +55,7 @@ export function startCollectionsBackupCron(): CronJob {
     },
     null,
     true,
-    "Europe/Kiev"
+    "Europe/Kiev",
   );
 
   log.info({ schedule: "0 0 6 * * *", timezone: "Europe/Kiev" }, "cron started");

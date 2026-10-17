@@ -36,8 +36,4 @@ const skugrSchema = new Schema<ISkugr>(
 
 skugrSchema.index({ konkName: 1, prodName: 1 });
 
-export const Skugr: Model<ISkugr> = getOrCreateModel<ISkugr>(
-  "Skugr",
-  skugrSchema,
-  "skugrs",
-);
+export const Skugr: Model<ISkugr> = getOrCreateModel<ISkugr>("Skugr", skugrSchema, "skugrs");

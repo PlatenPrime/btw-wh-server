@@ -81,9 +81,7 @@ describe("updateVariantByIdController", () => {
 
     await updateVariantByIdController(req, res);
     expect(responseStatus.code).toBe(200);
-    expect((responseJson.data as { title: string }).title).toBe(
-      "New title"
-    );
+    expect((responseJson.data as { title: string }).title).toBe("New title");
   });
 
   it("200 creates audit event when req.user is present", async () => {
@@ -109,4 +107,3 @@ describe("updateVariantByIdController", () => {
     expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });
-

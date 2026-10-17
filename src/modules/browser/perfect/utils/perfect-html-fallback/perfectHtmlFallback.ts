@@ -5,10 +5,7 @@ import {
 } from "../perfect-product-page-price/perfectProductPagePrice.js";
 import { toStockAndPrice } from "../perfect-per-piece-stock/perfectPerPieceStock.js";
 
-export function tryPerfectHtmlFallback(
-  html: string,
-  pageTitle: string
-): PerfectProductInfo | null {
+export function tryPerfectHtmlFallback(html: string, pageTitle: string): PerfectProductInfo | null {
   if (!isPerfectProductPageOutOfStock(html)) return null;
   const packPrice = extractDisplayPriceFromProductHtml(html);
   if (packPrice === null) return null;

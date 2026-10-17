@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import Role from "../../models/Role.js";
 import { createTestUser } from "../../../../test/setup.js";
@@ -96,4 +95,3 @@ describe("registrateUserController", () => {
     expect(responseJson.user.role).toBe("ADMIN");
   });
 });
-

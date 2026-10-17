@@ -90,7 +90,7 @@ describe("createAnalogController", () => {
     await createAnalogController(req2, res);
     expect(responseStatus.code).toBe(409);
     expect((responseJson as { message?: string }).message).toBe(
-      "Analog with this url already exists"
+      "Analog with this url already exists",
     );
     const count = await Analog.countDocuments();
     expect(count).toBe(1);

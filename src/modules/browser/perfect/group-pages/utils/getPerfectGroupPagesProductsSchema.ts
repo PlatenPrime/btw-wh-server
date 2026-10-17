@@ -6,6 +6,4 @@ export const getPerfectGroupPagesProductsSchema = z.object({
   maxPages: z.number().int().min(1).max(200).optional(),
 });
 
-export type GetPerfectGroupPagesProductsInput = z.infer<
-  typeof getPerfectGroupPagesProductsSchema
->;
+export type GetPerfectGroupPagesProductsInput = z.infer<typeof getPerfectGroupPagesProductsSchema>;

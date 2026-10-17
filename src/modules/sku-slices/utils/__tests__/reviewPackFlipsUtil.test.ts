@@ -16,7 +16,7 @@ const D1 = new Date("2026-09-14T00:00:00.000Z");
 const D2 = new Date("2026-09-15T00:00:00.000Z");
 
 async function seedSlices(
-  data: Array<{ date: Date; pid: Record<string, { stock: number; price: number }> }>
+  data: Array<{ date: Date; pid: Record<string, { stock: number; price: number }> }>,
 ): Promise<void> {
   for (const row of data) {
     await seedSkuSliceMonthDay("perfect", row.date, row.pid);
@@ -32,16 +32,12 @@ describe("packFlip date helpers", () => {
       "2026-09-15",
     ]);
     expect(
-      packFlipReviewDatesForSliceDay(
-        new Date("2026-09-01T00:00:00.000Z")
-      ).map(toUtcYmd)
+      packFlipReviewDatesForSliceDay(new Date("2026-09-01T00:00:00.000Z")).map(toUtcYmd),
     ).toEqual(["2026-08-30", "2026-08-31", "2026-09-01"]);
   });
 
   it("defaultPackFlipReviewDates covers 7 kyiv days inclusive", () => {
-    const dates = defaultPackFlipReviewDates(
-      new Date("2026-09-15T10:00:00.000Z")
-    );
+    const dates = defaultPackFlipReviewDates(new Date("2026-09-15T10:00:00.000Z"));
     expect(dates.map(toUtcYmd)).toEqual([
       "2026-09-09",
       "2026-09-10",
@@ -188,9 +184,7 @@ describe("reviewPackFlipsUtil", () => {
     });
 
     expect(result.konkName).toBe("air");
-    expect(result.patched).toEqual([
-      expect.objectContaining({ productId: "air-1", factor: 2 }),
-    ]);
+    expect(result.patched).toEqual([expect.objectContaining({ productId: "air-1", factor: 2 })]);
   });
 
   it("returns empty result for empty dates without throwing", async () => {

@@ -11,4 +11,3 @@ export const getArtsForExportWithKeysUtil = async (): Promise<IArt[]> => {
 
   return arts;
 };
-

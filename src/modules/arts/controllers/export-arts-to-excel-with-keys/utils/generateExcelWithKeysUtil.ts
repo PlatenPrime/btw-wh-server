@@ -1,8 +1,5 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../../../lib/excel/worksheetStyles.js";
 import { ExcelArtKeyRow } from "./types.js";
 
 const SHEET_NAME = "ArtsKeys";
@@ -22,7 +19,7 @@ const COLUMN_WIDTHS = [18, 24, 30, 30, 12, 10, 14, 10];
  * Генерирует key-based Excel файл из данных артикулов.
  */
 export async function generateExcelWithKeysUtil(
-  excelData: ExcelArtKeyRow[]
+  excelData: ExcelArtKeyRow[],
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(SHEET_NAME);
@@ -55,4 +52,3 @@ export async function generateExcelWithKeysUtil(
 
   return { buffer: Buffer.from(buffer), fileName };
 }
-

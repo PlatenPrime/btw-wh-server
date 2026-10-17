@@ -43,9 +43,7 @@ export async function aggregatePeriodSkuSliceMetricsForSkus(
   skus: SkuRowForSliceMetrics[],
   dateFrom: Date,
   dateTo: Date,
-): Promise<
-  { ok: true; data: PeriodSkuSliceMetricsItem[] } | { ok: false }
-> {
+): Promise<{ ok: true; data: PeriodSkuSliceMetricsItem[] } | { ok: false }> {
   const loaded = await loadSkuSliceSalesComputeContext(skus, dateFrom, dateTo);
   if (!loaded.ok) return { ok: false };
   const { maps, datesFull, indexStart, dates, recountDaysByKonk } = loaded.ctx;
@@ -66,11 +64,7 @@ export async function aggregatePeriodSkuSliceMetricsForSkus(
       const c = coalesced[i]!;
       const seq = salesSeq[i]!;
       const recountDays = recountDaysByKonk.get(sku.konkName) ?? new Set<string>();
-      const salesValue = applyRecountDayToSales(
-        seq.sales,
-        dates[i - indexStart]!,
-        recountDays,
-      );
+      const salesValue = applyRecountDayToSales(seq.sales, dates[i - indexStart]!, recountDays);
       salesPcs += salesValue;
       salesUah += computeRevenueForDay(salesValue, c.price);
     }
@@ -91,17 +85,11 @@ export async function aggregatePeriodSkuSliceMetricsBySkuKey(
   skus: SkuRowForSliceMetrics[],
   dateFrom: Date,
   dateTo: Date,
-): Promise<
-  { ok: true; byKey: Map<string, PeriodSkuSliceMetricsItem> } | { ok: false }
-> {
+): Promise<{ ok: true; byKey: Map<string, PeriodSkuSliceMetricsItem> } | { ok: false }> {
   const unique = uniqueSkuRowsForSliceMetrics(skus);
   if (unique.length === 0) return { ok: false };
 
-  const period = await aggregatePeriodSkuSliceMetricsForSkus(
-    unique,
-    dateFrom,
-    dateTo,
-  );
+  const period = await aggregatePeriodSkuSliceMetricsForSkus(unique, dateFrom, dateTo);
   if (!period.ok) return { ok: false };
 
   const byKey = new Map<string, PeriodSkuSliceMetricsItem>();

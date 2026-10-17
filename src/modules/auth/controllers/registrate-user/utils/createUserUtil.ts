@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from "mongoose";
+import { ClientSession } from "mongoose";
 import User, { IUser } from "../../../models/User.js";
 import { hashPasswordUtil } from "../../../utils/hashPasswordUtil.js";
 
@@ -52,4 +52,3 @@ export const createUserUtil = async ({
   await user.save({ session });
   return user as IUser;
 };
-

@@ -42,7 +42,7 @@ describe("runManualCompensatingSlice", () => {
     expect(runCompensatingSlicesForKonk).not.toHaveBeenCalled();
     expect(mockLogger.warn).toHaveBeenCalledWith(
       { konkName: "air" },
-      "compensating slice already running"
+      "compensating slice already running",
     );
     expect(isCompensatingRunActive("air")).toBe(true);
   });
@@ -65,7 +65,7 @@ describe("runManualCompensatingSlice", () => {
         analog: { refetched: 3, updated: 2 },
         sku: { refetched: 1, updated: 1 },
       },
-      "manual compensating slice done"
+      "manual compensating slice done",
     );
     expect(isCompensatingRunActive("air")).toBe(false);
   });
@@ -78,7 +78,7 @@ describe("runManualCompensatingSlice", () => {
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       { err, konkName: "air" },
-      "manual compensating slice failed"
+      "manual compensating slice failed",
     );
     expect(isCompensatingRunActive("air")).toBe(false);
   });

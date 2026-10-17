@@ -15,14 +15,10 @@ export async function runDeficitTelegramReportUtil(): Promise<ILiveDefsCalculati
 
   try {
     const liveDefs = await calculateLivePogrebiDefsUtil();
-    await sendDeficitTelegramReport(
-      formatDeficitTelegramMessages(liveDefs.result)
-    );
+    await sendDeficitTelegramReport(formatDeficitTelegramMessages(liveDefs.result));
     return liveDefs;
   } catch (error) {
-    await sendDeficitTelegramReport([
-      formatDeficitTelegramErrorMessage(error),
-    ]);
+    await sendDeficitTelegramReport([formatDeficitTelegramErrorMessage(error)]);
     throw error;
   }
 }

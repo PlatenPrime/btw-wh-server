@@ -7,6 +7,4 @@ export const getSkusBySkugrIdParamsSchema = z.object({
   }),
 });
 
-export type GetSkusBySkugrIdParams = z.infer<
-  typeof getSkusBySkugrIdParamsSchema
->;
+export type GetSkusBySkugrIdParams = z.infer<typeof getSkusBySkugrIdParamsSchema>;

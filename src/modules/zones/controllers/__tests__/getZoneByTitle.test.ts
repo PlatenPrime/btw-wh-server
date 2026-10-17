@@ -27,7 +27,7 @@ describe("getZoneByTitle Controller", () => {
 
   it("should return zone by valid title", async () => {
     // Arrange
-    const testZone = await createTestZone({
+    await createTestZone({
       title: "42-5-2",
       bar: 420502,
       sector: 0,
@@ -117,7 +117,7 @@ describe("getZoneByTitle Controller", () => {
 
     for (const testCase of testCases) {
       // Arrange
-      const testZone = await createTestZone({
+      await createTestZone({
         title: testCase.title,
         bar: testCase.bar,
         sector: testCase.sector,
@@ -141,7 +141,7 @@ describe("getZoneByTitle Controller", () => {
 
   it("should handle title with leading/trailing whitespace", async () => {
     // Arrange
-    const testZone = await createTestZone({
+    await createTestZone({
       title: "42-5-2",
       bar: 420502,
       sector: 0,
@@ -161,7 +161,7 @@ describe("getZoneByTitle Controller", () => {
 
   it("should return zone with all fields populated", async () => {
     // Arrange
-    const testZone = await createTestZone({
+    await createTestZone({
       title: "42-5-2",
       bar: 420502,
       sector: 1,
@@ -187,7 +187,7 @@ describe("getZoneByTitle Controller", () => {
 
   it("should return timestamps", async () => {
     // Arrange
-    const testZone = await createTestZone({
+    await createTestZone({
       title: "42-5-2",
       bar: 420502,
       sector: 0,
@@ -212,7 +212,7 @@ describe("getZoneByTitle Controller", () => {
 
   it("should handle exact title matching", async () => {
     // Arrange
-    const testZone = await createTestZone({
+    await createTestZone({
       title: "42-5-3",
       bar: 420503,
       sector: 1,
@@ -244,7 +244,7 @@ describe("getZoneByTitle Controller", () => {
 
   it("should handle special characters in title", async () => {
     // Arrange
-    const testZone = await createTestZone({
+    await createTestZone({
       title: "42-5-4",
       bar: 420504,
       sector: 0,

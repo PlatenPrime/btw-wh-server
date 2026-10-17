@@ -4,9 +4,7 @@ export type FillSkugrSkusReportStats = {
   total: number;
 };
 
-export function formatFillSkugrSkusReport(
-  stats: FillSkugrSkusReportStats
-): string {
+export function formatFillSkugrSkusReport(stats: FillSkugrSkusReportStats): string {
   return [
     "📊 Skugr refill — завершено",
     `Групи: ✅${stats.successCount} / ❌${stats.errorCount} / всього ${stats.total}`,

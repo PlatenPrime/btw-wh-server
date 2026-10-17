@@ -11,9 +11,7 @@ type ProdLean = {
 /**
  * Заголовки производителей для Excel: `Prod.title` по `name`, иначе fallback на `name`.
  */
-export async function loadProdDisplayTitlesByName(
-  names: string[],
-): Promise<Map<string, string>> {
+export async function loadProdDisplayTitlesByName(names: string[]): Promise<Map<string, string>> {
   const unique = [...new Set(names.map((n) => n.trim()).filter((n) => n.length > 0))];
   const map = new Map<string, string>();
   if (unique.length === 0) return map;

@@ -23,9 +23,7 @@ export function createExcelDownloadToken(jobId: string, userId: string): string 
   return jwt.sign(payload, secret, { expiresIn: EXCEL_DOWNLOAD_TOKEN_EXPIRES });
 }
 
-export function verifyExcelDownloadToken(
-  token: string,
-): ExcelDownloadTokenPayload | null {
+export function verifyExcelDownloadToken(token: string): ExcelDownloadTokenPayload | null {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
     return null;

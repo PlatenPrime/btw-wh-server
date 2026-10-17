@@ -83,17 +83,17 @@ describe("getSkugrSkusSalesUtil", () => {
     });
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-a`]: { stock: 10, price: 5 },
-          [`${konk}-b`]: { stock: 20, price: 2 },
-        });
+      [`${konk}-a`]: { stock: 10, price: 5 },
+      [`${konk}-b`]: { stock: 20, price: 2 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-a`]: { stock: 7, price: 5 },
-          [`${konk}-b`]: { stock: 18, price: 2 },
-        });
+      [`${konk}-a`]: { stock: 7, price: 5 },
+      [`${konk}-b`]: { stock: 18, price: 2 },
+    });
     await seedSkuSliceMonthDay(konk, d2, {
-          [`${konk}-a`]: { stock: 5, price: 5 },
-          [`${konk}-b`]: { stock: 15, price: 2 },
-        });
+      [`${konk}-a`]: { stock: 5, price: 5 },
+      [`${konk}-b`]: { stock: 15, price: 2 },
+    });
 
     const result = await getSkugrSkusSalesUtil({
       skugrId: skugr._id.toString(),
@@ -169,17 +169,17 @@ describe("getSkugrSkusSalesUtil", () => {
     });
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-flat`]: { stock: 10, price: 5 },
-          [`${konk}-sold`]: { stock: 10, price: 5 },
-        });
+      [`${konk}-flat`]: { stock: 10, price: 5 },
+      [`${konk}-sold`]: { stock: 10, price: 5 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-flat`]: { stock: 10, price: 5 },
-          [`${konk}-sold`]: { stock: 7, price: 5 },
-        });
+      [`${konk}-flat`]: { stock: 10, price: 5 },
+      [`${konk}-sold`]: { stock: 7, price: 5 },
+    });
     await seedSkuSliceMonthDay(konk, d2, {
-          [`${konk}-flat`]: { stock: 10, price: 5 },
-          [`${konk}-sold`]: { stock: 5, price: 5 },
-        });
+      [`${konk}-flat`]: { stock: 10, price: 5 },
+      [`${konk}-sold`]: { stock: 5, price: 5 },
+    });
 
     const result = await getSkugrSkusSalesUtil({
       skugrId: skugr._id.toString(),

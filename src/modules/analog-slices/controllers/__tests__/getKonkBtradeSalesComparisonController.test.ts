@@ -3,9 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getKonkBtradeSalesComparisonController } from "../get-konk-btrade-sales-comparison/getKonkBtradeSalesComparisonController.js";
 import { getKonkBtradeSalesComparisonUtil } from "../get-konk-btrade-sales-comparison/utils/getKonkBtradeSalesComparisonUtil.js";
 
-vi.mock(
-  "../get-konk-btrade-sales-comparison/utils/getKonkBtradeSalesComparisonUtil.js",
-);
+vi.mock("../get-konk-btrade-sales-comparison/utils/getKonkBtradeSalesComparisonUtil.js");
 
 describe("getKonkBtradeSalesComparisonController", () => {
   let res: Response;

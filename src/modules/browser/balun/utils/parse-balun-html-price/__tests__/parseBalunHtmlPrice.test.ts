@@ -19,18 +19,12 @@ describe("parseBalunHtmlPrice", () => {
 
   it("returns undefined when analytics/price is missing or invalid", () => {
     expect(parseBalunHtmlPrice("<div></div>")).toBeUndefined();
+    expect(parseBalunHtmlPrice(`<div data-analytics='{"clerk":{}}'></div>`)).toBeUndefined();
     expect(
-      parseBalunHtmlPrice(`<div data-analytics='{"clerk":{}}'></div>`)
+      parseBalunHtmlPrice(`<div data-analytics='{"clerk":{"price_original":""}}'></div>`),
     ).toBeUndefined();
     expect(
-      parseBalunHtmlPrice(
-        `<div data-analytics='{"clerk":{"price_original":""}}'></div>`
-      )
-    ).toBeUndefined();
-    expect(
-      parseBalunHtmlPrice(
-        `<div data-analytics='{"clerk":{"price_original":"abc"}}'></div>`
-      )
+      parseBalunHtmlPrice(`<div data-analytics='{"clerk":{"price_original":"abc"}}'></div>`),
     ).toBeUndefined();
   });
 });

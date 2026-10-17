@@ -24,10 +24,7 @@ describe("populateRowDataUtil", () => {
     });
 
     // Удаляем rowData для теста через прямое обновление MongoDB
-    await pos.collection.updateOne(
-      { _id: pos._id },
-      { $unset: { rowData: "" } }
-    );
+    await pos.collection.updateOne({ _id: pos._id }, { $unset: { rowData: "" } });
     // Перезагружаем документ из базы без валидации
     const Pos = (await import("../../../../models/Pos.js")).Pos;
     const updatedPos = await Pos.findById(pos._id).lean();
@@ -55,10 +52,7 @@ describe("populateRowDataUtil", () => {
     });
 
     // Удаляем row и rowData через прямое обновление MongoDB
-    await pos.collection.updateOne(
-      { _id: pos._id },
-      { $unset: { row: "", rowData: "" } }
-    );
+    await pos.collection.updateOne({ _id: pos._id }, { $unset: { row: "", rowData: "" } });
     // Перезагружаем документ из базы без валидации
     const Pos = (await import("../../../../models/Pos.js")).Pos;
     const updatedPos = await Pos.findById(pos._id).lean();
@@ -85,7 +79,7 @@ describe("populateRowDataUtil", () => {
     const fakeRowId = new mongoose.Types.ObjectId();
     await pos.collection.updateOne(
       { _id: pos._id },
-      { $set: { row: fakeRowId }, $unset: { rowData: "" } }
+      { $set: { row: fakeRowId }, $unset: { rowData: "" } },
     );
     // Перезагружаем документ из базы без валидации
     const Pos = (await import("../../../../models/Pos.js")).Pos;
@@ -97,4 +91,3 @@ describe("populateRowDataUtil", () => {
     await expect(populateRowDataUtil(pos)).rejects.toThrow("Row not found");
   });
 });
-

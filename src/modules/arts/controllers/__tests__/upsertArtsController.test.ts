@@ -76,9 +76,7 @@ describe("upsertArtsController", () => {
     const user = await createTestUser({ username: `art-upsert-event-${Date.now()}` });
 
     const req = {
-      body: [
-        { artikul: "NEW-001", zone: "A1", nameukr: "New Art 1", abc: "A" },
-      ],
+      body: [{ artikul: "NEW-001", zone: "A1", nameukr: "New Art 1", abc: "A" }],
       user: { id: user._id.toString(), role: "ADMIN" },
     } as unknown as Request;
 
@@ -90,4 +88,3 @@ describe("upsertArtsController", () => {
     expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });
-

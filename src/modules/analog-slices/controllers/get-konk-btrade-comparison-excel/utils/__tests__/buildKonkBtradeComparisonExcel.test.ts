@@ -73,16 +73,11 @@ describe("buildKonkBtradeComparisonExcel", () => {
       dateTo: date2,
     };
 
-    const { buffer, fileName } = await buildKonkBtradeComparisonExcel(
-      analogs,
-      options,
-    );
+    const { buffer, fileName } = await buildKonkBtradeComparisonExcel(analogs, options);
 
     expect(buffer).toBeInstanceOf(Buffer);
     expect(buffer.length).toBeGreaterThan(0);
-    expect(fileName).toContain(
-      "konk_btrade_comparison_air_gemar_2026-03-01_2026-03-02",
-    );
+    expect(fileName).toContain("konk_btrade_comparison_air_gemar_2026-03-01_2026-03-02");
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
@@ -105,4 +100,3 @@ describe("buildKonkBtradeComparisonExcel", () => {
     expect(analog2StockRow.getCell(7).value).toBe(3);
   });
 });
-

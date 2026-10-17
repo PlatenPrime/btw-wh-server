@@ -14,15 +14,11 @@ export const createSegSchema = z.object({
   order: z.number().int().min(1, "Order must be at least 1"),
   zones: z
     .array(
-      z.string().refine(
-        (val) => mongoose.Types.ObjectId.isValid(val),
-        {
-          message: "Invalid zone ID format",
-        }
-      )
+      z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+        message: "Invalid zone ID format",
+      }),
     )
     .min(1, "Segment must contain at least one zone"),
 });
 
 export type CreateSegInput = z.infer<typeof createSegSchema>;
-

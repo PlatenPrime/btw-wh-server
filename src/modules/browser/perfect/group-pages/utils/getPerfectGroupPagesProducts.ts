@@ -39,11 +39,7 @@ export async function getPerfectGroupPagesProducts(
     maxPages,
     parseProductsFromPage,
     getNextPageUrl: ($, url) => {
-      const next = getNextPageUrlFromLinkRelNext(
-        $,
-        url,
-        resolveHrefAgainstBase,
-      );
+      const next = getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase);
       if (!next) {
         return null;
       }

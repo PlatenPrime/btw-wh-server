@@ -10,10 +10,7 @@ export type SvbumGroupPageProduct = {
   imageUrl: string;
 };
 
-function pickImageUrl(
-  $card: BrowserCheerio,
-  currentPageUrl: string
-): string | null {
+function pickImageUrl($card: BrowserCheerio, currentPageUrl: string): string | null {
   const $img = $card.find(".image img").first();
   const src = $img.attr("src")?.trim() ?? "";
   if (!src) {
@@ -29,11 +26,7 @@ function pickImageUrl(
 function pickTitle($card: BrowserCheerio): string {
   const fromLink = $card.find(".product-title a").first().text();
   const $img = $card.find(".image img").first();
-  const raw =
-    fromLink.trim() ||
-    $img.attr("alt")?.trim() ||
-    $img.attr("title")?.trim() ||
-    "";
+  const raw = fromLink.trim() || $img.attr("alt")?.trim() || $img.attr("title")?.trim() || "";
   return decodeHtmlEntities(raw).replace(/\s+/g, " ").trim();
 }
 
@@ -43,7 +36,7 @@ function pickTitle($card: BrowserCheerio): string {
  */
 export function parseSvbumGroupListingProducts(
   $: cheerio.CheerioAPI,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, SvbumGroupPageProduct> {
   const result = new Map<string, SvbumGroupPageProduct>();
 

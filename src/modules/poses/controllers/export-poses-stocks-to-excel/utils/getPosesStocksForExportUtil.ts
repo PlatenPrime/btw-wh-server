@@ -1,12 +1,10 @@
-import { FilterQuery } from "mongoose";
+import { QueryFilter } from "mongoose";
 import { IPos, Pos } from "../../../models/Pos.js";
 
 type ExportablePos = Pick<IPos, "artikul" | "nameukr" | "quant" | "sklad">;
 
-export const getPosesStocksForExportUtil = async (
-  sklad?: string
-): Promise<ExportablePos[]> => {
-  const filter: FilterQuery<IPos> = {
+export const getPosesStocksForExportUtil = async (sklad?: string): Promise<ExportablePos[]> => {
+  const filter: QueryFilter<IPos> = {
     quant: { $gt: 0 },
   };
 
@@ -20,5 +18,3 @@ export const getPosesStocksForExportUtil = async (
 
   return poses;
 };
-
-

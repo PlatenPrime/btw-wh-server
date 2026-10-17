@@ -11,4 +11,3 @@ export const updatePosSchema = z.object({
 });
 
 export type UpdatePosInput = z.infer<typeof updatePosSchema>;
-

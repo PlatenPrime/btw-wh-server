@@ -7,21 +7,18 @@ import { deleteKonkByIdController } from "../delete-konk-by-id/deleteKonkByIdCon
 
 describe("deleteKonkByIdController", () => {
   let res: Response;
-  let responseJson: Record<string, unknown>;
   let responseStatus: { code?: number };
 
   beforeEach(async () => {
     await Konk.deleteMany({});
     await Event.deleteMany({});
-    responseJson = {};
     responseStatus = {};
     res = {
       status(code: number) {
         responseStatus.code = code;
         return this;
       },
-      json(data: unknown) {
-        responseJson = data as Record<string, unknown>;
+      json(_data: unknown) {
         return this;
       },
       headersSent: false,

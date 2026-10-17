@@ -14,7 +14,7 @@ import User from "../../../models/User.js";
  */
 export const checkUsernameAvailableForUpdateUtil = async (
   userId: string,
-  username: string
+  username: string,
 ): Promise<boolean> => {
   const existing = await User.findOne({ username });
   if (!existing) return true;

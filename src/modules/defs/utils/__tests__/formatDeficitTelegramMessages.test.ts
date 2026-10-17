@@ -6,10 +6,7 @@ import {
   formatDeficitTelegramMessages,
 } from "../formatDeficitTelegramMessages.js";
 
-function deficitItem(
-  status: IDeficitItem["status"],
-  difQuant: number
-): IDeficitItem {
+function deficitItem(status: IDeficitItem["status"], difQuant: number): IDeficitItem {
   return {
     nameukr: "Товар",
     quant: 10,
@@ -22,7 +19,7 @@ function deficitItem(
 
 function numberedResult(
   status: IDeficitItem["status"],
-  count: number
+  count: number,
 ): Record<string, IDeficitItem> {
   const result: Record<string, IDeficitItem> = {};
   for (let i = 1; i <= count; i += 1) {
@@ -45,14 +42,12 @@ describe("formatDeficitTelegramMessages", () => {
     });
 
     expect(messages).toHaveLength(2);
-    expect(messages[0]).toBe(
-      "🟡 Дефіцити в ліміті (1-2 з 2):\nA1: 3\nA2: 1"
-    );
+    expect(messages[0]).toBe("🟡 Дефіцити в ліміті (1-2 з 2):\nA1: 3\nA2: 1");
     expect(messages[1]).toBe(
       "✅ Розрахунок дефіцитів завершено\n" +
         "• Всього дефіцитів: 2\n" +
         "• Критичних: 0\n" +
-        "• В ліміті: 2"
+        "• В ліміті: 2",
     );
   });
 
@@ -82,15 +77,13 @@ describe("formatDeficitTelegramMessages", () => {
       "✅ Розрахунок дефіцитів завершено\n" +
         "• Всього дефіцитів: 2\n" +
         "• Критичних: 1\n" +
-        "• В ліміті: 1"
+        "• В ліміті: 1",
     );
   });
 
   it("splits a category into chunks of DEFICIT_REPORT_CHUNK_SIZE", () => {
     const count = DEFICIT_REPORT_CHUNK_SIZE + 1;
-    const messages = formatDeficitTelegramMessages(
-      numberedResult("limited", count)
-    );
+    const messages = formatDeficitTelegramMessages(numberedResult("limited", count));
 
     expect(messages).toHaveLength(3);
     expect(messages[0]).toContain(`1-${DEFICIT_REPORT_CHUNK_SIZE} з ${count}`);
@@ -116,13 +109,13 @@ describe("formatDeficitTelegramMessages", () => {
 describe("formatDeficitTelegramErrorMessage", () => {
   it("formats Error.message as plain text", () => {
     expect(formatDeficitTelegramErrorMessage(new Error("calc failed"))).toBe(
-      "❌ Помилка при розрахунку дефіцитів\n\nПомилка: calc failed"
+      "❌ Помилка при розрахунку дефіцитів\n\nПомилка: calc failed",
     );
   });
 
   it("uses fallback text for non-Error values", () => {
     expect(formatDeficitTelegramErrorMessage("boom")).toBe(
-      "❌ Помилка при розрахунку дефіцитів\n\nПомилка: Невідома помилка"
+      "❌ Помилка при розрахунку дефіцитів\n\nПомилка: Невідома помилка",
     );
   });
 });

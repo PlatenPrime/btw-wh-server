@@ -29,7 +29,7 @@ const analogSliceSchema = new Schema<IAnalogSlice>(
       default: {},
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 analogSliceSchema.index({ konkName: 1, date: 1 }, { unique: true });

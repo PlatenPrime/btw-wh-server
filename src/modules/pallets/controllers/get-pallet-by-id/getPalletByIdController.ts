@@ -1,13 +1,9 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
 import { getPalletByIdSchema } from "./schemas/getPalletByIdSchema.js";
 import { getPalletUtil } from "./utils/getPalletUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getPalletByIdController = async (
-  req: Request,
-  res: Response
-) => {
+export const getPalletByIdController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
@@ -16,7 +12,7 @@ export const getPalletByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -49,11 +45,3 @@ export const getPalletByIdController = async (
     }
   }
 };
-
-
-
-
-
-
-
-

@@ -19,5 +19,3 @@ describe("getCompleteAskMesUtil", () => {
     expect(msg).toContain("Виконавець: Solver");
   });
 });
-
-

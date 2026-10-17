@@ -8,16 +8,13 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Удалить группу товаров конкурента по id
  * @route   DELETE /api/skugrs/id/:id
  */
-export const deleteSkugrByIdController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const deleteSkugrByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = deleteSkugrByIdSchema.safeParse({ id: req.params.id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

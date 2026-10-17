@@ -1,9 +1,7 @@
 import { CookieJar } from "tough-cookie";
 
 import { createLogger } from "../../../logging/createLogger.js";
-import {
-  isAdmToolsChallengeHtml,
-} from "./adm-tools-challenge/admToolsChallenge.js";
+import { isAdmToolsChallengeHtml } from "./adm-tools-challenge/admToolsChallenge.js";
 import { solveAdmToolsChallenge } from "./adm-tools-challenge/solveAdmToolsChallenge.js";
 import {
   BrowserOriginBlockedError,
@@ -53,11 +51,7 @@ export type ImpitClientLike = {
 
 /** Минимум API cookie jar, совместимый с ImpitOptions.cookieJar. */
 export type ImpitCookieJar = {
-  setCookie: (
-    cookie: string,
-    url: string,
-    cb?: any
-  ) => Promise<void> | void;
+  setCookie: (cookie: string, url: string, cb?: any) => Promise<void> | void;
   getCookieString: (url: string) => Promise<string> | string;
 };
 
@@ -81,8 +75,7 @@ export type ImpitNativeModule = {
 
 export type ImpitModuleLoader = () => Promise<ImpitNativeModule>;
 
-export const IMPIT_NATIVE_LOAD_ERROR_PREFIX =
-  "Impit native bindings failed to load";
+export const IMPIT_NATIVE_LOAD_ERROR_PREFIX = "Impit native bindings failed to load";
 
 const defaultImpitModuleLoader: ImpitModuleLoader = () =>
   import("impit") as Promise<ImpitNativeModule>;
@@ -135,9 +128,7 @@ async function resolveImpitFactory(): Promise<ImpitFactory> {
 /**
  * Подмена `import("impit")` в тестах. `null` — вернуть default loader и сбросить native cache.
  */
-export function setImpitModuleLoaderForTests(
-  loader: ImpitModuleLoader | null
-): void {
+export function setImpitModuleLoaderForTests(loader: ImpitModuleLoader | null): void {
   impitModuleLoader = loader ?? defaultImpitModuleLoader;
   cachedNativeFactory = undefined;
   nativeFactoryPromise = undefined;
@@ -207,9 +198,7 @@ function resolveProxyUrl(proxyUrl: string | undefined): string | undefined {
   return trimmed;
 }
 
-async function getOrCreateClient(
-  proxyUrl: string | undefined
-): Promise<ImpitClientLike> {
+async function getOrCreateClient(proxyUrl: string | undefined): Promise<ImpitClientLike> {
   const key = proxyUrl ?? "";
   const cached = clientByProxyKey.get(key);
   if (cached) {
@@ -248,14 +237,8 @@ export function summarizeImpitErrorBody(html: string): {
   htmlLength: number;
 } {
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  const title = (titleMatch?.[1] ?? "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 120);
-  const snippet = html
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, IMPIT_ERROR_BODY_SNIPPET_MAX);
+  const title = (titleMatch?.[1] ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+  const snippet = html.replace(/\s+/g, " ").trim().slice(0, IMPIT_ERROR_BODY_SNIPPET_MAX);
   return { title, snippet, htmlLength: html.length };
 }
 
@@ -293,20 +276,14 @@ function throwImpitHttpError(args: {
       ...(retryAfter ? { retryAfter } : {}),
       ...bodySummary,
     },
-    "impit http error body"
+    "impit http error body",
   );
 
   const statusText = args.statusText?.trim();
   const statusTail = statusText ? ` ${statusText}` : "";
-  const titlePart = bodySummary.title
-    ? ` title=${JSON.stringify(bodySummary.title)}`
-    : "";
-  const snippetPart = bodySummary.snippet
-    ? ` body=${JSON.stringify(bodySummary.snippet)}`
-    : "";
-  const retryPart = retryAfter
-    ? ` retryAfter=${JSON.stringify(retryAfter)}`
-    : "";
+  const titlePart = bodySummary.title ? ` title=${JSON.stringify(bodySummary.title)}` : "";
+  const snippetPart = bodySummary.snippet ? ` body=${JSON.stringify(bodySummary.snippet)}` : "";
+  const retryPart = retryAfter ? ` retryAfter=${JSON.stringify(retryAfter)}` : "";
 
   const message = `Impit GET HTTP ${args.status}${statusTail}: ${args.url}${titlePart}${snippetPart}${retryPart}`;
 
@@ -335,11 +312,10 @@ async function readErrorBody(response: ImpitResponseLike): Promise<string> {
 async function fetchHtmlWithAdmToolsSolve(
   client: ImpitClientLike,
   url: string,
-  init: ImpitFetchInit
+  init: ImpitFetchInit,
 ): Promise<string> {
   const first = await client.fetch(url, init);
-  const body =
-    first.status < 400 ? await first.text() : await readErrorBody(first);
+  const body = first.status < 400 ? await first.text() : await readErrorBody(first);
   const isChallenge = isAdmToolsChallengeHtml(body);
 
   if (first.status < 400 && !isChallenge) {
@@ -366,10 +342,9 @@ async function fetchHtmlWithAdmToolsSolve(
       {
         context: "adm.tools challenge solve failed",
         url,
-        details:
-          solveErr instanceof Error ? solveErr.message : String(solveErr),
+        details: solveErr instanceof Error ? solveErr.message : String(solveErr),
       },
-      "adm tools challenge failed"
+      "adm tools challenge failed",
     );
     throwImpitHttpError({
       url,
@@ -410,10 +385,7 @@ async function fetchHtmlWithAdmToolsSolve(
  * adm.tools JS-challenge: POST ack → retry.
  * HTTP status ≥ 400 (после solve) → warn (snippet/Retry-After) + throw.
  */
-export async function impitGet(
-  url: string,
-  options?: ImpitGetOptions
-): Promise<string> {
+export async function impitGet(url: string, options?: ImpitGetOptions): Promise<string> {
   const proxyUrl = resolveProxyUrl(options?.proxyUrl);
   const proxyKey = proxyUrl ?? "";
   const client = await getOrCreateClient(proxyUrl);
@@ -436,12 +408,9 @@ export async function impitGet(
             context: "Impit warm-up failed, continue to target",
             url: warmUpUrl,
             targetUrl: url,
-            details:
-              warmErr instanceof Error
-                ? warmErr.message
-                : String(warmErr),
+            details: warmErr instanceof Error ? warmErr.message : String(warmErr),
           },
-          "impit warmup failed"
+          "impit warmup failed",
         );
       }
     }

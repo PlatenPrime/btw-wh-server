@@ -14,9 +14,7 @@ export const unlinkPalletController = async (req: Request, res: Response) => {
   const parseResult = unlinkPalletSchema.safeParse(body);
 
   if (!parseResult.success) {
-    return res
-      .status(400)
-      .json({ message: "Invalid data", errors: parseResult.error.errors });
+    return res.status(400).json({ message: "Invalid data", errors: parseResult.error.issues });
   }
 
   const { palletId } = parseResult.data;

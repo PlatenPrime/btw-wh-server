@@ -12,18 +12,16 @@ vi.mock("../../../../group-pages/config/groupPagesThrottle.js", () => ({
   getGroupPagesThrottleDelayMs: vi.fn(() => 999),
 }));
 
-const GROUP_URL =
-  "https://yumi.market/api/products?category_id=769&proizvoditel=425";
+const GROUP_URL = "https://yumi.market/api/products?category_id=769&proizvoditel=425";
 const GROUP_URL_WITH_PAGE =
   "https://yumi.market/api/products?category_id=769&proizvoditel=425&page=3";
-const PAGE2_URL =
-  "https://yumi.market/api/products?category_id=769&proizvoditel=425&page=2";
+const PAGE2_URL = "https://yumi.market/api/products?category_id=769&proizvoditel=425&page=2";
 
 function apiProduct(
   id: number,
   name: string,
   urlKey: string,
-  image = "https://yumi.market/cache/large/p.webp"
+  image = "https://yumi.market/cache/large/p.webp",
 ) {
   return {
     id,
@@ -33,10 +31,7 @@ function apiProduct(
   };
 }
 
-function jsonPage(
-  items: ReturnType<typeof apiProduct>[],
-  next: string | null
-) {
+function jsonPage(items: ReturnType<typeof apiProduct>[], next: string | null) {
   return JSON.stringify({
     data: items,
     links: { next },
@@ -53,10 +48,7 @@ describe("getYuminGroupPagesProducts", () => {
   it("parses products across two pages via links.next", async () => {
     vi.mocked(browserGet).mockImplementation(async (url: string) => {
       if (url === GROUP_URL) {
-        return jsonPage(
-          [apiProduct(111, "First  item", "first-slug")],
-          PAGE2_URL
-        );
+        return jsonPage([apiProduct(111, "First  item", "first-slug")], PAGE2_URL);
       }
       if (url === PAGE2_URL) {
         return jsonPage([apiProduct(222, "Second", "second-slug")], null);
@@ -80,9 +72,7 @@ describe("getYuminGroupPagesProducts", () => {
   });
 
   it("stops when links.next is null on first page", async () => {
-    vi.mocked(browserGet).mockResolvedValue(
-      jsonPage([apiProduct(1, "Solo", "solo-key")], null)
-    );
+    vi.mocked(browserGet).mockResolvedValue(jsonPage([apiProduct(1, "Solo", "solo-key")], null));
 
     const result = await getYuminGroupPagesProducts({ groupUrl: GROUP_URL });
 
@@ -92,12 +82,9 @@ describe("getYuminGroupPagesProducts", () => {
   });
 
   it("normalizes groupUrl by removing page param for first request", async () => {
-    const normalized =
-      "https://yumi.market/api/products?category_id=769&proizvoditel=425";
+    const normalized = "https://yumi.market/api/products?category_id=769&proizvoditel=425";
 
-    vi.mocked(browserGet).mockResolvedValue(
-      jsonPage([apiProduct(1, "A", "a")], null)
-    );
+    vi.mocked(browserGet).mockResolvedValue(jsonPage([apiProduct(1, "A", "a")], null));
 
     await getYuminGroupPagesProducts({ groupUrl: GROUP_URL_WITH_PAGE });
 
@@ -125,8 +112,7 @@ describe("getYuminGroupPagesProducts", () => {
   });
 
   it("stops on pagination loop (visited)", async () => {
-    const urlB =
-      "https://yumi.market/api/products?category_id=769&proizvoditel=425&page=99";
+    const urlB = "https://yumi.market/api/products?category_id=769&proizvoditel=425&page=99";
 
     vi.mocked(browserGet).mockImplementation(async (url: string) => {
       if (url === GROUP_URL) {
@@ -177,7 +163,7 @@ describe("getYuminGroupPagesProducts", () => {
           },
         ],
         links: { next: null },
-      })
+      }),
     );
 
     const result = await getYuminGroupPagesProducts({ groupUrl: GROUP_URL });
@@ -197,7 +183,7 @@ describe("getYuminGroupPagesProducts", () => {
           },
         ],
         links: { next: null },
-      })
+      }),
     );
 
     const result = await getYuminGroupPagesProducts({ groupUrl: GROUP_URL });

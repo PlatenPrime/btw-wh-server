@@ -6,10 +6,7 @@ import { getSkugrSkusSalesUtil } from "./utils/getSkugrSkusSalesUtil.js";
  * @desc    Итоги продаж (шт., грн) по каждому SKU товарной группы Skugr за период
  * @route   GET /api/sku-sales-reports/skugr/:skugrId/skus-sales?dateFrom=&dateTo=
  */
-export const getSkugrSkusSalesController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const getSkugrSkusSalesController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getSkugrSkusSalesSchema.safeParse({
     skugrId: req.params.skugrId,
     dateFrom: req.query.dateFrom,
@@ -19,7 +16,7 @@ export const getSkugrSkusSalesController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

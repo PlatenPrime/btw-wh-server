@@ -6,6 +6,4 @@ export const getSkuSliceDayStatusSchema = z.object({
   date: dateStringSchema,
 });
 
-export type GetSkuSliceDayStatusQuery = z.infer<
-  typeof getSkuSliceDayStatusSchema
->;
+export type GetSkuSliceDayStatusQuery = z.infer<typeof getSkuSliceDayStatusSchema>;

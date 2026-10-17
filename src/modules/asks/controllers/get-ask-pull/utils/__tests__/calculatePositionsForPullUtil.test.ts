@@ -34,7 +34,7 @@ describe("calculatePositionsForPullUtil", () => {
       "ART-1",
       null,
       null,
-      "ZONE-A"
+      "ZONE-A",
     );
 
     expect(result.length).toBe(1);
@@ -79,7 +79,7 @@ describe("calculatePositionsForPullUtil", () => {
       "ART-1",
       10,
       8,
-      "ZONE-B"
+      "ZONE-B",
     );
 
     expect(result.length).toBe(2); // Должно хватить на первые 2 позиции
@@ -95,15 +95,7 @@ describe("calculatePositionsForPullUtil", () => {
   });
 
   it("обрабатывает пустой массив позиций", () => {
-    const result = calculatePositionsForPullUtil(
-      [],
-      10,
-      "ask1",
-      "ART-1",
-      10,
-      10,
-      null
-    );
+    const result = calculatePositionsForPullUtil([], 10, "ask1", "ART-1", 10, 10, null);
 
     expect(result).toEqual([]);
   });
@@ -132,15 +124,7 @@ describe("calculatePositionsForPullUtil", () => {
 
     const positions = [pos1, pos2, pos3];
 
-    const result = calculatePositionsForPullUtil(
-      positions,
-      15,
-      "ask1",
-      "ART-1",
-      15,
-      15,
-      "ZONE-C"
-    );
+    const result = calculatePositionsForPullUtil(positions, 15, "ask1", "ART-1", 15, 15, "ZONE-C");
 
     // Позиции должны быть отсортированы по сектору
     // sector может быть строкой или числом
@@ -173,15 +157,7 @@ describe("calculatePositionsForPullUtil", () => {
 
     const positions = [pos1, pos2, pos3];
 
-    const result = calculatePositionsForPullUtil(
-      positions,
-      10,
-      "ask1",
-      "ART-1",
-      10,
-      10,
-      null
-    );
+    const result = calculatePositionsForPullUtil(positions, 10, "ask1", "ART-1", 10, 10, null);
 
     // Только позиция с quant > 0 должна быть включена
     expect(result.length).toBe(1);
@@ -206,7 +182,7 @@ describe("calculatePositionsForPullUtil", () => {
       "ART-1",
       null,
       null,
-      "ZONE-D"
+      "ZONE-D",
     );
 
     expect(result).toEqual([]);
@@ -236,7 +212,7 @@ describe("calculatePositionsForPullUtil", () => {
       "ART-1",
       7,
       7,
-      "ZONE-E"
+      "ZONE-E",
     );
 
     expect(result.length).toBe(2);
@@ -268,7 +244,7 @@ describe("calculatePositionsForPullUtil", () => {
       "ART-1",
       10,
       10,
-      "ZONE-F"
+      "ZONE-F",
     );
 
     expect(result.length).toBe(2);
@@ -285,15 +261,7 @@ describe("calculatePositionsForPullUtil", () => {
     pos1.palletData = { ...pos1.palletData, sector: 1 };
     await pos1.save();
 
-    const result = calculatePositionsForPullUtil(
-      [pos1],
-      5,
-      "ask1",
-      "ART-1",
-      5,
-      5,
-      null
-    );
+    const result = calculatePositionsForPullUtil([pos1], 5, "ask1", "ART-1", 5, 5, null);
 
     expect(result.length).toBe(1);
     expect(result[0].artZone).toBeNull();
@@ -301,4 +269,3 @@ describe("calculatePositionsForPullUtil", () => {
     expect(result[0].plannedQuant).toBe(5);
   });
 });
-

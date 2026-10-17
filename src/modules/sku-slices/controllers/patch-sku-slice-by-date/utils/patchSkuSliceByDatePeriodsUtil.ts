@@ -8,10 +8,7 @@ import {
   materializeSkuSliceSalesDateRange,
   sliceDatePlusDays,
 } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
-import {
-  getDayPoint,
-  upsertDayPoint,
-} from "../../../utils/skuSliceMonthStore.js";
+import { getDayPoint, upsertDayPoint } from "../../../utils/skuSliceMonthStore.js";
 
 export type PatchSkuSliceByDatePeriodsResult = {
   productId: string;
@@ -28,9 +25,7 @@ export type PatchSkuSliceByDatePeriodsResult = {
 export async function patchSkuSliceByDatePeriodsUtil(
   input: PatchSkuSliceByDatePeriodsInput,
 ): Promise<PatchSkuSliceByDatePeriodsResult | null> {
-  const sku = await Sku.findById(input.skuId)
-    .select("konkName productId")
-    .lean();
+  const sku = await Sku.findById(input.skuId).select("konkName productId").lean();
   if (!sku) return null;
 
   const productId = sku.productId?.trim();
@@ -47,9 +42,7 @@ export async function patchSkuSliceByDatePeriodsUtil(
       uniqueByTime.set(day.getTime(), day);
     }
   }
-  const dates = [...uniqueByTime.values()].sort(
-    (a, b) => a.getTime() - b.getTime(),
-  );
+  const dates = [...uniqueByTime.values()].sort((a, b) => a.getTime() - b.getTime());
 
   const nextItem: ISkuSliceDataItem = {
     stock: input.stock,

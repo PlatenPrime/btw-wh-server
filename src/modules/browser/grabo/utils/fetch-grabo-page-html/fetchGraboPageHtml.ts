@@ -30,7 +30,7 @@ export async function fetchGraboPageHtml(url: string): Promise<string> {
       if (attempt === GRABO_FETCH_MAX_ATTEMPTS || waitMs == null) {
         log.warn(
           { url, attempt, maxAttempts: GRABO_FETCH_MAX_ATTEMPTS, details },
-          "grabo fetch retry exhausted"
+          "grabo fetch retry exhausted",
         );
         throw error;
       }
@@ -43,7 +43,7 @@ export async function fetchGraboPageHtml(url: string): Promise<string> {
           waitMs,
           details,
         },
-        "grabo fetch retry"
+        "grabo fetch retry",
       );
       await sleep(waitMs);
     }

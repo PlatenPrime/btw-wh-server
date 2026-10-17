@@ -10,6 +10,7 @@
 **Доступ:** checkAuth + checkRoles(USER).
 
 **Запрос:** query-параметры:
+
 - `konkName`: string (опционально)
 - `prodName`: string (опционально)
 - `search`: string (опционально) — поиск по `title` (регистронезависимое совпадение)
@@ -43,6 +44,7 @@
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
 **Запрос body:**
+
 - `konkName`: string (обязательно)
 - `prodName`: string (обязательно)
 - `title`: string (обязательно)
@@ -63,6 +65,7 @@
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
 **Запрос:**
+
 - path-параметр `id` — MongoDB ObjectId
 - body: `{ konkName?: string, prodName?: string, title?: string, url?: string, varGroup?: { id: string, title: string }, imageUrl?: string }`
 
@@ -95,4 +98,3 @@
 - `imageUrl`: string
 - `createdAt`: Date (ISO строка в JSON)
 - `updatedAt`: Date (ISO строка в JSON)
-

@@ -61,16 +61,10 @@ describe("buildGraboSkuExcelBuffer", () => {
     expect(data.getCell(columnIndex("productId")).value).toBe("G1");
     expect(data.getCell(columnIndex("isNewProduct")).value).toBe(true);
     expect(data.getCell(columnIndex("tags")).value).toBe("Girl; Party");
-    expect(data.getCell(columnIndex("images")).value).toBe(
-      "https://img/a.jpg; https://img/b.jpg"
-    );
+    expect(data.getCell(columnIndex("images")).value).toBe("https://img/a.jpg; https://img/b.jpg");
     expect(data.getCell(columnIndex("isOnSite")).value).toBe(false);
-    expect(data.getCell(columnIndex("lastSeenAt")).value).toBe(
-      lastSeenAt.toISOString()
-    );
-    expect(data.getCell(columnIndex("createdAt")).value).toBe(
-      createdAt.toISOString()
-    );
+    expect(data.getCell(columnIndex("lastSeenAt")).value).toBe(lastSeenAt.toISOString());
+    expect(data.getCell(columnIndex("createdAt")).value).toBe(createdAt.toISOString());
   });
 
   it("fits column width to content and caps long url/images", async () => {

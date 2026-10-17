@@ -42,4 +42,3 @@ describe("getArtByIdUtil", () => {
     expect(result?.updatedAt).toBeDefined();
   });
 });
-

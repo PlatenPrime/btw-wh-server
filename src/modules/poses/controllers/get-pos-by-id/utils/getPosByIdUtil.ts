@@ -4,9 +4,7 @@ import { IPos, Pos } from "../../../models/Pos.js";
 /**
  * Получает позицию по ID
  */
-export const getPosByIdUtil = async (
-  posId: string
-): Promise<IPos | null> => {
+export const getPosByIdUtil = async (posId: string): Promise<IPos | null> => {
   if (!mongoose.Types.ObjectId.isValid(posId)) {
     throw new Error("Invalid position ID");
   }

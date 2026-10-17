@@ -6,10 +6,7 @@ interface GetCreateAskMessageInput {
   data: CreateAskData;
 }
 
-export const getCreateAskMessageUtil = ({
-  askerData,
-  data,
-}: GetCreateAskMessageInput) => {
+export const getCreateAskMessageUtil = ({ askerData, data }: GetCreateAskMessageInput) => {
   const { artikul, nameukr, quant, com } = data;
   return `🆕 Новий запит
 

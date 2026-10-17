@@ -52,23 +52,13 @@ import { checkAuth, checkRoles } from "./middleware/index.js";
 import { RoleType } from "../constants/roles.js";
 
 // Доступ только для ADMIN и PRIME
-router.delete(
-  "/users/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  deleteUser
-);
+router.delete("/users/:id", checkAuth, checkRoles([RoleType.ADMIN]), deleteUser);
 
 // Доступ для всех авторизованных (USER, ADMIN, PRIME)
 router.get("/profile", checkAuth, checkRoles([RoleType.USER]), getProfile);
 
 // Доступ только для PRIME
-router.post(
-  "/critical",
-  checkAuth,
-  checkRoles([RoleType.PRIME]),
-  criticalAction
-);
+router.post("/critical", checkAuth, checkRoles([RoleType.PRIME]), criticalAction);
 ```
 
 **Что делает:**
@@ -103,7 +93,7 @@ router.delete(
     const ask = await Ask.findById(req.params.id);
     return ask?.asker.toString();
   }),
-  deleteAsk
+  deleteAsk,
 );
 
 // Редактировать можно только свой профиль (или если ты ADMIN/PRIME)
@@ -113,7 +103,7 @@ router.put(
   checkOwnership(async (req) => {
     return req.params.userId;
   }),
-  updateProfile
+  updateProfile,
 );
 ```
 
@@ -171,12 +161,7 @@ router.post("/items", checkAuth, checkRoles([RoleType.ADMIN]), createItem);
 router.put("/items/:id", checkAuth, checkRoles([RoleType.ADMIN]), updateItem);
 
 // Удаление - только PRIME
-router.delete(
-  "/items/:id",
-  checkAuth,
-  checkRoles([RoleType.PRIME]),
-  deleteItem
-);
+router.delete("/items/:id", checkAuth, checkRoles([RoleType.PRIME]), deleteItem);
 
 export default router;
 ```
@@ -185,11 +170,7 @@ export default router;
 
 ```typescript
 import { Router } from "express";
-import {
-  checkAuth,
-  checkOwnership,
-  checkRoles,
-} from "../../middleware/index.js";
+import { checkAuth, checkOwnership, checkRoles } from "../../middleware/index.js";
 import { RoleType } from "../../constants/roles.js";
 import { Post } from "./models/Post.js";
 
@@ -206,7 +187,7 @@ router.put(
     const post = await Post.findById(req.params.id);
     return post?.authorId.toString();
   }),
-  updatePost
+  updatePost,
 );
 
 // Удалить - только владелец или ADMIN/PRIME
@@ -217,7 +198,7 @@ router.delete(
     const post = await Post.findById(req.params.id);
     return post?.authorId.toString();
   }),
-  deletePost
+  deletePost,
 );
 
 export default router;

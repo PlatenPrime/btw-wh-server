@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Block } from "../../../../blocks/models/Block.js";
 import { Zone } from "../../../../zones/models/Zone.js";
@@ -44,10 +43,7 @@ describe("getZonesBySegId Controller", () => {
       zones: [{ _id: zone._id, title: zone.title }],
     });
 
-    await Zone.updateOne(
-      { _id: zone._id },
-      { $set: { "seg.id": seg._id, sector: seg.sector } }
-    );
+    await Zone.updateOne({ _id: zone._id }, { $set: { "seg.id": seg._id, sector: seg.sector } });
 
     mockRequest = { params: { segId: seg._id.toString() } };
 

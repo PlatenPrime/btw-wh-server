@@ -23,7 +23,7 @@ export const calculatePositionsForPullUtil = (
   askArtikul: string,
   askQuant: number | null,
   askRemainingQuantity: number | null,
-  artZone: string | null
+  artZone: string | null,
 ): IPositionForPull[] => {
   // Сценарий 3: позиций нет
   if (positions.length === 0) {
@@ -34,13 +34,13 @@ export const calculatePositionsForPullUtil = (
   if (remainingQuantity === null) {
     const sortedPositions = sortPositionsByPalletSectorUtil([...positions]);
     const firstPosition = sortedPositions[0];
-    
+
     // Проверяем, что первая позиция имеет количество > 0
     // Если все позиции имеют quant === 0, возвращаем пустой массив
     if (!firstPosition || firstPosition.quant <= 0) {
       return [];
     }
-    
+
     return [
       {
         ...firstPosition.toObject(),
@@ -67,7 +67,7 @@ export const calculatePositionsForPullUtil = (
     }
 
     const availableQuant = Math.max(position.quant, 0);
-    
+
     if (availableQuant > 0) {
       const plannedQuant = Math.min(remaining, availableQuant);
       positionsForPull.push({
@@ -87,4 +87,3 @@ export const calculatePositionsForPullUtil = (
   // все равно возвращаем все доступные позиции с их остатками
   return positionsForPull;
 };
-

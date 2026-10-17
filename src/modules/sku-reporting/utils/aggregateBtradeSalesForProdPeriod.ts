@@ -15,8 +15,7 @@ export type AggregateBtradeSalesForProdPeriodInput = {
 };
 
 export type AggregateBtradeSalesForProdPeriodResult =
-  | { ok: true; salesPcs: number; salesUah: number }
-  | { ok: false };
+  { ok: true; salesPcs: number; salesUah: number } | { ok: false };
 
 function buildArtProdFilter(
   prodNamesLower: string[],

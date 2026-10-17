@@ -33,7 +33,7 @@ function kyivLocalToUtc(
   day: number,
   hour: number,
   minute = 0,
-  second = 0
+  second = 0,
 ): Date {
   const guess = new Date(Date.UTC(year, month - 1, day, hour - 2, minute, second));
   const fmt = new Intl.DateTimeFormat("en-US", {
@@ -49,8 +49,7 @@ function kyivLocalToUtc(
 
   for (let i = 0; i < 3; i++) {
     const parts = fmt.formatToParts(guess);
-    const get = (type: string) =>
-      Number(parts.find((p) => p.type === type)?.value);
+    const get = (type: string) => Number(parts.find((p) => p.type === type)?.value);
     const y = get("year");
     const m = get("month");
     const d = get("day");
@@ -63,11 +62,7 @@ function kyivLocalToUtc(
     }
 
     const diffMs =
-      ((year - y) * 365 * 24 +
-        (month - m) * 31 * 24 +
-        (day - d) * 24 +
-        (hour - h)) *
-        3600_000 +
+      ((year - y) * 365 * 24 + (month - m) * 31 * 24 + (day - d) * 24 + (hour - h)) * 3600_000 +
       (minute - min) * 60_000 +
       (second - sec) * 1000;
 
@@ -173,14 +168,12 @@ describe("sendAnalyticsChatNotificationDeferred", () => {
     vi.setSystemTime(kyivLocalToUtc(2025, 6, 6, 10, 0));
     vi.mocked(sendMessageToAnalyticsChat).mockRejectedValue(new Error("TG fail"));
 
-    await expect(
-      sendAnalyticsChatNotificationDeferred("fail report")
-    ).resolves.toBeUndefined();
+    await expect(sendAnalyticsChatNotificationDeferred("fail report")).resolves.toBeUndefined();
 
     expect(logModuleError).toHaveBeenCalledWith(
       "kyivNightNotificationDelay",
       expect.any(Error),
-      "analytics notification failed"
+      "analytics notification failed",
     );
   });
 
@@ -196,9 +189,7 @@ describe("sendAnalyticsChatNotificationDeferred", () => {
     const send = vi.mocked(sendMessageToAnalyticsChat);
     expect(send.mock.calls.length).toBeGreaterThan(1);
     for (const [message] of send.mock.calls) {
-      expect(String(message).length).toBeLessThanOrEqual(
-        TELEGRAM_MESSAGE_MAX_CHARS
-      );
+      expect(String(message).length).toBeLessThanOrEqual(TELEGRAM_MESSAGE_MAX_CHARS);
     }
   });
 });

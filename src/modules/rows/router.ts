@@ -15,25 +15,15 @@ const router = Router();
 // GET роуты - доступно для всех авторизованных пользователей
 router.get("/", checkAuth, checkRoles([RoleType.USER]), getAllRows);
 router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), getRowById);
-router.get(
-  "/title/:title",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  getRowByTitle
-);
+router.get("/title/:title", checkAuth, checkRoles([RoleType.USER]), getRowByTitle);
 
 // POST роуты - доступно для ADMIN и PRIME
 router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), createRow);
 
 // PUT роуты - доступно для ADMIN и PRIME
-router.put(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  async (req: Request, res: Response) => {
-    await updateRow(req, res);
-  }
-);
+router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), async (req: Request, res: Response) => {
+  await updateRow(req, res);
+});
 
 // DELETE роуты - доступно для ADMIN и PRIME
 router.delete(
@@ -42,7 +32,7 @@ router.delete(
   checkRoles([RoleType.PRIME]),
   async (req: Request, res: Response) => {
     await deleteRow(req, res);
-  }
+  },
 );
 
 export default router;

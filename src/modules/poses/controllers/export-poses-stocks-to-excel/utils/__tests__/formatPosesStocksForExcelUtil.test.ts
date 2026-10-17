@@ -9,7 +9,7 @@ describe("formatPosesStocksForExcelUtil", () => {
         { artikul: "ART-001", nameukr: "", quant: 3, sklad: "merezhi" },
         { artikul: "ART-002", quant: 0, sklad: "merezhi" },
       ],
-      { selectedSklad: "merezhi" }
+      { selectedSklad: "merezhi" },
     );
 
     expect(result).toEqual([
@@ -42,9 +42,7 @@ describe("formatPosesStocksForExcelUtil", () => {
   });
 
   it("uses default sklad label for empty sklad", () => {
-    const result = formatPosesStocksForExcelUtil([
-      { artikul: "ART-001", quant: 2, sklad: null },
-    ]);
+    const result = formatPosesStocksForExcelUtil([{ artikul: "ART-001", quant: 2, sklad: null }]);
 
     expect(result[0].Склад).toBe("Не указан");
   });

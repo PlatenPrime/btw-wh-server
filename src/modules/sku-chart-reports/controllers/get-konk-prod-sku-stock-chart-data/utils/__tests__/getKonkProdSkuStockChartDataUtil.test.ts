@@ -70,13 +70,13 @@ describe("getKonkProdSkuStockChartDataUtil", () => {
     const d2 = new Date("2026-10-02T00:00:00.000Z");
 
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-red`]: { stock: 10, price: 2 },
-          [`${konk}-blue`]: { stock: 5, price: 3 },
-        });
+      [`${konk}-red`]: { stock: 10, price: 2 },
+      [`${konk}-blue`]: { stock: 5, price: 3 },
+    });
     await seedSkuSliceMonthDay(konk, d2, {
-          [`${konk}-red`]: { stock: 8, price: 2 },
-          [`${konk}-blue`]: { stock: 4, price: 3 },
-        });
+      [`${konk}-red`]: { stock: 8, price: 2 },
+      [`${konk}-blue`]: { stock: 4, price: 3 },
+    });
 
     await seedBtradeSliceMonthDay(d1, {
       [bt1]: { quantity: 100, price: 5 },
@@ -154,13 +154,13 @@ describe("getKonkProdSkuStockChartDataUtil", () => {
     const d2 = new Date("2026-08-11T00:00:00.000Z");
 
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-x`]: { stock: 10, price: 2 },
-          [`${konk}-y`]: { stock: 20, price: 3 },
-        });
+      [`${konk}-x`]: { stock: 10, price: 2 },
+      [`${konk}-y`]: { stock: 20, price: 3 },
+    });
     await seedSkuSliceMonthDay(konk, d2, {
-          [`${konk}-x`]: { stock: 8, price: 2 },
-          [`${konk}-y`]: { stock: 15, price: 3 },
-        });
+      [`${konk}-x`]: { stock: 8, price: 2 },
+      [`${konk}-y`]: { stock: 15, price: 3 },
+    });
 
     await seedBtradeSliceMonthDay(d1, {
       [bt1]: { quantity: 100, price: 5 },
@@ -297,9 +297,9 @@ describe("getKonkProdSkuStockChartDataUtil", () => {
 
     const d1 = new Date("2026-09-01T00:00:00.000Z");
     await seedSkuSliceMonthDay(konk, d1, {
-        [`${konk}-in`]: { stock: 7, price: 1 },
-        [`${konk}-out`]: { stock: 100, price: 1 },
-      });
+      [`${konk}-in`]: { stock: 7, price: 1 },
+      [`${konk}-out`]: { stock: 100, price: 1 },
+    });
 
     const r = await getKonkProdSkuStockChartDataUtil({
       konk,

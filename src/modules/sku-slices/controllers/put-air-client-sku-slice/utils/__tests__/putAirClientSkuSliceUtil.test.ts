@@ -21,20 +21,14 @@ vi.mock("../../../../utils/skuSliceMonthStore.js", () => ({
 vi.mock("../../../../utils/skuSliceDayMetaStore.js", () => ({
   ensureSkuSliceDayMeta: vi.fn(),
 }));
-vi.mock(
-  "../../../../../sku-reporting/utils/scheduleAfterSkuSliceStockMutation.js",
-  () => ({
-    scheduleAfterSkuSliceStockMutation: vi.fn(),
-  }),
-);
+vi.mock("../../../../../sku-reporting/utils/scheduleAfterSkuSliceStockMutation.js", () => ({
+  scheduleAfterSkuSliceStockMutation: vi.fn(),
+}));
 
 import { readAirProductFromHtml } from "../../../../../browser/air/utils/air-product-page-from-html/readAirProductFromHtml.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
-import {
-  getDayPoint,
-  upsertDayPoint,
-} from "../../../../utils/skuSliceMonthStore.js";
+import { getDayPoint, upsertDayPoint } from "../../../../utils/skuSliceMonthStore.js";
 import { ensureSkuSliceDayMeta } from "../../../../utils/skuSliceDayMetaStore.js";
 import { scheduleAfterSkuSliceStockMutation } from "../../../../../sku-reporting/utils/scheduleAfterSkuSliceStockMutation.js";
 

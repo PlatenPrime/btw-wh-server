@@ -49,10 +49,7 @@ import {
   UNSUPPORTED_KONK_CODE,
 } from "../../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSliceDayMeta } from "../../../sku-slices/models/SkuSliceDayMeta.js";
-import {
-  loadDayMapForKonk,
-  upsertDayPoint,
-} from "../../../sku-slices/utils/skuSliceMonthStore.js";
+import { loadDayMapForKonk, upsertDayPoint } from "../../../sku-slices/utils/skuSliceMonthStore.js";
 import { getCompensationExcludedCompetitorSet } from "../../../slices/config/excludedCompetitors.js";
 import { runCompensatingSkuSlices } from "../runCompensatingSkuSlices.js";
 
@@ -83,17 +80,13 @@ describe("runCompensatingSkuSlices", () => {
   function mockSkuFindOne(id: string | null) {
     vi.mocked(Sku.findOne).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue(
-          id ? { _id: { toString: () => id } } : null,
-        ),
+        lean: vi.fn().mockResolvedValue(id ? { _id: { toString: () => id } } : null),
       }),
     } as never);
   }
 
   it("skips excluded competitors", async () => {
-    vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(
-      new Set(["yumi"]),
-    );
+    vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(new Set(["yumi"]));
     vi.mocked(SkuSliceDayMeta.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
         lean: vi.fn().mockResolvedValue([{ konkName: "yumi" }]),
@@ -197,10 +190,7 @@ describe("runCompensatingSkuSlices", () => {
   it("filters by konkName option", async () => {
     vi.mocked(SkuSliceDayMeta.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue([
-          { konkName: "air" },
-          { konkName: "balun" },
-        ]),
+        lean: vi.fn().mockResolvedValue([{ konkName: "air" }, { konkName: "balun" }]),
       }),
     } as never);
     mockDayMap({ P1: { stock: -1, price: -1 } });

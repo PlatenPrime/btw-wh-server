@@ -21,4 +21,3 @@ export const getAllSegs = async (req: Request, res: Response) => {
     }
   }
 };
-

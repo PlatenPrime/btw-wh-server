@@ -34,10 +34,7 @@ function parsePositiveInt(text: string): number | null {
   return count;
 }
 
-function firstPackFromElements(
-  $: CheerioAPI,
-  elements: Cheerio<Element>
-): number | null {
+function firstPackFromElements($: CheerioAPI, elements: Cheerio<Element>): number | null {
   for (const el of elements.toArray()) {
     const count = parsePackCountFromText($(el).text());
     if (count !== null) return count;
@@ -51,7 +48,7 @@ function firstPackFromElements(
  */
 function extractPackCountFromCharacteristics(
   $: CheerioAPI,
-  scope: Cheerio<Element>
+  scope: Cheerio<Element>,
 ): number | null {
   for (const labelEl of scope.find("dt, th").toArray()) {
     const label = $(labelEl).text().replace(/\s+/g, " ").trim();
@@ -75,10 +72,7 @@ function extractPackCountFromProductHtml(html: string): number | null {
   const main = $("#main").first();
   const scope = main.length ? main : $("body");
 
-  const fromInfoblock = firstPackFromElements(
-    $,
-    scope.find(".infoblock_pp, .infoblock_p")
-  );
+  const fromInfoblock = firstPackFromElements($, scope.find(".infoblock_pp, .infoblock_p"));
   if (fromInfoblock !== null) return fromInfoblock;
 
   const fromCharacteristics = extractPackCountFromCharacteristics($, scope);

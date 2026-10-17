@@ -1,13 +1,6 @@
 import type { Level } from "pino";
 
-const LEVELS: ReadonlySet<string> = new Set([
-  "fatal",
-  "error",
-  "warn",
-  "info",
-  "debug",
-  "trace",
-]);
+const LEVELS: ReadonlySet<string> = new Set(["fatal", "error", "warn", "info", "debug", "trace"]);
 
 export function getLogLevel(): Level {
   const raw = process.env.LOG_LEVEL?.trim().toLowerCase();

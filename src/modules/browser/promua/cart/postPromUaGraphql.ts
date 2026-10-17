@@ -29,10 +29,7 @@ export type PostPromUaGraphqlResult = {
 /**
  * URL Prom GraphQL на company site: `${origin}/bfg/graphql?...`.
  */
-export function buildPromUaGraphqlUrl(
-  origin: string,
-  operationName: string
-): string {
+export function buildPromUaGraphqlUrl(origin: string, operationName: string): string {
   const params = new URLSearchParams({
     operation_name: operationName,
     source: "COMPANY_SITE",
@@ -44,7 +41,7 @@ function buildGraphqlHeaders(
   origin: string,
   productUrl: string,
   cookieHeader: string,
-  csrfToken: string | undefined
+  csrfToken: string | undefined,
 ): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: "application/json, text/plain, */*",
@@ -72,7 +69,7 @@ function buildGraphqlHeaders(
  */
 export async function postPromUaGraphql(
   client: AxiosInstance,
-  input: PostPromUaGraphqlInput
+  input: PostPromUaGraphqlInput,
 ): Promise<PostPromUaGraphqlResult> {
   const origin = input.origin.replace(/\/$/, "");
   const url = buildPromUaGraphqlUrl(origin, input.operationName);
@@ -85,21 +82,16 @@ export async function postPromUaGraphql(
     },
     {
       ...BROWSER_TEXT_CONFIG,
-      headers: buildGraphqlHeaders(
-        origin,
-        input.productUrl,
-        input.cookieHeader,
-        input.csrfToken
-      ),
-    }
+      headers: buildGraphqlHeaders(origin, input.productUrl, input.cookieHeader, input.csrfToken),
+    },
   );
 
   const cookieHeader = mergeCookies(
     input.cookieHeader,
     pickHeaderCaseInsensitive(
       (response as { headers?: Record<string, unknown> }).headers ?? {},
-      "set-cookie"
-    )
+      "set-cookie",
+    ),
   );
 
   return {

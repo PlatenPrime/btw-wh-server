@@ -2,26 +2,20 @@ import { Request, Response } from "express";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { toSkugrDto } from "../../utils/toSkugrDto.js";
 import { createSkugrSchema } from "./schemas/createSkugrSchema.js";
-import {
-  InvalidSkuReferencesError,
-  createSkugrUtil,
-} from "./utils/createSkugrUtil.js";
+import { InvalidSkuReferencesError, createSkugrUtil } from "./utils/createSkugrUtil.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
 /**
  * @desc    Создать группу товаров конкурента (skugr)
  * @route   POST /api/skugrs
  */
-export const createSkugrController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const createSkugrController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createSkugrSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

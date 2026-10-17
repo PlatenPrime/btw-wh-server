@@ -3,10 +3,7 @@ import { getAskPullSchema } from "./schemas/getAskPullSchema.js";
 import { getAskPullUtil } from "./utils/getAskPullUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getAskPullController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAskPullController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -15,7 +12,7 @@ export const getAskPullController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -44,4 +41,3 @@ export const getAskPullController = async (
     });
   }
 };
-

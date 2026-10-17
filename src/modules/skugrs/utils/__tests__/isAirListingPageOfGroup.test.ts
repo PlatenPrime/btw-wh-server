@@ -1,19 +1,15 @@
 import { describe, expect, it } from "vitest";
-import {
-  isAirListingPageOfGroup,
-  sourceUrlMatchesSkugrUrl,
-} from "../isAirListingPageOfGroup.js";
+import { isAirListingPageOfGroup, sourceUrlMatchesSkugrUrl } from "../isAirListingPageOfGroup.js";
 
-const GROUP =
-  "https://airballoons.com.ua/ua/index.php?route=product/category&path=59";
+const GROUP = "https://airballoons.com.ua/ua/index.php?route=product/category&path=59";
 
 describe("sourceUrlMatchesSkugrUrl", () => {
   it("matches trailing slash variants", () => {
     expect(
       sourceUrlMatchesSkugrUrl(
         "https://airballoons.com.ua/ua/category/x/",
-        "https://airballoons.com.ua/ua/category/x"
-      )
+        "https://airballoons.com.ua/ua/category/x",
+      ),
     ).toBe(true);
   });
 
@@ -21,8 +17,8 @@ describe("sourceUrlMatchesSkugrUrl", () => {
     expect(
       sourceUrlMatchesSkugrUrl(
         "https://airballoons.com.ua/ua/category/a",
-        "https://airballoons.com.ua/ua/category/b"
-      )
+        "https://airballoons.com.ua/ua/category/b",
+      ),
     ).toBe(false);
   });
 });
@@ -37,20 +33,15 @@ describe("isAirListingPageOfGroup", () => {
   });
 
   it("rejects a different path", () => {
-    expect(
-      isAirListingPageOfGroup(
-        "https://airballoons.com.ua/ua/product/x",
-        GROUP
-      )
-    ).toBe(false);
+    expect(isAirListingPageOfGroup("https://airballoons.com.ua/ua/product/x", GROUP)).toBe(false);
   });
 
   it("rejects a different origin", () => {
     expect(
       isAirListingPageOfGroup(
         "https://evil.example/ua/index.php?route=product/category&path=59",
-        GROUP
-      )
+        GROUP,
+      ),
     ).toBe(false);
   });
 

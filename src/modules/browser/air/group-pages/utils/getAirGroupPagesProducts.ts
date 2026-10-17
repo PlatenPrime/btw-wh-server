@@ -30,7 +30,7 @@ const airLog = createLogger({ module: "browser" });
  * При AIR_IDLE_MODE сеть не трогает.
  */
 export async function getAirGroupPagesProducts(
-  input: GetAirGroupPagesProductsInput
+  input: GetAirGroupPagesProductsInput,
 ): Promise<AirGroupPageProduct[]> {
   if (AIR_IDLE_MODE) {
     throw new AirServerIdleError();
@@ -57,10 +57,9 @@ export async function getAirGroupPagesProducts(
           context: "Air group listing warm-up failed, continue crawl",
           url: warmUpUrl,
           groupUrl,
-          details:
-            warmErr instanceof Error ? warmErr.message : String(warmErr),
+          details: warmErr instanceof Error ? warmErr.message : String(warmErr),
         },
-        "air group warmup failed"
+        "air group warmup failed",
       );
     }
   }
@@ -69,8 +68,7 @@ export async function getAirGroupPagesProducts(
     startUrl: groupUrl,
     maxPages,
     parseProductsFromPage: parseAirGroupListingProductsMap,
-    getNextPageUrl: ($, url) =>
-      getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
+    getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
     stopOnEmptyPage: true,
     delayBeforeNextMs: () => getGroupPagesThrottleDelayMs("air"),
     getHtml: (url) => fetchPageHtml(url, listingOpts),

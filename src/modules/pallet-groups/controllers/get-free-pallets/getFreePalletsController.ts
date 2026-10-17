@@ -15,8 +15,7 @@ export const getFreePalletsController = async (req: Request, res: Response) => {
       data,
     });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Failed to fetch free pallets";
+    const message = error instanceof Error ? error.message : "Failed to fetch free pallets";
     return res.status(500).json({
       message,
     });

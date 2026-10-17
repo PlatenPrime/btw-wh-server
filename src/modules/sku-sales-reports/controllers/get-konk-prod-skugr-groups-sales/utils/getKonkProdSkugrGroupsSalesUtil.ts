@@ -22,8 +22,7 @@ type SkugrGroupsTotal = {
 const ALL_SKUGR_GROUPS_TITLE = "Всі групи";
 
 export type GetKonkProdSkugrGroupsSalesResult =
-  | { ok: true; data: SkugrGroupSalesRow[]; all: SkugrGroupsTotal }
-  | { ok: false };
+  { ok: true; data: SkugrGroupSalesRow[]; all: SkugrGroupsTotal } | { ok: false };
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
@@ -47,20 +46,14 @@ export async function getKonkProdSkugrGroupsSalesUtil(
   const metricsByKey =
     allSkuRefs.length === 0
       ? null
-      : await aggregatePeriodSkuSliceMetricsBySkuKey(
-          allSkuRefs,
-          dateFrom,
-          dateTo,
-        );
+      : await aggregatePeriodSkuSliceMetricsBySkuKey(allSkuRefs, dateFrom, dateTo);
 
   const data: SkugrGroupSalesRow[] = groups.map((g) => {
     let salesPcs = 0;
     let salesUah = 0;
     if (metricsByKey?.ok) {
       for (const sku of g.skus) {
-        const m = metricsByKey.byKey.get(
-          skuSliceMetricsKey(sku.konkName, sku.productId),
-        );
+        const m = metricsByKey.byKey.get(skuSliceMetricsKey(sku.konkName, sku.productId));
         if (!m) continue;
         salesPcs += m.salesPcs;
         salesUah += m.salesUah;

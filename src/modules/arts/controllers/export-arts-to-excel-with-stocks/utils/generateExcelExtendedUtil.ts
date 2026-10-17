@@ -1,8 +1,5 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../../../lib/excel/worksheetStyles.js";
 import type { ExcelArtRowExtended } from "./types.js";
 
 const SHEET_NAME = "Артикулы";
@@ -26,7 +23,7 @@ const COLUMN_WIDTHS = [12, 15, 15, 15, 15, 45, 10, 10, 15, 18];
  * @returns объект с буфером файла и именем файла
  */
 export async function generateExcelExtendedUtil(
-  excelData: ExcelArtRowExtended[]
+  excelData: ExcelArtRowExtended[],
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(SHEET_NAME);
@@ -52,9 +49,7 @@ export async function generateExcelExtendedUtil(
   });
 
   const buffer = await workbook.xlsx.writeBuffer();
-  const fileName = `arts_export_with_stocks_${
-    new Date().toISOString().split("T")[0]
-  }.xlsx`;
+  const fileName = `arts_export_with_stocks_${new Date().toISOString().split("T")[0]}.xlsx`;
 
   return { buffer: Buffer.from(buffer), fileName };
 }

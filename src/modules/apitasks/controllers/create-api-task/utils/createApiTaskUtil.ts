@@ -45,7 +45,7 @@ export async function createApiTaskUtil(input: {
       ok: false,
       status: 400,
       message: "Validation error",
-      errors: parsedParams.error.errors,
+      errors: parsedParams.error.issues,
     };
   }
 

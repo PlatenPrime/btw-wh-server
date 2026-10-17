@@ -19,5 +19,3 @@ describe("getRejectAskMesUtil", () => {
     expect(msg).toContain("Відхилив: Solver");
   });
 });
-
-

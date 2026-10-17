@@ -10,10 +10,7 @@ import {
   type SlicePoint,
 } from "../../slices/utils/detectPackFlipSpike.js";
 import type { ISkuSliceDataItem } from "../models/skuSliceTypes.js";
-import {
-  loadDayMapsForKonkDates,
-  upsertDayPoint,
-} from "./skuSliceMonthStore.js";
+import { loadDayMapsForKonkDates, upsertDayPoint } from "./skuSliceMonthStore.js";
 
 export type PackFlipFinding = {
   productId: string;
@@ -47,13 +44,7 @@ export type ReviewPackFlipsInput = {
 type SkuMeta = { skuId: string; title: string; url: string; imageUrl: string };
 
 export function addUtcDays(date: Date, delta: number): Date {
-  return new Date(
-    Date.UTC(
-      date.getUTCFullYear(),
-      date.getUTCMonth(),
-      date.getUTCDate() + delta,
-    ),
-  );
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate() + delta));
 }
 
 export function toUtcYmd(date: Date): string {
@@ -70,11 +61,7 @@ export function packFlipReviewDatesForSliceDay(sliceDate: Date): Date[] {
   return [addUtcDays(today, -2), addUtcDays(today, -1), today];
 }
 
-function emptyResult(
-  konkName: string,
-  apply: boolean,
-  dates: Date[],
-): PackFlipReviewResult {
+function emptyResult(konkName: string, apply: boolean, dates: Date[]): PackFlipReviewResult {
   return {
     konkName,
     apply,
@@ -85,9 +72,7 @@ function emptyResult(
   };
 }
 
-function collectProductIds(
-  dataByDate: Map<number, Record<string, unknown>>,
-): string[] {
+function collectProductIds(dataByDate: Map<number, Record<string, unknown>>): string[] {
   const ids = new Set<string>();
   for (const data of dataByDate.values()) {
     for (const key of Object.keys(data)) {
@@ -120,18 +105,16 @@ function toFinding(
   };
 }
 
-async function loadSkuMetaByProductId(
-  konkName: string,
-): Promise<Map<string, SkuMeta>> {
-  const rows = await Sku.find({ konkName })
-    .select("_id productId title url imageUrl")
-    .lean<{
+async function loadSkuMetaByProductId(konkName: string): Promise<Map<string, SkuMeta>> {
+  const rows = await Sku.find({ konkName }).select("_id productId title url imageUrl").lean<
+    {
       _id?: { toString(): string };
       productId?: string;
       title?: string;
       url?: string;
       imageUrl?: string;
-    }[]>();
+    }[]
+  >();
   const map = new Map<string, SkuMeta>();
   for (const row of rows) {
     if (typeof row.productId !== "string" || !row.productId) continue;
@@ -145,10 +128,7 @@ async function loadSkuMetaByProductId(
   return map;
 }
 
-async function applyInversePatches(
-  konkName: string,
-  findings: PackFlipFinding[],
-): Promise<void> {
+async function applyInversePatches(konkName: string, findings: PackFlipFinding[]): Promise<void> {
   for (const finding of findings) {
     if (!finding.patched || !finding.date) continue;
     const item: ISkuSliceDataItem = finding.patched;
@@ -174,9 +154,7 @@ function buildFindings(
     }));
     const decisions = decidePackFlipPatchesForSeries(series);
     for (const decision of decisions) {
-      findings.push(
-        toFinding(productId, skuMeta.get(productId), dates, decision),
-      );
+      findings.push(toFinding(productId, skuMeta.get(productId), dates, decision));
     }
   }
   return findings;

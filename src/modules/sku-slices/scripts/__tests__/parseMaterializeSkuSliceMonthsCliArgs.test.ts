@@ -29,23 +29,19 @@ describe("parseMaterializeSkuSliceMonthsCliArgs", () => {
   });
 
   it("rejects invalid ints, dates and unknown flags", () => {
-    expect(() => parseMaterializeSkuSliceMonthsCliArgs(["--wat"])).toThrow(
-      /Unknown/,
+    expect(() => parseMaterializeSkuSliceMonthsCliArgs(["--wat"])).toThrow(/Unknown/);
+    expect(() => parseMaterializeSkuSliceMonthsCliArgs(["--days-back", "0"])).toThrow(
+      /integer >= 1/,
     );
-    expect(() =>
-      parseMaterializeSkuSliceMonthsCliArgs(["--days-back", "0"]),
-    ).toThrow(/integer >= 1/);
-    expect(() =>
-      parseMaterializeSkuSliceMonthsCliArgs(["--days-back", "1.5"]),
-    ).toThrow(/integer >= 1/);
-    expect(() =>
-      parseMaterializeSkuSliceMonthsCliArgs(["--as-of", "07.10.2026"]),
-    ).toThrow(/YYYY-MM-DD/);
-    expect(() =>
-      parseMaterializeSkuSliceMonthsCliArgs(["--apply", "--as-of"]),
-    ).toThrow(/--as-of requires a value/);
-    expect(() =>
-      parseMaterializeSkuSliceMonthsCliArgs(["--konk", ""]),
-    ).toThrow(/--konk requires/);
+    expect(() => parseMaterializeSkuSliceMonthsCliArgs(["--days-back", "1.5"])).toThrow(
+      /integer >= 1/,
+    );
+    expect(() => parseMaterializeSkuSliceMonthsCliArgs(["--as-of", "07.10.2026"])).toThrow(
+      /YYYY-MM-DD/,
+    );
+    expect(() => parseMaterializeSkuSliceMonthsCliArgs(["--apply", "--as-of"])).toThrow(
+      /--as-of requires a value/,
+    );
+    expect(() => parseMaterializeSkuSliceMonthsCliArgs(["--konk", ""])).toThrow(/--konk requires/);
   });
 });

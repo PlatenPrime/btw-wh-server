@@ -4,21 +4,14 @@ import request from "supertest";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RoleType } from "../../../constants/roles.js";
 import app from "../../../test/utils/testApp.js";
-import {
-  createTestPallet,
-  createTestPos,
-  createTestRow,
-} from "../../../test/utils/testHelpers.js";
+import { createTestPallet, createTestPos, createTestRow } from "../../../test/utils/testHelpers.js";
 import { Pos } from "../models/Pos.js";
 
 const createAuthHeader = (role: RoleType = RoleType.USER) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 

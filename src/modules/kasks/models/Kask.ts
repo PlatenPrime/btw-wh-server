@@ -24,7 +24,7 @@ const kaskSchema = new Schema<IKask>(
     zone: { type: String, required: true },
     com: { type: String, required: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Kask: Model<IKask> = getOrCreateModel<IKask>("Kask", kaskSchema);

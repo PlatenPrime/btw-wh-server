@@ -55,7 +55,7 @@ const palletSubdocumentSchema = new Schema<IPalletSubdocument>(
     },
     isDef: { type: Boolean, default: false },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const rowSubdocumentSchema = new Schema<IRowSubdocument>(
@@ -63,7 +63,7 @@ const rowSubdocumentSchema = new Schema<IRowSubdocument>(
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const posSchema = new Schema<IPos>(
@@ -82,7 +82,7 @@ const posSchema = new Schema<IPos>(
     sklad: String, // Optional warehouse identifier
     comment: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

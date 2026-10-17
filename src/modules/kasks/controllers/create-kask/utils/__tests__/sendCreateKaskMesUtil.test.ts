@@ -55,9 +55,7 @@ describe("sendCreateKaskMesUtil", () => {
 
   it("не пробрасывает ошибку Telegram наружу", async () => {
     process.env.NODE_ENV = "development";
-    vi.mocked(sendMessageToKasaChat).mockRejectedValueOnce(
-      new Error("Telegram error"),
-    );
+    vi.mocked(sendMessageToKasaChat).mockRejectedValueOnce(new Error("Telegram error"));
 
     await expect(
       sendCreateKaskMesUtil({

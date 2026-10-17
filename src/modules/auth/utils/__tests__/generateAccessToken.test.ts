@@ -19,10 +19,7 @@ describe("generateAccessToken", () => {
     expect(typeof token).toBe("string");
     expect(token.split(".")).toHaveLength(3);
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!
-    ) as jwt.JwtPayload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as jwt.JwtPayload;
 
     expect(decoded.id).toBe(userId);
     expect(decoded.role).toBe(RoleType.USER);
@@ -41,7 +38,7 @@ describe("generateAccessToken", () => {
     delete process.env.JWT_SECRET;
 
     expect(() => generateAccessToken("user-id", RoleType.USER)).toThrow(
-      "JWT_SECRET is not defined in environment variables"
+      "JWT_SECRET is not defined in environment variables",
     );
   });
 });

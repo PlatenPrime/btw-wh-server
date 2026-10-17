@@ -54,8 +54,12 @@ describe("getSkuSalesRangeController", () => {
       title: "T",
       url: "https://e.com/sr",
     });
-    await seedSkuSliceMonthDay("air", new Date("2026-04-01T00:00:00.000Z"), { "air-srange-1": { stock: 5, price: 3 } });
-    await seedSkuSliceMonthDay("air", new Date("2026-04-02T00:00:00.000Z"), { "air-srange-1": { stock: 4, price: 3 } });
+    await seedSkuSliceMonthDay("air", new Date("2026-04-01T00:00:00.000Z"), {
+      "air-srange-1": { stock: 5, price: 3 },
+    });
+    await seedSkuSliceMonthDay("air", new Date("2026-04-02T00:00:00.000Z"), {
+      "air-srange-1": { stock: 4, price: 3 },
+    });
     const req = {
       params: { skuId: sku._id.toString() },
       query: { dateFrom: "2026-04-01", dateTo: "2026-04-02" },

@@ -117,4 +117,3 @@ describe("deletePalletEmptyPosesController", () => {
     expect(events[0].description).toContain("Pallet-1");
   });
 });
-

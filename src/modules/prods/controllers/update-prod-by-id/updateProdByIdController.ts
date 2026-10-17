@@ -8,10 +8,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Обновить производителя по id (указанные в body поля)
  * @route   PATCH /api/prods/id/:id
  */
-export const updateProdByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateProdByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, title, imageUrl } = req.body;
@@ -19,7 +16,7 @@ export const updateProdByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

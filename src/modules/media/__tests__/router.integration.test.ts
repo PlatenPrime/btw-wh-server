@@ -61,9 +61,7 @@ describe("Media router integration", () => {
       contentType: "image/jpeg",
     });
 
-    const first = await request(app)
-      .get("/api/media/sharik/1302-0065?size=big")
-      .expect(200);
+    const first = await request(app).get("/api/media/sharik/1302-0065?size=big").expect(200);
 
     const etag = first.headers.etag;
     expect(etag).toBeTruthy();
@@ -96,25 +94,17 @@ describe("Media router integration", () => {
   });
 
   it("404 when upstream image missing", async () => {
-    vi.mocked(fetchSharikArtImage).mockRejectedValue(
-      new SharikArtImageNotFoundError()
-    );
+    vi.mocked(fetchSharikArtImage).mockRejectedValue(new SharikArtImageNotFoundError());
 
-    const response = await request(app)
-      .get("/api/media/sharik/missing-art")
-      .expect(404);
+    const response = await request(app).get("/api/media/sharik/missing-art").expect(404);
 
     expect(response.body).toEqual({ message: "Image not found" });
   });
 
   it("502 when upstream/proxy fails", async () => {
-    vi.mocked(fetchSharikArtImage).mockRejectedValue(
-      new SharikArtImageUpstreamError("timeout")
-    );
+    vi.mocked(fetchSharikArtImage).mockRejectedValue(new SharikArtImageUpstreamError("timeout"));
 
-    const response = await request(app)
-      .get("/api/media/sharik/1302-0065")
-      .expect(502);
+    const response = await request(app).get("/api/media/sharik/1302-0065").expect(502);
 
     expect(response.body).toEqual({ message: "Upstream image fetch failed" });
   });

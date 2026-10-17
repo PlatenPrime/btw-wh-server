@@ -4,9 +4,6 @@ import { populateMissingPosData } from "../index.js";
 
 describe("populateMissingPosData Controller", () => {
   it("returns 410 API_TASKS_MIGRATED", async () => {
-    await assertMigratedApiTaskController(
-      populateMissingPosData,
-      "poses.populate-missing-data",
-    );
+    await assertMigratedApiTaskController(populateMissingPosData, "poses.populate-missing-data");
   });
 });

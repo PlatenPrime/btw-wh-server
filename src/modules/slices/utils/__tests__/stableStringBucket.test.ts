@@ -11,9 +11,7 @@ describe("stableStringBucket", () => {
   });
 
   it("is stable for the same input", () => {
-    expect(stableStringBucket("air-4699949", 3)).toBe(
-      stableStringBucket("air-4699949", 3)
-    );
+    expect(stableStringBucket("air-4699949", 3)).toBe(stableStringBucket("air-4699949", 3));
   });
 
   it("throws when cycleDays < 1", () => {

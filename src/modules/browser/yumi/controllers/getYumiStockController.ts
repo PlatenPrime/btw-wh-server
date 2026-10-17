@@ -7,10 +7,7 @@ import { logBrowserError } from "../../utils/browserRequest.js";
  * @desc    Получить остатки и цену товара с сайта Yumi по ссылке на страницу товара
  * @route   GET /api/browser/yumi/stock?link=<url>
  */
-export const getYumiStockController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getYumiStockController = async (req: Request, res: Response): Promise<void> => {
   try {
     const link = req.query.link;
     const parseResult = getYumiStockSchema.safeParse({ link });
@@ -18,7 +15,7 @@ export const getYumiStockController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -45,4 +42,3 @@ export const getYumiStockController = async (
     }
   }
 };
-

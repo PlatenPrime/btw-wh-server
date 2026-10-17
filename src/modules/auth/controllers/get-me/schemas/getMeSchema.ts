@@ -8,4 +8,3 @@ export const getMeSchema = z.object({
 });
 
 export type GetMeInput = z.infer<typeof getMeSchema>;
-

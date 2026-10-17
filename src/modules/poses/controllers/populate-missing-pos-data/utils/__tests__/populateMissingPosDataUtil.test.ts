@@ -23,10 +23,7 @@ describe("populateMissingPosDataUtil", () => {
       row: { _id: row._id, title: row.title },
     });
     // Удаляем palletData через прямое обновление MongoDB
-    await pos.collection.updateOne(
-      { _id: pos._id },
-      { $unset: { palletData: "" } }
-    );
+    await pos.collection.updateOne({ _id: pos._id }, { $unset: { palletData: "" } });
 
     const result = await populateMissingPosDataUtil();
 
@@ -49,10 +46,7 @@ describe("populateMissingPosDataUtil", () => {
       row: { _id: row._id, title: row.title },
     });
     // Удаляем palletData через прямое обновление MongoDB
-    await pos.collection.updateOne(
-      { _id: pos._id },
-      { $unset: { palletData: "" } }
-    );
+    await pos.collection.updateOne({ _id: pos._id }, { $unset: { palletData: "" } });
 
     const result = await populateMissingPosDataUtil();
 
@@ -61,4 +55,3 @@ describe("populateMissingPosDataUtil", () => {
     expect(result.errorDetails[0].posId).toBe(pos._id.toString());
   });
 });
-

@@ -9,10 +9,7 @@ const validateEmail = (email: string) => {
 };
 const validatePassword = (password: string) => {
   return (
-    password.length >= 8 &&
-    /[A-Z]/.test(password) &&
-    /[a-z]/.test(password) &&
-    /\d/.test(password)
+    password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password)
   );
 };
 

@@ -3,10 +3,7 @@ import { getPalletByTitleSchema } from "./schemas/getPalletByTitleSchema.js";
 import { getPalletByTitleUtil } from "./utils/getPalletByTitleUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getPalletByTitleController = async (
-  req: Request,
-  res: Response
-) => {
+export const getPalletByTitleController = async (req: Request, res: Response) => {
   try {
     const { title } = req.params;
 
@@ -15,7 +12,7 @@ export const getPalletByTitleController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -48,11 +45,3 @@ export const getPalletByTitleController = async (
     }
   }
 };
-
-
-
-
-
-
-
-

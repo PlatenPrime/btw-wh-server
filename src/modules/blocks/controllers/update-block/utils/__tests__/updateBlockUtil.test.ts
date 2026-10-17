@@ -81,7 +81,7 @@ describe("updateBlockUtil", () => {
       updateBlockUtil({
         id: blockB._id.toString(),
         updateData: { segs: [seg._id.toString()] },
-      })
+      }),
     ).rejects.toThrow(/segments not found or do not belong/i);
   });
 });

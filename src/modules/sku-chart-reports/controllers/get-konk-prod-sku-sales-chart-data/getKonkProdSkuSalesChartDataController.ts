@@ -27,7 +27,7 @@ export const getKonkProdSkuSalesChartDataController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }
@@ -35,8 +35,7 @@ export const getKonkProdSkuSalesChartDataController = async (
   const result = await getKonkProdSkuSalesChartDataUtil(parseResult.data);
   if (!result.ok) {
     res.status(404).json({
-      message:
-        "No skus found for provided konk/prod, or no sku with productId in group",
+      message: "No skus found for provided konk/prod, or no sku with productId in group",
     });
     return;
   }

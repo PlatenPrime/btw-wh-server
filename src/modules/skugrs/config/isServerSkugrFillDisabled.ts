@@ -7,8 +7,5 @@ import { AIR_CLIENT_SKUGR_KONK } from "../constants/airClientSkugrFill.js";
  * Cron скидает такие группы; ручной fill-skus отвечает CLIENT_INGEST_REQUIRED.
  */
 export function isServerSkugrFillDisabled(konkName: string): boolean {
-  return (
-    normalizeCompetitorName(konkName) === AIR_CLIENT_SKUGR_KONK &&
-    AIR_IDLE_MODE
-  );
+  return normalizeCompetitorName(konkName) === AIR_CLIENT_SKUGR_KONK && AIR_IDLE_MODE;
 }

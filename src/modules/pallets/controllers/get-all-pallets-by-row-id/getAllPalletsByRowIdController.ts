@@ -3,10 +3,7 @@ import { Pallet } from "../../models/Pallet.js";
 import { sortPalletsByTitle } from "../../utils/sortPalletsByTitle.js";
 import { getAllPalletsByRowIdSchema } from "./schemas/getAllPalletsByRowIdSchema.js";
 
-export const getAllPalletsByRowIdController = async (
-  req: Request,
-  res: Response
-) => {
+export const getAllPalletsByRowIdController = async (req: Request, res: Response) => {
   try {
     const { rowId } = req.params;
 
@@ -15,7 +12,7 @@ export const getAllPalletsByRowIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -41,11 +38,3 @@ export const getAllPalletsByRowIdController = async (
     }
   }
 };
-
-
-
-
-
-
-
-

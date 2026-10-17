@@ -48,5 +48,3 @@ describe("getAsksByDate", () => {
     expect(responseJson.message).toBe("Validation error");
   });
 });
-
-

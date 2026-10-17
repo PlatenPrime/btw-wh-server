@@ -1,10 +1,6 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import {
-  createTestPallet,
-  createTestPos,
-  createTestRow,
-} from "../../../../../../test/utils/testHelpers.js";
+import { createTestPallet, createTestRow } from "../../../../../../test/utils/testHelpers.js";
 import { Pos } from "../../../../models/Pos.js";
 import { createPosUtil } from "../createPosUtil.js";
 
@@ -49,4 +45,3 @@ describe("createPosUtil", () => {
     await session.endSession();
   });
 });
-

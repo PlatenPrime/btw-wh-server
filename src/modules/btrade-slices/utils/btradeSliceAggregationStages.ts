@@ -2,10 +2,7 @@ import type { PipelineStage } from "mongoose";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
 import type { IBtradeSliceDataItem } from "../models/btradeSliceTypes.js";
-import {
-  loadDayMaps,
-  loadPointsForArtikulsRange,
-} from "./btradeSliceMonthStore.js";
+import { loadDayMaps, loadPointsForArtikulsRange } from "./btradeSliceMonthStore.js";
 
 export type BtradeSliceAggregateRow = {
   date: Date;
@@ -16,9 +13,7 @@ export type BtradeSliceAggregateRow = {
  * Маркер списка artikul для shim `aggregateBtradeSlices` (Mongo pipeline не исполняется).
  * Форма сохранена совместимой со старым `$project` filter.
  */
-export function sliceDataProjectForArtikulList(
-  allowedArtikuls: string[],
-): PipelineStage {
+export function sliceDataProjectForArtikulList(allowedArtikuls: string[]): PipelineStage {
   return {
     $project: {
       _id: 0,
@@ -40,10 +35,7 @@ function extractDateRange(match: Record<string, unknown>): {
   dateFrom: Date;
   dateTo: Date;
 } | null {
-  const dateFilter = match.date as
-    | Date
-    | { $gte?: Date; $lte?: Date; $in?: Date[] }
-    | undefined;
+  const dateFilter = match.date as Date | { $gte?: Date; $lte?: Date; $in?: Date[] } | undefined;
 
   if (dateFilter instanceof Date) {
     const d = toSliceDate(dateFilter);
@@ -69,17 +61,13 @@ function extractDateRange(match: Record<string, unknown>): {
  * Пытается вытащить список artikul из legacy `$project` filter `$in`.
  * Для новых вызовов предпочтительнее loadBtradeSliceRowsForArtikuls.
  */
-function extractArtikulListFromPipeline(
-  pipeline: Array<Record<string, unknown>>,
-): string[] | null {
+function extractArtikulListFromPipeline(pipeline: Array<Record<string, unknown>>): string[] | null {
   for (const stage of pipeline) {
     const project = stage.$project as Record<string, unknown> | undefined;
     if (!project || typeof project !== "object") continue;
     const data = project.data as Record<string, unknown> | undefined;
     if (!data || typeof data !== "object") continue;
-    const arrayToObject = data.$arrayToObject as
-      | Record<string, unknown>
-      | undefined;
+    const arrayToObject = data.$arrayToObject as Record<string, unknown> | undefined;
     const filter = arrayToObject?.$filter as Record<string, unknown> | undefined;
     const cond = filter?.cond as Record<string, unknown> | undefined;
     const inExpr = cond?.$in as unknown[] | undefined;
@@ -151,9 +139,7 @@ export async function aggregateBtradeSlices<
   T extends Record<string, unknown> = BtradeSliceAggregateRow,
 >(pipeline: PipelineStage[]): Promise<T[]> {
   const stages = pipeline as unknown as Array<Record<string, unknown>>;
-  const match = stages.find((s) => s.$match)?.$match as
-    | Record<string, unknown>
-    | undefined;
+  const match = stages.find((s) => s.$match)?.$match as Record<string, unknown> | undefined;
   if (!match) return [];
 
   const range = extractDateRange(match);
@@ -161,11 +147,7 @@ export async function aggregateBtradeSlices<
 
   const artikuls = extractArtikulListFromPipeline(stages);
   const rows = artikuls
-    ? await loadBtradeSliceRowsForArtikuls(
-        artikuls,
-        range.dateFrom,
-        range.dateTo,
-      )
+    ? await loadBtradeSliceRowsForArtikuls(artikuls, range.dateFrom, range.dateTo)
     : await loadBtradeSliceDayDocs(range.dateFrom, range.dateTo);
 
   return rows as unknown as T[];

@@ -22,11 +22,9 @@ export type SalesByDateResult = {
  * null — аналог не найден, пустой artikul или нет среза/записи на запрошенную дату.
  */
 export async function getAnalogSalesByDateUtil(
-  input: GetAnalogSalesByDateInput
+  input: GetAnalogSalesByDateInput,
 ): Promise<SalesByDateResult | null> {
-  const analog = await Analog.findById(input.analogId)
-    .select("konkName artikul")
-    .lean();
+  const analog = await Analog.findById(input.analogId).select("konkName artikul").lean();
 
   if (!analog) return null;
 

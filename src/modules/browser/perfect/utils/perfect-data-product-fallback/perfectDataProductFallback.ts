@@ -74,7 +74,7 @@ export function extractDataProductFieldsFromHtmlRegex(html: string): DataProduct
 
 export function tryPerfectDataProductFallback(
   html: string,
-  pageTitle: string
+  pageTitle: string,
 ): PerfectProductInfo | null {
   const dataProduct =
     extractDataProductFromHtml(html) ?? extractDataProductFieldsFromHtmlRegex(html);
@@ -96,8 +96,7 @@ export function tryPerfectDataProductFallback(
   if (!Number.isFinite(stockPacks) || stockPacks < 0) return null;
   if (stockPacks <= 0 && isPerfectProductPageOutOfStock(html)) return null;
 
-  const nameFromData =
-    typeof dataProduct.name === "string" ? dataProduct.name.trim() : "";
+  const nameFromData = typeof dataProduct.name === "string" ? dataProduct.name.trim() : "";
   const title = nameFromData || pageTitle.trim();
 
   return {

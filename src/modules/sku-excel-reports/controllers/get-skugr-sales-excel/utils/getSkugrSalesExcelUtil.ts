@@ -19,8 +19,7 @@ import {
 import type { GetSkugrSalesExcelInput } from "../schemas/getSkugrSalesExcelSchema.js";
 
 export type GetSkugrSalesExcelResult =
-  | { ok: true; buffer: Buffer; fileName: string }
-  | { ok: false };
+  { ok: true; buffer: Buffer; fileName: string } | { ok: false };
 
 export async function getSkugrSalesExcelUtil(
   input: GetSkugrSalesExcelInput,

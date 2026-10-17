@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
 import { PalletGroup } from "../../models/PalletGroup.js";
 
-export const getAllPalletGroupsController = async (
-  req: Request,
-  res: Response,
-) => {
+export const getAllPalletGroupsController = async (req: Request, res: Response) => {
   try {
     const groups = await PalletGroup.find({}).sort({ order: 1 }).exec();
 

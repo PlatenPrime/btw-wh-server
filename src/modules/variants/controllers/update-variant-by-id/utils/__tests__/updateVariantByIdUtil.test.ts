@@ -69,4 +69,3 @@ describe("updateVariantByIdUtil", () => {
     expect(result?._id.toString()).toBe(variant._id.toString());
   });
 });
-

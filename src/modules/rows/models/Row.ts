@@ -21,7 +21,7 @@ const rowSchema = new Schema<IRow>(
     title: { type: String, required: true, unique: true },
     pallets: [{ type: Types.ObjectId, ref: "Pallet" }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

@@ -57,12 +57,3 @@ describe("getAllZonesController", () => {
     expect(responseJson.message).toBe("Invalid query parameters");
   });
 });
-
-
-
-
-
-
-
-
-

@@ -51,8 +51,7 @@ describe("migrateAllSkuSlicesToMonthsUtil", () => {
     const progress: string[] = [];
     const result = await migrateAllSkuSlicesToMonthsUtil({
       apply: true,
-      onProgress: (p) =>
-        progress.push(`${p.sliceIndex}/${p.slicesTotal} ${p.konkName}`),
+      onProgress: (p) => progress.push(`${p.sliceIndex}/${p.slicesTotal} ${p.konkName}`),
     });
     expect(result.slicesRead).toBe(2);
     expect(result.dayWritesUpserted).toBe(3);

@@ -26,7 +26,7 @@ describe("startFillPosNameukrFromArtsCron", () => {
     vi.clearAllMocks();
     cronCallback = null;
 
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const callbackArg = args[1];
       if (typeof callbackArg === "function") {
         cronCallback = callbackArg as () => Promise<void>;
@@ -49,7 +49,7 @@ describe("startFillPosNameukrFromArtsCron", () => {
       expect.any(Function),
       null,
       true,
-      "Europe/Kiev"
+      "Europe/Kiev",
     );
   });
 

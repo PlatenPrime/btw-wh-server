@@ -8,9 +8,7 @@ import { DeficitStatus, IDeficitCalculationResult } from "../types.js";
  * @param defs - Результат з даними Sharik
  * @returns Відфільтровані дефіцити з правильно розрахованим полем defLimit
  */
-export function filterDeficits(
-  defs: ISharikStocksResult
-): IDeficitCalculationResult {
+export function filterDeficits(defs: ISharikStocksResult): IDeficitCalculationResult {
   const filteredDefs: IDeficitCalculationResult = {};
 
   Object.entries(defs).forEach(([artikul, data]) => {

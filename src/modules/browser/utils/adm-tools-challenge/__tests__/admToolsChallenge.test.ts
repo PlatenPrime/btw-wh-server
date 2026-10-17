@@ -71,9 +71,7 @@ describe("isAdmToolsChallengeHtml", () => {
   });
 
   it("false без ack-поля", () => {
-    expect(
-      isAdmToolsChallengeHtml("<html>adm.tools Захищена сторінка</html>")
-    ).toBe(false);
+    expect(isAdmToolsChallengeHtml("<html>adm.tools Захищена сторінка</html>")).toBe(false);
   });
 
   it("false на пустом", () => {
@@ -83,35 +81,25 @@ describe("isAdmToolsChallengeHtml", () => {
 
 describe("detectAdmToolsAckProtocol", () => {
   it("json-__ack для JSON.stringify", () => {
-    expect(detectAdmToolsAckProtocol(SAMPLE_JSON_CHALLENGE_HTML)).toBe(
-      "json-__ack"
-    );
+    expect(detectAdmToolsAckProtocol(SAMPLE_JSON_CHALLENGE_HTML)).toBe("json-__ack");
   });
 
   it("form-___ack для form.append", () => {
-    expect(detectAdmToolsAckProtocol(SAMPLE_FORM_CHALLENGE_HTML)).toBe(
-      "form-___ack"
-    );
+    expect(detectAdmToolsAckProtocol(SAMPLE_FORM_CHALLENGE_HTML)).toBe("form-___ack");
   });
 
   it("undefined без паттерна", () => {
-    expect(
-      detectAdmToolsAckProtocol("<html>adm.tools __ack</html>")
-    ).toBeUndefined();
+    expect(detectAdmToolsAckProtocol("<html>adm.tools __ack</html>")).toBeUndefined();
   });
 });
 
 describe("extractAdmToolsAckExpression", () => {
   it("достаёт выражение из form.append", () => {
-    expect(extractAdmToolsAckExpression(SAMPLE_FORM_CHALLENGE_HTML)).toBe(
-      "6-27+26+56"
-    );
+    expect(extractAdmToolsAckExpression(SAMPLE_FORM_CHALLENGE_HTML)).toBe("6-27+26+56");
   });
 
   it("достаёт выражение из JSON.stringify({__ack: eval})", () => {
-    expect(extractAdmToolsAckExpression(SAMPLE_JSON_CHALLENGE_HTML)).toBe(
-      "10-93-92+33"
-    );
+    expect(extractAdmToolsAckExpression(SAMPLE_JSON_CHALLENGE_HTML)).toBe("10-93-92+33");
   });
 
   it("undefined без паттерна", () => {
@@ -129,9 +117,7 @@ describe("evalAdmToolsAckExpression", () => {
   });
 
   it("кидает на небезопасное выражение", () => {
-    expect(() => evalAdmToolsAckExpression("process.exit(1)")).toThrow(
-      /Unsafe/
-    );
+    expect(() => evalAdmToolsAckExpression("process.exit(1)")).toThrow(/Unsafe/);
   });
 
   it("кидает на пустое", () => {
@@ -149,8 +135,6 @@ describe("resolveAdmToolsAckFromHtml", () => {
   });
 
   it("кидает без выражения", () => {
-    expect(() =>
-      resolveAdmToolsAckFromHtml("<html>adm.tools __ack</html>")
-    ).toThrow(/missing ack/);
+    expect(() => resolveAdmToolsAckFromHtml("<html>adm.tools __ack</html>")).toThrow(/missing ack/);
   });
 });

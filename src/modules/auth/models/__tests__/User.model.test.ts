@@ -47,7 +47,7 @@ describe("User Model", () => {
           username,
           fullname: "Second",
           password: "password456",
-        })
+        }),
       ).rejects.toThrow();
     });
 

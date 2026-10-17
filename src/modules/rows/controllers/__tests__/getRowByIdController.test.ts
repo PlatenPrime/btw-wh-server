@@ -61,9 +61,9 @@ describe("getRowByIdController", () => {
 
   it("200: возвращает ряд с паллетами", async () => {
     const row = await Row.create({ title: "Row With Pallets" });
-    const pallet = await Pallet.create({
+    await Pallet.create({
       title: "Pallet 1",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [],
     });
@@ -76,4 +76,3 @@ describe("getRowByIdController", () => {
     expect(responseJson.data.pallets[0].title).toBe("Pallet 1");
   });
 });
-

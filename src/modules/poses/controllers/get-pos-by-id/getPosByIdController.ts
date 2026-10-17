@@ -37,4 +37,3 @@ export const getPosByIdController = async (req: Request, res: Response) => {
     }
   }
 };
-

@@ -39,24 +39,11 @@ export async function getAirClientPendingUtil(
   now: Date = new Date(),
 ): Promise<AirClientPendingResult> {
   const sliceDate = toSliceDate(now);
-  const allSkus = await loadSlicedSkusForKonk(
-    AIR_CLIENT_SLICE_KONK,
-    "_id productId title url",
-  );
-  const { skus, rotation } = filterSlicedSkusForRotation(
-    allSkus,
-    sliceDate,
-    AIR_CLIENT_SLICE_KONK,
-  );
+  const allSkus = await loadSlicedSkusForKonk(AIR_CLIENT_SLICE_KONK, "_id productId title url");
+  const { skus, rotation } = filterSlicedSkusForRotation(allSkus, sliceDate, AIR_CLIENT_SLICE_KONK);
 
-  const productIds = skus
-    .map((s) => (s.productId ?? "").trim())
-    .filter(Boolean);
-  const data = await loadDayPointsForProductIds(
-    AIR_CLIENT_SLICE_KONK,
-    productIds,
-    sliceDate,
-  );
+  const productIds = skus.map((s) => (s.productId ?? "").trim()).filter(Boolean);
+  const data = await loadDayPointsForProductIds(AIR_CLIENT_SLICE_KONK, productIds, sliceDate);
 
   const items: AirClientPendingItem[] = [];
 
@@ -75,8 +62,7 @@ export async function getAirClientPendingUtil(
     });
   }
 
-  const rotationInfo =
-    rotation ?? resolveSliceRotationInfo(AIR_CLIENT_SLICE_KONK, sliceDate);
+  const rotationInfo = rotation ?? resolveSliceRotationInfo(AIR_CLIENT_SLICE_KONK, sliceDate);
 
   return {
     date: sliceDate,

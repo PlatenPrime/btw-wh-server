@@ -6,8 +6,8 @@ export const getAllSkugrsQuerySchema = z.object({
   search: z.string().optional(),
   isSliced: z
     .enum(["true", "false"])
-    .optional()
-    .transform((val) => (val === undefined ? undefined : val === "true")),
+    .transform((val) => val === "true")
+    .optional(),
   page: z
     .string()
     .optional()

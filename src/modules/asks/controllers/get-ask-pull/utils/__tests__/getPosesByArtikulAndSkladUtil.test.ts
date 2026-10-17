@@ -78,10 +78,7 @@ describe("getPosesByArtikulAndSkladUtil", () => {
   });
 
   it("обрабатывает несуществующий артикул", async () => {
-    const result = await getPosesByArtikulAndSkladUtil(
-      "ART-NONEXISTENT",
-      "pogrebi"
-    );
+    const result = await getPosesByArtikulAndSkladUtil("ART-NONEXISTENT", "pogrebi");
 
     expect(result).toEqual([]);
   });
@@ -132,4 +129,3 @@ describe("getPosesByArtikulAndSkladUtil", () => {
     expect(result).toEqual([]);
   });
 });
-

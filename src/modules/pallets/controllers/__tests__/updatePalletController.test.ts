@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
-import { createTestRow, createTestPallet } from "../../../../test/utils/testHelpers.js";
+import { createTestPallet } from "../../../../test/utils/testHelpers.js";
 import { Event } from "../../../events/models/Event.js";
 import { updatePalletController } from "../update-pallet/updatePalletController.js";
 
@@ -88,11 +88,3 @@ describe("updatePalletController", () => {
     expect(responseJson.message).toBe("Validation error");
   });
 });
-
-
-
-
-
-
-
-

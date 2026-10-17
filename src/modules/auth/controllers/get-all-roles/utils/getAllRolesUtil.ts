@@ -14,4 +14,3 @@ export const getAllRolesUtil = async (): Promise<IRole[]> => {
   const roles = await Role.find();
   return roles;
 };
-

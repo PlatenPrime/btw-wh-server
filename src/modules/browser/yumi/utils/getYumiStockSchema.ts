@@ -5,4 +5,3 @@ export const getYumiStockSchema = z.object({
 });
 
 export type GetYumiStockInput = z.infer<typeof getYumiStockSchema>;
-

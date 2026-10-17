@@ -8,4 +8,3 @@ export const getAskPullSchema = z.object({
 });
 
 export type GetAskPullInput = z.infer<typeof getAskPullSchema>;
-

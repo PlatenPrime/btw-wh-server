@@ -87,8 +87,7 @@ export const calculateZonesSectorsUtil = async () => {
   // 7. Установить sector = 0 для всех зон без сегмента
   // Исключаем зоны, которые уже обработаны через сегменты
   const zonesWithoutSeg = allZones.filter(
-    (zone) =>
-      (!zone.seg || !zone.seg.id) && !zonesInSegs.has(zone._id.toString())
+    (zone) => (!zone.seg || !zone.seg.id) && !zonesInSegs.has(zone._id.toString()),
   );
 
   zonesWithoutSeg.forEach((zone) => {

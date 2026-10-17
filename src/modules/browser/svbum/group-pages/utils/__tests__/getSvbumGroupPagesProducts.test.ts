@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  getSvbumGroupPagesProducts,
-} from "../getSvbumGroupPagesProducts.js";
+import { getSvbumGroupPagesProducts } from "../getSvbumGroupPagesProducts.js";
 import { fetchPageHtml } from "../../../../utils/fetchPageHtml.js";
 import { sleep } from "../../../../utils/sleep.js";
 import { getGroupPagesThrottleDelayMs } from "../../../../group-pages/config/groupPagesThrottle.js";
@@ -16,19 +14,13 @@ vi.mock("../../../../group-pages/config/groupPagesThrottle.js", () => ({
 
 const GROUP_URL =
   "https://sviatobum.ua/povitryani-kuli/lateksni-kulki/?ocf=F2S2V1646816252F6S2V1054752947";
-const PAGE2_NO_OCF =
-  "https://sviatobum.ua/povitryani-kuli/lateksni-kulki/?page=2";
+const PAGE2_NO_OCF = "https://sviatobum.ua/povitryani-kuli/lateksni-kulki/?page=2";
 const PAGE2_WITH_OCF =
   "https://sviatobum.ua/povitryani-kuli/lateksni-kulki/?page=2&ocf=F2S2V1646816252F6S2V1054752947";
 const PAGE3_WITH_OCF =
   "https://sviatobum.ua/povitryani-kuli/lateksni-kulki/?ocf=F2S2V1646816252F6S2V1054752947&page=3";
 
-function card(opts: {
-  productId: string;
-  href: string;
-  title: string;
-  imageSrc: string;
-}): string {
+function card(opts: { productId: string; href: string; title: string; imageSrc: string }): string {
   return `<li class="product-layout product-grid">
   <div class="product-thumb">
     <div class="image"><img src="${opts.imageSrc}" alt="${opts.title}" /></div>
@@ -48,8 +40,7 @@ function pageHtml(opts: {
   nextHref?: string;
   forwardHref?: string;
 }): string {
-  const next =
-    opts.nextHref != null ? `<link rel="next" href="${opts.nextHref}" />` : "";
+  const next = opts.nextHref != null ? `<link rel="next" href="${opts.nextHref}" />` : "";
   const forward =
     opts.forwardHref != null
       ? `<ul class="pagination"><li class="paination-text"><a href="https://sviatobum.ua/back">Назад</a></li><li class="paination-text"><a href="${opts.forwardHref}">Вперед</a></li></ul>`
@@ -68,17 +59,15 @@ describe("getSvbumGroupPagesProducts", () => {
   });
 
   it("throws on invalid groupUrl", async () => {
-    await expect(
-      getSvbumGroupPagesProducts({ groupUrl: "not-a-url" })
-    ).rejects.toThrow();
+    await expect(getSvbumGroupPagesProducts({ groupUrl: "not-a-url" })).rejects.toThrow();
   });
 
   it("throws on maxPages out of range", async () => {
     await expect(
-      getSvbumGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 0 })
+      getSvbumGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 0 }),
     ).rejects.toThrow();
     await expect(
-      getSvbumGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 201 })
+      getSvbumGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 201 }),
     ).rejects.toThrow();
   });
 
@@ -189,7 +178,7 @@ describe("getSvbumGroupPagesProducts", () => {
 
   it("stops on empty listing page", async () => {
     vi.mocked(fetchPageHtml).mockResolvedValue(
-      `<!DOCTYPE html><html><head><link rel="next" href="${PAGE2_NO_OCF}" /></head><body><ul class="row"></ul></body></html>`
+      `<!DOCTYPE html><html><head><link rel="next" href="${PAGE2_NO_OCF}" /></head><body><ul class="row"></ul></body></html>`,
     );
 
     const result = await getSvbumGroupPagesProducts({

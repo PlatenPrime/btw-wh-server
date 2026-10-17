@@ -82,7 +82,7 @@ describe("upsertBlocksUtil", () => {
             segs: [seg._id.toString()],
           },
         ],
-      })
+      }),
     ).rejects.toThrow(/do not belong to block/i);
   });
 
@@ -93,7 +93,7 @@ describe("upsertBlocksUtil", () => {
           { title: "Dup", order: 1 },
           { title: "dup", order: 2 },
         ],
-      })
+      }),
     ).rejects.toThrow(/duplicate block title/i);
   });
 
@@ -106,9 +106,7 @@ describe("upsertBlocksUtil", () => {
           { _id: blockId, title: "One", order: 1 },
           { _id: blockId, title: "Two", order: 2 },
         ],
-      })
+      }),
     ).rejects.toThrow(/duplicate block _id/i);
   });
 });
-
-

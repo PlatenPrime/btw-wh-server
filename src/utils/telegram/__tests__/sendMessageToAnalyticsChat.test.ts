@@ -33,8 +33,6 @@ describe("sendMessageToAnalyticsChat", () => {
     const error = new Error("Test error");
     mockSendMessageToTGChat.mockRejectedValueOnce(error);
 
-    await expect(sendMessageToAnalyticsChat("Test message")).rejects.toThrow(
-      "Test error"
-    );
+    await expect(sendMessageToAnalyticsChat("Test message")).rejects.toThrow("Test error");
   });
 });

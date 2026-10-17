@@ -5,11 +5,8 @@ type GetBlockByIdInput = {
   id: string;
 };
 
-export const getBlockByIdUtil = async ({
-  id,
-}: GetBlockByIdInput): Promise<IBlock | null> => {
+export const getBlockByIdUtil = async ({ id }: GetBlockByIdInput): Promise<IBlock | null> => {
   const objectId = new mongoose.Types.ObjectId(id);
   const block = await Block.findById(objectId).exec();
   return block;
 };
-

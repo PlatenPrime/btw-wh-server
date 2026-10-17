@@ -12,20 +12,14 @@ describe("parseMigrateAllBtradeSlicesToMonthsCliArgs", () => {
 
   it("parses apply, verify-sample, no-verify", () => {
     expect(
-      parseMigrateAllBtradeSlicesToMonthsCliArgs([
-        "--apply",
-        "--verify-sample",
-        "50",
-      ]),
+      parseMigrateAllBtradeSlicesToMonthsCliArgs(["--apply", "--verify-sample", "50"]),
     ).toEqual({
       apply: true,
       verify: true,
       verifySample: 50,
     });
 
-    expect(
-      parseMigrateAllBtradeSlicesToMonthsCliArgs(["--apply", "--no-verify"]),
-    ).toEqual({
+    expect(parseMigrateAllBtradeSlicesToMonthsCliArgs(["--apply", "--no-verify"])).toEqual({
       apply: true,
       verify: false,
       verifySample: 100,
@@ -33,11 +27,7 @@ describe("parseMigrateAllBtradeSlicesToMonthsCliArgs", () => {
   });
 
   it("rejects bad args", () => {
-    expect(() =>
-      parseMigrateAllBtradeSlicesToMonthsCliArgs(["--wat"]),
-    ).toThrow();
-    expect(() =>
-      parseMigrateAllBtradeSlicesToMonthsCliArgs(["--verify-sample", "0"]),
-    ).toThrow();
+    expect(() => parseMigrateAllBtradeSlicesToMonthsCliArgs(["--wat"])).toThrow();
+    expect(() => parseMigrateAllBtradeSlicesToMonthsCliArgs(["--verify-sample", "0"])).toThrow();
   });
 });

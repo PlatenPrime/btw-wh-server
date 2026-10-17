@@ -26,9 +26,7 @@ describe("correctBalunFakeStockSpikesUtil", () => {
   });
 
   it("rejects daysBack < 1", async () => {
-    await expect(
-      correctBalunFakeStockSpikesUtil({ daysBack: 0 })
-    ).rejects.toThrow(/daysBack/);
+    await expect(correctBalunFakeStockSpikesUtil({ daysBack: 0 })).rejects.toThrow(/daysBack/);
   });
 
   it("dry-run finds patches and does not write", async () => {
@@ -132,9 +130,7 @@ describe("correctBalunFakeStockSpikesUtil", () => {
   });
 
   it("skips when no adequate neighbor inside lookback", async () => {
-    await seedBalun([
-      { date: D1, data: { "balun-1": { stock: 10000, price: 1 } } },
-    ]);
+    await seedBalun([{ date: D1, data: { "balun-1": { stock: 10000, price: 1 } } }]);
 
     const result = await correctBalunFakeStockSpikesUtil({
       daysBack: 1,

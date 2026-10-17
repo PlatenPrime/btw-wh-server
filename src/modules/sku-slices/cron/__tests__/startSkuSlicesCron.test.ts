@@ -21,11 +21,9 @@ vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", (
   sendCronAnalyticsReport: vi.fn(),
 }));
 vi.mock("../../../../cron/analytics-notifications/formatSkuSlicesReport.js", () => ({
-  formatSkuKonkSliceReport: vi.fn(
-    (stats: { konkName: string }) => `sku:${stats.konkName}`
-  ),
+  formatSkuKonkSliceReport: vi.fn((stats: { konkName: string }) => `sku:${stats.konkName}`),
   formatSkuSlicesExcludedReport: vi.fn(
-    (excluded: string[]) => `sku-excluded:${excluded.join(",")}`
+    (excluded: string[]) => `sku-excluded:${excluded.join(",")}`,
   ),
 }));
 vi.mock("../../../../cron/analytics-notifications/formatPackFlipReport.js", () => ({
@@ -48,7 +46,7 @@ describe("startSkuSlicesCron", () => {
     vi.clearAllMocks();
     cronCallback = null;
 
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const callbackArg = args[1];
       if (typeof callbackArg === "function") {
         cronCallback = callbackArg as () => Promise<void>;
@@ -83,7 +81,7 @@ describe("startSkuSlicesCron", () => {
       expect.any(Function),
       null,
       true,
-      "Europe/Kiev"
+      "Europe/Kiev",
     );
   });
 
@@ -99,23 +97,14 @@ describe("startSkuSlicesCron", () => {
       }
 
       expect(runSkuSliceForKonkUtil).toHaveBeenCalledTimes(2);
-      expect(runSkuSliceForKonkUtil).toHaveBeenNthCalledWith(
-        1,
-        "air",
-        expect.any(Date)
-      );
-      expect(runSkuSliceForKonkUtil).toHaveBeenNthCalledWith(
-        2,
-        "balun",
-        expect.any(Date)
-      );
+      expect(runSkuSliceForKonkUtil).toHaveBeenNthCalledWith(1, "air", expect.any(Date));
+      expect(runSkuSliceForKonkUtil).toHaveBeenNthCalledWith(2, "balun", expect.any(Date));
       const sliceDate = vi.mocked(runSkuSliceForKonkUtil).mock.calls[0]![1];
       expect(sliceDate.toISOString()).toBe("2026-04-03T00:00:00.000Z");
 
-      const postOrder =
-        vi.mocked(runSkuSlicePostCorrectionsUtil).mock.invocationCallOrder[0];
+      const postOrder = vi.mocked(runSkuSlicePostCorrectionsUtil).mock.invocationCallOrder[0];
       const lastSliceOrder = Math.max(
-        ...vi.mocked(runSkuSliceForKonkUtil).mock.invocationCallOrder
+        ...vi.mocked(runSkuSliceForKonkUtil).mock.invocationCallOrder,
       );
       expect(postOrder).toBeGreaterThan(lastSliceOrder);
 
@@ -132,9 +121,7 @@ describe("startSkuSlicesCron", () => {
         }),
       });
 
-      expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
-        "sku-excluded:yumi"
-      );
+      expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku-excluded:yumi");
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku:air");
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku:balun");
       expect(sendCronAnalyticsReport).toHaveBeenCalledTimes(3);
@@ -163,15 +150,14 @@ describe("startSkuSlicesCron", () => {
       startSkuSlicesCron();
       await cronCallback?.();
 
-      const hooks = vi.mocked(runSkuSlicePostCorrectionsUtil).mock.calls[0]![0]
-        .hooks!;
+      const hooks = vi.mocked(runSkuSlicePostCorrectionsUtil).mock.calls[0]![0].hooks!;
       await hooks.onBalunError?.(new Error("balun fix down"));
 
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
-        expect.stringContaining("Balun fake stock correction")
+        expect.stringContaining("Balun fake stock correction"),
       );
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
-        expect.stringContaining("balun fix down")
+        expect.stringContaining("balun fix down"),
       );
     } finally {
       vi.useRealTimers();

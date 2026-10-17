@@ -40,9 +40,7 @@ describe("GraboSku model", () => {
     expect(saved.isNew).toBe(false);
     expect(saved.isNewProduct).toBe(true);
     expect(saved.createdAt).toBeInstanceOf(Date);
-    expect(
-      (await GraboSku.findById(saved._id).lean())?.isNewProduct
-    ).toBe(true);
+    expect((await GraboSku.findById(saved._id).lean())?.isNewProduct).toBe(true);
   });
 
   it("fails without productId", async () => {
@@ -65,7 +63,7 @@ describe("GraboSku model", () => {
     const dup = new GraboSku(
       validGraboSku({
         url: "https://www.grabo-balloons.com/en/other",
-      })
+      }),
     );
     await expect(dup.save()).rejects.toThrow();
   });

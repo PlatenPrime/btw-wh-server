@@ -65,7 +65,7 @@ describe("sendMessageToTGUser", () => {
         chat_id: "123456789",
         text: "Test message",
         parse_mode: "HTML",
-      }
+      },
     );
     expect(logModuleDebug).toHaveBeenCalledWith("telegram", "message sent to user", {
       userId: "123456789",
@@ -74,20 +74,18 @@ describe("sendMessageToTGUser", () => {
   });
 
   it("should throw error for empty message", async () => {
-    await expect(sendMessageToTGUser("", "123456789")).rejects.toThrow(
-      "Message cannot be empty"
-    );
+    await expect(sendMessageToTGUser("", "123456789")).rejects.toThrow("Message cannot be empty");
     await expect(sendMessageToTGUser("   ", "123456789")).rejects.toThrow(
-      "Message cannot be empty"
+      "Message cannot be empty",
     );
   });
 
   it("should throw error for empty userId", async () => {
     await expect(sendMessageToTGUser("Test message", "")).rejects.toThrow(
-      "User ID cannot be empty"
+      "User ID cannot be empty",
     );
     await expect(sendMessageToTGUser("Test message", "   ")).rejects.toThrow(
-      "User ID cannot be empty"
+      "User ID cannot be empty",
     );
   });
 
@@ -101,10 +99,8 @@ describe("sendMessageToTGUser", () => {
       data: errorResponse,
     });
 
-    await expect(
-      sendMessageToTGUser("Test message", "123456789")
-    ).rejects.toThrow(
-      "Failed to send message to user: Telegram API error: [object Object]"
+    await expect(sendMessageToTGUser("Test message", "123456789")).rejects.toThrow(
+      "Failed to send message to user: Telegram API error: [object Object]",
     );
   });
 
@@ -112,16 +108,16 @@ describe("sendMessageToTGUser", () => {
     const axiosError = new Error("Network error");
     mockedAxios.post.mockRejectedValueOnce(axiosError);
 
-    await expect(
-      sendMessageToTGUser("Test message", "123456789")
-    ).rejects.toThrow("Failed to send message to user: Network error");
+    await expect(sendMessageToTGUser("Test message", "123456789")).rejects.toThrow(
+      "Failed to send message to user: Network error",
+    );
   });
 
   it("should handle unknown errors", async () => {
     mockedAxios.post.mockRejectedValueOnce("Unknown error");
 
-    await expect(
-      sendMessageToTGUser("Test message", "123456789")
-    ).rejects.toThrow("Failed to send message to user: Unknown error occurred");
+    await expect(sendMessageToTGUser("Test message", "123456789")).rejects.toThrow(
+      "Failed to send message to user: Unknown error occurred",
+    );
   });
 });

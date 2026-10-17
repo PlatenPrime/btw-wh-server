@@ -8,13 +8,13 @@ describe("pickYuminListingImageUrl", () => {
         large_image_url: " L ",
         medium_image_url: "M",
         original_image_url: "O",
-      })
+      }),
     ).toBe("L");
     expect(
       pickYuminListingImageUrl({
         medium_image_url: "M",
         original_image_url: "O",
-      })
+      }),
     ).toBe("M");
     expect(pickYuminListingImageUrl({ original_image_url: "O" })).toBe("O");
   });

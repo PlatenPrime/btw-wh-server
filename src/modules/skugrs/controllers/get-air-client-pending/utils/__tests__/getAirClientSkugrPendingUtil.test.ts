@@ -32,13 +32,8 @@ describe("getAirClientSkugrPendingUtil", () => {
 
     const result = await getAirClientSkugrPendingUtil();
     expect(result.items).toHaveLength(2);
-    expect(result.items.map((item) => item.title).sort()).toEqual([
-      "Air A",
-      "Air B",
-    ]);
-    expect(result.items.some((item) => item.skugrId === air._id.toString())).toBe(
-      true
-    );
+    expect(result.items.map((item) => item.title).sort()).toEqual(["Air A", "Air B"]);
+    expect(result.items.some((item) => item.skugrId === air._id.toString())).toBe(true);
   });
 
   it("skips air groups without url", async () => {

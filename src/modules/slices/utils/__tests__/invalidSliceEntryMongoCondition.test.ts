@@ -19,10 +19,8 @@ describe("invalidSliceEntryMongoCondition", () => {
     expect(invalidSliceEntryMongoCondition("e", "stock")).toMatchObject({
       $or: expect.any(Array),
     });
-    expect(invalidSliceEntryMongoCondition("entries", "quantity")).toMatchObject(
-      {
-        $or: expect.any(Array),
-      }
-    );
+    expect(invalidSliceEntryMongoCondition("entries", "quantity")).toMatchObject({
+      $or: expect.any(Array),
+    });
   });
 });

@@ -55,9 +55,7 @@ describe("buildSalesComparisonExcelBlock", () => {
     const headerRow = worksheet.getRow(1);
     expect(headerRow.getCell(1).value).toBe("Артикул");
     expect(headerRow.getCell(totalCol).value).toBe("Всього");
-    expect(headerRow.getCell(diffSalesCol).value).toBe(
-      "Δ Продажі Btrade vs конкурент, шт",
-    );
+    expect(headerRow.getCell(diffSalesCol).value).toBe("Δ Продажі Btrade vs конкурент, шт");
   });
 
   it("buildSalesComparisonExcelBlock computes sales totals and deltas", () => {

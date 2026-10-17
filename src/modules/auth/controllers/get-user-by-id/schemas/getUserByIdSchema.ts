@@ -8,4 +8,3 @@ export const getUserByIdSchema = z.object({
 });
 
 export type GetUserByIdInput = z.infer<typeof getUserByIdSchema>;
-

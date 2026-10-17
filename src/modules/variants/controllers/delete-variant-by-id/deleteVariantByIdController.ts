@@ -8,10 +8,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Удалить вариант по id
  * @route   DELETE /api/variants/id/:id
  */
-export const deleteVariantByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const deleteVariantByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -19,7 +16,7 @@ export const deleteVariantByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -50,4 +47,3 @@ export const deleteVariantByIdController = async (
     }
   }
 };
-

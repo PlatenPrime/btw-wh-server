@@ -12,17 +12,13 @@ export const createPalletGroupUtil = async ({
   order,
   session,
 }: CreatePalletGroupUtilInput): Promise<IPalletGroup> => {
-  const existingWithTitle = await PalletGroup.findOne({ title }).session(
-    session,
-  );
+  const existingWithTitle = await PalletGroup.findOne({ title }).session(session);
 
   if (existingWithTitle) {
     throw new Error("Pallet group with this title already exists");
   }
 
-  const allGroups = await PalletGroup.find({})
-    .sort({ order: 1 })
-    .session(session);
+  const allGroups = await PalletGroup.find({}).sort({ order: 1 }).session(session);
 
   const totalGroups = allGroups.length;
 

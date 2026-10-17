@@ -7,21 +7,18 @@ import { deleteConstantByIdController } from "../delete-constant-by-id/deleteCon
 
 describe("deleteConstantByIdController", () => {
   let res: Response;
-  let responseJson: Record<string, unknown>;
   let responseStatus: { code?: number };
 
   beforeEach(async () => {
     await Constant.deleteMany({});
     await Event.deleteMany({});
-    responseJson = {};
     responseStatus = {};
     res = {
       status(code: number) {
         responseStatus.code = code;
         return this;
       },
-      json(data: unknown) {
-        responseJson = data as Record<string, unknown>;
+      json(_data: unknown) {
         return this;
       },
       headersSent: false,

@@ -16,8 +16,7 @@ const ENV_KEYS = [
 ] as const;
 
 describe("telegram constants", () => {
-  const originalEnv: Partial<Record<(typeof ENV_KEYS)[number], string | undefined>> =
-    {};
+  const originalEnv: Partial<Record<(typeof ENV_KEYS)[number], string | undefined>> = {};
 
   beforeEach(() => {
     vi.resetModules();
@@ -50,14 +49,12 @@ describe("telegram constants", () => {
   it("getBtwToken throws and logs when env is missing", async () => {
     const { getBtwToken } = await import("../telegram.js");
 
-    expect(() => getBtwToken()).toThrow(
-      "Telegram configuration error: BTW_TOKEN is not set"
-    );
+    expect(() => getBtwToken()).toThrow("Telegram configuration error: BTW_TOKEN is not set");
     expect(mockLogModuleError).toHaveBeenCalledWith(
       "constants",
       expect.any(Error),
       "telegram env missing",
-      { envName: "BTW_TOKEN" }
+      { envName: "BTW_TOKEN" },
     );
   });
 
@@ -74,14 +71,12 @@ describe("telegram constants", () => {
 
     const { getKasaChatId } = await import("../telegram.js");
 
-    expect(() => getKasaChatId()).toThrow(
-      "Telegram configuration error: KASA_CHAT_ID is not set"
-    );
+    expect(() => getKasaChatId()).toThrow("Telegram configuration error: KASA_CHAT_ID is not set");
     expect(mockLogModuleError).toHaveBeenCalledWith(
       "constants",
       expect.any(Error),
       "telegram env missing",
-      { envName: "KASA_CHAT_ID" }
+      { envName: "KASA_CHAT_ID" },
     );
   });
 
@@ -97,7 +92,7 @@ describe("telegram constants", () => {
     const { getBtwPlatenId } = await import("../telegram.js");
 
     expect(() => getBtwPlatenId()).toThrow(
-      "Telegram configuration error: BTW_PLATEN_ID is not set"
+      "Telegram configuration error: BTW_PLATEN_ID is not set",
     );
   });
 
@@ -113,7 +108,7 @@ describe("telegram constants", () => {
     const { getBtwAnalyticsChatId } = await import("../telegram.js");
 
     expect(() => getBtwAnalyticsChatId()).toThrow(
-      "Telegram configuration error: BTW_ANALITICS_CHAT_ID is not set"
+      "Telegram configuration error: BTW_ANALITICS_CHAT_ID is not set",
     );
   });
 });

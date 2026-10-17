@@ -3,9 +3,7 @@ import ExcelJS from "exceljs";
 import { ExcelArtKeyRow } from "../types.js";
 import { generateExcelWithKeysUtil } from "../generateExcelWithKeysUtil.js";
 
-async function readSheetToJson(
-  buffer: Buffer
-): Promise<Record<string, unknown>[]> {
+async function readSheetToJson(buffer: Buffer): Promise<Record<string, unknown>[]> {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
   const worksheet = workbook.getWorksheet("ArtsKeys");

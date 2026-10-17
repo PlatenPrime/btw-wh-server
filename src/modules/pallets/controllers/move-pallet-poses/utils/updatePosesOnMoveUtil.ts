@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import { ClientSession } from "mongoose";
-import { IPos, Pos } from "../../../../poses/models/Pos.js";
+import { IPos } from "../../../../poses/models/Pos.js";
 import { IPallet } from "../../../models/Pallet.js";
 import { IRow } from "../../../../rows/models/Row.js";
-import { serializeIds } from "../../../utils/serialize-ids.js";
 
 type UpdatePosesOnMoveInput = {
   posesToMove: IPos[];
@@ -44,11 +43,3 @@ export const updatePosesOnMoveUtil = async ({
     await pos.save({ session });
   }
 };
-
-
-
-
-
-
-
-

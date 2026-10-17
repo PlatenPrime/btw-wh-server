@@ -14,6 +14,4 @@ export const getArtStockChartDataSchema = artDateRangeFieldsSchema
     path: [artDateRangeRefine.path[0]],
   });
 
-export type GetArtStockChartDataInput = z.infer<
-  typeof getArtStockChartDataSchema
->;
+export type GetArtStockChartDataInput = z.infer<typeof getArtStockChartDataSchema>;

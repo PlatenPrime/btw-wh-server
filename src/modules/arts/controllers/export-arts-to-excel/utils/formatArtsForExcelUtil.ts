@@ -12,11 +12,13 @@ export const formatArtsForExcelUtil = (arts: IArt[]): ExcelArtRow[] => {
     Виробник: art.prodName || "",
     "Назва (укр)": art.nameukr || "",
     "Назва (рус)": art.namerus || "",
-    Зона: art.zone, 
+    Зона: art.zone,
     Ліміт: art.limit ?? "",
     Маркер: art.marker || "",
     ABC: art.abc || "",
     "Залишки на сайті": art.btradeStock?.value ?? "",
-    "Дата оновлення залишків": art.btradeStock?.date ? new Date(art.btradeStock.date).toLocaleDateString("uk-UA") : "",
+    "Дата оновлення залишків": art.btradeStock?.date
+      ? new Date(art.btradeStock.date).toLocaleDateString("uk-UA")
+      : "",
   }));
 };

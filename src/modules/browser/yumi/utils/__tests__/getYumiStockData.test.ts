@@ -11,27 +11,25 @@ describe("getYumiStockData", () => {
 
   describe("Валидация входных данных", () => {
     it("должен выбрасывать ошибку при пустой ссылке", async () => {
-      await expect(getYumiStockData("")).rejects.toThrow(
-        "Link is required and must be a string"
-      );
+      await expect(getYumiStockData("")).rejects.toThrow("Link is required and must be a string");
     });
 
     it("должен выбрасывать ошибку при null", async () => {
-      await expect(
-        getYumiStockData(null as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getYumiStockData(null as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
 
     it("должен выбрасывать ошибку при undefined", async () => {
-      await expect(
-        getYumiStockData(undefined as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getYumiStockData(undefined as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
 
     it("должен выбрасывать ошибку при не-строковом link", async () => {
-      await expect(
-        getYumiStockData(123 as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getYumiStockData(123 as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
   });
 
@@ -142,4 +140,3 @@ describe("getYumiStockData", () => {
     });
   });
 });
-

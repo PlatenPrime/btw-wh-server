@@ -10,4 +10,3 @@ export const checkBlockDuplicatesUtil = async ({
   const existingBlock = await Block.findOne({ title }).exec();
   return existingBlock;
 };
-

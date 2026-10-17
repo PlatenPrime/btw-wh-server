@@ -9,13 +9,10 @@ type UpdateDelTitleByIdUtilInput = {
   prodName: string;
 };
 
-export type UpdateDelTitleByIdUtilResult =
-  | IDel
-  | null
-  | { error: typeof PROD_NOT_FOUND };
+export type UpdateDelTitleByIdUtilResult = IDel | null | { error: typeof PROD_NOT_FOUND };
 
 export const updateDelTitleByIdUtil = async (
-  input: UpdateDelTitleByIdUtilInput
+  input: UpdateDelTitleByIdUtilInput,
 ): Promise<UpdateDelTitleByIdUtilResult> => {
   const prod = await Prod.findOne({ name: input.prodName }).lean();
   if (!prod) {
@@ -29,7 +26,7 @@ export const updateDelTitleByIdUtil = async (
       prodName: input.prodName,
       prod: { title: prod.title, imageUrl: prod.imageUrl },
     },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   );
   return del;
 };

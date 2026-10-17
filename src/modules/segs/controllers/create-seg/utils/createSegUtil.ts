@@ -33,12 +33,10 @@ export const createSegUtil = async ({
   }
 
   // Валидация: проверить, что зоны не принадлежат другим сегментам
-  const zonesWithSeg = existingZones.filter(
-    (zone) => zone.seg && zone.seg.id
-  );
+  const zonesWithSeg = existingZones.filter((zone) => zone.seg && zone.seg.id);
   if (zonesWithSeg.length > 0) {
     throw new Error(
-      `Zones already belong to segments: ${zonesWithSeg.map((z) => z._id.toString()).join(", ")}`
+      `Zones already belong to segments: ${zonesWithSeg.map((z) => z._id.toString()).join(", ")}`,
     );
   }
 
@@ -62,7 +60,7 @@ export const createSegUtil = async ({
         zones: zonesData,
       },
     ],
-    { session }
+    { session },
   );
 
   if (!created || !created[0]) {
@@ -84,9 +82,8 @@ export const createSegUtil = async ({
         sector,
       },
     },
-    { session }
+    { session },
   );
 
   return created[0];
 };
-

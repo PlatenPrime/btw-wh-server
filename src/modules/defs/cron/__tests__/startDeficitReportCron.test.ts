@@ -37,7 +37,7 @@ describe("startDeficitReportCron", () => {
     vi.clearAllMocks();
     clearDeficitReportLockForTests();
     cronCallback = null;
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const cb = args[1];
       if (typeof cb === "function") {
         cronCallback = cb as () => Promise<void>;
@@ -61,7 +61,7 @@ describe("startDeficitReportCron", () => {
       expect.any(Function),
       null,
       true,
-      DEFICIT_REPORT_CRON_TZ
+      DEFICIT_REPORT_CRON_TZ,
     );
     expect(DEFICIT_REPORT_CRON_EXPR).toBe("0 20 9-17 * * 1-5");
     expect(DEFICIT_REPORT_CRON_TZ).toBe("Europe/Kyiv");
@@ -70,7 +70,7 @@ describe("startDeficitReportCron", () => {
         schedule: DEFICIT_REPORT_CRON_EXPR,
         timezone: DEFICIT_REPORT_CRON_TZ,
       },
-      "cron started"
+      "cron started",
     );
   });
 
@@ -80,10 +80,7 @@ describe("startDeficitReportCron", () => {
     await cronCallback?.();
 
     expect(runDeficitTelegramReportUtil).toHaveBeenCalledTimes(1);
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      { total: 3 },
-      "deficit report completed"
-    );
+    expect(mockLogger.info).toHaveBeenCalledWith({ total: 3 }, "deficit report completed");
   });
 
   it("skips tick when lock is held", async () => {
@@ -92,21 +89,17 @@ describe("startDeficitReportCron", () => {
     await cronCallback?.();
 
     expect(runDeficitTelegramReportUtil).not.toHaveBeenCalled();
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      "deficit report already running, skip cron tick"
-    );
+    expect(mockLogger.warn).toHaveBeenCalledWith("deficit report already running, skip cron tick");
   });
 
   it("logs error and releases lock when runner throws", async () => {
-    vi.mocked(runDeficitTelegramReportUtil).mockRejectedValue(
-      new Error("cron boom")
-    );
+    vi.mocked(runDeficitTelegramReportUtil).mockRejectedValue(new Error("cron boom"));
     startDeficitReportCron();
     await cronCallback?.();
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       { err: expect.any(Error) },
-      "deficit report cron failed"
+      "deficit report cron failed",
     );
     expect(tryAcquireDeficitReport()).toBe(true);
   });

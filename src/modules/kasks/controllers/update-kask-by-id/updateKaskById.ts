@@ -7,16 +7,13 @@ import { updateKaskUtil } from "./utils/updateKaskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
-export const updateKaskById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateKaskById = async (req: Request, res: Response): Promise<void> => {
   try {
     const paramsResult = updateKaskByIdParamsSchema.safeParse(req.params);
     if (!paramsResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: paramsResult.error.errors,
+        errors: paramsResult.error.issues,
       });
       return;
     }
@@ -25,7 +22,7 @@ export const updateKaskById = async (
     if (!bodyResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: bodyResult.error.errors,
+        errors: bodyResult.error.issues,
       });
       return;
     }

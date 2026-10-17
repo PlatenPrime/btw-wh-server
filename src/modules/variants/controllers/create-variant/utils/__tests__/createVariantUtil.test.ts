@@ -41,4 +41,3 @@ describe("createVariantUtil", () => {
     expect(result.varGroup?.title).toBe("Group 1");
   });
 });
-

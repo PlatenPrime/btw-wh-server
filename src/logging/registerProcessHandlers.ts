@@ -3,10 +3,7 @@ import { closePlaywrightBrowser } from "../modules/browser/utils/playwrightBrows
 
 let shutdownInProgress = false;
 
-async function shutdown(
-  log: AppLogger,
-  signal: NodeJS.Signals
-): Promise<void> {
+async function shutdown(log: AppLogger, signal: NodeJS.Signals): Promise<void> {
   if (shutdownInProgress) {
     return;
   }

@@ -133,17 +133,19 @@ describe("getAskPullController", () => {
 
   it("500: обработка ошибок сервера", async () => {
     // Создаем ситуацию, которая вызовет ошибку
-    const req = {
+    const _req = {
       params: { id: "valid-but-will-fail" },
     } as unknown as Request;
 
     // Мокаем getAskPullUtil чтобы выбросить ошибку
-    const originalUtil = await import("../get-ask-pull/utils/getAskPullUtil.js");
-    const mockUtil = {
+    await import("../get-ask-pull/utils/getAskPullUtil.js");
+    const _mockUtil = {
       getAskPullUtil: async () => {
         throw new Error("Database error");
       },
     };
+    void _req;
+    void _mockUtil;
 
     // Временно заменяем импорт (в реальности нужно использовать vi.mock)
     // Для этого теста просто проверяем что контроллер обрабатывает ошибки
@@ -153,4 +155,3 @@ describe("getAskPullController", () => {
     // Полный тест требует мокирования зависимостей
   });
 });
-

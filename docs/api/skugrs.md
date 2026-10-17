@@ -24,9 +24,7 @@
 ```json
 {
   "message": "Skugrs retrieved successfully",
-  "data": [
-    /* массив Skugr */
-  ],
+  "data": [/* массив Skugr */],
   "pagination": {
     "page": 1,
     "limit": 10,

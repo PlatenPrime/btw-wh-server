@@ -14,7 +14,7 @@ export const yuminProductsPageSchema = z.object({
         })
         .nullable()
         .optional(),
-    })
+    }),
   ),
   links: z
     .object({

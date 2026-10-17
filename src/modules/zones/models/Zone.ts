@@ -57,7 +57,7 @@ const zoneSchema = new Schema<IZone>(
       },
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Индексы для оптимизации поиска (уникальные поля уже имеют индексы)

@@ -38,9 +38,7 @@ describe("getBtradeSliceController", () => {
 
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Btrade slice retrieved successfully");
-    expect(
-      (responseJson.data as { items: Array<Record<string, unknown>> }).items
-    ).toEqual([
+    expect((responseJson.data as { items: Array<Record<string, unknown>> }).items).toEqual([
       {
         artikul: "ART-1",
         quantity: 5,

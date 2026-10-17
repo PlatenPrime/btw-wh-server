@@ -54,4 +54,3 @@ describe("getAllRowsController", () => {
     expect(responseStatus.code).toBe(404);
   });
 });
-

@@ -7,10 +7,7 @@ import {
   materializeSkuSliceSalesDateRange,
   sliceDatePlusDays,
 } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
-import {
-  getDayPoint,
-  upsertDayPoint,
-} from "../../../utils/skuSliceMonthStore.js";
+import { getDayPoint, upsertDayPoint } from "../../../utils/skuSliceMonthStore.js";
 
 export type PatchSkuSliceByDateRangeDayResult = {
   date: Date;
@@ -34,9 +31,7 @@ export type PatchSkuSliceByDateRangeResult = {
 export async function patchSkuSliceByDateRangeUtil(
   input: PatchSkuSliceByDateRangeInput,
 ): Promise<PatchSkuSliceByDateRangeResult | null> {
-  const sku = await Sku.findById(input.skuId)
-    .select("konkName productId")
-    .lean();
+  const sku = await Sku.findById(input.skuId).select("konkName productId").lean();
   if (!sku) return null;
 
   const productId = sku.productId?.trim();

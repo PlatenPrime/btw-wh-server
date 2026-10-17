@@ -13,41 +13,26 @@ import {
 
 const router = Router();
 
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllKonksController)
-);
-router.get(
-  "/id/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkByIdController)
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllKonksController));
+router.get("/id/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getKonkByIdController));
 router.get(
   "/name/:name",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkByNameController)
+  asyncHandler(getKonkByNameController),
 );
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createKonkController)
-);
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createKonkController));
 router.patch(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateKonkByIdController)
+  asyncHandler(updateKonkByIdController),
 );
 router.delete(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteKonkByIdController)
+  asyncHandler(deleteKonkByIdController),
 );
 
 export default router;

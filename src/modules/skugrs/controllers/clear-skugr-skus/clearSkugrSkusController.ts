@@ -9,16 +9,13 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Очистить массив skus у товарной группы (документы Sku не удаляются)
  * @route   POST /api/skugrs/id/:id/clear-skus
  */
-export const clearSkugrSkusController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const clearSkugrSkusController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = clearSkugrSkusSchema.safeParse({ id: req.params.id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

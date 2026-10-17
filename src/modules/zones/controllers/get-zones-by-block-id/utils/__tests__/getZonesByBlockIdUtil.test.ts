@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import "../../../../../../test/setup.js";
 import { Block } from "../../../../../blocks/models/Block.js";

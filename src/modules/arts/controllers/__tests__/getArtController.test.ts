@@ -25,7 +25,7 @@ describe("getArtController", () => {
   });
 
   it("200: возвращает артикул по artikul", async () => {
-    const testArt = await createTestArt({
+    await createTestArt({
       artikul: "ART-001",
       nameukr: "Test Art",
       zone: "A1",
@@ -89,4 +89,3 @@ describe("getArtController", () => {
     expect(responseJson.message).toBe("Artikul is required");
   });
 });
-

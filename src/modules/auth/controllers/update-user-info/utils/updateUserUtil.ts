@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from "mongoose";
+import { ClientSession } from "mongoose";
 import User, { IUser } from "../../../models/User.js";
 
 type UpdateUserInput = {
@@ -41,4 +41,3 @@ export const updateUserUtil = async ({
 
   return user;
 };
-

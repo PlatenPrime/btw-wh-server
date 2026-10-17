@@ -1,15 +1,7 @@
 import { ClientSession, Types } from "mongoose";
 import { IUser } from "../../../../auth/models/User.js";
-import {
-  Ask,
-  AskEvent,
-  AskEventPullDetails,
-  IAsk,
-} from "../../../models/Ask.js";
-import {
-  buildAskEvent,
-  mapUserToAskUserData,
-} from "../../../utils/askEventsUtil.js";
+import { Ask, AskEvent, AskEventPullDetails, IAsk } from "../../../models/Ask.js";
+import { buildAskEvent, mapUserToAskUserData } from "../../../utils/askEventsUtil.js";
 import { getUpdateAskActionUtil } from "../../update-ask-actions-by-id/utils/getUpdateAskActionUtil.js";
 import { PullAskPayload } from "../schemas/pullAskByIdSchema.js";
 
@@ -22,15 +14,15 @@ interface PullAskUtilInput {
   session: ClientSession;
 }
 
-const appendPullEvent = (
-  events: AskEvent[] | undefined,
-  event: AskEvent
-): AskEvent[] => [...(events ?? []), event];
+const appendPullEvent = (events: AskEvent[] | undefined, event: AskEvent): AskEvent[] => [
+  ...(events ?? []),
+  event,
+];
 
 const accumulatePullTotals = (
   currentQuant: number | undefined,
   currentBox: number | undefined,
-  pullDetails: AskEventPullDetails
+  pullDetails: AskEventPullDetails,
 ) => {
   const baseQuant = currentQuant ?? 0;
   const baseBox = currentBox ?? 0;
@@ -77,10 +69,7 @@ export const pullAskUtil = async ({
     events,
     pullQuant: totals.pullQuant,
     pullBox: totals.pullBox,
-    status:
-      ask.status === "completed" || ask.status === "rejected"
-        ? ask.status
-        : "processing",
+    status: ask.status === "completed" || ask.status === "rejected" ? ask.status : "processing",
   };
 
   const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {

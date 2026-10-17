@@ -20,55 +20,45 @@ router.get(
   "/id/:id/stock",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogStockDataController)
+  asyncHandler(getAnalogStockDataController),
 );
 router.get(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogByIdController)
+  asyncHandler(getAnalogByIdController),
 );
 router.get(
   "/prod/:prodName",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogsByProdController)
+  asyncHandler(getAnalogsByProdController),
 );
 router.get(
   "/konk/:konkName",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogsByKonkController)
+  asyncHandler(getAnalogsByKonkController),
 );
 router.get(
   "/artikul/:artikul",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogsByArtikulController)
+  asyncHandler(getAnalogsByArtikulController),
 );
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogsController)
-);
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createAnalogController)
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAnalogsController));
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createAnalogController));
 router.patch(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateAnalogByIdController)
+  asyncHandler(updateAnalogByIdController),
 );
 router.delete(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteAnalogByIdController)
+  asyncHandler(deleteAnalogByIdController),
 );
 
 export default router;

@@ -42,9 +42,7 @@ export type GetSkuSliceResult = {
  * @deprecated HTTP GET / снят (410). Логика оставлена для тестов / day-invalid twin.
  * Читает из SkuSliceMonth.
  */
-export async function getSkuSliceUtil(
-  input: GetSkuSliceQuery,
-): Promise<GetSkuSliceResult | null> {
+export async function getSkuSliceUtil(input: GetSkuSliceQuery): Promise<GetSkuSliceResult | null> {
   const { page, limit } = input;
   const sliceDate = toSliceDate(input.date);
 

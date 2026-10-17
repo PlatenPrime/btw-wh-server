@@ -27,31 +27,25 @@ export function startFillPosNameukrFromArtsCron(): CronJob {
             updatedCount: result.updatedCount,
             skippedArtikulsCount: result.skippedArtikulsCount,
           },
-          "fill pos nameukr completed"
+          "fill pos nameukr completed",
         );
         try {
           await sendMessageToPlaten(formatFillPosNameukrReport(result));
         } catch (notificationError) {
-          log.error(
-            { err: notificationError },
-            "telegram notification failed after success"
-          );
+          log.error({ err: notificationError }, "telegram notification failed after success");
         }
       } catch (error) {
         log.error({ err: error }, "fill pos nameukr cron failed");
         try {
           await sendMessageToPlaten(formatFillPosNameukrErrorReport(error));
         } catch (notificationError) {
-          log.error(
-            { err: notificationError },
-            "telegram notification failed after error"
-          );
+          log.error({ err: notificationError }, "telegram notification failed after error");
         }
       }
     },
     null,
     true,
-    "Europe/Kiev"
+    "Europe/Kiev",
   );
 
   log.info({ schedule: "0 30 6 * * *", timezone: "Europe/Kiev" }, "cron started");

@@ -1,11 +1,9 @@
 import mongoose from "mongoose";
 import { z } from "zod";
 
-const objectIdSchema = z
-  .string()
-  .refine((val) => mongoose.Types.ObjectId.isValid(val), {
-    message: "Invalid ObjectId format",
-  });
+const objectIdSchema = z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+  message: "Invalid ObjectId format",
+});
 
 const palletDataSchema = z.object({
   _id: objectIdSchema,

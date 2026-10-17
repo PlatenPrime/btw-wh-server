@@ -44,4 +44,3 @@ describe("getPosesByPalletIdUtil", () => {
     expect(poses).toEqual([]);
   });
 });
-

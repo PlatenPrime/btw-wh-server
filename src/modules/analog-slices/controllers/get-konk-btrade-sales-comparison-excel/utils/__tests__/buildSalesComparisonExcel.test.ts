@@ -71,9 +71,7 @@ describe("buildSalesComparisonExcel", () => {
 
     expect(buffer).toBeInstanceOf(Buffer);
     expect(buffer.length).toBeGreaterThan(0);
-    expect(fileName).toBe(
-      "sales_comparison_air_gemar_2026-03-01_2026-03-02.xlsx",
-    );
+    expect(fileName).toBe("sales_comparison_air_gemar_2026-03-01_2026-03-02.xlsx");
 
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer as unknown as ArrayBuffer);

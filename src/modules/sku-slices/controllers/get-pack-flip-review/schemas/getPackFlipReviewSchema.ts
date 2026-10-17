@@ -14,9 +14,17 @@ export const getPackFlipReviewSchema = z
     dateFrom: dateStringSchema,
     dateTo: dateStringSchema,
   })
-  .refine((data) => data.dateFrom.getTime() <= data.dateTo.getTime(), {
-    message: "dateFrom must be before or equal to dateTo",
-    path: ["dateTo"],
-  });
+  .refine(
+    (data) => {
+      if (!(data.dateFrom instanceof Date) || !(data.dateTo instanceof Date)) {
+        return true;
+      }
+      return data.dateFrom.getTime() <= data.dateTo.getTime();
+    },
+    {
+      message: "dateFrom must be before or equal to dateTo",
+      path: ["dateTo"],
+    },
+  );
 
 export type GetPackFlipReviewInput = z.infer<typeof getPackFlipReviewSchema>;

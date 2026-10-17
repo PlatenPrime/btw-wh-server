@@ -78,7 +78,7 @@ describe("getArtLimits", () => {
     expect(logModuleError).toHaveBeenCalledWith(
       "defs",
       expect.any(Error),
-      "Помилка при отриманні лімітів з моделі Art:"
+      "Помилка при отриманні лімітів з моделі Art:",
     );
   });
 

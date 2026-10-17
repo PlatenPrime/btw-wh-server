@@ -11,10 +11,7 @@ function normalizePathname(pathname: string): string {
  * pageUrl — та же категория, что groupUrl: origin + pathname совпадают,
  * query совпадает кроме параметра `page`.
  */
-export function isAirListingPageOfGroup(
-  pageUrl: string,
-  groupUrl: string
-): boolean {
+export function isAirListingPageOfGroup(pageUrl: string, groupUrl: string): boolean {
   try {
     const page = new URL(pageUrl.trim());
     const group = new URL(groupUrl.trim());
@@ -52,9 +49,6 @@ export function isAirListingPageOfGroup(
   }
 }
 
-export function sourceUrlMatchesSkugrUrl(
-  sourceUrl: string,
-  skugrUrl: string
-): boolean {
+export function sourceUrlMatchesSkugrUrl(sourceUrl: string, skugrUrl: string): boolean {
   return urlsMatchForClientIngest(sourceUrl, skugrUrl);
 }

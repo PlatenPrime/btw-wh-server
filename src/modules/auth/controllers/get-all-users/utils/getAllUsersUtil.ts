@@ -10,10 +10,7 @@ import User, { IUser } from "../../../models/User.js";
  * const users = await getAllUsersUtil();
  * ```
  */
-export const getAllUsersUtil = async (): Promise<
-  Omit<IUser, "password">[]
-> => {
+export const getAllUsersUtil = async (): Promise<Omit<IUser, "password">[]> => {
   const users = await User.find().select("-password");
   return users as Omit<IUser, "password">[];
 };
-

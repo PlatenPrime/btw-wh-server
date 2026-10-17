@@ -11,13 +11,10 @@ vi.mock("../air/utils/getAirStockData.js");
 vi.mock("../sharik/utils/getSharikStockData.js");
 
 const createAuthHeader = (role: RoleType = RoleType.USER) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -60,9 +57,7 @@ describe("Browser router integration", () => {
     it("404 when product not found", async () => {
       vi.mocked(getSharikStockData).mockResolvedValue(null);
 
-      await request(app)
-        .get("/api/browser/sharik/stock/UNKNOWN-ART")
-        .expect(404);
+      await request(app).get("/api/browser/sharik/stock/UNKNOWN-ART").expect(404);
     });
 
     it("200 returns sharik stock", async () => {
@@ -72,9 +67,7 @@ describe("Browser router integration", () => {
         quantity: 12,
       });
 
-      const response = await request(app)
-        .get("/api/browser/sharik/stock/1234-5678")
-        .expect(200);
+      const response = await request(app).get("/api/browser/sharik/stock/1234-5678").expect(200);
 
       expect(response.body.message).toBe("Sharik stock retrieved successfully");
       expect(response.body.data.quantity).toBe(12);

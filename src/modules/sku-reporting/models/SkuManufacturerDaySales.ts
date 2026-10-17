@@ -29,10 +29,7 @@ const skuManufacturerDaySalesSchema = new Schema<ISkuManufacturerDaySales>(
   { timestamps: true },
 );
 
-skuManufacturerDaySalesSchema.index(
-  { konkName: 1, date: 1, prodName: 1 },
-  { unique: true },
-);
+skuManufacturerDaySalesSchema.index({ konkName: 1, date: 1, prodName: 1 }, { unique: true });
 
 export const SkuManufacturerDaySales: Model<ISkuManufacturerDaySales> =
   getOrCreateModel<ISkuManufacturerDaySales>(

@@ -1,8 +1,5 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { ISkuSliceDataItem } from "../../../../sku-slices/models/skuSliceTypes.js";
 import {
@@ -83,16 +80,14 @@ export function computeSkuSalesPeriodMetrics(
   getItem: (
     konkName: string,
     productId: string,
-    sliceDate: Date
+    sliceDate: Date,
   ) => ISkuSliceDataItem | null | undefined,
   recountDays: ReadonlySet<string> = new Set(),
 ): SkuSalesPeriodMetrics {
   const datesReport = enumerateSliceDates(dateFrom, dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
   const datesFull =
-    warmStart.getTime() < dateFrom.getTime()
-      ? [warmStart, ...datesReport]
-      : datesReport;
+    warmStart.getTime() < dateFrom.getTime() ? [warmStart, ...datesReport] : datesReport;
   const reportOffset = datesFull.length - datesReport.length;
   const coalesced = coalesceSkuSliceItemsAlongDates(datesFull, (d) =>
     getItem(sku.konkName, sku.productId, d),
@@ -100,15 +95,11 @@ export function computeSkuSalesPeriodMetrics(
   const forReport = coalesced.slice(reportOffset);
   const stocksFull = coalesced.map((c) => c.stock);
   const prices = forReport.map((c) => c.price);
-  const isRecountDayByDay = datesReport.map((date) =>
-    recountDays.has(toUtcDateKey(date)),
-  );
+  const isRecountDayByDay = datesReport.map((date) => recountDays.has(toUtcDateKey(date)));
   const salesByDay = computeSalesFromStockSequence(stocksFull)
     .slice(reportOffset)
     .map((x, index) => applyRecountDayToSales(x.sales, datesReport[index]!, recountDays));
-  const revenueByDay = salesByDay.map((sales, i) =>
-    computeRevenueForDay(sales, prices[i] ?? null)
-  );
+  const revenueByDay = salesByDay.map((sales, i) => computeRevenueForDay(sales, prices[i] ?? null));
   const totalSales = salesByDay.reduce((acc, val) => acc + val, 0);
   const totalRevenue = revenueByDay.reduce((acc, val) => acc + val, 0);
   return {
@@ -135,7 +126,7 @@ function writeSummaryRow(
   sheet: ExcelJS.Worksheet,
   rowIndex: number,
   label: string,
-  value: number
+  value: number,
 ): void {
   const row = sheet.getRow(rowIndex);
   row.getCell(1).value = label;
@@ -169,7 +160,7 @@ function applyRevenueRowBold(
   sheet: ExcelJS.Worksheet,
   rowIndex: number,
   fromCol: number,
-  toCol: number
+  toCol: number,
 ): void {
   const row = sheet.getRow(rowIndex);
   for (let c = fromCol; c <= toCol; c++) {
@@ -185,9 +176,9 @@ export async function buildSkuSalesExcelForSkus(
   getItem: (
     konkName: string,
     productId: string,
-    sliceDate: Date
+    sliceDate: Date,
   ) => ISkuSliceDataItem | null | undefined,
-  options: SkuSalesExcelOptions = {}
+  options: SkuSalesExcelOptions = {},
 ): Promise<{ buffer: Buffer }> {
   const datesReport = enumerateSliceDates(dateFrom, dateTo);
   const dates = datesReport;
@@ -211,15 +202,11 @@ export async function buildSkuSalesExcelForSkus(
   applyHeaderStyle(sheet, columnCount);
 
   const summaryMode = options.summaryMode ?? "bottomOnly";
-  const summarySalesLabel =
-    options.summarySalesLabel ?? "Продажі конкурента (всього), шт";
-  const summaryRevenueLabel =
-    options.summaryRevenueLabel ?? "Виручка конкурента (всього), грн";
+  const summarySalesLabel = options.summarySalesLabel ?? "Продажі конкурента (всього), шт";
+  const summaryRevenueLabel = options.summaryRevenueLabel ?? "Виручка конкурента (всього), грн";
   const recountDays = new Set((options.recountDays ?? []).map(String));
   const selectedMetrics =
-    options.metrics && options.metrics.length > 0
-      ? options.metrics
-      : DEFAULT_METRICS;
+    options.metrics && options.metrics.length > 0 ? options.metrics : DEFAULT_METRICS;
   const rowsPerSkuBlock = selectedMetrics.length;
   const includeSales = selectedMetrics.includes("sales");
   const includeRevenue = selectedMetrics.includes("revenue");
@@ -231,20 +218,8 @@ export async function buildSkuSalesExcelForSkus(
 
   for (let skuIndex = 0; skuIndex < skuTotal; skuIndex++) {
     const sku = skus[skuIndex]!;
-    const {
-      salesByDay,
-      revenueByDay,
-      prices,
-      isRecountDayByDay,
-      totalSales,
-      totalRevenue,
-    } = computeSkuSalesPeriodMetrics(
-      sku,
-      dateFrom,
-      dateTo,
-      getItem,
-      recountDays,
-    );
+    const { salesByDay, revenueByDay, prices, isRecountDayByDay, totalSales, totalRevenue } =
+      computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem, recountDays);
     grandTotalSales += totalSales;
     grandTotalRevenue += totalRevenue;
 
@@ -306,12 +281,7 @@ export async function buildSkuSalesExcelForSkus(
     }
     const revenueOffset = selectedMetrics.indexOf("revenue");
     if (revenueOffset >= 0) {
-      applyRevenueRowBold(
-        sheet,
-        startRow + revenueOffset,
-        METRIC_LABEL_COL,
-        totalCol,
-      );
+      applyRevenueRowBold(sheet, startRow + revenueOffset, METRIC_LABEL_COL, totalCol);
     }
 
     startRow += rowsPerSkuBlock;
@@ -328,8 +298,7 @@ export async function buildSkuSalesExcelForSkus(
         totalRevenue,
       );
       // Как раньше при двух summary-строках: +1 пустая между блоками.
-      startRow =
-        afterSummary > startRow ? afterSummary + 1 : afterSummary;
+      startRow = afterSummary > startRow ? afterSummary + 1 : afterSummary;
     }
     notifyExcelBuildProgress(options.onProgress, skuIndex + 1, skuTotal);
   }

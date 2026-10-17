@@ -29,7 +29,7 @@ const btradeStockSchema = new Schema<IBtradeStock>(
     value: { type: Number, required: true },
     date: { type: Date, default: Date.now },
   },
-  { _id: false }
+  { _id: false },
 );
 
 // Схема для Art
@@ -52,7 +52,7 @@ const artSchema = new Schema<IArt>(
     abc: { type: String },
     btradeStock: { type: btradeStockSchema },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

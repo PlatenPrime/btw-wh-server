@@ -11,12 +11,9 @@ vi.mock("../../perfect-ajax-post/perfectAjaxPost.js", () => ({
 vi.mock("../../perfect-refresh-response/perfectRefreshResponse.js", () => ({
   extractProductDetailsHtmlFromRefreshResponse: vi.fn(),
 }));
-vi.mock(
-  "../../perfect-data-product-fallback/perfectDataProductFallback.js",
-  () => ({
-    tryPerfectDataProductFallback: vi.fn(),
-  })
-);
+vi.mock("../../perfect-data-product-fallback/perfectDataProductFallback.js", () => ({
+  tryPerfectDataProductFallback: vi.fn(),
+}));
 
 import { postPerfectAjax } from "../../perfect-ajax-post/perfectAjaxPost.js";
 import { extractProductDetailsHtmlFromRefreshResponse } from "../../perfect-refresh-response/perfectRefreshResponse.js";
@@ -31,13 +28,7 @@ describe("tryPerfectRefreshStock", () => {
       data: "",
       cookieHeader: "c=1",
     });
-    const result = await tryPerfectRefreshStock(
-      client,
-      "https://x/p",
-      "T",
-      "body",
-      "c=0"
-    );
+    const result = await tryPerfectRefreshStock(client, "https://x/p", "T", "body", "c=0");
     expect(result).toEqual({ info: null, cookieHeader: "c=1" });
   });
 
@@ -47,22 +38,14 @@ describe("tryPerfectRefreshStock", () => {
       data: "{}",
       cookieHeader: "c=2",
     });
-    vi.mocked(extractProductDetailsHtmlFromRefreshResponse).mockReturnValueOnce(
-      "<div>"
-    );
+    vi.mocked(extractProductDetailsHtmlFromRefreshResponse).mockReturnValueOnce("<div>");
     vi.mocked(tryPerfectDataProductFallback).mockReturnValueOnce({
       stock: 5,
       price: 1.2,
       source: "data-product",
     });
 
-    const result = await tryPerfectRefreshStock(
-      client,
-      "https://x/p",
-      "T",
-      "body",
-      "c=0"
-    );
+    const result = await tryPerfectRefreshStock(client, "https://x/p", "T", "body", "c=0");
     expect(result).toEqual({
       info: { stock: 5, price: 1.2, source: "refresh" },
       cookieHeader: "c=2",
@@ -75,16 +58,8 @@ describe("tryPerfectRefreshStock", () => {
       data: "{}",
       cookieHeader: "c=3",
     });
-    vi.mocked(extractProductDetailsHtmlFromRefreshResponse).mockReturnValueOnce(
-      null
-    );
-    const result = await tryPerfectRefreshStock(
-      client,
-      "https://x/p",
-      "T",
-      "body",
-      "c=0"
-    );
+    vi.mocked(extractProductDetailsHtmlFromRefreshResponse).mockReturnValueOnce(null);
+    const result = await tryPerfectRefreshStock(client, "https://x/p", "T", "body", "c=0");
     expect(result).toEqual({ info: null, cookieHeader: "c=3" });
   });
 });

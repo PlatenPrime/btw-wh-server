@@ -24,7 +24,7 @@ describe("getSharikStocks", () => {
       new Map([
         ["ART001", { actualQuantity: 15, sliceQuantity: 20, price: 100 }],
         ["ART002", { actualQuantity: 8, sliceQuantity: 9, price: 200 }],
-      ])
+      ]),
     );
 
     const result = await getSharikStocks(mockStocks, {
@@ -74,8 +74,8 @@ describe("getSharikStocks", () => {
   it("бросает при ошибке fetch map", async () => {
     mockedGetCachedMap.mockRejectedValue(new Error("Network error"));
 
-    await expect(
-      getSharikStocks({ ART001: { nameukr: "T", quant: 1, boxes: 1 } })
-    ).rejects.toThrow("Не удалось получить данные Sharik");
+    await expect(getSharikStocks({ ART001: { nameukr: "T", quant: 1, boxes: 1 } })).rejects.toThrow(
+      "Не удалось получить данные Sharik",
+    );
   });
 });

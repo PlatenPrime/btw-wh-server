@@ -3,10 +3,7 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
 import { listApiTasksSchema } from "../get-api-task/schemas/getApiTaskSchema.js";
 import { listApiTasksUtil } from "./utils/listApiTasksUtil.js";
 
-export const listApiTasksController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const listApiTasksController = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user?.id) {
       res.status(401).json({
@@ -21,7 +18,7 @@ export const listApiTasksController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

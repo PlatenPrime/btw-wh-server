@@ -5,17 +5,13 @@ describe("extractProductDetailsHtmlFromRefreshResponse", () => {
   it("returns product_details HTML", () => {
     const html = '<div id="product-details" data-product="{}"></div>';
     expect(
-      extractProductDetailsHtmlFromRefreshResponse(
-        JSON.stringify({ product_details: html })
-      )
+      extractProductDetailsHtmlFromRefreshResponse(JSON.stringify({ product_details: html })),
     ).toBe(html);
   });
 
   it("returns null for empty product_details", () => {
     expect(
-      extractProductDetailsHtmlFromRefreshResponse(
-        JSON.stringify({ product_details: "  " })
-      )
+      extractProductDetailsHtmlFromRefreshResponse(JSON.stringify({ product_details: "  " })),
     ).toBeNull();
   });
 

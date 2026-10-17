@@ -58,17 +58,14 @@ export function getMsUntilKyivMorningSend(d: Date = new Date()): number {
   });
 
   const minute = Number(
-    kyivMinuteFormatter.formatToParts(d).find((p) => p.type === "minute")?.value
+    kyivMinuteFormatter.formatToParts(d).find((p) => p.type === "minute")?.value,
   );
   const second = Number(
-    kyivSecondFormatter.formatToParts(d).find((p) => p.type === "second")?.value
+    kyivSecondFormatter.formatToParts(d).find((p) => p.type === "second")?.value,
   );
 
   const msUntilMorning =
-    hoursUntilMorning * 60 * 60 * 1000 -
-    minute * 60 * 1000 -
-    second * 1000 -
-    d.getMilliseconds();
+    hoursUntilMorning * 60 * 60 * 1000 - minute * 60 * 1000 - second * 1000 - d.getMilliseconds();
 
   return Math.max(0, msUntilMorning);
 }
@@ -106,7 +103,7 @@ async function sendAnalyticsChatChunks(chunks: string[]): Promise<void> {
  */
 export async function sendAnalyticsChatNotificationDeferred(
   message: string,
-  finishedAt: Date = new Date()
+  finishedAt: Date = new Date(),
 ): Promise<void> {
   const chunks = chunkTelegramMessage(message);
   const delayMs = getMsUntilKyivMorningSend(finishedAt);

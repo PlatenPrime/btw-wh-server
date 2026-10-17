@@ -30,9 +30,7 @@ const airLog = createLogger({ module: "browser" });
  * @returns Promise с объектом { stock, price }; при негативном исходе — { stock: -1, price: -1 }
  * @throws Error при пустом/не-строковом link; BrowserOriginBlockedError при CF 520–526
  */
-export async function getAirStockData(
-  link: string
-): Promise<AirProductInfo> {
+export async function getAirStockData(link: string): Promise<AirProductInfo> {
   if (AIR_IDLE_MODE) {
     return AIR_NEGATIVE_OUTCOME;
   }
@@ -68,7 +66,7 @@ export async function getAirStockData(
           link: productUrl,
           ...summary,
         },
-        "air stock parse negative"
+        "air stock parse negative",
       );
     }
     logBrowserStockResult({

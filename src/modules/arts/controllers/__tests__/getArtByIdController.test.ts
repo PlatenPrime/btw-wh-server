@@ -63,4 +63,3 @@ describe("getArtByIdController", () => {
     expect(responseJson.message).toBe("Invalid art ID format");
   });
 });
-

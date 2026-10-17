@@ -14,13 +14,10 @@ vi.mock("../utils/runCompensatingSlicesForKonk.js", () => ({
 import { runCompensatingSlicesForKonk } from "../utils/runCompensatingSlicesForKonk.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -41,10 +38,7 @@ describe("slice-compensation router integration", () => {
   });
 
   it("POST /api/slice-compensation/run returns 401 without token", async () => {
-    await request(app)
-      .post("/api/slice-compensation/run")
-      .send({ konkName: "air" })
-      .expect(401);
+    await request(app).post("/api/slice-compensation/run").send({ konkName: "air" }).expect(401);
   });
 
   it("POST /api/slice-compensation/run returns 403 for USER", async () => {

@@ -38,11 +38,9 @@ export type GetAnalogBtradeComparisonRangeResult =
  * ok: false — аналог не найден или у аналога пустой artikul.
  */
 export async function getAnalogBtradeComparisonRangeUtil(
-  input: GetAnalogBtradeComparisonExcelInput
+  input: GetAnalogBtradeComparisonExcelInput,
 ): Promise<GetAnalogBtradeComparisonRangeResult> {
-  const analog = await Analog.findById(input.analogId)
-    .select("konkName artikul prodName")
-    .lean();
+  const analog = await Analog.findById(input.analogId).select("konkName artikul prodName").lean();
 
   if (!analog) return { ok: false };
 
@@ -52,20 +50,14 @@ export async function getAnalogBtradeComparisonRangeUtil(
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
 
-  const artDoc = await Art.findOne({ artikul: artikulKey })
-    .select("nameukr abc")
-    .lean();
+  const artDoc = await Art.findOne({ artikul: artikulKey }).select("nameukr abc").lean();
   const artNameUkr = (artDoc?.nameukr ?? "").trim() || null;
   const artAbc = (artDoc?.abc ?? "").trim() || null;
 
-  const prodDoc = await Prod.findOne({ name: analog.prodName })
-    .select("title")
-    .lean();
+  const prodDoc = await Prod.findOne({ name: analog.prodName }).select("title").lean();
   const producerName = (prodDoc?.title ?? "").trim() || null;
 
-  const konkDoc = await Konk.findOne({ name: analog.konkName })
-    .select("title recountDays")
-    .lean();
+  const konkDoc = await Konk.findOne({ name: analog.konkName }).select("title recountDays").lean();
   const competitorTitle = (konkDoc?.title ?? "").trim() || null;
 
   // Загружаем документы срезов конкурента за диапазон
@@ -85,11 +77,7 @@ export async function getAnalogBtradeComparisonRangeUtil(
     analogByDate.set(normalizedDate.getTime(), item);
   }
 
-  const btradePoints = await loadPointsForArtikulsRange(
-    [artikulKey],
-    dateFrom,
-    dateTo,
-  );
+  const btradePoints = await loadPointsForArtikulsRange([artikulKey], dateFrom, dateTo);
   const btradeByDate = new Map<number, IBtradeSliceDataItem>();
   for (const point of btradePoints) {
     btradeByDate.set(toSliceDate(point.date).getTime(), point.item);
@@ -125,4 +113,3 @@ export async function getAnalogBtradeComparisonRangeUtil(
     recountDays: (konkDoc?.recountDays ?? []).map(String),
   };
 }
-

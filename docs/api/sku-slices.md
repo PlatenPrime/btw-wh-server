@@ -342,11 +342,11 @@
 
 **Тело:**
 
-| Поле | Тип | Обязательно | Описание |
-|------|-----|-------------|----------|
-| dateFrom | string | да | YYYY-MM-DD, UTC-сутки, inclusive |
-| dateTo | string | да | YYYY-MM-DD, inclusive, не раньше dateFrom; диапазон ≤ 31 день |
-| apply | boolean | нет, default false | true — запись в SkuSliceMonth и rollup; false — dry-run |
+| Поле     | Тип     | Обязательно        | Описание                                                      |
+| -------- | ------- | ------------------ | ------------------------------------------------------------- |
+| dateFrom | string  | да                 | YYYY-MM-DD, UTC-сутки, inclusive                              |
+| dateTo   | string  | да                 | YYYY-MM-DD, inclusive, не раньше dateFrom; диапазон ≤ 31 день |
+| apply    | boolean | нет, default false | true — запись в SkuSliceMonth и rollup; false — dry-run       |
 
 **Ответ 202:** как `POST /api/apitasks` (`message`, `data.taskId`, `data.kind`, `data.status`, `data.pollIntervalMs`, …).
 

@@ -6,12 +6,12 @@ Shared domain-модуль без HTTP и cron. Общая логика отчё
 
 ## Содержимое
 
-| Область | Назначение |
-|---------|------------|
-| `schemas/` | Общие Zod-схемы: `artikul`, диапазоны дат |
-| `utils/coalesceBtradeSliceItemsForReporting` | Forward-fill `-1` для quantity/price |
-| `utils/loadArtBtradeSliceSeries` | Загрузка рядов Btrade из `btrade_slice_months` по artikul с warm day |
-| `utils/buildArtStockExcel`, `buildArtSalesExcel` | Сборка XLSX по одному артикулу |
+| Область                                          | Назначение                                                           |
+| ------------------------------------------------ | -------------------------------------------------------------------- |
+| `schemas/`                                       | Общие Zod-схемы: `artikul`, диапазоны дат                            |
+| `utils/coalesceBtradeSliceItemsForReporting`     | Forward-fill `-1` для quantity/price                                 |
+| `utils/loadArtBtradeSliceSeries`                 | Загрузка рядов Btrade из `btrade_slice_months` по artikul с warm day |
+| `utils/buildArtStockExcel`, `buildArtSalesExcel` | Сборка XLSX по одному артикулу                                       |
 
 ## Связи
 

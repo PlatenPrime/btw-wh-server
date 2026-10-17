@@ -36,7 +36,7 @@ describe("parsePackPrice", () => {
     expect(
       parsePackPrice({
         embedded_attributes: { price_without_reduction: "12,5" },
-      })
+      }),
     ).toBe(12.5);
   });
 
@@ -44,7 +44,7 @@ describe("parsePackPrice", () => {
     expect(
       parsePackPrice({
         embedded_attributes: { price: "8" },
-      })
+      }),
     ).toBe(8);
     expect(parsePackPrice({ price: 7 })).toBe(7);
   });
@@ -55,8 +55,8 @@ describe("resolvePerfectCartDeleteIds", () => {
     expect(
       resolvePerfectCartDeleteIds(
         { id_product: 12115, id_product_attribute: 3651, id_customization: 3 },
-        { idProduct: "1", idProductAttribute: "2", idCustomization: "0" }
-      )
+        { idProduct: "1", idProductAttribute: "2", idCustomization: "0" },
+      ),
     ).toEqual({
       idProduct: "12115",
       idProductAttribute: "3651",
@@ -82,8 +82,8 @@ describe("resolvePerfectCartDeleteIds", () => {
     expect(
       resolvePerfectCartDeleteIds(
         { id_product: "  ", id_product_attribute: "", id_customization: "" },
-        fallback
-      )
+        fallback,
+      ),
     ).toEqual(fallback);
   });
 });

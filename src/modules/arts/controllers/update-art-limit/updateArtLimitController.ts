@@ -4,10 +4,7 @@ import { updateArtLimitUtil } from "./utils/updateArtLimitUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
-export const updateArtLimitController = async (
-  req: Request,
-  res: Response
-) => {
+export const updateArtLimitController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { limit } = req.body;
@@ -17,7 +14,7 @@ export const updateArtLimitController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -55,4 +52,3 @@ export const updateArtLimitController = async (
     }
   }
 };
-

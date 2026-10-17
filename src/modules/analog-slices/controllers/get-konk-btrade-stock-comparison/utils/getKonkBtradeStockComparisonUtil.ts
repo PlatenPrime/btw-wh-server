@@ -24,8 +24,7 @@ export interface KonkBtradeStockComparisonData {
 }
 
 export type GetKonkBtradeStockComparisonResult =
-  | { ok: true; data: KonkBtradeStockComparisonData }
-  | { ok: false };
+  { ok: true; data: KonkBtradeStockComparisonData } | { ok: false };
 
 export async function getKonkBtradeStockComparisonUtil(
   input: GetKonkBtradeStockComparisonInput,
@@ -75,9 +74,7 @@ export async function getKonkBtradeStockComparisonUtil(
       : Math.round((diffCompetitorStock / firstCompetitor) * 100 * 100) / 100;
 
   const diffBtradeStockPct =
-    firstBtrade === 0
-      ? null
-      : Math.round((diffBtradeStock / firstBtrade) * 100 * 100) / 100;
+    firstBtrade === 0 ? null : Math.round((diffBtradeStock / firstBtrade) * 100 * 100) / 100;
 
   return {
     ok: true,

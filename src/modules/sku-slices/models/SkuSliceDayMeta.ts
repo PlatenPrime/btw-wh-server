@@ -1,9 +1,6 @@
 import { Document, Model, Schema, Types } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
-import type {
-  ISkuSliceDayRunStats,
-  ISkuSliceRotationMeta,
-} from "./skuSliceTypes.js";
+import type { ISkuSliceDayRunStats, ISkuSliceRotationMeta } from "./skuSliceTypes.js";
 
 /**
  * Observability дневного прогона среза конкурента: meta/stats без точек stock/price.
@@ -53,9 +50,8 @@ const skuSliceDayMetaSchema = new Schema<ISkuSliceDayMeta>(
 
 skuSliceDayMetaSchema.index({ konkName: 1, date: 1 }, { unique: true });
 
-export const SkuSliceDayMeta: Model<ISkuSliceDayMeta> =
-  getOrCreateModel<ISkuSliceDayMeta>(
-    "SkuSliceDayMeta",
-    skuSliceDayMetaSchema,
-    "sku_slice_day_metas",
-  );
+export const SkuSliceDayMeta: Model<ISkuSliceDayMeta> = getOrCreateModel<ISkuSliceDayMeta>(
+  "SkuSliceDayMeta",
+  skuSliceDayMetaSchema,
+  "sku_slice_day_metas",
+);

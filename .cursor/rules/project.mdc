@@ -248,8 +248,11 @@ modules/<name>/
 
 - `npm run dev` - разработка с hot reload
 - `npm run build` - компиляция TypeScript
+- `npm run format` - Prettier по репозиторию
+- `npm run lint` - ESLint
 - `npm run test` - запуск тестов
 - `npm run test:coverage` - покрытие кода тестами
+- `npm run ci` - format:check, lint, test:run, build
 
 ### Структура файлов
 

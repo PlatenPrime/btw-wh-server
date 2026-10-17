@@ -11,17 +11,14 @@ describe("checkUsernameAvailableForUpdateUtil", () => {
     const user = await createTestUser({ username: `user1-${Date.now()}` });
     const available = await checkUsernameAvailableForUpdateUtil(
       user._id.toString(),
-      "nonexistent-username"
+      "nonexistent-username",
     );
     expect(available).toBe(true);
   });
 
   it("возвращает true если username совпадает с текущим пользователем", async () => {
     const user = await createTestUser({ username: `myuser-${Date.now()}` });
-    const available = await checkUsernameAvailableForUpdateUtil(
-      user._id.toString(),
-      user.username
-    );
+    const available = await checkUsernameAvailableForUpdateUtil(user._id.toString(), user.username);
     expect(available).toBe(true);
   });
 
@@ -30,7 +27,7 @@ describe("checkUsernameAvailableForUpdateUtil", () => {
     const user2 = await createTestUser({ username: `user2-${Date.now()}` });
     const available = await checkUsernameAvailableForUpdateUtil(
       user1._id.toString(),
-      user2.username
+      user2.username,
     );
     expect(available).toBe(false);
   });

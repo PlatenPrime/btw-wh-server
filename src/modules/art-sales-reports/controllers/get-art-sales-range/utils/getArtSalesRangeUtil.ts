@@ -5,9 +5,7 @@ import {
 } from "../../../../art-reporting/utils/loadArtBtradeSliceSeries.js";
 import type { GetArtSalesRangeInput } from "../schemas/getArtSalesRangeSchema.js";
 
-export type GetArtSalesRangeResult =
-  | { ok: true; data: ArtBtradeSalesPoint[] }
-  | { ok: false };
+export type GetArtSalesRangeResult = { ok: true; data: ArtBtradeSalesPoint[] } | { ok: false };
 
 export async function getArtSalesRangeUtil(
   input: GetArtSalesRangeInput,

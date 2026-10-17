@@ -10,10 +10,7 @@ const HTML_CSRF_PATTERNS = [
 /**
  * Значение cookie из заголовка `Cookie` (`a=1; b=2`).
  */
-export function getCookieValue(
-  cookieHeader: string,
-  name: string
-): string | undefined {
+export function getCookieValue(cookieHeader: string, name: string): string | undefined {
   const parts = cookieHeader.split(";");
   for (const part of parts) {
     const pair = part.trim();
@@ -29,10 +26,7 @@ export function getCookieValue(
 /**
  * CSRF для `x-csrftoken`: сначала HTML (meta / JSON), иначе cookie `csrf_token_company_site`.
  */
-export function extractPromUaCsrfToken(
-  html: string,
-  cookieHeader: string
-): string | undefined {
+export function extractPromUaCsrfToken(html: string, cookieHeader: string): string | undefined {
   for (const pattern of HTML_CSRF_PATTERNS) {
     const match = html.match(pattern);
     const token = match?.[1]?.trim();

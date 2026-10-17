@@ -14,5 +14,3 @@ describe("getCompleteAskActionUtil", () => {
     expect(action).toBe("2025-01-01 12:00 Solver: ВИКОНАВ запит");
   });
 });
-
-

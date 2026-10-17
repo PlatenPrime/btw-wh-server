@@ -8,24 +8,18 @@ import { Zone } from "../../zones/models/Zone.js";
 import { Seg } from "../models/Seg.js";
 
 const getAdminAuthHeader = () => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role: "ADMIN" },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role: "ADMIN" }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
 const getUserAuthHeader = () => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role: "USER" },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role: "USER" }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -51,10 +45,7 @@ describe("Segs Router Integration", () => {
   });
 
   it("GET /api/segs returns 403 for non-admin user", async () => {
-    await request(app)
-      .get("/api/segs")
-      .set(getUserAuthHeader())
-      .expect(403);
+    await request(app).get("/api/segs").set(getUserAuthHeader()).expect(403);
   });
 
   it("GET /api/segs returns all segments for admin", async () => {
@@ -67,10 +58,7 @@ describe("Segs Router Integration", () => {
       zones: [],
     });
 
-    const response = await request(app)
-      .get("/api/segs")
-      .set(getAdminAuthHeader())
-      .expect(200);
+    const response = await request(app).get("/api/segs").set(getAdminAuthHeader()).expect(200);
 
     expect(response.body.exists).toBe(true);
     expect(response.body.message).toBe("Segments retrieved successfully");
@@ -146,10 +134,7 @@ describe("Segs Router Integration", () => {
       zones: [{ _id: zone._id, title: zone.title }],
     });
 
-    await Zone.updateOne(
-      { _id: zone._id },
-      { $set: { "seg.id": seg._id, sector: seg.sector } }
-    );
+    await Zone.updateOne({ _id: zone._id }, { $set: { "seg.id": seg._id, sector: seg.sector } });
 
     const response = await request(app)
       .get(`/api/segs/${seg._id.toString()}/zones`)

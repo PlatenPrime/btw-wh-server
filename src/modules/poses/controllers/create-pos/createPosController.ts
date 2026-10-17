@@ -13,21 +13,12 @@ export const createPosController = async (req: Request, res: Response) => {
     // 1. Валидация
     const parseResult = createPosSchema.safeParse(req.body);
     if (!parseResult.success) {
-      res.status(400).json({ error: parseResult.error.errors });
+      res.status(400).json({ error: parseResult.error.issues });
       return;
     }
 
-    const {
-      palletId,
-      rowId,
-      artikul,
-      nameukr,
-      quant,
-      boxes,
-      date,
-      sklad,
-      comment,
-    } = parseResult.data;
+    const { palletId, rowId, artikul, nameukr, quant, boxes, date, sklad, comment } =
+      parseResult.data;
 
     // 2. Оркестрация в транзакции
     let createdPos: any = null;
@@ -82,9 +73,7 @@ export const createPosController = async (req: Request, res: Response) => {
       } else if (error instanceof Error && error.message === "Row not found") {
         res.status(404).json({ error: "Row not found" });
       } else {
-        res
-          .status(500)
-          .json({ error: "Failed to create position", details: error });
+        res.status(500).json({ error: "Failed to create position", details: error });
       }
     }
   } finally {

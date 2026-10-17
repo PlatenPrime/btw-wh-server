@@ -11,10 +11,7 @@ export type PerfectGroupPageProduct = {
   imageUrl: string;
 };
 
-function pickImageUrl(
-  $img: BrowserCheerio,
-  currentPageUrl: string
-): string | null {
+function pickImageUrl($img: BrowserCheerio, currentPageUrl: string): string | null {
   const full =
     $img.attr("data-full-size-image-url")?.trim() ??
     $img.attr("data-lzl-src")?.trim() ??
@@ -32,13 +29,11 @@ function pickImageUrl(
  */
 export function parsePerfectGroupListingProducts(
   $: cheerio.CheerioAPI,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, PerfectGroupPageProduct> {
   const result = new Map<string, PerfectGroupPageProduct>();
 
-  $(
-    "article.product-miniature.js-product-miniature[data-id-product]"
-  ).each((_, el) => {
+  $("article.product-miniature.js-product-miniature[data-id-product]").each((_, el) => {
     const $card = $(el);
     const $link = $card.find("a.thumbnail.product-thumbnail").first();
     const href = $link.attr("href")?.trim() ?? "";
@@ -49,10 +44,7 @@ export function parsePerfectGroupListingProducts(
     if (!productId) return;
 
     const $img = $link.find("img").first();
-    const rawTitle =
-      $img.attr("alt")?.trim() ||
-      $img.attr("title")?.trim() ||
-      "";
+    const rawTitle = $img.attr("alt")?.trim() || $img.attr("title")?.trim() || "";
     const title = decodeHtmlEntities(rawTitle).replace(/\s+/g, " ").trim();
     if (!title) return;
 

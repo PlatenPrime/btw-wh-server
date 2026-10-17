@@ -3,10 +3,9 @@ import { variantsPaginationQuerySchema } from "./variantsPaginationQuerySchema.j
 
 export const getVariantsQuerySchema = z
   .object({
-  konkName: z.string().optional(),
-  prodName: z.string().optional(),
+    konkName: z.string().optional(),
+    prodName: z.string().optional(),
   })
   .merge(variantsPaginationQuerySchema);
 
 export type GetVariantsQuery = z.infer<typeof getVariantsQuerySchema>;
-

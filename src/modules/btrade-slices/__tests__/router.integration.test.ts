@@ -8,23 +8,17 @@ import app from "../../../test/utils/testApp.js";
 import { seedBtradeSliceMonthDay } from "../utils/seedBtradeSliceMonthDay.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
 describe("Btrade slices router integration", () => {
   describe("GET /api/btrade-slices", () => {
     it("401 without auth token", async () => {
-      await request(app)
-        .get("/api/btrade-slices")
-        .query({ date: "2025-03-01" })
-        .expect(401);
+      await request(app).get("/api/btrade-slices").query({ date: "2025-03-01" }).expect(401);
     });
 
     it("403 for USER role", async () => {
@@ -100,9 +94,7 @@ describe("Btrade slices router integration", () => {
         .query({ dateFrom: "2026-03-01", dateTo: "2026-03-01" })
         .expect(200);
 
-      expect(response.body.data).toEqual([
-        { date: d1.toISOString(), quantity: 4, price: 99 },
-      ]);
+      expect(response.body.data).toEqual([{ date: d1.toISOString(), quantity: 4, price: 99 }]);
     });
   });
 });

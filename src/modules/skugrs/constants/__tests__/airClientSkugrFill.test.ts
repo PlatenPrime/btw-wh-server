@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  AIR_CLIENT_SKUGR_KONK,
-  AIR_CLIENT_SKUGR_PRODUCTS_MAX,
-} from "../airClientSkugrFill.js";
+import { AIR_CLIENT_SKUGR_KONK, AIR_CLIENT_SKUGR_PRODUCTS_MAX } from "../airClientSkugrFill.js";
 
 describe("airClientSkugrFill constants", () => {
   it("pins konk and products cap", () => {

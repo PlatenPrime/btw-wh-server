@@ -12,4 +12,3 @@ export const getPalletDataUtil = (pallet: IPallet) => {
     isDef: pallet.isDef,
   };
 };
-

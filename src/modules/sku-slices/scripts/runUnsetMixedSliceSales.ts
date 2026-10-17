@@ -15,9 +15,7 @@ const DOC_LOG_EVERY = 25;
  *
  * npx tsx src/modules/sku-slices/scripts/runUnsetMixedSliceSales.ts --from YYYY-MM-DD --to YYYY-MM-DD [--konk name] [--apply]
  */
-export async function executeUnsetMixedSliceSalesCli(
-  argv: string[],
-): Promise<{
+export async function executeUnsetMixedSliceSalesCli(argv: string[]): Promise<{
   apply: boolean;
   skuDocsTouched: number;
   btradeDocsTouched: number;
@@ -39,18 +37,14 @@ export async function executeUnsetMixedSliceSalesCli(
     apply: args.apply,
     onProgress: (info) => {
       if (info.event === "phase-start") {
-        console.log(
-          `[unset-mixed-sales] ${info.phase}: found ${info.total} docs, scanning…`,
-        );
+        console.log(`[unset-mixed-sales] ${info.phase}: found ${info.total} docs, scanning…`);
         return;
       }
       const isEdge = info.scanned === 1 || info.scanned === info.total;
       const isStep = info.scanned % DOC_LOG_EVERY === 0;
       if (!isEdge && !isStep) return;
       const who =
-        info.phase === "sku"
-          ? `${info.konkName ?? "?"} ${info.day ?? "?"}`
-          : (info.day ?? "?");
+        info.phase === "sku" ? `${info.konkName ?? "?"} ${info.day ?? "?"}` : (info.day ?? "?");
       console.log(
         `[unset-mixed-sales] ${info.phase} ${info.scanned}/${info.total}` +
           ` touched=${info.touched} ${who}`,
@@ -72,9 +66,7 @@ export async function executeUnsetMixedSliceSalesCli(
   return payload;
 }
 
-export async function runUnsetMixedSliceSalesConnected(
-  argv: string[],
-): Promise<void> {
+export async function runUnsetMixedSliceSalesConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executeUnsetMixedSliceSalesCli(argv);

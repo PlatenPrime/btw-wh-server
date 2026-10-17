@@ -8,10 +8,7 @@ import {
   parseDojdevikTitleFromDom,
 } from "../parseDojdevikPackagePriceFromDom.js";
 
-const fixturesDir = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../../../sku-pages"
-);
+const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), "../../../sku-pages");
 
 describe("parseDojdevikPackagePriceFromDom", () => {
   it("reads package price from sku-page fixture", () => {
@@ -28,9 +25,7 @@ describe("parseDojdevikPackagePriceFromDom", () => {
   });
 
   it("prefers data-qaprice attr over text", () => {
-    const $ = cheerio.load(
-      `<span data-qaid="product_price" data-qaprice="12.5">999</span>`
-    );
+    const $ = cheerio.load(`<span data-qaid="product_price" data-qaprice="12.5">999</span>`);
     expect(parseDojdevikPackagePriceFromDom($)).toBe(12.5);
   });
 

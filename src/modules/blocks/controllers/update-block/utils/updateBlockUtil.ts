@@ -34,9 +34,7 @@ export const updateBlockUtil = async ({
   // Если передан список сегментов, обновить массив segs
   if (updateData.segs !== undefined) {
     // Валидация: проверить существование всех сегментов
-    const segObjectIds = updateData.segs.map(
-      (segId) => new mongoose.Types.ObjectId(segId)
-    );
+    const segObjectIds = updateData.segs.map((segId) => new mongoose.Types.ObjectId(segId));
     const existingSegs = await Seg.find({
       _id: { $in: segObjectIds },
       block: objectId, // Сегменты должны принадлежать этому блоку
@@ -51,11 +49,9 @@ export const updateBlockUtil = async ({
   }
 
   // Обновить блок
-  const updatedBlock = await Block.findByIdAndUpdate(
-    objectId,
-    blockUpdateData,
-    { new: true }
-  ).exec();
+  const updatedBlock = await Block.findByIdAndUpdate(objectId, blockUpdateData, {
+    new: true,
+  }).exec();
 
   if (!updatedBlock) {
     return null;
@@ -63,4 +59,3 @@ export const updateBlockUtil = async ({
 
   return updatedBlock;
 };
-

@@ -255,9 +255,7 @@ describe("fillSkugrSkusFromBrowserUtil", () => {
       skus: [],
     });
 
-    await expect(
-      fillSkugrSkusFromBrowserUtil(skugr._id.toString())
-    ).rejects.toMatchObject({
+    await expect(fillSkugrSkusFromBrowserUtil(skugr._id.toString())).rejects.toMatchObject({
       name: "ServerSkugrFillDisabledError",
       code: "CLIENT_INGEST_REQUIRED",
     });

@@ -2,8 +2,8 @@ import { z } from "zod";
 
 const optionalBooleanQuery = z
   .union([z.literal("true"), z.literal("false")])
-  .optional()
-  .transform((v) => (v === undefined ? undefined : v === "true"));
+  .transform((v) => v === "true")
+  .optional();
 
 export const getAllGraboSkusQuerySchema = z.object({
   search: z.string().optional(),

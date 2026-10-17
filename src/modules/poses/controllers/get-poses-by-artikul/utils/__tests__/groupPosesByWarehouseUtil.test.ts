@@ -20,10 +20,7 @@ describe("groupPosesByWarehouseUtil", () => {
   });
 
   it("обрабатывает регистр склада", () => {
-    const poses = [
-      { sklad: "POGRebi" } as any,
-      { sklad: "MeReZhI" } as any,
-    ];
+    const poses = [{ sklad: "POGRebi" } as any, { sklad: "MeReZhI" } as any];
 
     const result = groupPosesByWarehouseUtil(poses);
 
@@ -39,4 +36,3 @@ describe("groupPosesByWarehouseUtil", () => {
     expect(result.other).toEqual([]);
   });
 });
-

@@ -9,11 +9,7 @@ import { buildKonkBtradeComparisonExcel } from "../../../analog-slices/controlle
 import { getKonkBtradeComparisonRangeUtil } from "../../../analog-slices/controllers/get-konk-btrade-comparison-excel/utils/getKonkBtradeComparisonRangeUtil.js";
 import { getKonkBtradeSalesComparisonExcelSchema } from "../../../analog-slices/controllers/get-konk-btrade-sales-comparison-excel/schemas/getKonkBtradeSalesComparisonExcelSchema.js";
 import { buildSalesComparisonExcel } from "../../../analog-slices/controllers/get-konk-btrade-sales-comparison-excel/utils/buildSalesComparisonExcel.js";
-import {
-  failExcelJobRun,
-  okExcelJobRun,
-  type ExcelJobKindRunner,
-} from "../excelJobRunTypes.js";
+import { failExcelJobRun, okExcelJobRun, type ExcelJobKindRunner } from "../excelJobRunTypes.js";
 
 export const runAnalogComparison: ExcelJobKindRunner = async (params, options) => {
   const parsed = getAnalogBtradeComparisonExcelSchema.safeParse(params);
@@ -38,10 +34,7 @@ export const runAnalogComparison: ExcelJobKindRunner = async (params, options) =
   return okExcelJobRun(built.buffer, built.fileName);
 };
 
-export const runAnalogSalesComparison: ExcelJobKindRunner = async (
-  params,
-  options,
-) => {
+export const runAnalogSalesComparison: ExcelJobKindRunner = async (params, options) => {
   const parsed = getAnalogSalesComparisonExcelSchema.safeParse(params);
   if (!parsed.success) {
     return failExcelJobRun("Validation error");
@@ -65,10 +58,7 @@ export const runAnalogSalesComparison: ExcelJobKindRunner = async (
   return okExcelJobRun(built.buffer, built.fileName);
 };
 
-export const runKonkBtradeComparison: ExcelJobKindRunner = async (
-  params,
-  options,
-) => {
+export const runKonkBtradeComparison: ExcelJobKindRunner = async (params, options) => {
   const parsed = getKonkBtradeComparisonExcelSchema.safeParse(params);
   if (!parsed.success) {
     return failExcelJobRun("Validation error");
@@ -88,10 +78,7 @@ export const runKonkBtradeComparison: ExcelJobKindRunner = async (
   return okExcelJobRun(built.buffer, built.fileName);
 };
 
-export const runKonkBtradeSalesComparison: ExcelJobKindRunner = async (
-  params,
-  options,
-) => {
+export const runKonkBtradeSalesComparison: ExcelJobKindRunner = async (params, options) => {
   const parsed = getKonkBtradeSalesComparisonExcelSchema.safeParse(params);
   if (!parsed.success) {
     return failExcelJobRun("Validation error");

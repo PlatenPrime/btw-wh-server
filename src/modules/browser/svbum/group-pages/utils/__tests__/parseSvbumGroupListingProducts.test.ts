@@ -48,7 +48,7 @@ describe("parseSvbumGroupListingProducts", () => {
         href: "/povitryani-kuli/lateksni-kulki/item-a",
         title: "Balloon Set",
         imageSrc: "/image/a.webp",
-      })
+      }),
     );
     const $ = cheerio.load(html);
     const result = parseSvbumGroupListingProducts($, BASE);
@@ -69,7 +69,7 @@ describe("parseSvbumGroupListingProducts", () => {
         href: "https://sviatobum.ua/p/1",
         title: "Кульки 5&quot; пастель",
         imageSrc: "https://sviatobum.ua/img/1.webp",
-      })
+      }),
     );
     const $ = cheerio.load(html);
     const result = parseSvbumGroupListingProducts($, BASE);
@@ -85,7 +85,7 @@ describe("parseSvbumGroupListingProducts", () => {
         title: "Sold out balloon",
         imageSrc: "https://sviatobum.ua/img/oos.webp",
         hasOptions: false,
-      })
+      }),
     );
     const $ = cheerio.load(html);
     const result = parseSvbumGroupListingProducts($, BASE);
@@ -152,7 +152,7 @@ describe("parseSvbumGroupListingProducts", () => {
           href: "https://sviatobum.ua/p/second",
           title: "Second",
           imageSrc: "https://sviatobum.ua/img/b.webp",
-        })
+        }),
     );
     const $ = cheerio.load(html);
     const result = parseSvbumGroupListingProducts($, BASE);

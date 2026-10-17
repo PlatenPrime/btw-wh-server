@@ -6,15 +6,12 @@ import { getBtradeSliceUtil } from "./utils/getBtradeSliceUtil.js";
  * @desc    Срез Btrade по дате (пагинация, строки с маппингом на Art)
  * @route   GET /api/btrade-slices?date=&page=&limit=&isInvalid=
  */
-export const getBtradeSliceController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getBtradeSliceController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getBtradeSliceQuerySchema.safeParse(req.query);
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

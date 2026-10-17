@@ -27,15 +27,12 @@ type GetArtLeanBase = {
 
 export type GetArtUtilResult = GetArtLeanBase & { prod: ArtProdEmbed | null };
 
-export const getArtUtil = async (
-  artikul: string
-): Promise<GetArtUtilResult | null> => {
+export const getArtUtil = async (artikul: string): Promise<GetArtUtilResult | null> => {
   const art = await Art.findOne({ artikul }).lean();
   if (!art) return null;
 
   let prod: ArtProdEmbed | null = null;
-  const prodName =
-    typeof art.prodName === "string" ? art.prodName.trim() : "";
+  const prodName = typeof art.prodName === "string" ? art.prodName.trim() : "";
   if (prodName) {
     const doc = await Prod.findOne({ name: prodName })
       .select("name title imageUrl")

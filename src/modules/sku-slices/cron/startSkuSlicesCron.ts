@@ -50,13 +50,8 @@ export function startSkuSlicesCron(): CronJob {
 
         log.info({ konkCount: konkNames.length }, "starting sku slices");
         if (excludedFromData.length > 0) {
-          log.info(
-            { excludedCompetitors: excludedFromData },
-            "excluded competitors"
-          );
-          await sendCronAnalyticsReport(
-            formatSkuSlicesExcludedReport(excludedFromData)
-          );
+          log.info({ excludedCompetitors: excludedFromData }, "excluded competitors");
+          await sendCronAnalyticsReport(formatSkuSlicesExcludedReport(excludedFromData));
         }
 
         const sliceDate = toNextKyivSliceDate(new Date());
@@ -73,7 +68,7 @@ export function startSkuSlicesCron(): CronJob {
             };
             await sendCronAnalyticsReport(formatSkuKonkSliceReport(stats));
             return stats;
-          })
+          }),
         );
         log.info({ results }, "sku slices completed");
         await runSkuSlicePostCorrectionsUtil({
@@ -85,13 +80,13 @@ export function startSkuSlicesCron(): CronJob {
             onBalunError: async (error) => {
               log.error({ err: error }, "balun fake stock correction failed");
               await sendCronAnalyticsReport(
-                formatCronErrorReport("Balun fake stock correction", error)
+                formatCronErrorReport("Balun fake stock correction", error),
               );
             },
             onSvbumError: async (error) => {
               log.error({ err: error }, "svbum fake stock correction failed");
               await sendCronAnalyticsReport(
-                formatCronErrorReport("Svbum fake stock correction", error)
+                formatCronErrorReport("Svbum fake stock correction", error),
               );
             },
             onPackFlipSuccess: async (review) => {
@@ -100,10 +95,7 @@ export function startSkuSlicesCron(): CronJob {
             onPackFlipError: async (konkName, reviewError) => {
               log.error({ err: reviewError, konkName }, "pack-flip review failed");
               await sendCronAnalyticsReport(
-                formatCronErrorReport(
-                  `Pack-flip review (${konkName})`,
-                  reviewError
-                )
+                formatCronErrorReport(`Pack-flip review (${konkName})`, reviewError),
               );
             },
           },
@@ -115,7 +107,7 @@ export function startSkuSlicesCron(): CronJob {
     },
     null,
     true,
-    "Europe/Kiev"
+    "Europe/Kiev",
   );
 
   log.info({ schedule: "0 0 20 * * *", timezone: "Europe/Kiev" }, "cron started");

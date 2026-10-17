@@ -30,14 +30,8 @@ import { loadSlicedSkusForKonk } from "./loadSlicedSkusForKonk.js";
 import { filterSlicedSkusForRotation } from "./filterSlicedSkusForRotation.js";
 import { isSkuSliceDataKeyFilled } from "./isSkuSliceDataKeyFilled.js";
 import type { ISkuSliceRotationMeta } from "../models/skuSliceTypes.js";
-import {
-  ensureSkuSliceDayMeta,
-  upsertSkuSliceDayMeta,
-} from "./skuSliceDayMetaStore.js";
-import {
-  loadDayPointsForProductIds,
-  upsertDayPoint,
-} from "./skuSliceMonthStore.js";
+import { ensureSkuSliceDayMeta, upsertSkuSliceDayMeta } from "./skuSliceDayMetaStore.js";
+import { loadDayPointsForProductIds, upsertDayPoint } from "./skuSliceMonthStore.js";
 
 type SliceCounters = {
   count: number;
@@ -50,17 +44,9 @@ type SlicedSkuRow = {
   productId?: string;
 };
 
-type ProcessOutcome =
-  | "ok"
-  | "origin_blocked"
-  | "unsupported"
-  | "consecutive_invalid";
+type ProcessOutcome = "ok" | "origin_blocked" | "unsupported" | "consecutive_invalid";
 
-async function fetchSkuStockWithRetry(
-  konkName: string,
-  productKey: string,
-  skuId: string
-) {
+async function fetchSkuStockWithRetry(konkName: string, productKey: string, skuId: string) {
   const log = createLogger({ module: "sku-slices", konkName });
   const delays = [1000, 3000, 5000];
 
@@ -81,7 +67,7 @@ async function fetchSkuStockWithRetry(
 
       log.warn(
         { productKey, attempt, maxAttempts: delays.length, err: msg },
-        "sku stock fetch attempt failed"
+        "sku stock fetch attempt failed",
       );
 
       if (attempt < delays.length) {
@@ -95,9 +81,10 @@ async function fetchSkuStockWithRetry(
   throw lastError ?? new Error("Unknown error in fetchSkuStockWithRetry");
 }
 
-function pauseRangeForKind(
-  kind: Exclude<AirSkuSlicePauseKind, "none">
-): { minMs: number; maxMs: number } {
+function pauseRangeForKind(kind: Exclude<AirSkuSlicePauseKind, "none">): {
+  minMs: number;
+  maxMs: number;
+} {
   if (kind === "block") {
     return {
       minMs: AIR_SKU_SLICE_BLOCK_PAUSE_MIN_MS,
@@ -126,10 +113,7 @@ async function delayBetweenSkuFetches(args: {
   const fetchesInChunk = args.fetchesInChunk ?? listIndex + 1;
 
   if (isAir) {
-    const pauseKind = resolveAirSkuSlicePauseKind(
-      fetchesInChunk,
-      listIndex >= listTotal - 1
-    );
+    const pauseKind = resolveAirSkuSlicePauseKind(fetchesInChunk, listIndex >= listTotal - 1);
     // Граница чанка: inter-chunk pause делает runAirSkuSliceWithChunks — без jitter.
     if (
       pauseKind === "none" &&
@@ -147,10 +131,7 @@ async function delayBetweenSkuFetches(args: {
     return;
   }
 
-  const pauseKind = resolveAirSkuSlicePauseKind(
-    fetchesInChunk,
-    listIndex >= listTotal - 1
-  );
+  const pauseKind = resolveAirSkuSlicePauseKind(fetchesInChunk, listIndex >= listTotal - 1);
   if (pauseKind === "none") {
     return;
   }
@@ -171,14 +152,14 @@ async function delayBetweenSkuFetches(args: {
       invalid: args.counters?.invalid ?? 0,
       errors: args.counters?.errors ?? 0,
     },
-    "air sku slice pause"
+    "air sku slice pause",
   );
 }
 
 function countPendingSkuFetches(
   withPid: SlicedSkuRow[],
   startIndex: number,
-  sliceData: Record<string, unknown>
+  sliceData: Record<string, unknown>,
 ): number {
   let pending = 0;
   for (let i = startIndex; i < withPid.length; i++) {
@@ -207,7 +188,7 @@ async function processOneSkuForSlice(args: {
 
   log.debug(
     { productKey, index: args.listIndex + 1, total: args.listTotal },
-    "processing sku for slice"
+    "processing sku for slice",
   );
 
   try {
@@ -217,9 +198,7 @@ async function processOneSkuForSlice(args: {
       log.warn({ productKey }, "sku slice item invalid");
       if (args.consecutiveInvalid) {
         args.consecutiveInvalid.value += 1;
-        if (
-          args.consecutiveInvalid.value >= AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT
-        ) {
+        if (args.consecutiveInvalid.value >= AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT) {
           const remaining = Math.max(0, args.listTotal - args.listIndex - 1);
           log.error(
             {
@@ -230,7 +209,7 @@ async function processOneSkuForSlice(args: {
               invalid: counters.invalid,
               errors: counters.errors,
             },
-            "consecutive invalid, sku slice aborted"
+            "consecutive invalid, sku slice aborted",
           );
           counters.errors += remaining;
           return "consecutive_invalid";
@@ -245,15 +224,10 @@ async function processOneSkuForSlice(args: {
 
     if (isInvalidSliceStockResult(result)) {
       counters.invalid += 1;
-      log.warn(
-        { productKey, stock: result.stock, price: result.price },
-        "sku slice item invalid"
-      );
+      log.warn({ productKey, stock: result.stock, price: result.price }, "sku slice item invalid");
       if (args.consecutiveInvalid) {
         args.consecutiveInvalid.value += 1;
-        if (
-          args.consecutiveInvalid.value >= AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT
-        ) {
+        if (args.consecutiveInvalid.value >= AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT) {
           const remaining = Math.max(0, args.listTotal - args.listIndex - 1);
           log.error(
             {
@@ -264,7 +238,7 @@ async function processOneSkuForSlice(args: {
               invalid: counters.invalid,
               errors: counters.errors,
             },
-            "consecutive invalid, sku slice aborted"
+            "consecutive invalid, sku slice aborted",
           );
           counters.errors += remaining;
           return "consecutive_invalid";
@@ -291,7 +265,7 @@ async function processOneSkuForSlice(args: {
         },
         isOriginBlockedError(err)
           ? "origin blocked, sku slice aborted"
-          : "unsupported konk for stock fetch, slice aborted"
+          : "unsupported konk for stock fetch, slice aborted",
       );
       counters.errors += args.listTotal - args.listIndex;
       return isOriginBlockedError(err) ? "origin_blocked" : "unsupported";
@@ -303,9 +277,7 @@ async function processOneSkuForSlice(args: {
   }
 }
 
-function isAbortOutcome(
-  outcome: ProcessOutcome
-): outcome is Exclude<ProcessOutcome, "ok"> {
+function isAbortOutcome(outcome: ProcessOutcome): outcome is Exclude<ProcessOutcome, "ok"> {
   return outcome !== "ok";
 }
 
@@ -319,11 +291,7 @@ async function runAirSkuSliceWithChunks(args: {
   const log = createLogger({ module: "sku-slices", konkName });
 
   const productIds = withPid.map((s) => s.productId!.trim());
-  const existingPoints = await loadDayPointsForProductIds(
-    konkName,
-    productIds,
-    sliceDate,
-  );
+  const existingPoints = await loadDayPointsForProductIds(konkName, productIds, sliceDate);
   const sliceData: Record<string, unknown> = { ...existingPoints };
 
   const pendingAtStart = countPendingSkuFetches(withPid, 0, sliceData);
@@ -333,7 +301,7 @@ async function runAirSkuSliceWithChunks(args: {
       pending: pendingAtStart,
       chunkMaxFetches: AIR_SKU_SLICE_CHUNK_MAX_FETCHES,
     },
-    "air sku slice started"
+    "air sku slice started",
   );
 
   let index = 0;
@@ -400,7 +368,7 @@ async function runAirSkuSliceWithChunks(args: {
     chunkIndex += 1;
     const interChunkPauseMs = jitterMs(
       AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS,
-      AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS
+      AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS,
     );
     log.info(
       {
@@ -414,7 +382,7 @@ async function runAirSkuSliceWithChunks(args: {
         invalid: counters.invalid,
         errors: counters.errors,
       },
-      "air sku slice chunk completed"
+      "air sku slice chunk completed",
     );
 
     resetImpitClientCache();
@@ -484,7 +452,7 @@ export type SkuSliceKonkResult = {
 
 export async function runSkuSliceForKonkUtil(
   konkName: string,
-  date: Date
+  date: Date,
 ): Promise<SkuSliceKonkResult> {
   const log = createLogger({ module: "sku-slices", konkName });
   const sliceDate = toSliceDate(date);
@@ -494,16 +462,10 @@ export async function runSkuSliceForKonkUtil(
 
   const counters: SliceCounters = { count: 0, invalid: 0, errors: 0 };
   const total = skus.length;
-  const withPidAll = skus.filter(
-    (s) => (s.productId ?? "").trim() !== ""
-  ) as SlicedSkuRow[];
+  const withPidAll = skus.filter((s) => (s.productId ?? "").trim() !== "") as SlicedSkuRow[];
   counters.invalid += total - withPidAll.length;
 
-  const { skus: withPid, rotation } = filterSlicedSkusForRotation(
-    withPidAll,
-    sliceDate,
-    konkName
-  );
+  const { skus: withPid, rotation } = filterSlicedSkusForRotation(withPidAll, sliceDate, konkName);
 
   let rotationMeta: ISkuSliceRotationMeta | undefined;
   if (rotation) {
@@ -519,11 +481,11 @@ export async function runSkuSliceForKonkUtil(
         dueCount: withPid.length,
         totalSliced: withPidAll.length,
       },
-      "sku slice rotation filter applied"
+      "sku slice rotation filter applied",
     );
   }
 
-  let abortReason: SkuSliceAbortReason | null = null;
+  let abortReason: SkuSliceAbortReason | null;
 
   if (isAirSkuSliceChunkKonk(konkName)) {
     abortReason = await runAirSkuSliceWithChunks({

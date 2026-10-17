@@ -25,9 +25,7 @@ interface SharteAddCartResponse {
  * @param productUrl — URL страницы товара на sharte.net
  * @returns StockInfo; при негативном исходе — объект с stock: -1, price: -1
  */
-export async function getSharteStockData(
-  productUrl: string
-): Promise<StockInfo> {
+export async function getSharteStockData(productUrl: string): Promise<StockInfo> {
   let productId = "";
   try {
     const url = productUrl.trim();
@@ -68,8 +66,7 @@ export async function getSharteStockData(
     const reservedSafe = Number.isNaN(reserved) ? 0 : reserved;
     const available = stock - reservedSafe;
 
-    const price =
-      data["~PRICE"] != null ? Number(data["~PRICE"]) : undefined;
+    const price = data["~PRICE"] != null ? Number(data["~PRICE"]) : undefined;
 
     return {
       id: data.ID ?? productId,

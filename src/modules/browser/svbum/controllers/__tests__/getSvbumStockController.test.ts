@@ -44,9 +44,7 @@ describe("getSvbumStockController", () => {
 
     expect(responseStatus.code).toBe(404);
     expect(responseJson.message).toBe("Товар не найден или данные недоступны");
-    expect(getSvbumStockData).toHaveBeenCalledWith(
-      "https://example.com/product/1"
-    );
+    expect(getSvbumStockData).toHaveBeenCalledWith("https://example.com/product/1");
   });
 
   it("200 returns stock data", async () => {
@@ -66,9 +64,7 @@ describe("getSvbumStockController", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Svbum stock retrieved successfully");
     expect(responseJson.data).toEqual(mockData);
-    expect(getSvbumStockData).toHaveBeenCalledWith(
-      "https://sviatobum.ua/product/2"
-    );
+    expect(getSvbumStockData).toHaveBeenCalledWith("https://sviatobum.ua/product/2");
   });
 
   it("500 when service throws", async () => {

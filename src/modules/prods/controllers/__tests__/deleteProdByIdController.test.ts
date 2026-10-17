@@ -7,21 +7,18 @@ import { deleteProdByIdController } from "../delete-prod-by-id/deleteProdByIdCon
 
 describe("deleteProdByIdController", () => {
   let res: Response;
-  let responseJson: Record<string, unknown>;
   let responseStatus: { code?: number };
 
   beforeEach(async () => {
     await Prod.deleteMany({});
     await Event.deleteMany({});
-    responseJson = {};
     responseStatus = {};
     res = {
       status(code: number) {
         responseStatus.code = code;
         return this;
       },
-      json(data: unknown) {
-        responseJson = data as Record<string, unknown>;
+      json(_data: unknown) {
         return this;
       },
       headersSent: false,

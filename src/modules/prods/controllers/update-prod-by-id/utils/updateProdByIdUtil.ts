@@ -7,9 +7,7 @@ type UpdateProdByIdUtilInput = {
   imageUrl?: string;
 };
 
-export const updateProdByIdUtil = async (
-  input: UpdateProdByIdUtilInput
-): Promise<IProd | null> => {
+export const updateProdByIdUtil = async (input: UpdateProdByIdUtilInput): Promise<IProd | null> => {
   const update: Partial<Pick<IProd, "name" | "title" | "imageUrl">> = {};
   if (input.name !== undefined) update.name = input.name;
   if (input.title !== undefined) update.title = input.title;
@@ -19,10 +17,6 @@ export const updateProdByIdUtil = async (
     return Prod.findById(input.id);
   }
 
-  const prod = await Prod.findByIdAndUpdate(
-    input.id,
-    update,
-    { new: true, runValidators: true }
-  );
+  const prod = await Prod.findByIdAndUpdate(input.id, update, { new: true, runValidators: true });
   return prod;
 };

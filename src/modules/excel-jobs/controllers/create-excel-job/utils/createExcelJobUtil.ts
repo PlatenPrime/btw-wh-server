@@ -44,7 +44,7 @@ export async function createExcelJobUtil(input: {
       ok: false,
       status: 400,
       message: "Validation error",
-      errors: parsedParams.error.errors,
+      errors: parsedParams.error.issues,
     };
   }
 

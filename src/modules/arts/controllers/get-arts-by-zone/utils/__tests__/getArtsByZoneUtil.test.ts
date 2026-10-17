@@ -37,4 +37,3 @@ describe("getArtsByZoneUtil", () => {
     expect(result.every((art) => art.zone === "A1")).toBe(true);
   });
 });
-

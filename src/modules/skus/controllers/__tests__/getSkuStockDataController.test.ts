@@ -7,10 +7,7 @@ vi.mock("../../utils/getSkuStockDataUtil.js", () => ({
   UNSUPPORTED_KONK_CODE: "UNSUPPORTED_KONK",
 }));
 
-import {
-  getSkuStockDataUtil,
-  UNSUPPORTED_KONK_CODE,
-} from "../../utils/getSkuStockDataUtil.js";
+import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE } from "../../utils/getSkuStockDataUtil.js";
 import { getSkuStockDataController } from "../get-sku-stock/getSkuStockDataController.js";
 
 const mockGetStock = vi.mocked(getSkuStockDataUtil);

@@ -158,4 +158,3 @@ describe("getVariantsUtil", () => {
     expect(result.variants.map((v) => v.title)).toEqual(["A", "B", "C"]);
   });
 });
-

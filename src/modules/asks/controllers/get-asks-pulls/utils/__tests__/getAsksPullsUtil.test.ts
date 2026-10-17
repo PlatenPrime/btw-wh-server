@@ -1,15 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-  createTestArt,
-  createTestAsk,
-  createTestPos,
-} from "../../../../../../test/setup.js";
+import { createTestArt, createTestAsk, createTestPos } from "../../../../../../test/setup.js";
 import { getAsksPullsUtil } from "../getAsksPullsUtil.js";
 
 describe("getAsksPullsUtil", () => {
   it("получает позиции для всех активных заявок (new, processing)", async () => {
     // Создаем активные заявки
-    const ask1 = await createTestAsk({
+    await createTestAsk({
       artikul: "ART-1",
       quant: 10,
       pullQuant: 0,
@@ -17,7 +13,7 @@ describe("getAsksPullsUtil", () => {
       sklad: "pogrebi",
     });
 
-    const ask2 = await createTestAsk({
+    await createTestAsk({
       artikul: "ART-2",
       quant: 5,
       pullQuant: 0,
@@ -84,15 +80,13 @@ describe("getAsksPullsUtil", () => {
     const result = await getAsksPullsUtil();
 
     // Проверяем что processing заявки включены в processingAsks
-    const processingAskIds = result.processingAsks.map((ask) =>
-      String(ask._id)
-    );
+    const processingAskIds = result.processingAsks.map((ask) => String(ask._id));
     expect(processingAskIds).toContain(String(askProcessing._id));
     expect(processingAskIds).not.toContain(String(askNew._id));
   });
 
   it("группирует позиции по секторам", async () => {
-    const ask = await createTestAsk({
+    await createTestAsk({
       artikul: "ART-GROUP",
       quant: 10,
       pullQuant: 0,
@@ -152,7 +146,7 @@ describe("getAsksPullsUtil", () => {
   });
 
   it("включает информацию о заявке, artZone и quant в каждую позицию", async () => {
-    const ask = await createTestAsk({
+    await createTestAsk({
       artikul: "ART-WITH-INFO",
       quant: 10,
       pullQuant: 0,
@@ -174,8 +168,7 @@ describe("getAsksPullsUtil", () => {
     const result = await getAsksPullsUtil();
 
     expect(result.response.positionsBySector.length).toBeGreaterThan(0);
-    const firstPosition =
-      result.response.positionsBySector[0].positions[0];
+    const firstPosition = result.response.positionsBySector[0].positions[0];
     expect(firstPosition).toBeDefined();
     expect(firstPosition.askId).toBeDefined();
     expect(firstPosition.askArtikul).toBe("ART-WITH-INFO");
@@ -202,11 +195,9 @@ describe("getAsksPullsUtil", () => {
     const result = await getAsksPullsUtil();
 
     expect(result.response.positionsBySector.length).toBeGreaterThan(0);
-    const firstPosition =
-      result.response.positionsBySector[0].positions[0];
+    const firstPosition = result.response.positionsBySector[0].positions[0];
     expect(firstPosition.artZone).toBeNull();
     expect(firstPosition.quant).toBe(8);
     expect(firstPosition.plannedQuant).toBe(5);
   });
 });
-

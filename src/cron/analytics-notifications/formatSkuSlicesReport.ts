@@ -1,16 +1,10 @@
-import {
-  formatKonkSliceLine,
-  type KonkSliceStats,
-} from "./formatKonkSliceStats.js";
+import { formatKonkSliceLine, type KonkSliceStats } from "./formatKonkSliceStats.js";
 
 export function formatSkuSlicesReport(
   competitors: KonkSliceStats[],
-  excluded: string[] = []
+  excluded: string[] = [],
 ): string {
-  const lines = [
-    "📊 SKU slices — завершено",
-    ...competitors.map(formatKonkSliceLine),
-  ];
+  const lines = ["📊 SKU slices — завершено", ...competitors.map(formatKonkSliceLine)];
 
   if (excluded.length > 0) {
     lines.push(`Пропущено: ${excluded.join(", ")}`);

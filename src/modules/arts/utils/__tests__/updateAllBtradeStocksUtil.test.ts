@@ -18,9 +18,7 @@ describe("updateAllBtradeStocksUtil", () => {
   it("обновляет btradeStock из actualQuantity одним fetch map", async () => {
     await createTestArt({ artikul: "ART-001", zone: "A1" });
     mockGetCachedMap.mockResolvedValue(
-      new Map([
-        ["ART-001", { actualQuantity: 10, sliceQuantity: 12, price: 1 }],
-      ])
+      new Map([["ART-001", { actualQuantity: 10, sliceQuantity: 12, price: 1 }]]),
     );
 
     const result = await updateAllBtradeStocksUtil();

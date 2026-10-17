@@ -74,10 +74,7 @@ describe("scheduleAfterSkuSliceStockMutation", () => {
   });
 
   it("does not infinite-loop when runner fails without new schedules", async () => {
-    const runner = vi
-      .fn()
-      .mockRejectedValueOnce(new Error("boom"))
-      .mockResolvedValue(undefined);
+    const runner = vi.fn().mockRejectedValueOnce(new Error("boom")).mockResolvedValue(undefined);
     setScheduledSkuSliceStockMutationRunnerForTests(runner);
 
     scheduleAfterSkuSliceStockMutation({ konkName: "air", dayD });

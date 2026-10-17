@@ -51,9 +51,11 @@
 Создание новой зоны.
 
 **Запрос:**
+
 - Body: `{ title: string, bar: number, sector?: number }`
 
 **Ответ:**
+
 - 201: `{ message: string, data: Zone }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 409: `{ message: string, duplicateFields?: array }` - зона с такими данными уже существует
@@ -66,6 +68,7 @@
 Получение списка зон с пагинацией и поиском.
 
 **Запрос:**
+
 - Query параметры:
   - `page` (number, опционально, по умолчанию 1) - номер страницы
   - `limit` (number, опционально, по умолчанию 10, максимум 100) - количество элементов на странице
@@ -74,6 +77,7 @@
   - `sortOrder` (string, опционально, по умолчанию "asc") - направление сортировки: "asc", "desc"
 
 **Ответ:**
+
 - 200: `{ message: string, data: Array<Zone>, pagination: { page: number, limit: number, total: number, totalPages: number, hasNext: boolean, hasPrev: boolean } }`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -84,9 +88,11 @@
 Получение зоны по идентификатору.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Zone }`
 - 400: `{ message: string }` - неверный формат ID
 - 404: `{ message: string }` - зона не найдена
@@ -99,9 +105,11 @@
 Получение зоны по названию.
 
 **Запрос:**
+
 - Path параметры: `title` (string)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Zone }`
 - 400: `{ message: string }` - название не указано
 - 404: `{ message: string }` - зона не найдена
@@ -114,9 +122,11 @@
 Получение всех зон блока (через сегменты).
 
 **Запрос:**
+
 - Path параметры: `blockId` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Array<Zone> }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -128,10 +138,12 @@
 Обновление зоны.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 - Body: `{ title?: string, bar?: number, sector?: number }` (все поля опциональны, но хотя бы одно должно быть указано)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Zone }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - зона не найдена
@@ -145,9 +157,11 @@
 Удаление зоны.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Zone }`
 - 400: `{ message: string }` - неверный формат ID
 - 404: `{ message: string }` - зона не найдена
@@ -160,9 +174,11 @@
 Массовое создание или обновление зон.
 
 **Запрос:**
+
 - Body: `{ zones: Array<{ title: string, bar: number }> }` (массив от 1 до 1000 элементов)
 
 **Ответ:**
+
 - 200: `{ message: string, results: { created: number, skipped: number, errors: Array<{ index: number, error: string, data: object }> } }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -193,4 +209,3 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `zones-export`.
   updatedAt: Date;                 // Дата обновления
 }
 ```
-

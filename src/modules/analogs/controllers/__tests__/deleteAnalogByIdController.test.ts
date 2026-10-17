@@ -7,21 +7,18 @@ import { deleteAnalogByIdController } from "../delete-analog-by-id/deleteAnalogB
 
 describe("deleteAnalogByIdController", () => {
   let res: Response;
-  let responseJson: Record<string, unknown>;
   let responseStatus: { code?: number };
 
   beforeEach(async () => {
     await Analog.deleteMany({});
     await Event.deleteMany({});
-    responseJson = {};
     responseStatus = {};
     res = {
       status(code: number) {
         responseStatus.code = code;
         return this;
       },
-      json(data: unknown) {
-        responseJson = data as Record<string, unknown>;
+      json(_data: unknown) {
         return this;
       },
       headersSent: false,

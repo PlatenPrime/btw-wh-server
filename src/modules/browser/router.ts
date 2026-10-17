@@ -12,41 +12,14 @@ import { getDojdevikStockController } from "./dojdevik/controllers/index.js";
 
 const router = Router();
 
-router.get(
-  "/air/stock",
-  asyncHandler(getAirStockController)
-);
-router.get(
-  "/balun/stock",
-  asyncHandler(getBalunStockController)
-);
-router.get(
-  "/perfect/stock",
-  asyncHandler(getPerfectStockController)
-);
-router.get(
-  "/yumi/stock",
-  asyncHandler(getYumiStockController)
-);
-router.get(
-  "/yumin/stock",
-  asyncHandler(getYuminStockController)
-);
-router.get(
-  "/sharte/stock",
-  asyncHandler(getSharteStockController)
-);
-router.get(
-  "/svbum/stock",
-  asyncHandler(getSvbumStockController)
-);
-router.get(
-  "/dojdevik/stock",
-  asyncHandler(getDojdevikStockController)
-);
-router.get(
-  "/sharik/stock/:artikul",
-  asyncHandler(getSharikStockController)
-);
+router.get("/air/stock", asyncHandler(getAirStockController));
+router.get("/balun/stock", asyncHandler(getBalunStockController));
+router.get("/perfect/stock", asyncHandler(getPerfectStockController));
+router.get("/yumi/stock", asyncHandler(getYumiStockController));
+router.get("/yumin/stock", asyncHandler(getYuminStockController));
+router.get("/sharte/stock", asyncHandler(getSharteStockController));
+router.get("/svbum/stock", asyncHandler(getSvbumStockController));
+router.get("/dojdevik/stock", asyncHandler(getDojdevikStockController));
+router.get("/sharik/stock/:artikul", asyncHandler(getSharikStockController));
 
 export default router;

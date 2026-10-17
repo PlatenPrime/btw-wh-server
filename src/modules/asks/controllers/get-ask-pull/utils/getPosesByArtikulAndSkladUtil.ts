@@ -8,7 +8,7 @@ import { IPos, Pos } from "../../../../poses/models/Pos.js";
  */
 export const getPosesByArtikulAndSkladUtil = async (
   artikul: string,
-  sklad: string = "pogrebi"
+  sklad: string = "pogrebi",
 ): Promise<IPos[]> => {
   const poses = await Pos.find({ artikul, sklad, quant: { $gt: 0 } }).exec();
   return poses;

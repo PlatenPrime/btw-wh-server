@@ -70,9 +70,7 @@ const AIR_GROUP_PAGES_PAGE_PROFILE: CompetitorScrapeProfile = {
   requestJitter: { minMs: 2000, maxMs: 4000 },
 };
 
-export const DEFAULT_SCRAPE_PROFILES: Readonly<
-  Record<ScrapeRunKind, CompetitorScrapeProfile>
-> = {
+export const DEFAULT_SCRAPE_PROFILES: Readonly<Record<ScrapeRunKind, CompetitorScrapeProfile>> = {
   skuSlice: {
     requestJitter: DEFAULT_SKU_SLICE_REQUEST_JITTER,
   },
@@ -99,7 +97,7 @@ export const COMPETITOR_SCRAPE_PROFILE_OVERRIDES: Readonly<
 
 function mergeProfile(
   base: CompetitorScrapeProfile,
-  override?: CompetitorScrapeProfile
+  override?: CompetitorScrapeProfile,
 ): CompetitorScrapeProfile {
   if (!override) {
     return base;
@@ -113,14 +111,13 @@ function mergeProfile(
     chunk: override.chunk ?? base.chunk,
     interUnit: override.interUnit ?? base.interUnit,
     interUnitCluster: override.interUnitCluster ?? base.interUnitCluster,
-    consecutiveInvalidAbort:
-      override.consecutiveInvalidAbort ?? base.consecutiveInvalidAbort,
+    consecutiveInvalidAbort: override.consecutiveInvalidAbort ?? base.consecutiveInvalidAbort,
   };
 }
 
 export function resolveScrapeProfile(
   konkName: string,
-  runKind: ScrapeRunKind
+  runKind: ScrapeRunKind,
 ): CompetitorScrapeProfile {
   const key = normalizeCompetitorName(konkName);
   const base = DEFAULT_SCRAPE_PROFILES[runKind];

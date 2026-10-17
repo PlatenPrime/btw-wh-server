@@ -2,17 +2,9 @@ import { Document, Model, Schema, Types } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
 import { IUser } from "../../auth/models/User.js";
 
-export type AskUserData = Pick<
-  IUser,
-  "_id" | "fullname" | "telegram" | "photo"
->;
+export type AskUserData = Pick<IUser, "_id" | "fullname" | "telegram" | "photo">;
 export type AskStatus = "new" | "processing" | "completed" | "rejected";
-export const validAskStatuses: AskStatus[] = [
-  "new",
-  "processing",
-  "completed",
-  "rejected",
-];
+export const validAskStatuses: AskStatus[] = ["new", "processing", "completed", "rejected"];
 
 export type AskEventName = "create" | "complete" | "reject" | "pull";
 
@@ -61,7 +53,7 @@ const askUserDataSchema = new Schema<AskUserData>(
     telegram: { type: String },
     photo: { type: String },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const askEventPalletDataSchema = new Schema<AskEventPalletData>(
@@ -69,7 +61,7 @@ const askEventPalletDataSchema = new Schema<AskEventPalletData>(
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const askEventPullDetailsSchema = new Schema<AskEventPullDetails>(
@@ -78,7 +70,7 @@ const askEventPullDetailsSchema = new Schema<AskEventPullDetails>(
     quant: { type: Number, required: true },
     boxes: { type: Number, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const askEventSchema = new Schema<AskEvent>(
@@ -92,14 +84,11 @@ const askEventSchema = new Schema<AskEvent>(
     date: { type: Date, required: true },
     pullDetails: { type: askEventPullDetailsSchema },
   },
-  { _id: false }
+  { _id: false },
 );
 
 askEventSchema.path("pullDetails").validate({
-  validator: function (
-    this: AskEvent,
-    pullDetails: AskEventPullDetails | undefined
-  ): boolean {
+  validator: function (this: AskEvent, pullDetails: AskEventPullDetails | undefined): boolean {
     if (this.eventName === "pull") {
       return Boolean(pullDetails);
     }
@@ -130,7 +119,7 @@ const askSchema = new Schema<IAsk>(
     pullBox: { type: Number, default: 0 },
     events: { type: [askEventSchema], default: [] },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Ask: Model<IAsk> = getOrCreateModel<IAsk>("Ask", askSchema);

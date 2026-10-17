@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  TELEGRAM_MESSAGE_MAX_CHARS,
-  chunkTelegramMessage,
-} from "../chunkTelegramMessage.js";
+import { TELEGRAM_MESSAGE_MAX_CHARS, chunkTelegramMessage } from "../chunkTelegramMessage.js";
 
 describe("chunkTelegramMessage", () => {
   it("returns the original text when within the limit", () => {

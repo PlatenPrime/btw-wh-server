@@ -6,27 +6,20 @@ import { RoleType } from "../../../constants/roles.js";
 import "../../../test/setup.js";
 import app from "../../../test/utils/testApp.js";
 import { Block } from "../models/Block.js";
-import { Seg } from "../../segs/models/Seg.js";
 import { Zone } from "../../zones/models/Zone.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
 describe("Blocks router integration", () => {
   describe("POST /api/blocks", () => {
     it("401 without auth token", async () => {
-      await request(app)
-        .post("/api/blocks")
-        .send({ title: "Block A" })
-        .expect(401);
+      await request(app).post("/api/blocks").send({ title: "Block A" }).expect(401);
     });
 
     it("403 for USER role", async () => {

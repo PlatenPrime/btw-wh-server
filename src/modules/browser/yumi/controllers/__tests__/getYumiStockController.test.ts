@@ -44,9 +44,7 @@ describe("getYumiStockController", () => {
 
     expect(responseStatus.code).toBe(404);
     expect(responseJson.message).toBe("Товар не найден или данные недоступны");
-    expect(getYumiStockData).toHaveBeenCalledWith(
-      "https://example.com/product/1"
-    );
+    expect(getYumiStockData).toHaveBeenCalledWith("https://example.com/product/1");
   });
 
   it("200 returns stock data", async () => {
@@ -66,9 +64,7 @@ describe("getYumiStockController", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Yumi stock retrieved successfully");
     expect(responseJson.data).toEqual(mockData);
-    expect(getYumiStockData).toHaveBeenCalledWith(
-      "https://example.com/product/2"
-    );
+    expect(getYumiStockData).toHaveBeenCalledWith("https://example.com/product/2");
   });
 
   it("500 when service throws", async () => {
@@ -84,4 +80,3 @@ describe("getYumiStockController", () => {
     expect(responseJson.message).toBe("Server error");
   });
 });
-

@@ -30,15 +30,14 @@ function stringifyCartId(value: unknown): string | null {
 
 export function resolvePerfectCartDeleteIds(
   product: PerfectCartProduct | undefined,
-  fallback: PerfectCartDeleteIds
+  fallback: PerfectCartDeleteIds,
 ): PerfectCartDeleteIds {
   if (!product) return fallback;
   return {
     idProduct: stringifyCartId(product.id_product) ?? fallback.idProduct,
     idProductAttribute:
       stringifyCartId(product.id_product_attribute) ?? fallback.idProductAttribute,
-    idCustomization:
-      stringifyCartId(product.id_customization) ?? fallback.idCustomization,
+    idCustomization: stringifyCartId(product.id_customization) ?? fallback.idCustomization,
   };
 }
 
@@ -58,9 +57,7 @@ export function parsePackPrice(product: PerfectCartProduct): number | null {
   const direct = parseNumberLike(product.price_without_reduction);
   if (direct !== null) return direct;
 
-  const embeddedDirect = parseNumberLike(
-    product.embedded_attributes?.price_without_reduction
-  );
+  const embeddedDirect = parseNumberLike(product.embedded_attributes?.price_without_reduction);
   if (embeddedDirect !== null) return embeddedDirect;
 
   const embeddedText = parseNumberLike(product.embedded_attributes?.price);

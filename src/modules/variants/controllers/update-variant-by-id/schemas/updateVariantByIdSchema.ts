@@ -24,4 +24,3 @@ export const updateVariantByIdSchema = z
   }, "At least one field must be provided for update");
 
 export type UpdateVariantByIdInput = z.infer<typeof updateVariantByIdSchema>;
-

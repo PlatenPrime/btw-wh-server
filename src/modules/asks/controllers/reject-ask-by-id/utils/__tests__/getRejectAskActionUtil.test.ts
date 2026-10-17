@@ -14,5 +14,3 @@ describe("getRejectAskActionUtil", () => {
     expect(s).toBe("2025-01-01 12:00 Solver: ВІДХИЛИВ запит");
   });
 });
-
-

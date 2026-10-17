@@ -12,9 +12,7 @@ export const upsertArtsUtil = async ({ arts }: UpsertArtsUtilInput) => {
 
   const operations = arts.map((art) => {
     // Если маркер не передан явно, используем автоматически сгенерированный
-    const marker = art.marker !== undefined && art.marker !== null 
-      ? art.marker 
-      : currentMarker;
+    const marker = art.marker !== undefined && art.marker !== null ? art.marker : currentMarker;
 
     return {
       updateOne: {
@@ -38,4 +36,3 @@ export const upsertArtsUtil = async ({ arts }: UpsertArtsUtilInput) => {
   const result = await Art.bulkWrite(operations);
   return result;
 };
-

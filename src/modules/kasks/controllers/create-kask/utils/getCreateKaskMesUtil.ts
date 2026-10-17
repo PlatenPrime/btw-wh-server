@@ -1,5 +1,4 @@
-const SHARIK_IMAGE_BASE =
-  "https://sharik.ua/images/elements_big";
+const SHARIK_IMAGE_BASE = "https://sharik.ua/images/elements_big";
 
 interface GetCreateKaskMessageInput {
   artikul: string;
@@ -21,8 +20,7 @@ export const getCreateKaskMessageUtil = ({
   com,
 }: GetCreateKaskMessageInput): string => {
   const imageUrl = `${SHARIK_IMAGE_BASE}/${encodeURIComponent(artikul)}_m1.jpg`;
-  const quantLine =
-    quant !== undefined && quant !== null ? `${quant} шт` : "—";
+  const quantLine = quant !== undefined && quant !== null ? `${quant} шт` : "—";
 
   return `🆕 Новий запит до каси
 

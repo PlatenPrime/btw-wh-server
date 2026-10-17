@@ -49,12 +49,10 @@ vi.mock("../logging/createLogger.js", () => ({
 import { startServer } from "../startServer.js";
 
 describe("startServer", () => {
-  const listen = vi.fn(
-    (_port: unknown, cb?: () => void) => {
-      cb?.();
-      return {} as never;
-    }
-  );
+  const listen = vi.fn((_port: unknown, cb?: () => void) => {
+    cb?.();
+    return {} as never;
+  });
 
   const app = { listen } as unknown as Express;
 
@@ -71,19 +69,13 @@ describe("startServer", () => {
 
     expect(connectionOn).toHaveBeenCalledWith("connected", expect.any(Function));
     expect(connectionOn).toHaveBeenCalledWith("error", expect.any(Function));
-    expect(connectionOn).toHaveBeenCalledWith(
-      "disconnected",
-      expect.any(Function)
-    );
+    expect(connectionOn).toHaveBeenCalledWith("disconnected", expect.any(Function));
     expect(mongooseConnect).toHaveBeenCalledWith("mongodb://test");
     expect(startCronOperations).toHaveBeenCalledOnce();
     expect(startExcelJobRuntime).toHaveBeenCalledOnce();
     expect(startApiTaskRuntime).toHaveBeenCalledOnce();
     expect(listen).toHaveBeenCalledWith(4000, expect.any(Function));
-    expect(bootLog.info).toHaveBeenCalledWith(
-      { port: 4000 },
-      "server started"
-    );
+    expect(bootLog.info).toHaveBeenCalledWith({ port: 4000 }, "server started");
     expect(logServerEgressGeo).toHaveBeenCalledWith("startup");
   });
 
@@ -91,13 +83,13 @@ describe("startServer", () => {
     await startServer(app, { port: 4000 });
 
     const connectedHandler = connectionOn.mock.calls.find(
-      ([event]) => event === "connected"
+      ([event]) => event === "connected",
     )?.[1] as () => void;
-    const errorHandler = connectionOn.mock.calls.find(
-      ([event]) => event === "error"
-    )?.[1] as (err: Error) => void;
+    const errorHandler = connectionOn.mock.calls.find(([event]) => event === "error")?.[1] as (
+      err: Error,
+    ) => void;
     const disconnectedHandler = connectionOn.mock.calls.find(
-      ([event]) => event === "disconnected"
+      ([event]) => event === "disconnected",
     )?.[1] as () => void;
 
     connectedHandler();
@@ -105,10 +97,7 @@ describe("startServer", () => {
 
     const err = new Error("mongo fail");
     errorHandler(err);
-    expect(bootLog.error).toHaveBeenCalledWith(
-      { err },
-      "mongodb connection error"
-    );
+    expect(bootLog.error).toHaveBeenCalledWith({ err }, "mongodb connection error");
 
     disconnectedHandler();
     expect(bootLog.warn).toHaveBeenCalledWith("mongodb disconnected");
@@ -118,16 +107,11 @@ describe("startServer", () => {
     const connectError = new Error("connect failed");
     mongooseConnect.mockRejectedValueOnce(connectError);
 
-    const exitSpy = vi
-      .spyOn(process, "exit")
-      .mockImplementation((() => undefined) as never);
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => undefined) as never);
 
     await startServer(app, { port: 4000 });
 
-    expect(bootLog.fatal).toHaveBeenCalledWith(
-      { err: connectError },
-      "server failed to start"
-    );
+    expect(bootLog.fatal).toHaveBeenCalledWith({ err: connectError }, "server failed to start");
     expect(exitSpy).toHaveBeenCalledWith(1);
     expect(listen).not.toHaveBeenCalled();
 

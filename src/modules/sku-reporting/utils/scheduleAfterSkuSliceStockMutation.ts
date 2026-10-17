@@ -12,9 +12,7 @@ export type ScheduleAfterSkuSliceStockMutationParams = {
   dayD: Date;
 };
 
-type MutationRunner = (
-  params: ScheduleAfterSkuSliceStockMutationParams,
-) => Promise<unknown>;
+type MutationRunner = (params: ScheduleAfterSkuSliceStockMutationParams) => Promise<unknown>;
 
 type Slot = {
   dirty: boolean;
@@ -106,9 +104,7 @@ export async function flushScheduledSkuSliceStockMutations(): Promise<void> {
       .map((s) => s.runPromise)
       .filter((p): p is Promise<void> => p !== null);
     if (pending.length === 0) {
-      const dirtyIdle = [...slots.entries()].filter(
-        ([, s]) => s.dirty && !s.running,
-      );
+      const dirtyIdle = [...slots.entries()].filter(([, s]) => s.dirty && !s.running);
       if (dirtyIdle.length === 0) return;
       for (const [key] of dirtyIdle) {
         void pump(key);
@@ -126,8 +122,6 @@ export function resetScheduledSkuSliceStockMutationsForTests(): void {
 }
 
 /** Подмена runner для unit-тестов coalesce. */
-export function setScheduledSkuSliceStockMutationRunnerForTests(
-  runner: MutationRunner,
-): void {
+export function setScheduledSkuSliceStockMutationRunnerForTests(runner: MutationRunner): void {
   mutationRunner = runner;
 }

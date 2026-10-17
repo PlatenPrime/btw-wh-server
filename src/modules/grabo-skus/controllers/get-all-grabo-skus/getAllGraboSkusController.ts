@@ -7,16 +7,13 @@ import { getAllGraboSkusUtil } from "./utils/getAllGraboSkusUtil.js";
  * @desc    Список GraboSku с пагинацией, фильтрами и опционально filterOptions
  * @route   GET /api/grabo-skus
  */
-export const getAllGraboSkusController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAllGraboSkusController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getAllGraboSkusQuerySchema.safeParse(req.query);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid query parameters",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -27,9 +24,7 @@ export const getAllGraboSkusController = async (
       message: "Grabo skus retrieved successfully",
       data: result.graboSkus,
       pagination: result.pagination,
-      ...(result.filterOptions !== undefined
-        ? { filterOptions: result.filterOptions }
-        : {}),
+      ...(result.filterOptions !== undefined ? { filterOptions: result.filterOptions } : {}),
     });
   } catch (error) {
     logModuleError("grabo-skus", error, "Error fetching grabo skus:");

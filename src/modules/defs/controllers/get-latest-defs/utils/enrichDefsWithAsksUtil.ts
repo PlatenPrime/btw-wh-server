@@ -9,7 +9,7 @@ import type {
  * Обогащает дефициты информацией о существующих активных заявках
  */
 export async function enrichDefsWithAsksUtil(
-  result: IDeficitCalculationResult
+  result: IDeficitCalculationResult,
 ): Promise<IDeficitCalculationResultWithAsks> {
   const artikuls = Object.keys(result);
   const existingAsks = await Ask.find({
@@ -19,28 +19,32 @@ export async function enrichDefsWithAsksUtil(
     .select("artikul status createdAt askerData.fullname askerData._id")
     .lean();
 
-  const asksByArtikul = existingAsks.reduce((acc, ask) => {
-    if (!acc[ask.artikul]) {
-      acc[ask.artikul] = {
-        _id: ask._id.toString(),
-        status: ask.status,
-        createdAt: ask.createdAt,
-        askerName: ask.askerData.fullname,
-        askerId: ask.askerData._id.toString(),
-      } as IExistingAsk;
-    }
-    return acc;
-  }, {} as Record<string, IExistingAsk>);
+  const asksByArtikul = existingAsks.reduce(
+    (acc, ask) => {
+      if (!acc[ask.artikul]) {
+        acc[ask.artikul] = {
+          _id: ask._id.toString(),
+          status: ask.status,
+          createdAt: ask.createdAt,
+          askerName: ask.askerData.fullname,
+          askerId: ask.askerData._id.toString(),
+        } as IExistingAsk;
+      }
+      return acc;
+    },
+    {} as Record<string, IExistingAsk>,
+  );
 
-  const resultWithAsks: IDeficitCalculationResultWithAsks = Object.keys(
-    result
-  ).reduce((acc, artikul) => {
-    acc[artikul] = {
-      ...result[artikul],
-      existingAsk: asksByArtikul[artikul] || null,
-    };
-    return acc;
-  }, {} as IDeficitCalculationResultWithAsks);
+  const resultWithAsks: IDeficitCalculationResultWithAsks = Object.keys(result).reduce(
+    (acc, artikul) => {
+      acc[artikul] = {
+        ...result[artikul],
+        existingAsk: asksByArtikul[artikul] || null,
+      };
+      return acc;
+    },
+    {} as IDeficitCalculationResultWithAsks,
+  );
 
   return resultWithAsks;
 }

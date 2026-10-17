@@ -7,17 +7,14 @@ import { getPerfectStockSchema } from "../utils/getPerfectStockSchema.js";
  * @desc    Получить остатки и цену товара с сайта Perfect по ссылке на страницу товара
  * @route   GET /api/browser/perfect/stock?link=<url>
  */
-export const getPerfectStockController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getPerfectStockController = async (req: Request, res: Response): Promise<void> => {
   try {
     const link = req.query.link;
     const parseResult = getPerfectStockSchema.safeParse({ link });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

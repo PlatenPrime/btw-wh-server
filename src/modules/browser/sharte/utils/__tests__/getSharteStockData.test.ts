@@ -27,7 +27,7 @@ describe("getSharteStockData", () => {
           CATALOG_QUANTITY: 10,
           CATALOG_QUANTITY_RESERVED: 2,
           "~PRICE": 123.45,
-        })
+        }),
       );
     const result = await getSharteStockData(productUrl);
     expect(result).toEqual({
@@ -41,17 +41,15 @@ describe("getSharteStockData", () => {
     expect(browserGet).toHaveBeenNthCalledWith(1, productUrl);
     expect(browserGet).toHaveBeenNthCalledWith(
       2,
-      "https://sharte.net/ajax.php?act=addCart&id=4777&q=1&site_id=s1"
+      "https://sharte.net/ajax.php?act=addCart&id=4777&q=1&site_id=s1",
     );
   });
 
   it("returns negative outcome when HTML has no #catalogElement with data-product-id", async () => {
     vi.mocked(browserGet).mockResolvedValueOnce(
-      "<html><body><div>No catalog element</div></body></html>"
+      "<html><body><div>No catalog element</div></body></html>",
     );
-    const result = await getSharteStockData(
-      "https://sharte.net/catalog/product/999/"
-    );
+    const result = await getSharteStockData("https://sharte.net/catalog/product/999/");
     expect(result).toEqual({
       id: "",
       name: "",
@@ -65,11 +63,9 @@ describe("getSharteStockData", () => {
 
   it("returns negative outcome when #catalogElement exists but data-product-id is empty", async () => {
     vi.mocked(browserGet).mockResolvedValueOnce(
-      `<!DOCTYPE html><html><body><div id="catalogElement" class="item" data-product-id=""></div></body></html>`
+      `<!DOCTYPE html><html><body><div id="catalogElement" class="item" data-product-id=""></div></body></html>`,
     );
-    const result = await getSharteStockData(
-      "https://sharte.net/catalog/product/999/"
-    );
+    const result = await getSharteStockData("https://sharte.net/catalog/product/999/");
     expect(result.stock).toBe(-1);
     expect(result.price).toBe(-1);
     expect(browserGet).toHaveBeenCalledTimes(1);
@@ -77,13 +73,8 @@ describe("getSharteStockData", () => {
 
   it("returns StockInfo with price from a.price.changePrice when addCart has no quantity", async () => {
     const productUrl = "https://sharte.net/catalog/product/999/";
-    const html = productPageWithCatalogElement(
-      "999",
-      '<a class="price changePrice">1.85 грн.</a>'
-    );
-    vi.mocked(browserGet)
-      .mockResolvedValueOnce(html)
-      .mockResolvedValueOnce("{}");
+    const html = productPageWithCatalogElement("999", '<a class="price changePrice">1.85 грн.</a>');
+    vi.mocked(browserGet).mockResolvedValueOnce(html).mockResolvedValueOnce("{}");
     const result = await getSharteStockData(productUrl);
     expect(result).toEqual({
       id: "999",
@@ -96,7 +87,7 @@ describe("getSharteStockData", () => {
     expect(browserGet).toHaveBeenNthCalledWith(1, productUrl);
     expect(browserGet).toHaveBeenNthCalledWith(
       2,
-      "https://sharte.net/ajax.php?act=addCart&id=999&q=1&site_id=s1"
+      "https://sharte.net/ajax.php?act=addCart&id=999&q=1&site_id=s1",
     );
   });
 
@@ -119,9 +110,7 @@ describe("getSharteStockData", () => {
 
   it("returns negative outcome when page request fails", async () => {
     vi.mocked(browserGet).mockRejectedValueOnce(new Error("Network error"));
-    const result = await getSharteStockData(
-      "https://sharte.net/catalog/product/999/"
-    );
+    const result = await getSharteStockData("https://sharte.net/catalog/product/999/");
     expect(result).toEqual({
       id: "",
       name: "",
@@ -142,7 +131,7 @@ describe("getSharteStockData", () => {
           "~NAME": "Product Without Price",
           CATALOG_QUANTITY: 5,
           CATALOG_QUANTITY_RESERVED: 0,
-        })
+        }),
       );
     const result = await getSharteStockData(productUrl);
     expect(result).toEqual({
@@ -159,7 +148,7 @@ describe("getSharteStockData", () => {
     const productUrl = "https://sharte.net/catalog/product/4777/";
     const html = productPageWithCatalogElement(
       "4777",
-      '<a class="price changePrice">14.61 грн.</a>'
+      '<a class="price changePrice">14.61 грн.</a>',
     );
     vi.mocked(browserGet)
       .mockResolvedValueOnce(html)
@@ -195,7 +184,7 @@ describe("getSharteStockData", () => {
     const productUrl = "https://sharte.net/catalog/product/6117/";
     const html = productPageWithCatalogElement(
       "6117",
-      '<a class="price changePrice">14.61 грн.</a>'
+      '<a class="price changePrice">14.61 грн.</a>',
     );
     vi.mocked(browserGet)
       .mockResolvedValueOnce(html)
@@ -213,17 +202,14 @@ describe("getSharteStockData", () => {
 
   it("uses HTML fallback when CATALOG_QUANTITY is null in JSON", async () => {
     const productUrl = "https://sharte.net/catalog/product/100/";
-    const html = productPageWithCatalogElement(
-      "100",
-      '<a class="price changePrice">2 грн.</a>'
-    );
+    const html = productPageWithCatalogElement("100", '<a class="price changePrice">2 грн.</a>');
     vi.mocked(browserGet)
       .mockResolvedValueOnce(html)
       .mockResolvedValueOnce(
         JSON.stringify({
           ID: "100",
           CATALOG_QUANTITY: null,
-        })
+        }),
       );
     const result = await getSharteStockData(productUrl);
     expect(result).toEqual({

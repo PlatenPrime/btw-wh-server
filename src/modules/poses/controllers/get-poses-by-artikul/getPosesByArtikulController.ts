@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
 import { processPosesByArtikulUtil } from "./utils/processPosesByArtikulUtil.js";
 
-export const getPosesByArtikulController = async (
-  req: Request,
-  res: Response
-) => {
+export const getPosesByArtikulController = async (req: Request, res: Response) => {
   try {
     const { artikul } = req.params;
 
@@ -25,7 +22,7 @@ export const getPosesByArtikulController = async (
       success: true,
       data: response,
     });
-  } catch (error) {
+  } catch {
     // 4. Обработка ошибок
     res.status(500).json({
       success: false,

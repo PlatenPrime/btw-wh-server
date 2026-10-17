@@ -21,16 +21,14 @@ export function extractDojdevikPackCount(html: string): number {
   }
 
   const fromAttrs = html.match(
-    /data-qaid=["']attribute_name["'][^>]*>[^<]*кількість[^<]*<\/td>\s*<td[^>]*data-qaid=["']attribute_value["'][^>]*>\s*(\d+)\s*</i
+    /data-qaid=["']attribute_name["'][^>]*>[^<]*кількість[^<]*<\/td>\s*<td[^>]*data-qaid=["']attribute_value["'][^>]*>\s*(\d+)\s*</i,
   );
   const attrsCount = parsePositiveInt(fromAttrs?.[1]);
   if (attrsCount !== null) {
     return attrsCount;
   }
 
-  const fromDescription = html.match(
-    /Кількість\s+в\s+упаковці\s+(\d+)\s*шт/i
-  );
+  const fromDescription = html.match(/Кількість\s+в\s+упаковці\s+(\d+)\s*шт/i);
   const descriptionCount = parsePositiveInt(fromDescription?.[1]);
   if (descriptionCount !== null) {
     return descriptionCount;

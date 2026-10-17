@@ -36,11 +36,7 @@ export async function loadSkuSliceSalesComputeContext(
   const konkNames = [...new Set(skus.map((s) => s.konkName))];
   const warmupStart = sliceDateMinusDays(dateFrom, 1);
 
-  const sliceDocs = await loadSkuSliceRowsForKonksProducts(
-    skus,
-    warmupStart,
-    dateTo,
-  );
+  const sliceDocs = await loadSkuSliceRowsForKonksProducts(skus, warmupStart, dateTo);
 
   const maps = buildSliceMapsByKonk(sliceDocs);
   const datesFull = enumerateReportingDates(warmupStart, dateTo);
@@ -55,10 +51,7 @@ export async function loadSkuSliceSalesComputeContext(
     .lean();
   const recountDaysByKonk = new Map<string, Set<string>>();
   for (const doc of konkDocs) {
-    recountDaysByKonk.set(
-      doc.name,
-      new Set((doc.recountDays ?? []).map(String)),
-    );
+    recountDaysByKonk.set(doc.name, new Set((doc.recountDays ?? []).map(String)));
   }
 
   return {

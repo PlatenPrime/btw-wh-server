@@ -63,7 +63,7 @@ describe("createVariantController", () => {
     await createVariantController(req, res);
     expect(responseStatus.code).toBe(201);
     expect((responseJson.data as { varGroup?: { id: string; title: string } }).varGroup?.id).toBe(
-      "group-1"
+      "group-1",
     );
   });
 
@@ -94,7 +94,7 @@ describe("createVariantController", () => {
     await createVariantController(req2, res);
     expect(responseStatus.code).toBe(409);
     expect((responseJson as { message?: string }).message).toBe(
-      "Variant with this url already exists"
+      "Variant with this url already exists",
     );
 
     const count = await Variant.countDocuments();
@@ -121,4 +121,3 @@ describe("createVariantController", () => {
     expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });
-

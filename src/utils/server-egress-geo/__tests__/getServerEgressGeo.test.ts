@@ -33,7 +33,7 @@ describe("getServerEgressGeo", () => {
     });
     expect(mockedAxios.get).toHaveBeenCalledWith(
       "https://ipapi.co/json/",
-      expect.objectContaining({ timeout: 5000 })
+      expect.objectContaining({ timeout: 5000 }),
     );
   });
 
@@ -51,7 +51,7 @@ describe("getServerEgressGeo", () => {
 
     expect(mockedAxios.get).toHaveBeenCalledWith(
       "https://custom.example/geo",
-      expect.objectContaining({ timeout: 5000 })
+      expect.objectContaining({ timeout: 5000 }),
     );
   });
 

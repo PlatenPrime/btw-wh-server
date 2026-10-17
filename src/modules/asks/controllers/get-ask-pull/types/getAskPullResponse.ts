@@ -32,4 +32,3 @@ export interface GetAskPullResponse {
   status: "process" | "satisfied" | "no_poses" | "finished";
   message: string;
 }
-

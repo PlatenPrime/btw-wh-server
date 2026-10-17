@@ -6,6 +6,4 @@ export const getSvbumGroupPagesProductsSchema = z.object({
   maxPages: z.number().int().min(1).max(200).optional(),
 });
 
-export type GetSvbumGroupPagesProductsInput = z.infer<
-  typeof getSvbumGroupPagesProductsSchema
->;
+export type GetSvbumGroupPagesProductsInput = z.infer<typeof getSvbumGroupPagesProductsSchema>;

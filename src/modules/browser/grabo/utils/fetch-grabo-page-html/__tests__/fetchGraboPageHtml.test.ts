@@ -24,7 +24,7 @@ vi.mock("../../../../utils/sleep.js", () => ({
 
 const URL = "https://www.grabo-balloons.com/en/hearts/page-4";
 const TIMEOUT = new Error(
-  "Browser GET failed (ETIMEDOUT): https://www.grabo-balloons.com/en/hearts/page-4 — connect ETIMEDOUT 77.89.18.150:443"
+  "Browser GET failed (ETIMEDOUT): https://www.grabo-balloons.com/en/hearts/page-4 — connect ETIMEDOUT 77.89.18.150:443",
 );
 
 describe("fetchGraboPageHtml", () => {
@@ -64,7 +64,7 @@ describe("fetchGraboPageHtml", () => {
         maxAttempts: 3,
         waitMs: 8_000,
       }),
-      "grabo fetch retry"
+      "grabo fetch retry",
     );
   });
 
@@ -78,7 +78,7 @@ describe("fetchGraboPageHtml", () => {
     expect(sleep).toHaveBeenCalledTimes(2);
     expect(mockLogger.warn).toHaveBeenCalledWith(
       expect.objectContaining({ attempt: 3, url: URL }),
-      "grabo fetch retry exhausted"
+      "grabo fetch retry exhausted",
     );
   });
 

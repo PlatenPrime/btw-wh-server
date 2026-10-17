@@ -2,10 +2,7 @@ import { Request, Response } from "express";
 import { getPosesByPalletIdQuerySchema } from "./schemas/getPosesByPalletIdSchema.js";
 import { getPosesByPalletIdUtil } from "./utils/getPosesByPalletIdUtil.js";
 
-export const getPosesByPalletIdController = async (
-  req: Request,
-  res: Response
-) => {
+export const getPosesByPalletIdController = async (req: Request, res: Response) => {
   const { palletId } = req.params;
 
   try {
@@ -14,7 +11,7 @@ export const getPosesByPalletIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         error: "Invalid query parameters",
-        details: parseResult.error.errors,
+        details: parseResult.error.issues,
       });
       return;
     }

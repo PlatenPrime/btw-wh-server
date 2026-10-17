@@ -112,27 +112,25 @@ describe("getYuminStockData", () => {
 
   describe("Валидация входных данных", () => {
     it("должен выбрасывать ошибку при пустой ссылке", async () => {
-      await expect(getYuminStockData("")).rejects.toThrow(
-        "Link is required and must be a string"
-      );
+      await expect(getYuminStockData("")).rejects.toThrow("Link is required and must be a string");
     });
 
     it("должен выбрасывать ошибку при null", async () => {
-      await expect(
-        getYuminStockData(null as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getYuminStockData(null as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
 
     it("должен выбрасывать ошибку при undefined", async () => {
-      await expect(
-        getYuminStockData(undefined as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getYuminStockData(undefined as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
 
     it("должен выбрасывать ошибку при не-строковом link", async () => {
-      await expect(
-        getYuminStockData(123 as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getYuminStockData(123 as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
   });
 

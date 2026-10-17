@@ -20,10 +20,7 @@ describe("btradeSliceAggregationStages", () => {
       "ART-3": { price: 300, quantity: 15 },
     });
 
-    const pipeline = [
-      { $match: { date } },
-      sliceDataProjectForArtikulList(["ART-1", "ART-3"]),
-    ];
+    const pipeline = [{ $match: { date } }, sliceDataProjectForArtikulList(["ART-1", "ART-3"])];
 
     const result = await aggregateBtradeSlices(pipeline);
 

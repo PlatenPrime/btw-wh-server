@@ -8,15 +8,13 @@ import { upsertSegsUtil } from "../utils/upsertSegsUtil.js";
 
 describe("upsertSegsUtil", () => {
   const createZone = async (
-    overrides: Partial<{ title: string; bar: number; sector: number }> = {}
+    overrides: Partial<{ title: string; bar: number; sector: number }> = {},
   ) => {
     const timestamp = Date.now();
     const random = Math.floor(Math.random() * 99) + 1;
     return Zone.create({
       title: overrides.title ?? `42-${(timestamp % 99) + 1}-${random}`,
-      bar:
-        overrides.bar ??
-        Math.max(1, Math.floor(Math.random() * 1_000_000)),
+      bar: overrides.bar ?? Math.max(1, Math.floor(Math.random() * 1_000_000)),
       sector: overrides.sector ?? 0,
     });
   };
@@ -74,7 +72,7 @@ describe("upsertSegsUtil", () => {
       { _id: zoneInitial._id },
       {
         $set: { "seg.id": seg._id, sector: seg.sector },
-      }
+      },
     );
 
     const session = await mongoose.startSession();
@@ -124,10 +122,7 @@ describe("upsertSegsUtil", () => {
       zones: [{ _id: zone._id, title: zone.title }],
     });
 
-    await Zone.updateOne(
-      { _id: zone._id },
-      { $set: { "seg.id": seg._id, sector: seg.sector } }
-    );
+    await Zone.updateOne({ _id: zone._id }, { $set: { "seg.id": seg._id, sector: seg.sector } });
 
     const session = await mongoose.startSession();
 
@@ -144,12 +139,10 @@ describe("upsertSegsUtil", () => {
             ],
             session,
           });
-        })
+        }),
       ).rejects.toThrow(/already belong to other segments/i);
     } finally {
       await session.endSession();
     }
   });
 });
-
-

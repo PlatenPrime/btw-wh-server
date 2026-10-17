@@ -4,9 +4,7 @@ import { createVariantUtil } from "./utils/createVariantUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
-function isDuplicateUrlError(
-  err: unknown
-): err is { code: number; keyPattern?: { url?: number } } {
+function isDuplicateUrlError(err: unknown): err is { code: number; keyPattern?: { url?: number } } {
   return (
     typeof err === "object" &&
     err !== null &&
@@ -20,16 +18,13 @@ function isDuplicateUrlError(
  * @desc    Создать вариант
  * @route   POST /api/variants
  */
-export const createVariantController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createVariantController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createVariantSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -64,4 +59,3 @@ export const createVariantController = async (
     });
   }
 };
-

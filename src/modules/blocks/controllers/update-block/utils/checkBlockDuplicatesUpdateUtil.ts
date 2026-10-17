@@ -22,4 +22,3 @@ export const checkBlockDuplicatesUpdateUtil = async ({
 
   return existingBlock;
 };
-

@@ -45,9 +45,11 @@
 Создание нового блока.
 
 **Запрос:**
+
 - Body: `{ title: string }`
 
 **Ответ:**
+
 - 201: `{ message: string, data: Block }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 409: `{ message: string }` - блок с таким названием уже существует
@@ -60,9 +62,11 @@
 Получение всех блоков, отсортированных по порядку.
 
 **Запрос:**
+
 - Query параметры отсутствуют
 
 **Ответ:**
+
 - 200: `{ exists: boolean, message: string, data: Array<Block> }`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -73,9 +77,11 @@
 Получение блока по идентификатору.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ exists: boolean, message: string, data: Block | null }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -87,10 +93,12 @@
 Обновление блока.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 - Body: `{ title?: string, order?: number, segs?: Array<string> }` (все поля опциональны)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Block }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - блок не найден или сегменты не найдены
@@ -106,10 +114,12 @@
 Переименование блока.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 - Body: `{ title: string }`
 
 **Ответ:**
+
 - 200: `{ message: string, data: Block }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - блок не найден
@@ -123,9 +133,11 @@
 Удаление блока.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Block }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - блок не найден
@@ -140,9 +152,11 @@
 Массовое создание или обновление блоков.
 
 **Запрос:**
+
 - Body: `Array<{ _id?: string, title: string, order: number, segs?: Array<string> }>`
 
 **Ответ:**
+
 - 200: `{ message: string, data: { bulkResult: object, updatedBlocks: Array<Block> } }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -154,9 +168,11 @@
 Пересчет секторов всех зон на основе текущих позиций блоков и сегментов.
 
 **Запрос:**
+
 - Body отсутствует
 
 **Ответ:**
+
 - 200: `{ message: string, data: { updatedZones: number, updatedSegs: number, blocksProcessed: number } }`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -169,9 +185,11 @@
 Сброс секторов всех зон в 0.
 
 **Запрос:**
+
 - Body отсутствует
 
 **Ответ:**
+
 - 200: `{ message: string, data: { matchedCount: number, modifiedCount: number } }`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -185,12 +203,11 @@
 
 ```typescript
 {
-  _id: string;                    // MongoDB ObjectId
-  title: string;                  // Уникальное название блока
-  order: number;                  // Порядок блока (начинается с 1)
-  segs: Array<string>;            // Массив ObjectId сегментов
-  createdAt: Date;                // Дата создания
-  updatedAt: Date;                // Дата обновления
+  _id: string; // MongoDB ObjectId
+  title: string; // Уникальное название блока
+  order: number; // Порядок блока (начинается с 1)
+  segs: Array<string>; // Массив ObjectId сегментов
+  createdAt: Date; // Дата создания
+  updatedAt: Date; // Дата обновления
 }
 ```
-

@@ -1,9 +1,5 @@
 import { DEFICIT_REPORT_CHUNK_SIZE } from "../constants/deficitReportCron.js";
-import type {
-  DeficitStatus,
-  IDeficitCalculationResult,
-  IDeficitItem,
-} from "../types.js";
+import type { DeficitStatus, IDeficitCalculationResult, IDeficitItem } from "../types.js";
 
 type DeficitEntry = [string, IDeficitItem];
 
@@ -37,13 +33,12 @@ function createDeficitChunkMessage(
   deficits: DeficitEntry[],
   startIndex: number,
   totalDeficits: number,
-  category: DeficitStatus
+  category: DeficitStatus,
 ): string {
   const endIndex = startIndex + deficits.length - 1;
   const rangeText = `${startIndex + 1}-${endIndex + 1} з ${totalDeficits}`;
   const categoryIcon = category === "critical" ? "🔴" : "🟡";
-  const categoryName =
-    category === "critical" ? "Критичні дефіцити" : "Дефіцити в ліміті";
+  const categoryName = category === "critical" ? "Критичні дефіцити" : "Дефіцити в ліміті";
   const deficitList = deficits
     .map(([artikul, data]) => `${artikul}: ${data.difQuant || 0}`)
     .join("\n");
@@ -54,7 +49,7 @@ function createDeficitChunkMessage(
 function appendCategoryChunks(
   messages: string[],
   entries: DeficitEntry[],
-  category: DeficitStatus
+  category: DeficitStatus,
 ): void {
   if (entries.length === 0) {
     return;
@@ -63,12 +58,7 @@ function appendCategoryChunks(
   const chunks = chunkArray(entries, DEFICIT_REPORT_CHUNK_SIZE);
   chunks.forEach((chunk, index) => {
     messages.push(
-      createDeficitChunkMessage(
-        chunk,
-        index * DEFICIT_REPORT_CHUNK_SIZE,
-        entries.length,
-        category
-      )
+      createDeficitChunkMessage(chunk, index * DEFICIT_REPORT_CHUNK_SIZE, entries.length, category),
     );
   });
 }
@@ -77,9 +67,7 @@ function appendCategoryChunks(
  * Сообщения для чата дефицитов: limited-чанки, critical-чанки, summary.
  * Пустой снимок — одно empty-state сообщение.
  */
-export function formatDeficitTelegramMessages(
-  result: IDeficitCalculationResult
-): string[] {
+export function formatDeficitTelegramMessages(result: IDeficitCalculationResult): string[] {
   const totalDeficits = Object.keys(result).length;
 
   if (totalDeficits === 0) {
@@ -96,7 +84,7 @@ export function formatDeficitTelegramMessages(
     `✅ Розрахунок дефіцитів завершено\n` +
       `• Всього дефіцитів: ${totalDeficits}\n` +
       `• Критичних: ${critical.length}\n` +
-      `• В ліміті: ${limited.length}`
+      `• В ліміті: ${limited.length}`,
   );
 
   return messages;

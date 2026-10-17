@@ -15,13 +15,11 @@ export type ResolveLazyListingImageOptions = {
 export function resolveLazyListingImage(
   $img: BrowserCheerio,
   baseUrl: string,
-  options: ResolveLazyListingImageOptions = {}
+  options: ResolveLazyListingImageOptions = {},
 ): string | null {
   const src = $img.attr("src")?.trim();
   const dataSrcset = $img.attr("data-srcset")?.trim();
-  const dataSrc = options.preferDataSrc
-    ? $img.attr("data-src")?.trim()
-    : undefined;
+  const dataSrc = options.preferDataSrc ? $img.attr("data-src")?.trim() : undefined;
 
   if (src && !src.includes(LAZY_IMAGE_MARKER)) {
     return resolveHrefAgainstBase(src, baseUrl);

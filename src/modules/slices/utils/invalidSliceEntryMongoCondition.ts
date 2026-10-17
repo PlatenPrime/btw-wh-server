@@ -10,14 +10,11 @@ export type SliceDataQuantityField = "stock" | "quantity";
  */
 export function invalidSliceEntryMongoCondition(
   variableRoot: InvalidSliceEntryVariableRoot,
-  stockOrQuantityField: SliceDataQuantityField
+  stockOrQuantityField: SliceDataQuantityField,
 ): Record<string, unknown> {
   const stockOrQuantity =
-    variableRoot === "e"
-      ? `$$e.v.${stockOrQuantityField}`
-      : `$entries.v.${stockOrQuantityField}`;
-  const price =
-    variableRoot === "e" ? "$$e.v.price" : "$entries.v.price";
+    variableRoot === "e" ? `$$e.v.${stockOrQuantityField}` : `$entries.v.${stockOrQuantityField}`;
+  const price = variableRoot === "e" ? "$$e.v.price" : "$entries.v.price";
 
   const invalidPrice: Record<string, unknown> = {
     $or: [
@@ -37,10 +34,7 @@ export function invalidSliceEntryMongoCondition(
   return {
     $or: [
       {
-        $and: [
-          { $eq: [stockOrQuantity, -1] },
-          { $eq: [price, -1] },
-        ],
+        $and: [{ $eq: [stockOrQuantity, -1] }, { $eq: [price, -1] }],
       },
       invalidPrice,
     ],

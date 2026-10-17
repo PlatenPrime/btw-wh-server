@@ -12,9 +12,7 @@ type UpdateSkugrByIdUtilInput = {
 export const updateSkugrByIdUtil = async (
   input: UpdateSkugrByIdUtilInput,
 ): Promise<ISkugr | null> => {
-  const update: Partial<
-    Pick<ISkugr, "konkName" | "prodName" | "title" | "url" | "isSliced">
-  > = {};
+  const update: Partial<Pick<ISkugr, "konkName" | "prodName" | "title" | "url" | "isSliced">> = {};
 
   if (input.konkName !== undefined) update.konkName = input.konkName;
   if (input.prodName !== undefined) update.prodName = input.prodName;

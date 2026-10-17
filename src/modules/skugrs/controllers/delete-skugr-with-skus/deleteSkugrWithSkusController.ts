@@ -8,10 +8,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Удалить товарную группу и документы Sku из её skus; id убрать из других групп
  * @route   DELETE /api/skugrs/id/:id/with-skus
  */
-export const deleteSkugrWithSkusController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const deleteSkugrWithSkusController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = deleteSkugrWithSkusSchema.safeParse({
       id: req.params.id,
@@ -19,7 +16,7 @@ export const deleteSkugrWithSkusController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

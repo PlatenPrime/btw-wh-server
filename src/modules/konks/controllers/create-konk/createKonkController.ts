@@ -8,16 +8,13 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Создать конкурента
  * @route   POST /api/konks
  */
-export const createKonkController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createKonkController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createKonkSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

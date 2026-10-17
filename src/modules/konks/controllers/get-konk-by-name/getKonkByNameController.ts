@@ -7,17 +7,14 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить конкурента по name
  * @route   GET /api/konks/name/:name
  */
-export const getKonkByNameController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getKonkByNameController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name } = req.params;
     const parseResult = getKonkByNameSchema.safeParse({ name });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

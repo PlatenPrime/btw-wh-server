@@ -30,10 +30,7 @@ vi.mock("../../../browser/dojdevik/utils/getDojdevikStockData.js", () => ({
   getDojdevikStockData: vi.fn(),
 }));
 
-import {
-  getSkuStockDataUtil,
-  UNSUPPORTED_KONK_CODE,
-} from "../getSkuStockDataUtil.js";
+import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE } from "../getSkuStockDataUtil.js";
 
 const mockGetBalunStockData = vi.mocked(getBalunStockData);
 const mockGetAirStockData = vi.mocked(getAirStockData);
@@ -130,9 +127,7 @@ describe("getSkuStockDataUtil", () => {
 
     const result = await getSkuStockDataUtil(sku._id.toString());
 
-    expect(mockGetSvbumStockData).toHaveBeenCalledWith(
-      "https://sviatobum.ua/item"
-    );
+    expect(mockGetSvbumStockData).toHaveBeenCalledWith("https://sviatobum.ua/item");
     expect(result).toEqual({ stock: 300, price: 3.93 });
   });
 
@@ -150,7 +145,7 @@ describe("getSkuStockDataUtil", () => {
     const result = await getSkuStockDataUtil(sku._id.toString());
 
     expect(mockGetDojdevikStockData).toHaveBeenCalledWith(
-      "https://dojdevik.com.ua/ua/p17755382.html"
+      "https://dojdevik.com.ua/ua/p17755382.html",
     );
     expect(result).toEqual({ stock: 3500, price: 1.7 });
   });

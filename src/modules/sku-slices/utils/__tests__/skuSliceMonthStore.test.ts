@@ -158,11 +158,7 @@ describe("skuSliceMonthStore", () => {
     expect(await isDayPointFilled("air", "bad", date)).toBe(false);
     expect(await isDayPointFilled("air", "missing", date)).toBe(false);
 
-    const map = await loadDayPointsForProductIds(
-      "air",
-      ["ok", "bad", "missing"],
-      date,
-    );
+    const map = await loadDayPointsForProductIds("air", ["ok", "bad", "missing"], date);
     expect(map).toEqual({
       ok: { stock: 1, price: 1 },
       bad: { stock: -1, price: -1 },

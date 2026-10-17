@@ -1,14 +1,8 @@
 import type { AnyBulkWriteOperation } from "mongoose";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { SkuSlice } from "../models/SkuSlice.js";
-import {
-  SkuSliceMonth,
-  type ISkuSliceMonth,
-} from "../models/SkuSliceMonth.js";
-import {
-  toSliceMonthDate,
-  toSliceMonthDayKey,
-} from "./skuSliceMonthKeys.js";
+import { SkuSliceMonth, type ISkuSliceMonth } from "../models/SkuSliceMonth.js";
+import { toSliceMonthDate, toSliceMonthDayKey } from "./skuSliceMonthKeys.js";
 
 export type MigrateAllSkuSlicesToMonthsProgress = {
   sliceIndex: number;
@@ -103,9 +97,7 @@ function dayWritesFromSliceData(slice: SliceLean): DayWrite[] {
   return out;
 }
 
-function buildUpsertOps(
-  writes: DayWrite[],
-): AnyBulkWriteOperation<ISkuSliceMonth>[] {
+function buildUpsertOps(writes: DayWrite[]): AnyBulkWriteOperation<ISkuSliceMonth>[] {
   return writes.map((w) => ({
     updateOne: {
       filter: {
@@ -146,10 +138,7 @@ export async function migrateAllSkuSlicesToMonthsUtil(
   let dayWritesUpserted = 0;
   let sliceIndex = 0;
 
-  const cursor = SkuSlice.find(filter)
-    .select("konkName date data")
-    .lean()
-    .cursor();
+  const cursor = SkuSlice.find(filter).select("konkName date data").lean().cursor();
 
   for await (const raw of cursor) {
     const slice = raw as SliceLean;
@@ -228,9 +217,7 @@ export async function verifyRandomSkuSlicesVsMonths(
         .select({ [`days.${dayKey}`]: 1 })
         .lean();
 
-      const monthItem = doc?.days?.[dayKey] as
-        | { stock?: number; price?: number }
-        | undefined;
+      const monthItem = doc?.days?.[dayKey] as { stock?: number; price?: number } | undefined;
 
       if (!monthItem) {
         mismatches.push({

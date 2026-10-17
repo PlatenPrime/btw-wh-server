@@ -8,9 +8,7 @@ export const generateMarkerUtil = (): string => {
   const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
 
   // Convert to Kyiv timezone (Europe/Kyiv)
-  const kyivTime = new Date(
-    now.toLocaleString("en-US", { timeZone: "Europe/Kyiv" })
-  );
+  const kyivTime = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Kyiv" }));
 
   const year = kyivTime.getFullYear();
   const month = pad(kyivTime.getMonth() + 1);

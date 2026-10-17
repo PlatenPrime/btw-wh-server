@@ -25,9 +25,7 @@ function parseYmd(flag: string, raw: string): Date {
   return parsed.data;
 }
 
-export function parseBackfillSkuSliceSalesCliArgs(
-  argv: string[],
-): BackfillSkuSliceSalesCliArgs {
+export function parseBackfillSkuSliceSalesCliArgs(argv: string[]): BackfillSkuSliceSalesCliArgs {
   let from: Date | undefined;
   let to: Date | undefined;
   let apply = false;

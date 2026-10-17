@@ -16,4 +16,3 @@ export const getAllArtsQuerySchema = z.object({
 });
 
 export type GetAllArtsQuery = z.infer<typeof getAllArtsQuerySchema>;
-

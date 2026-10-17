@@ -12,39 +12,14 @@ import {
 
 const router = Router();
 
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(createKaskController),
-);
+router.post("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(createKaskController));
 
-router.get(
-  "/by-date",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getKasksByDate),
-);
+router.get("/by-date", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKasksByDate));
 
-router.get(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getKaskById),
-);
+router.get("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getKaskById));
 
-router.patch(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(updateKaskById),
-);
+router.patch("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(updateKaskById));
 
-router.delete(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteKaskById),
-);
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deleteKaskById));
 
 export default router;

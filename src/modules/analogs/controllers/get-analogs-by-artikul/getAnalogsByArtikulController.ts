@@ -7,17 +7,14 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить аналоги по artikul
  * @route   GET /api/analogs/artikul/:artikul
  */
-export const getAnalogsByArtikulController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAnalogsByArtikulController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { artikul } = req.params;
     const parseResult = getAnalogsByArtikulSchema.safeParse({ artikul });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

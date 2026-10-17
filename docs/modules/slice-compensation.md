@@ -8,10 +8,10 @@
 
 ## Что компенсируется
 
-| Целевая коллекция | Условие попадания в очередь | Источник refetch | Обновление |
-|-------------------|----------------------------|------------------|------------|
-| **AnalogSlice** | `stock === -1 && price === -1` | `getAnalogStockDataUtil` по `_id` аналога | если ответ не полный `-1/-1` |
-| **SkuSliceMonth** | полный `-1/-1` **или** невалидная цена | `getSkuStockDataUtil` по `_id` SKU | если ответ не полный `-1/-1` |
+| Целевая коллекция | Условие попадания в очередь            | Источник refetch                          | Обновление                   |
+| ----------------- | -------------------------------------- | ----------------------------------------- | ---------------------------- |
+| **AnalogSlice**   | `stock === -1 && price === -1`         | `getAnalogStockDataUtil` по `_id` аналога | если ответ не полный `-1/-1` |
+| **SkuSliceMonth** | полный `-1/-1` **или** невалидная цена | `getSkuStockDataUtil` по `_id` SKU        | если ответ не полный `-1/-1` |
 
 Пропускаются: конкуренты из `getCompensationExcludedCompetitorSet` (union [`excludedCompetitors`](slices.md) и `compensationExcludedCompetitors`), отсутствующие Analog/Sku, неподдерживаемый konk. **Air исключён из server compensation** (и cron 10:30, и ручной POST по `konkName=air` дают пустую очередь). Дозаполнение Air SKU — только client-ingestion в [sku-slices](sku-slices.md).
 

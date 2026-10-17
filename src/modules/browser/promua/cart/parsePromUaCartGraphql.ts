@@ -53,10 +53,7 @@ function readUnitSelling(item: Record<string, unknown>): number | null {
   return parseNonNegativeNumber(item.price.unit.selling);
 }
 
-function pickItem(
-  items: unknown,
-  productId: string
-): Record<string, unknown> | undefined {
+function pickItem(items: unknown, productId: string): Record<string, unknown> | undefined {
   if (!Array.isArray(items)) return undefined;
   const records = items.filter(isRecord);
   const matched = records.find((item) => item.productId === productId);
@@ -69,14 +66,9 @@ function readCarts(payload: Record<string, unknown>): unknown[] {
   return Array.isArray(carts) ? carts : [];
 }
 
-function readChangeCart(
-  payload: Record<string, unknown>
-): Record<string, unknown> | undefined {
-  if (!isRecord(payload.self) || !isRecord(payload.self.cartList))
-    return undefined;
-  return isRecord(payload.self.cartList.cart)
-    ? payload.self.cartList.cart
-    : undefined;
+function readChangeCart(payload: Record<string, unknown>): Record<string, unknown> | undefined {
+  if (!isRecord(payload.self) || !isRecord(payload.self.cartList)) return undefined;
+  return isRecord(payload.self.cartList.cart) ? payload.self.cartList.cart : undefined;
 }
 
 /**
@@ -84,7 +76,7 @@ function readChangeCart(
  */
 export function parsePromUaAddProductResponse(
   body: unknown,
-  productId: string
+  productId: string,
 ): PromUaAddProductResult {
   const data = unwrapGraphqlData(body);
   if (!data || !isRecord(data.cartAddProduct)) {
@@ -125,7 +117,7 @@ export function parsePromUaAddProductResponse(
  */
 export function parsePromUaChangeQuantityResponse(
   body: unknown,
-  productId: string
+  productId: string,
 ): PromUaChangeQuantityResult {
   const data = unwrapGraphqlData(body);
   if (!data || !isRecord(data.cartChangeProductQuantity)) {

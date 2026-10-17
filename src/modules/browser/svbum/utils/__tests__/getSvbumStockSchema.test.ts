@@ -11,8 +11,6 @@ describe("getSvbumStockSchema", () => {
 
   it("отклоняет пустой и не-URL", () => {
     expect(getSvbumStockSchema.safeParse({ link: "" }).success).toBe(false);
-    expect(getSvbumStockSchema.safeParse({ link: "not-a-url" }).success).toBe(
-      false
-    );
+    expect(getSvbumStockSchema.safeParse({ link: "not-a-url" }).success).toBe(false);
   });
 });

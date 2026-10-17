@@ -12,7 +12,6 @@ import { IUser } from "../models/User.js";
  * ```
  */
 export const getUserWithoutPasswordUtil = (user: IUser): Omit<IUser, "password"> => {
-  const { password, ...userWithoutPassword } = user.toObject();
+  const { password: _password, ...userWithoutPassword } = user.toObject();
   return userWithoutPassword as Omit<IUser, "password">;
 };
-

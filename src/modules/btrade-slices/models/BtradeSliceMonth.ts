@@ -34,9 +34,8 @@ btradeSliceMonthSchema.index({ artikul: 1, month: 1 }, { unique: true });
 /** Day-wide scan по month без artikul. */
 btradeSliceMonthSchema.index({ month: 1 });
 
-export const BtradeSliceMonth: Model<IBtradeSliceMonth> =
-  getOrCreateModel<IBtradeSliceMonth>(
-    "BtradeSliceMonth",
-    btradeSliceMonthSchema,
-    "btrade_slice_months",
-  );
+export const BtradeSliceMonth: Model<IBtradeSliceMonth> = getOrCreateModel<IBtradeSliceMonth>(
+  "BtradeSliceMonth",
+  btradeSliceMonthSchema,
+  "btrade_slice_months",
+);

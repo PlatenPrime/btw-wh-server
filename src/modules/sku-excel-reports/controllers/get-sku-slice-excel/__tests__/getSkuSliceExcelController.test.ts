@@ -4,9 +4,6 @@ import { getSkuStockSliceExcelController } from "../getSkuSliceExcelController.j
 
 describe("getSkuStockSliceExcelController", () => {
   it("returns 410 EXCEL_JOBS_MIGRATED", async () => {
-    await assertMigratedExcelController(
-      getSkuStockSliceExcelController,
-      "sku-one-stock",
-    );
+    await assertMigratedExcelController(getSkuStockSliceExcelController, "sku-one-stock");
   });
 });

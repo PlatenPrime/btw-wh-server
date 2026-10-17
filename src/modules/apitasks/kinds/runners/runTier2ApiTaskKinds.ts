@@ -31,17 +31,12 @@ export const runGraboSkusSync: ApiTaskKindRunner = async (_params, options) => {
     }
     return okApiTaskRun({ ...stats });
   } catch (error) {
-    await sendCronAnalyticsReport(
-      formatCronErrorReport("Grabo SKU sync", error),
-    );
+    await sendCronAnalyticsReport(formatCronErrorReport("Grabo SKU sync", error));
     throw error;
   }
 };
 
-export const runArtsBtradeStockUpdateAll: ApiTaskKindRunner = async (
-  _params,
-  options,
-) => {
+export const runArtsBtradeStockUpdateAll: ApiTaskKindRunner = async (_params, options) => {
   throwIfAborted(options?.signal);
   const result = await updateAllBtradeStocksUtil({
     onProgress: options?.onProgress,
@@ -58,10 +53,7 @@ export const runArtsBtradeStockUpdateAll: ApiTaskKindRunner = async (
   return okApiTaskRun({ ...result });
 };
 
-export const runDelsArtikulsUpdateAll: ApiTaskKindRunner = async (
-  params,
-  options,
-) => {
+export const runDelsArtikulsUpdateAll: ApiTaskKindRunner = async (params, options) => {
   const parsed = delsArtikulsUpdateAllParamsSchema.safeParse(params);
   if (!parsed.success) {
     return failApiTaskRun("Invalid params for dels.artikuls-update-all");

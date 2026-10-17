@@ -18,8 +18,7 @@ export function buildLoggerOptions(): pino.LoggerOptions {
 }
 
 function createRootLogger(): Logger {
-  const usePretty =
-    getLogFormat() === "pretty" && process.env.NODE_ENV !== "production";
+  const usePretty = getLogFormat() === "pretty" && process.env.NODE_ENV !== "production";
 
   if (usePretty) {
     return pino({

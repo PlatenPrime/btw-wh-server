@@ -13,7 +13,7 @@ describe("logPerfectUnavailableOutcome", () => {
       "Perfect stock unavailable (empty body)",
       expect.objectContaining({
         message: "url=https://x/p status=200 productPageHtml=false",
-      })
+      }),
     );
   });
 });

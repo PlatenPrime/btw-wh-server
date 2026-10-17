@@ -44,9 +44,7 @@ export function roundMoney(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-export function isUsablePackFlipPoint(
-  item: SlicePoint | null | undefined
-): item is SlicePoint {
+export function isUsablePackFlipPoint(item: SlicePoint | null | undefined): item is SlicePoint {
   if (!item) return false;
   if (!Number.isFinite(item.stock) || !Number.isFinite(item.price)) return false;
   return item.stock > 0 && item.price > 0;
@@ -76,10 +74,7 @@ export function areSamePriceScale(a: SlicePoint, b: SlicePoint): boolean {
   return nearestIntegerFactor(b.price / a.price) === null;
 }
 
-export function detectInversePackFlip(
-  prev: SlicePoint,
-  curr: SlicePoint
-): InversePackFlip | null {
+export function detectInversePackFlip(prev: SlicePoint, curr: SlicePoint): InversePackFlip | null {
   if (!isUsablePackFlipPoint(prev) || !isUsablePackFlipPoint(curr)) return null;
 
   const prevValue = prev.stock * prev.price;
@@ -106,7 +101,7 @@ export function detectInversePackFlip(
 
 export function detectPriceOnlyPackFlip(
   prev: SlicePoint,
-  curr: SlicePoint
+  curr: SlicePoint,
 ): PriceOnlyPackFlip | null {
   if (!isUsablePackFlipPoint(prev) || !isUsablePackFlipPoint(curr)) return null;
   if (detectInversePackFlip(prev, curr)) return null;
@@ -122,7 +117,7 @@ export function detectPriceOnlyPackFlip(
 
 export function rescaleToNeighborScale(
   neighbor: SlicePoint,
-  anomaly: SlicePoint
+  anomaly: SlicePoint,
 ): SlicePoint | null {
   const flip = detectInversePackFlip(neighbor, anomaly);
   if (!flip) return null;
@@ -147,7 +142,7 @@ function pushInverseDecision(
   index: number,
   neighborIndex: number,
   from: SlicePoint,
-  neighbor: SlicePoint
+  neighbor: SlicePoint,
 ): void {
   const patched = rescaleToNeighborScale(neighbor, from);
   const flip = detectInversePackFlip(neighbor, from);
@@ -167,17 +162,13 @@ function collectRoundTripDecisions(
   series: SeriesDay[],
   out: PackFlipSeriesDecision[],
   patchedIdx: Set<number>,
-  confirmedIdx: Set<number>
+  confirmedIdx: Set<number>,
 ): void {
   for (let i = 1; i <= series.length - 2; i++) {
     const a = series[i - 1]?.point;
     const b = series[i]?.point;
     const c = series[i + 1]?.point;
-    if (
-      !isUsablePackFlipPoint(a) ||
-      !isUsablePackFlipPoint(b) ||
-      !isUsablePackFlipPoint(c)
-    ) {
+    if (!isUsablePackFlipPoint(a) || !isUsablePackFlipPoint(b) || !isUsablePackFlipPoint(c)) {
       continue;
     }
 
@@ -208,7 +199,7 @@ function collectEdgeSpikeDecisions(
   series: SeriesDay[],
   out: PackFlipSeriesDecision[],
   patchedIdx: Set<number>,
-  confirmedIdx: Set<number>
+  confirmedIdx: Set<number>,
 ): void {
   const n = series.length;
   if (n < 3) return;
@@ -217,11 +208,7 @@ function collectEdgeSpikeDecisions(
     const a = series[0]?.point;
     const b = series[1]?.point;
     const c = series[2]?.point;
-    if (
-      isUsablePackFlipPoint(a) &&
-      isUsablePackFlipPoint(b) &&
-      isUsablePackFlipPoint(c)
-    ) {
+    if (isUsablePackFlipPoint(a) && isUsablePackFlipPoint(b) && isUsablePackFlipPoint(c)) {
       const ab = detectInversePackFlip(a, b);
       const bc = detectInversePackFlip(b, c);
       if (ab && !bc && areSamePriceScale(b, c)) {
@@ -236,11 +223,7 @@ function collectEdgeSpikeDecisions(
   const curr = series[last]?.point;
   const prev = series[last - 1]?.point;
   const d2 = series[last - 2]?.point;
-  if (
-    !isUsablePackFlipPoint(curr) ||
-    !isUsablePackFlipPoint(prev) ||
-    !isUsablePackFlipPoint(d2)
-  ) {
+  if (!isUsablePackFlipPoint(curr) || !isUsablePackFlipPoint(prev) || !isUsablePackFlipPoint(d2)) {
     return;
   }
 
@@ -267,7 +250,7 @@ function collectEdgeSpikeDecisions(
 function collectPriceOnlyDecisions(
   series: SeriesDay[],
   out: PackFlipSeriesDecision[],
-  patchedIdx: Set<number>
+  patchedIdx: Set<number>,
 ): void {
   for (let i = 1; i < series.length; i++) {
     if (patchedIdx.has(i) || patchedIdx.has(i - 1)) continue;
@@ -292,9 +275,7 @@ function collectPriceOnlyDecisions(
  * ведущий/хвостовой скачок патчит край, если соседняя пара на том же масштабе;
  * неоднозначные двойные инверсии — без патча; price-only только отчёт.
  */
-export function decidePackFlipPatchesForSeries(
-  series: SeriesDay[]
-): PackFlipSeriesDecision[] {
+export function decidePackFlipPatchesForSeries(series: SeriesDay[]): PackFlipSeriesDecision[] {
   const out: PackFlipSeriesDecision[] = [];
   const patchedIdx = new Set<number>();
   const confirmedIdx = new Set<number>();

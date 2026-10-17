@@ -51,11 +51,7 @@ describe("getAirClientPendingUtil", () => {
 
     expect(result.date).toEqual(sliceDate);
     expect(result.rotation).toBeNull();
-    expect(result.items.map((i) => i.productId)).toEqual([
-      "air-a",
-      "air-b",
-      "air-c",
-    ]);
+    expect(result.items.map((i) => i.productId)).toEqual(["air-a", "air-b", "air-c"]);
   });
 
   it("includes missing and -1 entries, skips valid ones", async () => {
@@ -93,9 +89,6 @@ describe("getAirClientPendingUtil", () => {
     const result = await getAirClientPendingUtil(now);
 
     expect(result.rotation).toBeNull();
-    expect(result.items.map((i) => i.productId)).toEqual([
-      "air-minus",
-      "air-missing",
-    ]);
+    expect(result.items.map((i) => i.productId)).toEqual(["air-minus", "air-missing"]);
   });
 });

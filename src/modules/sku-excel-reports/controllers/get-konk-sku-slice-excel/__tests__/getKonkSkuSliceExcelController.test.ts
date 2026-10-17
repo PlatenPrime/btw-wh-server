@@ -4,9 +4,6 @@ import { getKonkSkuStockSliceExcelController } from "../getKonkSkuSliceExcelCont
 
 describe("getKonkSkuStockSliceExcelController", () => {
   it("returns 410 EXCEL_JOBS_MIGRATED", async () => {
-    await assertMigratedExcelController(
-      getKonkSkuStockSliceExcelController,
-      "sku-konk-stock",
-    );
+    await assertMigratedExcelController(getKonkSkuStockSliceExcelController, "sku-konk-stock");
   });
 });

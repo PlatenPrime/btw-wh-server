@@ -7,10 +7,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Единоразово проставить isSliced=true для старых skugr без поля isSliced
  * @route   POST /api/skugrs/set-is-sliced
  */
-export const setIsSlicedController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const setIsSlicedController = async (req: Request, res: Response): Promise<void> => {
   try {
     const result = await setIsSlicedUtil();
 

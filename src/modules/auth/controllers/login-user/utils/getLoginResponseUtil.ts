@@ -22,9 +22,7 @@ type LoginResponse = {
  * const response = getLoginResponseUtil({ user });
  * ```
  */
-export const getLoginResponseUtil = ({
-  user,
-}: GetLoginResponseInput): LoginResponse => {
+export const getLoginResponseUtil = ({ user }: GetLoginResponseInput): LoginResponse => {
   const userWithoutPassword = getUserWithoutPasswordUtil(user);
   const token = generateAccessToken(user._id.toString(), user.role || "USER");
 
@@ -33,4 +31,3 @@ export const getLoginResponseUtil = ({
     token,
   };
 };
-

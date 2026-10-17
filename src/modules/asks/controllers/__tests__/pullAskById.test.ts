@@ -7,10 +7,7 @@ vi.mock("../../../../utils/getCurrentFormattedDateTime.js", () => ({
 }));
 
 import { pullAskById } from "../pull-ask-by-id/pullAskById.js";
-import {
-  createTestAsk,
-  createTestUser,
-} from "../../../../test/setup.js";
+import { createTestAsk, createTestUser } from "../../../../test/setup.js";
 import { Event } from "../../../events/models/Event.js";
 
 describe("pullAskById controller", () => {
@@ -103,7 +100,7 @@ describe("pullAskById controller", () => {
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(actor._id));
     expect(events[0].description).toBe(
-      "Знято товар по заявці на артикул ART-PULL: 5 шт., 2 кор. (палета: Pallet-123)"
+      "Знято товар по заявці на артикул ART-PULL: 5 шт., 2 кор. (палета: Pallet-123)",
     );
   });
 
@@ -175,4 +172,3 @@ describe("pullAskById controller", () => {
     expect(responseJson.message).toBe("Solver user not found");
   });
 });
-

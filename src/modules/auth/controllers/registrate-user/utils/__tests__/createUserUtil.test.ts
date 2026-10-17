@@ -51,4 +51,3 @@ describe("createUserUtil", () => {
     await session.endSession();
   });
 });
-

@@ -25,7 +25,7 @@ export const sendMessageToTGChat = async ({
       {
         chat_id: chatId,
         text: message,
-      }
+      },
     );
 
     if (!response.data.ok) {
@@ -37,8 +37,7 @@ export const sendMessageToTGChat = async ({
       messageId: response.data.result.message_id,
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     logModuleError("telegram", error, "Error sending message to chat:");
     throw new Error(`Failed to send message to chat: ${errorMessage}`);
   }

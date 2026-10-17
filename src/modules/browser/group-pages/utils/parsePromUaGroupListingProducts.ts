@@ -15,7 +15,7 @@ export type PromUaGroupPageProduct = {
  */
 export function parsePromUaGroupListingProducts(
   $: cheerio.CheerioAPI,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, PromUaGroupPageProduct> {
   const result = new Map<string, PromUaGroupPageProduct>();
 
@@ -55,10 +55,7 @@ export function parsePromUaGroupListingProducts(
     const $titleLink = $card.find("a.b-product-gallery__title").first();
     const $imgLink = $card.find("a.b-product-gallery__image-link").first();
 
-    const href =
-      $titleLink.attr("href")?.trim() ??
-      $imgLink.attr("href")?.trim() ??
-      "";
+    const href = $titleLink.attr("href")?.trim() ?? $imgLink.attr("href")?.trim() ?? "";
     const url = resolveHrefAgainstBase(href, currentPageUrl);
     if (!url) {
       return;
@@ -73,11 +70,9 @@ export function parsePromUaGroupListingProducts(
     }
 
     const $img = $imgLink.find("img").first();
-    const rawImg =
-      $img.attr("src")?.trim() ?? $img.attr("data-src")?.trim() ?? "";
+    const rawImg = $img.attr("src")?.trim() ?? $img.attr("data-src")?.trim() ?? "";
     const imageUrl =
-      resolveHrefAgainstBase(rawImg, currentPageUrl) ??
-      (rawImg.startsWith("http") ? rawImg : null);
+      resolveHrefAgainstBase(rawImg, currentPageUrl) ?? (rawImg.startsWith("http") ? rawImg : null);
     if (!imageUrl) {
       return;
     }

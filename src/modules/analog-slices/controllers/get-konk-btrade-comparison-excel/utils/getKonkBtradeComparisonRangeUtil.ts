@@ -3,10 +3,7 @@ import { Art } from "../../../../arts/models/Art.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import type { IBtradeSliceDataItem } from "../../../../btrade-slices/models/btradeSliceTypes.js";
 import { loadPointsForArtikulsRange } from "../../../../btrade-slices/utils/btradeSliceMonthStore.js";
-import {
-  AnalogSlice,
-  type IAnalogSliceDataItem,
-} from "../../../models/AnalogSlice.js";
+import { AnalogSlice, type IAnalogSliceDataItem } from "../../../models/AnalogSlice.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { toSliceDate } from "../../../utils/runAnalogSliceForKonkUtil.js";
 import { sliceDateMinusDays } from "../../../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
@@ -107,8 +104,12 @@ export async function getKonkBtradeComparisonRangeUtil(
   const prodNameList = Array.from(prodNameSet);
 
   const [artDocs, prodDocs, konkDoc] = await Promise.all([
-    Art.find({ artikul: { $in: artikulList } }).select("artikul nameukr abc").lean(),
-    Prod.find({ name: { $in: prodNameList } }).select("name title").lean(),
+    Art.find({ artikul: { $in: artikulList } })
+      .select("artikul nameukr abc")
+      .lean(),
+    Prod.find({ name: { $in: prodNameList } })
+      .select("name title")
+      .lean(),
     Konk.findOne({ name: input.konk }).select("title recountDays").lean(),
   ]);
 
@@ -155,15 +156,8 @@ export async function getKonkBtradeComparisonRangeUtil(
     }
   }
 
-  const btradePoints = await loadPointsForArtikulsRange(
-    [...artikulSet],
-    warmStart,
-    dateTo,
-  );
-  const btradeByArtikulAndDate = new Map<
-    string,
-    Map<number, IBtradeSliceDataItem>
-  >();
+  const btradePoints = await loadPointsForArtikulsRange([...artikulSet], warmStart, dateTo);
+  const btradeByArtikulAndDate = new Map<string, Map<number, IBtradeSliceDataItem>>();
   for (const point of btradePoints) {
     if (!artikulSet.has(point.artikul)) continue;
     let byDate = btradeByArtikulAndDate.get(point.artikul);
@@ -189,13 +183,10 @@ export async function getKonkBtradeComparisonRangeUtil(
     .map((analog) => {
       const artNameUkr = artNameByArtikul.get(analog.artikul) ?? null;
       const artAbc = artAbcByArtikul.get(analog.artikul) ?? null;
-      const producerName =
-        producerTitleByProdName.get(analog.prodName) ?? null;
+      const producerName = producerTitleByProdName.get(analog.prodName) ?? null;
 
-      const analogByDate =
-        analogByArtikulAndDate.get(analog.artikul) ?? new Map();
-      const btradeByDate =
-        btradeByArtikulAndDate.get(analog.artikul) ?? new Map();
+      const analogByDate = analogByArtikulAndDate.get(analog.artikul) ?? new Map();
+      const btradeByDate = btradeByArtikulAndDate.get(analog.artikul) ?? new Map();
       const warmDateKey = warmStart.getTime();
       const warmAnalogItem = analogByDate.get(warmDateKey);
       const warmBtradeItem = btradeByDate.get(warmDateKey);
@@ -229,10 +220,7 @@ export async function getKonkBtradeComparisonRangeUtil(
 
   if (input.abc != null) {
     const abcUpper = input.abc.toUpperCase();
-    analogs = analogs.filter(
-      (a) =>
-        (a.artAbc ?? "").toUpperCase().includes(abcUpper),
-    );
+    analogs = analogs.filter((a) => (a.artAbc ?? "").toUpperCase().includes(abcUpper));
   }
 
   if (analogs.length === 0) {
@@ -242,21 +230,17 @@ export async function getKonkBtradeComparisonRangeUtil(
   const useSortByAbc = input.sortBy === "abc";
 
   if (useSortByAbc) {
-    analogs = analogs
-      .slice()
-      .sort((a, b) => {
-        const orderA = getAbcLetterOrder(a.artAbc);
-        const orderB = getAbcLetterOrder(b.artAbc);
-        if (orderA !== orderB) return orderA - orderB;
-        const numA = parseAbcNumeric(a.artAbc);
-        const numB = parseAbcNumeric(b.artAbc);
-        if (numA !== numB) return numA - numB;
-        return a.artikul.localeCompare(b.artikul);
-      });
+    analogs = analogs.slice().sort((a, b) => {
+      const orderA = getAbcLetterOrder(a.artAbc);
+      const orderB = getAbcLetterOrder(b.artAbc);
+      if (orderA !== orderB) return orderA - orderB;
+      const numA = parseAbcNumeric(a.artAbc);
+      const numB = parseAbcNumeric(b.artAbc);
+      if (numA !== numB) return numA - numB;
+      return a.artikul.localeCompare(b.artikul);
+    });
   } else {
-    analogs = analogs
-      .slice()
-      .sort((a, b) => a.artikul.localeCompare(b.artikul));
+    analogs = analogs.slice().sort((a, b) => a.artikul.localeCompare(b.artikul));
   }
 
   return {
@@ -269,4 +253,3 @@ export async function getKonkBtradeComparisonRangeUtil(
     recountDays: (konkDoc?.recountDays ?? []).map(String),
   };
 }
-

@@ -12,10 +12,7 @@ export type StartServerOptions = {
   port?: string | number;
 };
 
-export async function startServer(
-  app: Express,
-  options: StartServerOptions = {}
-): Promise<void> {
+export async function startServer(app: Express, options: StartServerOptions = {}): Promise<void> {
   const bootLog = createLogger({ module: "server" });
   const port = (options.port ?? process.env.PORT) || 3232;
 

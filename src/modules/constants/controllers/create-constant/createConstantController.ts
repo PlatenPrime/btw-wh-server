@@ -8,16 +8,13 @@ import { createConstantUtil } from "./utils/createConstantUtil.js";
  * @desc    Создать константу
  * @route   POST /api/constants
  */
-export const createConstantController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createConstantController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createConstantSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

@@ -9,18 +9,12 @@ vi.mock("../../perfect-ajax-post/perfectAjaxPost.js", () => ({
 vi.mock("../../perfect-cart-delete/deletePerfectCartItem.js", () => ({
   deletePerfectCartItem: vi.fn().mockResolvedValue(undefined),
 }));
-vi.mock(
-  "../../perfect-product-page-extract/perfectProductPageExtract.js",
-  () => ({
-    buildPerfectAddToCartBody: vi.fn(() => "add-body"),
-  })
-);
-vi.mock(
-  "../../perfect-parse-cart-stock-outcome/parsePerfectCartStockOutcome.js",
-  () => ({
-    parsePerfectCartStockOutcome: vi.fn(),
-  })
-);
+vi.mock("../../perfect-product-page-extract/perfectProductPageExtract.js", () => ({
+  buildPerfectAddToCartBody: vi.fn(() => "add-body"),
+}));
+vi.mock("../../perfect-parse-cart-stock-outcome/parsePerfectCartStockOutcome.js", () => ({
+  parsePerfectCartStockOutcome: vi.fn(),
+}));
 vi.mock("../../perfect-resolve-cart-failure/resolvePerfectCartFailure.js", () => ({
   resolvePerfectCartFailure: vi.fn(() => ({
     stock: 0,
@@ -71,7 +65,7 @@ describe("fetchPerfectCartStockAndRelease", () => {
         token: "tok",
         cookieHeader: "c=2",
         productUrl: "https://x/p",
-      })
+      }),
     );
   });
 

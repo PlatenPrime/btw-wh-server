@@ -61,11 +61,9 @@ describe("deletePalletPosesUtil", () => {
         deletePalletPosesUtil({
           palletId: new mongoose.Types.ObjectId().toString(),
           session,
-        })
+        }),
       ).rejects.toThrow("Pallet not found");
     });
     await session.endSession();
   });
 });
-
-

@@ -16,8 +16,7 @@ import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForS
 import type { GetSkugrSliceExcelInput } from "../schemas/getSkugrSliceExcelSchema.js";
 
 export type GetSkugrSliceExcelResult =
-  | { ok: true; buffer: Buffer; fileName: string }
-  | { ok: false };
+  { ok: true; buffer: Buffer; fileName: string } | { ok: false };
 
 export async function getSkugrSliceExcelUtil(
   input: GetSkugrSliceExcelInput,

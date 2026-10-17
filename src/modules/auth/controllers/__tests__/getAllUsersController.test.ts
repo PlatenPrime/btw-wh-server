@@ -52,4 +52,3 @@ describe("getAllUsersController", () => {
     expect(responseJson.length).toBe(0);
   });
 });
-

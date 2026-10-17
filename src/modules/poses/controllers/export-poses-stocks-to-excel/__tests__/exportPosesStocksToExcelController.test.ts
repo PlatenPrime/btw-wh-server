@@ -4,9 +4,6 @@ import { exportPosesStocksToExcelController } from "../exportPosesStocksToExcelC
 
 describe("exportPosesStocksToExcelController", () => {
   it("returns 410 EXCEL_JOBS_MIGRATED", async () => {
-    await assertMigratedExcelController(
-      exportPosesStocksToExcelController,
-      "poses-export-stocks",
-    );
+    await assertMigratedExcelController(exportPosesStocksToExcelController, "poses-export-stocks");
   });
 });

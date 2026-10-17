@@ -4,10 +4,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
 import { PalletGroup } from "../../models/PalletGroup.js";
 
-export const deletePalletGroupController = async (
-  req: Request,
-  res: Response
-) => {
+export const deletePalletGroupController = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -35,15 +32,13 @@ export const deletePalletGroupController = async (
           $set: { sector: 0 },
           $unset: { palgr: "" },
         },
-        { session }
+        { session },
       );
     }
 
     await group.deleteOne({ session });
 
-    const remainingGroups = await PalletGroup.find({})
-      .sort({ order: 1 })
-      .session(session);
+    const remainingGroups = await PalletGroup.find({}).sort({ order: 1 }).session(session);
 
     for (let index = 0; index < remainingGroups.length; index += 1) {
       const g = remainingGroups[index];
@@ -75,4 +70,3 @@ export const deletePalletGroupController = async (
     });
   }
 };
-

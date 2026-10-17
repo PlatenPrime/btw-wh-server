@@ -49,9 +49,7 @@ export const checkRoles = (requiredRoles: RoleType[]) => {
       }
 
       // Проверяем, входит ли роль пользователя в список разрешенных ролей
-      const hasAccess = requiredRoles.some((requiredRole) =>
-        hasRoleAccess(role, requiredRole)
-      );
+      const hasAccess = requiredRoles.some((requiredRole) => hasRoleAccess(role, requiredRole));
 
       if (!hasAccess) {
         res.status(403).json({
@@ -65,7 +63,7 @@ export const checkRoles = (requiredRoles: RoleType[]) => {
 
       // Пользователь имеет необходимые права
       next();
-    } catch (error) {
+    } catch {
       res.status(500).json({
         message: "Ошибка проверки прав доступа",
         code: "ROLE_CHECK_ERROR",
@@ -97,13 +95,9 @@ export const checkRoles = (requiredRoles: RoleType[]) => {
  * ```
  */
 export const checkOwnership = (
-  getUserIdFromResource: (req: Request) => Promise<string | undefined>
+  getUserIdFromResource: (req: Request) => Promise<string | undefined>,
 ) => {
-  return async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       if (!req.user) {
         res.status(401).json({
@@ -142,7 +136,7 @@ export const checkOwnership = (
       }
 
       next();
-    } catch (error) {
+    } catch {
       res.status(500).json({
         message: "Ошибка проверки владельца ресурса",
         code: "OWNERSHIP_CHECK_ERROR",

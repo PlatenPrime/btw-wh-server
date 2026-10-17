@@ -15,13 +15,7 @@ describe("sortPalletsByTitle", () => {
       { title: "1-1" },
     ];
     const sorted = sortPalletsByTitle([...pallets]);
-    expect(mapPalletsToTitle(sorted)).toEqual([
-      "1-1",
-      "1-2",
-      "1-10",
-      "2-2",
-      "2-10",
-    ]);
+    expect(mapPalletsToTitle(sorted)).toEqual(["1-1", "1-2", "1-10", "2-2", "2-10"]);
   });
 
   it("корректно работает с однозначными и двузначными числами", () => {

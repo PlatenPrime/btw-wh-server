@@ -1,19 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../logging/httpLogger.js", () => ({
-  createHttpLogger: vi.fn(
-    () => (_req: unknown, _res: unknown, next: () => void) => next()
-  ),
-  createSlowRequestLogger: vi.fn(
-    () => (_req: unknown, _res: unknown, next: () => void) => next()
-  ),
+  createHttpLogger: vi.fn(() => (_req: unknown, _res: unknown, next: () => void) => next()),
+  createSlowRequestLogger: vi.fn(() => (_req: unknown, _res: unknown, next: () => void) => next()),
 }));
 
 vi.mock("../logging/errorLogger.js", () => ({
   createErrorLogger: vi.fn(
-    () =>
-      (_err: unknown, _req: unknown, _res: unknown, next: () => void) =>
-        next()
+    () => (_err: unknown, _req: unknown, _res: unknown, next: () => void) => next(),
   ),
 }));
 
@@ -22,10 +16,7 @@ vi.mock("../registerRoutes.js", () => ({
 }));
 
 import { createErrorLogger } from "../logging/errorLogger.js";
-import {
-  createHttpLogger,
-  createSlowRequestLogger,
-} from "../logging/httpLogger.js";
+import { createHttpLogger, createSlowRequestLogger } from "../logging/httpLogger.js";
 import { registerRoutes } from "../registerRoutes.js";
 import { createApp } from "../createApp.js";
 

@@ -1,10 +1,7 @@
 import { Request, Response } from "express";
 import { getPosesByRowIdUtil } from "./utils/getPosesByRowIdUtil.js";
 
-export const getPosesByRowIdController = async (
-  req: Request,
-  res: Response
-) => {
+export const getPosesByRowIdController = async (req: Request, res: Response) => {
   const { rowId } = req.params;
 
   try {
@@ -27,4 +24,3 @@ export const getPosesByRowIdController = async (
     }
   }
 };
-

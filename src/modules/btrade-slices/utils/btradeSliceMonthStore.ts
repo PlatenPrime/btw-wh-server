@@ -2,14 +2,8 @@ import type { AnyBulkWriteOperation } from "mongoose";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { isInvalidSliceStockPriceItem } from "../../slices/utils/isInvalidSliceStockPriceItem.js";
 import type { IBtradeSliceDataItem } from "../models/btradeSliceTypes.js";
-import {
-  BtradeSliceMonth,
-  type IBtradeSliceMonth,
-} from "../models/BtradeSliceMonth.js";
-import {
-  toSliceMonthDate,
-  toSliceMonthDayKey,
-} from "./btradeSliceMonthKeys.js";
+import { BtradeSliceMonth, type IBtradeSliceMonth } from "../models/BtradeSliceMonth.js";
+import { toSliceMonthDate, toSliceMonthDayKey } from "./btradeSliceMonthKeys.js";
 
 export type BtradeSliceDayPointWrite = {
   artikul: string;
@@ -38,9 +32,7 @@ function parseDayItem(raw: unknown): IBtradeSliceDataItem | null {
   return { quantity, price };
 }
 
-function buildUpsertOp(
-  w: BtradeSliceDayPointWrite,
-): AnyBulkWriteOperation<IBtradeSliceMonth> {
+function buildUpsertOp(w: BtradeSliceDayPointWrite): AnyBulkWriteOperation<IBtradeSliceMonth> {
   const sliceDate = toSliceDate(w.date);
   const month = toSliceMonthDate(sliceDate);
   const dayKey = toSliceMonthDayKey(sliceDate);
@@ -79,9 +71,7 @@ export async function upsertDayPoint(
 }
 
 /** Bulk upsert точек (cron full-day catalog). */
-export async function upsertDayPointsBulk(
-  writes: BtradeSliceDayPointWrite[],
-): Promise<number> {
+export async function upsertDayPointsBulk(writes: BtradeSliceDayPointWrite[]): Promise<number> {
   if (writes.length === 0) return 0;
   await BtradeSliceMonth.bulkWrite(writes.map(buildUpsertOp), {
     ordered: false,
@@ -112,9 +102,7 @@ export async function getDayPoint(
 /**
  * Карта artikul → item за один день (для rollup / materialize).
  */
-export async function loadDayMap(
-  date: Date,
-): Promise<Record<string, IBtradeSliceDataItem>> {
+export async function loadDayMap(date: Date): Promise<Record<string, IBtradeSliceDataItem>> {
   const sliceDate = toSliceDate(date);
   const month = toSliceMonthDate(sliceDate);
   const dayKey = toSliceMonthDayKey(sliceDate);
@@ -145,14 +133,12 @@ export async function loadDayMaps(
   if (dates.length === 0) return out;
 
   const sliceDates = dates.map((d) => toSliceDate(d));
-  const uniqueTimes = [...new Set(sliceDates.map((d) => d.getTime()))].sort(
-    (a, b) => a - b,
-  );
+  const uniqueTimes = [...new Set(sliceDates.map((d) => d.getTime()))].sort((a, b) => a - b);
   const uniqueDates = uniqueTimes.map((t) => new Date(t));
 
-  const months = [
-    ...new Set(uniqueDates.map((d) => toSliceMonthDate(d).getTime())),
-  ].map((t) => new Date(t));
+  const months = [...new Set(uniqueDates.map((d) => toSliceMonthDate(d).getTime()))].map(
+    (t) => new Date(t),
+  );
 
   const dayKeysNeeded = new Set(uniqueDates.map((d) => toSliceMonthDayKey(d)));
 
@@ -188,9 +174,7 @@ export async function loadPointsForArtikulsRange(
   artikuls: string[],
   dateFrom: Date,
   dateTo: Date,
-): Promise<
-  Array<{ artikul: string; date: Date; item: IBtradeSliceDataItem }>
-> {
+): Promise<Array<{ artikul: string; date: Date; item: IBtradeSliceDataItem }>> {
   const keys = [...new Set(artikuls.map((a) => a.trim()).filter(Boolean))];
   if (keys.length === 0) return [];
 
@@ -211,8 +195,7 @@ export async function loadPointsForArtikulsRange(
     .lean()
     .exec();
 
-  const out: Array<{ artikul: string; date: Date; item: IBtradeSliceDataItem }> =
-    [];
+  const out: Array<{ artikul: string; date: Date; item: IBtradeSliceDataItem }> = [];
 
   for (const doc of docs) {
     const artikul = (doc.artikul ?? "").trim();
@@ -269,10 +252,7 @@ export async function findDayPointsPage(
     if (!item) continue;
     const artikul = (doc.artikul ?? "").trim();
     if (!artikul) continue;
-    if (
-      input.isInvalid === true &&
-      !isInvalidSliceStockPriceItem(item.quantity, item.price)
-    ) {
+    if (input.isInvalid === true && !isInvalidSliceStockPriceItem(item.quantity, item.price)) {
       continue;
     }
     rows.push({ artikul, quantity: item.quantity, price: item.price });

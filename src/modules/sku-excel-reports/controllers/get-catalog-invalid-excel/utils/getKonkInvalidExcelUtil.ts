@@ -16,15 +16,11 @@ export async function getKonkInvalidExcelUtil(
   konkName: string,
 ): Promise<GetKonkInvalidExcelResult> {
   const isAllKonks = konkName === SKU_EXCEL_ALL_KONKS;
-  const skus = await Sku.find(
-    isAllKonks ? { isInvalid: true } : { konkName, isInvalid: true },
-  )
+  const skus = await Sku.find(isAllKonks ? { isInvalid: true } : { konkName, isInvalid: true })
     .sort(isAllKonks ? { konkName: 1, title: 1 } : { title: 1 })
     .lean();
 
-  const konkTitleByName = await loadKonkTitleByKonkNames(
-    skus.map((s) => s.konkName),
-  );
+  const konkTitleByName = await loadKonkTitleByKonkNames(skus.map((s) => s.konkName));
 
   const rows: SkuCatalogExcelRow[] = skus.map((s) => ({
     productId: (s.productId ?? "").trim(),

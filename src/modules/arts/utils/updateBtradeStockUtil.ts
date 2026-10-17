@@ -35,9 +35,8 @@ export const updateBtradeStockUtil = async ({
       {
         new: true,
         runValidators: true,
-        select:
-          "artikul zone namerus nameukr limit marker btradeStock createdAt updatedAt",
-      }
+        select: "artikul zone namerus nameukr limit marker btradeStock createdAt updatedAt",
+      },
     );
 
     return updatedArt;
@@ -46,4 +45,3 @@ export const updateBtradeStockUtil = async ({
     throw error;
   }
 };
-

@@ -18,71 +18,66 @@ import {
 
 const router = Router();
 
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogSliceController)
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAnalogSliceController));
 router.get(
   "/analog/:analogId/range",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogSliceRangeController)
+  asyncHandler(getAnalogSliceRangeController),
 );
 router.get(
   "/analog/:analogId/sales-range",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogSalesRangeController)
+  asyncHandler(getAnalogSalesRangeController),
 );
 router.get(
   "/analog/:analogId/sales-by-date",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogSalesByDateController)
+  asyncHandler(getAnalogSalesByDateController),
 );
 router.get(
   "/analog/:analogId/comparison-excel",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogBtradeComparisonExcelController)
+  asyncHandler(getAnalogBtradeComparisonExcelController),
 );
 router.get(
   "/konk-btrade/sales-comparison",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkBtradeSalesComparisonController)
+  asyncHandler(getKonkBtradeSalesComparisonController),
 );
 router.get(
   "/konk-btrade/stock-comparison",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkBtradeStockComparisonController)
+  asyncHandler(getKonkBtradeStockComparisonController),
 );
 router.get(
   "/konk-btrade/comparison-excel",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkBtradeComparisonExcelController)
+  asyncHandler(getKonkBtradeComparisonExcelController),
 );
 router.get(
   "/konk-btrade/sales-comparison-excel",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getKonkBtradeSalesComparisonExcelController)
+  asyncHandler(getKonkBtradeSalesComparisonExcelController),
 );
 router.get(
   "/analog/:analogId/sales-comparison-excel",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogSalesComparisonExcelController)
+  asyncHandler(getAnalogSalesComparisonExcelController),
 );
 router.get(
   "/analog/:analogId",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAnalogSliceByDateController)
+  asyncHandler(getAnalogSliceByDateController),
 );
 
 export default router;

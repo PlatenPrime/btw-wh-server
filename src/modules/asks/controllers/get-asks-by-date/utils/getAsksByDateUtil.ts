@@ -18,4 +18,3 @@ export const getAsksByDateUtil = async (date: string): Promise<IAsk[]> => {
 
   return asks;
 };
-

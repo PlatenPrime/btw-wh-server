@@ -73,7 +73,9 @@ describe("createExcelJobUtil", () => {
     if (!third.ok) {
       expect(third.status).toBe(429);
     }
-    expect(getExcelJobQueueSnapshot().queuedIds.length + (getExcelJobQueueSnapshot().runningId ? 1 : 0)).toBeGreaterThanOrEqual(1);
+    expect(
+      getExcelJobQueueSnapshot().queuedIds.length + (getExcelJobQueueSnapshot().runningId ? 1 : 0),
+    ).toBeGreaterThanOrEqual(1);
     release();
     await ExcelJob.deleteMany({ userId: "u-limit" });
   });

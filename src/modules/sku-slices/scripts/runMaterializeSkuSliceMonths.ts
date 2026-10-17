@@ -30,9 +30,7 @@ export async function executeMaterializeSkuSliceMonthsCli(
   const mode = input.apply ? "APPLY" : "DRY-RUN";
   console.log(
     `[sku-slice-months] start mode=${mode} daysBack=${input.daysBack}` +
-      (input.asOf
-        ? ` asOf=${input.asOf.toISOString().slice(0, 10)}`
-        : "") +
+      (input.asOf ? ` asOf=${input.asOf.toISOString().slice(0, 10)}` : "") +
       (input.konkName ? ` konk=${input.konkName}` : ""),
   );
 
@@ -56,9 +54,7 @@ export async function executeMaterializeSkuSliceMonthsCli(
   return result;
 }
 
-export async function runMaterializeSkuSliceMonthsConnected(
-  argv: string[],
-): Promise<void> {
+export async function runMaterializeSkuSliceMonthsConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executeMaterializeSkuSliceMonthsCli(argv);

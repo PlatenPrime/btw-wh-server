@@ -6,9 +6,7 @@ import { Seg } from "../../../../models/Seg.js";
 import { createSegUtil } from "../createSegUtil.js";
 
 describe("createSegUtil", () => {
-  const createZone = async (
-    overrides: Partial<{ title: string; bar: number }> = {}
-  ) => {
+  const createZone = async (overrides: Partial<{ title: string; bar: number }> = {}) => {
     const timestamp = Date.now();
     const random = Math.floor(Math.random() * 99) + 1;
     return Zone.create({
@@ -19,7 +17,7 @@ describe("createSegUtil", () => {
   };
 
   const runWithSession = async <T>(
-    fn: (session: mongoose.ClientSession) => Promise<T>
+    fn: (session: mongoose.ClientSession) => Promise<T>,
   ): Promise<T> => {
     const session = await mongoose.startSession();
     try {
@@ -44,7 +42,7 @@ describe("createSegUtil", () => {
         order: 3,
         zones: [zoneA._id.toString(), zoneB._id.toString()],
         session,
-      })
+      }),
     );
 
     expect(createdSeg.order).toBe(3);
@@ -52,9 +50,7 @@ describe("createSegUtil", () => {
     expect(createdSeg.zones).toHaveLength(2);
 
     const updatedBlock = await Block.findById(block._id).lean().exec();
-    expect(updatedBlock?.segs.map((id) => id.toString())).toContain(
-      createdSeg._id.toString()
-    );
+    expect(updatedBlock?.segs.map((id) => id.toString())).toContain(createdSeg._id.toString());
 
     const updatedZoneA = await Zone.findById(zoneA._id).lean().exec();
     expect(updatedZoneA?.seg?.id?.toString()).toBe(createdSeg._id.toString());
@@ -72,8 +68,8 @@ describe("createSegUtil", () => {
           order: 1,
           zones: [missingZoneId],
           session,
-        })
-      )
+        }),
+      ),
     ).rejects.toThrow(/one or more zones not found/i);
   });
 
@@ -91,7 +87,7 @@ describe("createSegUtil", () => {
 
     await Zone.updateOne(
       { _id: zone._id },
-      { $set: { "seg.id": existingSeg._id, sector: existingSeg.sector } }
+      { $set: { "seg.id": existingSeg._id, sector: existingSeg.sector } },
     );
 
     await expect(
@@ -101,8 +97,8 @@ describe("createSegUtil", () => {
           order: 2,
           zones: [zone._id.toString()],
           session,
-        })
-      )
+        }),
+      ),
     ).rejects.toThrow(/zones already belong to segments/i);
   });
 });

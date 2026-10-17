@@ -43,9 +43,11 @@
 Вход в систему.
 
 **Запрос:**
+
 - Body: `{ username: string, password: string }`
 
 **Ответ:**
+
 - 200: `{ user: User (без password), token: string }`
 - 400: `{ message: string }` - ошибка валидации или неверные учетные данные
 
@@ -56,9 +58,11 @@
 Регистрация нового пользователя.
 
 **Запрос:**
+
 - Body: `{ username: string, password: string, fullname: string, role?: string, telegram?: string, photo?: string }`
 
 **Ответ:**
+
 - 201: `{ user: User (без password) }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 409: `{ message: string }` - пользователь с таким username уже существует
@@ -71,9 +75,11 @@
 Получение списка всех пользователей.
 
 **Запрос:**
+
 - Query параметры отсутствуют
 
 **Ответ:**
+
 - 200: `Array<User (без password)>`
 - 500: `{ message: string, error: any }` - ошибка сервера
 
@@ -84,9 +90,11 @@
 Создание пользователя (админка). Доступно только для PRIME.
 
 **Запрос:**
+
 - Body: `{ username: string, password: string, fullname: string, role?: string, telegram?: string, photo?: string }`
 
 **Ответ:**
+
 - 201: `{ user: User (без password) }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 409: `{ message: string }` - пользователь с таким username уже существует
@@ -99,9 +107,11 @@
 Получение пользователя по идентификатору.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ user: User (без password) }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - пользователь не найден
@@ -114,9 +124,11 @@
 Получение информации о текущем пользователе с обновленным токеном.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ user: User (без password), token: string }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - пользователь не найден
@@ -129,10 +141,12 @@
 Обновление информации о пользователе (все поля, включая username). Доступно только для PRIME.
 
 **Запрос:**
+
 - Path параметры: `userId` (MongoDB ObjectId)
 - Body: `{ username?: string, password?: string, fullname?: string, role?: string, telegram?: string, photo?: string }` (все поля опциональны)
 
 **Ответ:**
+
 - 200: `{ user: User (без password), token: string }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - пользователь не найден
@@ -146,9 +160,11 @@
 Получение списка всех доступных ролей.
 
 **Запрос:**
+
 - Query параметры отсутствуют
 
 **Ответ:**
+
 - 200: `Array<Role>`
 - 500: `{ message: string, error: any }` - ошибка сервера
 
@@ -189,4 +205,3 @@
   token: string;         // JWT токен для авторизации
 }
 ```
-

@@ -17,39 +17,26 @@ const START = "https://example.test/list";
 const PAGE2 = "https://example.test/list/page2";
 
 function htmlWithNext(body: string, nextHref?: string): string {
-  const next =
-    nextHref != null
-      ? `<link rel="next" href="${nextHref}" />`
-      : "";
+  const next = nextHref != null ? `<link rel="next" href="${nextHref}" />` : "";
   return `<!DOCTYPE html><html><head>${next}</head><body>${body}</body></html>`;
 }
 
 describe("getNextPageUrlFromLinkRelNext", () => {
   it("returns null when rel=next is absent", () => {
     const $ = cheerio.load("<html><head></head></html>");
-    expect(
-      getNextPageUrlFromLinkRelNext($, START, () => null)
-    ).toBeNull();
+    expect(getNextPageUrlFromLinkRelNext($, START, () => null)).toBeNull();
   });
 
   it("returns null when resolveUrl rejects the href", () => {
-    const $ = cheerio.load(
-      '<html><head><link rel="next" href="/p2" /></head></html>'
-    );
-    expect(
-      getNextPageUrlFromLinkRelNext($, START, () => null)
-    ).toBeNull();
+    const $ = cheerio.load('<html><head><link rel="next" href="/p2" /></head></html>');
+    expect(getNextPageUrlFromLinkRelNext($, START, () => null)).toBeNull();
   });
 
   it("resolves next href via resolveUrl", () => {
-    const $ = cheerio.load(
-      '<html><head><link rel="next" href="page2" /></head></html>'
-    );
+    const $ = cheerio.load('<html><head><link rel="next" href="page2" /></head></html>');
     const base = "https://example.test/list/";
-    const resolved = getNextPageUrlFromLinkRelNext(
-      $,
-      base,
-      (href, b) => new URL(href, b).toString()
+    const resolved = getNextPageUrlFromLinkRelNext($, base, (href, b) =>
+      new URL(href, b).toString(),
     );
     expect(resolved).toBe("https://example.test/list/page2");
   });
@@ -59,17 +46,17 @@ describe("mergeSearchParamsFromSource", () => {
   it("appends all search params from source onto target", () => {
     const merged = mergeSearchParamsFromSource(
       "https://balun.example.test/ua/g1/page_2",
-      "https://balun.example.test/ua/g1?product_items_per_page=48&csbss47=793"
+      "https://balun.example.test/ua/g1?product_items_per_page=48&csbss47=793",
     );
     expect(merged).toBe(
-      "https://balun.example.test/ua/g1/page_2?product_items_per_page=48&csbss47=793"
+      "https://balun.example.test/ua/g1/page_2?product_items_per_page=48&csbss47=793",
     );
   });
 
   it("overwrites keys on target with values from source", () => {
     const merged = mergeSearchParamsFromSource(
       "https://example.test/list/page_2?foo=old&keep=1",
-      "https://example.test/list?foo=new"
+      "https://example.test/list?foo=new",
     );
     expect(merged).toBe("https://example.test/list/page_2?foo=new&keep=1");
   });
@@ -111,8 +98,7 @@ describe("crawlHtmlGroupListingPages", () => {
       throw new Error(`Unexpected url: ${url}`);
     });
 
-    const resolve = (href: string, base: string) =>
-      new URL(href, base).toString();
+    const resolve = (href: string, base: string) => new URL(href, base).toString();
 
     const result = await crawlHtmlGroupListingPages({
       startUrl: START,
@@ -143,8 +129,7 @@ describe("crawlHtmlGroupListingPages", () => {
       throw new Error(`Unexpected url: ${url}`);
     });
 
-    const resolve = (href: string, base: string) =>
-      new URL(href, base).toString();
+    const resolve = (href: string, base: string) => new URL(href, base).toString();
 
     const result = await crawlHtmlGroupListingPages({
       startUrl: START,
@@ -173,8 +158,7 @@ describe("crawlHtmlGroupListingPages", () => {
       throw new Error(`Unexpected url: ${url}`);
     });
 
-    const resolve = (href: string, base: string) =>
-      new URL(href, base).toString();
+    const resolve = (href: string, base: string) => new URL(href, base).toString();
 
     const result = await crawlHtmlGroupListingPages({
       startUrl: START,
@@ -204,8 +188,7 @@ describe("crawlHtmlGroupListingPages", () => {
       throw new Error(`Unexpected url: ${url}`);
     });
 
-    const resolve = (href: string, base: string) =>
-      new URL(href, base).toString();
+    const resolve = (href: string, base: string) => new URL(href, base).toString();
 
     const result = await crawlHtmlGroupListingPages({
       startUrl: START,
@@ -229,8 +212,7 @@ describe("crawlHtmlGroupListingPages", () => {
     const html = htmlWithNext('<b data-k="x"></b>', START);
     vi.mocked(browserGet).mockResolvedValue(html);
 
-    const resolve = (href: string, base: string) =>
-      new URL(href, base).toString();
+    const resolve = (href: string, base: string) => new URL(href, base).toString();
 
     const result = await crawlHtmlGroupListingPages({
       startUrl: START,
@@ -248,7 +230,7 @@ describe("crawlHtmlGroupListingPages", () => {
   });
 
   it("calls sleep between pages when delayBeforeNextMs is set", async () => {
-    const h1 = htmlWithNext('<i></i>', PAGE2);
+    const h1 = htmlWithNext("<i></i>", PAGE2);
     const h2 = htmlWithNext("<i></i>");
     vi.mocked(browserGet).mockImplementation(async (url: string) => {
       if (url === START) return h1;
@@ -256,8 +238,7 @@ describe("crawlHtmlGroupListingPages", () => {
       throw new Error(`Unexpected url: ${url}`);
     });
 
-    const resolve = (href: string, base: string) =>
-      new URL(href, base).toString();
+    const resolve = (href: string, base: string) => new URL(href, base).toString();
 
     await crawlHtmlGroupListingPages({
       startUrl: START,
@@ -280,8 +261,7 @@ describe("crawlHtmlGroupListingPages", () => {
       throw new Error(`Unexpected url: ${url}`);
     });
 
-    const resolve = (href: string, base: string) =>
-      new URL(href, base).toString();
+    const resolve = (href: string, base: string) => new URL(href, base).toString();
     const delayProvider = vi.fn(() => 123);
 
     await crawlHtmlGroupListingPages({

@@ -32,8 +32,7 @@ export interface KonkBtradeSalesComparisonData {
 }
 
 export type GetKonkBtradeSalesComparisonResult =
-  | { ok: true; data: KonkBtradeSalesComparisonData }
-  | { ok: false };
+  { ok: true; data: KonkBtradeSalesComparisonData } | { ok: false };
 
 export async function getKonkBtradeSalesComparisonUtil(
   input: GetKonkBtradeSalesComparisonInput,
@@ -58,8 +57,14 @@ export async function getKonkBtradeSalesComparisonUtil(
   const dayBtradeRevenue = new Float64Array(dayCount);
 
   for (const analog of analogs) {
-    const analogStockByDay = [analog.previousAnalogStock, ...analog.items.map((i) => i.analogStock)];
-    const btradeStockByDay = [analog.previousBtradeStock, ...analog.items.map((i) => i.btradeStock)];
+    const analogStockByDay = [
+      analog.previousAnalogStock,
+      ...analog.items.map((i) => i.analogStock),
+    ];
+    const btradeStockByDay = [
+      analog.previousBtradeStock,
+      ...analog.items.map((i) => i.btradeStock),
+    ];
 
     const analogSalesResults = computeSalesFromStockSequence(analogStockByDay).slice(1);
     const btradeSalesResults = computeSalesFromStockSequence(btradeStockByDay).slice(1);
@@ -72,10 +77,7 @@ export async function getKonkBtradeSalesComparisonUtil(
         recountDays,
       );
       const btradeSales = btradeSalesResults[d]!.sales;
-      const analogRevenue = computeRevenueForDay(
-        analogSales,
-        analog.items[d]!.analogPrice,
-      );
+      const analogRevenue = computeRevenueForDay(analogSales, analog.items[d]!.analogPrice);
       const btradeRevenue = computeRevenueForDay(btradeSales, analog.items[d]!.btradePrice);
 
       dayCompetitorSales[d] += analogSales;

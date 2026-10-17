@@ -14,4 +14,3 @@ export const updateUserInfoSchema = z.object({
 });
 
 export type UpdateUserInfoInput = z.infer<typeof updateUserInfoSchema>;
-

@@ -30,11 +30,7 @@ interface JWTPayload {
  * });
  * ```
  */
-export const checkAuth = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
+export const checkAuth = (req: Request, res: Response, next: NextFunction): void => {
   try {
     // Извлекаем токен из заголовка Authorization
     const authHeader = req.headers.authorization;

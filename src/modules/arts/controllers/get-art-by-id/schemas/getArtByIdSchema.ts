@@ -8,4 +8,3 @@ export const getArtByIdSchema = z.object({
 });
 
 export type GetArtByIdInput = z.infer<typeof getArtByIdSchema>;
-

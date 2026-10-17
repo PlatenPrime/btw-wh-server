@@ -46,11 +46,3 @@ describe("getAllPalletsController", () => {
     expect(responseJson.length).toBe(0);
   });
 });
-
-
-
-
-
-
-
-

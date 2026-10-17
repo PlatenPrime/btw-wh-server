@@ -8,8 +8,8 @@ vi.mock("../../perfect-cart-response/perfectCartResponse.js", () => ({
   resolvePerfectCartDeleteIds: vi.fn(
     (
       _product: unknown,
-      fallback: { idProduct: string; idProductAttribute: string | null; idCustomization: string }
-    ) => fallback
+      fallback: { idProduct: string; idProductAttribute: string | null; idCustomization: string },
+    ) => fallback,
   ),
 }));
 vi.mock("../../perfect-resolve-cart-failure/resolvePerfectCartFailure.js", () => ({
@@ -56,7 +56,7 @@ describe("parsePerfectCartStockOutcome", () => {
       fallbackIds,
       200,
       true,
-      "https://x/p"
+      "https://x/p",
     );
     expect(result.outcome).toEqual({
       stock: 0,
@@ -88,7 +88,7 @@ describe("parsePerfectCartStockOutcome", () => {
       fallbackIds,
       200,
       true,
-      "https://x/p"
+      "https://x/p",
     );
     expect(result.outcome).toEqual({
       stock: 10,
@@ -114,7 +114,7 @@ describe("parsePerfectCartStockOutcome", () => {
       fallbackIds,
       200,
       true,
-      "https://x/p"
+      "https://x/p",
     );
     expect(result.outcome).toEqual(PERFECT_UNAVAILABLE_OUTCOME);
   });

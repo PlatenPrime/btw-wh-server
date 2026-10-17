@@ -32,10 +32,7 @@ describe("sendRejectAskMesUtil", () => {
       telegramChatId: "123456789",
     });
 
-    expect(mockSendMessageToTGUser).toHaveBeenCalledWith(
-      "Ваша заявка отклонена",
-      "123456789"
-    );
+    expect(mockSendMessageToTGUser).toHaveBeenCalledWith("Ваша заявка отклонена", "123456789");
   });
 
   it("обрабатывает ошибки при отправке", async () => {
@@ -47,13 +44,13 @@ describe("sendRejectAskMesUtil", () => {
       sendRejectAskMesUtil({
         message: "Ваша заявка отклонена",
         telegramChatId: "123456789",
-      })
+      }),
     ).resolves.not.toThrow();
 
     expect(logModuleError).toHaveBeenCalledWith(
       "asks",
       error,
-      "Failed to send Telegram notification:"
+      "Failed to send Telegram notification:",
     );
   });
 
@@ -65,13 +62,13 @@ describe("sendRejectAskMesUtil", () => {
       sendRejectAskMesUtil({
         message: "Test message",
         telegramChatId: "123456789",
-      })
+      }),
     ).resolves.not.toThrow();
 
     expect(logModuleError).toHaveBeenCalledWith(
       "asks",
       error,
-      "Failed to send Telegram notification:"
+      "Failed to send Telegram notification:",
     );
   });
 
@@ -89,4 +86,3 @@ describe("sendRejectAskMesUtil", () => {
     expect(mockSendMessageToTGUser).toHaveBeenCalledWith(message, telegramChatId);
   });
 });
-

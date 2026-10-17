@@ -23,7 +23,7 @@ export const updateBlock = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -109,4 +109,3 @@ export const updateBlock = async (req: Request, res: Response) => {
     }
   }
 };
-

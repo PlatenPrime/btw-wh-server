@@ -12,13 +12,10 @@ vi.mock("../controllers/get-latest-defs/utils/calculateLivePogrebiDefsUtil.js", 
 import { calculateLivePogrebiDefsUtil } from "../controllers/get-latest-defs/utils/calculateLivePogrebiDefsUtil.js";
 
 const createAuthHeader = (role: RoleType = RoleType.USER) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 

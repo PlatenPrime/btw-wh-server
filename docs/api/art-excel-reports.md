@@ -4,8 +4,8 @@
 
 Доступ: checkAuth + checkRoles(ADMIN).
 
-| Путь | kind |
-|------|------|
+| Путь                          | kind        |
+| ----------------------------- | ----------- |
 | GET `/artikul/:artikul/stock` | `art-stock` |
 | GET `/artikul/:artikul/sales` | `art-sales` |
 

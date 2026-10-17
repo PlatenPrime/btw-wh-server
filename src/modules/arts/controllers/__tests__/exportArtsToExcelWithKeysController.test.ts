@@ -4,9 +4,6 @@ import { exportArtsToExcelWithKeysController } from "../export-arts-to-excel-wit
 
 describe("exportArtsToExcelWithKeysController", () => {
   it("returns 410 EXCEL_JOBS_MIGRATED", async () => {
-    await assertMigratedExcelController(
-      exportArtsToExcelWithKeysController,
-      "arts-export-keys",
-    );
+    await assertMigratedExcelController(exportArtsToExcelWithKeysController, "arts-export-keys");
   });
 });

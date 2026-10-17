@@ -10,9 +10,7 @@ describe("materializeSkuSliceMonthsUtil", () => {
   });
 
   it("rejects daysBack < 1", async () => {
-    await expect(
-      materializeSkuSliceMonthsUtil({ daysBack: 0 }),
-    ).rejects.toThrow(/daysBack/);
+    await expect(materializeSkuSliceMonthsUtil({ daysBack: 0 })).rejects.toThrow(/daysBack/);
   });
 
   it("dry-run counts day writes and does not write", async () => {
@@ -48,8 +46,7 @@ describe("materializeSkuSliceMonthsUtil", () => {
       data: { "air-1": { stock: 7, price: 3 } },
     });
 
-    const progress: Array<{ sliceIndex: number; daysWrittenInSlice: number }> =
-      [];
+    const progress: Array<{ sliceIndex: number; daysWrittenInSlice: number }> = [];
     const result = await materializeSkuSliceMonthsUtil({
       daysBack: 1,
       asOf: date,
@@ -247,15 +244,9 @@ describe("materializeSkuSliceMonthsUtil", () => {
 
     expect(result.slicesRead).toBe(3);
     expect(result.dayWritesUpserted).toBe(3);
-    expect(progressDates).toEqual([
-      "2026-03-08",
-      "2026-03-09",
-      "2026-03-10",
-    ]);
+    expect(progressDates).toEqual(["2026-03-08", "2026-03-09", "2026-03-10"]);
 
-    const findCalls = findSpy.mock.calls as unknown as Array<
-      [filter?: { date?: unknown }]
-    >;
+    const findCalls = findSpy.mock.calls as unknown as Array<[filter?: { date?: unknown }]>;
     for (const call of findCalls) {
       expect(call[0]?.date).toBeInstanceOf(Date);
     }

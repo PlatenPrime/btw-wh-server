@@ -18,9 +18,6 @@ describe("sendCronAnalyticsReport", () => {
 
     await sendCronAnalyticsReport("report text", finishedAt);
 
-    expect(sendAnalyticsChatNotificationDeferred).toHaveBeenCalledWith(
-      "report text",
-      finishedAt
-    );
+    expect(sendAnalyticsChatNotificationDeferred).toHaveBeenCalledWith("report text", finishedAt);
   });
 });

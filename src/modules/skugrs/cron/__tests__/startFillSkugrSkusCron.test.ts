@@ -32,9 +32,7 @@ import { startFillSkugrSkusCron } from "../startFillSkugrSkusCron.js";
 import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { delay } from "../../../../utils/delay.js";
 import { isServerSkugrFillDisabled } from "../../config/isServerSkugrFillDisabled.js";
-import {
-  BrowserOriginBlockedError,
-} from "../../../browser/utils/browserOriginBlockedError.js";
+import { BrowserOriginBlockedError } from "../../../browser/utils/browserOriginBlockedError.js";
 
 describe("startFillSkugrSkusCron", () => {
   let cronCallback: (() => Promise<void>) | null = null;
@@ -45,7 +43,7 @@ describe("startFillSkugrSkusCron", () => {
     vi.clearAllMocks();
     cronCallback = null;
 
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const callbackArg = args[1];
       if (typeof callbackArg === "function") {
         cronCallback = callbackArg as () => Promise<void>;
@@ -69,7 +67,7 @@ describe("startFillSkugrSkusCron", () => {
       expect.any(Function),
       null,
       true,
-      "Europe/Kyiv"
+      "Europe/Kyiv",
     );
   });
 
@@ -129,7 +127,7 @@ describe("startFillSkugrSkusCron", () => {
         new BrowserOriginBlockedError("blocked", {
           httpStatus: 520,
           retryAfterSec: 60,
-        })
+        }),
       )
       .mockResolvedValueOnce({
         skugr: {} as never,
@@ -148,7 +146,7 @@ describe("startFillSkugrSkusCron", () => {
 
   it("skips air groups when server fill is disabled and still fills others", async () => {
     vi.mocked(isServerSkugrFillDisabled).mockImplementation(
-      (konkName: string) => konkName.trim().toLowerCase() === "air"
+      (konkName: string) => konkName.trim().toLowerCase() === "air",
     );
 
     const groups = [

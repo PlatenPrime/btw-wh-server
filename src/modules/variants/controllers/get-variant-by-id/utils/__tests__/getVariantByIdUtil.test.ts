@@ -26,4 +26,3 @@ describe("getVariantByIdUtil", () => {
     expect(result?.title).toBe("Variant");
   });
 });
-

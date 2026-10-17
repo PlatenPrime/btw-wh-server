@@ -9,12 +9,7 @@ export const API_TASK_STATUSES = [
 
 export type ApiTaskStatus = (typeof API_TASK_STATUSES)[number];
 
-export const API_TASK_PHASES = [
-  "queued",
-  "preparing",
-  "running",
-  "finalizing",
-] as const;
+export const API_TASK_PHASES = ["queued", "preparing", "running", "finalizing"] as const;
 
 export type ApiTaskPhase = (typeof API_TASK_PHASES)[number];
 

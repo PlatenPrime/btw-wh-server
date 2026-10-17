@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from "mongoose";
+import { ClientSession } from "mongoose";
 import { IAsk } from "../../../models/Ask.js";
 import { Ask } from "../../../models/Ask.js";
 import { IUser } from "../../../../auth/models/User.js";
@@ -24,15 +24,11 @@ export async function updateAskActionsUtil({
     actions: updatedActions,
   };
 
-  const updatedAsk = await Ask.findByIdAndUpdate(
-    ask._id,
-    updateFields,
-    {
-      new: true,
-      runValidators: true,
-      session,
-    }
-  );
+  const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
+    new: true,
+    runValidators: true,
+    session,
+  });
 
   if (!updatedAsk) {
     throw new Error("Failed to update ask actions");
@@ -40,4 +36,3 @@ export async function updateAskActionsUtil({
 
   return updatedAsk as IAsk;
 }
-

@@ -11,4 +11,3 @@ export const completeAskByIdSchema = z.object({
 });
 
 export type CompleteAskByIdInput = z.infer<typeof completeAskByIdSchema>;
-

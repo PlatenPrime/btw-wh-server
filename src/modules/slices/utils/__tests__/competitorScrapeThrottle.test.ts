@@ -52,7 +52,7 @@ describe("competitorScrapeThrottle", () => {
         konkName: "air",
         completedUnits: 4,
         isLast: false,
-      })
+      }),
     ).toBe(false);
   });
 });

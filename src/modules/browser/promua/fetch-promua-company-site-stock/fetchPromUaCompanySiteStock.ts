@@ -12,10 +12,7 @@ import {
   parsePromUaAddProductResponse,
   parsePromUaChangeQuantityResponse,
 } from "../cart/parsePromUaCartGraphql.js";
-import {
-  BROWSER_TEXT_CONFIG,
-  postPromUaGraphql,
-} from "../cart/postPromUaGraphql.js";
+import { BROWSER_TEXT_CONFIG, postPromUaGraphql } from "../cart/postPromUaGraphql.js";
 import { extractPromUaCsrfToken } from "../extract-promua-csrf-token/extractPromUaCsrfToken.js";
 import { extractPromUaProductId } from "../extract-promua-product-id/extractPromUaProductId.js";
 import { resolvePromUaUnitPrice } from "../resolve-promua-unit-price/resolvePromUaUnitPrice.js";
@@ -44,7 +41,7 @@ export type FetchPromUaCompanySiteStockParams<TContext, TOutcome> = {
  * GET HTML → CSRF → AddProductToCart → CartChangeProductQuantity probe → normalize.
  */
 export async function fetchPromUaCompanySiteStock<TContext, TOutcome>(
-  params: FetchPromUaCompanySiteStockParams<TContext, TOutcome>
+  params: FetchPromUaCompanySiteStockParams<TContext, TOutcome>,
 ): Promise<TOutcome> {
   const {
     origin,
@@ -63,10 +60,7 @@ export async function fetchPromUaCompanySiteStock<TContext, TOutcome>(
     }
 
     const client = getBrowserAxios();
-    const htmlResponse = await client.get<string>(
-      productUrl,
-      BROWSER_TEXT_CONFIG
-    );
+    const htmlResponse = await client.get<string>(productUrl, BROWSER_TEXT_CONFIG);
     const html = String(htmlResponse.data ?? "");
     if (!html.trim()) {
       return negativeOutcome;
@@ -75,12 +69,8 @@ export async function fetchPromUaCompanySiteStock<TContext, TOutcome>(
     const ctx = parseHtmlContext(html);
     const htmlPrice = resolveHtmlPrice(ctx);
 
-    const htmlHeaders =
-      (htmlResponse as { headers?: Record<string, unknown> }).headers ?? {};
-    let cookieHeader = mergeCookies(
-      "",
-      pickHeaderCaseInsensitive(htmlHeaders, "set-cookie")
-    );
+    const htmlHeaders = (htmlResponse as { headers?: Record<string, unknown> }).headers ?? {};
+    let cookieHeader = mergeCookies("", pickHeaderCaseInsensitive(htmlHeaders, "set-cookie"));
     const csrfToken = extractPromUaCsrfToken(html, cookieHeader);
 
     const addResp = await postPromUaGraphql(client, {
@@ -139,17 +129,14 @@ export async function fetchPromUaCompanySiteStock<TContext, TOutcome>(
       return negativeOutcome;
     }
 
-    const changeResult = parsePromUaChangeQuantityResponse(
-      changeResp.body,
-      productId
-    );
+    const changeResult = parsePromUaChangeQuantityResponse(changeResp.body, productId);
     if (changeResult.kind !== "recalculated") {
       return negativeOutcome;
     }
 
     const unitPrice = resolvePromUaUnitPrice(
       htmlPrice,
-      changeResult.unitSellingPrice ?? addResult.unitSellingPrice
+      changeResult.unitSellingPrice ?? addResult.unitSellingPrice,
     );
     return normalizeOutcome({
       quantity: changeResult.quantity,

@@ -37,4 +37,3 @@ describe("fetchBtradeDataUtil", () => {
     await expect(fetchBtradeDataUtil("ERROR-ARTIKUL")).rejects.toThrow("API error");
   });
 });
-

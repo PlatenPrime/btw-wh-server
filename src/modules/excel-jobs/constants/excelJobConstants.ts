@@ -9,12 +9,7 @@ export const EXCEL_JOB_STATUSES = [
 
 export type ExcelJobStatus = (typeof EXCEL_JOB_STATUSES)[number];
 
-export const EXCEL_JOB_PHASES = [
-  "queued",
-  "loading",
-  "building",
-  "finalizing",
-] as const;
+export const EXCEL_JOB_PHASES = ["queued", "loading", "building", "finalizing"] as const;
 
 export type ExcelJobPhase = (typeof EXCEL_JOB_PHASES)[number];
 

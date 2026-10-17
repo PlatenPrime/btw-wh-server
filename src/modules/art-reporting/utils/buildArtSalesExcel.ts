@@ -1,8 +1,5 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
 import {
   computeArtSalesPointsFromSeries,
@@ -24,10 +21,7 @@ export type BuildArtSalesExcelInput = {
   dateTo: Date;
 };
 
-function salesPointValue(
-  point: ArtBtradeSalesPoint,
-  metricIndex: number,
-): number | null {
+function salesPointValue(point: ArtBtradeSalesPoint, metricIndex: number): number | null {
   if (metricIndex === 0) return point.sales;
   if (metricIndex === 1) return point.price;
   return point.revenue;
@@ -45,10 +39,7 @@ export async function buildArtSalesExcel(
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Продажі");
 
-  const headers = [
-    ...META_HEADERS,
-    ...input.datesReport.map((d) => formatExcelDateHeaderUk(d)),
-  ];
+  const headers = [...META_HEADERS, ...input.datesReport.map((d) => formatExcelDateHeaderUk(d))];
 
   worksheet.addRow(headers);
   applyHeaderStyle(worksheet, headers.length);

@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { Sku } from "../../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../models/Skugr.js";
-import {
-  InvalidSkuReferencesError,
-  createSkugrUtil,
-} from "../createSkugrUtil.js";
+import { InvalidSkuReferencesError, createSkugrUtil } from "../createSkugrUtil.js";
 
 describe("createSkugrUtil", () => {
   beforeEach(async () => {

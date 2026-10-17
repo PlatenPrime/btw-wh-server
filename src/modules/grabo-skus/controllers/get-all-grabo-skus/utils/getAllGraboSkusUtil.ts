@@ -36,9 +36,7 @@ export const getAllGraboSkusUtil = async ({
       .limit(limit)
       .lean<GraboSkuLean[]>(),
     GraboSku.countDocuments(filter),
-    includeFilterOptions
-      ? getGraboSkuFilterOptions()
-      : Promise.resolve(undefined),
+    includeFilterOptions ? getGraboSkuFilterOptions() : Promise.resolve(undefined),
   ]);
 
   const totalPages = Math.ceil(total / limit);

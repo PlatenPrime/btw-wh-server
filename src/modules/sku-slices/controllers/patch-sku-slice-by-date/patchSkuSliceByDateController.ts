@@ -12,10 +12,7 @@ import { patchSkuSliceByDateUtil } from "./utils/patchSkuSliceByDateUtil.js";
  * @desc    Ручная запись stock/price SKU в срез на дату, диапазон или массив периодов
  * @route   PATCH /api/sku-slices/sku/:skuId
  */
-export const patchSkuSliceByDateController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const patchSkuSliceByDateController = async (req: Request, res: Response): Promise<void> => {
   const body = req.body ?? {};
   const payload: Record<string, unknown> = {
     skuId: req.params.skuId,
@@ -31,7 +28,7 @@ export const patchSkuSliceByDateController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

@@ -9,10 +9,7 @@ type DeleteSegInput = {
   session: ClientSession;
 };
 
-export const deleteSegUtil = async ({
-  segId,
-  session,
-}: DeleteSegInput): Promise<ISeg | null> => {
+export const deleteSegUtil = async ({ segId, session }: DeleteSegInput): Promise<ISeg | null> => {
   const objectId = new mongoose.Types.ObjectId(segId);
 
   // Проверить существование сегмента
@@ -36,24 +33,19 @@ export const deleteSegUtil = async ({
           sector: 0,
         },
       },
-      { session }
+      { session },
     );
   }
 
   // Удалить сегмент из массива segs блока
   const block = await Block.findById(existingSeg.block).session(session).exec();
   if (block) {
-    block.segs = block.segs.filter(
-      (segId) => segId.toString() !== objectId.toString()
-    );
+    block.segs = block.segs.filter((segId) => segId.toString() !== objectId.toString());
     await block.save({ session });
   }
 
   // Удалить сегмент
-  const deletedSeg = await Seg.findByIdAndDelete(objectId)
-    .session(session)
-    .exec();
+  const deletedSeg = await Seg.findByIdAndDelete(objectId).session(session).exec();
 
   return deletedSeg;
 };
-

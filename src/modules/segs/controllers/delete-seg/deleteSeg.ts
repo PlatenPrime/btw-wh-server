@@ -6,12 +6,9 @@ import { deleteSegUtil } from "./utils/deleteSegUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
 const deleteSegSchema = z.object({
-  id: z.string().refine(
-    (val) => mongoose.Types.ObjectId.isValid(val),
-    {
-      message: "Invalid segment ID format",
-    }
-  ),
+  id: z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+    message: "Invalid segment ID format",
+  }),
 });
 
 export const deleteSeg = async (req: Request, res: Response) => {
@@ -25,7 +22,7 @@ export const deleteSeg = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -73,4 +70,3 @@ export const deleteSeg = async (req: Request, res: Response) => {
     await session.endSession();
   }
 };
-

@@ -32,31 +32,28 @@ describe("loadSlicedSkusForKonk", () => {
   it("loads deduplicated skus with custom select", async () => {
     vi.mocked(Skugr.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue([
-          { skus: [{ toString: () => "id1" }, { toString: () => "id2" }] },
-          { skus: [{ toString: () => "id2" }] },
-        ]),
+        lean: vi
+          .fn()
+          .mockResolvedValue([
+            { skus: [{ toString: () => "id1" }, { toString: () => "id2" }] },
+            { skus: [{ toString: () => "id2" }] },
+          ]),
       }),
     } as never);
     vi.mocked(Sku.find).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue([
-          { _id: { toString: () => "id1" }, productId: "air-1" },
-        ]),
+        lean: vi.fn().mockResolvedValue([{ _id: { toString: () => "id1" }, productId: "air-1" }]),
       }),
     } as never);
 
-    const result = await loadSlicedSkusForKonk(
-      "air",
-      "_id productId title url"
-    );
+    const result = await loadSlicedSkusForKonk("air", "_id productId title url");
 
     expect(Sku.find).toHaveBeenCalledWith({
       konkName: "air",
       _id: { $in: ["id1", "id2"] },
     });
     expect(vi.mocked(Sku.find).mock.results[0]?.value.select).toHaveBeenCalledWith(
-      "_id productId title url"
+      "_id productId title url",
     );
     expect(result).toHaveLength(1);
   });

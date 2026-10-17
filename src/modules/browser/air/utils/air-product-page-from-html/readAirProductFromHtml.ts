@@ -21,8 +21,7 @@ export function readAirProductFromHtml(html: string): AirProductInfo {
   }
 
   const priceRaw =
-    $(".us-price-actual").first().text().trim() ||
-    $(".us-price-new").first().text().trim();
+    $(".us-price-actual").first().text().trim() || $(".us-price-new").first().text().trim();
   if (!priceRaw) {
     return AIR_NEGATIVE_OUTCOME;
   }

@@ -16,9 +16,9 @@ TTL готового файла: 30 минут после `ready`. Download-toke
 
 **Тело:**
 
-| Поле | Тип | Обязательно | Описание |
-|------|-----|-------------|----------|
-| kind | string | да | Один из kind в таблице |
+| Поле   | Тип    | Обязательно       | Описание                                  |
+| ------ | ------ | ----------------- | ----------------------------------------- |
+| kind   | string | да                | Один из kind в таблице                    |
 | params | object | нет, default `{}` | Параметры отчёта (бывший query/path/body) |
 
 **Ответ 202:**
@@ -62,14 +62,14 @@ TTL готового файла: 30 минут после `ready`. Download-toke
 
 **Ответ 200 `data`:**
 
-| Поле | Когда |
-|------|--------|
-| jobId, kind, status, phase, progress | всегда |
-| queuePosition | `0` если running, `1+` если в очереди, иначе `null` |
-| fileName, sizeBytes | `ready` |
-| downloadToken | только `status=ready` |
-| error | `failed` |
-| expiresAt, createdAt | всегда |
+| Поле                                 | Когда                                               |
+| ------------------------------------ | --------------------------------------------------- |
+| jobId, kind, status, phase, progress | всегда                                              |
+| queuePosition                        | `0` если running, `1+` если в очереди, иначе `null` |
+| fileName, sizeBytes                  | `ready`                                             |
+| downloadToken                        | только `status=ready`                               |
+| error                                | `failed`                                            |
+| expiresAt, createdAt                 | всегда                                              |
 
 `phase`: `queued` \| `loading` \| `building` \| `finalizing`.
 
@@ -95,28 +95,28 @@ TTL готового файла: 30 минут после `ready`. Download-toke
 
 ## kind и params
 
-| kind | Старый URL | params |
-|------|------------|--------|
-| sku-catalog-new-since | GET `/api/sku-excel-reports/catalog/new-since` | `konk` string (`all` допустим), `since` YYYY-MM-DD |
-| sku-catalog-invalid | GET `/api/sku-excel-reports/catalog/invalid` | `konk` string (`all` допустим) |
-| sku-konk-stock | GET `/api/sku-excel-reports/konk/stock` | `konk`, `prod`, `dateFrom`, `dateTo`; опционально `skugrIds`; опционально `metrics`: `stock` \| `price` (CSV или массив; без param — обе) |
-| sku-konk-sales | GET `/api/sku-excel-reports/konk/sales` | как stock; опционально `sortBy`: `sales` \| `revenue`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три) |
-| sku-skugr-stock | GET `/api/sku-excel-reports/skugr/:skugrId/stock` | `skugrId`, `dateFrom`, `dateTo`; опционально `metrics`: `stock` \| `price` (CSV или массив; без param — обе) |
-| sku-skugr-sales | GET `/api/sku-excel-reports/skugr/:skugrId/sales` | `skugrId`, `dateFrom`, `dateTo`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три) |
-| sku-one-stock | GET `/api/sku-excel-reports/sku/:skuId/stock` | `skuId`, `dateFrom`, `dateTo`; опционально `metrics`: `stock` \| `price` (CSV или массив; без param — обе) |
-| sku-one-sales | GET `/api/sku-excel-reports/sku/:skuId/sales` | `skuId`, `dateFrom`, `dateTo`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три) |
-| art-stock | GET `/api/art-excel-reports/artikul/:artikul/stock` | `artikul`, `dateFrom`, `dateTo` |
-| art-sales | GET `/api/art-excel-reports/artikul/:artikul/sales` | `artikul`, `dateFrom`, `dateTo` |
-| analog-comparison | GET `/api/analog-slices/analog/:analogId/comparison-excel` | `analogId`, `dateFrom`, `dateTo` |
-| analog-sales-comparison | GET `/api/analog-slices/analog/:analogId/sales-comparison-excel` | `analogId`, `dateFrom`, `dateTo` |
-| konk-btrade-comparison | GET `/api/analog-slices/konk-btrade/comparison-excel` | `konk`, `prod`, `dateFrom`, `dateTo`; опционально `abc`, `sortBy=abc` |
-| konk-btrade-sales-comparison | GET `/api/analog-slices/konk-btrade/sales-comparison-excel` | как konk-btrade-comparison |
-| arts-export | GET `/api/arts/export` | `{}` |
-| arts-export-with-stocks | GET `/api/arts/export-with-stocks` | `{}` |
-| arts-export-keys | GET `/api/arts/export-keys` | `{}` |
-| poses-export-stocks | POST `/api/poses/export-stocks` | опционально `sklad`: `merezhi` \| `pogrebi` |
-| zones-export | GET `/api/zones/export` | `{}` |
-| grabo-skus | GET `/api/grabo-skus/excel` | `{}` |
+| kind                         | Старый URL                                                       | params                                                                                                                                              |
+| ---------------------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| sku-catalog-new-since        | GET `/api/sku-excel-reports/catalog/new-since`                   | `konk` string (`all` допустим), `since` YYYY-MM-DD                                                                                                  |
+| sku-catalog-invalid          | GET `/api/sku-excel-reports/catalog/invalid`                     | `konk` string (`all` допустим)                                                                                                                      |
+| sku-konk-stock               | GET `/api/sku-excel-reports/konk/stock`                          | `konk`, `prod`, `dateFrom`, `dateTo`; опционально `skugrIds`; опционально `metrics`: `stock` \| `price` (CSV или массив; без param — обе)           |
+| sku-konk-sales               | GET `/api/sku-excel-reports/konk/sales`                          | как stock; опционально `sortBy`: `sales` \| `revenue`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три) |
+| sku-skugr-stock              | GET `/api/sku-excel-reports/skugr/:skugrId/stock`                | `skugrId`, `dateFrom`, `dateTo`; опционально `metrics`: `stock` \| `price` (CSV или массив; без param — обе)                                        |
+| sku-skugr-sales              | GET `/api/sku-excel-reports/skugr/:skugrId/sales`                | `skugrId`, `dateFrom`, `dateTo`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три)                       |
+| sku-one-stock                | GET `/api/sku-excel-reports/sku/:skuId/stock`                    | `skuId`, `dateFrom`, `dateTo`; опционально `metrics`: `stock` \| `price` (CSV или массив; без param — обе)                                          |
+| sku-one-sales                | GET `/api/sku-excel-reports/sku/:skuId/sales`                    | `skuId`, `dateFrom`, `dateTo`; опционально `metrics`: `sales` \| `price` \| `revenue` (CSV или массив; без param — все три)                         |
+| art-stock                    | GET `/api/art-excel-reports/artikul/:artikul/stock`              | `artikul`, `dateFrom`, `dateTo`                                                                                                                     |
+| art-sales                    | GET `/api/art-excel-reports/artikul/:artikul/sales`              | `artikul`, `dateFrom`, `dateTo`                                                                                                                     |
+| analog-comparison            | GET `/api/analog-slices/analog/:analogId/comparison-excel`       | `analogId`, `dateFrom`, `dateTo`                                                                                                                    |
+| analog-sales-comparison      | GET `/api/analog-slices/analog/:analogId/sales-comparison-excel` | `analogId`, `dateFrom`, `dateTo`                                                                                                                    |
+| konk-btrade-comparison       | GET `/api/analog-slices/konk-btrade/comparison-excel`            | `konk`, `prod`, `dateFrom`, `dateTo`; опционально `abc`, `sortBy=abc`                                                                               |
+| konk-btrade-sales-comparison | GET `/api/analog-slices/konk-btrade/sales-comparison-excel`      | как konk-btrade-comparison                                                                                                                          |
+| arts-export                  | GET `/api/arts/export`                                           | `{}`                                                                                                                                                |
+| arts-export-with-stocks      | GET `/api/arts/export-with-stocks`                               | `{}`                                                                                                                                                |
+| arts-export-keys             | GET `/api/arts/export-keys`                                      | `{}`                                                                                                                                                |
+| poses-export-stocks          | POST `/api/poses/export-stocks`                                  | опционально `sklad`: `merezhi` \| `pogrebi`                                                                                                         |
+| zones-export                 | GET `/api/zones/export`                                          | `{}`                                                                                                                                                |
+| grabo-skus                   | GET `/api/grabo-skus/excel`                                      | `{}`                                                                                                                                                |
 
 Даты — строки `YYYY-MM-DD`. Path-параметры старых URL входят в `params`.
 

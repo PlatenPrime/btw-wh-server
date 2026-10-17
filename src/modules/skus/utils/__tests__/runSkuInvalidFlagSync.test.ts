@@ -92,9 +92,7 @@ describe("runSkuInvalidFlagSync", () => {
       const d = days[i]!;
       const bad = i === days.length - 1;
       await seedSkuSliceMonthDay("air", d, {
-        "air-z": bad
-          ? { stock: -1, price: -1 }
-          : { stock: 1, price: 2 },
+        "air-z": bad ? { stock: -1, price: -1 } : { stock: 1, price: 2 },
       });
     }
 

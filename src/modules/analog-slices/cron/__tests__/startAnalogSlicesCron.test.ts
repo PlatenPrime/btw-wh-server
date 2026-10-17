@@ -14,11 +14,9 @@ vi.mock("../../../../cron/analytics-notifications/sendCronAnalyticsReport.js", (
   sendCronAnalyticsReport: vi.fn(),
 }));
 vi.mock("../../../../cron/analytics-notifications/formatAnalogSlicesReport.js", () => ({
-  formatAnalogKonkSliceReport: vi.fn(
-    (stats: { konkName: string }) => `analog:${stats.konkName}`
-  ),
+  formatAnalogKonkSliceReport: vi.fn((stats: { konkName: string }) => `analog:${stats.konkName}`),
   formatAnalogSlicesExcludedReport: vi.fn(
-    (excluded: string[]) => `analog-excluded:${excluded.join(",")}`
+    (excluded: string[]) => `analog-excluded:${excluded.join(",")}`,
   ),
 }));
 vi.mock("../../../../cron/analytics-notifications/formatCronReports.js", () => ({
@@ -47,7 +45,7 @@ describe("startAnalogSlicesCron", () => {
     vi.clearAllMocks();
     cronCallback = null;
 
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const callbackArg = args[1];
       if (typeof callbackArg === "function") {
         cronCallback = callbackArg as () => Promise<void>;
@@ -58,14 +56,7 @@ describe("startAnalogSlicesCron", () => {
     vi.mocked(getExcludedCompetitorSet).mockReturnValue(new Set());
     vi.mocked(calculateAnalogSlice).mockImplementation(async (konkName) => ({
       ...sliceResult,
-      count:
-        konkName === "balun"
-          ? 2
-          : konkName === "sharte"
-            ? 3
-            : konkName === "yumi"
-              ? 4
-              : 5,
+      count: konkName === "balun" ? 2 : konkName === "sharte" ? 3 : konkName === "yumi" ? 4 : 5,
     }));
     vi.mocked(sendCronAnalyticsReport).mockResolvedValue(undefined);
   });
@@ -78,7 +69,7 @@ describe("startAnalogSlicesCron", () => {
       expect.any(Function),
       null,
       true,
-      "Europe/Kiev"
+      "Europe/Kiev",
     );
   });
 
@@ -97,9 +88,7 @@ describe("startAnalogSlicesCron", () => {
     expect(calculateAnalogSlice).not.toHaveBeenCalledWith("balun");
     expect(calculateAnalogSlice).not.toHaveBeenCalledWith("yumi");
 
-    expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
-      "analog-excluded:balun,yumi"
-    );
+    expect(sendCronAnalyticsReport).toHaveBeenCalledWith("analog-excluded:balun,yumi");
     expect(sendCronAnalyticsReport).toHaveBeenCalledWith("analog:sharte");
     expect(sendCronAnalyticsReport).toHaveBeenCalledWith("analog:yumin");
     expect(sendCronAnalyticsReport).toHaveBeenCalledTimes(3);

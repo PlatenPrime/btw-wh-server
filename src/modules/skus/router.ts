@@ -17,65 +17,50 @@ import {
 
 const router = Router();
 
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllSkusController)
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllSkusController));
 router.delete(
   "/konk/:konkName/invalid",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteKonkInvalidSkusController)
+  asyncHandler(deleteKonkInvalidSkusController),
 );
 router.delete(
   "/not-in-any-skugr",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteSkusNotInAnySkugrController)
+  asyncHandler(deleteSkusNotInAnySkugrController),
 );
 router.get(
   "/by-skugr/:skugrId",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkusBySkugrIdController)
+  asyncHandler(getSkusBySkugrIdController),
 );
 router.get(
   "/id/:id/stock",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkuStockDataController)
+  asyncHandler(getSkuStockDataController),
 );
-router.get(
-  "/id/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkuByIdController)
-);
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createSkuController)
-);
+router.get("/id/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getSkuByIdController));
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createSkuController));
 router.post(
   "/fix-incorrect-sku-data",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(fixIncorrectSkuDataController)
+  asyncHandler(fixIncorrectSkuDataController),
 );
 router.patch(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateSkuByIdController)
+  asyncHandler(updateSkuByIdController),
 );
 router.delete(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteSkuByIdController)
+  asyncHandler(deleteSkuByIdController),
 );
 
 export default router;

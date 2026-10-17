@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IPos, Pos } from "../../../models/Pos.js";
+import { Pos } from "../../../models/Pos.js";
 import { populatePalletDataUtil } from "./populatePalletDataUtil.js";
 import { populateRowDataUtil } from "./populateRowDataUtil.js";
 
@@ -63,4 +63,3 @@ export const populateMissingPosDataUtil = async (options?: {
     errorDetails: errors,
   };
 };
-

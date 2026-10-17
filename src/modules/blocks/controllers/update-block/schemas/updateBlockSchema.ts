@@ -7,12 +7,9 @@ export const updateBlockSchema = z.object({
   order: z.number().int().min(1, "Order must be at least 1").optional(),
   segs: z
     .array(
-      z.string().refine(
-        (val) => mongoose.Types.ObjectId.isValid(val),
-        {
-          message: "Invalid segment ID format",
-        }
-      )
+      z.string().refine((val) => mongoose.Types.ObjectId.isValid(val), {
+        message: "Invalid segment ID format",
+      }),
     )
     .optional(), // Массив ObjectId сегментов
 });

@@ -1,12 +1,6 @@
 import { toSliceDate } from "../../../utils/sliceDate.js";
-import {
-  SkuSliceDayMeta,
-  type ISkuSliceDayMeta,
-} from "../models/SkuSliceDayMeta.js";
-import type {
-  ISkuSliceDayRunStats,
-  ISkuSliceRotationMeta,
-} from "../models/skuSliceTypes.js";
+import { SkuSliceDayMeta, type ISkuSliceDayMeta } from "../models/SkuSliceDayMeta.js";
+import type { ISkuSliceDayRunStats, ISkuSliceRotationMeta } from "../models/skuSliceTypes.js";
 
 export type UpsertSkuSliceDayMetaInput = {
   konkName: string;
@@ -46,11 +40,11 @@ export async function upsertSkuSliceDayMeta(
   if (Object.keys($set).length > 0) update.$set = $set;
   if (Object.keys($unset).length > 0) update.$unset = $unset;
 
-  const doc = await SkuSliceDayMeta.findOneAndUpdate(
-    { konkName: input.konkName, date },
-    update,
-    { upsert: true, new: true, setDefaultsOnInsert: true },
-  ).exec();
+  const doc = await SkuSliceDayMeta.findOneAndUpdate({ konkName: input.konkName, date }, update, {
+    upsert: true,
+    new: true,
+    setDefaultsOnInsert: true,
+  }).exec();
 
   return doc!;
 }
@@ -65,10 +59,7 @@ export async function getSkuSliceDayMeta(
   }).exec();
 }
 
-export async function ensureSkuSliceDayMeta(
-  konkName: string,
-  date: Date,
-): Promise<void> {
+export async function ensureSkuSliceDayMeta(konkName: string, date: Date): Promise<void> {
   const dateKey = toSliceDate(date);
   await SkuSliceDayMeta.findOneAndUpdate(
     { konkName, date: dateKey },

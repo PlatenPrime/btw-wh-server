@@ -9,9 +9,7 @@ export class InvalidSkuReferencesError extends Error {
   }
 }
 
-export const createSkugrUtil = async (
-  input: CreateSkugrInput,
-): Promise<ISkugr> => {
+export const createSkugrUtil = async (input: CreateSkugrInput): Promise<ISkugr> => {
   const uniqueIds = [...new Set(input.skus)];
 
   if (uniqueIds.length > 0) {

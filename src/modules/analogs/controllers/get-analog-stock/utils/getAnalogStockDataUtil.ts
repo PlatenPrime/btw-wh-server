@@ -33,30 +33,23 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
  * @returns { stock, price } или null если аналог не найден
  * @throws Error с code === UNSUPPORTED_KONK_CODE при неподдерживаемом konkName
  */
-export async function getAnalogStockDataUtil(
-  analogId: string
-): Promise<AnalogStockResult | null> {
-  const analog = await Analog.findById(analogId)
-    .select("konkName url")
-    .lean();
+export async function getAnalogStockDataUtil(analogId: string): Promise<AnalogStockResult | null> {
+  const analog = await Analog.findById(analogId).select("konkName url").lean();
 
   if (!analog) return null;
 
   const key = (analog.konkName ?? "").trim().toLowerCase();
   const getter = KONK_STOCK_GETTERS[key];
   if (!getter) {
-    const err = new Error(
-      `Unsupported competitor for stock: ${analog.konkName}`
-    ) as Error & { code?: string };
+    const err = new Error(`Unsupported competitor for stock: ${analog.konkName}`) as Error & {
+      code?: string;
+    };
     err.code = UNSUPPORTED_KONK_CODE;
     throw err;
   }
 
   const result = await getter(analog.url);
-  const price =
-    result.price !== undefined && result.price !== null
-      ? result.price
-      : -1;
+  const price = result.price !== undefined && result.price !== null ? result.price : -1;
 
   return {
     stock: result.stock,

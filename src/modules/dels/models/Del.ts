@@ -43,7 +43,7 @@ const delArtikulsSchema = new Schema<IDelArtikuls>(
   {
     _id: false,
     strict: false,
-  }
+  },
 );
 
 const delProdSchema = new Schema<IDelProd>(
@@ -51,7 +51,7 @@ const delProdSchema = new Schema<IDelProd>(
     title: { type: String, required: true },
     imageUrl: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const delSchema = new Schema<IDel>(
@@ -68,7 +68,7 @@ const delSchema = new Schema<IDel>(
       default: () => ({}),
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

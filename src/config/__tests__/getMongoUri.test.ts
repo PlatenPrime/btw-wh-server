@@ -23,7 +23,7 @@ describe("getMongoUri", () => {
     process.env.MONGO_CLUSTER_HOST = "mongo.example.test";
 
     expect(getMongoUri()).toBe(
-      "mongodb+srv://test-user:test-password@mongo.example.test/test-db?retryWrites=true&w=majority"
+      "mongodb+srv://test-user:test-password@mongo.example.test/test-db?retryWrites=true&w=majority",
     );
   });
 });

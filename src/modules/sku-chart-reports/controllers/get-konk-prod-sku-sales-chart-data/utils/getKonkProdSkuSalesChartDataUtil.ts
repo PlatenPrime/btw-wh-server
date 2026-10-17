@@ -3,8 +3,7 @@ import { loadKonkProdSkuChartSeries } from "../../../../sku-reporting/utils/konk
 import type { GetKonkProdSkuSalesChartDataInput } from "../schemas/getKonkProdSkuSalesChartDataSchema.js";
 
 export type GetKonkProdSkuSalesChartDataResult =
-  | { ok: true; data: KonkBtradeSalesComparisonData }
-  | { ok: false };
+  { ok: true; data: KonkBtradeSalesComparisonData } | { ok: false };
 
 export async function getKonkProdSkuSalesChartDataUtil(
   input: GetKonkProdSkuSalesChartDataInput,
@@ -51,21 +50,17 @@ export async function getKonkProdSkuSalesChartDataUtil(
   totalBtradeRevenue = Math.round(totalBtradeRevenue * 100) / 100;
 
   const diffSalesPcs = totalBtradeSales - totalCompetitorSales;
-  const diffRevenueUah =
-    Math.round((totalBtradeRevenue - totalCompetitorRevenue) * 100) / 100;
+  const diffRevenueUah = Math.round((totalBtradeRevenue - totalCompetitorRevenue) * 100) / 100;
 
   const diffSalesPct =
     totalCompetitorSales === 0
       ? null
-      : Math.round((totalBtradeSales / totalCompetitorSales - 1) * 100 * 100) /
-        100;
+      : Math.round((totalBtradeSales / totalCompetitorSales - 1) * 100 * 100) / 100;
 
   const diffRevenuePct =
     totalCompetitorRevenue === 0
       ? null
-      : Math.round(
-          (totalBtradeRevenue / totalCompetitorRevenue - 1) * 100 * 100,
-        ) / 100;
+      : Math.round((totalBtradeRevenue / totalCompetitorRevenue - 1) * 100 * 100) / 100;
 
   return {
     ok: true,

@@ -14,7 +14,9 @@ vi.mock("../../../modules/poses/models/Pos.js", () => ({
 
 vi.mock("../../../modules/arts/models/Art.js", () => ({
   Art: {
-    find: (...args: unknown[]) => ({ select: () => ({ lean: () => ({ exec: () => mockFind(...args) }) }) }),
+    find: (...args: unknown[]) => ({
+      select: () => ({ lean: () => ({ exec: () => mockFind(...args) }) }),
+    }),
   },
 }));
 

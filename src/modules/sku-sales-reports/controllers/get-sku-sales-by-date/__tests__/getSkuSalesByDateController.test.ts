@@ -61,8 +61,12 @@ describe("getSkuSalesByDateController", () => {
       title: "T",
       url: "https://e.com/s2",
     });
-    await seedSkuSliceMonthDay("air", new Date("2026-03-04T00:00:00.000Z"), { "air-sales-2": { stock: 10, price: 2 } });
-    await seedSkuSliceMonthDay("air", new Date("2026-03-05T00:00:00.000Z"), { "air-sales-2": { stock: 8, price: 2 } });
+    await seedSkuSliceMonthDay("air", new Date("2026-03-04T00:00:00.000Z"), {
+      "air-sales-2": { stock: 10, price: 2 },
+    });
+    await seedSkuSliceMonthDay("air", new Date("2026-03-05T00:00:00.000Z"), {
+      "air-sales-2": { stock: 8, price: 2 },
+    });
     const req = {
       params: { skuId: sku._id.toString() },
       query: { date: "2026-03-05" },

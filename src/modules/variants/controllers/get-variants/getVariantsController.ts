@@ -7,16 +7,13 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить варианты с пагинацией и фильтрами
  * @route   GET /api/variants
  */
-export const getVariantsController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getVariantsController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getVariantsQuerySchema.safeParse(req.query);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid query parameters",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -38,4 +35,3 @@ export const getVariantsController = async (
     }
   }
 };
-

@@ -140,17 +140,17 @@
         "competitorSales": 12,
         "competitorRevenue": 3456.78,
         "btradeSales": 15,
-        "btradeRevenue": 4200.50
+        "btradeRevenue": 4200.5
       }
     ],
     "summary": {
       "totalCompetitorSales": 150,
       "totalBtradeSales": 180,
-      "totalCompetitorRevenue": 45000.00,
-      "totalBtradeRevenue": 52000.00,
+      "totalCompetitorRevenue": 45000.0,
+      "totalBtradeRevenue": 52000.0,
       "diffSalesPcs": 30,
-      "diffRevenueUah": 7000.00,
-      "diffSalesPct": 20.00,
+      "diffRevenueUah": 7000.0,
+      "diffSalesPct": 20.0,
       "diffRevenuePct": 15.56
     }
   }
@@ -222,8 +222,8 @@
       "lastDayBtradeStock": 270,
       "diffCompetitorStock": -30,
       "diffBtradeStock": -30,
-      "diffCompetitorStockPct": -20.00,
-      "diffBtradeStockPct": -10.00
+      "diffCompetitorStockPct": -20.0,
+      "diffBtradeStockPct": -10.0
     }
   }
 }

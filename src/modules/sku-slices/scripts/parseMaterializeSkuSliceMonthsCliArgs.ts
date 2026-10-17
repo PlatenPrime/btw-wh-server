@@ -48,11 +48,7 @@ export function parseMaterializeSkuSliceMonthsCliArgs(
       continue;
     }
     if (arg === "--days-back") {
-      daysBack = parsePositiveInt(
-        "--days-back",
-        readFlagValue(argv, i, "--days-back"),
-        1,
-      );
+      daysBack = parsePositiveInt("--days-back", readFlagValue(argv, i, "--days-back"), 1);
       i += 1;
       continue;
     }

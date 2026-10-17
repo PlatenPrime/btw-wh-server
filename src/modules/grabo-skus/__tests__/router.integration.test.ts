@@ -24,13 +24,10 @@ vi.mock("../../../cron/analytics-notifications/sendCronAnalyticsReport.js", () =
 }));
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -44,16 +41,11 @@ describe("grabo-skus router integration", () => {
   });
 
   it("401 without JWT on GET /id/:id", async () => {
-    await request(app)
-      .get("/api/grabo-skus/id/000000000000000000000000")
-      .expect(401);
+    await request(app).get("/api/grabo-skus/id/000000000000000000000000").expect(401);
   });
 
   it("403 for USER on GET /", async () => {
-    await request(app)
-      .get("/api/grabo-skus")
-      .set(createAuthHeader(RoleType.USER))
-      .expect(403);
+    await request(app).get("/api/grabo-skus").set(createAuthHeader(RoleType.USER)).expect(403);
   });
 
   it("200 for ADMIN on GET /", async () => {

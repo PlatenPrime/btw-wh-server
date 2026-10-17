@@ -32,15 +32,15 @@ describe("getRowByIdUtil", () => {
 
   it("возвращает ряд с отсортированными паллетами", async () => {
     const row = await Row.create({ title: "Row With Pallets" });
-    const pallet2 = await Pallet.create({
+    await Pallet.create({
       title: "2-1",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [],
     });
-    const pallet1 = await Pallet.create({
+    await Pallet.create({
       title: "1-1",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [],
     });
@@ -58,13 +58,13 @@ describe("getRowByIdUtil", () => {
     const row = await Row.create({ title: "Row With Empty Pallets" });
     const emptyPallet = await Pallet.create({
       title: "Empty Pallet",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [],
     });
     const pos = await Pos.create({
-      pallet: { _id: emptyPallet._id, title: emptyPallet.title },
-      row: { _id: row._id, title: row.title },
+      pallet: emptyPallet._id,
+      row: row._id,
       palletData: { _id: emptyPallet._id, title: emptyPallet.title },
       rowData: { _id: row._id, title: row.title },
       palletTitle: emptyPallet.title,
@@ -73,9 +73,9 @@ describe("getRowByIdUtil", () => {
       quant: 10,
       boxes: 2,
     });
-    const fullPallet = await Pallet.create({
+    await Pallet.create({
       title: "Full Pallet",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [pos._id as Types.ObjectId],
     });
@@ -93,9 +93,9 @@ describe("getRowByIdUtil", () => {
 
   it("возвращает правильные поля паллет", async () => {
     const row = await Row.create({ title: "Row For Fields" });
-    const pallet = await Pallet.create({
+    await Pallet.create({
       title: "Test Pallet",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [],
     });
@@ -111,4 +111,3 @@ describe("getRowByIdUtil", () => {
     expect(result?.pallets[0]).toHaveProperty("isDef");
   });
 });
-

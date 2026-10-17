@@ -5,4 +5,3 @@ export const getRowByTitleSchema = z.object({
 });
 
 export type GetRowByTitleInput = z.infer<typeof getRowByTitleSchema>;
-

@@ -1,7 +1,4 @@
-export function pickHeaderCaseInsensitive(
-  headers: Record<string, unknown>,
-  key: string
-): unknown {
+export function pickHeaderCaseInsensitive(headers: Record<string, unknown>, key: string): unknown {
   const wanted = key.toLowerCase();
   for (const [k, v] of Object.entries(headers)) {
     if (k.toLowerCase() === wanted) return v;

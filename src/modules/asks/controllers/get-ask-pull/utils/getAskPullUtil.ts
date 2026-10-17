@@ -10,9 +10,7 @@ import { getRemainingQuantityUtil } from "./getRemainingQuantityUtil.js";
  * @param askId - ID ask для получения позиций
  * @returns Ответ с позициями для снятия или null если ask не найден
  */
-export const getAskPullUtil = async (
-  askId: string
-): Promise<GetAskPullResponse | null> => {
+export const getAskPullUtil = async (askId: string): Promise<GetAskPullResponse | null> => {
   const ask = await Ask.findById(askId).exec();
 
   if (!ask) {
@@ -51,10 +49,7 @@ export const getAskPullUtil = async (
     };
   }
 
-  const positions = await getPosesByArtikulAndSkladUtil(
-    ask.artikul,
-    ask.sklad || "pogrebi"
-  );
+  const positions = await getPosesByArtikulAndSkladUtil(ask.artikul, ask.sklad || "pogrebi");
 
   if (positions.length === 0) {
     return {
@@ -66,25 +61,23 @@ export const getAskPullUtil = async (
     };
   }
 
-  const art = await Art.findOne({ artikul: ask.artikul })
-    .select("zone")
-    .lean()
-    .exec();
+  const art = await Art.findOne({ artikul: ask.artikul }).select("zone").lean().exec();
   const artZone = art?.zone ?? null;
 
-  const askQuant = (ask.quant !== undefined && ask.quant !== null && ask.quant > 0) ? ask.quant : null;
-  const askRemainingQuantity = (askQuant !== null) ? remainingQuantity : null;
-  
+  const askQuant =
+    ask.quant !== undefined && ask.quant !== null && ask.quant > 0 ? ask.quant : null;
+  const askRemainingQuantity = askQuant !== null ? remainingQuantity : null;
+
   const positionsForPull = calculatePositionsForPullUtil(
     positions,
     // Если quant не указан, передаем null, чтобы сработал сценарий 1 (одна позиция)
     // getRemainingQuantityUtil возвращает 0 если quant не указан, но нам для calculatePositions нужно null
-    (askQuant === null) ? null : remainingQuantity,
+    askQuant === null ? null : remainingQuantity,
     askId, // Используем параметр функции, который уже является строкой
     ask.artikul,
     askQuant,
     askRemainingQuantity,
-    artZone
+    artZone,
   );
 
   return {

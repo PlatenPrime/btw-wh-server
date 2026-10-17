@@ -34,8 +34,7 @@ export async function getYumiStockData(link: string): Promise<YumiProductInfo> {
     }
 
     const packCount = extractPackCount(title);
-    const finalPrice =
-      packCount && packCount > 1 ? toMoney(basePrice / packCount) : basePrice;
+    const finalPrice = packCount && packCount > 1 ? toMoney(basePrice / packCount) : basePrice;
 
     if (packCount && packCount > 1 && stock > 0) {
       stock = stock * packCount;

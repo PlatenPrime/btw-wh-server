@@ -13,20 +13,14 @@ const SECTION_ICON = {
   ambiguous: "⚠️",
 } as const;
 
-function formatFindingLines(
-  icon: string,
-  finding: PackFlipLineFinding
-): string[] {
+function formatFindingLines(icon: string, finding: PackFlipLineFinding): string[] {
   const head = `${icon} ${finding.date} · ${finding.productId} · ×${finding.factor}`;
   const title = finding.title.trim();
   if (!title) return [head];
   return [head, `   ${title}`];
 }
 
-function formatSection(
-  label: keyof typeof SECTION_ICON,
-  rows: PackFlipLineFinding[]
-): string[] {
+function formatSection(label: keyof typeof SECTION_ICON, rows: PackFlipLineFinding[]): string[] {
   if (rows.length === 0) return [];
   const icon = SECTION_ICON[label];
   const lines = [`${label}:`];

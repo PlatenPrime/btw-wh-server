@@ -11,10 +11,9 @@ export const createDelSchema = z.object({
   artikuls: z
     .array(artikulItemSchema)
     .default([])
-    .refine(
-      (items) => new Set(items.map((i) => i.artikul)).size === items.length,
-      { message: "Duplicate artikul values are not allowed" }
-    ),
+    .refine((items) => new Set(items.map((i) => i.artikul)).size === items.length, {
+      message: "Duplicate artikul values are not allowed",
+    }),
 });
 
 export type CreateDelInput = z.infer<typeof createDelSchema>;

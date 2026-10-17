@@ -7,11 +7,10 @@ export const updateArtLimitSchema = z.object({
   }),
   limit: z
     .number({
-      required_error: "limit is required",
-      invalid_type_error: "limit must be a number",
+      error: (issue) =>
+        issue.input === undefined ? "limit is required" : "limit must be a number",
     })
     .nonnegative("limit must be a non-negative number"),
 });
 
 export type UpdateArtLimitInput = z.infer<typeof updateArtLimitSchema>;
-

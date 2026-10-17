@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
 import { hashPasswordUtil } from "../../utils/hashPasswordUtil.js";
@@ -100,4 +99,3 @@ describe("loginUserController", () => {
     expect(responseJson.message).toBe("Пароль не вірний");
   });
 });
-

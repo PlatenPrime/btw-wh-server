@@ -27,10 +27,7 @@ describe("populatePalletDataUtil", () => {
     });
 
     // Удаляем palletData для теста через прямое обновление MongoDB
-    await pos.collection.updateOne(
-      { _id: pos._id },
-      { $unset: { palletData: "" } }
-    );
+    await pos.collection.updateOne({ _id: pos._id }, { $unset: { palletData: "" } });
     // Перезагружаем документ из базы без валидации
     const Pos = (await import("../../../../models/Pos.js")).Pos;
     const updatedPos = await Pos.findById(pos._id).lean();
@@ -54,10 +51,7 @@ describe("populatePalletDataUtil", () => {
     });
 
     // Удаляем palletData через прямое обновление MongoDB
-    await pos.collection.updateOne(
-      { _id: pos._id },
-      { $unset: { palletData: "" } }
-    );
+    await pos.collection.updateOne({ _id: pos._id }, { $unset: { palletData: "" } });
     // Перезагружаем документ
     const updatedDoc = await pos.collection.findOne({ _id: pos._id });
     if (updatedDoc) {
@@ -65,9 +59,6 @@ describe("populatePalletDataUtil", () => {
       pos.pallet = fakePalletId;
     }
 
-    await expect(populatePalletDataUtil(pos)).rejects.toThrow(
-      "Pallet not found"
-    );
+    await expect(populatePalletDataUtil(pos)).rejects.toThrow("Pallet not found");
   });
 });
-

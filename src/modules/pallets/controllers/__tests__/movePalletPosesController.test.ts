@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
-import { createTestRow, createTestPallet, createTestPos } from "../../../../test/utils/testHelpers.js";
+import {
+  createTestRow,
+  createTestPallet,
+  createTestPos,
+} from "../../../../test/utils/testHelpers.js";
 import { Event } from "../../../events/models/Event.js";
 import { movePalletPosesController } from "../move-pallet-poses/movePalletPosesController.js";
 
@@ -60,7 +64,7 @@ describe("movePalletPosesController", () => {
     const updatedSource = await PalletModel.findByIdAndUpdate(
       sourcePallet._id,
       { $set: { poses: [pos._id] } },
-      { new: true }
+      { new: true },
     );
     expect(updatedSource?.poses.length).toBe(1);
 
@@ -150,9 +154,7 @@ describe("movePalletPosesController", () => {
     await movePalletPosesController(req, res);
 
     expect(responseStatus.code).toBe(400);
-    expect(responseJson.message).toBe(
-      "Source and target pallet IDs must be different"
-    );
+    expect(responseJson.message).toBe("Source and target pallet IDs must be different");
   });
 
   it("404: если source pallet не найдена", async () => {
@@ -170,4 +172,3 @@ describe("movePalletPosesController", () => {
     expect(responseStatus.code).toBe(404);
   });
 });
-

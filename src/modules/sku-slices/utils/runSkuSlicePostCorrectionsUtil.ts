@@ -70,7 +70,7 @@ function errorMessage(error: unknown): string {
 
 async function runBalunStep(
   asOf: Date,
-  apply: boolean
+  apply: boolean,
 ): Promise<CorrectBalunFakeStockSpikesResult> {
   return correctBalunFakeStockSpikesUtil({
     daysBack: BALUN_FAKE_STOCK_CRON_DAYS_BACK,
@@ -81,7 +81,7 @@ async function runBalunStep(
 
 async function runSvbumStep(
   asOf: Date,
-  apply: boolean
+  apply: boolean,
 ): Promise<CorrectSvbumFakeStockSpikesResult> {
   return correctSvbumFakeStockSpikesUtil({
     daysBack: SVBUM_FAKE_STOCK_CRON_DAYS_BACK,
@@ -91,14 +91,13 @@ async function runSvbumStep(
 }
 
 export async function runSkuSlicePostCorrectionsUtil(
-  input: RunSkuSlicePostCorrectionsInput
+  input: RunSkuSlicePostCorrectionsInput,
 ): Promise<RunSkuSlicePostCorrectionsResult> {
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
   const apply = input.apply ?? false;
   const asOfDates = enumerateReportingDates(dateFrom, dateTo);
-  const rollupKonkNames =
-    input.rollupKonkNames ?? (await resolveSkuSliceRollupKonkNames());
+  const rollupKonkNames = input.rollupKonkNames ?? (await resolveSkuSliceRollupKonkNames());
   const errors: PostCorrectionStepError[] = [];
   const days: RunSkuSlicePostCorrectionsDayResult[] = [];
   const totalSteps = asOfDates.length;
@@ -110,7 +109,7 @@ export async function runSkuSlicePostCorrectionsUtil(
     input.onProgress?.(
       dayIndex,
       totalSteps,
-      `Post-corrections ${asOfYmd} (${dayIndex + 1}/${totalSteps})`
+      `Post-corrections ${asOfYmd} (${dayIndex + 1}/${totalSteps})`,
     );
 
     const dayResult: RunSkuSlicePostCorrectionsDayResult = {

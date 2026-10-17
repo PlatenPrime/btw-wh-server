@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import {
-  createTestPallet,
-  createTestRow,
-} from "../../../../../../test/utils/testHelpers.js";
+import { createTestPallet, createTestRow } from "../../../../../../test/utils/testHelpers.js";
 import { validatePalletsAndRowsUtil } from "../validatePalletsAndRowsUtil.js";
 
 describe("validatePalletsAndRowsUtil", () => {
@@ -77,7 +74,7 @@ describe("validatePalletsAndRowsUtil", () => {
             },
           ],
           session,
-        })
+        }),
       ).rejects.toThrow("Some pallets not found");
     });
     await session.endSession();
@@ -111,10 +108,9 @@ describe("validatePalletsAndRowsUtil", () => {
             },
           ],
           session,
-        })
+        }),
       ).rejects.toThrow("Some rows not found");
     });
     await session.endSession();
   });
 });
-

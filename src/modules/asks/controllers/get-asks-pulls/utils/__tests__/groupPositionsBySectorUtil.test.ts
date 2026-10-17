@@ -166,4 +166,3 @@ describe("groupPositionsBySectorUtil", () => {
     expect(result[0].positions.length).toBe(1);
   });
 });
-

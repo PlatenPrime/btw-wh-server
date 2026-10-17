@@ -2,10 +2,7 @@ import { Router } from "express";
 import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import {
-  getArtSalesByDateController,
-  getArtSalesRangeController,
-} from "./controllers/index.js";
+import { getArtSalesByDateController, getArtSalesRangeController } from "./controllers/index.js";
 
 const router = Router();
 

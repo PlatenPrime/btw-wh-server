@@ -7,9 +7,7 @@ import { Art, IArt } from "../../../models/Art.js";
 export const getArtsForExportUtil = async (): Promise<IArt[]> => {
   const arts: IArt[] = await Art.find()
     .sort({ artikul: 1 })
-    .select(
-      "artikul nameukr namerus zone limit marker btradeStock createdAt updatedAt"
-    )
+    .select("artikul nameukr namerus zone limit marker btradeStock createdAt updatedAt")
     .lean();
   return arts;
 };

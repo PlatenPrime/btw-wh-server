@@ -6,10 +6,7 @@ import { getSkuSliceRangeUtil } from "./utils/getSkuSliceRangeUtil.js";
  * @desc    Срез по SKU за период дат
  * @route   GET /api/sku-slices/sku/:skuId/range?dateFrom=&dateTo=
  */
-export const getSkuSliceRangeController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getSkuSliceRangeController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getSkuSliceRangeSchema.safeParse({
     skuId: req.params.skuId,
     dateFrom: req.query.dateFrom,
@@ -18,7 +15,7 @@ export const getSkuSliceRangeController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

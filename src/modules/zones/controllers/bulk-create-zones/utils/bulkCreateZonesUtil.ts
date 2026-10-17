@@ -5,9 +5,7 @@ type BulkCreateZonesUtilInput = {
   zones: BulkCreateZonesInput["zones"];
 };
 
-export const bulkCreateZonesUtil = async ({
-  zones,
-}: BulkCreateZonesUtilInput) => {
+export const bulkCreateZonesUtil = async ({ zones }: BulkCreateZonesUtilInput) => {
   const operations = zones.map((zone) => ({
     updateOne: {
       filter: { bar: zone.bar },
@@ -25,4 +23,3 @@ export const bulkCreateZonesUtil = async ({
   const result = await Zone.bulkWrite(operations);
   return result;
 };
-

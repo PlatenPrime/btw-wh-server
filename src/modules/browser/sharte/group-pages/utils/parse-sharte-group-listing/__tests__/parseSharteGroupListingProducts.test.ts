@@ -37,9 +37,7 @@ describe("parseSharteGroupListingProducts", () => {
       </div>
     `;
     const $ = cheerio.load(html);
-    expect(parseSharteGroupListingProducts($, "https://sharte.net/cat/").size).toBe(
-      0
-    );
+    expect(parseSharteGroupListingProducts($, "https://sharte.net/cat/").size).toBe(0);
   });
 });
 
@@ -52,14 +50,14 @@ describe("getSharteGroupNextPageUrl", () => {
       <link rel="next" href="/cat/?PAGEN_1=3" />
     `);
     expect(getSharteGroupNextPageUrl($, "https://sharte.net/cat/")).toBe(
-      "https://sharte.net/cat/?PAGEN_1=2"
+      "https://sharte.net/cat/?PAGEN_1=2",
     );
   });
 
   it("falls back to link rel=next", () => {
     const $ = cheerio.load(`<link rel="next" href="/cat/?page=2" />`);
     expect(getSharteGroupNextPageUrl($, "https://sharte.net/cat/")).toBe(
-      "https://sharte.net/cat/?page=2"
+      "https://sharte.net/cat/?page=2",
     );
   });
 });

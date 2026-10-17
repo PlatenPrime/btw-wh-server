@@ -29,4 +29,3 @@ describe("excludeKonksSchema", () => {
     expect(result.data).toBeUndefined();
   });
 });
-

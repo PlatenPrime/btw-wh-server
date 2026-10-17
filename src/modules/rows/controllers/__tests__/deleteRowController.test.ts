@@ -80,13 +80,13 @@ describe("deleteRowController", () => {
     const row = await Row.create({ title: "Cascade Test" });
     const pallet = await Pallet.create({
       title: "Pallet For Cascade",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [],
     });
     const pos = await Pos.create({
-      pallet: { _id: pallet._id, title: pallet.title },
-      row: { _id: row._id, title: row.title },
+      pallet: pallet._id,
+      row: row._id,
       palletData: { _id: pallet._id, title: pallet.title },
       rowData: { _id: row._id, title: row.title },
       palletTitle: pallet.title,
@@ -100,11 +100,10 @@ describe("deleteRowController", () => {
     await deleteRow(req, res);
 
     expect(responseStatus.code).toBe(200);
-    
+
     const deletedPallet = await Pallet.findById(pallet._id);
     const deletedPos = await Pos.findById(pos._id);
     expect(deletedPallet).toBeNull();
     expect(deletedPos).toBeNull();
   });
 });
-

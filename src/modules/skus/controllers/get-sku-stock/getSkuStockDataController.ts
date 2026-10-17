@@ -1,26 +1,20 @@
 import { Request, Response } from "express";
 import { logModuleError } from "../../../../logging/logModuleError.js";
-import {
-  getSkuStockDataUtil,
-  UNSUPPORTED_KONK_CODE,
-} from "../../utils/getSkuStockDataUtil.js";
+import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE } from "../../utils/getSkuStockDataUtil.js";
 import { getSkuByIdSchema } from "../get-sku-by-id/schemas/getSkuByIdSchema.js";
 
 /**
  * @desc    Получить остаток и цену по SKU (по id, выбор утилиты по konkName)
  * @route   GET /api/skus/id/:id/stock
  */
-export const getSkuStockDataController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getSkuStockDataController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = getSkuByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

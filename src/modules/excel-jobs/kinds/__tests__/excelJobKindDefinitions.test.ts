@@ -40,7 +40,7 @@ describe("excelJobKindDefinitions", () => {
     });
     expect(parsed.success).toBe(true);
     if (!parsed.success) return;
-    expect(parsed.data.metrics).toEqual(["sales", "revenue"]);
+    expect(parsed.data).toMatchObject({ metrics: ["sales", "revenue"] });
   });
 
   it("rejects invalid sku-konk-sales params", () => {

@@ -14,7 +14,7 @@ describe("postPerfectAjax", () => {
       "https://perfectparty.in.ua/cart",
       "token=aa",
       "PHPSESSID=abc",
-      "https://perfectparty.in.ua/x.html"
+      "https://perfectparty.in.ua/x.html",
     );
 
     expect(result).toEqual({
@@ -31,7 +31,7 @@ describe("postPerfectAjax", () => {
           Referer: "https://perfectparty.in.ua/x.html",
           "X-Requested-With": "XMLHttpRequest",
         }),
-      })
+      }),
     );
   });
 
@@ -42,7 +42,7 @@ describe("postPerfectAjax", () => {
       "https://perfectparty.in.ua/cart",
       "a=1",
       "",
-      "https://perfectparty.in.ua/x.html"
+      "https://perfectparty.in.ua/x.html",
     );
     const headers = post.mock.calls[0]?.[2]?.headers ?? {};
     expect(headers.Cookie).toBeUndefined();

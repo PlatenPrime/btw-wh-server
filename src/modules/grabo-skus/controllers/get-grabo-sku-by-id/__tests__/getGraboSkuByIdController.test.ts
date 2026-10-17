@@ -57,17 +57,13 @@ describe("getGraboSkuByIdController", () => {
   });
 
   it("200 returns the document", async () => {
-    const saved = await GraboSku.create(
-      graboSkuDoc({ productId: "G72274", title: "Pink Ribbon" })
-    );
+    const saved = await GraboSku.create(graboSkuDoc({ productId: "G72274", title: "Pink Ribbon" }));
     const req = { params: { id: saved._id.toString() } } as unknown as Request;
     await getGraboSkuByIdController(req, res);
 
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Grabo sku retrieved successfully");
-    expect((responseJson.data as { productId: string }).productId).toBe(
-      "G72274"
-    );
+    expect((responseJson.data as { productId: string }).productId).toBe("G72274");
   });
 
   it("500 when lookup fails", async () => {

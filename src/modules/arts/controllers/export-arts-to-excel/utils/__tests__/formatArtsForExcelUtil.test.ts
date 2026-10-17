@@ -106,9 +106,7 @@ describe("formatArtsForExcelUtil", () => {
 
     const result = formatArtsForExcelUtil(arts);
 
-    expect(result[0]["Дата оновлення залишків"]).toBe(
-      testDate.toLocaleDateString("uk-UA")
-    );
+    expect(result[0]["Дата оновлення залишків"]).toBe(testDate.toLocaleDateString("uk-UA"));
   });
 
   it("возвращает пустой массив для пустого входного массива", () => {
@@ -189,4 +187,3 @@ describe("formatArtsForExcelUtil", () => {
     expect(result[0]["Дата оновлення залишків"]).toBe("");
   });
 });
-

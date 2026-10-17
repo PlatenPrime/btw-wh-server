@@ -1,10 +1,7 @@
 import { ClientSession } from "mongoose";
 import { IUser } from "../../../../auth/models/User.js";
 import { Ask, IAsk } from "../../../models/Ask.js";
-import {
-  buildAskEvent,
-  mapUserToAskUserData,
-} from "../../../utils/askEventsUtil.js";
+import { buildAskEvent, mapUserToAskUserData } from "../../../utils/askEventsUtil.js";
 import { CreateAskData } from "../schemas/createAskSchema.js";
 
 type CreateAskUtilParams = {

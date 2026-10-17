@@ -6,6 +6,4 @@ export const getAirGroupPagesProductsSchema = z.object({
   maxPages: z.number().int().min(1).max(200).optional(),
 });
 
-export type GetAirGroupPagesProductsInput = z.infer<
-  typeof getAirGroupPagesProductsSchema
->;
+export type GetAirGroupPagesProductsInput = z.infer<typeof getAirGroupPagesProductsSchema>;

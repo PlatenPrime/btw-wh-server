@@ -36,8 +36,7 @@ export async function logServerEgressGeo(context: string): Promise<void> {
 
     log.warn({ context }, "server egress geo unavailable");
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "unknown error";
+    const message = error instanceof Error ? error.message : "unknown error";
     log.warn({ context, err: message }, "server egress geo failed");
   }
 }

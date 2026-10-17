@@ -36,8 +36,6 @@ describe("sendMessageToDefsChat", () => {
     const error = new Error("Test error");
     mockSendMessageToTGChat.mockRejectedValueOnce(error);
 
-    await expect(sendMessageToDefsChat("Test message")).rejects.toThrow(
-      "Test error"
-    );
+    await expect(sendMessageToDefsChat("Test message")).rejects.toThrow("Test error");
   });
 });

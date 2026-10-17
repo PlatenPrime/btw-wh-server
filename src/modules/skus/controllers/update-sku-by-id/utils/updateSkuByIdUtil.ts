@@ -11,19 +11,11 @@ type UpdateSkuByIdUtilInput = {
   imageUrl?: string;
 };
 
-export const updateSkuByIdUtil = async (
-  input: UpdateSkuByIdUtilInput
-): Promise<ISku | null> => {
+export const updateSkuByIdUtil = async (input: UpdateSkuByIdUtilInput): Promise<ISku | null> => {
   const update: Partial<
     Pick<
       ISku,
-      | "konkName"
-      | "prodName"
-      | "productId"
-      | "btradeAnalog"
-      | "title"
-      | "url"
-      | "imageUrl"
+      "konkName" | "prodName" | "productId" | "btradeAnalog" | "title" | "url" | "imageUrl"
     >
   > = {};
 

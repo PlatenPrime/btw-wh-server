@@ -77,11 +77,8 @@ describe("isHttpLogEnabled", () => {
     expect(isHttpLogEnabled()).toBe(true);
   });
 
-  it.each(["0", "false", "no", "off"])(
-    "false при LOG_HTTP=%s",
-    (value) => {
-      process.env.LOG_HTTP = value;
-      expect(isHttpLogEnabled()).toBe(false);
-    }
-  );
+  it.each(["0", "false", "no", "off"])("false при LOG_HTTP=%s", (value) => {
+    process.env.LOG_HTTP = value;
+    expect(isHttpLogEnabled()).toBe(false);
+  });
 });

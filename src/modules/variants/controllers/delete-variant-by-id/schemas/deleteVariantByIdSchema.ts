@@ -8,4 +8,3 @@ export const deleteVariantByIdSchema = z.object({
 });
 
 export type DeleteVariantByIdInput = z.infer<typeof deleteVariantByIdSchema>;
-

@@ -23,15 +23,11 @@ const konkSchema = new Schema<IKonk>(
     imageUrl: { type: String, required: true },
     recountDays: { type: [String], required: true, default: [] },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**
  * Konk Mongoose model
  * @see IKonk
  */
-export const Konk: Model<IKonk> = getOrCreateModel<IKonk>(
-  "Konk",
-  konkSchema,
-  "konks",
-);
+export const Konk: Model<IKonk> = getOrCreateModel<IKonk>("Konk", konkSchema, "konks");

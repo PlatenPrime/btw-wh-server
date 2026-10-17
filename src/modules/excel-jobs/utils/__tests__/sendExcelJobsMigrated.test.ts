@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Request, Response } from "express";
 import { EXCEL_JOBS_MIGRATED_CODE } from "../../constants/excelJobConstants.js";
-import {
-  createMigratedExcelController,
-  sendExcelJobsMigrated,
-} from "../sendExcelJobsMigrated.js";
+import { createMigratedExcelController, sendExcelJobsMigrated } from "../sendExcelJobsMigrated.js";
 
 describe("sendExcelJobsMigrated", () => {
   it("responds 410 with kind", () => {

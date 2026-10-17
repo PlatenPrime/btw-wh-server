@@ -9,13 +9,10 @@ import { createTestPallet, createTestRow } from "../../../test/utils/testHelpers
 import { Pallet } from "../models/Pallet.js";
 
 const createAuthHeader = (role: RoleType = RoleType.USER) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -49,9 +46,7 @@ describe("Pallets router integration", () => {
         .expect(200);
 
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.some((p: { title: string }) => p.title === "Empty-1")).toBe(
-        true,
-      );
+      expect(response.body.some((p: { title: string }) => p.title === "Empty-1")).toBe(true);
     });
   });
 

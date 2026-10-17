@@ -26,12 +26,10 @@ export type SkuSalesRangeItem = {
   isDeliveryDay: boolean;
 };
 
-export type GetSkuSalesRangeResult =
-  | { ok: true; data: SkuSalesRangeItem[] }
-  | { ok: false };
+export type GetSkuSalesRangeResult = { ok: true; data: SkuSalesRangeItem[] } | { ok: false };
 
 export async function getSkuSalesRangeUtil(
-  input: GetSkuSalesRangeInput
+  input: GetSkuSalesRangeInput,
 ): Promise<GetSkuSalesRangeResult> {
   const sku = await Sku.findById(input.skuId).select("konkName productId").lean();
 
@@ -39,9 +37,7 @@ export async function getSkuSalesRangeUtil(
 
   const productKey = sku.productId?.trim();
   if (!productKey) return { ok: false };
-  const konkDoc = await Konk.findOne({ name: sku.konkName })
-    .select("recountDays")
-    .lean();
+  const konkDoc = await Konk.findOne({ name: sku.konkName }).select("recountDays").lean();
   const recountDays = new Set((konkDoc?.recountDays ?? []).map(String));
 
   const dateFrom = toSliceDate(input.dateFrom);
@@ -64,13 +60,13 @@ export async function getSkuSalesRangeUtil(
   for (const doc of docs) {
     byDate.set(
       toSliceDate(doc.date).getTime(),
-      (doc.data ?? {}) as Record<string, ISkuSliceDataItem>
+      (doc.data ?? {}) as Record<string, ISkuSliceDataItem>,
     );
   }
 
   const datesFull = enumerateReportingDates(warmStart, dateTo);
   const indexStart = datesFull.findIndex(
-    (d) => toSliceDate(d).getTime() >= toSliceDate(dateFrom).getTime()
+    (d) => toSliceDate(d).getTime() >= toSliceDate(dateFrom).getTime(),
   );
   if (indexStart < 0) return { ok: false };
 
@@ -88,8 +84,7 @@ export async function getSkuSalesRangeUtil(
     const dayResult = salesResults[i]!;
     const sales = applyRecountDayToSales(dayResult.sales, d, recountDays);
     const priceVal = coalescedReport[i]!.price;
-    const price =
-      typeof priceVal === "number" && Number.isFinite(priceVal) ? priceVal : 0;
+    const price = typeof priceVal === "number" && Number.isFinite(priceVal) ? priceVal : 0;
     const revenue = computeRevenueForDay(sales, priceVal ?? null);
     return {
       date: d.toISOString(),

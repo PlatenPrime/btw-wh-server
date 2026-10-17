@@ -102,9 +102,7 @@ describe("Art Model - Schema Validation Only", () => {
       expect(savedArt.btradeStock).toBeDefined();
       expect(savedArt.btradeStock?.value).toBe(75);
       expect(savedArt.btradeStock?.date).toBeInstanceOf(Date);
-      expect(savedArt.btradeStock?.date.toISOString()).toBe(
-        "2024-01-15T00:00:00.000Z"
-      );
+      expect(savedArt.btradeStock?.date.toISOString()).toBe("2024-01-15T00:00:00.000Z");
     });
     it("should use current date when btradeStock date is not provided", async () => {
       const artData = {
@@ -115,9 +113,7 @@ describe("Art Model - Schema Validation Only", () => {
       const art = new Art(artData);
       const savedArt = await art.save();
       expect(savedArt.btradeStock?.date).toBeInstanceOf(Date);
-      expect(savedArt.btradeStock?.date.getTime()).toBeGreaterThan(
-        Date.now() - 1000
-      );
+      expect(savedArt.btradeStock?.date.getTime()).toBeGreaterThan(Date.now() - 1000);
     });
     it("should fail btradeStock without required value", async () => {
       const artData = {

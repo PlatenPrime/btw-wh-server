@@ -30,9 +30,7 @@ export type SkugrLeanForGetSku = {
 
 export type GetSkuByIdResult = SkuLeanForGetById & { skugrs: SkugrLeanForGetSku[] };
 
-export const getSkuByIdUtil = async (
-  id: string,
-): Promise<GetSkuByIdResult | null> => {
+export const getSkuByIdUtil = async (id: string): Promise<GetSkuByIdResult | null> => {
   const sku = await Sku.findById(id).lean<SkuLeanForGetById | null>().exec();
   if (!sku) {
     return null;

@@ -51,21 +51,12 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
     }
 
     if (!hasProductPageHtml && htmlStatus >= 400) {
-      logPerfectUnavailableOutcome(
-        productUrl,
-        "not a product page",
-        htmlStatus,
-        false
-      );
+      logPerfectUnavailableOutcome(productUrl, "not a product page", htmlStatus, false);
       return PERFECT_UNAVAILABLE_OUTCOME;
     }
 
-    const htmlRespHeaders =
-      (htmlResponse as { headers?: Record<string, unknown> }).headers ?? {};
-    let cookieHeader = mergeCookies(
-      "",
-      pickHeaderCaseInsensitive(htmlRespHeaders, "set-cookie")
-    );
+    const htmlRespHeaders = (htmlResponse as { headers?: Record<string, unknown> }).headers ?? {};
+    let cookieHeader = mergeCookies("", pickHeaderCaseInsensitive(htmlRespHeaders, "set-cookie"));
 
     const pageTitle = extractTitle(html);
 
@@ -81,7 +72,7 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
         productUrl,
         "id_product missing",
         htmlStatus,
-        hasProductPageHtml
+        hasProductPageHtml,
       );
       return PERFECT_UNAVAILABLE_OUTCOME;
     }
@@ -90,12 +81,7 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
     cookieHeader = tokenResult.cookieHeader;
     const token = tokenResult.token;
     if (!token) {
-      logPerfectUnavailableOutcome(
-        productUrl,
-        "token missing",
-        htmlStatus,
-        hasProductPageHtml
-      );
+      logPerfectUnavailableOutcome(productUrl, "token missing", htmlStatus, hasProductPageHtml);
       return PERFECT_UNAVAILABLE_OUTCOME;
     }
 
@@ -113,7 +99,7 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
       productUrl,
       pageTitle,
       buildPerfectRefreshBody(productForm),
-      cookieHeader
+      cookieHeader,
     );
     cookieHeader = refreshResult.cookieHeader;
     if (refreshResult.info) return refreshResult.info;

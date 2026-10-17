@@ -31,9 +31,9 @@ export async function purgePromotedFromNewskuUtil(): Promise<PurgePromotedFromNe
     };
   }
 
-  const allSkuIds = [
-    ...new Set(groups.flatMap((g) => g.skus.map((id) => id.toString()))),
-  ].map((id) => new mongoose.Types.ObjectId(id));
+  const allSkuIds = [...new Set(groups.flatMap((g) => g.skus.map((id) => id.toString())))].map(
+    (id) => new mongoose.Types.ObjectId(id),
+  );
 
   if (allSkuIds.length === 0) {
     return {

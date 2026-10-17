@@ -2,10 +2,7 @@ import { Request, Response } from "express";
 import { getUserByIdSchema } from "./schemas/getUserByIdSchema.js";
 import { getUserByIdUtil } from "./utils/getUserByIdUtil.js";
 
-export const getUserByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getUserByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -14,7 +11,7 @@ export const getUserByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -34,4 +31,3 @@ export const getUserByIdController = async (
     }
   }
 };
-

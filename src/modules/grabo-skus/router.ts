@@ -11,32 +11,27 @@ import {
 
 const router = Router();
 
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllGraboSkusController)
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllGraboSkusController));
 
 router.get(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getGraboSkuByIdController)
+  asyncHandler(getGraboSkuByIdController),
 );
 
 router.post(
   "/sync",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(runGraboSkuSyncController)
+  asyncHandler(runGraboSkuSyncController),
 );
 
 router.get(
   "/excel",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getGraboSkuExcelController)
+  asyncHandler(getGraboSkuExcelController),
 );
 
 export default router;

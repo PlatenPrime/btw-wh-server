@@ -96,7 +96,7 @@ describe("updateRowController", () => {
   });
 
   it("500: внутренняя ошибка при нарушении уникальности", async () => {
-    const row1 = await Row.create({ title: "Unique 1" });
+    await Row.create({ title: "Unique 1" });
     const row2 = await Row.create({ title: "Unique 2" });
 
     const req = {
@@ -109,4 +109,3 @@ describe("updateRowController", () => {
     expect(responseStatus.code).toBe(500);
   });
 });
-

@@ -14,10 +14,7 @@ const mediaLog = createLogger({ module: "media" });
  * @desc    Публичный proxy JPEG артикула с sharik.ua
  * @route   GET /api/media/sharik/:artikul?size=prev|big
  */
-export const getSharikArtImageController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getSharikArtImageController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getSharikArtImageSchema.safeParse({
       artikul: req.params.artikul,
@@ -27,7 +24,7 @@ export const getSharikArtImageController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -36,10 +33,7 @@ export const getSharikArtImageController = async (
     const entry = await getCachedSharikArtImage(artikul, size);
 
     const ifNoneMatch = req.headers["if-none-match"];
-    if (
-      typeof ifNoneMatch === "string" &&
-      ifNoneMatch.trim() === entry.etag
-    ) {
+    if (typeof ifNoneMatch === "string" && ifNoneMatch.trim() === entry.etag) {
       res.setHeader("ETag", entry.etag);
       res.setHeader("Cache-Control", SHARIK_ART_IMAGE_HTTP_CACHE_CONTROL);
       res.status(304).end();
@@ -59,10 +53,7 @@ export const getSharikArtImageController = async (
     }
 
     if (error instanceof SharikArtImageUpstreamError) {
-      mediaLog.warn(
-        { details: error.message },
-        "sharik art image upstream failed"
-      );
+      mediaLog.warn({ details: error.message }, "sharik art image upstream failed");
       res.status(502).json({
         message: "Upstream image fetch failed",
       });
@@ -73,7 +64,7 @@ export const getSharikArtImageController = async (
       {
         details: error instanceof Error ? error.message : String(error),
       },
-      "sharik art image unexpected error"
+      "sharik art image unexpected error",
     );
 
     if (!res.headersSent) {

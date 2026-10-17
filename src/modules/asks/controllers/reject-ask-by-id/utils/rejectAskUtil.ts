@@ -1,10 +1,7 @@
 import { ClientSession, Types } from "mongoose";
 import { IUser } from "../../../../auth/models/User.js";
 import { Ask, IAsk } from "../../../models/Ask.js";
-import {
-  buildAskEvent,
-  mapUserToAskUserData,
-} from "../../../utils/askEventsUtil.js";
+import { buildAskEvent, mapUserToAskUserData } from "../../../utils/askEventsUtil.js";
 import { getRejectAskActionUtil } from "./getRejectAskActionUtil.js";
 
 interface RejectAskUtilInput {
@@ -35,15 +32,11 @@ export async function rejectAskUtil({
     pullBox: ask.pullBox ?? 0,
   };
 
-  const updatedAsk = await Ask.findByIdAndUpdate(
-    ask._id,
-    updateFields,
-    {
-      new: true,
-      runValidators: true,
-      session,
-    }
-  );
+  const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
+    new: true,
+    runValidators: true,
+    session,
+  });
 
   if (!updatedAsk) {
     throw new Error("Failed to update ask");
@@ -51,4 +44,3 @@ export async function rejectAskUtil({
 
   return updatedAsk as IAsk;
 }
-

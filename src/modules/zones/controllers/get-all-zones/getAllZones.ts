@@ -12,7 +12,7 @@ export const getAllZones = async (req: GetAllZonesRequest, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid query parameters",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -42,12 +42,3 @@ export const getAllZones = async (req: GetAllZonesRequest, res: Response) => {
     }
   }
 };
-
-
-
-
-
-
-
-
-

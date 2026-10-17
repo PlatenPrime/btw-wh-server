@@ -44,4 +44,3 @@ describe("getPosesByRowIdUtil", () => {
     expect(poses).toEqual([]);
   });
 });
-

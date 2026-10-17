@@ -27,16 +27,13 @@ type GetAnalogsByProdResult = {
 };
 
 export const getAnalogsByProdUtil = async (
-  input: GetAnalogsByProdInput
+  input: GetAnalogsByProdInput,
 ): Promise<GetAnalogsByProdResult> => {
   const { prodName, page, limit, search } = input;
 
   const baseFilter: Record<string, unknown> = { prodName };
   const searchCondition = buildAnalogSearchFilter(search);
-  const filter =
-    searchCondition === null
-      ? baseFilter
-      : { $and: [baseFilter, searchCondition] };
+  const filter = searchCondition === null ? baseFilter : { $and: [baseFilter, searchCondition] };
 
   const [analogs, total] = await Promise.all([
     Analog.find(filter)

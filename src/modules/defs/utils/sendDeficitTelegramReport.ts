@@ -14,7 +14,7 @@ async function delay(ms: number): Promise<void> {
  */
 export async function sendDeficitTelegramReport(
   messages: string[],
-  delayMs: number = DEFICIT_REPORT_CHUNK_DELAY_MS
+  delayMs: number = DEFICIT_REPORT_CHUNK_DELAY_MS,
 ): Promise<void> {
   try {
     for (let i = 0; i < messages.length; i += 1) {
@@ -24,10 +24,6 @@ export async function sendDeficitTelegramReport(
       }
     }
   } catch (error) {
-    logModuleError(
-      "defs",
-      error,
-      "Failed to send deficit report to Defs Chat:"
-    );
+    logModuleError("defs", error, "Failed to send deficit report to Defs Chat:");
   }
 }

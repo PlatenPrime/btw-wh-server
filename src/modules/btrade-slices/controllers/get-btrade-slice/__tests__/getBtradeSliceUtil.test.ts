@@ -121,14 +121,9 @@ describe("getBtradeSliceUtil", () => {
 
     expect(result).not.toBeNull();
     expect(result!.pagination.total).toBe(2);
-    expect(result!.items.map((i) => i.artikul).sort()).toEqual([
-      "ART-bad-full",
-      "ART-bad-price",
-    ]);
+    expect(result!.items.map((i) => i.artikul).sort()).toEqual(["ART-bad-full", "ART-bad-price"]);
     for (const row of result!.items) {
-      expect(
-        isInvalidSliceStockPriceItem(row.quantity, row.price)
-      ).toBe(true);
+      expect(isInvalidSliceStockPriceItem(row.quantity, row.price)).toBe(true);
     }
     expect(isInvalidSliceStockPriceItem(10, 100)).toBe(false);
   });
@@ -167,10 +162,7 @@ describe("getBtradeSliceUtil", () => {
       isInvalid: true,
     });
     expect(page1!.pagination.total).toBe(3);
-    expect(page1!.items.map((i) => i.artikul)).toEqual([
-      "ART-bad-a",
-      "ART-bad-b",
-    ]);
+    expect(page1!.items.map((i) => i.artikul)).toEqual(["ART-bad-a", "ART-bad-b"]);
 
     const page2 = await getBtradeSliceUtil({
       date,

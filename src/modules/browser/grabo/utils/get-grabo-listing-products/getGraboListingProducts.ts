@@ -23,15 +23,14 @@ export type GetGraboListingProductsOptions = {
  */
 export async function getGraboListingProducts(
   input: GetGraboListingProductsInput,
-  options?: GetGraboListingProductsOptions
+  options?: GetGraboListingProductsOptions,
 ): Promise<string[]> {
   const parseResult = getGraboListingProductsSchema.safeParse(input);
   if (!parseResult.success) {
     throw new Error(parseResult.error.message);
   }
 
-  const { groupUrl, maxPages = GRABO_LISTING_DEFAULT_MAX_PAGES } =
-    parseResult.data;
+  const { groupUrl, maxPages = GRABO_LISTING_DEFAULT_MAX_PAGES } = parseResult.data;
   const innerGetHtml = options?.getHtml ?? fetchGraboPageHtml;
 
   let page = 0;
@@ -51,10 +50,7 @@ export async function getGraboListingProducts(
     getHtml,
   });
 
-  log.info(
-    { groupUrl, pages: page, listed: products.length },
-    "grabo listing crawl done"
-  );
+  log.info({ groupUrl, pages: page, listed: products.length }, "grabo listing crawl done");
 
   return products.map((product) => product.url);
 }

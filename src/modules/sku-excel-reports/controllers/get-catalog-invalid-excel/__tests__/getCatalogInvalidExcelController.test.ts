@@ -4,9 +4,6 @@ import { getCatalogInvalidExcelController } from "../getCatalogInvalidExcelContr
 
 describe("getCatalogInvalidExcelController", () => {
   it("returns 410 EXCEL_JOBS_MIGRATED", async () => {
-    await assertMigratedExcelController(
-      getCatalogInvalidExcelController,
-      "sku-catalog-invalid",
-    );
+    await assertMigratedExcelController(getCatalogInvalidExcelController, "sku-catalog-invalid");
   });
 });

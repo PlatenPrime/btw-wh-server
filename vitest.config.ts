@@ -1,19 +1,11 @@
-import { resolve } from "path";
 import { defineConfig } from "vitest/config";
 import type { CoverageOptions } from "vitest/node";
 
-const coverageConfig: CoverageOptions<"v8"> = {
+const coverageConfig: CoverageOptions = {
   provider: "v8",
   reporter: ["text", "json", "html"],
   include: ["src/modules/**"],
-  exclude: [
-    "node_modules/",
-    "dist/",
-    "src/test/",
-    "**/*.d.ts",
-    "**/*.config.*",
-    "**/__tests__/**",
-  ],
+  exclude: ["node_modules/", "dist/", "src/test/", "**/*.d.ts", "**/*.config.*", "**/__tests__/**"],
   thresholds: {
     lines: 80,
     functions: 80,
@@ -30,6 +22,7 @@ export default defineConfig({
       NODE_ENV: "test",
     },
     coverage: coverageConfig,
+    globalSetup: "./src/test/globalTeardown.ts",
     projects: [
       {
         extends: true,
@@ -65,20 +58,10 @@ export default defineConfig({
             "chrome-extensions/**",
           ],
           setupFiles: ["./src/test/setup.ts"],
-          globalTeardown: "./src/test/globalTeardown.ts",
-          pool: "forks",
-          poolOptions: {
-            forks: {
-              singleFork: true,
-            },
-          },
+          maxWorkers: 1,
+          fileParallelism: false,
         },
       },
     ],
-  },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
-    },
   },
 });

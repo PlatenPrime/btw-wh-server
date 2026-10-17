@@ -12,10 +12,6 @@ import bcrypt from "bcryptjs";
  * const hashedPassword = hashPasswordUtil("myPassword123");
  * ```
  */
-export const hashPasswordUtil = (
-  password: string,
-  saltRounds: number = 7
-): string => {
+export const hashPasswordUtil = (password: string, saltRounds: number = 7): string => {
   return bcrypt.hashSync(password, saltRounds);
 };
-

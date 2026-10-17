@@ -17,4 +17,3 @@ export interface GetAsksPullsResponse {
   /** Позиции для снятия, сгруппированные по секторам паллет */
   positionsBySector: IPositionsBySector[];
 }
-

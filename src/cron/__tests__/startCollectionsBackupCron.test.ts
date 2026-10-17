@@ -49,7 +49,7 @@ describe("startCollectionsBackupCron", () => {
       stop: vi.fn(),
     };
 
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       if (args[1] && typeof args[1] === "function") {
         cronCallback = args[1] as () => Promise<void>;
       }
@@ -65,13 +65,13 @@ describe("startCollectionsBackupCron", () => {
       expect.any(Function),
       null,
       true,
-      "Europe/Kiev"
+      "Europe/Kiev",
     );
 
     expect(job).toBe(mockCronJobInstance);
     expect(mockLogger.info).toHaveBeenCalledWith(
       { schedule: "0 0 6 * * *", timezone: "Europe/Kiev" },
-      "cron started"
+      "cron started",
     );
   });
 
@@ -92,13 +92,11 @@ describe("startCollectionsBackupCron", () => {
     expect(mockLogger.info).toHaveBeenCalledWith("starting collections backup");
     expect(exportCollectionsToJson).toHaveBeenCalled();
     expect(sendFileToTGUser).toHaveBeenCalledWith(mockFilePath, "555196992");
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      "backup completed and sent successfully"
-    );
+    expect(mockLogger.info).toHaveBeenCalledWith("backup completed and sent successfully");
     expect(mockedFs.unlink).toHaveBeenCalledWith(mockFilePath);
     expect(mockLogger.info).toHaveBeenCalledWith(
       { backupFilePath: mockFilePath },
-      "temporary backup file deleted"
+      "temporary backup file deleted",
     );
   });
 
@@ -117,10 +115,10 @@ describe("startCollectionsBackupCron", () => {
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       { err: exportError },
-      "collections backup failed"
+      "collections backup failed",
     );
     expect(sendMessageToPlaten).toHaveBeenCalledWith(
-      "❌ Помилка під час створення бэкапу колекцій:\nExport failed"
+      "❌ Помилка під час створення бэкапу колекцій:\nExport failed",
     );
     expect(sendFileToTGUser).not.toHaveBeenCalled();
   });
@@ -141,12 +139,9 @@ describe("startCollectionsBackupCron", () => {
       await cronCallback();
     }
 
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      { err: sendError },
-      "collections backup failed"
-    );
+    expect(mockLogger.error).toHaveBeenCalledWith({ err: sendError }, "collections backup failed");
     expect(sendMessageToPlaten).toHaveBeenCalledWith(
-      "❌ Помилка під час створення бэкапу колекцій:\nSend failed"
+      "❌ Помилка під час створення бэкапу колекцій:\nSend failed",
     );
     expect(mockedFs.unlink).toHaveBeenCalledWith(mockFilePath);
   });
@@ -168,7 +163,7 @@ describe("startCollectionsBackupCron", () => {
 
     expect(mockLogger.warn).toHaveBeenCalledWith(
       { err: deleteError, backupFilePath: mockFilePath },
-      "failed to delete temporary backup file"
+      "failed to delete temporary backup file",
     );
   });
 
@@ -188,7 +183,7 @@ describe("startCollectionsBackupCron", () => {
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       { err: notificationError },
-      "failed to send backup error notification"
+      "failed to send backup error notification",
     );
   });
 });

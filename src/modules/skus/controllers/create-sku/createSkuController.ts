@@ -8,16 +8,13 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Создать sku конкурента
  * @route   POST /api/skus
  */
-export const createSkuController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createSkuController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createSkuSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

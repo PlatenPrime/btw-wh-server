@@ -8,14 +8,10 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Обновить sku по id (указанные в body поля)
  * @route   PATCH /api/skus/id/:id
  */
-export const updateSkuByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateSkuByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { konkName, prodName, btradeAnalog, title, url, imageUrl } =
-      req.body;
+    const { konkName, prodName, btradeAnalog, title, url, imageUrl } = req.body;
     const parseResult = updateSkuByIdSchema.safeParse({
       id,
       konkName,
@@ -29,7 +25,7 @@ export const updateSkuByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

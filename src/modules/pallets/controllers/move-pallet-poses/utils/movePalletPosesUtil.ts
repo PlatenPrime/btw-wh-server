@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import { ClientSession } from "mongoose";
-import { IPos, Pos } from "../../../../poses/models/Pos.js";
-import { IPallet, Pallet } from "../../../models/Pallet.js";
-import { IRow, Row } from "../../../../rows/models/Row.js";
+import { Pos } from "../../../../poses/models/Pos.js";
+import { Pallet } from "../../../models/Pallet.js";
+import { Row } from "../../../../rows/models/Row.js";
 import { serializeIds } from "../../../utils/serialize-ids.js";
 
 type MovePalletPosesInput = {
@@ -22,10 +22,8 @@ export const movePalletPosesUtil = async ({
   session,
 }: MovePalletPosesInput): Promise<MovePalletPosesResult> => {
   // Получение паллет
-  const [sourcePallet, targetPallet] = await Promise.all([
-    Pallet.findById(sourcePalletId).session(session),
-    Pallet.findById(targetPalletId).session(session),
-  ]);
+  const sourcePallet = await Pallet.findById(sourcePalletId).session(session);
+  const targetPallet = await Pallet.findById(targetPalletId).session(session);
 
   if (!sourcePallet) {
     throw new Error("Source pallet not found");
@@ -79,15 +77,11 @@ export const movePalletPosesUtil = async ({
   targetPallet.poses = sourcePallet.poses;
   sourcePallet.poses = [];
 
-  await Promise.all([
-    targetPallet.save({ session }),
-    sourcePallet.save({ session }),
-  ]);
+  await targetPallet.save({ session });
+  await sourcePallet.save({ session });
 
   return {
     sourcePallet: serializeIds(sourcePallet.toObject()),
     targetPallet: serializeIds(targetPallet.toObject()),
   };
 };
-
-

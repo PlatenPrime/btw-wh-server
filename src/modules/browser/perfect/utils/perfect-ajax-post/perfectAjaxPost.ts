@@ -33,7 +33,7 @@ export async function postPerfectAjax(
   url: string,
   formData: string,
   cookieHeader: string,
-  referer: string
+  referer: string,
 ): Promise<PerfectAjaxPostResult> {
   const resp = await client.post<string>(url, formData, {
     ...BROWSER_TEXT_CONFIG,
@@ -47,9 +47,6 @@ export async function postPerfectAjax(
   return {
     status: (resp as { status?: number }).status ?? 0,
     data: String(resp.data ?? ""),
-    cookieHeader: mergeCookies(
-      cookieHeader,
-      pickHeaderCaseInsensitive(headers, "set-cookie")
-    ),
+    cookieHeader: mergeCookies(cookieHeader, pickHeaderCaseInsensitive(headers, "set-cookie")),
   };
 }

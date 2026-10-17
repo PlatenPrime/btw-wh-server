@@ -42,56 +42,52 @@ describe("runAnalogSliceForKonkUtil", () => {
     vi.clearAllMocks();
   });
 
-  it(
-    "creates slice document first with empty data then fills data per analog",
-    async () => {
-      vi.useFakeTimers();
-      vi.mocked(Analog.find).mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          lean: vi.fn().mockResolvedValue([
-            { _id: { toString: () => "id1" }, artikul: "ART-001" },
-            { _id: { toString: () => "id2" }, artikul: "ART-002" },
-          ]),
-        }),
-      } as any);
-      vi.mocked(getAnalogStockDataUtil)
-        .mockResolvedValueOnce({ stock: 10, price: 100 })
-        .mockResolvedValueOnce({ stock: 5, price: 200 });
+  it("creates slice document first with empty data then fills data per analog", async () => {
+    vi.useFakeTimers();
+    vi.mocked(Analog.find).mockReturnValue({
+      select: vi.fn().mockReturnValue({
+        lean: vi.fn().mockResolvedValue([
+          { _id: { toString: () => "id1" }, artikul: "ART-001" },
+          { _id: { toString: () => "id2" }, artikul: "ART-002" },
+        ]),
+      }),
+    } as any);
+    vi.mocked(getAnalogStockDataUtil)
+      .mockResolvedValueOnce({ stock: 10, price: 100 })
+      .mockResolvedValueOnce({ stock: 5, price: 200 });
 
-      const resultPromise = runAnalogSliceForKonkUtil("air", new Date("2025-03-01T12:00:00.000Z"));
-      await vi.runAllTimersAsync();
-      const result = await resultPromise;
-      vi.useRealTimers();
+    const resultPromise = runAnalogSliceForKonkUtil("air", new Date("2025-03-01T12:00:00.000Z"));
+    await vi.runAllTimersAsync();
+    const result = await resultPromise;
+    vi.useRealTimers();
 
-      expect(result).toEqual({
-        saved: true,
-        count: 2,
-        total: 2,
-        invalid: 0,
-        errors: 0,
-      });
+    expect(result).toEqual({
+      saved: true,
+      count: 2,
+      total: 2,
+      invalid: 0,
+      errors: 0,
+    });
 
-      expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(3);
-      const calls = vi.mocked(AnalogSlice.findOneAndUpdate).mock.calls;
+    expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(3);
+    const calls = vi.mocked(AnalogSlice.findOneAndUpdate).mock.calls;
 
-      expect(calls[0][0]).toEqual({ konkName: "air", date: sliceDate });
-      expect(calls[0][1]).toEqual({
-        $setOnInsert: { konkName: "air", date: sliceDate, data: {} },
-      });
-      expect(calls[0][2]).toEqual({ upsert: true });
+    expect(calls[0][0]).toEqual({ konkName: "air", date: sliceDate });
+    expect(calls[0][1]).toEqual({
+      $setOnInsert: { konkName: "air", date: sliceDate, data: {} },
+    });
+    expect(calls[0][2]).toEqual({ upsert: true });
 
-      expect(calls[1][0]).toEqual({ konkName: "air", date: sliceDate });
-      expect(calls[1][1]).toEqual({
-        $set: { "data.ART-001": { stock: 10, price: 100, artikul: "ART-001" } },
-      });
+    expect(calls[1][0]).toEqual({ konkName: "air", date: sliceDate });
+    expect(calls[1][1]).toEqual({
+      $set: { "data.ART-001": { stock: 10, price: 100, artikul: "ART-001" } },
+    });
 
-      expect(calls[2][0]).toEqual({ konkName: "air", date: sliceDate });
-      expect(calls[2][1]).toEqual({
-        $set: { "data.ART-002": { stock: 5, price: 200, artikul: "ART-002" } },
-      });
-    },
-    10000
-  );
+    expect(calls[2][0]).toEqual({ konkName: "air", date: sliceDate });
+    expect(calls[2][1]).toEqual({
+      $set: { "data.ART-002": { stock: 5, price: 200, artikul: "ART-002" } },
+    });
+  }, 10000);
 
   it("when no analogs exist only initial upsert is called", async () => {
     vi.mocked(Analog.find).mockReturnValue({
@@ -112,8 +108,14 @@ describe("runAnalogSliceForKonkUtil", () => {
     expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledTimes(1);
     expect(AnalogSlice.findOneAndUpdate).toHaveBeenCalledWith(
       { konkName: "balun", date: toSliceDate(new Date("2025-03-02T00:00:00.000Z")) },
-      { $setOnInsert: { konkName: "balun", date: toSliceDate(new Date("2025-03-02T00:00:00.000Z")), data: {} } },
-      { upsert: true }
+      {
+        $setOnInsert: {
+          konkName: "balun",
+          date: toSliceDate(new Date("2025-03-02T00:00:00.000Z")),
+          data: {},
+        },
+      },
+      { upsert: true },
     );
   });
 
@@ -164,7 +166,7 @@ describe("runAnalogSliceForKonkUtil", () => {
         $set: {
           "data.ART-001": { stock: -1, price: -1, artikul: "ART-001" },
         },
-      }
+      },
     );
   });
 
@@ -201,15 +203,10 @@ describe("runAnalogSliceForKonkUtil", () => {
     vi.mocked(getAnalogStockDataUtil).mockReset();
     vi.mocked(getAnalogStockDataUtil)
       .mockResolvedValueOnce({ stock: 10, price: 1 })
-      .mockRejectedValueOnce(
-        new BrowserOriginBlockedError("cf 520", { httpStatus: 520 })
-      );
+      .mockRejectedValueOnce(new BrowserOriginBlockedError("cf 520", { httpStatus: 520 }));
 
     vi.useFakeTimers();
-    const resultPromise = runAnalogSliceForKonkUtil(
-      "air",
-      new Date("2025-03-01")
-    );
+    const resultPromise = runAnalogSliceForKonkUtil("air", new Date("2025-03-01"));
     await vi.runAllTimersAsync();
     const result = await resultPromise;
     vi.useRealTimers();

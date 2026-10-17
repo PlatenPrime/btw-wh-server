@@ -31,12 +31,3 @@ describe("getZoneByTitleUtil", () => {
     expect(result?.title).toBe("81-2");
   });
 });
-
-
-
-
-
-
-
-
-

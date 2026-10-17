@@ -1,5 +1,10 @@
 import type { ExcelJobKind } from "../constants/excelJobConstants.js";
-import { failExcelJobRun, type ExcelJobKindRunner, type ExcelJobRunOptions, type ExcelJobRunResult } from "./excelJobRunTypes.js";
+import {
+  failExcelJobRun,
+  type ExcelJobKindRunner,
+  type ExcelJobRunOptions,
+  type ExcelJobRunResult,
+} from "./excelJobRunTypes.js";
 import {
   runAnalogComparison,
   runAnalogSalesComparison,

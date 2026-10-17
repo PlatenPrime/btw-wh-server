@@ -59,9 +59,11 @@
 Получение всех позиций.
 
 **Запрос:**
+
 - Query параметры отсутствуют
 
 **Ответ:**
+
 - 200: `Array<Pos>`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -72,9 +74,11 @@
 Получение позиции по идентификатору.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `Pos`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - позиция не найдена
@@ -87,9 +91,11 @@
 Получение позиций по артикулу с группировкой по паллетам и рядам.
 
 **Запрос:**
+
 - Path параметры: `artikul` (string)
 
 **Ответ:**
+
 - 200: `{ success: boolean, data: { artikul: string, nameukr?: string, totalQuant: number, totalBoxes: number, locations: Array<{ pallet: { _id: string, title: string }, row: { _id: string, title: string }, quant: number, boxes: number }> } }`
 - 400: `{ success: boolean, message: string }` - артикул не указан
 - 500: `{ success: boolean, message: string }` - ошибка сервера
@@ -101,9 +107,11 @@
 Получение всех позиций паллеты.
 
 **Запрос:**
+
 - Path параметры: `palletId` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `Array<Pos>`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -115,9 +123,11 @@
 Получение всех позиций ряда.
 
 **Запрос:**
+
 - Path параметры: `rowId` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `Array<Pos>`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -129,9 +139,11 @@
 Создание новой позиции.
 
 **Запрос:**
+
 - Body: `{ pallet: string, row: string, artikul: string, nameukr?: string, quant: number, boxes: number, date?: string, sklad?: string, comment?: string }`
 
 **Ответ:**
+
 - 201: `Pos`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - паллета или ряд не найдены
@@ -144,9 +156,11 @@
 Массовое создание позиций.
 
 **Запрос:**
+
 - Body: `Array<{ pallet: string, row: string, artikul: string, nameukr?: string, quant: number, boxes: number, date?: string, sklad?: string, comment?: string }>`
 
 **Ответ:**
+
 - 201: `{ message: string, created: number, errors: Array<{ index: number, error: string, data: object }> }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -158,9 +172,11 @@
 Заполнение недостающих кэшированных данных для существующих позиций.
 
 **Запрос:**
+
 - Body отсутствует
 
 **Ответ:**
+
 - 200: `{ updated: number, errors: Array<string>, errorDetails: Array<{ index: number, error: string }> }`
 - 500: `{ error: string }` - ошибка сервера
 
@@ -177,10 +193,12 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `poses-export-stocks`
 Обновление позиции.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 - Body: `{ pallet?: string, row?: string, artikul?: string, nameukr?: string, quant?: number, boxes?: number, date?: string, sklad?: string, comment?: string }` (все поля опциональны)
 
 **Ответ:**
+
 - 200: `Pos`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - позиция, паллета или ряд не найдены
@@ -193,9 +211,11 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `poses-export-stocks`
 Удаление позиции.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `Pos`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - позиция не найдена
@@ -235,4 +255,3 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `poses-export-stocks`
   updatedAt?: Date;                 // Дата обновления
 }
 ```
-

@@ -4,10 +4,7 @@ import {
   DEFICIT_REPORT_CRON_EXPR,
   DEFICIT_REPORT_CRON_TZ,
 } from "../constants/deficitReportCron.js";
-import {
-  releaseDeficitReport,
-  tryAcquireDeficitReport,
-} from "../utils/deficitReportLock.js";
+import { releaseDeficitReport, tryAcquireDeficitReport } from "../utils/deficitReportLock.js";
 import { runDeficitTelegramReportUtil } from "../utils/runDeficitTelegramReportUtil.js";
 
 export { DEFICIT_REPORT_CRON_EXPR, DEFICIT_REPORT_CRON_TZ };
@@ -37,12 +34,12 @@ export function startDeficitReportCron(): CronJob {
     },
     null,
     true,
-    DEFICIT_REPORT_CRON_TZ
+    DEFICIT_REPORT_CRON_TZ,
   );
 
   log.info(
     { schedule: DEFICIT_REPORT_CRON_EXPR, timezone: DEFICIT_REPORT_CRON_TZ },
-    "cron started"
+    "cron started",
   );
   return job;
 }

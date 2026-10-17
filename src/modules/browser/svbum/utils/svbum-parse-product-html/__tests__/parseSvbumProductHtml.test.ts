@@ -5,10 +5,7 @@ import { describe, expect, it } from "vitest";
 import { parseSvbumProductHtml } from "../parseSvbumProductHtml.js";
 import { SVBUM_NEGATIVE_OUTCOME } from "../../svbum-product-types/svbumProductInfo.js";
 
-const FIXTURES_DIR = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../../../product-pages"
-);
+const FIXTURES_DIR = join(dirname(fileURLToPath(import.meta.url)), "../../../product-pages");
 
 function readFixture(name: string): string {
   return readFileSync(join(FIXTURES_DIR, name), "utf8");
@@ -51,8 +48,7 @@ function optionsProductHtml(opts: {
 }): string {
   const radios = opts.options
     .map((option) => {
-      const specialAttr =
-        option.special !== undefined ? ` data-special="${option.special}"` : "";
+      const specialAttr = option.special !== undefined ? ` data-special="${option.special}"` : "";
       return `<label class="product-option-card">
         <input type="radio" name="option[1]" data-price="${option.price}"${specialAttr} data-option-quantity="${option.qty}" />
         <span class="product-option--name">${option.name}</span>
@@ -82,7 +78,7 @@ function optionsProductHtml(opts: {
 }
 
 describe("parseSvbumProductHtml", () => {
-  it("page-1: simple in-stock, 18\" is not pack count, recommendations ignored", () => {
+  it('page-1: simple in-stock, 18" is not pack count, recommendations ignored', () => {
     const result = parseSvbumProductHtml(readFixture("product-page-1.txt"));
     expect(result).toMatchObject({ stock: 43, price: 11.77 });
     expect(result.title).toContain("AS-10015");
@@ -109,7 +105,7 @@ describe("parseSvbumProductHtml", () => {
         title: 'Серветки "Горох" 10 шт',
         price: "74.50",
         qty: "16",
-      })
+      }),
     );
     expect(result).toMatchObject({ stock: 160, price: 7.45 });
   });
@@ -122,7 +118,7 @@ describe("parseSvbumProductHtml", () => {
           { name: "упаковка (20шт)", qty: "5", price: "100", special: "94.4475" },
           { name: "упаковка (100шт)", qty: "2", price: "500", special: "393.225" },
         ],
-      })
+      }),
     );
     expect(result).toMatchObject({ stock: 300, price: 3.93 });
   });
@@ -135,7 +131,7 @@ describe("parseSvbumProductHtml", () => {
           { name: "упаковка (20шт)", qty: "5", price: "137.4950", special: "94.4475" },
           { name: "упаковка (100шт)", qty: "0", price: "572.4500", special: "393.225" },
         ],
-      })
+      }),
     );
     expect(result).toMatchObject({ stock: 100, price: 4.72 });
   });
@@ -147,15 +143,15 @@ describe("parseSvbumProductHtml", () => {
         price: "137.4950",
         special: "94.4475",
         qty: "3",
-      })
+      }),
     );
     expect(result).toMatchObject({ stock: 3, price: 94.45 });
   });
 
   it("returns -1,-1 without #product", () => {
-    expect(parseSvbumProductHtml("<html><body><h1 class='page-title'>X</h1></body></html>")).toEqual(
-      SVBUM_NEGATIVE_OUTCOME
-    );
+    expect(
+      parseSvbumProductHtml("<html><body><h1 class='page-title'>X</h1></body></html>"),
+    ).toEqual(SVBUM_NEGATIVE_OUTCOME);
   });
 
   it("returns -1,-1 when #product has no price", () => {

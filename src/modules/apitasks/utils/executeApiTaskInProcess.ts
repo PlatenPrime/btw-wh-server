@@ -1,11 +1,5 @@
-import {
-  API_TASK_COMPLETED_TTL_MS,
-  isApiTaskKind,
-} from "../constants/apiTaskConstants.js";
-import {
-  isApiTaskAbortedError,
-  type ApiTaskRunOptions,
-} from "../kinds/apiTaskRunTypes.js";
+import { API_TASK_COMPLETED_TTL_MS, isApiTaskKind } from "../constants/apiTaskConstants.js";
+import { isApiTaskAbortedError, type ApiTaskRunOptions } from "../kinds/apiTaskRunTypes.js";
 import { runApiTaskKind } from "../kinds/runApiTaskKind.js";
 import { ApiTask } from "../models/ApiTask.js";
 
@@ -14,14 +8,8 @@ async function taskIsCancelled(taskId: string): Promise<boolean> {
   return task?.status === "cancelled";
 }
 
-async function patchRunningTask(
-  taskId: string,
-  fields: Record<string, unknown>,
-): Promise<boolean> {
-  const updated = await ApiTask.updateOne(
-    { _id: taskId, status: "running" },
-    { $set: fields },
-  );
+async function patchRunningTask(taskId: string, fields: Record<string, unknown>): Promise<boolean> {
+  const updated = await ApiTask.updateOne({ _id: taskId, status: "running" }, { $set: fields });
   return updated.modifiedCount > 0;
 }
 

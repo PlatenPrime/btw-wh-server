@@ -3,10 +3,7 @@ import { Pos } from "../../modules/poses/models/Pos.js";
 import type { AnyBulkWriteOperation } from "mongoose";
 
 const POS_EMPTY_NAMEUKR_FILTER = {
-  $or: [
-    { nameukr: { $in: [null, ""] } },
-    { nameukr: { $exists: false } },
-  ],
+  $or: [{ nameukr: { $in: [null, ""] } }, { nameukr: { $exists: false } }],
 };
 
 const BULK_WRITE_CHUNK_SIZE = 500;
@@ -23,60 +20,59 @@ export interface FillPosNameukrFromArtsResult {
  *
  * @returns Статистика: количество обновлённых документов и артикулов без подходящего Art
  */
-export const fillPosNameukrFromArtsUtil =
-  async (): Promise<FillPosNameukrFromArtsResult> => {
-    const distinctArtikuls = await Pos.distinct("artikul", POS_EMPTY_NAMEUKR_FILTER);
+export const fillPosNameukrFromArtsUtil = async (): Promise<FillPosNameukrFromArtsResult> => {
+  const distinctArtikuls = await Pos.distinct("artikul", POS_EMPTY_NAMEUKR_FILTER);
 
-    if (distinctArtikuls.length === 0) {
-      return { updatedCount: 0, skippedArtikulsCount: 0 };
+  if (distinctArtikuls.length === 0) {
+    return { updatedCount: 0, skippedArtikulsCount: 0 };
+  }
+
+  const arts = await Art.find({
+    artikul: { $in: distinctArtikuls },
+    nameukr: { $exists: true, $nin: [null, ""] },
+  })
+    .select("artikul nameukr")
+    .lean()
+    .exec();
+
+  const artikulToNameukr = new Map<string, string>();
+  for (const art of arts) {
+    if (art.nameukr?.trim()) {
+      artikulToNameukr.set(art.artikul, art.nameukr.trim());
     }
+  }
 
-    const arts = await Art.find({
-      artikul: { $in: distinctArtikuls },
-      nameukr: { $exists: true, $nin: [null, ""] },
-    })
-      .select("artikul nameukr")
-      .lean()
-      .exec();
-
-    const artikulToNameukr = new Map<string, string>();
-    for (const art of arts) {
-      if (art.nameukr?.trim()) {
-        artikulToNameukr.set(art.artikul, art.nameukr.trim());
-      }
-    }
-
-    if (artikulToNameukr.size === 0) {
-      return {
-        updatedCount: 0,
-        skippedArtikulsCount: distinctArtikuls.length,
-      };
-    }
-
-    const operations: AnyBulkWriteOperation[] = [];
-    for (const [artikul, nameukr] of artikulToNameukr) {
-      operations.push({
-        updateMany: {
-          filter: {
-            artikul,
-            ...POS_EMPTY_NAMEUKR_FILTER,
-          },
-          update: { $set: { nameukr } },
-        },
-      });
-    }
-
-    let totalModified = 0;
-    for (let i = 0; i < operations.length; i += BULK_WRITE_CHUNK_SIZE) {
-      const chunk = operations.slice(i, i + BULK_WRITE_CHUNK_SIZE);
-      const result = await Pos.bulkWrite(chunk);
-      totalModified += result.modifiedCount;
-    }
-
-    const skippedArtikulsCount = distinctArtikuls.length - artikulToNameukr.size;
-
+  if (artikulToNameukr.size === 0) {
     return {
-      updatedCount: totalModified,
-      skippedArtikulsCount,
+      updatedCount: 0,
+      skippedArtikulsCount: distinctArtikuls.length,
     };
+  }
+
+  const operations: AnyBulkWriteOperation[] = [];
+  for (const [artikul, nameukr] of artikulToNameukr) {
+    operations.push({
+      updateMany: {
+        filter: {
+          artikul,
+          ...POS_EMPTY_NAMEUKR_FILTER,
+        },
+        update: { $set: { nameukr } },
+      },
+    });
+  }
+
+  let totalModified = 0;
+  for (let i = 0; i < operations.length; i += BULK_WRITE_CHUNK_SIZE) {
+    const chunk = operations.slice(i, i + BULK_WRITE_CHUNK_SIZE);
+    const result = await Pos.bulkWrite(chunk);
+    totalModified += result.modifiedCount;
+  }
+
+  const skippedArtikulsCount = distinctArtikuls.length - artikulToNameukr.size;
+
+  return {
+    updatedCount: totalModified,
+    skippedArtikulsCount,
   };
+};

@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  MAX_PATCH_RANGE_DAYS,
-  patchSkuSliceByDateSchema,
-} from "../patchSkuSliceByDateSchema.js";
+import { MAX_PATCH_RANGE_DAYS, patchSkuSliceByDateSchema } from "../patchSkuSliceByDateSchema.js";
 
 const VALID_SKU_ID = "507f1f77bcf86cd799439011";
 
@@ -29,7 +26,7 @@ describe("patchSkuSliceByDateSchema", () => {
         ...validSingle,
         stock: 0,
         price: -1,
-      }).success
+      }).success,
     ).toBe(true);
   });
 
@@ -55,13 +52,13 @@ describe("patchSkuSliceByDateSchema", () => {
       patchSkuSliceByDateSchema.safeParse({
         ...validSingle,
         stock: Number.NaN,
-      }).success
+      }).success,
     ).toBe(false);
     expect(
       patchSkuSliceByDateSchema.safeParse({
         ...validSingle,
         price: Number.POSITIVE_INFINITY,
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -76,7 +73,7 @@ describe("patchSkuSliceByDateSchema", () => {
         ...validSingle,
         dateFrom: "2026-06-01",
         dateTo: "2026-06-02",
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -86,7 +83,7 @@ describe("patchSkuSliceByDateSchema", () => {
         ...validRange,
         dateFrom: "2026-06-10",
         dateTo: "2026-06-01",
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -96,7 +93,7 @@ describe("patchSkuSliceByDateSchema", () => {
         ...validRange,
         dateFrom: "2025-01-01",
         dateTo: "2026-01-02",
-      }).success
+      }).success,
     ).toBe(false);
     expect(MAX_PATCH_RANGE_DAYS).toBe(366);
   });
@@ -130,7 +127,7 @@ describe("patchSkuSliceByDateSchema", () => {
           { dateFrom: "2026-06-01", dateTo: "2026-06-05" },
           { dateFrom: "2026-06-03", dateTo: "2026-06-07" },
         ],
-      }).success
+      }).success,
     ).toBe(true);
   });
 
@@ -139,7 +136,7 @@ describe("patchSkuSliceByDateSchema", () => {
       patchSkuSliceByDateSchema.safeParse({
         ...validPeriods,
         periods: [],
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -148,7 +145,7 @@ describe("patchSkuSliceByDateSchema", () => {
       patchSkuSliceByDateSchema.safeParse({
         ...validSingle,
         periods: [{ dateFrom: "2026-06-01", dateTo: "2026-06-02" }],
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -157,7 +154,7 @@ describe("patchSkuSliceByDateSchema", () => {
       patchSkuSliceByDateSchema.safeParse({
         ...validRange,
         periods: [{ dateFrom: "2026-06-10", dateTo: "2026-06-12" }],
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -166,7 +163,7 @@ describe("patchSkuSliceByDateSchema", () => {
       patchSkuSliceByDateSchema.safeParse({
         ...validPeriods,
         periods: [{ dateFrom: "2026-06-10", dateTo: "2026-06-01" }],
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -178,7 +175,7 @@ describe("patchSkuSliceByDateSchema", () => {
           { dateFrom: "2025-01-01", dateTo: "2025-07-01" },
           { dateFrom: "2025-07-02", dateTo: "2026-01-02" },
         ],
-      }).success
+      }).success,
     ).toBe(false);
   });
 });

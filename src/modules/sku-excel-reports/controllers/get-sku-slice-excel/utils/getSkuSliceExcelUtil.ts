@@ -11,9 +11,7 @@ import { getSliceItem } from "../../../../sku-reporting/utils/skugrReporting.js"
 import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForSkus.js";
 import type { GetSkuSliceExcelInput } from "../schemas/getSkuSliceExcelSchema.js";
 
-export type GetSkuSliceExcelResult =
-  | { ok: true; buffer: Buffer; fileName: string }
-  | { ok: false };
+export type GetSkuSliceExcelResult = { ok: true; buffer: Buffer; fileName: string } | { ok: false };
 
 export async function getSkuSliceExcelUtil(
   input: GetSkuSliceExcelInput,

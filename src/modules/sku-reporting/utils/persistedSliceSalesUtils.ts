@@ -37,8 +37,7 @@ export function computePersistedDaySales(params: {
   date: Date;
   recountDays?: ReadonlySet<string>;
 }): PersistedDaySales {
-  const { prevStockRaw, currStockRaw, currPriceRaw, date, recountDays } =
-    params;
+  const { prevStockRaw, currStockRaw, currPriceRaw, date, recountDays } = params;
 
   if (isRedFlagSliceStock(currStockRaw)) {
     return { salesPcs: 0, salesUah: 0, isDeliveryDay: false };

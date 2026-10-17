@@ -28,11 +28,7 @@ export const purgePromotedFromNewskuController = async (
       data: result,
     });
   } catch (error) {
-    logModuleError(
-      "skugrs",
-      error,
-      "Error purging promoted skus from newsku groups:",
-    );
+    logModuleError("skugrs", error, "Error purging promoted skus from newsku groups:");
     if (!res.headersSent) {
       res.status(500).json({
         message: "Server error",

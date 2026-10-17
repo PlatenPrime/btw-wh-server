@@ -14,10 +14,7 @@ function pageHtml(opts: {
   imageUrl: string;
   nextHref?: string;
 }): string {
-  const next =
-    opts.nextHref != null
-      ? `<link rel="next" href="${opts.nextHref}" />`
-      : "";
+  const next = opts.nextHref != null ? `<link rel="next" href="${opts.nextHref}" />` : "";
   return `<!DOCTYPE html><html><head>${next}</head><body>
 <button type="button" data-qaid="buy-button" data-product-id="${opts.productId}"
   data-product-name="${opts.titleAttr}"
@@ -34,7 +31,7 @@ describe("getYumiGroupPagesProducts", () => {
   it("parses products across two pages", async () => {
     const html1 = pageHtml({
       productId: "111",
-      titleAttr: 'Widget &#34;10&quot;',
+      titleAttr: "Widget &#34;10&quot;",
       productPath: "/p111.html",
       imageUrl: "https://images.prom.ua/a.jpg",
       nextHref: PAGE2_URL,

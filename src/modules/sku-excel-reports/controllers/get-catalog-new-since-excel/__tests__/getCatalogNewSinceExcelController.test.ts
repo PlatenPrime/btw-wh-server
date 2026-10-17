@@ -4,9 +4,6 @@ import { getCatalogNewSinceExcelController } from "../getCatalogNewSinceExcelCon
 
 describe("getCatalogNewSinceExcelController", () => {
   it("returns 410 EXCEL_JOBS_MIGRATED", async () => {
-    await assertMigratedExcelController(
-      getCatalogNewSinceExcelController,
-      "sku-catalog-new-since",
-    );
+    await assertMigratedExcelController(getCatalogNewSinceExcelController, "sku-catalog-new-since");
   });
 });

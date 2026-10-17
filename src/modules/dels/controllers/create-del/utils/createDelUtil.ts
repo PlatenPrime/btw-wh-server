@@ -20,9 +20,7 @@ export type CreateDelUtilResult = IDel | { error: typeof PROD_NOT_FOUND };
 /**
  * Собирает объект artikuls для поставки: quant из quantity клиента, nameukr из коллекции arts (если найден).
  */
-export const createDelUtil = async (
-  input: CreateDelUtilInput
-): Promise<CreateDelUtilResult> => {
+export const createDelUtil = async (input: CreateDelUtilInput): Promise<CreateDelUtilResult> => {
   const prod = await Prod.findOne({ name: input.prodName }).lean();
   if (!prod) {
     return { error: PROD_NOT_FOUND };
@@ -36,9 +34,7 @@ export const createDelUtil = async (
     const arts = await Art.find({ artikul: { $in: artikulKeys } })
       .select("artikul nameukr")
       .lean();
-    const nameukrByArtikul = new Map(
-      arts.map((a) => [a.artikul, a.nameukr] as const)
-    );
+    const nameukrByArtikul = new Map(arts.map((a) => [a.artikul, a.nameukr] as const));
 
     for (const { artikul, quantity } of rawArtikuls) {
       const nameukr = nameukrByArtikul.get(artikul);

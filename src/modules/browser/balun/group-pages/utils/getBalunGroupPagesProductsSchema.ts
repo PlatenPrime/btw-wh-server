@@ -6,6 +6,4 @@ export const getBalunGroupPagesProductsSchema = z.object({
   maxPages: z.number().int().min(1).max(200).optional(),
 });
 
-export type GetBalunGroupPagesProductsInput = z.infer<
-  typeof getBalunGroupPagesProductsSchema
->;
+export type GetBalunGroupPagesProductsInput = z.infer<typeof getBalunGroupPagesProductsSchema>;

@@ -7,9 +7,7 @@ import {
 
 describe("pickHeaderCaseInsensitive", () => {
   it("finds header ignoring case", () => {
-    expect(
-      pickHeaderCaseInsensitive({ "Set-Cookie": ["a=1"] }, "set-cookie")
-    ).toEqual(["a=1"]);
+    expect(pickHeaderCaseInsensitive({ "Set-Cookie": ["a=1"] }, "set-cookie")).toEqual(["a=1"]);
   });
 
   it("returns undefined when missing", () => {

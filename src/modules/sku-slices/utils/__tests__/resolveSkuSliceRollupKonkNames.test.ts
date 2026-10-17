@@ -19,17 +19,8 @@ describe("resolveSkuSliceRollupKonkNames", () => {
   });
 
   it("dedupes and excludes skuSlices competitors", async () => {
-    vi.mocked(Sku.distinct).mockResolvedValue([
-      "air",
-      " Air ",
-      "balun",
-      "yumi",
-      "",
-    ] as never);
+    vi.mocked(Sku.distinct).mockResolvedValue(["air", " Air ", "balun", "yumi", ""] as never);
 
-    await expect(resolveSkuSliceRollupKonkNames()).resolves.toEqual([
-      "air",
-      "balun",
-    ]);
+    await expect(resolveSkuSliceRollupKonkNames()).resolves.toEqual(["air", "balun"]);
   });
 });

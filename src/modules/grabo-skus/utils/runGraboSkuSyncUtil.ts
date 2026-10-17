@@ -51,7 +51,7 @@ function throwIfAborted(signal?: AbortSignal): void {
  * Полный срез каталога Grabo: listing → PDP upsert по productId → absent-pass.
  */
 export async function runGraboSkuSyncUtil(
-  deps: RunGraboSkuSyncDeps = {}
+  deps: RunGraboSkuSyncDeps = {},
 ): Promise<GraboSkuSyncStats> {
   const collectCatalog = deps.collectCatalog ?? collectGraboCatalogProductUrls;
   const getSkuData = deps.getSkuData ?? getGraboSkuData;
@@ -87,7 +87,7 @@ export async function runGraboSkuSyncUtil(
       failedCategories: catalog.failedCategoryUrls.length,
       catalogComplete,
     },
-    "grabo sku catalog collected"
+    "grabo sku catalog collected",
   );
 
   for (let i = 0; i < catalog.productUrls.length; i++) {
@@ -102,13 +102,13 @@ export async function runGraboSkuSyncUtil(
         stats.skippedNoProductId += 1;
         log.info(
           { index, total: stats.listed, url, result: "skipped-no-productId" },
-          "grabo sku product"
+          "grabo sku product",
         );
         continue;
       }
       const result = await upsertGraboSkuUtil(
         { ...data, productId: data.productId.trim(), url },
-        now()
+        now(),
       );
       if (result === "created") {
         stats.created += 1;
@@ -126,7 +126,7 @@ export async function runGraboSkuSyncUtil(
           errors: stats.errors,
           url,
         },
-        "grabo sku product"
+        "grabo sku product",
       );
     } catch (error) {
       stats.errors += 1;
@@ -138,29 +138,19 @@ export async function runGraboSkuSyncUtil(
           errors: stats.errors,
           details: error instanceof Error ? error.message : String(error),
         },
-        "grabo sku product fetch failed"
+        "grabo sku product fetch failed",
       );
     }
-    deps.onProgress?.(
-      index,
-      Math.max(stats.listed, 1),
-      `Product ${index}/${stats.listed}`
-    );
+    deps.onProgress?.(index, Math.max(stats.listed, 1), `Product ${index}/${stats.listed}`);
   }
 
   throwIfAborted(deps.signal);
   if (catalogComplete && catalog.productUrls.length > 0) {
     log.info({ listed: stats.listed }, "grabo sku absent-pass start");
     stats.markedOffSite = await markGraboSkusOffSiteUtil(catalog.productUrls);
-    log.info(
-      { markedOffSite: stats.markedOffSite },
-      "grabo sku absent-pass done"
-    );
+    log.info({ markedOffSite: stats.markedOffSite }, "grabo sku absent-pass done");
   } else {
-    log.info(
-      { catalogComplete, listed: stats.listed },
-      "grabo sku absent-pass skipped"
-    );
+    log.info({ catalogComplete, listed: stats.listed }, "grabo sku absent-pass skipped");
   }
 
   log.info(stats, "grabo sku sync finished");

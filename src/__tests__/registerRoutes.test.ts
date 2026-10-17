@@ -1,11 +1,7 @@
 import express from "express";
 import { describe, expect, it, vi } from "vitest";
 
-import {
-  API_ROUTES,
-  getApiRoutePrefixes,
-  registerRoutes,
-} from "../registerRoutes.js";
+import { API_ROUTES, getApiRoutePrefixes, registerRoutes } from "../registerRoutes.js";
 
 describe("registerRoutes", () => {
   it("getApiRoutePrefixes возвращает все path prefix'ы из API_ROUTES", () => {

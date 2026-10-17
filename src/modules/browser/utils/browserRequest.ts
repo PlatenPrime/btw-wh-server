@@ -1,8 +1,4 @@
-import axios, {
-  AxiosError,
-  type AxiosInstance,
-  isAxiosError,
-} from "axios";
+import axios, { AxiosError, type AxiosInstance, isAxiosError } from "axios";
 import type { Agent } from "node:http";
 
 import { createLogger } from "../../../logging/createLogger.js";
@@ -43,15 +39,14 @@ export type BrowserGetBufferResult = {
   status: number;
 };
 
-const IMAGE_ACCEPT =
-  "image/avif,image/webp,image/apng,image/*,*/*;q=0.8";
+const IMAGE_ACCEPT = "image/avif,image/webp,image/apng,image/*,*/*;q=0.8";
 
 /**
  * Axios request agents для HTTP(S) proxy (HttpsProxyAgent), либо undefined без proxy.
  * @throws Error при невалидном proxy URL
  */
 export function resolveBrowserProxyAgents(
-  proxyUrl: string | undefined
+  proxyUrl: string | undefined,
 ): { httpAgent: Agent; httpsAgent: Agent } | undefined {
   const trimmed = proxyUrl?.trim();
   if (!trimmed) {
@@ -137,7 +132,7 @@ export function formatBrowserFetchError(url: string, err: unknown): string {
  */
 export async function browserGet<T = unknown>(
   url: string,
-  options?: BrowserGetOptions
+  options?: BrowserGetOptions,
 ): Promise<T> {
   const client = getBrowserAxios();
   const agents = resolveBrowserProxyAgents(options?.proxyUrl);
@@ -164,7 +159,7 @@ export async function browserGet<T = unknown>(
  */
 export async function browserGetBuffer(
   url: string,
-  options?: BrowserGetOptions
+  options?: BrowserGetOptions,
 ): Promise<BrowserGetBufferResult> {
   const client = getBrowserAxios();
   const agents = resolveBrowserProxyAgents(options?.proxyUrl);
@@ -189,9 +184,8 @@ export async function browserGetBuffer(
 
     const rawContentType = response.headers["content-type"];
     const contentType =
-      (typeof rawContentType === "string"
-        ? rawContentType.split(";")[0]?.trim()
-        : "") || "application/octet-stream";
+      (typeof rawContentType === "string" ? rawContentType.split(";")[0]?.trim() : "") ||
+      "application/octet-stream";
 
     return {
       buffer: Buffer.from(response.data ?? []),

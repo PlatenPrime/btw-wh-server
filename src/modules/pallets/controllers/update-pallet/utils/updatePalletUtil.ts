@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { ClientSession } from "mongoose";
 import { IRow } from "../../../../rows/models/Row.js";
-import { IPallet, Pallet } from "../../../models/Pallet.js";
+import { Pallet } from "../../../models/Pallet.js";
 import { serializeIds } from "../../../utils/serialize-ids.js";
 
 type UpdatePalletInput = {
@@ -55,11 +55,3 @@ export const updatePalletUtil = async ({
 
   return serializeIds(pallet.toObject());
 };
-
-
-
-
-
-
-
-

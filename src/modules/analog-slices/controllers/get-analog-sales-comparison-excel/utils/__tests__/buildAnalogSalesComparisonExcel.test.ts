@@ -53,18 +53,14 @@ describe("buildAnalogSalesComparisonExcel", () => {
 
     expect(buffer).toBeInstanceOf(Buffer);
     expect(buffer.length).toBeGreaterThan(0);
-    expect(fileName).toContain(
-      "analog_sales_comparison_1102-0259_2026-03-01_2026-03-02",
-    );
+    expect(fileName).toContain("analog_sales_comparison_1102-0259_2026-03-01_2026-03-02");
 
     const rows = await readSheetToMatrix(buffer);
     expect(rows.length).toBeGreaterThanOrEqual(9);
 
     const headerRow = rows[0]!;
     expect(headerRow[0]).toBe("Артикул");
-    expect(headerRow[6]).toBe(
-      formatExcelDateHeaderUk(new Date("2026-03-01T00:00:00.000Z")),
-    );
+    expect(headerRow[6]).toBe(formatExcelDateHeaderUk(new Date("2026-03-01T00:00:00.000Z")));
     expect(headerRow[8]).toBe("Всього");
 
     const dataRow = rows[1]!;

@@ -4,6 +4,4 @@ export const getKonkInvalidExcelParamsSchema = z.object({
   konkName: z.string().min(1, "konkName is required"),
 });
 
-export type GetKonkInvalidExcelParams = z.infer<
-  typeof getKonkInvalidExcelParamsSchema
->;
+export type GetKonkInvalidExcelParams = z.infer<typeof getKonkInvalidExcelParamsSchema>;

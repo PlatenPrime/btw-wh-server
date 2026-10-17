@@ -43,9 +43,7 @@ describe("getAsksByArt", () => {
     expect(responseJson.artikul).toBe("ART-TEST");
     expect(responseJson.data).toBeInstanceOf(Array);
     expect(responseJson.data.length).toBe(3);
-    expect(responseJson.data.every((ask: any) => ask.artikul === "ART-TEST")).toBe(
-      true
-    );
+    expect(responseJson.data.every((ask: any) => ask.artikul === "ART-TEST")).toBe(true);
   });
 
   it("400: ошибка валидации при отсутствии artikul", async () => {

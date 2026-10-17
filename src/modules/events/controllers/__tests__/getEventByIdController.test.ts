@@ -56,8 +56,6 @@ describe("getEventByIdController", () => {
     } as unknown as Request;
     await getEventByIdController(req, res);
     expect(responseStatus.code).toBe(200);
-    expect((responseJson.data as { description: string }).description).toBe(
-      "By id"
-    );
+    expect((responseJson.data as { description: string }).description).toBe("By id");
   });
 });

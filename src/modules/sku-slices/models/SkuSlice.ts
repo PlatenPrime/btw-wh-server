@@ -1,9 +1,6 @@
 import { Document, Model, Schema, Types } from "mongoose";
 import { getOrCreateModel } from "../../../utils/getOrCreateModel.js";
-import type {
-  ISkuSliceDataItem,
-  ISkuSliceRotationMeta,
-} from "./skuSliceTypes.js";
+import type { ISkuSliceDataItem, ISkuSliceRotationMeta } from "./skuSliceTypes.js";
 
 export type { ISkuSliceDataItem, ISkuSliceRotationMeta } from "./skuSliceTypes.js";
 

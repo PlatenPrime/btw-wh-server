@@ -77,11 +77,3 @@ describe("deletePalletController", () => {
     expect(responseJson.message).toBe("Validation error");
   });
 });
-
-
-
-
-
-
-
-

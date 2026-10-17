@@ -2,10 +2,7 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import { Art } from "../../arts/models/Art.js";
 import { loadDayMap } from "../../btrade-slices/utils/btradeSliceMonthStore.js";
 import { BtradeManufacturerDaySales } from "../models/BtradeManufacturerDaySales.js";
-import {
-  sliceDateMinusDays,
-  sliceDatePlusDays,
-} from "./coalesceSkuSliceItemsForReporting.js";
+import { sliceDateMinusDays, sliceDatePlusDays } from "./coalesceSkuSliceItemsForReporting.js";
 import { computePersistedDaySales } from "./persistedSliceSalesUtils.js";
 
 export type MaterializeBtradeManufacturerSalesResult = {
@@ -31,10 +28,7 @@ async function loadProdNameByArtikul(): Promise<Map<string, string>> {
 
 async function replaceBtradeManufacturerDayRollup(params: {
   day: Date;
-  prevData:
-    | Record<string, { quantity?: number; price?: number }>
-    | null
-    | undefined;
+  prevData: Record<string, { quantity?: number; price?: number }> | null | undefined;
   currData: Record<string, { quantity?: number; price?: number }>;
   prodNameByArtikul: Map<string, string>;
   apply: boolean;
@@ -169,22 +163,14 @@ export async function materializeBtradeManufacturerSalesDateRange(params: {
   let rollupDocs = 0;
   const daysTouched: string[] = [];
 
-  const dayTotal =
-    Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+  const dayTotal = Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000)) + 1;
   let dayIndex = 0;
 
-  for (
-    let d = new Date(from);
-    d.getTime() <= to.getTime();
-    d = sliceDatePlusDays(d, 1)
-  ) {
+  for (let d = new Date(from); d.getTime() <= to.getTime(); d = sliceDatePlusDays(d, 1)) {
     dayIndex += 1;
     const dayPrev = sliceDateMinusDays(d, 1);
     const dayKey = d.toISOString().slice(0, 10);
-    const [prevData, dData] = await Promise.all([
-      loadDayMap(dayPrev),
-      loadDayMap(d),
-    ]);
+    const [prevData, dData] = await Promise.all([loadDayMap(dayPrev), loadDayMap(d)]);
     if (Object.keys(dData).length === 0) {
       params.onProgress?.({
         day: dayKey,

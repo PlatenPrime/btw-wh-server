@@ -29,10 +29,7 @@ export const ROLE_HIERARCHY = {
  * @param requiredRole - требуемая роль
  * @returns true если роль пользователя >= требуемой роли
  */
-export const hasRoleAccess = (
-  userRole: string,
-  requiredRole: RoleType
-): boolean => {
+export const hasRoleAccess = (userRole: string, requiredRole: RoleType): boolean => {
   const userLevel = ROLE_HIERARCHY[userRole as RoleType] || 0;
   const requiredLevel = ROLE_HIERARCHY[requiredRole];
   return userLevel >= requiredLevel;

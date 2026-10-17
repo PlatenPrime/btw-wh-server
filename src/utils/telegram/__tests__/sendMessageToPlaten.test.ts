@@ -26,18 +26,13 @@ describe("sendMessageToPlaten", () => {
 
     await sendMessageToPlaten("Test message");
 
-    expect(mockSendMessageToTGUser).toHaveBeenCalledWith(
-      "Test message",
-      "555196992"
-    );
+    expect(mockSendMessageToTGUser).toHaveBeenCalledWith("Test message", "555196992");
   });
 
   it("should pass through errors from sendMessageToTGUser", async () => {
     const error = new Error("Test error");
     mockSendMessageToTGUser.mockRejectedValueOnce(error);
 
-    await expect(sendMessageToPlaten("Test message")).rejects.toThrow(
-      "Test error"
-    );
+    await expect(sendMessageToPlaten("Test message")).rejects.toThrow("Test error");
   });
 });

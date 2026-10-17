@@ -1,13 +1,9 @@
 import type { AxiosInstance } from "axios";
-import {
-  PERFECT_CART_URL,
-  postPerfectAjax,
-} from "../perfect-ajax-post/perfectAjaxPost.js";
+import { PERFECT_CART_URL, postPerfectAjax } from "../perfect-ajax-post/perfectAjaxPost.js";
 import { deletePerfectCartItem } from "../perfect-cart-delete/deletePerfectCartItem.js";
 import type { PerfectCartDeleteIds } from "../perfect-cart-response/perfectCartResponse.js";
 import { parsePerfectCartStockOutcome } from "../perfect-parse-cart-stock-outcome/parsePerfectCartStockOutcome.js";
 import type { PerfectProductInfo } from "../perfect-per-piece-stock/perfectProductInfo.js";
-import { PERFECT_UNAVAILABLE_OUTCOME } from "../perfect-per-piece-stock/perfectProductInfo.js";
 import { buildPerfectAddToCartBody } from "../perfect-product-page-extract/perfectProductPageExtract.js";
 import { resolvePerfectCartFailure } from "../perfect-resolve-cart-failure/resolvePerfectCartFailure.js";
 
@@ -24,7 +20,7 @@ export async function fetchPerfectCartStockAndRelease(
     cookieHeader: string;
     htmlStatus: number;
     hasProductPageHtml: boolean;
-  }
+  },
 ): Promise<PerfectProductInfo> {
   const addBody = buildPerfectAddToCartBody({
     token: params.token,
@@ -38,7 +34,7 @@ export async function fetchPerfectCartStockAndRelease(
     idProductAttribute: params.idProductAttribute,
     idCustomization: "0",
   };
-  let outcome: PerfectProductInfo = PERFECT_UNAVAILABLE_OUTCOME;
+  let outcome: PerfectProductInfo;
 
   try {
     const cartResp = await postPerfectAjax(
@@ -46,7 +42,7 @@ export async function fetchPerfectCartStockAndRelease(
       PERFECT_CART_URL,
       addBody,
       params.cookieHeader,
-      params.productUrl
+      params.productUrl,
     );
     deleteCookieHeader = cartResp.cookieHeader;
     if (cartResp.status >= 400) {
@@ -59,7 +55,7 @@ export async function fetchPerfectCartStockAndRelease(
         deleteIds,
         params.htmlStatus,
         params.hasProductPageHtml,
-        params.productUrl
+        params.productUrl,
       );
       outcome = parsed.outcome;
       deleteIds = parsed.deleteIds;

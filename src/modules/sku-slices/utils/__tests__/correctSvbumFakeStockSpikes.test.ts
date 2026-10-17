@@ -27,17 +27,8 @@ describe("isSvbumFakeStock", () => {
 
 describe("computeSvbumFakeStockPatchesForSeries", () => {
   it("zeros sandwich including middle normal day", () => {
-    const series = [
-      day(D0, 6_000_000),
-      day(D1, 10_000),
-      day(D2, 6_000_000),
-    ];
-    const { patches } = computeSvbumFakeStockPatchesForSeries(
-      "svbum-1",
-      series,
-      D0,
-      D2
-    );
+    const series = [day(D0, 6_000_000), day(D1, 10_000), day(D2, 6_000_000)];
+    const { patches } = computeSvbumFakeStockPatchesForSeries("svbum-1", series, D0, D2);
     expect(patches).toEqual([
       { productId: "svbum-1", dateMs: D0, from: 6_000_000, to: 0 },
       { productId: "svbum-1", dateMs: D1, from: 10_000, to: 0 },
@@ -47,76 +38,31 @@ describe("computeSvbumFakeStockPatchesForSeries", () => {
 
   it("does not zero trailing spike with no day to the right", () => {
     const series = [day(D0, 50), day(D1, 6_000_000)];
-    const { patches } = computeSvbumFakeStockPatchesForSeries(
-      "svbum-1",
-      series,
-      D0,
-      D1,
-      1
-    );
+    const { patches } = computeSvbumFakeStockPatchesForSeries("svbum-1", series, D0, D1, 1);
     expect(patches).toEqual([]);
   });
 
   it("zeros needle spike between normals after one day to the right", () => {
-    const series = [
-      day(D0, 12),
-      day(D1, 1_000_000),
-      day(D2, 12),
-    ];
-    const { patches } = computeSvbumFakeStockPatchesForSeries(
-      "svbum-1",
-      series,
-      D0,
-      D2,
-      1
-    );
-    expect(patches).toEqual([
-      { productId: "svbum-1", dateMs: D1, from: 1_000_000, to: 0 },
-    ]);
+    const series = [day(D0, 12), day(D1, 1_000_000), day(D2, 12)];
+    const { patches } = computeSvbumFakeStockPatchesForSeries("svbum-1", series, D0, D2, 1);
+    expect(patches).toEqual([{ productId: "svbum-1", dateMs: D1, from: 1_000_000, to: 0 }]);
   });
 
   it("zeros lone spike after grace days, not the following normals", () => {
-    const series = [
-      day(D0, 6_000_000),
-      day(D1, 100),
-      day(D2, 100),
-    ];
-    const { patches } = computeSvbumFakeStockPatchesForSeries(
-      "svbum-1",
-      series,
-      D0,
-      D2,
-      1
-    );
-    expect(patches).toEqual([
-      { productId: "svbum-1", dateMs: D0, from: 6_000_000, to: 0 },
-    ]);
+    const series = [day(D0, 6_000_000), day(D1, 100), day(D2, 100)];
+    const { patches } = computeSvbumFakeStockPatchesForSeries("svbum-1", series, D0, D2, 1);
+    expect(patches).toEqual([{ productId: "svbum-1", dateMs: D0, from: 6_000_000, to: 0 }]);
   });
 
   it("does not treat 900_000 as fake", () => {
     const series = [day(D0, 50), day(D1, 900_000), day(D2, 50), day(D3, 50)];
-    const { patches } = computeSvbumFakeStockPatchesForSeries(
-      "svbum-1",
-      series,
-      D0,
-      D3,
-      1
-    );
+    const { patches } = computeSvbumFakeStockPatchesForSeries("svbum-1", series, D0, D3, 1);
     expect(patches).toEqual([]);
   });
 
   it("only patches days inside the window", () => {
-    const series = [
-      day(D0, 6_000_000),
-      day(D1, 10_000),
-      day(D2, 6_000_000),
-    ];
-    const { patches } = computeSvbumFakeStockPatchesForSeries(
-      "svbum-1",
-      series,
-      D1,
-      D2
-    );
+    const series = [day(D0, 6_000_000), day(D1, 10_000), day(D2, 6_000_000)];
+    const { patches } = computeSvbumFakeStockPatchesForSeries("svbum-1", series, D1, D2);
     expect(patches).toEqual([
       { productId: "svbum-1", dateMs: D1, from: 10_000, to: 0 },
       { productId: "svbum-1", dateMs: D2, from: 6_000_000, to: 0 },
@@ -124,17 +70,8 @@ describe("computeSvbumFakeStockPatchesForSeries", () => {
   });
 
   it("zeros -1 between spikes", () => {
-    const series = [
-      day(D0, 6_000_000),
-      day(D1, -1),
-      day(D2, 6_000_000),
-    ];
-    const { patches } = computeSvbumFakeStockPatchesForSeries(
-      "svbum-1",
-      series,
-      D0,
-      D2
-    );
+    const series = [day(D0, 6_000_000), day(D1, -1), day(D2, 6_000_000)];
+    const { patches } = computeSvbumFakeStockPatchesForSeries("svbum-1", series, D0, D2);
     expect(patches).toEqual([
       { productId: "svbum-1", dateMs: D0, from: 6_000_000, to: 0 },
       { productId: "svbum-1", dateMs: D1, from: -1, to: 0 },
@@ -143,17 +80,8 @@ describe("computeSvbumFakeStockPatchesForSeries", () => {
   });
 
   it("skips already-zero stock", () => {
-    const series = [
-      day(D0, 6_000_000),
-      day(D1, 0),
-      day(D2, 6_000_000),
-    ];
-    const { patches } = computeSvbumFakeStockPatchesForSeries(
-      "svbum-1",
-      series,
-      D0,
-      D2
-    );
+    const series = [day(D0, 6_000_000), day(D1, 0), day(D2, 6_000_000)];
+    const { patches } = computeSvbumFakeStockPatchesForSeries("svbum-1", series, D0, D2);
     expect(patches).toEqual([
       { productId: "svbum-1", dateMs: D0, from: 6_000_000, to: 0 },
       { productId: "svbum-1", dateMs: D2, from: 6_000_000, to: 0 },

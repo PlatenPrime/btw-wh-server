@@ -24,7 +24,7 @@ describe("getRowByTitleController", () => {
   });
 
   it("200: возвращает ряд с exists: true", async () => {
-    const row = await Row.create({ title: "Test Search Row" });
+    await Row.create({ title: "Test Search Row" });
     const req = { params: { title: "Test Search Row" } } as unknown as Request;
 
     await getRowByTitle(req, res);
@@ -57,4 +57,3 @@ describe("getRowByTitleController", () => {
     expect(Array.isArray(responseJson.errors)).toBe(true);
   });
 });
-

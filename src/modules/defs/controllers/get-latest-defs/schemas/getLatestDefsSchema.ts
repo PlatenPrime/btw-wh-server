@@ -7,4 +7,3 @@ import { z } from "zod";
 export const getLatestDefsSchema = z.object({});
 
 export type GetLatestDefsInput = z.infer<typeof getLatestDefsSchema>;
-

@@ -31,7 +31,7 @@ describe("startCompensatingSlicesCron", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cronCallback = null;
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const cb = args[1];
       if (typeof cb === "function") {
         cronCallback = cb as () => Promise<void>;
@@ -57,7 +57,7 @@ describe("startCompensatingSlicesCron", () => {
       expect.any(Function),
       null,
       true,
-      "Europe/Kiev"
+      "Europe/Kiev",
     );
   });
 

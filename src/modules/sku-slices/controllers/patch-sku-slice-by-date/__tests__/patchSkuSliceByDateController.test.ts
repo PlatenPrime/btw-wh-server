@@ -78,7 +78,9 @@ describe("patchSkuSliceByDateController", () => {
       title: "T",
       url: "https://e.com/t",
     });
-    await seedSkuSliceMonthDay("perfect", new Date("2026-09-20T00:00:00.000Z"), { "perfect-ctrl-1": { stock: 60, price: 5.5 } });
+    await seedSkuSliceMonthDay("perfect", new Date("2026-09-20T00:00:00.000Z"), {
+      "perfect-ctrl-1": { stock: 60, price: 5.5 },
+    });
     const req = {
       params: { skuId: sku._id.toString() },
       body: { date: "2026-09-20", stock: 3, price: 110 },
@@ -137,9 +139,7 @@ describe("patchSkuSliceByDateController", () => {
     } as unknown as Request;
     await patchSkuSliceByDateController(req, res);
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.message).toBe(
-      "Sku slice by date range updated successfully"
-    );
+    expect(responseJson.message).toBe("Sku slice by date range updated successfully");
     const data = responseJson.data as {
       updatedCount: number;
       days: unknown[];
@@ -183,9 +183,7 @@ describe("patchSkuSliceByDateController", () => {
     } as unknown as Request;
     await patchSkuSliceByDateController(req, res);
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.message).toBe(
-      "Sku slice by date periods updated successfully"
-    );
+    expect(responseJson.message).toBe("Sku slice by date periods updated successfully");
     const data = responseJson.data as {
       updatedCount: number;
       days: unknown[];

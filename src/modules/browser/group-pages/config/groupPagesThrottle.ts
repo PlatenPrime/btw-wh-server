@@ -5,10 +5,8 @@ import {
 } from "../../../slices/config/competitorScrapeProfiles.js";
 import { getGroupPagesPageDelayMs as resolveKonkPageDelayMs } from "../../../slices/utils/competitorScrapeThrottle.js";
 
-export const GROUP_PAGES_THROTTLE_MIN_DELAY_MS =
-  DEFAULT_GROUP_PAGES_PAGE_JITTER.minMs;
-export const GROUP_PAGES_THROTTLE_MAX_DELAY_MS =
-  DEFAULT_GROUP_PAGES_PAGE_JITTER.maxMs;
+export const GROUP_PAGES_THROTTLE_MIN_DELAY_MS = DEFAULT_GROUP_PAGES_PAGE_JITTER.minMs;
+export const GROUP_PAGES_THROTTLE_MAX_DELAY_MS = DEFAULT_GROUP_PAGES_PAGE_JITTER.maxMs;
 
 /**
  * Возвращает случайную задержку для перехода между страницами группы.
@@ -16,25 +14,20 @@ export const GROUP_PAGES_THROTTLE_MAX_DELAY_MS =
  * С konkName — resolveScrapeProfile(..., groupPagesPage).
  */
 export function getGroupPagesThrottleDelayMs(): number;
-export function getGroupPagesThrottleDelayMs(
-  minDelayMs: number,
-  maxDelayMs?: number
-): number;
+export function getGroupPagesThrottleDelayMs(minDelayMs: number, maxDelayMs?: number): number;
 export function getGroupPagesThrottleDelayMs(konkName: string): number;
 export function getGroupPagesThrottleDelayMs(
   minDelayMsOrKonkName?: number | string,
-  maxDelayMs?: number
+  maxDelayMs?: number,
 ): number {
   if (typeof minDelayMsOrKonkName === "string") {
     return resolveKonkPageDelayMs(minDelayMsOrKonkName);
   }
-  const min = Math.trunc(
-    minDelayMsOrKonkName ?? GROUP_PAGES_THROTTLE_MIN_DELAY_MS
-  );
+  const min = Math.trunc(minDelayMsOrKonkName ?? GROUP_PAGES_THROTTLE_MIN_DELAY_MS);
   const max = Math.trunc(maxDelayMs ?? GROUP_PAGES_THROTTLE_MAX_DELAY_MS);
   if (min <= 0 || max <= 0 || min > max) {
     throw new Error(
-      `Invalid group pages throttle range: min=${minDelayMsOrKonkName}, max=${maxDelayMs}`
+      `Invalid group pages throttle range: min=${minDelayMsOrKonkName}, max=${maxDelayMs}`,
     );
   }
   return jitterMs(min, max);

@@ -41,12 +41,3 @@ describe("getZoneByIdUtil", () => {
     expect(result?.updatedAt).toBeDefined();
   });
 });
-
-
-
-
-
-
-
-
-

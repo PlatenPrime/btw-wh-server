@@ -19,9 +19,7 @@ export const setPalletsUtil = async ({
     throw new Error("Pallet group not found");
   }
 
-  const palletObjectIds = palletIds.map(
-    (id) => new mongoose.Types.ObjectId(id),
-  );
+  const palletObjectIds = palletIds.map((id) => new mongoose.Types.ObjectId(id));
 
   const pallets = await Pallet.find({
     _id: { $in: palletObjectIds },
@@ -50,9 +48,7 @@ export const setPalletsUtil = async ({
   group.pallets = palletObjectIds;
   await group.save({ session });
 
-  const removedPalletIds = previousPalletIds.filter(
-    (id) => !palletIds.includes(id),
-  );
+  const removedPalletIds = previousPalletIds.filter((id) => !palletIds.includes(id));
 
   if (removedPalletIds.length > 0) {
     await Pallet.updateMany(

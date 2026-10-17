@@ -14,14 +14,8 @@ async function jobIsCancelled(jobId: string): Promise<boolean> {
   return job?.status === "cancelled";
 }
 
-async function patchRunningJob(
-  jobId: string,
-  fields: Record<string, unknown>,
-): Promise<boolean> {
-  const updated = await ExcelJob.updateOne(
-    { _id: jobId, status: "running" },
-    { $set: fields },
-  );
+async function patchRunningJob(jobId: string, fields: Record<string, unknown>): Promise<boolean> {
+  const updated = await ExcelJob.updateOne({ _id: jobId, status: "running" }, { $set: fields });
   return updated.modifiedCount > 0;
 }
 

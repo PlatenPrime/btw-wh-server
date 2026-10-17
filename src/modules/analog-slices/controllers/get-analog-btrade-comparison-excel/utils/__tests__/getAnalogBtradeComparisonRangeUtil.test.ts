@@ -136,4 +136,3 @@ describe("getAnalogBtradeComparisonRangeUtil", () => {
     expect(data[2].analogStock).toBeNull();
   });
 });
-

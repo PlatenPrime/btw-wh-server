@@ -43,7 +43,7 @@ describe("getAnalogsByKonkUtil", () => {
   it("filters by search when provided", async () => {
     await Analog.create([
       { konkName: "acme", prodName: "p", url: "https://a.com", nameukr: "Совпадение" },
-      { konkName: "acme", prodName: "p", url: "https://b.com", title: "Other" },
+      { konkName: "acme", prodName: "p", url: "https://b.com", nameukr: "Other" },
     ]);
     const result = await getAnalogsByKonkUtil({
       konkName: "acme",

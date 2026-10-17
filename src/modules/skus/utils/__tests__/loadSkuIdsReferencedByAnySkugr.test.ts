@@ -48,9 +48,7 @@ describe("loadSkuIdsReferencedByAnySkugr", () => {
     const ids = await loadSkuIdsReferencedByAnySkugr();
     expect(ids).toHaveLength(2);
     const asStrings = ids.map((id) => id.toString()).sort();
-    expect(asStrings).toEqual(
-      [sku1._id.toString(), sku2._id.toString()].sort(),
-    );
+    expect(asStrings).toEqual([sku1._id.toString(), sku2._id.toString()].sort());
   });
 
   it("normalizes string ids from distinct", async () => {

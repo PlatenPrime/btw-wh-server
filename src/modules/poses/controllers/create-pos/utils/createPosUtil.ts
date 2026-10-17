@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from "mongoose";
+import { ClientSession } from "mongoose";
 import { IPallet } from "../../../../pallets/models/Pallet.js";
 import { IRow } from "../../../../rows/models/Row.js";
 import { IPos, Pos } from "../../../models/Pos.js";
@@ -48,9 +48,8 @@ export const createPosUtil = async ({
         comment,
       },
     ],
-    { session }
+    { session },
   );
 
   return createdPos as IPos;
 };
-

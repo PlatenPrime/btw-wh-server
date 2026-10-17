@@ -11,17 +11,17 @@
 
 ## Поддерживаемые конкуренты
 
-| Конкурент | Путь | HTTP-эндпоинт |
-|-----------|------|---------------|
-| air | [`src/modules/browser/air/`](../../src/modules/browser/air/) | `GET /api/browser/air/stock` |
-| balun | [`src/modules/browser/balun/`](../../src/modules/browser/balun/) | `GET /api/browser/balun/stock` |
-| perfect | [`src/modules/browser/perfect/`](../../src/modules/browser/perfect/) | `GET /api/browser/perfect/stock` |
-| sharte | [`src/modules/browser/sharte/`](../../src/modules/browser/sharte/) | `GET /api/browser/sharte/stock` |
-| sharik (Btrade) | [`src/modules/browser/sharik/`](../../src/modules/browser/sharik/) | `GET /api/browser/sharik/stock/:artikul` |
-| yumi | [`src/modules/browser/yumi/`](../../src/modules/browser/yumi/) | `GET /api/browser/yumi/stock` |
-| yumin | [`src/modules/browser/yumin/`](../../src/modules/browser/yumin/) | `GET /api/browser/yumin/stock` |
-| svbum | [`src/modules/browser/svbum/`](../../src/modules/browser/svbum/) | `GET /api/browser/svbum/stock` |
-| dojdevik | [`src/modules/browser/dojdevik/`](../../src/modules/browser/dojdevik/) | `GET /api/browser/dojdevik/stock` |
+| Конкурент       | Путь                                                                   | HTTP-эндпоинт                            |
+| --------------- | ---------------------------------------------------------------------- | ---------------------------------------- |
+| air             | [`src/modules/browser/air/`](../../src/modules/browser/air/)           | `GET /api/browser/air/stock`             |
+| balun           | [`src/modules/browser/balun/`](../../src/modules/browser/balun/)       | `GET /api/browser/balun/stock`           |
+| perfect         | [`src/modules/browser/perfect/`](../../src/modules/browser/perfect/)   | `GET /api/browser/perfect/stock`         |
+| sharte          | [`src/modules/browser/sharte/`](../../src/modules/browser/sharte/)     | `GET /api/browser/sharte/stock`          |
+| sharik (Btrade) | [`src/modules/browser/sharik/`](../../src/modules/browser/sharik/)     | `GET /api/browser/sharik/stock/:artikul` |
+| yumi            | [`src/modules/browser/yumi/`](../../src/modules/browser/yumi/)         | `GET /api/browser/yumi/stock`            |
+| yumin           | [`src/modules/browser/yumin/`](../../src/modules/browser/yumin/)       | `GET /api/browser/yumin/stock`           |
+| svbum           | [`src/modules/browser/svbum/`](../../src/modules/browser/svbum/)       | `GET /api/browser/svbum/stock`           |
+| dojdevik        | [`src/modules/browser/dojdevik/`](../../src/modules/browser/dojdevik/) | `GET /api/browser/dojdevik/stock`        |
 
 Каждая папка конкурента содержит `controllers/` и `utils/get*StockData.ts` с логикой разбора HTML/DOM/JSON конкретного сайта.
 
@@ -108,36 +108,36 @@ Air stock явно задаёт `transport: "impit"`, origin warm-up и Referer/
 
 #### `browser/utils/`
 
-| Утилита | Путь | Когда брать |
-|---------|------|-------------|
-| `toMoney` | `utils/to-money/` | Округление цены до 2 знаков (pack→piece и любые денежные поля) |
-| `parseStrippedDecimal` | `utils/parse-stripped-decimal/` | Число из «грязной» строки цены |
-| `decodeHtmlEntities` | `utils/decode-html-entities/` | HTML-entities в title/тексте |
-| `parseJsonHtmlAttribute` | `utils/parse-json-html-attribute/` | JSON из HTML-атрибута |
-| `tryParseJsonRecord` | `utils/try-parse-json-record/` | Безопасный parse в plain object |
-| `resolveHrefAgainstBase` | `utils/resolve-href-against-base/` | Относительный href → absolute |
-| `resolveLazyListingImage` | `utils/resolve-lazy-listing-image/` | Картинка листинга (lazy placeholder / srcset / data-src) |
-| `mergeResponseCookies` | `utils/merge-response-cookies/` | Merge `Set-Cookie` / Cookie header |
-| `parseHttpProxyUrl` | `utils/parse-http-proxy-url/` | Proxy URL → axios proxy config |
-| `createHttpsProxyAgent` | `utils/create-https-proxy-agent/` | `HttpsProxyAgent` из proxy URL |
-| `sleep` | `utils/sleep.ts` | Async delay |
-| `browserRequest` | `utils/browserRequest.ts` | Shared axios, `browserGet`, `logBrowserError` |
-| `fetchPageHtml` | `utils/fetchPageHtml.ts` | Multi-transport HTML GET |
-| `resolveBrowserTransport` | `utils/resolveBrowserTransport.ts` | Выбор http/impit/playwright |
-| `impitGet` / `playwrightGet` | `utils/impitGet.ts`, `utils/playwrightGet.ts` | Транспортные GET |
-| `admToolsChallenge` | `utils/adm-tools-challenge/` | Detect/solve adm.tools challenge |
-| `logBrowserStockResult` | `utils/logBrowserStockResult.ts` | Rate-limited stock result log |
-| `browserOriginBlockedError` | `utils/browserOriginBlockedError.ts` | CF 520–526 / ORIGIN_BLOCKED |
+| Утилита                      | Путь                                          | Когда брать                                                    |
+| ---------------------------- | --------------------------------------------- | -------------------------------------------------------------- |
+| `toMoney`                    | `utils/to-money/`                             | Округление цены до 2 знаков (pack→piece и любые денежные поля) |
+| `parseStrippedDecimal`       | `utils/parse-stripped-decimal/`               | Число из «грязной» строки цены                                 |
+| `decodeHtmlEntities`         | `utils/decode-html-entities/`                 | HTML-entities в title/тексте                                   |
+| `parseJsonHtmlAttribute`     | `utils/parse-json-html-attribute/`            | JSON из HTML-атрибута                                          |
+| `tryParseJsonRecord`         | `utils/try-parse-json-record/`                | Безопасный parse в plain object                                |
+| `resolveHrefAgainstBase`     | `utils/resolve-href-against-base/`            | Относительный href → absolute                                  |
+| `resolveLazyListingImage`    | `utils/resolve-lazy-listing-image/`           | Картинка листинга (lazy placeholder / srcset / data-src)       |
+| `mergeResponseCookies`       | `utils/merge-response-cookies/`               | Merge `Set-Cookie` / Cookie header                             |
+| `parseHttpProxyUrl`          | `utils/parse-http-proxy-url/`                 | Proxy URL → axios proxy config                                 |
+| `createHttpsProxyAgent`      | `utils/create-https-proxy-agent/`             | `HttpsProxyAgent` из proxy URL                                 |
+| `sleep`                      | `utils/sleep.ts`                              | Async delay                                                    |
+| `browserRequest`             | `utils/browserRequest.ts`                     | Shared axios, `browserGet`, `logBrowserError`                  |
+| `fetchPageHtml`              | `utils/fetchPageHtml.ts`                      | Multi-transport HTML GET                                       |
+| `resolveBrowserTransport`    | `utils/resolveBrowserTransport.ts`            | Выбор http/impit/playwright                                    |
+| `impitGet` / `playwrightGet` | `utils/impitGet.ts`, `utils/playwrightGet.ts` | Транспортные GET                                               |
+| `admToolsChallenge`          | `utils/adm-tools-challenge/`                  | Detect/solve adm.tools challenge                               |
+| `logBrowserStockResult`      | `utils/logBrowserStockResult.ts`              | Rate-limited stock result log                                  |
+| `browserOriginBlockedError`  | `utils/browserOriginBlockedError.ts`          | CF 520–526 / ORIGIN_BLOCKED                                    |
 
 #### `browser/promua/`
 
-| Утилита | Путь | Когда брать |
-|---------|------|-------------|
-| `extractPromUaProductId` | `promua/extract-promua-product-id/` | productId из `/p{digits}` |
-| `extractPromUaCsrfToken` | `promua/extract-promua-csrf-token/` | CSRF из HTML/cookie |
-| GraphQL queries / post / parse | `promua/cart/` | Add/Change cart GraphQL |
-| `resolvePromUaUnitPrice` | `promua/resolve-promua-unit-price/` | HTML-цена vs GraphQL unit selling |
-| `fetchPromUaCompanySiteStock` | `promua/fetch-promua-company-site-stock/` | Общий stock pipeline company site |
+| Утилита                        | Путь                                      | Когда брать                       |
+| ------------------------------ | ----------------------------------------- | --------------------------------- |
+| `extractPromUaProductId`       | `promua/extract-promua-product-id/`       | productId из `/p{digits}`         |
+| `extractPromUaCsrfToken`       | `promua/extract-promua-csrf-token/`       | CSRF из HTML/cookie               |
+| GraphQL queries / post / parse | `promua/cart/`                            | Add/Change cart GraphQL           |
+| `resolvePromUaUnitPrice`       | `promua/resolve-promua-unit-price/`       | HTML-цена vs GraphQL unit selling |
+| `fetchPromUaCompanySiteStock`  | `promua/fetch-promua-company-site-stock/` | Общий stock pipeline company site |
 
 #### Group pages
 

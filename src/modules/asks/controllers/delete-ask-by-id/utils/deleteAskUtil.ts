@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from "mongoose";
+import { ClientSession } from "mongoose";
 import { Ask, IAsk } from "../../../models/Ask.js";
 
 interface DeleteAskUtilInput {
@@ -6,10 +6,7 @@ interface DeleteAskUtilInput {
   session: ClientSession;
 }
 
-export async function deleteAskUtil({
-  id,
-  session,
-}: DeleteAskUtilInput): Promise<IAsk | null> {
+export async function deleteAskUtil({ id, session }: DeleteAskUtilInput): Promise<IAsk | null> {
   // Проверяем существование заявки перед удалением
   const ask: IAsk | null = await Ask.findById(id).session(session);
 
@@ -22,4 +19,3 @@ export async function deleteAskUtil({
 
   return ask;
 }
-

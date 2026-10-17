@@ -42,4 +42,3 @@ export const getAllPosesController = async (req: Request, res: Response) => {
     }
   }
 };
-

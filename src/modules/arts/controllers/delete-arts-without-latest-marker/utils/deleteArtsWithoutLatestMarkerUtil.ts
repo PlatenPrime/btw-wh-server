@@ -22,11 +22,7 @@ export const deleteArtsWithoutLatestMarkerUtil =
     ]);
 
     // Если в базе нет артикулов или нет маркеров, возвращаем пустой результат
-    if (
-      !aggregationResult ||
-      aggregationResult.length === 0 ||
-      !aggregationResult[0].maxMarker
-    ) {
+    if (!aggregationResult || aggregationResult.length === 0 || !aggregationResult[0].maxMarker) {
       return {
         deletedCount: 0,
         latestMarker: null,
@@ -52,4 +48,3 @@ export const deleteArtsWithoutLatestMarkerUtil =
       latestMarker: latestMarker,
     };
   };
-

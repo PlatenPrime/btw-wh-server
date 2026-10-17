@@ -56,4 +56,3 @@ describe("normalizeObjectId", () => {
     expect(result2.toString()).toBe(idString2);
   });
 });
-

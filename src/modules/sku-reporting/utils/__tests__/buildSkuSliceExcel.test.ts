@@ -37,7 +37,7 @@ describe("buildSkuSliceExcelForSkus", () => {
         if (t === to.getTime()) return { stock: 2, price: 3 };
         return undefined;
       },
-      TITLES
+      TITLES,
     );
 
     expect(Buffer.isBuffer(buffer)).toBe(true);
@@ -68,7 +68,7 @@ describe("buildSkuSliceExcelForSkus", () => {
         if (t === to.getTime()) return { stock: 7, price: 5 };
         return undefined;
       },
-      TITLES
+      TITLES,
     );
 
     const wb = new ExcelJS.Workbook();
@@ -141,7 +141,7 @@ describe("buildSkuSliceExcelForSkus", () => {
         return undefined;
       },
       TITLES,
-      { includeTotalsRow: true, totalsRowLabel: "Підсумок" }
+      { includeTotalsRow: true, totalsRowLabel: "Підсумок" },
     );
 
     const wb = new ExcelJS.Workbook();
@@ -177,7 +177,7 @@ describe("buildSkuSliceExcelForSkus", () => {
         if (t === to.getTime()) return { stock: 3, price: 2 };
         return undefined;
       },
-      TITLES
+      TITLES,
     );
 
     const wb = new ExcelJS.Workbook();
@@ -218,7 +218,7 @@ describe("buildSkuSliceExcelForSkus", () => {
         if (t === to.getTime()) return { stock: 5, price: 2 };
         return undefined;
       },
-      TITLES
+      TITLES,
     );
 
     const wb = new ExcelJS.Workbook();
@@ -256,7 +256,7 @@ describe("buildSkuSliceExcelForSkus", () => {
         if (t === to.getTime()) return { stock: 1, price: 12 };
         return undefined;
       },
-      TITLES
+      TITLES,
     );
 
     const wb = new ExcelJS.Workbook();
@@ -288,7 +288,7 @@ describe("buildSkuSliceExcelForSkus skugr column", () => {
       from,
       to,
       () => ({ stock: 1, price: 1 }),
-      TITLES
+      TITLES,
     );
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
@@ -313,7 +313,7 @@ describe("buildSkuSliceExcelForSkus skugr column", () => {
       from,
       to,
       () => ({ stock: 1, price: 1 }),
-      TITLES
+      TITLES,
     );
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
@@ -382,9 +382,7 @@ describe("buildSkuSliceExcelForSkus skugr column", () => {
 
 describe("buildSkuSliceExcel helpers", () => {
   it("formatDateHeader is UTC YYYY-MM-DD", () => {
-    expect(
-      formatDateHeader(new Date("2026-03-05T00:00:00.000Z"))
-    ).toBe("2026-03-05");
+    expect(formatDateHeader(new Date("2026-03-05T00:00:00.000Z"))).toBe("2026-03-05");
   });
 
   it("safeFilePart strips unsafe chars", () => {

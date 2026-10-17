@@ -104,27 +104,27 @@ describe("getKonkBtradeStockComparisonUtil", () => {
     expect(days[0]).toMatchObject({
       date: "2026-03-01T00:00:00.000Z",
       competitorStock: 150, // 100 + 50
-      btradeStock: 300,     // 200 + 100
+      btradeStock: 300, // 200 + 100
     });
 
     expect(days[1]).toMatchObject({
       date: "2026-03-02T00:00:00.000Z",
       competitorStock: 130, // 90 + 40
-      btradeStock: 275,     // 185 + 90
+      btradeStock: 275, // 185 + 90
     });
 
     expect(days[2]).toMatchObject({
       date: "2026-03-03T00:00:00.000Z",
       competitorStock: 115, // 80 + 35
-      btradeStock: 250,     // 170 + 80
+      btradeStock: 250, // 170 + 80
     });
 
     expect(summary.firstDayCompetitorStock).toBe(150);
     expect(summary.lastDayCompetitorStock).toBe(115);
     expect(summary.firstDayBtradeStock).toBe(300);
     expect(summary.lastDayBtradeStock).toBe(250);
-    expect(summary.diffCompetitorStock).toBe(-35);  // 115 - 150
-    expect(summary.diffBtradeStock).toBe(-50);       // 250 - 300
+    expect(summary.diffCompetitorStock).toBe(-35); // 115 - 150
+    expect(summary.diffBtradeStock).toBe(-50); // 250 - 300
 
     // diffCompetitorStockPct = (-35 / 150) * 100 = -23.333... rounded to -23.33
     expect(summary.diffCompetitorStockPct).toBeCloseTo(-23.33, 1);

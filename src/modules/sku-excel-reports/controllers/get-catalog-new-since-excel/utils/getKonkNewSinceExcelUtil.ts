@@ -21,16 +21,12 @@ export async function getKonkNewSinceExcelUtil(
   const since = toSliceDate(query.since);
   const isAllKonks = konkName === SKU_EXCEL_ALL_KONKS;
   const skus = await Sku.find(
-    isAllKonks
-      ? { createdAt: { $gte: since } }
-      : { konkName, createdAt: { $gte: since } },
+    isAllKonks ? { createdAt: { $gte: since } } : { konkName, createdAt: { $gte: since } },
   )
     .sort({ createdAt: -1 })
     .lean();
 
-  const konkTitleByName = await loadKonkTitleByKonkNames(
-    skus.map((s) => s.konkName),
-  );
+  const konkTitleByName = await loadKonkTitleByKonkNames(skus.map((s) => s.konkName));
 
   const rows: SkuCatalogExcelRow[] = skus.map((s) => ({
     productId: (s.productId ?? "").trim(),

@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  API_TASK_KIND_DEFINITIONS,
-  getApiTaskKindDefinition,
-} from "../apiTaskKindDefinitions.js";
+import { API_TASK_KIND_DEFINITIONS, getApiTaskKindDefinition } from "../apiTaskKindDefinitions.js";
 import { API_TASK_KIND_IDS } from "../../constants/apiTaskConstants.js";
 
 describe("apiTaskKindDefinitions", () => {

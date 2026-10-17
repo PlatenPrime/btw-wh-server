@@ -14,7 +14,7 @@ type SortOrder = "asc" | "desc";
 export const getPosesByPalletIdUtil = async (
   palletId: string,
   sortBy: SortBy = "updatedAt",
-  sortOrder: SortOrder = "desc"
+  sortOrder: SortOrder = "desc",
 ): Promise<IPos[]> => {
   if (!mongoose.Types.ObjectId.isValid(palletId)) {
     throw new Error("Invalid pallet ID");
@@ -27,9 +27,7 @@ export const getPosesByPalletIdUtil = async (
   const sortOptions: Record<string, 1 | -1> = {};
   sortOptions[sortBy] = sortDirection;
 
-  const poses = await Pos.find({ "palletData._id": palletId }).sort(
-    sortOptions
-  );
+  const poses = await Pos.find({ "palletData._id": palletId }).sort(sortOptions);
 
   return poses as IPos[];
 };

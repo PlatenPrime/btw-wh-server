@@ -39,6 +39,4 @@ export const postSkuSlicePostCorrectionsSchema = z
     }
   });
 
-export type PostSkuSlicePostCorrectionsInput = z.infer<
-  typeof postSkuSlicePostCorrectionsSchema
->;
+export type PostSkuSlicePostCorrectionsInput = z.infer<typeof postSkuSlicePostCorrectionsSchema>;

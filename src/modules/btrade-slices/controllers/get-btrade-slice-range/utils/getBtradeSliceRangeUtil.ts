@@ -8,8 +8,7 @@ import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { GetBtradeSliceRangeInput } from "../schemas/getBtradeSliceRangeSchema.js";
 
 export type GetBtradeSliceRangeResult =
-  | { ok: true; data: ReturnType<typeof mapBtradeSliceDocsToRangeItems> }
-  | { ok: false };
+  { ok: true; data: ReturnType<typeof mapBtradeSliceDocsToRangeItems> } | { ok: false };
 
 export async function getBtradeSliceRangeUtil(
   input: GetBtradeSliceRangeInput,

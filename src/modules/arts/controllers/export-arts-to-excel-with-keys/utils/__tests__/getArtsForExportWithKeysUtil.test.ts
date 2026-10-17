@@ -40,11 +40,7 @@ describe("getArtsForExportWithKeysUtil", () => {
 
     const result = await getArtsForExportWithKeysUtil();
 
-    expect(result.map((art) => art.artikul)).toEqual([
-      "KEY-001",
-      "KEY-002",
-      "KEY-003",
-    ]);
+    expect(result.map((art) => art.artikul)).toEqual(["KEY-001", "KEY-002", "KEY-003"]);
   });
 
   it("возвращает plain objects через lean()", async () => {

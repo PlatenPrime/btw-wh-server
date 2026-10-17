@@ -18,16 +18,13 @@ function isDuplicateUrlError(err: unknown): err is { code: number; keyPattern?: 
  * @desc    Создать аналог (аналог артикула у конкурента)
  * @route   POST /api/analogs
  */
-export const createAnalogController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createAnalogController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createAnalogSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

@@ -13,7 +13,7 @@ import {
 export type { SharteGroupPageProduct };
 
 export async function getSharteGroupPagesProducts(
-  input: GetSharteGroupPagesProductsInput
+  input: GetSharteGroupPagesProductsInput,
 ): Promise<SharteGroupPageProduct[]> {
   const parseResult = getSharteGroupPagesProductsSchema.safeParse(input);
   if (!parseResult.success) {

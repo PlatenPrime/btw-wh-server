@@ -88,4 +88,3 @@ describe("updateUserUtil", () => {
     await session.endSession();
   });
 });
-

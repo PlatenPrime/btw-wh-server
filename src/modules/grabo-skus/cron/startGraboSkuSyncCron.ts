@@ -3,10 +3,7 @@ import { formatCronErrorReport } from "../../../cron/analytics-notifications/for
 import { formatGraboSkuSyncReport } from "../../../cron/analytics-notifications/formatGraboSkuSyncReport.js";
 import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { createLogger } from "../../../logging/createLogger.js";
-import {
-  releaseGraboSkuSync,
-  tryAcquireGraboSkuSync,
-} from "../utils/graboSkuSyncLock.js";
+import { releaseGraboSkuSync, tryAcquireGraboSkuSync } from "../utils/graboSkuSyncLock.js";
 import { runGraboSkuSyncUtil } from "../utils/runGraboSkuSyncUtil.js";
 
 export const GRABO_SKU_SYNC_CRON_EXPR = "0 0 4 * * 6";
@@ -32,21 +29,19 @@ export function startGraboSkuSyncCron(): CronJob {
         await sendCronAnalyticsReport(formatGraboSkuSyncReport(stats));
       } catch (error) {
         log.error({ err: error }, "grabo sku sync cron failed");
-        await sendCronAnalyticsReport(
-          formatCronErrorReport("Grabo SKU sync", error)
-        );
+        await sendCronAnalyticsReport(formatCronErrorReport("Grabo SKU sync", error));
       } finally {
         releaseGraboSkuSync();
       }
     },
     null,
     true,
-    GRABO_SKU_SYNC_CRON_TZ
+    GRABO_SKU_SYNC_CRON_TZ,
   );
 
   log.info(
     { schedule: GRABO_SKU_SYNC_CRON_EXPR, timezone: GRABO_SKU_SYNC_CRON_TZ },
-    "cron started"
+    "cron started",
   );
   return job;
 }

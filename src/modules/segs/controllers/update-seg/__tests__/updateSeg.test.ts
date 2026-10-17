@@ -131,9 +131,7 @@ describe("updateSeg Controller", () => {
     await updateSeg(mockRequest as Request, res);
 
     expect(responseStatus.code).toBe(400);
-    expect(responseJson.message).toBe(
-      "At least one field (order or zones) must be provided"
-    );
+    expect(responseJson.message).toBe("At least one field (order or zones) must be provided");
   });
 
   it("500: zones already belong to other segments (case-sensitive zones check in controller)", async () => {
@@ -149,7 +147,7 @@ describe("updateSeg Controller", () => {
 
     await Zone.updateOne(
       { _id: zone._id },
-      { $set: { "seg.id": new mongoose.Types.ObjectId(), sector: 1001 } }
+      { $set: { "seg.id": new mongoose.Types.ObjectId(), sector: 1001 } },
     );
 
     mockRequest = {

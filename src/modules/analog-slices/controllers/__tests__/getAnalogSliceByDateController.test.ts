@@ -53,8 +53,7 @@ describe("getAnalogSliceByDateController", () => {
     expect(getAnalogSliceByDateUtil).toHaveBeenCalledTimes(1);
     expect(responseStatus.code).toBe(404);
     expect(responseBody).toEqual({
-      message:
-        "Analog not found, analog has no artikul, or no slice data for this date",
+      message: "Analog not found, analog has no artikul, or no slice data for this date",
     });
   });
 

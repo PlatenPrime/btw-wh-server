@@ -59,10 +59,12 @@ describe("createDelController", () => {
     expect(responseStatus.code).toBe(201);
     expect((responseJson.data as { title: string }).title).toBe("New");
     expect((responseJson.data as { prodName: string }).prodName).toBe("acme");
-    expect((responseJson.data as { prod: { title: string; imageUrl: string } }).prod).toMatchObject({
-      title: "Acme",
-      imageUrl: "https://example.com/acme.png",
-    });
+    expect((responseJson.data as { prod: { title: string; imageUrl: string } }).prod).toMatchObject(
+      {
+        title: "Acme",
+        imageUrl: "https://example.com/acme.png",
+      },
+    );
     const count = await Del.countDocuments();
     expect(count).toBe(1);
   });
@@ -82,9 +84,7 @@ describe("createDelController", () => {
     const events = await Event.find({ department: "dels" });
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(user._id));
-    expect(events[0].description).toBe(
-      'Створено поставку "Audited" від виробника acme'
-    );
+    expect(events[0].description).toBe('Створено поставку "Audited" від виробника acme');
   });
 
   it("400 when prodName does not exist in Prod", async () => {
@@ -93,8 +93,6 @@ describe("createDelController", () => {
     } as Request;
     await createDelController(req, res);
     expect(responseStatus.code).toBe(400);
-    expect((responseJson as { message: string }).message).toContain(
-      "Производитель"
-    );
+    expect((responseJson as { message: string }).message).toContain("Производитель");
   });
 });

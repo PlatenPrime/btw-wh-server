@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from "mongoose";
+import { ClientSession } from "mongoose";
 import { IPos, Pos } from "../../../models/Pos.js";
 import { UpdatePosInput } from "../schemas/updatePosSchema.js";
 
@@ -28,4 +28,3 @@ export const updatePosUtil = async ({
 
   return updatedPos as IPos;
 };
-

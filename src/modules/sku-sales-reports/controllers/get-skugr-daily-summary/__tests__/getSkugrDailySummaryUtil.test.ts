@@ -79,13 +79,13 @@ describe("getSkugrDailySummaryUtil", () => {
     const d1 = new Date("2026-06-01T00:00:00.000Z");
     const d2 = new Date("2026-06-02T00:00:00.000Z");
     await seedSkuSliceMonthDay("agg-k", d1, {
-          "agg-k-a": { stock: 10, price: 2 },
-          "agg-k-b": { stock: 5, price: 4 },
-        });
+      "agg-k-a": { stock: 10, price: 2 },
+      "agg-k-b": { stock: 5, price: 4 },
+    });
     await seedSkuSliceMonthDay("agg-k", d2, {
-          "agg-k-a": { stock: 8, price: 2 },
-          "agg-k-b": { stock: 3, price: 4 },
-        });
+      "agg-k-a": { stock: 8, price: 2 },
+      "agg-k-b": { stock: 3, price: 4 },
+    });
 
     const result = await getSkugrDailySummaryUtil({
       skugrId: skugr._id.toString(),

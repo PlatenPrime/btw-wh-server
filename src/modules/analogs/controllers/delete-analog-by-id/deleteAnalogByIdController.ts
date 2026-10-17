@@ -8,17 +8,14 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Удалить аналог по id
  * @route   DELETE /api/analogs/id/:id
  */
-export const deleteAnalogByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const deleteAnalogByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = deleteAnalogByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

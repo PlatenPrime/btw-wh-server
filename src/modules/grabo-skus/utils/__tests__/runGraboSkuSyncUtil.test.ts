@@ -60,8 +60,7 @@ describe("runGraboSkuSyncUtil", () => {
         productUrls: [URL_A, URL_B],
         failedCategoryUrls: [],
       }),
-      getSkuData: async (url) =>
-        url === URL_A ? skuData("GA", "New A") : skuData("GB", "B"),
+      getSkuData: async (url) => (url === URL_A ? skuData("GA", "New A") : skuData("GB", "B")),
       delayMs: () => 0,
       now: () => new Date("2026-08-15T00:00:00.000Z"),
     });
@@ -73,9 +72,7 @@ describe("runGraboSkuSyncUtil", () => {
       errors: 0,
       catalogComplete: true,
     });
-    expect((await GraboSku.findOne({ productId: "GA" }).lean())?.title).toBe(
-      "New A"
-    );
+    expect((await GraboSku.findOne({ productId: "GA" }).lean())?.title).toBe("New A");
     expect(await GraboSku.countDocuments()).toBe(2);
   });
 
@@ -99,9 +96,7 @@ describe("runGraboSkuSyncUtil", () => {
     });
 
     expect(stats.markedOffSite).toBe(1);
-    expect(
-      (await GraboSku.findOne({ productId: "GG" }).lean())?.isOnSite
-    ).toBe(false);
+    expect((await GraboSku.findOne({ productId: "GG" }).lean())?.isOnSite).toBe(false);
   });
 
   it("does not absent-pass when a category crawl failed", async () => {
@@ -125,9 +120,7 @@ describe("runGraboSkuSyncUtil", () => {
 
     expect(stats.catalogComplete).toBe(false);
     expect(stats.markedOffSite).toBe(0);
-    expect(
-      (await GraboSku.findOne({ productId: "GG" }).lean())?.isOnSite
-    ).toBe(true);
+    expect((await GraboSku.findOne({ productId: "GG" }).lean())?.isOnSite).toBe(true);
   });
 
   it("does not flip isOnSite when product fetch fails", async () => {
@@ -153,9 +146,7 @@ describe("runGraboSkuSyncUtil", () => {
 
     expect(stats.errors).toBe(1);
     expect(stats.markedOffSite).toBe(0);
-    expect(
-      (await GraboSku.findOne({ productId: "GA" }).lean())?.isOnSite
-    ).toBe(true);
+    expect((await GraboSku.findOne({ productId: "GA" }).lean())?.isOnSite).toBe(true);
   });
 
   it("does not absent-pass when listed urls are empty", async () => {
@@ -179,9 +170,7 @@ describe("runGraboSkuSyncUtil", () => {
 
     expect(stats.catalogComplete).toBe(true);
     expect(stats.markedOffSite).toBe(0);
-    expect(
-      (await GraboSku.findOne({ productId: "GG" }).lean())?.isOnSite
-    ).toBe(true);
+    expect((await GraboSku.findOne({ productId: "GG" }).lean())?.isOnSite).toBe(true);
   });
 
   it("skips empty productId", async () => {
@@ -208,8 +197,7 @@ describe("runGraboSkuSyncUtil", () => {
         productUrls: [URL_A, URL_B],
         failedCategoryUrls: [],
       }),
-      getSkuData: async (url) =>
-        url === URL_A ? skuData("GA", "A") : skuData("GB", "B"),
+      getSkuData: async (url) => (url === URL_A ? skuData("GA", "A") : skuData("GB", "B")),
       delayMs: () => 11,
     });
 
@@ -224,15 +212,14 @@ describe("runGraboSkuSyncUtil", () => {
         productUrls: [URL_A, URL_B],
         failedCategoryUrls: [],
       }),
-      getSkuData: async (url) =>
-        url === URL_A ? skuData("GA", "A") : skuData("GB", "B"),
+      getSkuData: async (url) => (url === URL_A ? skuData("GA", "A") : skuData("GB", "B")),
       delayMs: () => 0,
     });
 
     expect(mockLogger.info).toHaveBeenCalledWith("grabo sku sync started");
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.objectContaining({ listed: 2, catalogComplete: true }),
-      "grabo sku catalog collected"
+      "grabo sku catalog collected",
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -241,15 +228,15 @@ describe("runGraboSkuSyncUtil", () => {
         productId: "GA",
         result: "created",
       }),
-      "grabo sku product"
+      "grabo sku product",
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.objectContaining({ listed: 2 }),
-      "grabo sku absent-pass start"
+      "grabo sku absent-pass start",
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.objectContaining({ listed: 2 }),
-      "grabo sku sync finished"
+      "grabo sku sync finished",
     );
   });
 });

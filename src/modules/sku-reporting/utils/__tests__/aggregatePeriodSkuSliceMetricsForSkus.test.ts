@@ -31,17 +31,17 @@ describe("aggregatePeriodSkuSliceMetricsForSkus", () => {
     const d2 = new Date("2026-04-03T00:00:00.000Z");
 
     await seedSkuSliceMonthDay("k", d0, {
-          "p-a": { stock: 10, price: 5 },
-          "p-b": { stock: 20, price: 10 },
-        });
+      "p-a": { stock: 10, price: 5 },
+      "p-b": { stock: 20, price: 10 },
+    });
     await seedSkuSliceMonthDay("k", d1, {
-          "p-a": { stock: 7, price: 5 },
-          "p-b": { stock: 18, price: 10 },
-        });
+      "p-a": { stock: 7, price: 5 },
+      "p-b": { stock: 18, price: 10 },
+    });
     await seedSkuSliceMonthDay("k", d2, {
-          "p-a": { stock: 5, price: 5 },
-          "p-b": { stock: 15, price: 10 },
-        });
+      "p-a": { stock: 5, price: 5 },
+      "p-b": { stock: 15, price: 10 },
+    });
 
     const skus = [
       { konkName: "k", productId: "p-a" },

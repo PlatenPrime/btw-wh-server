@@ -31,7 +31,7 @@ const skuSchema = new Schema<ISku>(
     imageUrl: { type: String, default: "" },
     isInvalid: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 skuSchema.index({ konkName: 1, isInvalid: 1 });

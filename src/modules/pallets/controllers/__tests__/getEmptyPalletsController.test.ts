@@ -25,8 +25,8 @@ describe("getEmptyPalletsController", () => {
   });
 
   it("200: возвращает только пустые паллеты", async () => {
-    const emptyPallet1 = await createTestPallet({ title: "Empty-1", poses: [] });
-    const emptyPallet2 = await createTestPallet({ title: "Empty-2", poses: [] });
+    await createTestPallet({ title: "Empty-1", poses: [] });
+    await createTestPallet({ title: "Empty-2", poses: [] });
     const filledPallet = await createTestPallet({ title: "Filled-1", poses: [] });
     const pos = await createTestPos({ pallet: filledPallet });
 
@@ -45,4 +45,3 @@ describe("getEmptyPalletsController", () => {
     expect(titles).not.toContain("Filled-1");
   });
 });
-

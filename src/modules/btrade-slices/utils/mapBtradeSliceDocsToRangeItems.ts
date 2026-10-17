@@ -21,10 +21,7 @@ export function mapBtradeSliceDocsToRangeItems(
 ): BtradeSliceRangeItem[] {
   const data: BtradeSliceRangeItem[] = [];
   for (const doc of docs) {
-    const dataRecord = (doc.data ?? {}) as Record<
-      string,
-      IBtradeSliceDataItem | undefined
-    >;
+    const dataRecord = (doc.data ?? {}) as Record<string, IBtradeSliceDataItem | undefined>;
     const item = dataRecord[artikulKey];
     if (!item) continue;
     data.push({

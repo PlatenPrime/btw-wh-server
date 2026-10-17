@@ -21,7 +21,7 @@ export type YuminGroupPageProduct = {
 };
 
 export async function getYuminGroupPagesProducts(
-  input: GetYuminGroupPagesProductsInput
+  input: GetYuminGroupPagesProductsInput,
 ): Promise<YuminGroupPageProduct[]> {
   const parseResult = getYuminGroupPagesProductsSchema.safeParse(input);
   if (!parseResult.success) {
@@ -46,9 +46,7 @@ export async function getYuminGroupPagesProducts(
     visited.add(currentUrl);
 
     const raw = await browserGet<string>(currentUrl);
-    const pageParsed = yuminProductsPageSchema.safeParse(
-      parseYuminProductsPage(raw, currentUrl)
-    );
+    const pageParsed = yuminProductsPageSchema.safeParse(parseYuminProductsPage(raw, currentUrl));
     if (!pageParsed.success) {
       throw new Error(pageParsed.error.message);
     }

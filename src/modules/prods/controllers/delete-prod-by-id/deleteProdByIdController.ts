@@ -9,17 +9,14 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @route   DELETE /api/prods/id/:id
  * @access  PRIME
  */
-export const deleteProdByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const deleteProdByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = deleteProdByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

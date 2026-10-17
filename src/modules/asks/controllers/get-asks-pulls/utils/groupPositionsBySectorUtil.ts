@@ -7,9 +7,7 @@ import { IPositionsBySector } from "../types/getAsksPullsResponse.js";
  * @param positions - Массив позиций для группировки
  * @returns Массив групп позиций, отсортированный по секторам
  */
-export const groupPositionsBySectorUtil = (
-  positions: IPositionForPull[]
-): IPositionsBySector[] => {
+export const groupPositionsBySectorUtil = (positions: IPositionForPull[]): IPositionsBySector[] => {
   if (positions.length === 0) {
     return [];
   }
@@ -25,9 +23,7 @@ export const groupPositionsBySectorUtil = (
   }
 
   // Преобразуем Map в массив и сортируем по секторам
-  const result: IPositionsBySector[] = Array.from(
-    positionsBySectorMap.entries()
-  )
+  const result: IPositionsBySector[] = Array.from(positionsBySectorMap.entries())
     .map(([sector, positions]) => ({
       sector,
       positions,
@@ -36,4 +32,3 @@ export const groupPositionsBySectorUtil = (
 
   return result;
 };
-

@@ -60,18 +60,14 @@ describe("sendDeficitTelegramReport", () => {
   });
 
   it("does not throw when Telegram fails", async () => {
-    vi.mocked(sendMessageToDefsChat).mockRejectedValueOnce(
-      new Error("Telegram error")
-    );
+    vi.mocked(sendMessageToDefsChat).mockRejectedValueOnce(new Error("Telegram error"));
 
-    await expect(
-      sendDeficitTelegramReport(["first", "second"], 0)
-    ).resolves.toBeUndefined();
+    await expect(sendDeficitTelegramReport(["first", "second"], 0)).resolves.toBeUndefined();
 
     expect(logModuleError).toHaveBeenCalledWith(
       "defs",
       expect.any(Error),
-      "Failed to send deficit report to Defs Chat:"
+      "Failed to send deficit report to Defs Chat:",
     );
     expect(sendMessageToDefsChat).toHaveBeenCalledTimes(1);
   });

@@ -45,7 +45,7 @@ describe("getSegById Controller", () => {
     expect(responseJson.exists).toBe(true);
     expect(responseJson.message).toBe("Segment retrieved successfully");
     expect(String((responseJson.data as { _id: { toString(): string } })._id)).toBe(
-      seg._id.toString()
+      seg._id.toString(),
     );
   });
 

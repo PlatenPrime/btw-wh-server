@@ -25,9 +25,7 @@ type DojdevikHtmlContext = {
  * Price — цена упаковки / packSize (2 знака).
  * Негативный исход — `{ stock: -1, price: -1 }`.
  */
-export async function getDojdevikStockData(
-  link: string
-): Promise<DojdevikProductInfo> {
+export async function getDojdevikStockData(link: string): Promise<DojdevikProductInfo> {
   if (!link || typeof link !== "string") {
     throw new Error("Link is required and must be a string");
   }
@@ -52,11 +50,6 @@ export async function getDojdevikStockData(
     },
     resolveHtmlPrice: (ctx) => ctx.htmlPackagePrice,
     normalizeOutcome: ({ quantity, unitPrice, ctx }) =>
-      normalizeDojdevikOutcome(
-        quantity,
-        unitPrice,
-        ctx.packSize,
-        ctx.title
-      ),
+      normalizeDojdevikOutcome(quantity, unitPrice, ctx.packSize, ctx.title),
   });
 }

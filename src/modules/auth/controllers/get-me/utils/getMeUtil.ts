@@ -15,4 +15,3 @@ export const getMeUtil = async (id: string): Promise<IUser | null> => {
   const user = await User.findById(id);
   return user;
 };
-

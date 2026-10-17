@@ -28,18 +28,16 @@ export type AnalogSliceKonkResult = {
  */
 export async function runAnalogSliceForKonkUtil(
   konkName: string,
-  date: Date
+  date: Date,
 ): Promise<AnalogSliceKonkResult> {
   const log = createLogger({ module: "analog-slices", konkName });
   const sliceDate = toSliceDate(date);
-  const analogs = await Analog.find({ konkName })
-    .select("_id artikul")
-    .lean() as AnalogLean[];
+  const analogs = (await Analog.find({ konkName }).select("_id artikul").lean()) as AnalogLean[];
 
   await AnalogSlice.findOneAndUpdate(
     { konkName, date: sliceDate },
     { $setOnInsert: { konkName, date: sliceDate, data: {} } },
-    { upsert: true }
+    { upsert: true },
   );
 
   let count = 0;
@@ -74,7 +72,7 @@ export async function runAnalogSliceForKonkUtil(
       };
       await AnalogSlice.findOneAndUpdate(
         { konkName, date: sliceDate },
-        { $set: { [`data.${artikulKey}`]: dataItem } }
+        { $set: { [`data.${artikulKey}`]: dataItem } },
       );
 
       if (isInvalidSliceStockResult(result)) {
@@ -93,7 +91,7 @@ export async function runAnalogSliceForKonkUtil(
             invalid,
             errors,
           },
-          "origin blocked, analog slice aborted"
+          "origin blocked, analog slice aborted",
         );
         errors += analogs.length - i;
         break;

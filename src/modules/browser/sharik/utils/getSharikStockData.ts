@@ -12,9 +12,7 @@ export { clearSharikProductRestsCache };
  * Получает данные о товаре с sharik.ua по артикулу через bulk product_rests
  * (актуальный остаток = actualQuantity). nameukr — из коллекции Art.
  */
-export async function getSharikStockData(
-  artikul: string
-): Promise<SharikProductInfo | null> {
+export async function getSharikStockData(artikul: string): Promise<SharikProductInfo | null> {
   if (!artikul || typeof artikul !== "string") {
     throw new Error("Artikul is required and must be a string");
   }
@@ -28,9 +26,7 @@ export async function getSharikStockData(
 
     const art = await Art.findOne({ artikul }).select("nameukr").lean();
     const nameukr =
-      typeof art?.nameukr === "string" && art.nameukr.trim() !== ""
-        ? art.nameukr
-        : "";
+      typeof art?.nameukr === "string" && art.nameukr.trim() !== "" ? art.nameukr : "";
 
     return {
       nameukr,
@@ -38,16 +34,13 @@ export async function getSharikStockData(
       quantity: row.actualQuantity,
     };
   } catch (error) {
-    if (
-      error instanceof Error &&
-      error.message.startsWith("Artikul is required")
-    ) {
+    if (error instanceof Error && error.message.startsWith("Artikul is required")) {
       throw error;
     }
     throw new Error(
       `Failed to fetch data from sharik.ua: ${
         error instanceof Error ? error.message : String(error)
-      }`
+      }`,
     );
   }
 }

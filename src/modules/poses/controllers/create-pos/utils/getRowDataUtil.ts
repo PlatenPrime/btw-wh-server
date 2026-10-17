@@ -10,4 +10,3 @@ export const getRowDataUtil = (row: IRow) => {
     title: row.title,
   };
 };
-

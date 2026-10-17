@@ -24,18 +24,16 @@ export type SliceAggregateRowWithKonk = {
  * @deprecated no-op identity — оставлено для совместимости импортов тестов.
  * Данные читаются через loadSkuSlice*FromMonths.
  */
-export function sliceDataProjectForSingleProductId(
-  _productKey: string,
-): { $project: { _id: number; date: number; data: number } } {
+export function sliceDataProjectForSingleProductId(_productKey: string): {
+  $project: { _id: number; date: number; data: number };
+} {
   return { $project: { _id: 0, date: 1, data: 1 } };
 }
 
 /**
  * @deprecated no-op identity — см. loadSkuSliceRowsForKonksProducts.
  */
-export function sliceDataProjectForProductIdList(
-  _allowedProductIds: string[],
-): {
+export function sliceDataProjectForProductIdList(_allowedProductIds: string[]): {
   $project: { _id: number; konkName: number; date: number; data: number };
 } {
   return { $project: { _id: 0, konkName: 1, date: 1, data: 1 } };
@@ -52,12 +50,7 @@ export async function loadSkuSliceRowsForProduct(
 ): Promise<SliceAggregateRowSingle[]> {
   const from = toSliceDate(dateFrom);
   const to = toSliceDate(dateTo);
-  const points = await loadPointsForProductIdsRange(
-    konkName,
-    [productId],
-    from,
-    to,
-  );
+  const points = await loadPointsForProductIdsRange(konkName, [productId], from, to);
   const byTime = new Map<number, ISkuSliceDataItem>();
   for (const p of points) {
     if (p.productId !== productId.trim()) continue;
@@ -107,11 +100,7 @@ export async function loadSkuSliceRowsForKonksProducts(
       rows.push({ konkName, date: new Date(t), data });
     }
   }
-  rows.sort(
-    (a, b) =>
-      a.konkName.localeCompare(b.konkName) ||
-      a.date.getTime() - b.date.getTime(),
-  );
+  rows.sort((a, b) => a.konkName.localeCompare(b.konkName) || a.date.getTime() - b.date.getTime());
   return rows;
 }
 
@@ -143,16 +132,11 @@ export async function loadSkuSliceDayDocsForKonk(
 export async function aggregateSkuSlices<
   T extends Record<string, unknown> = SliceAggregateRowSingle,
 >(pipeline: Array<Record<string, unknown>>): Promise<T[]> {
-  const match = pipeline.find((s) => s.$match)?.$match as
-    | Record<string, unknown>
-    | undefined;
+  const match = pipeline.find((s) => s.$match)?.$match as Record<string, unknown> | undefined;
   if (!match) return [];
 
   const konkName = match.konkName;
-  const dateFilter = match.date as
-    | Date
-    | { $gte?: Date; $lte?: Date; $in?: Date[] }
-    | undefined;
+  const dateFilter = match.date as Date | { $gte?: Date; $lte?: Date; $in?: Date[] } | undefined;
 
   let dateFrom: Date | undefined;
   let dateTo: Date | undefined;

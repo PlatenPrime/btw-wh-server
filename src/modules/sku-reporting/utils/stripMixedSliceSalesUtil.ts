@@ -34,10 +34,7 @@ function stripSalesFieldsFromData(
       next[key] = item as Record<string, unknown>;
       continue;
     }
-    const { salesPcs: _pcs, salesUah: _uah, ...rest } = item as Record<
-      string,
-      unknown
-    >;
+    const { salesPcs: _pcs, salesUah: _uah, ...rest } = item as Record<string, unknown>;
     if ("salesPcs" in item || "salesUah" in item) {
       changed = true;
     }
@@ -94,7 +91,7 @@ export async function stripMixedSliceSalesFields(params: {
     skuDocsScanned += 1;
     const day = toSliceDate(doc.date).toISOString().slice(0, 10);
     const { next, changed } = stripSalesFieldsFromData(
-      doc.data as Record<string, Record<string, unknown>>,
+      doc.data as unknown as Record<string, Record<string, unknown>>,
     );
     if (changed) {
       skuDocsTouched += 1;
@@ -136,7 +133,7 @@ export async function stripMixedSliceSalesFields(params: {
     btradeDocsScanned += 1;
     const day = toSliceDate(doc.date).toISOString().slice(0, 10);
     const { next, changed } = stripSalesFieldsFromData(
-      doc.data as Record<string, Record<string, unknown>>,
+      doc.data as unknown as Record<string, Record<string, unknown>>,
     );
     if (changed) {
       btradeDocsTouched += 1;

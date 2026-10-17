@@ -2,10 +2,7 @@ import { formatCronErrorReport } from "../../../cron/analytics-notifications/for
 import { formatGraboSkuSyncReport } from "../../../cron/analytics-notifications/formatGraboSkuSyncReport.js";
 import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { createLogger } from "../../../logging/createLogger.js";
-import {
-  releaseGraboSkuSync,
-  tryAcquireGraboSkuSync,
-} from "./graboSkuSyncLock.js";
+import { releaseGraboSkuSync, tryAcquireGraboSkuSync } from "./graboSkuSyncLock.js";
 import { runGraboSkuSyncUtil } from "./runGraboSkuSyncUtil.js";
 
 const log = createLogger({ module: "grabo-skus", job: "manual" });

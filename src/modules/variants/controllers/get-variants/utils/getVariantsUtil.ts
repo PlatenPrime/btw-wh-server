@@ -27,9 +27,7 @@ type GetVariantsResult = {
   };
 };
 
-export const getVariantsUtil = async (
-  input: GetVariantsQuery
-): Promise<GetVariantsResult> => {
+export const getVariantsUtil = async (input: GetVariantsQuery): Promise<GetVariantsResult> => {
   const { konkName, prodName, search, page, limit } = input;
 
   const baseFilter: Record<string, unknown> = {};
@@ -67,4 +65,3 @@ export const getVariantsUtil = async (
     },
   };
 };
-

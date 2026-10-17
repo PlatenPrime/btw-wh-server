@@ -26,9 +26,7 @@ describe("parseMigrateAllSkuSlicesToMonthsCliArgs", () => {
       konkName: "air",
     });
 
-    expect(
-      parseMigrateAllSkuSlicesToMonthsCliArgs(["--apply", "--no-verify"]),
-    ).toEqual({
+    expect(parseMigrateAllSkuSlicesToMonthsCliArgs(["--apply", "--no-verify"])).toEqual({
       apply: true,
       verify: false,
       verifySample: 100,
@@ -37,11 +35,7 @@ describe("parseMigrateAllSkuSlicesToMonthsCliArgs", () => {
 
   it("rejects bad args", () => {
     expect(() => parseMigrateAllSkuSlicesToMonthsCliArgs(["--wat"])).toThrow();
-    expect(() =>
-      parseMigrateAllSkuSlicesToMonthsCliArgs(["--verify-sample", "0"]),
-    ).toThrow();
-    expect(() =>
-      parseMigrateAllSkuSlicesToMonthsCliArgs(["--konk", ""]),
-    ).toThrow();
+    expect(() => parseMigrateAllSkuSlicesToMonthsCliArgs(["--verify-sample", "0"])).toThrow();
+    expect(() => parseMigrateAllSkuSlicesToMonthsCliArgs(["--konk", ""])).toThrow();
   });
 });

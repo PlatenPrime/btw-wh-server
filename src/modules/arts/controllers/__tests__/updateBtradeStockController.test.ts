@@ -30,9 +30,7 @@ describe("updateBtradeStockController", () => {
 
   it("200: обновляет btradeStock", async () => {
     const updatedArt = { artikul: "ART-001", btradeStock: { value: 5 } };
-    vi.spyOn(updateUtil, "updateBtradeStockUtil").mockResolvedValue(
-      updatedArt as any
-    );
+    vi.spyOn(updateUtil, "updateBtradeStockUtil").mockResolvedValue(updatedArt as any);
 
     const req = { params: { artikul: "ART-001" } } as unknown as Request;
 
@@ -51,9 +49,7 @@ describe("updateBtradeStockController", () => {
     await updateBtradeStockController(req, res);
 
     expect(responseStatus.code).toBe(404);
-    expect(responseJson.message).toBe(
-      "Art not found or product not found on sharik.ua"
-    );
+    expect(responseJson.message).toBe("Art not found or product not found on sharik.ua");
   });
 
   it("400: ошибка валидации при пустом artikul", async () => {
@@ -66,9 +62,7 @@ describe("updateBtradeStockController", () => {
   });
 
   it("500: обрабатывает ошибки util", async () => {
-    vi.spyOn(updateUtil, "updateBtradeStockUtil").mockRejectedValue(
-      new Error("Server failure")
-    );
+    vi.spyOn(updateUtil, "updateBtradeStockUtil").mockRejectedValue(new Error("Server failure"));
 
     const req = { params: { artikul: "ART-ERR" } } as unknown as Request;
 
@@ -85,9 +79,7 @@ describe("updateBtradeStockController", () => {
       artikul: "ART-001",
       btradeStock: { value: 5 },
     };
-    vi.spyOn(updateUtil, "updateBtradeStockUtil").mockResolvedValue(
-      updatedArt as any
-    );
+    vi.spyOn(updateUtil, "updateBtradeStockUtil").mockResolvedValue(updatedArt as any);
 
     const req = {
       params: { artikul: "ART-001" },

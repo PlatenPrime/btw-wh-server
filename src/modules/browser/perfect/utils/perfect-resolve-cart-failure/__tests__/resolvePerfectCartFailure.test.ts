@@ -5,12 +5,9 @@ import { PERFECT_UNAVAILABLE_OUTCOME } from "../../perfect-per-piece-stock/perfe
 vi.mock("../../perfect-html-fallback/perfectHtmlFallback.js", () => ({
   tryPerfectHtmlFallback: vi.fn(() => null),
 }));
-vi.mock(
-  "../../perfect-data-product-fallback/perfectDataProductFallback.js",
-  () => ({
-    tryPerfectDataProductFallback: vi.fn(() => null),
-  })
-);
+vi.mock("../../perfect-data-product-fallback/perfectDataProductFallback.js", () => ({
+  tryPerfectDataProductFallback: vi.fn(() => null),
+}));
 
 import { tryPerfectHtmlFallback } from "../../perfect-html-fallback/perfectHtmlFallback.js";
 import { tryPerfectDataProductFallback } from "../../perfect-data-product-fallback/perfectDataProductFallback.js";
@@ -46,8 +43,6 @@ describe("resolvePerfectCartFailure", () => {
   it("returns unavailable when both fallbacks miss", () => {
     vi.mocked(tryPerfectHtmlFallback).mockReturnValueOnce(null);
     vi.mocked(tryPerfectDataProductFallback).mockReturnValueOnce(null);
-    expect(resolvePerfectCartFailure("<html>", "T")).toEqual(
-      PERFECT_UNAVAILABLE_OUTCOME
-    );
+    expect(resolvePerfectCartFailure("<html>", "T")).toEqual(PERFECT_UNAVAILABLE_OUTCOME);
   });
 });

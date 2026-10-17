@@ -38,5 +38,3 @@ describe("completeAskUtil", () => {
     await session.endSession();
   });
 });
-
-

@@ -4,9 +4,6 @@ import { getKonkSkuSalesExcelController } from "../getKonkSkuSalesExcelControlle
 
 describe("getKonkSkuSalesExcelController", () => {
   it("returns 410 EXCEL_JOBS_MIGRATED", async () => {
-    await assertMigratedExcelController(
-      getKonkSkuSalesExcelController,
-      "sku-konk-sales",
-    );
+    await assertMigratedExcelController(getKonkSkuSalesExcelController, "sku-konk-sales");
   });
 });

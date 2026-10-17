@@ -8,4 +8,3 @@ export { renameBlock } from "./rename-block/renameBlock.js";
 export { resetZonesSectors } from "./reset-zones-sectors/resetZonesSectors.js";
 export { recalculateZonesSectors } from "./recalculate-zones-sectors/recalculateZonesSectors.js";
 export { upsertBlocksController } from "./upsert-blocks/upsertBlocksController.js";
-

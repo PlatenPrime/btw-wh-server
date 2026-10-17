@@ -23,9 +23,7 @@ export const getAsksPullsUtil = async (): Promise<{
   const processingAsks: IAsk[] = [];
 
   for (const ask of asks) {
-    const pullResult = await getAskPullUtil(
-      (ask._id as mongoose.Types.ObjectId).toString()
-    );
+    const pullResult = await getAskPullUtil((ask._id as mongoose.Types.ObjectId).toString());
 
     if (pullResult && pullResult.isPullRequired) {
       // Добавляем позиции для снятия

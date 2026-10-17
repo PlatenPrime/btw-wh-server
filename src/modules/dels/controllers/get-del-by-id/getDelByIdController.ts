@@ -7,17 +7,14 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить поставку по id (полный документ)
  * @route   GET /api/dels/id/:id
  */
-export const getDelByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getDelByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = getDelByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

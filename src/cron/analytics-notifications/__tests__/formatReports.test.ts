@@ -13,10 +13,7 @@ import { formatBtradeSliceReport } from "../formatBtradeSliceReport.js";
 import { formatCompensatingSlicesReport } from "../formatCompensatingSlicesReport.js";
 import { formatFillSkugrSkusReport } from "../formatFillSkugrSkusReport.js";
 import { formatGraboSkuSyncReport } from "../formatGraboSkuSyncReport.js";
-import {
-  formatKonkSliceLine,
-  formatKonkSliceReportLines,
-} from "../formatKonkSliceStats.js";
+import { formatKonkSliceLine, formatKonkSliceReportLines } from "../formatKonkSliceStats.js";
 import { formatSkuInvalidFlagReport } from "../formatSkuInvalidFlagReport.js";
 import {
   formatSkuKonkSliceReport,
@@ -33,7 +30,7 @@ describe("formatKonkSliceStats", () => {
         errors: 1,
         invalid: 2,
         total: 15,
-      })
+      }),
     ).toBe("air: ✅12 / ❌1 / ⚠️2");
   });
 
@@ -46,10 +43,8 @@ describe("formatKonkSliceStats", () => {
         invalid: 0,
         total: 5283,
         abortReason: "origin_blocked",
-      })
-    ).toBe(
-      "air: ✅0 / ❌5283 / ⚠️0 — abort ORIGIN_BLOCKED remaining 5283"
-    );
+      }),
+    ).toBe("air: ✅0 / ❌5283 / ⚠️0 — abort ORIGIN_BLOCKED remaining 5283");
   });
 
   it("formats consecutive_invalid abort", () => {
@@ -61,10 +56,8 @@ describe("formatKonkSliceStats", () => {
         invalid: 15,
         total: 20,
         abortReason: "consecutive_invalid",
-      })
-    ).toBe(
-      "air: ✅0 / ❌5 / ⚠️15 — abort CONSECUTIVE_INVALID remaining 5"
-    );
+      }),
+    ).toBe("air: ✅0 / ❌5 / ⚠️15 — abort CONSECUTIVE_INVALID remaining 5");
   });
 
   it("formats multiple competitors", () => {
@@ -72,7 +65,7 @@ describe("formatKonkSliceStats", () => {
       formatKonkSliceReportLines([
         { konkName: "air", count: 1, errors: 0, invalid: 0, total: 1 },
         { konkName: "balun", count: 3, errors: 1, invalid: 2, total: 6 },
-      ])
+      ]),
     ).toEqual(["air: ✅1 / ❌0 / ⚠️0", "balun: ✅3 / ❌1 / ⚠️2"]);
   });
 });
@@ -102,16 +95,14 @@ describe("formatAnalogKonkSliceReport", () => {
         errors: 0,
         invalid: 1,
         total: 6,
-      })
+      }),
     ).toBe("📊 Analog slices — balun\nbalun: ✅5 / ❌0 / ⚠️1");
   });
 });
 
 describe("formatAnalogSlicesExcludedReport", () => {
   it("lists excluded", () => {
-    expect(formatAnalogSlicesExcludedReport(["balun"])).toBe(
-      "📊 Analog slices — пропущено: balun"
-    );
+    expect(formatAnalogSlicesExcludedReport(["balun"])).toBe("📊 Analog slices — пропущено: balun");
   });
 });
 
@@ -135,7 +126,7 @@ describe("formatSkuKonkSliceReport", () => {
         errors: 1,
         invalid: 2,
         total: 15,
-      })
+      }),
     ).toBe("📊 SKU slices — air\nair: ✅12 / ❌1 / ⚠️2");
   });
 });
@@ -143,7 +134,7 @@ describe("formatSkuKonkSliceReport", () => {
 describe("formatSkuSlicesExcludedReport", () => {
   it("lists excluded", () => {
     expect(formatSkuSlicesExcludedReport(["yumi", "air"])).toBe(
-      "📊 SKU slices — пропущено: yumi, air"
+      "📊 SKU slices — пропущено: yumi, air",
     );
   });
 });
@@ -246,16 +237,12 @@ describe("formatFillPosNameukrReport", () => {
   });
 
   it("formats error report", () => {
-    expect(formatFillPosNameukrErrorReport(new Error("DB fail"))).toContain(
-      "DB fail"
-    );
+    expect(formatFillPosNameukrErrorReport(new Error("DB fail"))).toContain("DB fail");
   });
 });
 
 describe("formatCronErrorReport", () => {
   it("formats cron error with name", () => {
-    expect(formatCronErrorReport("Analog slices", "timeout")).toContain(
-      "Analog slices — помилка"
-    );
+    expect(formatCronErrorReport("Analog slices", "timeout")).toContain("Analog slices — помилка");
   });
 });

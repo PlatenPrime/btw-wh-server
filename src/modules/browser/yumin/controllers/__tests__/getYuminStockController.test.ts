@@ -44,9 +44,7 @@ describe("getYuminStockController", () => {
 
     expect(responseStatus.code).toBe(404);
     expect(responseJson.message).toBe("Товар не найден или данные недоступны");
-    expect(getYuminStockData).toHaveBeenCalledWith(
-      "https://example.com/product/1"
-    );
+    expect(getYuminStockData).toHaveBeenCalledWith("https://example.com/product/1");
   });
 
   it("200 returns stock data", async () => {
@@ -66,9 +64,7 @@ describe("getYuminStockController", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Yumin stock retrieved successfully");
     expect(responseJson.data).toEqual(mockData);
-    expect(getYuminStockData).toHaveBeenCalledWith(
-      "https://example.com/product/2"
-    );
+    expect(getYuminStockData).toHaveBeenCalledWith("https://example.com/product/2");
   });
 
   it("500 when service throws", async () => {

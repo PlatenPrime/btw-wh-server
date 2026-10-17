@@ -1,19 +1,11 @@
 import { normalizeObjectId } from "../../../utils/normalizeObjectId.js";
 import { IUser } from "../../auth/models/User.js";
-import {
-  AskEvent,
-  AskEventName,
-  AskEventPullDetails,
-  AskUserData,
-} from "../models/Ask.js";
+import { AskEvent, AskEventName, AskEventPullDetails, AskUserData } from "../models/Ask.js";
 
 type MapUserToAskUserDataInput =
-  | Pick<IUser, "_id" | "fullname" | "telegram" | "photo">
-  | AskUserData;
+  Pick<IUser, "_id" | "fullname" | "telegram" | "photo"> | AskUserData;
 
-export const mapUserToAskUserData = (
-  user: MapUserToAskUserDataInput
-): AskUserData => {
+export const mapUserToAskUserData = (user: MapUserToAskUserDataInput): AskUserData => {
   return {
     _id: normalizeObjectId(user._id),
     fullname: user.fullname,
@@ -27,23 +19,17 @@ interface BuildAskEventBase<TName extends AskEventName> {
   user: MapUserToAskUserDataInput;
 }
 
-interface BuildPullAskEventInput
-  extends BuildAskEventBase<"pull">,
-    Pick<AskEvent, "pullDetails"> {
+interface BuildPullAskEventInput extends BuildAskEventBase<"pull">, Pick<AskEvent, "pullDetails"> {
   pullDetails: AskEventPullDetails;
 }
 
-type BuildNonPullAskEventInput = BuildAskEventBase<
-  Exclude<AskEventName, "pull">
-> & { pullDetails?: undefined };
+type BuildNonPullAskEventInput = BuildAskEventBase<Exclude<AskEventName, "pull">> & {
+  pullDetails?: undefined;
+};
 
 type BuildAskEventInput = BuildPullAskEventInput | BuildNonPullAskEventInput;
 
-export const buildAskEvent = ({
-  eventName,
-  user,
-  pullDetails,
-}: BuildAskEventInput): AskEvent => {
+export const buildAskEvent = ({ eventName, user, pullDetails }: BuildAskEventInput): AskEvent => {
   if (eventName === "pull" && !pullDetails) {
     throw new Error("Pull events require pullDetails payload");
   }

@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 import { ClientSession } from "mongoose";
 import { IRow } from "../../../../rows/models/Row.js";
-import { IPallet, Pallet } from "../../../models/Pallet.js";
+import { Pallet } from "../../../models/Pallet.js";
 import { serializeIds } from "../../../utils/serialize-ids.js";
 
 type CreatePalletInput = {
@@ -15,7 +15,6 @@ type CreatePalletInput = {
 
 export const createPalletUtil = async ({
   title,
-  rowId,
   sector,
   isDef,
   rowData,
@@ -32,7 +31,7 @@ export const createPalletUtil = async ({
         isDef,
       },
     ],
-    { session }
+    { session },
   );
 
   if (!created || !created[0]) {
@@ -44,11 +43,3 @@ export const createPalletUtil = async ({
 
   return serializeIds(created[0].toObject());
 };
-
-
-
-
-
-
-
-

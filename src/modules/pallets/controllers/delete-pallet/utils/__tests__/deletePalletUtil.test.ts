@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import { createTestRow, createTestPallet, createTestPos } from "../../../../../../test/utils/testHelpers.js";
+import {
+  createTestRow,
+  createTestPallet,
+  createTestPos,
+} from "../../../../../../test/utils/testHelpers.js";
 import { Pallet } from "../../../../models/Pallet.js";
 import { Pos } from "../../../../../poses/models/Pos.js";
 import { Row } from "../../../../../rows/models/Row.js";
@@ -52,9 +56,7 @@ describe("deletePalletUtil", () => {
         session,
       });
 
-      const deletedPallet = await Pallet.findById(pallet._id).session(
-        session
-      );
+      const deletedPallet = await Pallet.findById(pallet._id).session(session);
       expect(deletedPallet).toBeNull();
 
       const deletedPos1 = await Pos.findById(pos1._id).session(session);
@@ -75,11 +77,9 @@ describe("deletePalletUtil", () => {
         deletePalletUtil({
           palletId: new mongoose.Types.ObjectId().toString(),
           session,
-        })
+        }),
       ).rejects.toThrow("Pallet not found");
     });
     await session.endSession();
   });
 });
-
-

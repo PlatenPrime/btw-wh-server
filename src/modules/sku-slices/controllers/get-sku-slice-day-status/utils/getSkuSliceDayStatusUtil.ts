@@ -66,12 +66,8 @@ export async function getSkuSliceDayStatusUtil(
           filled: meta.stats.filled,
           invalid: meta.stats.invalid,
           errorCount: meta.stats.errorCount,
-          ...(meta.stats.dueTotal !== undefined
-            ? { dueTotal: meta.stats.dueTotal }
-            : {}),
-          ...(meta.stats.abortReason
-            ? { abortReason: meta.stats.abortReason }
-            : {}),
+          ...(meta.stats.dueTotal !== undefined ? { dueTotal: meta.stats.dueTotal } : {}),
+          ...(meta.stats.abortReason ? { abortReason: meta.stats.abortReason } : {}),
         }
       : null,
     pointsTotal: allPage.total,

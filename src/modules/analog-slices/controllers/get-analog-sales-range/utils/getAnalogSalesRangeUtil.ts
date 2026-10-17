@@ -16,9 +16,7 @@ export type SalesRangeItem = {
   isDeliveryDay: boolean;
 };
 
-export type GetAnalogSalesRangeResult =
-  | { ok: true; data: SalesRangeItem[] }
-  | { ok: false };
+export type GetAnalogSalesRangeResult = { ok: true; data: SalesRangeItem[] } | { ok: false };
 
 /**
  * Возвращает массив продаж и выручки по аналогу за период дат (для графиков).
@@ -27,11 +25,9 @@ export type GetAnalogSalesRangeResult =
  * ok: false — аналог не найден или у аналога пустой artikul.
  */
 export async function getAnalogSalesRangeUtil(
-  input: GetAnalogSalesRangeInput
+  input: GetAnalogSalesRangeInput,
 ): Promise<GetAnalogSalesRangeResult> {
-  const analog = await Analog.findById(input.analogId)
-    .select("konkName artikul")
-    .lean();
+  const analog = await Analog.findById(input.analogId).select("konkName artikul").lean();
 
   if (!analog) return { ok: false };
 

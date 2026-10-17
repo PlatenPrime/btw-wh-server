@@ -11,24 +11,9 @@ import {
 
 const router = Router();
 
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.EDITOR]),
-  asyncHandler(createApiTaskController),
-);
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.EDITOR]),
-  asyncHandler(listApiTasksController),
-);
-router.get(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.EDITOR]),
-  asyncHandler(getApiTaskController),
-);
+router.post("/", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(createApiTaskController));
+router.get("/", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(listApiTasksController));
+router.get("/:id", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(getApiTaskController));
 router.delete(
   "/:id",
   checkAuth,

@@ -6,4 +6,3 @@ export const createBlockSchema = z.object({
 });
 
 export type CreateBlockInput = z.infer<typeof createBlockSchema>;
-

@@ -8,16 +8,13 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить SKU группы по id skugr с пагинацией и фильтрами
  * @route   GET /api/skus/by-skugr/:skugrId
  */
-export const getSkusBySkugrIdController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const getSkusBySkugrIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const paramsResult = getSkusBySkugrIdParamsSchema.safeParse(req.params);
     if (!paramsResult.success) {
       res.status(400).json({
         message: "Invalid path parameters",
-        errors: paramsResult.error.errors,
+        errors: paramsResult.error.issues,
       });
       return;
     }
@@ -26,15 +23,12 @@ export const getSkusBySkugrIdController = async (
     if (!queryResult.success) {
       res.status(400).json({
         message: "Invalid query parameters",
-        errors: queryResult.error.errors,
+        errors: queryResult.error.issues,
       });
       return;
     }
 
-    const result = await getSkusBySkugrIdUtil(
-      paramsResult.data.skugrId,
-      queryResult.data,
-    );
+    const result = await getSkusBySkugrIdUtil(paramsResult.data.skugrId, queryResult.data);
 
     if (!result) {
       res.status(404).json({ message: "Skugr not found" });

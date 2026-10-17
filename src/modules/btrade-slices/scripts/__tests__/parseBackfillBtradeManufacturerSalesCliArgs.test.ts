@@ -16,8 +16,8 @@ describe("parseBackfillBtradeManufacturerSalesCliArgs", () => {
   });
 
   it("rejects missing range", () => {
-    expect(() =>
-      parseBackfillBtradeManufacturerSalesCliArgs(["--apply"]),
-    ).toThrow(/--from and --to/);
+    expect(() => parseBackfillBtradeManufacturerSalesCliArgs(["--apply"])).toThrow(
+      /--from and --to/,
+    );
   });
 });

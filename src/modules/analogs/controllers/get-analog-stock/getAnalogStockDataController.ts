@@ -1,26 +1,20 @@
 import { Request, Response } from "express";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { getAnalogByIdSchema } from "../get-analog-by-id/schemas/getAnalogByIdSchema.js";
-import {
-  getAnalogStockDataUtil,
-  UNSUPPORTED_KONK_CODE,
-} from "./utils/getAnalogStockDataUtil.js";
+import { getAnalogStockDataUtil, UNSUPPORTED_KONK_CODE } from "./utils/getAnalogStockDataUtil.js";
 
 /**
  * @desc    Получить остаток и цену по аналогу (по id аналога, выбор утилиты по konkName)
  * @route   GET /api/analogs/id/:id/stock
  */
-export const getAnalogStockDataController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAnalogStockDataController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = getAnalogByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

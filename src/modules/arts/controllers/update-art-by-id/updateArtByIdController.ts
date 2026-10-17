@@ -4,10 +4,7 @@ import { updateArtByIdUtil } from "./utils/updateArtByIdUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
-export const updateArtByIdController = async (
-  req: Request,
-  res: Response
-) => {
+export const updateArtByIdController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { limit, prodName } = req.body;
@@ -16,13 +13,12 @@ export const updateArtByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
 
-    const { id: artId, limit: nextLimit, prodName: nextProdName } =
-      parseResult.data;
+    const { id: artId, limit: nextLimit, prodName: nextProdName } = parseResult.data;
 
     const updatedArt = await updateArtByIdUtil({
       id: artId,

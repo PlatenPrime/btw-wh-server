@@ -35,10 +35,7 @@ function pageHtml(opts: {
   imagePath: string;
   nextHref?: string;
 }): string {
-  const next =
-    opts.nextHref != null
-      ? `<link rel="next" href="${opts.nextHref}" />`
-      : "";
+  const next = opts.nextHref != null ? `<link rel="next" href="${opts.nextHref}" />` : "";
   return `<!DOCTYPE html><html><head>${next}</head><body>
 <div class="products row">${miniatureCard(opts)}</div>
 </body></html>`;
@@ -87,8 +84,7 @@ describe("getPerfectGroupPagesProducts", () => {
   it("preserves groupUrl query on paginated next URL (rel=next without query)", async () => {
     const groupWithQuery =
       "https://perfectparty.example.test/20-lateksni-kulki?virobniki=sempertex-kolumbiya";
-    const page2NoQuery =
-      "https://perfectparty.example.test/20-lateksni-kulki?page=2";
+    const page2NoQuery = "https://perfectparty.example.test/20-lateksni-kulki?page=2";
     const page2WithQuery =
       "https://perfectparty.example.test/20-lateksni-kulki?page=2&virobniki=sempertex-kolumbiya";
 

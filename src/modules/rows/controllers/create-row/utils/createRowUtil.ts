@@ -5,9 +5,7 @@ type CreateRowInput = {
   title: string;
 };
 
-export const createRowUtil = async ({
-  title,
-}: CreateRowInput): Promise<IRow> => {
+export const createRowUtil = async ({ title }: CreateRowInput): Promise<IRow> => {
   const geoPromise = logServerEgressGeo("createRow");
   const row: IRow = new Row({ title });
   await row.save();

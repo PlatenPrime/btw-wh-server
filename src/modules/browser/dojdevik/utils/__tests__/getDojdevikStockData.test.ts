@@ -15,13 +15,9 @@ vi.mock("../../../utils/browserRequest.js", () => ({
   logBrowserError: vi.fn(),
 }));
 
-const fixturesDir = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../../sku-pages"
-);
+const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), "../../sku-pages");
 
-const PRODUCT_URL =
-  "https://dojdevik.com.ua/ua/p17755382-vozdushnye-shary-prozrachnye.html";
+const PRODUCT_URL = "https://dojdevik.com.ua/ua/p17755382-vozdushnye-shary-prozrachnye.html";
 const PRODUCT_ID = "17755382";
 const CART_ID = "1104685463";
 
@@ -88,20 +84,20 @@ describe("getDojdevikStockData", () => {
   describe("Валидация входных данных", () => {
     it("должен выбрасывать ошибку при пустой ссылке", async () => {
       await expect(getDojdevikStockData("")).rejects.toThrow(
-        "Link is required and must be a string"
+        "Link is required and must be a string",
       );
     });
 
     it("должен выбрасывать ошибку при пробельной ссылке", async () => {
       await expect(getDojdevikStockData("   ")).rejects.toThrow(
-        "Link is required and must be a string"
+        "Link is required and must be a string",
       );
     });
 
     it("должен выбрасывать ошибку при не-строковом link", async () => {
-      await expect(
-        getDojdevikStockData(null as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getDojdevikStockData(null as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
   });
 
@@ -140,7 +136,7 @@ describe("getDojdevikStockData", () => {
           viewerSource: "COMPANY_SITE",
         },
       }),
-      expect.anything()
+      expect.anything(),
     );
     expect(mockPost).toHaveBeenNthCalledWith(
       2,
@@ -158,7 +154,7 @@ describe("getDojdevikStockData", () => {
           source: "COMPANY_SITE",
         },
       }),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -184,9 +180,10 @@ describe("getDojdevikStockData", () => {
   });
 
   it("returns -1 when productId is missing in URL", async () => {
-    await expect(
-      getDojdevikStockData("https://dojdevik.com.ua/ua/catalog")
-    ).resolves.toEqual({ stock: -1, price: -1 });
+    await expect(getDojdevikStockData("https://dojdevik.com.ua/ua/catalog")).resolves.toEqual({
+      stock: -1,
+      price: -1,
+    });
     expect(getBrowserAxios).not.toHaveBeenCalled();
   });
 

@@ -36,7 +36,7 @@ const blockSubdocumentSchema = new Schema<IBlockSubdocument>(
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const zoneSubdocumentSchema = new Schema<IZoneSubdocument>(
@@ -44,7 +44,7 @@ const zoneSubdocumentSchema = new Schema<IZoneSubdocument>(
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const segSchema = new Schema<ISeg>(
@@ -64,7 +64,7 @@ const segSchema = new Schema<ISeg>(
     },
     zones: [zoneSubdocumentSchema],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Индексы для оптимизации

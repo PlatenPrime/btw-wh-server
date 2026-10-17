@@ -24,12 +24,7 @@ const router = Router();
 router.get("/", checkAuth, checkRoles([RoleType.USER]), getAllArtsController);
 
 // Получить артикулы по зоне - доступно для всех авторизованных пользователей
-router.get(
-  "/zone/:zone",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  getArtsByZoneController
-);
+router.get("/zone/:zone", checkAuth, checkRoles([RoleType.USER]), getArtsByZoneController);
 
 // Получить артикул по ID - доступно для всех авторизованных пользователей
 router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), getArtByIdController);
@@ -38,20 +33,10 @@ router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), getArtByIdControll
 router.get("/artikul/:artikul", checkAuth, checkRoles([RoleType.USER]), getArtController);
 
 // Получить информацию из Btrade - доступно для всех авторизованных пользователей
-router.get(
-  "/btrade/:artikul",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  getBtradeArtInfoController
-);
+router.get("/btrade/:artikul", checkAuth, checkRoles([RoleType.USER]), getBtradeArtInfoController);
 
 // Обновить лимит артикула - доступно для ADMIN
-router.patch(
-  "/:id/limit",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  updateArtLimitController
-);
+router.patch("/:id/limit", checkAuth, checkRoles([RoleType.ADMIN]), updateArtLimitController);
 
 // Создать/обновить артикулы - доступно для ADMIN и PRIME
 router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), upsertArtsController);
@@ -61,39 +46,29 @@ router.patch(
   "/:artikul/btrade-stock",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  updateBtradeStockController
+  updateBtradeStockController,
 );
 
 // Обновить limit и/или prodName артикула по id - доступно для ADMIN
-router.patch(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  updateArtByIdController
-);
+router.patch("/:id", checkAuth, checkRoles([RoleType.ADMIN]), updateArtByIdController);
 
 // Обновить btradeStock для всех артикулов - доступно только для ADMIN
 router.post(
   "/btrade-stock/update-all",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  updateAllBtradeStocksController
+  updateAllBtradeStocksController,
 );
 
 // Экспортировать все артикулы в Excel - доступно только для ADMIN
-router.get(
-  "/export",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  exportArtsToExcelController
-);
+router.get("/export", checkAuth, checkRoles([RoleType.ADMIN]), exportArtsToExcelController);
 
 // Экспортировать все артикулы в Excel с данными о запасах и витрине - доступно только для ADMIN
 router.get(
   "/export-with-stocks",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  exportArtsToExcelWithStocksController
+  exportArtsToExcelWithStocksController,
 );
 
 // Экспортировать все артикулы в key-based Excel - доступно только для ADMIN
@@ -101,7 +76,7 @@ router.get(
   "/export-keys",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  exportArtsToExcelWithKeysController
+  exportArtsToExcelWithKeysController,
 );
 
 // Удалить все артикулы без последнего актуального маркера - доступно только для PRIME
@@ -109,7 +84,7 @@ router.delete(
   "/without-latest-marker",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  deleteArtsWithoutLatestMarkerController
+  deleteArtsWithoutLatestMarkerController,
 );
 
 export default router;

@@ -36,13 +36,11 @@ describe("runCompensatingSlicesForKonk", () => {
       analog: { refetched: 1, updated: 1 },
       sku: { refetched: 2, updated: 0 },
     });
-    expect(runCompensatingAnalogSlices).toHaveBeenCalledWith(
-      new Date("2026-07-14T00:00:00.000Z"),
-      { konkName: "air" }
-    );
-    expect(runCompensatingSkuSlices).toHaveBeenCalledWith(
-      new Date("2026-07-14T00:00:00.000Z"),
-      { konkName: "air" }
-    );
+    expect(runCompensatingAnalogSlices).toHaveBeenCalledWith(new Date("2026-07-14T00:00:00.000Z"), {
+      konkName: "air",
+    });
+    expect(runCompensatingSkuSlices).toHaveBeenCalledWith(new Date("2026-07-14T00:00:00.000Z"), {
+      konkName: "air",
+    });
   });
 });

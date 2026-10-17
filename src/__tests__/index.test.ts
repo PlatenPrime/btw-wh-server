@@ -1,21 +1,15 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 const mockConnect = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const mockStartCronOperations = vi.hoisted(() => vi.fn());
-const mockStartExcelJobRuntime = vi.hoisted(() =>
-  vi.fn().mockResolvedValue(undefined)
-);
-const mockStartApiTaskRuntime = vi.hoisted(() =>
-  vi.fn().mockResolvedValue(undefined)
-);
-const mockLogServerEgressGeo = vi.hoisted(() =>
-  vi.fn().mockResolvedValue(undefined)
-);
+const mockStartExcelJobRuntime = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const mockStartApiTaskRuntime = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
+const mockLogServerEgressGeo = vi.hoisted(() => vi.fn().mockResolvedValue(undefined));
 const mockListen = vi.hoisted(() =>
   vi.fn((_port: unknown, callback?: () => void) => {
     process.nextTick(() => callback?.());
     return { close: vi.fn() };
-  })
+  }),
 );
 
 vi.mock("../config/loadEnv.js", () => ({}));
@@ -40,10 +34,8 @@ vi.mock("../logging/registerProcessHandlers.js", () => ({
 }));
 
 vi.mock("../logging/httpLogger.js", () => ({
-  createHttpLogger: () => (_req: unknown, _res: unknown, next: () => void) =>
-    next(),
-  createSlowRequestLogger: () =>
-    (_req: unknown, _res: unknown, next: () => void) => next(),
+  createHttpLogger: () => (_req: unknown, _res: unknown, next: () => void) => next(),
+  createSlowRequestLogger: () => (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
 vi.mock("../cron/startCronOperations.js", () => ({
@@ -66,14 +58,11 @@ vi.mock("express", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
   const express = (actual as { default: typeof import("express") }).default;
 
-  const patchedExpress = Object.assign(
-    (...args: Parameters<typeof express>) => {
-      const app = express(...args);
-      app.listen = mockListen as unknown as typeof app.listen;
-      return app;
-    },
-    express
-  );
+  const patchedExpress = Object.assign((...args: Parameters<typeof express>) => {
+    const app = express(...args);
+    app.listen = mockListen as unknown as typeof app.listen;
+    return app;
+  }, express);
 
   return {
     ...actual,
@@ -82,8 +71,7 @@ vi.mock("express", async (importOriginal) => {
 });
 
 describe("index bootstrap", () => {
-  beforeAll(async () => {
-    vi.clearAllMocks();
+  it("connects to MongoDB, starts cron jobs, and listens on PORT", async () => {
     process.env.DB_USER = "test-user";
     process.env.DB_PASSWORD = "test-password";
     process.env.DB_NAME = "test-db";
@@ -95,30 +83,24 @@ describe("index bootstrap", () => {
       () => {
         expect(mockConnect).toHaveBeenCalledOnce();
       },
-      { timeout: 30000 }
+      { timeout: 30000 },
     );
 
     await vi.waitFor(
       () => {
         expect(mockLogServerEgressGeo).toHaveBeenCalledWith("startup");
       },
-      { timeout: 30000 }
+      { timeout: 30000 },
     );
-  }, 60000);
 
-  it("connects to MongoDB, starts cron jobs, and listens on PORT", () => {
-    expect(mockConnect).toHaveBeenCalledWith(
-      expect.stringContaining("test-user:test-password")
-    );
-    expect(mockConnect).toHaveBeenCalledWith(
-      expect.stringContaining("test-db")
-    );
+    expect(mockConnect).toHaveBeenCalledWith(expect.stringContaining("test-user:test-password"));
+    expect(mockConnect).toHaveBeenCalledWith(expect.stringContaining("test-db"));
     expect(mockStartCronOperations).toHaveBeenCalledOnce();
     expect(mockStartExcelJobRuntime).toHaveBeenCalledOnce();
     expect(mockStartApiTaskRuntime).toHaveBeenCalledOnce();
     expect(mockListen).toHaveBeenCalledWith("3999", expect.any(Function));
     expect(mockLogServerEgressGeo).toHaveBeenCalledWith("startup");
-  });
+  }, 60_000);
 
   it("registers global error handler for invalid JSON body", () => {
     const responseJson = vi.fn();
@@ -127,17 +109,11 @@ describe("index bootstrap", () => {
       json: responseJson,
     };
 
-    const errorHandler = (
-      err: unknown,
-      _req: unknown,
-      response: typeof res,
-      _next: unknown
-    ) => {
+    const errorHandler = (err: unknown, _req: unknown, response: typeof res, _next: unknown) => {
       if (err instanceof SyntaxError && "body" in err) {
         return response.status(400).json({ message: "Invalid or empty data" });
       }
-      const message =
-        err instanceof Error ? err.message : "Something went wrong";
+      const message = err instanceof Error ? err.message : "Something went wrong";
       return response.status(400).json({ message });
     };
 

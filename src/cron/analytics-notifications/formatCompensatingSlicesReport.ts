@@ -4,9 +4,7 @@ export type CompensatingSlicesReportStats = {
   sliceDateLabel: string;
 };
 
-export function formatCompensatingSlicesReport(
-  stats: CompensatingSlicesReportStats
-): string {
+export function formatCompensatingSlicesReport(stats: CompensatingSlicesReportStats): string {
   return [
     `📊 Compensating slices — завершено (${stats.sliceDateLabel})`,
     `Analog: refetched=${stats.analog.refetched}, updated=${stats.analog.updated}`,

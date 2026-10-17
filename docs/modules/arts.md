@@ -47,12 +47,14 @@ BtradeStock представляет информацию об остатках 
 Получение списка артикулов с пагинацией и поиском.
 
 **Запрос:**
+
 - Query параметры:
   - `page` (string, опционально, по умолчанию "1") - номер страницы
   - `limit` (string, опционально, по умолчанию "10") - количество элементов на странице
   - `search` (string, опционально) - поисковый запрос по artikul, prodName, nameukr или namerus
 
 **Ответ:**
+
 - 200: `{ data: Array<Art>, total: number, page: number, totalPages: number }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -64,9 +66,11 @@ BtradeStock представляет информацию об остатках 
 Получение артикула по идентификатору.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `Art`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - артикул не найден
@@ -79,9 +83,11 @@ BtradeStock представляет информацию об остатках 
 Получение артикула по номеру артикула.
 
 **Запрос:**
+
 - Path параметры: `artikul` (string)
 
 **Ответ:**
+
 - 200: `{ exists: boolean, message: string, data: ArtWithProd | null }`
   - при `exists: false` поле `data` равно `null` (артикул не найден);
   - при `exists: true` поле `data` — объект артикула в формате **ArtWithProd** (поля `Art` плюс вложенный **`prod`**, см. ниже).
@@ -95,9 +101,11 @@ BtradeStock представляет информацию об остатках 
 Получение артикулов по зоне хранения.
 
 **Запрос:**
+
 - Path параметры: `zone` (string) - идентификатор зоны
 
 **Ответ:**
+
 - 200: `{ data: Array<Art>, total: number }`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -108,9 +116,11 @@ BtradeStock представляет информацию об остатках 
 Получение информации о товаре из системы Btrade.
 
 **Запрос:**
+
 - Path параметры: `artikul` (string)
 
 **Ответ:**
+
 - 200: `{ exists: boolean, message: string, data: { nameukr: string, price: number, quantity: number } | null }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 500: `{ message: string, error?: string }` - ошибка сервера
@@ -122,9 +132,11 @@ BtradeStock представляет информацию об остатках 
 Массовое создание или обновление артикулов.
 
 **Запрос:**
+
 - Body: `Array<{ artikul: string, zone: string, prodName?: string, nameukr?: string, namerus?: string, limit?: number, marker?: string, abc?: string }>`
 
 **Ответ:**
+
 - 200: `{ message: string, result: object }` - результат операции MongoDB bulkWrite
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 401: `{ message: string }` - не авторизован
@@ -138,9 +150,11 @@ BtradeStock представляет информацию об остатках 
 Удаление всех артикулов без последнего актуального маркера.
 
 **Запрос:**
+
 - Body отсутствует
 
 **Ответ:**
+
 - 200: `{ message: string, result: { deletedCount: number, latestMarker: string | null } }`
 - 401: `{ message: string }` - не авторизован
 - 403: `{ message: string }` - недостаточно прав (требуется PRIME)
@@ -171,10 +185,12 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`.
 Обновление лимита артикула.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 - Body: `{ limit: number }` (неотрицательное число)
 
 **Ответ:**
+
 - 200: `Art`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - артикул не найден
@@ -187,10 +203,12 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`.
 Частичное обновление артикула по идентификатору: поля **`limit`** и/или **`prodName`**. Расширяет возможности узкого эндпоинта `PATCH /api/arts/:id/limit` (только лимит); здесь можно менять оба поля за один запрос или только одно из них.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 - Body: `{ limit?: number, prodName?: string }` — должно быть указано **хотя бы одно** поле; `limit` неотрицательный, `prodName` — строка (в т.ч. пустая для сброса текстового значения в БД)
 
 **Ответ:**
+
 - 200: `Art` (в ответе присутствует `prodName` среди выбранных полей)
 - 400: `{ message: string, errors?: array }` — ошибка валидации (неверный id, отсутствуют оба поля, отрицательный `limit` и т.д.)
 - 404: `{ message: string }` — артикул не найден
@@ -203,10 +221,12 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`.
 Обновление информации об остатках Btrade для одного артикула.
 
 **Запрос:**
+
 - Path параметры: `artikul` (string)
 - Body отсутствует
 
 **Ответ:**
+
 - 200: `Art`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 404: `{ message: string }` - артикул не найден
@@ -219,9 +239,11 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`.
 Обновление информации об остатках Btrade для всех артикулов.
 
 **Запрос:**
+
 - Body отсутствует
 
 **Ответ:**
+
 - 202: `{ message: string }` - процесс обновления запущен
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -261,10 +283,10 @@ HTTP-заглушка: **410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`.
 ```typescript
 type ArtWithProd = Art & {
   prod: {
-    name: string;       // Уникальный идентификатор производителя (как в Prod.name)
+    name: string; // Уникальный идентификатор производителя (как в Prod.name)
     title: string;
     imageUrl: string;
-  } | null;             // null, если prodName отсутствует или запись в prods не найдена
+  } | null; // null, если prodName отсутствует или запись в prods не найдена
 };
 ```
 
@@ -272,9 +294,8 @@ type ArtWithProd = Art & {
 
 ```typescript
 {
-  nameukr: string;                // Название товара
-  price: number;                  // Цена
-  quantity: number;               // Количество на витрине
+  nameukr: string; // Название товара
+  price: number; // Цена
+  quantity: number; // Количество на витрине
 }
 ```
-

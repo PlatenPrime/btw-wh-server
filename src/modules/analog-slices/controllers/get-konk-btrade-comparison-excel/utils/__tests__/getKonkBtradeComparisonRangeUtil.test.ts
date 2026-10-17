@@ -274,18 +274,7 @@ describe("getKonkBtradeComparisonRangeUtil", () => {
       "art-4D": "4D",
       "art-278D": "278D",
     };
-    const expectedOrder = [
-      "12A",
-      "56A",
-      "2B",
-      "7B",
-      "42B",
-      "34C",
-      "87C",
-      "123C",
-      "4D",
-      "278D",
-    ];
+    const expectedOrder = ["12A", "56A", "2B", "7B", "42B", "34C", "87C", "123C", "4D", "278D"];
 
     await Analog.insertMany(
       artikuls.map((artikul) => ({
@@ -358,4 +347,3 @@ describe("getKonkBtradeComparisonRangeUtil", () => {
     expect(result.ok).toBe(false);
   });
 });
-

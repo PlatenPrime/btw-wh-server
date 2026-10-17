@@ -3,12 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../../../../events/utils/createEventUtil.js", () => ({
   createEventUtil: vi.fn(),
 }));
-vi.mock(
-  "../../../../sku-slices/utils/runSkuSlicePostCorrectionsUtil.js",
-  () => ({
-    runSkuSlicePostCorrectionsUtil: vi.fn(),
-  })
-);
+vi.mock("../../../../sku-slices/utils/runSkuSlicePostCorrectionsUtil.js", () => ({
+  runSkuSlicePostCorrectionsUtil: vi.fn(),
+}));
 
 import { createEventUtil } from "../../../../events/utils/createEventUtil.js";
 import { runSkuSlicePostCorrectionsUtil } from "../../../../sku-slices/utils/runSkuSlicePostCorrectionsUtil.js";
@@ -34,7 +31,7 @@ describe("runSkuSlicesPostCorrectionsRun", () => {
         dateTo: "2026-04-03",
         apply: true,
       },
-      { onProgress, userId: "u1" }
+      { onProgress, userId: "u1" },
     );
 
     expect(result.ok).toBe(true);
@@ -44,7 +41,7 @@ describe("runSkuSlicesPostCorrectionsRun", () => {
         dateTo: new Date("2026-04-03T00:00:00.000Z"),
         apply: true,
         onProgress,
-      })
+      }),
     );
     expect(createEventUtil).toHaveBeenCalledOnce();
   });

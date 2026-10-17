@@ -3,6 +3,7 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
 import { loadDayMapsForKonkDates } from "../../sku-slices/utils/skuSliceMonthStore.js";
+import { Types } from "mongoose";
 import { Sku } from "../models/Sku.js";
 
 export type RunSkuInvalidFlagSyncResult = {
@@ -25,9 +26,7 @@ export async function runSkuInvalidFlagSync(
   const dates = enumerateReportingDates(windowStart, windowEnd);
 
   const konks = await Sku.distinct("konkName");
-  const konkList = konks.filter(
-    (k): k is string => typeof k === "string" && k.length > 0,
-  );
+  const konkList = konks.filter((k): k is string => typeof k === "string" && k.length > 0);
 
   let updated = 0;
 
@@ -41,7 +40,7 @@ export async function runSkuInvalidFlagSync(
     const skus = await Sku.find({ konkName }).select("_id productId").lean();
     const bulkOps: Array<{
       updateOne: {
-        filter: { _id: unknown };
+        filter: { _id: Types.ObjectId };
         update: { $set: { isInvalid: boolean } };
       };
     }> = [];
@@ -55,9 +54,7 @@ export async function runSkuInvalidFlagSync(
           const rec = byDate.get(toSliceDate(d).getTime());
           if (!rec || Object.keys(rec).length === 0) return false;
           const it = rec[pid];
-          return (
-            it != null && isFullMinusOneStockPrice(it.stock, it.price)
-          );
+          return it != null && isFullMinusOneStockPrice(it.stock, it.price);
         });
       }
 

@@ -9,10 +9,8 @@ import { postAirClientFillPageUtil } from "../utils/postAirClientFillPageUtil.js
 
 const id = "507f1f77bcf86cd799439011";
 const body = {
-  sourceUrl:
-    "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
-  pageUrl:
-    "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
+  sourceUrl: "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
+  pageUrl: "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
   products: [
     {
       productId: "111",

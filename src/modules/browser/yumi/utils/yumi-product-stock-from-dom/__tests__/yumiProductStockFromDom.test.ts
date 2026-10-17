@@ -5,21 +5,19 @@ import { parseStockFromDom } from "../yumiProductStockFromDom.js";
 describe("parseStockFromDom", () => {
   it("returns 0 when out of stock (Ukrainian)", () => {
     const $ = cheerio.load(
-      `<div data-qaid="product_status_sticky_panel" title="Немає в наявності"></div>`
+      `<div data-qaid="product_status_sticky_panel" title="Немає в наявності"></div>`,
     );
     expect(parseStockFromDom($)).toBe(0);
   });
 
   it("returns 0 when out of stock (Russian)", () => {
-    const $ = cheerio.load(
-      `<div data-qaid="product_status_sticky_panel">нет в наличии</div>`
-    );
+    const $ = cheerio.load(`<div data-qaid="product_status_sticky_panel">нет в наличии</div>`);
     expect(parseStockFromDom($)).toBe(0);
   });
 
   it("parses quantity from in-stock status text", () => {
     const $ = cheerio.load(
-      `<div data-qaid="product_status_sticky_panel" title="В наявності: 42 шт"></div>`
+      `<div data-qaid="product_status_sticky_panel" title="В наявності: 42 шт"></div>`,
     );
     expect(parseStockFromDom($)).toBe(42);
   });

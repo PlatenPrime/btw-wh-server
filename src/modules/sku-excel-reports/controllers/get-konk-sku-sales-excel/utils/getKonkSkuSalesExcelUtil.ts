@@ -19,8 +19,7 @@ import {
 import { sortSkuSalesExcelRowsByScore } from "../../get-sku-sales-excel/utils/sortSkuSalesExcelRowsByScore.js";
 
 export type GetKonkSkuSalesExcelResult =
-  | { ok: true; buffer: Buffer; fileName: string }
-  | { ok: false };
+  { ok: true; buffer: Buffer; fileName: string } | { ok: false };
 
 export async function getKonkSkuSalesExcelUtil(
   input: GetKonkSkuSalesExcelInput,
@@ -61,21 +60,14 @@ export async function getKonkSkuSalesExcelUtil(
     skugrTitle: r.skugrTitle,
   }));
 
-  const lookup = (kn: string, pid: string, d: Date) =>
-    getSliceItem(maps, kn, pid, d);
+  const lookup = (kn: string, pid: string, d: Date) => getSliceItem(maps, kn, pid, d);
 
   let rowsOrdered: SkuSalesExcelSkuRow[] = rows;
   if (input.sortBy === "sales" || input.sortBy === "revenue") {
     const metric = input.sortBy;
     const scoreByProductId = new Map<string, number>();
     for (const row of rows) {
-      const computed = computeSkuSalesPeriodMetrics(
-        row,
-        dateFrom,
-        dateTo,
-        lookup,
-        recountDaysSet,
-      );
+      const computed = computeSkuSalesPeriodMetrics(row, dateFrom, dateTo, lookup, recountDaysSet);
       scoreByProductId.set(
         row.productId,
         metric === "sales" ? computed.totalSales : computed.totalRevenue,
@@ -87,20 +79,14 @@ export async function getKonkSkuSalesExcelUtil(
     );
   }
 
-  const { buffer } = await buildSkuSalesExcelForSkus(
-    rowsOrdered,
-    dateFrom,
-    dateTo,
-    lookup,
-    {
-      summaryMode: "bottomOnly",
-      summarySalesLabel: "Загальні продажі, шт",
-      summaryRevenueLabel: "Загальна виручка, грн",
-      recountDays,
-      metrics: input.metrics,
-      onProgress: progress.onProgress,
-    },
-  );
+  const { buffer } = await buildSkuSalesExcelForSkus(rowsOrdered, dateFrom, dateTo, lookup, {
+    summaryMode: "bottomOnly",
+    summarySalesLabel: "Загальні продажі, шт",
+    summaryRevenueLabel: "Загальна виручка, грн",
+    recountDays,
+    metrics: input.metrics,
+    onProgress: progress.onProgress,
+  });
 
   const fileName = `sku_sales_konk_${safeFilePart(input.konk)}_${safeFilePart(input.prod)}_${formatDateHeader(dateFrom)}_${formatDateHeader(dateTo)}.xlsx`;
   return { ok: true, buffer, fileName };

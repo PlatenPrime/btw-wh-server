@@ -6,10 +6,7 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить список поставок (без artikuls)
  * @route   GET /api/dels
  */
-export const getAllDelsController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAllDelsController = async (req: Request, res: Response): Promise<void> => {
   try {
     const list = await getAllDelsUtil();
     res.status(200).json({

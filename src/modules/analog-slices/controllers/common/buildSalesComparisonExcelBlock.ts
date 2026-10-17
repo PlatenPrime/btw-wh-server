@@ -1,8 +1,5 @@
 import type ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { AnalogBtradeCompareItem } from "../get-analog-btrade-comparison-excel/utils/getAnalogBtradeComparisonRangeUtil.js";
 import {
@@ -31,9 +28,7 @@ export interface SetupSalesComparisonHeaderRowParams {
  * Первая строка листа: колонки 1–4 (Артикул, Назва, Конкурент, Виробник), колонка 5 пустая,
  * далее даты, колонка «Всього», затем 4 колонки дельт.
  */
-export function setupSalesComparisonHeaderRow(
-  params: SetupSalesComparisonHeaderRowParams,
-): void {
+export function setupSalesComparisonHeaderRow(params: SetupSalesComparisonHeaderRowParams): void {
   const {
     worksheet,
     items,
@@ -55,17 +50,14 @@ export function setupSalesComparisonHeaderRow(
   headerRow.getCell(6).value = "";
 
   items.forEach((item, index) => {
-    headerRow.getCell(index + dataStartCol).value = formatExcelDateHeaderUk(
-      item.date,
-    );
+    headerRow.getCell(index + dataStartCol).value = formatExcelDateHeaderUk(item.date);
   });
 
   headerRow.getCell(totalCol).value = "Всього";
   headerRow.getCell(diffSalesCol).value = "Δ Продажі Btrade vs конкурент, шт";
   headerRow.getCell(diffSalesPctCol).value = "Δ Продажі Btrade vs конкурент, %";
   headerRow.getCell(diffRevenueCol).value = "Δ Виручка Btrade vs конкурент, грн";
-  headerRow.getCell(diffRevenuePctCol).value =
-    "Δ Виручка Btrade vs конкурент, %";
+  headerRow.getCell(diffRevenuePctCol).value = "Δ Виручка Btrade vs конкурент, %";
 
   applyHeaderStyle(worksheet, columnCount);
 
@@ -170,7 +162,7 @@ export function buildSalesComparisonExcelBlock(
     "Ціна Btrade",
     "Виручка Btrade",
   ];
-  rows.forEach((row, i) => row.getCell(6).value = labels[i]);
+  rows.forEach((row, i) => (row.getCell(6).value = labels[i]));
 
   const safeProducerName = producerName ?? "";
   const safeCompetitorTitle = competitorTitle ?? "";
@@ -270,8 +262,7 @@ export function buildSalesComparisonExcelBlock(
   if (Number.isFinite(diffSalesPieces) && diffSalesPieces !== 0) {
     diffSalesCell.font = {
       ...(diffSalesCell.font ?? {}),
-      color:
-        diffSalesPieces > 0 ? { argb: "FF00AA00" } : { argb: DELIVERY_DAY_RED },
+      color: diffSalesPieces > 0 ? { argb: "FF00AA00" } : { argb: DELIVERY_DAY_RED },
     };
   }
 
@@ -291,8 +282,7 @@ export function buildSalesComparisonExcelBlock(
     if (rounded !== 0) {
       diffSalesPctCell.font = {
         ...(diffSalesPctCell.font ?? {}),
-        color:
-          rounded > 0 ? { argb: "FF00AA00" } : { argb: DELIVERY_DAY_RED },
+        color: rounded > 0 ? { argb: "FF00AA00" } : { argb: DELIVERY_DAY_RED },
       };
     }
   }
@@ -302,10 +292,7 @@ export function buildSalesComparisonExcelBlock(
   if (Number.isFinite(diffRevenueUah) && diffRevenueUah !== 0) {
     diffRevenueCell.font = {
       ...(diffRevenueCell.font ?? {}),
-      color:
-        diffRevenueUah > 0
-          ? { argb: "FF00AA00" }
-          : { argb: DELIVERY_DAY_RED },
+      color: diffRevenueUah > 0 ? { argb: "FF00AA00" } : { argb: DELIVERY_DAY_RED },
     };
   }
 
@@ -325,8 +312,7 @@ export function buildSalesComparisonExcelBlock(
     if (rounded !== 0) {
       diffRevenuePctCell.font = {
         ...(diffRevenuePctCell.font ?? {}),
-        color:
-          rounded > 0 ? { argb: "FF00AA00" } : { argb: DELIVERY_DAY_RED },
+        color: rounded > 0 ? { argb: "FF00AA00" } : { argb: DELIVERY_DAY_RED },
       };
     }
   }
@@ -395,13 +381,9 @@ export function buildSalesComparisonSummaryBlock(
   const diffSalesPieces = totalBtradeSales - totalAnalogSales;
   const diffRevenueUah = totalBtradeRevenue - totalAnalogRevenue;
   const diffSalesPct =
-    totalAnalogSales === 0
-      ? null
-      : (totalBtradeSales / totalAnalogSales - 1) * 100;
+    totalAnalogSales === 0 ? null : (totalBtradeSales / totalAnalogSales - 1) * 100;
   const diffRevenuePct =
-    totalAnalogRevenue === 0
-      ? null
-      : (totalBtradeRevenue / totalAnalogRevenue - 1) * 100;
+    totalAnalogRevenue === 0 ? null : (totalBtradeRevenue / totalAnalogRevenue - 1) * 100;
 
   const entries: [string, number | null][] = [
     ["Продажі конкурента (всього)", totalAnalogSales],
@@ -410,14 +392,8 @@ export function buildSalesComparisonSummaryBlock(
     ["Виручка Btrade (всього)", totalBtradeRevenue],
     ["Δ Продажі, шт", diffSalesPieces],
     ["Δ Виручка, грн", diffRevenueUah],
-    [
-      "Δ Продажі, %",
-      diffSalesPct !== null ? Math.round(diffSalesPct * 100) / 100 : null,
-    ],
-    [
-      "Δ Виручка, %",
-      diffRevenuePct !== null ? Math.round(diffRevenuePct * 100) / 100 : null,
-    ],
+    ["Δ Продажі, %", diffSalesPct !== null ? Math.round(diffSalesPct * 100) / 100 : null],
+    ["Δ Виручка, %", diffRevenuePct !== null ? Math.round(diffRevenuePct * 100) / 100 : null],
   ];
 
   entries.forEach(([key, value], index) => {

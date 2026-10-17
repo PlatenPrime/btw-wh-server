@@ -9,10 +9,7 @@ import { parseGraboSkuHtml } from "../parseGraboSkuHtml.js";
 vi.mock("../../../../utils/fetchPageHtml.js");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const fixtureHtml = readFileSync(
-  join(__dirname, "fixtures", "grabo-sku.html"),
-  "utf-8"
-);
+const fixtureHtml = readFileSync(join(__dirname, "fixtures", "grabo-sku.html"), "utf-8");
 
 describe("parseGraboSkuHtml", () => {
   it("parses full product page fixture into GraboSkuData", () => {
@@ -99,8 +96,7 @@ describe("getGraboSkuData", () => {
   it("fetches page html and returns parsed GraboSkuData", async () => {
     vi.mocked(fetchPageHtml).mockResolvedValue(fixtureHtml);
 
-    const link =
-      "https://www.grabo-balloons.com/en/g72274-balloon-pink-birthday-bottle-mini-gold";
+    const link = "https://www.grabo-balloons.com/en/g72274-balloon-pink-birthday-bottle-mini-gold";
     const data = await getGraboSkuData(link);
 
     expect(fetchPageHtml).toHaveBeenCalledWith(link, { konkName: "grabo" });
@@ -113,32 +109,29 @@ describe("getGraboSkuData", () => {
 
     await getGraboSkuData("  https://www.grabo-balloons.com/en/x  ");
 
-    expect(fetchPageHtml).toHaveBeenCalledWith(
-      "https://www.grabo-balloons.com/en/x",
-      { konkName: "grabo" }
-    );
+    expect(fetchPageHtml).toHaveBeenCalledWith("https://www.grabo-balloons.com/en/x", {
+      konkName: "grabo",
+    });
   });
 
   it("throws when link is empty or not a string", async () => {
-    await expect(getGraboSkuData("")).rejects.toThrow(
-      "Link is required and must be a string"
-    );
+    await expect(getGraboSkuData("")).rejects.toThrow("Link is required and must be a string");
     await expect(getGraboSkuData(null as unknown as string)).rejects.toThrow(
-      "Link is required and must be a string"
+      "Link is required and must be a string",
     );
-    await expect(
-      getGraboSkuData(undefined as unknown as string)
-    ).rejects.toThrow("Link is required and must be a string");
+    await expect(getGraboSkuData(undefined as unknown as string)).rejects.toThrow(
+      "Link is required and must be a string",
+    );
     await expect(getGraboSkuData(123 as unknown as string)).rejects.toThrow(
-      "Link is required and must be a string"
+      "Link is required and must be a string",
     );
   });
 
   it("propagates fetchPageHtml rejection", async () => {
     vi.mocked(fetchPageHtml).mockRejectedValue(new Error("Network error"));
 
-    await expect(
-      getGraboSkuData("https://www.grabo-balloons.com/en/x")
-    ).rejects.toThrow("Network error");
+    await expect(getGraboSkuData("https://www.grabo-balloons.com/en/x")).rejects.toThrow(
+      "Network error",
+    );
   });
 });

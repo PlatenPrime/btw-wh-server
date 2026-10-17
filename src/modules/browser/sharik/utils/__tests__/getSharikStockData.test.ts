@@ -36,25 +36,25 @@ describe("getSharikStockData", () => {
   describe("Валидация входных данных", () => {
     it("должен выбрасывать ошибку при пустом артикуле", async () => {
       await expect(getSharikStockData("")).rejects.toThrow(
-        "Artikul is required and must be a string"
+        "Artikul is required and must be a string",
       );
     });
 
     it("должен выбрасывать ошибку при null артикуле", async () => {
       await expect(getSharikStockData(null as any)).rejects.toThrow(
-        "Artikul is required and must be a string"
+        "Artikul is required and must be a string",
       );
     });
 
     it("должен выбрасывать ошибку при undefined артикуле", async () => {
       await expect(getSharikStockData(undefined as any)).rejects.toThrow(
-        "Artikul is required and must be a string"
+        "Artikul is required and must be a string",
       );
     });
 
     it("должен выбрасывать ошибку при не-строковом артикуле", async () => {
       await expect(getSharikStockData(123 as any)).rejects.toThrow(
-        "Artikul is required and must be a string"
+        "Artikul is required and must be a string",
       );
     });
   });
@@ -66,9 +66,7 @@ describe("getSharikStockData", () => {
         zone: "A1",
         nameukr: "Товар з Art",
       });
-      vi.mocked(browserGet).mockResolvedValue(
-        "<pre>1501-3445 = 15; 20; 1250.50</pre>"
-      );
+      vi.mocked(browserGet).mockResolvedValue("<pre>1501-3445 = 15; 20; 1250.50</pre>");
 
       const result = await getSharikStockData("1501-3445");
 
@@ -77,16 +75,13 @@ describe("getSharikStockData", () => {
         price: 1250.5,
         quantity: 15,
       });
-      expect(browserGet).toHaveBeenCalledWith(
-        "https://sharik.ua/product_rests/1302-0065/",
-        { proxyUrl: undefined }
-      );
+      expect(browserGet).toHaveBeenCalledWith("https://sharik.ua/product_rests/1302-0065/", {
+        proxyUrl: undefined,
+      });
     });
 
     it("nameukr пустой если Art нет", async () => {
-      vi.mocked(browserGet).mockResolvedValue(
-        "<pre>1501-3445 = 15; 20; 1250.50</pre>"
-      );
+      vi.mocked(browserGet).mockResolvedValue("<pre>1501-3445 = 15; 20; 1250.50</pre>");
 
       const result = await getSharikStockData("1501-3445");
 
@@ -98,9 +93,7 @@ describe("getSharikStockData", () => {
     });
 
     it("возвращает null когда артикула нет в map", async () => {
-      vi.mocked(browserGet).mockResolvedValue(
-        "<pre>1501-0001 = 1; 1; 10.00</pre>"
-      );
+      vi.mocked(browserGet).mockResolvedValue("<pre>1501-0001 = 1; 1; 10.00</pre>");
 
       const result = await getSharikStockData("nonexistent");
 
@@ -108,9 +101,7 @@ describe("getSharikStockData", () => {
     });
 
     it("переиспользует cache на повторном вызове", async () => {
-      vi.mocked(browserGet).mockResolvedValue(
-        "<pre>1501-3445 = 15; 20; 1250.50</pre>"
-      );
+      vi.mocked(browserGet).mockResolvedValue("<pre>1501-3445 = 15; 20; 1250.50</pre>");
 
       await getSharikStockData("1501-3445");
       await getSharikStockData("1501-3445");
@@ -124,7 +115,7 @@ describe("getSharikStockData", () => {
       vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
 
       await expect(getSharikStockData("test")).rejects.toThrow(
-        "Failed to fetch data from sharik.ua"
+        "Failed to fetch data from sharik.ua",
       );
     });
   });

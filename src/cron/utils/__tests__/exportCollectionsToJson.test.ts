@@ -1,5 +1,4 @@
 import fs from "fs/promises";
-import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { exportCollectionsToJson } from "../exportCollectionsToJson.js";
 
@@ -187,15 +186,14 @@ describe("exportCollectionsToJson", () => {
     await exportCollectionsToJson();
 
     // Проверяем что была попытка создать директорию
-    expect(mockedFs.mkdir).toHaveBeenCalledWith(
-      expect.stringContaining("backups"),
-      { recursive: true }
-    );
+    expect(mockedFs.mkdir).toHaveBeenCalledWith(expect.stringContaining("backups"), {
+      recursive: true,
+    });
   });
 
   it("должен обрабатывать ошибки экспорта отдельных коллекций", async () => {
     const collectionError = new Error("Collection error");
-    
+
     const createMockQuery = (data: unknown, shouldFail = false) => ({
       lean: vi.fn().mockReturnThis(),
       exec: vi.fn().mockImplementation(() => {
@@ -222,7 +220,7 @@ describe("exportCollectionsToJson", () => {
     (User.find as any).mockReturnValue(createSuccessQuery([]));
     (Role.find as any).mockReturnValue(createSuccessQuery([]));
 
-    const result = await exportCollectionsToJson();
+    await exportCollectionsToJson();
 
     // Функция не должна упасть, а arts должен быть пустым массивом
     expect(mockedFs.writeFile).toHaveBeenCalled();
@@ -256,9 +254,7 @@ describe("exportCollectionsToJson", () => {
     const writeError = new Error("Write failed");
     mockedFs.writeFile.mockRejectedValueOnce(writeError);
 
-    await expect(exportCollectionsToJson()).rejects.toThrow(
-      "Failed to export collections"
-    );
+    await expect(exportCollectionsToJson()).rejects.toThrow("Failed to export collections");
 
     // Проверяем что ошибка записи файла корректно обработана и функция бросила исключение
     // Логирование ошибок проверяется через stderr в выводе теста

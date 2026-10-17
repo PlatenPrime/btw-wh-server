@@ -3,10 +3,7 @@ import { getBtradeArtInfoSchema } from "./schemas/getBtradeArtInfoSchema.js";
 import { fetchBtradeDataUtil } from "./utils/fetchBtradeDataUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getBtradeArtInfoController = async (
-  req: Request,
-  res: Response
-) => {
+export const getBtradeArtInfoController = async (req: Request, res: Response) => {
   try {
     const { artikul } = req.params;
 
@@ -15,7 +12,7 @@ export const getBtradeArtInfoController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Artikul is required",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

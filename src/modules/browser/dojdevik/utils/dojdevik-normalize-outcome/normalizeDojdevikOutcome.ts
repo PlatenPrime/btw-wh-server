@@ -9,7 +9,7 @@ export function normalizeDojdevikOutcome(
   packs: number,
   packagePrice: number | undefined,
   packSize: number,
-  title: string
+  title: string,
 ): DojdevikProductInfo {
   if (packagePrice === undefined) {
     return DOJDEVIK_NEGATIVE_OUTCOME;

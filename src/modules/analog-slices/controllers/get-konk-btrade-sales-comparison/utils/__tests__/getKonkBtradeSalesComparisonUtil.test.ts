@@ -122,28 +122,28 @@ describe("getKonkBtradeSalesComparisonUtil", () => {
     // Day 2: artikul1 competitor: 100-90=10, btrade: 200-185=15; artikul2 competitor: 50-40=10, btrade: 100-90=10
     expect(days[1]).toMatchObject({
       date: "2026-03-02T00:00:00.000Z",
-      competitorSales: 20,       // 10 + 10
-      competitorRevenue: 300,    // 10*10 + 10*20
-      btradeSales: 25,           // 15 + 10
-      btradeRevenue: 400,        // 15*12 + 10*22
+      competitorSales: 20, // 10 + 10
+      competitorRevenue: 300, // 10*10 + 10*20
+      btradeSales: 25, // 15 + 10
+      btradeRevenue: 400, // 15*12 + 10*22
     });
 
     // Day 3: artikul1 competitor: 90-80=10, btrade: 185-170=15; artikul2 competitor: 40-35=5, btrade: 90-80=10
     expect(days[2]).toMatchObject({
       date: "2026-03-03T00:00:00.000Z",
-      competitorSales: 15,       // 10 + 5
-      competitorRevenue: 200,    // 10*10 + 5*20
-      btradeSales: 25,           // 15 + 10
-      btradeRevenue: 400,        // 15*12 + 10*22
+      competitorSales: 15, // 10 + 5
+      competitorRevenue: 200, // 10*10 + 5*20
+      btradeSales: 25, // 15 + 10
+      btradeRevenue: 400, // 15*12 + 10*22
     });
 
     // Summary: totals across all days
-    expect(summary.totalCompetitorSales).toBe(35);    // 0 + 20 + 15
-    expect(summary.totalBtradeSales).toBe(50);         // 0 + 25 + 25
-    expect(summary.totalCompetitorRevenue).toBe(500);  // 0 + 300 + 200
-    expect(summary.totalBtradeRevenue).toBe(800);      // 0 + 400 + 400
-    expect(summary.diffSalesPcs).toBe(15);             // 50 - 35
-    expect(summary.diffRevenueUah).toBe(300);          // 800 - 500
+    expect(summary.totalCompetitorSales).toBe(35); // 0 + 20 + 15
+    expect(summary.totalBtradeSales).toBe(50); // 0 + 25 + 25
+    expect(summary.totalCompetitorRevenue).toBe(500); // 0 + 300 + 200
+    expect(summary.totalBtradeRevenue).toBe(800); // 0 + 400 + 400
+    expect(summary.diffSalesPcs).toBe(15); // 50 - 35
+    expect(summary.diffRevenueUah).toBe(300); // 800 - 500
 
     // diffSalesPct = (50/35 - 1) * 100 = 42.857... rounded to 42.86
     expect(summary.diffSalesPct).toBeCloseTo(42.86, 1);

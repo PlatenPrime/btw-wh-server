@@ -28,9 +28,7 @@ import {
 describe("buildCompensatingDataKeyQueue", () => {
   const excluded = new Set(["yumi"]);
   const shouldInclude = (item: unknown) =>
-    typeof item === "object" &&
-    item !== null &&
-    (item as { stock?: number }).stock === -1;
+    typeof item === "object" && item !== null && (item as { stock?: number }).stock === -1;
 
   it("queues data keys for included items", () => {
     const queue = buildCompensatingDataKeyQueue(
@@ -44,7 +42,7 @@ describe("buildCompensatingDataKeyQueue", () => {
         },
       ],
       excluded,
-      shouldInclude
+      shouldInclude,
     );
 
     expect(queue).toEqual([{ konkName: "air", dataKey: "P1" }]);
@@ -63,7 +61,7 @@ describe("buildCompensatingDataKeyQueue", () => {
         },
       ],
       excluded,
-      shouldInclude
+      shouldInclude,
     );
 
     expect(queue).toEqual([{ konkName: "air", dataKey: "P2" }]);
@@ -73,16 +71,14 @@ describe("buildCompensatingDataKeyQueue", () => {
     const queue = buildCompensatingDataKeyQueue(
       [{ konkName: undefined as unknown as string, data: undefined }],
       excluded,
-      () => true
+      () => true,
     );
 
     expect(queue).toEqual([]);
   });
 
   it("returns empty queue for empty docs", () => {
-    expect(buildCompensatingDataKeyQueue([], excluded, shouldInclude)).toEqual(
-      []
-    );
+    expect(buildCompensatingDataKeyQueue([], excluded, shouldInclude)).toEqual([]);
   });
 });
 
@@ -125,7 +121,7 @@ describe("runCompensatingSliceRefetchLoop", () => {
         total: 2,
         konkName: "air",
         dataKey: "P1",
-      }
+      },
     );
     expect(logModuleInfo).toHaveBeenCalledWith(
       "slice-compensation",
@@ -137,7 +133,7 @@ describe("runCompensatingSliceRefetchLoop", () => {
         dataKey: "P1",
         refetched: 1,
         updated: 0,
-      }
+      },
     );
     expect(logModuleInfo).toHaveBeenCalledWith(
       "slice-compensation",
@@ -149,7 +145,7 @@ describe("runCompensatingSliceRefetchLoop", () => {
         dataKey: "P2",
         refetched: 1,
         updated: 1,
-      }
+      },
     );
   });
 
@@ -199,10 +195,7 @@ describe("runCompensatingSliceRefetchLoop", () => {
   it("does not delay for single-item queue", async () => {
     const processItem = vi.fn().mockResolvedValue({ refetched: 1, updated: 0 });
 
-    await runCompensatingSliceRefetchLoop(
-      [{ konkName: "air", dataKey: "P1" }],
-      processItem
-    );
+    await runCompensatingSliceRefetchLoop([{ konkName: "air", dataKey: "P1" }], processItem);
 
     expect(processItem).toHaveBeenCalledTimes(1);
     expect(delay).not.toHaveBeenCalled();

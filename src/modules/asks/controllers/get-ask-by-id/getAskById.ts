@@ -3,10 +3,7 @@ import { getAskByIdSchema } from "./schemas/getAskByIdSchema.js";
 import { getAskUtil } from "./utils/getAskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getAskById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAskById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -15,7 +12,7 @@ export const getAskById = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -44,4 +41,3 @@ export const getAskById = async (
     });
   }
 };
-

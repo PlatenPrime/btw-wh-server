@@ -9,19 +9,15 @@ vi.mock("../correctSvbumFakeStockSpikesUtil.js", () => ({
   correctSvbumFakeStockSpikesUtil: vi.fn(),
 }));
 vi.mock("../reviewPackFlipsUtil.js", async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import("../reviewPackFlipsUtil.js")>();
+  const actual = await importOriginal<typeof import("../reviewPackFlipsUtil.js")>();
   return {
     ...actual,
     reviewPackFlipsUtil: vi.fn(),
   };
 });
-vi.mock(
-  "../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js",
-  () => ({
-    afterSkuSliceStockMutation: vi.fn(),
-  })
-);
+vi.mock("../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js", () => ({
+  afterSkuSliceStockMutation: vi.fn(),
+}));
 
 import { correctBalunFakeStockSpikesUtil } from "../correctBalunFakeStockSpikesUtil.js";
 import { correctSvbumFakeStockSpikesUtil } from "../correctSvbumFakeStockSpikesUtil.js";
@@ -83,18 +79,14 @@ describe("runSkuSlicePostCorrectionsUtil", () => {
     expect(result.days).toHaveLength(2);
     expect(correctBalunFakeStockSpikesUtil).toHaveBeenCalledTimes(2);
     expect(correctSvbumFakeStockSpikesUtil).toHaveBeenCalledTimes(2);
-    expect(reviewPackFlipsUtil).toHaveBeenCalledTimes(
-      2 * packFlipAutoApplyKonks.length
-    );
+    expect(reviewPackFlipsUtil).toHaveBeenCalledTimes(2 * packFlipAutoApplyKonks.length);
     expect(afterSkuSliceStockMutation).toHaveBeenCalledTimes(2);
     expect(onBalunError).not.toHaveBeenCalled();
     expect(result.errors).toEqual([]);
   });
 
   it("continues when balun throws and records error", async () => {
-    vi.mocked(correctBalunFakeStockSpikesUtil).mockRejectedValue(
-      new Error("balun down")
-    );
+    vi.mocked(correctBalunFakeStockSpikesUtil).mockRejectedValue(new Error("balun down"));
     const onBalunError = vi.fn();
 
     const result = await runSkuSlicePostCorrectionsUtil({
@@ -128,7 +120,7 @@ describe("runSkuSlicePostCorrectionsUtil", () => {
         apply: false,
         rollupKonkNames: [],
         signal: controller.signal,
-      })
+      }),
     ).rejects.toBeInstanceOf(ApiTaskAbortedError);
 
     expect(correctBalunFakeStockSpikesUtil).not.toHaveBeenCalled();

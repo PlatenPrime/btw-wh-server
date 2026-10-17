@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import mongoose from "mongoose";
 import { createTestUser } from "../../../../../../test/setup.js";
 import { getLoginResponseUtil } from "../getLoginResponseUtil.js";
 
@@ -34,4 +33,3 @@ describe("getLoginResponseUtil", () => {
     expect(response.token.length).toBeGreaterThan(0);
   });
 });
-

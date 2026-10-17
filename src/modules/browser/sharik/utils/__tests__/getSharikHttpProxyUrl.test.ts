@@ -1,8 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  SHARIK_HTTP_PROXY_ENABLED,
-  getSharikHttpProxyUrl,
-} from "../getSharikHttpProxyUrl.js";
+import { SHARIK_HTTP_PROXY_ENABLED, getSharikHttpProxyUrl } from "../getSharikHttpProxyUrl.js";
 
 describe("getSharikHttpProxyUrl", () => {
   const original = process.env.SHARIK_HTTP_PROXY_URL;
@@ -17,11 +14,8 @@ describe("getSharikHttpProxyUrl", () => {
 
   it("SHARIK_HTTP_PROXY_ENABLED=true — возвращает trimmed URL из env", () => {
     expect(SHARIK_HTTP_PROXY_ENABLED).toBe(true);
-    process.env.SHARIK_HTTP_PROXY_URL =
-      "  http://user:secret@77.47.252.164:50100  ";
-    expect(getSharikHttpProxyUrl()).toBe(
-      "http://user:secret@77.47.252.164:50100"
-    );
+    process.env.SHARIK_HTTP_PROXY_URL = "  http://user:secret@77.47.252.164:50100  ";
+    expect(getSharikHttpProxyUrl()).toBe("http://user:secret@77.47.252.164:50100");
   });
 
   it("undefined когда env пустой или отсутствует", () => {

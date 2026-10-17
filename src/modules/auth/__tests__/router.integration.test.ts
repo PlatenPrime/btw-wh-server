@@ -9,12 +9,8 @@ import { hashPasswordUtil } from "../utils/hashPasswordUtil.js";
 import Role from "../models/Role.js";
 import User from "../models/User.js";
 
-const createAuthHeader = (
-  role: RoleType = RoleType.USER,
-  userId?: string
-) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+const createAuthHeader = (role: RoleType = RoleType.USER, userId?: string) => {
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
   const id = userId ?? new mongoose.Types.ObjectId().toString();
   const token = jwt.sign({ id, role }, secret, { expiresIn: "1h" });
   return { Authorization: `Bearer ${token}` };
@@ -87,10 +83,7 @@ describe("Auth router integration", () => {
     });
 
     it("403 for USER role", async () => {
-      await request(app)
-        .get("/api/auth/users")
-        .set(createAuthHeader(RoleType.USER))
-        .expect(403);
+      await request(app).get("/api/auth/users").set(createAuthHeader(RoleType.USER)).expect(403);
     });
 
     it("200 returns users for ADMIN", async () => {

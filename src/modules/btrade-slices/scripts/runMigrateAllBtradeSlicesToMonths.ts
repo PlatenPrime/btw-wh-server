@@ -11,9 +11,7 @@ import {
 } from "../utils/migrateAllBtradeSlicesToMonthsUtil.js";
 import { parseMigrateAllBtradeSlicesToMonthsCliArgs } from "./parseMigrateAllBtradeSlicesToMonthsCliArgs.js";
 
-export async function executeMigrateAllBtradeSlicesToMonthsCli(
-  argv: string[],
-): Promise<{
+export async function executeMigrateAllBtradeSlicesToMonthsCli(argv: string[]): Promise<{
   migrate: MigrateAllBtradeSlicesToMonthsResult;
   verify?: Awaited<ReturnType<typeof verifyRandomBtradeSlicesVsMonths>>;
 }> {
@@ -49,9 +47,7 @@ export async function executeMigrateAllBtradeSlicesToMonthsCli(
         "[migrate-btrade-slice-months] skip verify on dry-run (no writes); pass --apply for verify",
       );
     } else {
-      console.log(
-        `[migrate-btrade-slice-months] verify sample=${args.verifySample}…`,
-      );
+      console.log(`[migrate-btrade-slice-months] verify sample=${args.verifySample}…`);
       verify = await verifyRandomBtradeSlicesVsMonths(args.verifySample);
       console.log(JSON.stringify(verify, null, 2));
       if (!verify.ok) {
@@ -60,9 +56,7 @@ export async function executeMigrateAllBtradeSlicesToMonthsCli(
         );
         process.exitCode = 1;
       } else {
-        console.log(
-          `[migrate-btrade-slice-months] verify OK compared=${verify.compared}`,
-        );
+        console.log(`[migrate-btrade-slice-months] verify OK compared=${verify.compared}`);
       }
     }
   }
@@ -70,9 +64,7 @@ export async function executeMigrateAllBtradeSlicesToMonthsCli(
   return { migrate, ...(verify ? { verify } : {}) };
 }
 
-export async function runMigrateAllBtradeSlicesToMonthsConnected(
-  argv: string[],
-): Promise<void> {
+export async function runMigrateAllBtradeSlicesToMonthsConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executeMigrateAllBtradeSlicesToMonthsCli(argv);
@@ -88,11 +80,9 @@ function isExecutedAsCli(): boolean {
 }
 
 if (isExecutedAsCli()) {
-  runMigrateAllBtradeSlicesToMonthsConnected(process.argv.slice(2)).catch(
-    (err) => {
-      const message = err instanceof Error ? err.message : String(err);
-      console.error(message);
-      process.exitCode = 1;
-    },
-  );
+  runMigrateAllBtradeSlicesToMonthsConnected(process.argv.slice(2)).catch((err) => {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(message);
+    process.exitCode = 1;
+  });
 }

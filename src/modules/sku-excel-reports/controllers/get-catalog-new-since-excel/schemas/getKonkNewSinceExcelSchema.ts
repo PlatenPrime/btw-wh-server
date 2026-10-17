@@ -9,9 +9,5 @@ export const getKonkNewSinceExcelQuerySchema = z.object({
   since: dateStringSchema,
 });
 
-export type GetKonkNewSinceExcelParams = z.infer<
-  typeof getKonkNewSinceExcelParamsSchema
->;
-export type GetKonkNewSinceExcelQuery = z.infer<
-  typeof getKonkNewSinceExcelQuerySchema
->;
+export type GetKonkNewSinceExcelParams = z.infer<typeof getKonkNewSinceExcelParamsSchema>;
+export type GetKonkNewSinceExcelQuery = z.infer<typeof getKonkNewSinceExcelQuerySchema>;

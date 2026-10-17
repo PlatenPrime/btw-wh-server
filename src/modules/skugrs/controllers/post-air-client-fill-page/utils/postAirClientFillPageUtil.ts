@@ -18,19 +18,14 @@ export type PostAirClientFillPageResult =
     }
   | {
       ok: false;
-      code:
-        | "SKUGR_NOT_FOUND"
-        | "NOT_AIR"
-        | "URL_MISMATCH"
-        | "PAGE_URL_MISMATCH"
-        | "PARSE_FAILED";
+      code: "SKUGR_NOT_FOUND" | "NOT_AIR" | "URL_MISMATCH" | "PAGE_URL_MISMATCH" | "PARSE_FAILED";
       message: string;
     };
 
 function resolveNextPageUrl(
   productsLength: number,
   nextPageUrl: string | null,
-  skugrUrl: string
+  skugrUrl: string,
 ): string | null {
   if (productsLength === 0 || nextPageUrl == null) {
     return null;
@@ -45,7 +40,7 @@ function resolveNextPageUrl(
  * Принимает карточки одной страницы Air-листинга с клиента и аддитивно заполняет группу.
  */
 export async function postAirClientFillPageUtil(
-  input: PostAirClientFillPageInput
+  input: PostAirClientFillPageInput,
 ): Promise<PostAirClientFillPageResult> {
   const skugr = await Skugr.findById(input.id).exec();
   if (!skugr) {
@@ -88,10 +83,7 @@ export async function postAirClientFillPageUtil(
     };
   }
 
-  const fillResult = await fillSkugrSkusFromProductsUtil(
-    skugr,
-    input.products
-  );
+  const fillResult = await fillSkugrSkusFromProductsUtil(skugr, input.products);
   if (!fillResult) {
     return {
       ok: false,
@@ -103,11 +95,7 @@ export async function postAirClientFillPageUtil(
   return {
     ok: true,
     stats: fillResult.stats,
-    nextPageUrl: resolveNextPageUrl(
-      input.products.length,
-      input.nextPageUrl,
-      skugr.url
-    ),
+    nextPageUrl: resolveNextPageUrl(input.products.length, input.nextPageUrl, skugr.url),
     productsOnPage: input.products.length,
   };
 }

@@ -9,7 +9,7 @@ describe("checkZoneDuplicatesUpdateUtil", () => {
 
   it("возвращает null если дубликатов нет", async () => {
     const zone1 = await Zone.create({ title: "12-1", bar: 11010, sector: 0 });
-    const zone2 = await Zone.create({ title: "12-2", bar: 11020, sector: 0 });
+    await Zone.create({ title: "12-2", bar: 11020, sector: 0 });
 
     const result = await checkZoneDuplicatesUpdateUtil({
       id: zone1._id.toString(),
@@ -45,7 +45,7 @@ describe("checkZoneDuplicatesUpdateUtil", () => {
 
   it("возвращает дубликат по bar", async () => {
     const zone1 = await Zone.create({ title: "15-1", bar: 11310, sector: 0 });
-    const zone2 = await Zone.create({ title: "15-2", bar: 11320, sector: 0 });
+    await Zone.create({ title: "15-2", bar: 11320, sector: 0 });
 
     const result = await checkZoneDuplicatesUpdateUtil({
       id: zone1._id.toString(),
@@ -56,12 +56,3 @@ describe("checkZoneDuplicatesUpdateUtil", () => {
     expect(result?.bar).toBe(11320);
   });
 });
-
-
-
-
-
-
-
-
-

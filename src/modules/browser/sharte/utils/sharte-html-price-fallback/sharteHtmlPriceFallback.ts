@@ -1,7 +1,7 @@
 import * as cheerio from "cheerio";
 import type { StockInfo } from "../../../utils/types.js";
 
-const PRICE_TEXT_REGEX = /([\d\s,\.]+)\s*грн/i;
+const PRICE_TEXT_REGEX = /([\d\s,.]+)\s*грн/i;
 
 /**
  * Извлекает цену из текста элемента a.price.changePrice (формат «1.85 грн.»).

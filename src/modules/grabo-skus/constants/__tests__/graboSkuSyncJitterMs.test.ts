@@ -13,9 +13,7 @@ describe("graboSkuSyncJitterMs", () => {
   it("defines a positive jitter range with min less than max", () => {
     expect(GRABO_SKU_SYNC_JITTER_MIN_MS).toBe(2500);
     expect(GRABO_SKU_SYNC_JITTER_MAX_MS).toBe(7000);
-    expect(GRABO_SKU_SYNC_JITTER_MIN_MS).toBeLessThan(
-      GRABO_SKU_SYNC_JITTER_MAX_MS
-    );
+    expect(GRABO_SKU_SYNC_JITTER_MIN_MS).toBeLessThan(GRABO_SKU_SYNC_JITTER_MAX_MS);
   });
 
   it("returns inclusive bounds via jitterMs", () => {

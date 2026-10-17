@@ -4,10 +4,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { updatePalletGroupSchema } from "./schemas/updatePalletGroupSchema.js";
 import { updatePalletGroupUtil } from "./utils/updatePalletGroupUtil.js";
 
-export const updatePalletGroupController = async (
-  req: Request,
-  res: Response
-) => {
+export const updatePalletGroupController = async (req: Request, res: Response) => {
   const body = {
     id: req.params.id,
     ...req.body,
@@ -16,9 +13,7 @@ export const updatePalletGroupController = async (
   const parseResult = updatePalletGroupSchema.safeParse(body);
 
   if (!parseResult.success) {
-    return res
-      .status(400)
-      .json({ message: "Invalid data", errors: parseResult.error.errors });
+    return res.status(400).json({ message: "Invalid data", errors: parseResult.error.issues });
   }
 
   const { id, title, order } = parseResult.data;
@@ -64,4 +59,3 @@ export const updatePalletGroupController = async (
     });
   }
 };
-

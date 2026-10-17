@@ -40,11 +40,11 @@ Root logger сериализует `level` как строку (`error`, `warn`,
 
 ## Env
 
-| Переменная | Значение | По умолчанию |
-|------------|----------|--------------|
-| LOG_LEVEL | fatal, error, warn, info, debug, trace | info (prod), debug (dev) |
-| LOG_FORMAT | json, pretty | json |
-| LOG_HTTP | true/false | true |
+| Переменная | Значение                               | По умолчанию             |
+| ---------- | -------------------------------------- | ------------------------ |
+| LOG_LEVEL  | fatal, error, warn, info, debug, trace | info (prod), debug (dev) |
+| LOG_FORMAT | json, pretty                           | json                     |
+| LOG_HTTP   | true/false                             | true                     |
 
 ## Redaction
 

@@ -29,7 +29,7 @@ function addZeroPatch(
   productId: string,
   day: SvbumStockDay,
   windowStartMs: number,
-  windowEndMs: number
+  windowEndMs: number,
 ): void {
   const { dateMs, stock } = day;
   if (typeof stock !== "number" || !Number.isFinite(stock)) return;
@@ -54,7 +54,7 @@ export function computeSvbumFakeStockPatchesForSeries(
   series: SvbumStockDay[],
   windowStartMs: number,
   windowEndMs: number,
-  trailingGraceDays: number = SVBUM_FAKE_STOCK_TRAILING_GRACE_DAYS
+  trailingGraceDays: number = SVBUM_FAKE_STOCK_TRAILING_GRACE_DAYS,
 ): SvbumFakeStockComputeResult {
   const spikeIndexes: number[] = [];
   for (let i = 0; i < series.length; i++) {
@@ -95,7 +95,7 @@ export function computeSvbumFakeStockPatches(
   seriesByProductId: Map<string, SvbumStockDay[]>,
   windowStartMs: number,
   windowEndMs: number,
-  trailingGraceDays: number = SVBUM_FAKE_STOCK_TRAILING_GRACE_DAYS
+  trailingGraceDays: number = SVBUM_FAKE_STOCK_TRAILING_GRACE_DAYS,
 ): SvbumFakeStockComputeResult {
   const patches: SvbumFakeStockPatch[] = [];
 
@@ -105,7 +105,7 @@ export function computeSvbumFakeStockPatches(
       series,
       windowStartMs,
       windowEndMs,
-      trailingGraceDays
+      trailingGraceDays,
     );
     patches.push(...result.patches);
   }

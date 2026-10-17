@@ -95,11 +95,8 @@ describe("getAllPosesUtil", () => {
     });
 
     expect(result.data.length).toBeGreaterThanOrEqual(1);
-    expect(
-      result.data.every(
-        (p) => p.palletData._id.toString() === pallet1._id.toString()
-      )
-    ).toBe(true);
+    expect(result.data.every((p) => p.palletData._id.toString() === pallet1._id.toString())).toBe(
+      true,
+    );
   });
 });
-

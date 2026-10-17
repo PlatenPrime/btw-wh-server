@@ -50,10 +50,9 @@ describe("deletePosUtil", () => {
         deletePosUtil({
           posId: nonExistentId,
           session,
-        })
+        }),
       ).rejects.toThrow("Position not found");
     });
     await session.endSession();
   });
 });
-

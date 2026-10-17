@@ -28,7 +28,7 @@ describe("resolveCorrectBalunFakeStockCliInput", () => {
         "--apply",
         "--lookback-days",
         "10",
-      ])
+      ]),
     ).toEqual({
       daysBack: 3,
       asOf: new Date("2026-10-07T00:00:00.000Z"),
@@ -99,16 +99,10 @@ describe("runCorrectBalunFakeStockConnected", () => {
   });
 
   it("connects and disconnects even when cli args are invalid", async () => {
-    const connect = vi
-      .spyOn(mongoose, "connect")
-      .mockResolvedValue(mongoose as never);
-    const disconnect = vi
-      .spyOn(mongoose, "disconnect")
-      .mockResolvedValue(undefined);
+    const connect = vi.spyOn(mongoose, "connect").mockResolvedValue(mongoose as never);
+    const disconnect = vi.spyOn(mongoose, "disconnect").mockResolvedValue(undefined);
 
-    await expect(runCorrectBalunFakeStockConnected(["--wat"])).rejects.toThrow(
-      /Unknown argument/
-    );
+    await expect(runCorrectBalunFakeStockConnected(["--wat"])).rejects.toThrow(/Unknown argument/);
     expect(connect).toHaveBeenCalledOnce();
     expect(disconnect).toHaveBeenCalledOnce();
   });

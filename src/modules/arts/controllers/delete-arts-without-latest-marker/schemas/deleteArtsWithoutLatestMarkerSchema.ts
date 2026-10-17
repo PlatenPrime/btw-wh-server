@@ -7,4 +7,3 @@ export const deleteArtsWithoutLatestMarkerSchema = z.object({});
 export type DeleteArtsWithoutLatestMarkerInput = z.infer<
   typeof deleteArtsWithoutLatestMarkerSchema
 >;
-

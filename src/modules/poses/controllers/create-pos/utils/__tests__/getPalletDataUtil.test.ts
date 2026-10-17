@@ -34,4 +34,3 @@ describe("getPalletDataUtil", () => {
     expect(result.isDef).toBe(true);
   });
 });
-

@@ -28,7 +28,7 @@ describe("startBtradeSlicesCron", () => {
     vi.clearAllMocks();
     cronCallback = null;
 
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const callbackArg = args[1];
       if (typeof callbackArg === "function") {
         cronCallback = callbackArg as () => Promise<void>;
@@ -54,7 +54,7 @@ describe("startBtradeSlicesCron", () => {
       expect.any(Function),
       null,
       true,
-      "Europe/Kiev"
+      "Europe/Kiev",
     );
   });
 
@@ -70,9 +70,7 @@ describe("startBtradeSlicesCron", () => {
   });
 
   it("sends error report when slice calculation fails", async () => {
-    vi.mocked(calculateBtradeSlice).mockRejectedValue(
-      new Error("slice failed"),
-    );
+    vi.mocked(calculateBtradeSlice).mockRejectedValue(new Error("slice failed"));
 
     startBtradeSlicesCron();
     expect(cronCallback).toBeDefined();

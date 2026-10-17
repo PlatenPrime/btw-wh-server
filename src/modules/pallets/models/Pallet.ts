@@ -39,7 +39,7 @@ const rowSubdocumentSchema = new Schema<IRowSubdocument>(
     _id: { type: Schema.Types.ObjectId, required: true },
     title: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const palletGroupSubdocumentSchema = new Schema<IPalletGroupSubdocument>(
@@ -47,7 +47,7 @@ const palletGroupSubdocumentSchema = new Schema<IPalletGroupSubdocument>(
     id: { type: Schema.Types.ObjectId, ref: "PalletGroup" },
     title: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const palletSchema = new Schema<IPallet>(
@@ -65,7 +65,7 @@ const palletSchema = new Schema<IPallet>(
     },
     palgr: { type: palletGroupSubdocumentSchema, required: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export { palletSchema };

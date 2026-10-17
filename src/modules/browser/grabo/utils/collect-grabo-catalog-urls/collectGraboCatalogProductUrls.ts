@@ -4,10 +4,7 @@ import { fetchGraboPageHtml } from "../fetch-grabo-page-html/fetchGraboPageHtml.
 import { getGraboListingProducts } from "../get-grabo-listing-products/getGraboListingProducts.js";
 import { parseGraboSitemapCategoryUrls } from "../parse-grabo-sitemap/parseGraboSitemapCategoryUrls.js";
 import { GRABO_SITEMAP_URL } from "../types/graboSkuData.js";
-import {
-  GRABO_EXTRA_CATEGORY_URLS,
-  mergeGraboCategoryUrls,
-} from "./graboExtraCategoryUrls.js";
+import { GRABO_EXTRA_CATEGORY_URLS, mergeGraboCategoryUrls } from "./graboExtraCategoryUrls.js";
 
 const log = createLogger({ module: "browser", konk: "grabo" });
 
@@ -37,25 +34,21 @@ function resolveDelay(delay?: number | (() => number)): number {
  * Ошибка sitemap пробрасывается. Ошибка одной категории — в failedCategoryUrls, остальные идут дальше.
  */
 export async function collectGraboCatalogProductUrls(
-  options?: CollectGraboCatalogOptions
+  options?: CollectGraboCatalogOptions,
 ): Promise<CollectGraboCatalogResult> {
   const getHtml = options?.getHtml ?? fetchGraboPageHtml;
-  const extraCategoryUrls =
-    options?.extraCategoryUrls ?? GRABO_EXTRA_CATEGORY_URLS;
+  const extraCategoryUrls = options?.extraCategoryUrls ?? GRABO_EXTRA_CATEGORY_URLS;
 
   const sitemapHtml = await getHtml(GRABO_SITEMAP_URL);
   const sitemapCategoryUrls = parseGraboSitemapCategoryUrls(sitemapHtml);
-  const categoryUrls = mergeGraboCategoryUrls(
-    sitemapCategoryUrls,
-    extraCategoryUrls
-  );
+  const categoryUrls = mergeGraboCategoryUrls(sitemapCategoryUrls, extraCategoryUrls);
   log.info(
     {
       sitemapUrl: GRABO_SITEMAP_URL,
       extraCategoryCount: extraCategoryUrls.length,
       categoryCount: categoryUrls.length,
     },
-    "grabo catalog sitemap parsed"
+    "grabo catalog sitemap parsed",
   );
   const productUrls = new Set<string>();
   const failedCategoryUrls: string[] = [];
@@ -70,10 +63,7 @@ export async function collectGraboCatalogProductUrls(
 
     const categoryUrl = categoryUrls[i]!;
     const index = i + 1;
-    log.info(
-      { index, total: categoryUrls.length, categoryUrl },
-      "grabo catalog category start"
-    );
+    log.info({ index, total: categoryUrls.length, categoryUrl }, "grabo catalog category start");
     try {
       const urls = await getGraboListingProducts(
         {
@@ -83,7 +73,7 @@ export async function collectGraboCatalogProductUrls(
         {
           delayBeforeNextMs: options?.delayBeforeNextMs,
           getHtml,
-        }
+        },
       );
       for (const url of urls) {
         productUrls.add(url);
@@ -96,7 +86,7 @@ export async function collectGraboCatalogProductUrls(
           listed: urls.length,
           uniqueTotal: productUrls.size,
         },
-        "grabo catalog category done"
+        "grabo catalog category done",
       );
     } catch (error) {
       failedCategoryUrls.push(categoryUrl);
@@ -107,7 +97,7 @@ export async function collectGraboCatalogProductUrls(
           categoryUrl,
           details: error instanceof Error ? error.message : String(error),
         },
-        "grabo catalog category failed"
+        "grabo catalog category failed",
       );
     }
   }

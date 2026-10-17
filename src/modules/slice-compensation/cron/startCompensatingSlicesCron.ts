@@ -31,13 +31,11 @@ export function startCompensatingSlicesCron(): CronJob {
             sliceDateLabel,
             analog,
             sku,
-          })
+          }),
         );
       } catch (error) {
         log.error({ err: error }, "compensating slices cron failed");
-        await sendCronAnalyticsReport(
-          formatCronErrorReport("Compensating slices", error)
-        );
+        await sendCronAnalyticsReport(formatCronErrorReport("Compensating slices", error));
       }
     },
     null,

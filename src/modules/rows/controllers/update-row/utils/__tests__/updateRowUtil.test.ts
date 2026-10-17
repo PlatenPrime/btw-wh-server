@@ -43,13 +43,12 @@ describe("updateRowUtil", () => {
   });
 
   it("сохраняет валидацию уникальности title", async () => {
-    const row1 = await Row.create({ title: "Unique Title 1" });
+    await Row.create({ title: "Unique Title 1" });
     const row2 = await Row.create({ title: "Unique Title 2" });
 
     // Попытка установить row2 тот же title что у row1 должна вызвать ошибку
     await expect(
-      updateRowUtil({ id: row2._id.toString(), title: "Unique Title 1" })
+      updateRowUtil({ id: row2._id.toString(), title: "Unique Title 1" }),
     ).rejects.toThrow();
   });
 });
-

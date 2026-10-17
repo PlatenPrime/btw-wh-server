@@ -57,10 +57,9 @@ describe("updatePosUtil", () => {
           posId: nonExistentId,
           updateData: { artikul: "ART-NEW" },
           session,
-        })
+        }),
       ).rejects.toThrow("Position not found");
     });
     await session.endSession();
   });
 });
-

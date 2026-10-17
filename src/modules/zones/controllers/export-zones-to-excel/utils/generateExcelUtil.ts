@@ -1,8 +1,5 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../../../lib/excel/worksheetStyles.js";
 import type { ExcelZoneRow } from "./types.js";
 
 const SHEET_NAME = "Зони";
@@ -10,7 +7,7 @@ const COLUMN_KEYS: (keyof ExcelZoneRow)[] = ["Назва", "Штрихкод", "
 const COLUMN_WIDTHS = [15, 12, 10];
 
 export async function generateExcelUtil(
-  excelData: ExcelZoneRow[]
+  excelData: ExcelZoneRow[],
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(SHEET_NAME);

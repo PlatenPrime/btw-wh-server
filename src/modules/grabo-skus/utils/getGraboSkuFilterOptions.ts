@@ -35,16 +35,15 @@ function uniqueSortedSizeOptions(values: unknown[]): string[] {
  * Уникальные значения селектов из всей коллекции, без сужения текущими фильтрами.
  */
 export async function getGraboSkuFilterOptions(): Promise<GraboSkuFilterOptions> {
-  const [color, size, material, gas, language, gasCapacity, tags] =
-    await Promise.all([
-      GraboSku.distinct("color"),
-      GraboSku.distinct("size"),
-      GraboSku.distinct("material"),
-      GraboSku.distinct("gas"),
-      GraboSku.distinct("language"),
-      GraboSku.distinct("gasCapacity"),
-      GraboSku.distinct("tags"),
-    ]);
+  const [color, size, material, gas, language, gasCapacity, tags] = await Promise.all([
+    GraboSku.distinct("color"),
+    GraboSku.distinct("size"),
+    GraboSku.distinct("material"),
+    GraboSku.distinct("gas"),
+    GraboSku.distinct("language"),
+    GraboSku.distinct("gasCapacity"),
+    GraboSku.distinct("tags"),
+  ]);
 
   return {
     color: uniqueSortedNonEmpty(color),

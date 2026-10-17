@@ -33,7 +33,9 @@ function delay(ms) {
 }
 
 function normalizeApiBase(raw) {
-  return String(raw || "").trim().replace(/\/+$/, "");
+  return String(raw || "")
+    .trim()
+    .replace(/\/+$/, "");
 }
 
 function apiUrl(apiBase, path) {
@@ -79,8 +81,6 @@ function waitTabComplete(tabId) {
     };
     chrome.tabs.onUpdated.addListener(listener);
   });
-}
-
 }
 
 async function getListingFromTab(tabId) {
@@ -132,7 +132,7 @@ async function fillPage(apiBase, jwt, group, pageUrl, listing) {
         nextPageUrl: listing.nextPageUrl,
         hasListingMarkup: listing.hasListingMarkup,
       }),
-    }
+    },
   );
   return { status: res.status, body };
 }
@@ -156,12 +156,9 @@ async function runFill() {
   log({ level: "info", message: "Старт очереди" });
 
   try {
-    const { res, body } = await apiFetch(
-      apiBase,
-      jwt,
-      "/api/skugrs/client/air/pending",
-      { method: "GET" }
-    );
+    const { res, body } = await apiFetch(apiBase, jwt, "/api/skugrs/client/air/pending", {
+      method: "GET",
+    });
     if (!res.ok) {
       log({
         level: "error",
@@ -170,9 +167,7 @@ async function runFill() {
       return;
     }
 
-    const items = Array.isArray(body.data && body.data.items)
-      ? body.data.items
-      : [];
+    const items = Array.isArray(body.data && body.data.items) ? body.data.items : [];
     log({ level: "info", message: `Групп в очереди: ${items.length}` });
 
     for (let i = 0; i < items.length; i += 1) {
@@ -234,12 +229,7 @@ async function runFill() {
 
           pageUrl = data.nextPageUrl || null;
           if (pageUrl) {
-            await delay(
-              jitter(
-                settings[STORAGE_KEYS.pageMinMs],
-                settings[STORAGE_KEYS.pageMaxMs]
-              )
-            );
+            await delay(jitter(settings[STORAGE_KEYS.pageMinMs], settings[STORAGE_KEYS.pageMaxMs]));
           }
         }
       } finally {
@@ -253,12 +243,7 @@ async function runFill() {
       }
 
       if (!stopRequested && i < items.length - 1) {
-        await delay(
-          jitter(
-            settings[STORAGE_KEYS.groupMinMs],
-            settings[STORAGE_KEYS.groupMaxMs]
-          )
-        );
+        await delay(jitter(settings[STORAGE_KEYS.groupMinMs], settings[STORAGE_KEYS.groupMaxMs]));
       }
     }
 

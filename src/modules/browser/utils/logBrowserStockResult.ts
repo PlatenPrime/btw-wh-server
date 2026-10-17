@@ -47,7 +47,7 @@ function truncateLink(link: string): string {
  */
 export function logBrowserStockResult(
   input: BrowserStockResultLogInput,
-  now: number = Date.now()
+  now: number = Date.now(),
 ): boolean {
   prune(now);
 
@@ -59,7 +59,7 @@ export function logBrowserStockResult(
           dropped: droppedSinceLastWarn,
           limit: BROWSER_STOCK_RESULT_LOGS_PER_MINUTE,
         },
-        "dropped stock result logs"
+        "dropped stock result logs",
       );
       droppedSinceLastWarn = 0;
       lastDropWarnAt = now;
@@ -77,7 +77,7 @@ export function logBrowserStockResult(
       price: input.price,
       ok,
     },
-    "browser stock result"
+    "browser stock result",
   );
   return true;
 }

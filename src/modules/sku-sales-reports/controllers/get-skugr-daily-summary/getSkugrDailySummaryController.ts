@@ -18,7 +18,7 @@ export const getSkugrDailySummaryController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }
@@ -26,8 +26,7 @@ export const getSkugrDailySummaryController = async (
   const result = await getSkugrDailySummaryUtil(parseResult.data);
   if (!result.ok) {
     res.status(404).json({
-      message:
-        "Skugr not found or group has no skus with productId for reporting",
+      message: "Skugr not found or group has no skus with productId for reporting",
     });
     return;
   }

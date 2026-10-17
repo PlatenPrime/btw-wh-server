@@ -5,10 +5,7 @@ interface GetCompleteAskMesUtilInput {
   solverName: string;
 }
 
-export const getCompleteAskMesUtil = ({
-  ask,
-  solverName,
-}: GetCompleteAskMesUtilInput): string => {
+export const getCompleteAskMesUtil = ({ ask, solverName }: GetCompleteAskMesUtilInput): string => {
   const message = `✅ Ваш запит виконано!
 
         📦 ${ask.artikul}

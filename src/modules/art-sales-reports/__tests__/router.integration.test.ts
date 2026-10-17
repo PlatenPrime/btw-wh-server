@@ -9,13 +9,10 @@ import { Art } from "../../arts/models/Art.js";
 import { seedBtradeSliceMonthDay } from "../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -37,9 +34,7 @@ describe("art-sales-reports router integration", () => {
       .query({ dateFrom: "2026-03-02", dateTo: "2026-03-02" })
       .expect(200);
 
-    expect(response.body.message).toBe(
-      "Art sales range retrieved successfully",
-    );
+    expect(response.body.message).toBe("Art sales range retrieved successfully");
     expect(response.body.data).toHaveLength(1);
     expect(response.body.data[0].sales).toBe(3);
   });

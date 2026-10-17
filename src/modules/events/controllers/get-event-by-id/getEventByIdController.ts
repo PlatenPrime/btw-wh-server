@@ -7,16 +7,13 @@ import { getEventByIdUtil } from "./utils/getEventByIdUtil.js";
  * @desc    Получить audit-событие по id
  * @route   GET /api/events/id/:id
  */
-export const getEventByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getEventByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getEventByIdSchema.safeParse({ id: req.params.id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

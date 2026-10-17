@@ -4,12 +4,10 @@ export function logPerfectUnavailableOutcome(
   productUrl: string,
   reason: string,
   htmlStatus: number,
-  hasProductPageHtml: boolean
+  hasProductPageHtml: boolean,
 ): void {
   logBrowserError(
     `Perfect stock unavailable (${reason})`,
-    new Error(
-      `url=${productUrl} status=${htmlStatus} productPageHtml=${hasProductPageHtml}`
-    )
+    new Error(`url=${productUrl} status=${htmlStatus} productPageHtml=${hasProductPageHtml}`),
   );
 }

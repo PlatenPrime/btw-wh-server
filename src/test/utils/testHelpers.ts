@@ -70,8 +70,7 @@ export const createMockResponse = () => {
 /**
  * Wait for a specified amount of time (useful for async operations)
  */
-export const wait = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
  * Clean up test data

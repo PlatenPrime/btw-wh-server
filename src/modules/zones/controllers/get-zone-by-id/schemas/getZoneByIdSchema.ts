@@ -8,12 +8,3 @@ export const getZoneByIdSchema = z.object({
 });
 
 export type GetZoneByIdInput = z.infer<typeof getZoneByIdSchema>;
-
-
-
-
-
-
-
-
-

@@ -4,9 +4,7 @@ import { ExcelArtRow } from "../types.js";
 import { generateExcelUtil } from "../generateExcelUtil.js";
 
 /** Reads worksheet into array of row objects (header row = keys, following rows = values). */
-async function readSheetToJson(
-  buffer: Buffer
-): Promise<Record<string, unknown>[]> {
+async function readSheetToJson(buffer: Buffer): Promise<Record<string, unknown>[]> {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
   const worksheet = workbook.getWorksheet("Артикулы");

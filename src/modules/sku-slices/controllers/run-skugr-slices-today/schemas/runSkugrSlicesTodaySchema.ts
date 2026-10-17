@@ -7,6 +7,4 @@ export const runSkugrSlicesTodaySchema = z.object({
   }),
 });
 
-export type RunSkugrSlicesTodayInput = z.infer<
-  typeof runSkugrSlicesTodaySchema
->;
+export type RunSkugrSlicesTodayInput = z.infer<typeof runSkugrSlicesTodaySchema>;

@@ -9,13 +9,10 @@ import { Pallet } from "../../pallets/models/Pallet.js";
 import { PalletGroup } from "../models/PalletGroup.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -38,10 +35,7 @@ describe("Pallet groups router integration", () => {
     });
 
     it("403 for USER role", async () => {
-      await request(app)
-        .get("/api/pallet-groups")
-        .set(createAuthHeader(RoleType.USER))
-        .expect(403);
+      await request(app).get("/api/pallet-groups").set(createAuthHeader(RoleType.USER)).expect(403);
     });
 
     it("200 returns all groups for ADMIN", async () => {
@@ -158,9 +152,7 @@ describe("Pallet groups router integration", () => {
         })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Pallet groups order updated successfully",
-      );
+      expect(response.body.message).toBe("Pallet groups order updated successfully");
       expect(response.body.data.updatedCount).toBe(2);
     });
   });
@@ -228,9 +220,7 @@ describe("Pallet groups router integration", () => {
         .expect(410);
 
       expect(response.body.code).toBe("API_TASKS_MIGRATED");
-      expect(response.body.kind).toBe(
-        "pallet-groups.recalculate-pallets-sectors",
-      );
+      expect(response.body.kind).toBe("pallet-groups.recalculate-pallets-sectors");
     });
   });
 
@@ -272,9 +262,7 @@ describe("Pallet groups router integration", () => {
         .send({ palletId: pallet._id.toString() })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Pallet unlinked from group successfully",
-      );
+      expect(response.body.message).toBe("Pallet unlinked from group successfully");
       expect(response.body.data.pallets).toHaveLength(0);
     });
   });

@@ -22,7 +22,7 @@ const UserSchema: Schema<IUser> = new Schema(
     telegram: { type: String },
     photo: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const User: Model<IUser> = getOrCreateModel<IUser>("User", UserSchema);

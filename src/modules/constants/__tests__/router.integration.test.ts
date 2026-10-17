@@ -7,13 +7,10 @@ import app from "../../../test/utils/testApp.js";
 import { Constant } from "../models/Constant.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" }
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -28,10 +25,7 @@ describe("Constants router integration", () => {
     });
 
     it("403 for USER role", async () => {
-      await request(app)
-        .get("/api/constants")
-        .set(createAuthHeader(RoleType.USER))
-        .expect(403);
+      await request(app).get("/api/constants").set(createAuthHeader(RoleType.USER)).expect(403);
     });
 
     it("200 returns all constants for ADMIN", async () => {

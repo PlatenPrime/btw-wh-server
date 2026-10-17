@@ -1,8 +1,5 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../../../lib/excel/worksheetStyles.js";
 import type { ExcelArtRow } from "./types.js";
 
 const SHEET_NAME = "Артикулы";
@@ -24,7 +21,7 @@ const COLUMN_WIDTHS = [15, 30, 30, 10, 10, 15, 15, 18];
  * @returns объект с буфером файла и именем файла
  */
 export async function generateExcelUtil(
-  excelData: ExcelArtRow[]
+  excelData: ExcelArtRow[],
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(SHEET_NAME);

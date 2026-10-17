@@ -3,10 +3,7 @@ import {
   notifyExcelBuildProgress,
   type ExcelBuildProgressHandler,
 } from "../../../lib/excel/excelBuildProgress.js";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
 import { enumerateSliceDates } from "../../slices/utils/enumerateSliceDates.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
@@ -87,7 +84,7 @@ export type SkuSliceExcelOptions = {
 };
 
 function getFirstAndLastNumeric(
-  values: (number | null | undefined)[]
+  values: (number | null | undefined)[],
 ): { first: number; last: number } | null {
   let first: number | null = null;
   let last: number | null = null;
@@ -113,7 +110,7 @@ function applyRowDiffAndPct(
   dateValues: (number | null)[],
   dataStartCol: number,
   diffCol: number,
-  diffPctCol: number
+  diffPctCol: number,
 ): void {
   const bounds = getFirstAndLastNumeric(dateValues);
   if (!bounds) return;
@@ -141,11 +138,10 @@ function applyStockDayCellHighlights(
   stockRow: ExcelJS.Row,
   dataStartCol: number,
   dates: Date[],
-  createdAt?: Date
+  createdAt?: Date,
 ): void {
   const dateCount = dates.length;
-  const newSkuDayMs =
-    createdAt != null ? toSliceDate(createdAt).getTime() : null;
+  const newSkuDayMs = createdAt != null ? toSliceDate(createdAt).getTime() : null;
 
   for (let i = 0; i < dateCount; i++) {
     const sliceDayMs = toSliceDate(dates[i]!).getTime();
@@ -164,13 +160,9 @@ function applyStockDayCellHighlights(
 
     const prevCell = stockRow.getCell(dataStartCol + i - 1);
     const prevVal =
-      typeof prevCell.value === "number"
-        ? prevCell.value
-        : Number(prevCell.value ?? NaN);
+      typeof prevCell.value === "number" ? prevCell.value : Number(prevCell.value ?? NaN);
     const currVal =
-      typeof currCell.value === "number"
-        ? currCell.value
-        : Number(currCell.value ?? NaN);
+      typeof currCell.value === "number" ? currCell.value : Number(currCell.value ?? NaN);
     if (!Number.isFinite(prevVal) || !Number.isFinite(currVal)) continue;
     if (currVal > prevVal) {
       currCell.fill = {
@@ -185,19 +177,15 @@ function applyStockDayCellHighlights(
 function highlightPriceChanges(
   priceRow: ExcelJS.Row,
   dataStartCol: number,
-  dateCount: number
+  dateCount: number,
 ): void {
   for (let i = 1; i < dateCount; i++) {
     const prevCell = priceRow.getCell(dataStartCol + i - 1);
     const currCell = priceRow.getCell(dataStartCol + i);
     const prevVal =
-      typeof prevCell.value === "number"
-        ? prevCell.value
-        : Number(prevCell.value ?? NaN);
+      typeof prevCell.value === "number" ? prevCell.value : Number(prevCell.value ?? NaN);
     const currVal =
-      typeof currCell.value === "number"
-        ? currCell.value
-        : Number(currCell.value ?? NaN);
+      typeof currCell.value === "number" ? currCell.value : Number(currCell.value ?? NaN);
     if (!Number.isFinite(prevVal) || !Number.isFinite(currVal)) continue;
     if (currVal < prevVal) {
       currCell.font = {
@@ -234,17 +222,15 @@ export async function buildSkuSliceExcelForSkus(
   getItem: (
     konkName: string,
     productId: string,
-    sliceDate: Date
+    sliceDate: Date,
   ) => ISkuSliceDataItem | null | undefined,
   titles: SkuSliceExcelTitles,
-  options: SkuSliceExcelOptions = {}
+  options: SkuSliceExcelOptions = {},
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const datesReport = enumerateSliceDates(dateFrom, dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
   const datesFull =
-    warmStart.getTime() < dateFrom.getTime()
-      ? [warmStart, ...datesReport]
-      : datesReport;
+    warmStart.getTime() < dateFrom.getTime() ? [warmStart, ...datesReport] : datesReport;
   const reportOffset = datesFull.length - datesReport.length;
   const dates = datesReport;
   const dateCount = dates.length;
@@ -271,9 +257,7 @@ export async function buildSkuSliceExcelForSkus(
   applyHeaderStyle(sheet, columnCount);
 
   const selectedMetrics =
-    options.metrics && options.metrics.length > 0
-      ? options.metrics
-      : DEFAULT_METRICS;
+    options.metrics && options.metrics.length > 0 ? options.metrics : DEFAULT_METRICS;
   const rowsPerSkuBlock = selectedMetrics.length;
   const includeStock = selectedMetrics.includes("stock");
 
@@ -368,8 +352,7 @@ export async function buildSkuSliceExcelForSkus(
   }
 
   for (let c = 1; c <= columnCount; c++) {
-    sheet.getColumn(c).width =
-      c >= dataStartCol && c < diffCol ? 22 : 14;
+    sheet.getColumn(c).width = c >= dataStartCol && c < diffCol ? 22 : 14;
   }
 
   const buf = await workbook.xlsx.writeBuffer();

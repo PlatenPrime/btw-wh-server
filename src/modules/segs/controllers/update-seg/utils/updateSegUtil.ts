@@ -28,9 +28,7 @@ export const updateSegUtil = async ({
   }
 
   // Получить блок для расчета сектора
-  const block = await Block.findById(existingSeg.block)
-    .session(session)
-    .exec();
+  const block = await Block.findById(existingSeg.block).session(session).exec();
   if (!block) {
     throw new Error("Block not found");
   }
@@ -45,9 +43,7 @@ export const updateSegUtil = async ({
   // Обновить zones
   if (updateData.zones !== undefined) {
     // Валидация: проверить существование всех зон
-    const zoneObjectIds = updateData.zones.map(
-      (zoneId) => new mongoose.Types.ObjectId(zoneId)
-    );
+    const zoneObjectIds = updateData.zones.map((zoneId) => new mongoose.Types.ObjectId(zoneId));
     const existingZones = await Zone.find({
       _id: { $in: zoneObjectIds },
     })
@@ -60,14 +56,11 @@ export const updateSegUtil = async ({
 
     // Валидация: проверить, что зоны не принадлежат другим сегментам
     const zonesWithOtherSegs = existingZones.filter(
-      (zone) =>
-        zone.seg &&
-        zone.seg.id &&
-        zone.seg.id.toString() !== segId
+      (zone) => zone.seg && zone.seg.id && zone.seg.id.toString() !== segId,
     );
     if (zonesWithOtherSegs.length > 0) {
       throw new Error(
-        `Zones already belong to other segments: ${zonesWithOtherSegs.map((z) => z._id.toString()).join(", ")}`
+        `Zones already belong to other segments: ${zonesWithOtherSegs.map((z) => z._id.toString()).join(", ")}`,
       );
     }
 
@@ -76,9 +69,7 @@ export const updateSegUtil = async ({
     const newZoneIds = updateData.zones;
 
     // Найти зоны, которые нужно удалить из сегмента
-    const zonesToRemove = oldZoneIds.filter(
-      (zoneId) => !newZoneIds.includes(zoneId)
-    );
+    const zonesToRemove = oldZoneIds.filter((zoneId) => !newZoneIds.includes(zoneId));
 
     // Удалить ссылки seg из зон, которые больше не в сегменте
     if (zonesToRemove.length > 0) {
@@ -94,7 +85,7 @@ export const updateSegUtil = async ({
             sector: 0,
           },
         },
-        { session }
+        { session },
       );
     }
 
@@ -117,7 +108,7 @@ export const updateSegUtil = async ({
           "seg.id": objectId,
         },
       },
-      { session }
+      { session },
     );
   }
 
@@ -127,10 +118,11 @@ export const updateSegUtil = async ({
   updateDataSeg.sector = sector;
 
   // Обновить сектор во всех зонах сегмента
-  const finalZoneIds = updateData.zones !== undefined 
-    ? updateData.zones.map((id) => new mongoose.Types.ObjectId(id))
-    : existingSeg.zones.map((zone) => zone._id);
-  
+  const finalZoneIds =
+    updateData.zones !== undefined
+      ? updateData.zones.map((id) => new mongoose.Types.ObjectId(id))
+      : existingSeg.zones.map((zone) => zone._id);
+
   await Zone.updateMany(
     {
       _id: { $in: finalZoneIds },
@@ -140,16 +132,14 @@ export const updateSegUtil = async ({
         sector,
       },
     },
-    { session }
+    { session },
   );
 
   // Обновить сегмент
-  const updatedSeg = await Seg.findByIdAndUpdate(
-    objectId,
-    updateDataSeg,
-    { new: true, session }
-  ).exec();
+  const updatedSeg = await Seg.findByIdAndUpdate(objectId, updateDataSeg, {
+    new: true,
+    session,
+  }).exec();
 
   return updatedSeg;
 };
-

@@ -22,6 +22,4 @@ export const postAirClientFillPageSchema = z.object({
   hasListingMarkup: z.boolean(),
 });
 
-export type PostAirClientFillPageInput = z.infer<
-  typeof postAirClientFillPageSchema
->;
+export type PostAirClientFillPageInput = z.infer<typeof postAirClientFillPageSchema>;

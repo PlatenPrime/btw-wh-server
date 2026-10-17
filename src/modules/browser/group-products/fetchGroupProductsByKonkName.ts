@@ -10,9 +10,7 @@ import type { FetchGroupProductsInput, GroupBrowserProduct } from "./types.js";
 
 type GroupPageProductRow = Pick<GroupBrowserProduct, keyof GroupBrowserProduct>;
 
-function buildGroupPagesFetchArgs(
-  input: FetchGroupProductsInput
-): FetchGroupProductsInput {
+function buildGroupPagesFetchArgs(input: FetchGroupProductsInput): FetchGroupProductsInput {
   return {
     groupUrl: input.groupUrl,
     ...(input.maxPages !== undefined && { maxPages: input.maxPages }),
@@ -21,9 +19,7 @@ function buildGroupPagesFetchArgs(
 
 async function fetchGroupPagesProductsVia(
   input: FetchGroupProductsInput,
-  fetcher: (
-    args: FetchGroupProductsInput
-  ) => Promise<ReadonlyArray<GroupPageProductRow>>
+  fetcher: (args: FetchGroupProductsInput) => Promise<ReadonlyArray<GroupPageProductRow>>,
 ): Promise<GroupBrowserProduct[]> {
   const rows = await fetcher(buildGroupPagesFetchArgs(input));
   return rows.map((p) => ({
@@ -46,7 +42,7 @@ export class UnsupportedKonkForGroupProductsError extends Error {
  */
 export async function fetchGroupProductsByKonkName(
   konkName: string,
-  input: FetchGroupProductsInput
+  input: FetchGroupProductsInput,
 ): Promise<GroupBrowserProduct[]> {
   const normalized = konkName.trim().toLowerCase();
 

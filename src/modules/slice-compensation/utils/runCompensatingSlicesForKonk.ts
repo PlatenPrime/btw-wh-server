@@ -25,7 +25,7 @@ export type RunCompensatingSlicesForKonkOptions = {
  */
 export async function runCompensatingSlicesForKonk(
   konkName: string,
-  options?: RunCompensatingSlicesForKonkOptions
+  options?: RunCompensatingSlicesForKonkOptions,
 ): Promise<CompensatingSlicesForKonkResult> {
   const normalized = normalizeCompetitorName(konkName);
   const sliceDate = toSliceDate(new Date());
@@ -34,11 +34,7 @@ export async function runCompensatingSlicesForKonk(
     (offset: number, weight: number, label: string) =>
     (done: number, total: number, message?: string) => {
       const mappedDone = offset + Math.round((weight * done) / Math.max(total, 1));
-      options?.onProgress?.(
-        mappedDone,
-        100,
-        message ? `${label}: ${message}` : label
-      );
+      options?.onProgress?.(mappedDone, 100, message ? `${label}: ${message}` : label);
     };
 
   if (options?.onProgress || options?.signal) {

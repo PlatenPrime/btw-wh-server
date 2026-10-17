@@ -121,9 +121,7 @@ describe("processPosesByArtikulUtil", () => {
     const pogrebiPoses = [mockPoses[0], mockPoses[2]];
     const merezhiPoses = [mockPoses[1]];
 
-    (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockPoses,
-    );
+    (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(mockPoses);
     (groupPosesByWarehouseUtil as ReturnType<typeof vi.fn>).mockReturnValue({
       pogrebi: pogrebiPoses,
       merezhi: merezhiPoses,
@@ -207,9 +205,7 @@ describe("processPosesByArtikulUtil", () => {
       } as IPos,
     ];
 
-    (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockPoses,
-    );
+    (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(mockPoses);
     (groupPosesByWarehouseUtil as ReturnType<typeof vi.fn>).mockReturnValue({
       pogrebi: [mockPoses[0]],
       merezhi: [mockPoses[1]],
@@ -261,9 +257,7 @@ describe("processPosesByArtikulUtil", () => {
 
     const pogrebiPoses = [...mockPoses];
 
-    (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(
-      mockPoses,
-    );
+    (getPosesByArtikulUtil as ReturnType<typeof vi.fn>).mockResolvedValue(mockPoses);
     (groupPosesByWarehouseUtil as ReturnType<typeof vi.fn>).mockReturnValue({
       pogrebi: pogrebiPoses,
       merezhi: [],

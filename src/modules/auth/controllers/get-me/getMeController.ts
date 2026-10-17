@@ -3,10 +3,7 @@ import { getMeSchema } from "./schemas/getMeSchema.js";
 import { getMeUtil } from "./utils/getMeUtil.js";
 import { getMeResponseUtil } from "./utils/getMeResponseUtil.js";
 
-export const getMeController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getMeController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -15,7 +12,7 @@ export const getMeController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -37,4 +34,3 @@ export const getMeController = async (
     }
   }
 };
-

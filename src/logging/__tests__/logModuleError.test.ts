@@ -14,12 +14,7 @@ vi.mock("../createLogger.js", () => ({
   }),
 }));
 
-import {
-  logModuleDebug,
-  logModuleError,
-  logModuleInfo,
-  logModuleWarn,
-} from "../logModuleError.js";
+import { logModuleDebug, logModuleError, logModuleInfo, logModuleWarn } from "../logModuleError.js";
 
 describe("logModuleError", () => {
   beforeEach(() => {
@@ -37,10 +32,7 @@ describe("logModuleError", () => {
     const err = new Error("boom");
     logModuleError("arts", err, "fetch failed", { artikul: "123" });
 
-    expect(mockError).toHaveBeenCalledWith(
-      { err, artikul: "123" },
-      "fetch failed"
-    );
+    expect(mockError).toHaveBeenCalledWith({ err, artikul: "123" }, "fetch failed");
   });
 });
 

@@ -12,9 +12,7 @@ import { logModuleError } from "../../../../../logging/logModuleError.js";
  * @param asks - Массив asks со статусом "processing" для проверки
  * @returns Массив ID завершенных asks
  */
-export const checkAndCompleteAsksUtil = async (
-  asks: IAsk[]
-): Promise<string[]> => {
+export const checkAndCompleteAsksUtil = async (asks: IAsk[]): Promise<string[]> => {
   const completedAskIds: string[] = [];
 
   // Фильтруем asks, которые готовы к завершению
@@ -51,30 +49,22 @@ export const checkAndCompleteAsksUtil = async (
           solver = await User.findById(ask.solver).session(session);
           if (!solver) {
             throw new Error(
-              `Solver user not found for ask ${(
-                ask._id as mongoose.Types.ObjectId
-              ).toString()}`
+              `Solver user not found for ask ${(ask._id as mongoose.Types.ObjectId).toString()}`,
             );
           }
 
           // Обновляем ask в транзакции, чтобы получить актуальную версию
-          const currentAsk = await Ask.findById(
-            ask._id as mongoose.Types.ObjectId
-          ).session(session);
+          const currentAsk = await Ask.findById(ask._id as mongoose.Types.ObjectId).session(
+            session,
+          );
           if (!currentAsk) {
-            throw new Error(
-              `Ask not found: ${(
-                ask._id as mongoose.Types.ObjectId
-              ).toString()}`
-            );
+            throw new Error(`Ask not found: ${(ask._id as mongoose.Types.ObjectId).toString()}`);
           }
 
           // Проверяем еще раз, что ask все еще готов к завершению
           const remainingQuantity = getRemainingQuantityUtil(currentAsk);
-          const pullQuant =
-            typeof currentAsk.pullQuant === "number" ? currentAsk.pullQuant : 0;
-          const hasQuant =
-            typeof currentAsk.quant === "number" && currentAsk.quant > 0;
+          const pullQuant = typeof currentAsk.pullQuant === "number" ? currentAsk.pullQuant : 0;
+          const hasQuant = typeof currentAsk.quant === "number" && currentAsk.quant > 0;
 
           if (currentAsk.status !== "processing" || !currentAsk.solver) {
             // Ask уже был обработан или изменился, пропускаем

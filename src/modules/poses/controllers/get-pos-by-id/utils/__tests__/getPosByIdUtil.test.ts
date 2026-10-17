@@ -36,4 +36,3 @@ describe("getPosByIdUtil", () => {
     expect(found).toBeNull();
   });
 });
-

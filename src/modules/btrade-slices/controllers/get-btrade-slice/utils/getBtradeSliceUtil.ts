@@ -64,7 +64,9 @@ export async function getBtradeSliceUtil(
   const artikuls = pageResult.items.map((r) => r.artikul);
   const arts =
     artikuls.length > 0
-      ? ((await Art.find({ artikul: { $in: artikuls } }).lean().exec()) as ArtLean[])
+      ? ((await Art.find({ artikul: { $in: artikuls } })
+          .lean()
+          .exec()) as ArtLean[])
       : [];
 
   const artByArtikul = new Map<string, ArtLean>();

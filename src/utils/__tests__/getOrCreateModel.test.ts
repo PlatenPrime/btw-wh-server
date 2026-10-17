@@ -11,10 +11,7 @@ describe("getOrCreateModel", () => {
 
   it("registers a model on first call", () => {
     const schema = new Schema({ name: String });
-    const Model = getOrCreateModel<{ name: string }>(
-      "TestGetOrCreateModel",
-      schema,
-    );
+    const Model = getOrCreateModel<{ name: string }>("TestGetOrCreateModel", schema);
 
     expect(Model.modelName).toBe("TestGetOrCreateModel");
     expect(mongoose.models.TestGetOrCreateModel).toBe(Model);
@@ -22,14 +19,8 @@ describe("getOrCreateModel", () => {
 
   it("returns existing model without OverwriteModelError", () => {
     const schema = new Schema({ name: String });
-    const first = getOrCreateModel<{ name: string }>(
-      "TestGetOrCreateModel",
-      schema,
-    );
-    const second = getOrCreateModel<{ name: string }>(
-      "TestGetOrCreateModel",
-      schema,
-    );
+    const first = getOrCreateModel<{ name: string }>("TestGetOrCreateModel", schema);
+    const second = getOrCreateModel<{ name: string }>("TestGetOrCreateModel", schema);
 
     expect(second).toBe(first);
   });

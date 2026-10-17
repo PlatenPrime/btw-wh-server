@@ -1,4 +1,4 @@
-import mongoose, { ClientSession } from "mongoose";
+import { ClientSession } from "mongoose";
 import { Pallet } from "../../../../pallets/models/Pallet.js";
 import { Pos } from "../../../../poses/models/Pos.js";
 import { Row } from "../../../models/Row.js";
@@ -8,12 +8,9 @@ type DeleteRowInput = {
   session: ClientSession;
 };
 
-export const deleteRowUtil = async ({
-  id,
-  session,
-}: DeleteRowInput): Promise<boolean> => {
+export const deleteRowUtil = async ({ id, session }: DeleteRowInput): Promise<boolean> => {
   const row = await Row.findById(id).session(session);
-  
+
   if (!row) {
     return false;
   }
@@ -35,4 +32,3 @@ export const deleteRowUtil = async ({
 
   return true;
 };
-

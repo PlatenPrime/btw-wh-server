@@ -7,17 +7,14 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить производителя по name
  * @route   GET /api/prods/name/:name
  */
-export const getProdByNameController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getProdByNameController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { name } = req.params;
     const parseResult = getProdByNameSchema.safeParse({ name });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

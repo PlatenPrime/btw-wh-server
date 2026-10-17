@@ -19,4 +19,3 @@ export const getAllRows = async (req: Request, res: Response) => {
     }
   }
 };
-

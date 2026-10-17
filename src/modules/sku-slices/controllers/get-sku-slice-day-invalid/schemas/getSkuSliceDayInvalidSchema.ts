@@ -16,6 +16,4 @@ export const getSkuSliceDayInvalidSchema = z.object({
     .refine((val) => val > 0 && val <= 100, "Limit must be between 1 and 100"),
 });
 
-export type GetSkuSliceDayInvalidQuery = z.infer<
-  typeof getSkuSliceDayInvalidSchema
->;
+export type GetSkuSliceDayInvalidQuery = z.infer<typeof getSkuSliceDayInvalidSchema>;

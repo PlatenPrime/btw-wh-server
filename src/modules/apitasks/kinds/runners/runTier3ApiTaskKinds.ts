@@ -16,10 +16,7 @@ import {
   type ApiTaskKindRunner,
 } from "../apiTaskRunTypes.js";
 
-export const runRecalculatePalletsSectors: ApiTaskKindRunner = async (
-  _params,
-  options,
-) => {
+export const runRecalculatePalletsSectors: ApiTaskKindRunner = async (_params, options) => {
   throwIfAborted(options?.signal);
   options?.onProgress?.(0, 1, "Recalculating pallet sectors");
   const result = await calculatePalletsSectorsUtil();
@@ -42,10 +39,7 @@ export const runRecalculatePalletsSectors: ApiTaskKindRunner = async (
   return okApiTaskRun({ ...result });
 };
 
-export const runRecalculateZonesSectors: ApiTaskKindRunner = async (
-  _params,
-  options,
-) => {
+export const runRecalculateZonesSectors: ApiTaskKindRunner = async (_params, options) => {
   throwIfAborted(options?.signal);
   options?.onProgress?.(0, 1, "Recalculating zone sectors");
   const result = await calculateZonesSectorsUtil();
@@ -66,10 +60,7 @@ export const runRecalculateZonesSectors: ApiTaskKindRunner = async (
   return okApiTaskRun({ ...result });
 };
 
-export const runPopulateMissingPosData: ApiTaskKindRunner = async (
-  _params,
-  options,
-) => {
+export const runPopulateMissingPosData: ApiTaskKindRunner = async (_params, options) => {
   throwIfAborted(options?.signal);
   const result = await populateMissingPosDataUtil({
     onProgress: options?.onProgress,
@@ -94,10 +85,7 @@ export const runPopulateMissingPosData: ApiTaskKindRunner = async (
   });
 };
 
-export const runFixIncorrectSkuData: ApiTaskKindRunner = async (
-  params,
-  options,
-) => {
+export const runFixIncorrectSkuData: ApiTaskKindRunner = async (params, options) => {
   const parsed = fixIncorrectSkuDataSchema.safeParse(params);
   if (!parsed.success) {
     return failApiTaskRun("Invalid params for skus.fix-incorrect-sku-data");
@@ -121,10 +109,7 @@ export const runFixIncorrectSkuData: ApiTaskKindRunner = async (
   return okApiTaskRun({ ...result });
 };
 
-export const runDeleteKonkInvalidSkus: ApiTaskKindRunner = async (
-  params,
-  options,
-) => {
+export const runDeleteKonkInvalidSkus: ApiTaskKindRunner = async (params, options) => {
   const parsed = deleteKonkInvalidSkusParamsSchema.safeParse(params);
   if (!parsed.success) {
     return failApiTaskRun("Invalid params for skus.delete-konk-invalid");
@@ -139,19 +124,13 @@ export const runDeleteKonkInvalidSkus: ApiTaskKindRunner = async (
       department: "skus",
       type: "delete",
       description:
-        "Видалено invalid SKU (" +
-        parsed.data.konkName +
-        "): " +
-        String(result.deletedCount),
+        "Видалено invalid SKU (" + parsed.data.konkName + "): " + String(result.deletedCount),
     });
   }
   return okApiTaskRun({ ...result, konkName: parsed.data.konkName });
 };
 
-export const runDeleteSkusNotInAnySkugr: ApiTaskKindRunner = async (
-  params,
-  options,
-) => {
+export const runDeleteSkusNotInAnySkugr: ApiTaskKindRunner = async (params, options) => {
   const parsed = deleteSkusNotInAnySkugrQuerySchema.safeParse(params ?? {});
   if (!parsed.success) {
     return failApiTaskRun("Invalid params for skus.delete-not-in-any-skugr");
@@ -174,10 +153,7 @@ export const runDeleteSkusNotInAnySkugr: ApiTaskKindRunner = async (
   return okApiTaskRun({ ...result });
 };
 
-export const runDeleteArtsWithoutLatestMarker: ApiTaskKindRunner = async (
-  _params,
-  options,
-) => {
+export const runDeleteArtsWithoutLatestMarker: ApiTaskKindRunner = async (_params, options) => {
   throwIfAborted(options?.signal);
   options?.onProgress?.(0, 1, "Deleting arts without latest marker");
   const result = await deleteArtsWithoutLatestMarkerUtil();

@@ -4,14 +4,11 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { bulkCreatePosesSchema } from "./schemas/bulkCreatePosesSchema.js";
 import { bulkCreatePosesUtil } from "./utils/bulkCreatePosesUtil.js";
 
-export const bulkCreatePosesController = async (
-  req: Request,
-  res: Response
-) => {
+export const bulkCreatePosesController = async (req: Request, res: Response) => {
   // 1. Валидация (вне try/catch согласно документации)
   const parseResult = bulkCreatePosesSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: parseResult.error.errors });
+    res.status(400).json({ error: parseResult.error.issues });
     return;
   }
 
@@ -44,8 +41,7 @@ export const bulkCreatePosesController = async (
     if (!res.headersSent) {
       if (
         error instanceof Error &&
-        (error.message === "Some pallets not found" ||
-          error.message === "Some rows not found")
+        (error.message === "Some pallets not found" || error.message === "Some rows not found")
       ) {
         res.status(404).json({ error: error.message });
       } else {
@@ -59,4 +55,3 @@ export const bulkCreatePosesController = async (
     await session.endSession();
   }
 };
-

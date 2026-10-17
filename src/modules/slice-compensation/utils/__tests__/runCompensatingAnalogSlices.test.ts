@@ -7,10 +7,9 @@ vi.mock("../../../../utils/delay.js", () => ({
 vi.mock("../../../analogs/models/Analog.js", () => ({
   Analog: { findOne: vi.fn() },
 }));
-vi.mock(
-  "../../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js",
-  () => ({ getAnalogStockDataUtil: vi.fn() })
-);
+vi.mock("../../../analogs/controllers/get-analog-stock/utils/getAnalogStockDataUtil.js", () => ({
+  getAnalogStockDataUtil: vi.fn(),
+}));
 vi.mock("../../../analog-slices/models/AnalogSlice.js", () => ({
   AnalogSlice: { find: vi.fn(), findOneAndUpdate: vi.fn() },
 }));
@@ -63,17 +62,13 @@ describe("runCompensatingAnalogSlices", () => {
   function mockAnalogFindOne(id: string | null) {
     vi.mocked(Analog.findOne).mockReturnValue({
       select: vi.fn().mockReturnValue({
-        lean: vi.fn().mockResolvedValue(
-          id ? { _id: { toString: () => id } } : null
-        ),
+        lean: vi.fn().mockResolvedValue(id ? { _id: { toString: () => id } } : null),
       }),
     } as never);
   }
 
   it("skips documents for excluded competitors", async () => {
-    vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(
-      new Set(["air"])
-    );
+    vi.mocked(getCompensationExcludedCompetitorSet).mockReturnValue(new Set(["air"]));
     mockFindLean([
       {
         konkName: "air",
@@ -114,7 +109,7 @@ describe("runCompensatingAnalogSlices", () => {
         stock: -1,
         price: -1,
         updated: false,
-      }
+      },
     );
   });
 
@@ -140,7 +135,7 @@ describe("runCompensatingAnalogSlices", () => {
         $set: {
           "data.ART1": { stock: 3, price: 99, artikul: "ART1" },
         },
-      }
+      },
     );
     expect(logModuleInfo).toHaveBeenCalledWith(
       "slice-compensation",
@@ -152,7 +147,7 @@ describe("runCompensatingAnalogSlices", () => {
         stock: 3,
         price: 99,
         updated: true,
-      }
+      },
     );
   });
 
@@ -171,7 +166,7 @@ describe("runCompensatingAnalogSlices", () => {
     expect(logModuleWarn).toHaveBeenCalledWith(
       "slice-compensation",
       "compensating analog: entity not found, skip",
-      { konkName: "sharte", artikulKey: "ART1" }
+      { konkName: "sharte", artikulKey: "ART1" },
     );
   });
 
@@ -191,7 +186,7 @@ describe("runCompensatingAnalogSlices", () => {
     expect(logModuleInfo).toHaveBeenCalledWith(
       "slice-compensation",
       "compensating analog refetch empty",
-      { konkName: "sharte", artikulKey: "ART1", kind: "analog" }
+      { konkName: "sharte", artikulKey: "ART1", kind: "analog" },
     );
   });
 

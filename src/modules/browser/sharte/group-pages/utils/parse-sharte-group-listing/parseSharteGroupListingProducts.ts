@@ -11,10 +11,7 @@ export type SharteGroupPageProduct = {
   imageUrl: string;
 };
 
-function pickProductHref(
-  $card: BrowserCheerio,
-  currentPageUrl: string
-): string | null {
+function pickProductHref($card: BrowserCheerio, currentPageUrl: string): string | null {
   const pictureHref = $card.find("a.picture").first().attr("href")?.trim();
   if (pictureHref && pictureHref !== "#") {
     const u = resolveHrefAgainstBase(pictureHref, currentPageUrl);
@@ -33,7 +30,7 @@ function pickProductHref(
 
 export function parseSharteGroupListingProducts(
   $: CheerioAPI,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, SharteGroupPageProduct> {
   const result = new Map<string, SharteGroupPageProduct>();
 
@@ -45,14 +42,10 @@ export function parseSharteGroupListingProducts(
     }
 
     const $img = $card.find("a.picture img").first();
-    const imageUrl = $img.length
-      ? resolveLazyListingImage($img, currentPageUrl)
-      : null;
+    const imageUrl = $img.length ? resolveLazyListingImage($img, currentPageUrl) : null;
 
     const rawTitle =
-      $card.find("a.name .middle").first().text().trim() ||
-      $img.attr("alt")?.trim() ||
-      "";
+      $card.find("a.name .middle").first().text().trim() || $img.attr("alt")?.trim() || "";
     const title = decodeHtmlEntities(rawTitle).replace(/\s+/g, " ").trim();
 
     const url = pickProductHref($card, currentPageUrl);
@@ -72,14 +65,8 @@ export function parseSharteGroupListingProducts(
   return result;
 }
 
-export function getSharteGroupNextPageUrl(
-  $: CheerioAPI,
-  currentPageUrl: string
-): string | null {
-  const nextFromPagination = $(".bx-pagination li.bx-pag-next a")
-    .first()
-    .attr("href")
-    ?.trim();
+export function getSharteGroupNextPageUrl($: CheerioAPI, currentPageUrl: string): string | null {
+  const nextFromPagination = $(".bx-pagination li.bx-pag-next a").first().attr("href")?.trim();
   if (nextFromPagination) {
     return resolveHrefAgainstBase(nextFromPagination, currentPageUrl);
   }

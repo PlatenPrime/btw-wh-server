@@ -94,9 +94,7 @@ describe("createKaskController", () => {
     const events = await Event.find({ department: "kasks" });
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(user._id));
-    expect(events[0].description).toBe(
-      "Створено касовий запит на артикул 1111-2222 (4 шт.)"
-    );
+    expect(events[0].description).toBe("Створено касовий запит на артикул 1111-2222 (4 шт.)");
   });
 
   it("201 creates kask without optional fields", async () => {

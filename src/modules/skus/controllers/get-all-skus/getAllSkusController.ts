@@ -7,16 +7,13 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить sku с пагинацией и фильтрами
  * @route   GET /api/skus
  */
-export const getAllSkusController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAllSkusController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getAllSkusQuerySchema.safeParse(req.query);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid query parameters",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

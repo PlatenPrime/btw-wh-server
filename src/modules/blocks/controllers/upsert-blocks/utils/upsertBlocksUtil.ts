@@ -33,9 +33,7 @@ const ensureUniqueEntries = (normalizedBlocks: NormalizedBlock[]) => {
   });
 };
 
-const validateSegmentsOwnership = async (
-  blocks: NormalizedBlock[]
-): Promise<void> => {
+const validateSegmentsOwnership = async (blocks: NormalizedBlock[]): Promise<void> => {
   for (const block of blocks) {
     if (!block.segs || block.segs.length === 0) {
       continue;
@@ -49,20 +47,16 @@ const validateSegmentsOwnership = async (
       .exec();
 
     if (segDocs.length !== block.segs.length) {
-      throw new Error(
-        `One or more segments do not exist for block ${block.title}`
-      );
+      throw new Error(`One or more segments do not exist for block ${block.title}`);
     }
 
-    const invalidSegs = segDocs.filter(
-      (seg) => seg.block.toString() !== block._id.toString()
-    );
+    const invalidSegs = segDocs.filter((seg) => seg.block.toString() !== block._id.toString());
 
     if (invalidSegs.length > 0) {
       throw new Error(
         `Segments ${invalidSegs
           .map((seg) => seg._id.toString())
-          .join(", ")} do not belong to block ${block.title}`
+          .join(", ")} do not belong to block ${block.title}`,
       );
     }
   }
@@ -124,11 +118,8 @@ export const upsertBlocksUtil = async ({
 
   await Promise.all(
     normalizedBlocks.map((block) =>
-      Seg.updateMany(
-        { block: block._id },
-        { $set: { "blockData.title": block.title } }
-      ).exec()
-    )
+      Seg.updateMany({ block: block._id }, { $set: { "blockData.title": block.title } }).exec(),
+    ),
   );
 
   const updatedBlocks = await Block.find({
@@ -142,5 +133,3 @@ export const upsertBlocksUtil = async ({
     updatedBlocks,
   };
 };
-
-

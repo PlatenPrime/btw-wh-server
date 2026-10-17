@@ -17,10 +17,7 @@ import {
 } from "../apiTaskRunTypes.js";
 import { fillSkugrsApiTaskParamsSchema } from "../apiTaskKindDefinitions.js";
 
-export const runSkuSlicesPostCorrectionsRun: ApiTaskKindRunner = async (
-  params,
-  options,
-) => {
+export const runSkuSlicesPostCorrectionsRun: ApiTaskKindRunner = async (params, options) => {
   const parsed = postSkuSlicePostCorrectionsSchema.safeParse(params);
   if (!parsed.success) {
     return failApiTaskRun("Invalid params for sku-slices.post-corrections.run");
@@ -47,10 +44,7 @@ export const runSkuSlicesPostCorrectionsRun: ApiTaskKindRunner = async (
   return okApiTaskRun({ ...result });
 };
 
-export const runSkuSlicesSkugrRunToday: ApiTaskKindRunner = async (
-  params,
-  options,
-) => {
+export const runSkuSlicesSkugrRunToday: ApiTaskKindRunner = async (params, options) => {
   const parsed = runSkugrSlicesTodaySchema.safeParse(params);
   if (!parsed.success) {
     return failApiTaskRun("Invalid params for sku-slices.skugr-run-today");
@@ -88,10 +82,7 @@ export const runSkuSlicesSkugrRunToday: ApiTaskKindRunner = async (
   });
 };
 
-export const runSliceCompensationRun: ApiTaskKindRunner = async (
-  params,
-  options,
-) => {
+export const runSliceCompensationRun: ApiTaskKindRunner = async (params, options) => {
   const parsed = runCompensatingSliceSchema.safeParse(params);
   if (!parsed.success) {
     return failApiTaskRun("Invalid params for slice-compensation.run");
@@ -107,8 +98,7 @@ export const runSliceCompensationRun: ApiTaskKindRunner = async (
       department: "slice-compensation",
       type: "other",
       description:
-        "Запущено позачерговий компенсуючий забір слайсів для конкурента " +
-        result.konkName,
+        "Запущено позачерговий компенсуючий забір слайсів для конкурента " + result.konkName,
     });
   }
   return okApiTaskRun({

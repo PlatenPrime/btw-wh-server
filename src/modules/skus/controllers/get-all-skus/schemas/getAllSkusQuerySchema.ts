@@ -7,12 +7,12 @@ export const getAllSkusQuerySchema = z.object({
   search: z.string().optional(),
   isInvalid: z
     .union([z.literal("true"), z.literal("false")])
-    .optional()
-    .transform((v) => (v === undefined ? undefined : v === "true")),
+    .transform((v) => v === "true")
+    .optional(),
   notInAnySkugr: z
     .union([z.literal("true"), z.literal("false")])
-    .optional()
-    .transform((v) => (v === undefined ? undefined : v === "true")),
+    .transform((v) => v === "true")
+    .optional(),
   createdFrom: dateStringSchema.optional(),
   page: z
     .string()

@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestUser } from "../../../../../../test/setup.js";
 import { checkUserExistsUtil } from "../checkUserExistsUtil.js";
@@ -24,4 +23,3 @@ describe("checkUserExistsUtil", () => {
     expect(exists).toBe(false);
   });
 });
-

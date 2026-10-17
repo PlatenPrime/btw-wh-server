@@ -20,13 +20,13 @@ export { getSvbumNextPageUrl } from "./get-svbum-next-page-url/getSvbumNextPageU
 
 function parseProductsFromPage(
   $: CheerioAPI,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, SvbumGroupPageProduct> {
   return parseSvbumGroupListingProducts($, currentPageUrl);
 }
 
 export async function getSvbumGroupPagesProducts(
-  input: GetSvbumGroupPagesProductsInput
+  input: GetSvbumGroupPagesProductsInput,
 ): Promise<SvbumGroupPageProduct[]> {
   const parseResult = getSvbumGroupPagesProductsSchema.safeParse(input);
   if (!parseResult.success) {

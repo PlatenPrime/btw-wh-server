@@ -11,12 +11,9 @@ export class BrowserOriginBlockedError extends Error {
 
   constructor(
     message: string,
-    args: { httpStatus: number; retryAfterSec?: number; cause?: unknown }
+    args: { httpStatus: number; retryAfterSec?: number; cause?: unknown },
   ) {
-    super(
-      message,
-      args.cause !== undefined ? { cause: args.cause } : undefined
-    );
+    super(message, args.cause !== undefined ? { cause: args.cause } : undefined);
     this.name = "BrowserOriginBlockedError";
     this.httpStatus = args.httpStatus;
     if (args.retryAfterSec !== undefined) {
@@ -27,14 +24,11 @@ export class BrowserOriginBlockedError extends Error {
 
 export function isCloudflareOriginBlockedStatus(status: number): boolean {
   return (
-    status >= CLOUDFLARE_ORIGIN_BLOCKED_STATUS_MIN &&
-    status <= CLOUDFLARE_ORIGIN_BLOCKED_STATUS_MAX
+    status >= CLOUDFLARE_ORIGIN_BLOCKED_STATUS_MIN && status <= CLOUDFLARE_ORIGIN_BLOCKED_STATUS_MAX
   );
 }
 
-export function parseRetryAfterSeconds(
-  value: string | undefined
-): number | undefined {
+export function parseRetryAfterSeconds(value: string | undefined): number | undefined {
   const trimmed = value?.trim();
   if (!trimmed || !/^\d+$/.test(trimmed)) {
     return undefined;
@@ -42,15 +36,11 @@ export function parseRetryAfterSeconds(
   return Number(trimmed);
 }
 
-export function isOriginBlockedError(
-  err: unknown
-): err is BrowserOriginBlockedError {
+export function isOriginBlockedError(err: unknown): err is BrowserOriginBlockedError {
   if (err instanceof BrowserOriginBlockedError) {
     return true;
   }
   return Boolean(
-    err &&
-      typeof err === "object" &&
-      (err as { code?: string }).code === ORIGIN_BLOCKED_CODE
+    err && typeof err === "object" && (err as { code?: string }).code === ORIGIN_BLOCKED_CODE,
   );
 }

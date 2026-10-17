@@ -34,18 +34,14 @@ export function resolvePackFlipCliDates(argv: string[]): {
   };
 }
 
-export async function executePackFlipReviewCli(
-  argv: string[]
-): Promise<PackFlipReviewResult> {
+export async function executePackFlipReviewCli(argv: string[]): Promise<PackFlipReviewResult> {
   const parsed = resolvePackFlipCliDates(argv);
   const result = await reviewPackFlipsUtil(parsed);
   console.log(JSON.stringify(result, null, 2));
   return result;
 }
 
-export async function runPackFlipReviewConnected(
-  argv: string[]
-): Promise<void> {
+export async function runPackFlipReviewConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executePackFlipReviewCli(argv);

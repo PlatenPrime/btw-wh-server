@@ -6,10 +6,7 @@ const SHARIK_PREV_BASE = "https://sharik.ua/images/elements_big_prev";
 /**
  * Строит upstream URL картинки артикула на sharik.ua.
  */
-export function buildSharikArtImageUrl(
-  artikul: string,
-  size: SharikArtImageSize = "prev"
-): string {
+export function buildSharikArtImageUrl(artikul: string, size: SharikArtImageSize = "prev"): string {
   const encoded = encodeURIComponent(artikul);
   if (size === "big") {
     return `${SHARIK_BIG_BASE}/${encoded}_m1.jpg`;

@@ -84,12 +84,8 @@ describe("getAllGraboSkusUtil", () => {
   });
 
   it("searches title and productId case-insensitively", async () => {
-    await GraboSku.create(
-      graboSkuDoc({ productId: "G72274", title: "Pink Ribbon" })
-    );
-    await GraboSku.create(
-      graboSkuDoc({ productId: "G10000", title: "Blue Star" })
-    );
+    await GraboSku.create(graboSkuDoc({ productId: "G72274", title: "Pink Ribbon" }));
+    await GraboSku.create(graboSkuDoc({ productId: "G10000", title: "Blue Star" }));
 
     const byTitle = await getAllGraboSkusUtil({
       page: 1,
@@ -137,7 +133,7 @@ describe("getAllGraboSkusUtil", () => {
         language: "EN",
         gasCapacity: "air only",
         tags: ["birthday", "gold"],
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
@@ -147,7 +143,7 @@ describe("getAllGraboSkusUtil", () => {
         color: "Blue",
         gasCapacity: "helium 0.02 m3",
         tags: ["other"],
-      })
+      }),
     );
 
     const result = await getAllGraboSkusUtil({
@@ -173,25 +169,25 @@ describe("getAllGraboSkusUtil", () => {
       graboSkuDoc({
         productId: "G40A",
         size: '40" / 62x91x25 cm',
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
         productId: "G40B",
         size: '40" / other',
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
         productId: "G400",
         size: '400" / huge',
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
         productId: "G14",
         size: '14"',
-      })
+      }),
     );
 
     const result = await getAllGraboSkusUtil({
@@ -201,10 +197,7 @@ describe("getAllGraboSkusUtil", () => {
       size: '40"',
     });
 
-    expect(result.graboSkus.map((doc) => doc.productId).sort()).toEqual([
-      "G40A",
-      "G40B",
-    ]);
+    expect(result.graboSkus.map((doc) => doc.productId).sort()).toEqual(["G40A", "G40B"]);
   });
 
   it("includes filterOptions from the whole collection, not the current page", async () => {
@@ -215,7 +208,7 @@ describe("getAllGraboSkusUtil", () => {
         size: '14" / a',
         gasCapacity: "air only",
         tags: ["Party"],
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
@@ -224,7 +217,7 @@ describe("getAllGraboSkusUtil", () => {
         size: '18" / b',
         gasCapacity: "helium 0.02 m3",
         tags: ["Girl", "Party"],
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
@@ -233,7 +226,7 @@ describe("getAllGraboSkusUtil", () => {
         size: '14" / c',
         gasCapacity: "",
         tags: [],
-      })
+      }),
     );
 
     const result = await getAllGraboSkusUtil({
@@ -247,10 +240,7 @@ describe("getAllGraboSkusUtil", () => {
     expect(result.graboSkus[0]!.productId).toBe("G1");
     expect(result.filterOptions?.color).toEqual(["Blue", "Gold", "Pink"]);
     expect(result.filterOptions?.size).toEqual(['14"', '18"']);
-    expect(result.filterOptions?.gasCapacity).toEqual([
-      "air only",
-      "helium 0.02 m3",
-    ]);
+    expect(result.filterOptions?.gasCapacity).toEqual(["air only", "helium 0.02 m3"]);
     expect(result.filterOptions?.tags).toEqual(["Girl", "Party"]);
   });
 });

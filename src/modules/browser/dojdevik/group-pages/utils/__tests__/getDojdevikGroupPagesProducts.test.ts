@@ -7,13 +7,9 @@ import { browserGet } from "../../../../utils/browserRequest.js";
 
 vi.mock("../../../../utils/browserRequest.js");
 
-const fixturesDir = join(
-  dirname(fileURLToPath(import.meta.url)),
-  "../../../skugr-pages"
-);
+const fixturesDir = join(dirname(fileURLToPath(import.meta.url)), "../../../skugr-pages");
 
-const GROUP_URL =
-  "https://dojdevik.com.ua/ua/g4092193-vozdushnye-shariki-multfilmy";
+const GROUP_URL = "https://dojdevik.com.ua/ua/g4092193-vozdushnye-shariki-multfilmy";
 const PAGE2_URL = `${GROUP_URL}/page_2`;
 
 describe("getDojdevikGroupPagesProducts", () => {
@@ -39,16 +35,13 @@ describe("getDojdevikGroupPagesProducts", () => {
     expect(result.length).toBeGreaterThan(20);
     expect(result.every((p) => p.productId && p.url && p.title)).toBe(true);
     expect(result.some((p) => p.url.includes("dojdevik.com.ua") || p.url.startsWith("http"))).toBe(
-      true
+      true,
     );
     expect(vi.mocked(browserGet)).toHaveBeenCalledTimes(2);
   });
 
   it("includes OOS products from last page via product-block", async () => {
-    const htmlLast = readFileSync(
-      join(fixturesDir, "skugr-page-last.txt"),
-      "utf8"
-    );
+    const htmlLast = readFileSync(join(fixturesDir, "skugr-page-last.txt"), "utf8");
 
     vi.mocked(browserGet).mockResolvedValue(htmlLast);
 
@@ -62,8 +55,6 @@ describe("getDojdevikGroupPagesProducts", () => {
   });
 
   it("throws on invalid input", async () => {
-    await expect(
-      getDojdevikGroupPagesProducts({ groupUrl: "" } as never)
-    ).rejects.toThrow();
+    await expect(getDojdevikGroupPagesProducts({ groupUrl: "" } as never)).rejects.toThrow();
   });
 });

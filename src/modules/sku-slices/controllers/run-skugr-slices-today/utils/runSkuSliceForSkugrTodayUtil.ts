@@ -39,11 +39,7 @@ function throwIfAborted(signal?: AbortSignal): void {
   }
 }
 
-async function fetchSkuStockWithRetry(
-  konkName: string,
-  productKey: string,
-  skuId: string
-) {
+async function fetchSkuStockWithRetry(konkName: string, productKey: string, skuId: string) {
   const log = createLogger({ module: "sku-slices", konkName });
   const delays = [1000, 3000, 5000];
   let lastError: unknown = null;
@@ -60,7 +56,7 @@ async function fetchSkuStockWithRetry(
       const msg = err instanceof Error ? err.message : String(err);
       log.warn(
         { productKey, attempt, maxAttempts: delays.length, err: msg },
-        "sku stock fetch attempt failed"
+        "sku stock fetch attempt failed",
       );
       if (attempt < delays.length) {
         await delay(delays[attempt - 1]!);
@@ -77,19 +73,15 @@ async function fetchSkuStockWithRetry(
  */
 export async function runSkuSliceForSkugrTodayUtil(
   input: RunSkugrSlicesTodayInput,
-  options?: RunSkuSliceForSkugrTodayOptions
+  options?: RunSkuSliceForSkugrTodayOptions,
 ): Promise<RunSkuSliceForSkugrTodayResult | null> {
   throwIfAborted(options?.signal);
-  const skugr = await Skugr.findById(input.skugrId)
-    .select("konkName skus")
-    .lean();
+  const skugr = await Skugr.findById(input.skugrId).select("konkName skus").lean();
   if (!skugr) return null;
 
   const konkName = skugr.konkName;
   const sliceDate = toSliceDate(new Date());
-  const skuIds = [
-    ...new Set(skugr.skus.map((id) => id.toString())),
-  ];
+  const skuIds = [...new Set(skugr.skus.map((id) => id.toString()))];
 
   const skus =
     skuIds.length === 0
@@ -136,7 +128,7 @@ export async function runSkuSliceForSkugrTodayUtil(
               stock: result.stock,
               price: result.price,
             },
-            "skugr slice item invalid"
+            "skugr slice item invalid",
           );
         } else {
           counters.count += 1;
@@ -156,23 +148,16 @@ export async function runSkuSliceForSkugrTodayUtil(
           },
           isOriginBlockedError(err)
             ? "origin blocked, skugr slice aborted"
-            : "unsupported konk for stock fetch, skugr slice aborted"
+            : "unsupported konk for stock fetch, skugr slice aborted",
         );
         break;
       }
       counters.errors += 1;
       const msg = err instanceof Error ? err.message : String(err);
-      log.error(
-        { productKey, skugrId: input.skugrId, err: msg },
-        "skugr slice item failed"
-      );
+      log.error({ productKey, skugrId: input.skugrId, err: msg }, "skugr slice item failed");
     }
 
-    options?.onProgress?.(
-      i + 1,
-      progressTotal,
-      `SKU ${i + 1}/${withPid.length}`
-    );
+    options?.onProgress?.(i + 1, progressTotal, `SKU ${i + 1}/${withPid.length}`);
 
     if (i < withPid.length - 1) {
       throwIfAborted(options?.signal);

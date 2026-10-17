@@ -45,7 +45,7 @@ describe("getGraboSkuFilterOptions", () => {
         language: "EN",
         gasCapacity: "air only",
         tags: ["Party", "Girl"],
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
@@ -57,7 +57,7 @@ describe("getGraboSkuFilterOptions", () => {
         language: "IT",
         gasCapacity: "helium 0.02 m3",
         tags: ["Girl", ""],
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
@@ -69,7 +69,7 @@ describe("getGraboSkuFilterOptions", () => {
         language: "",
         gasCapacity: "",
         tags: [],
-      })
+      }),
     );
 
     const options = await getGraboSkuFilterOptions();
@@ -88,13 +88,13 @@ describe("getGraboSkuFilterOptions", () => {
       graboSkuDoc({
         productId: "G14",
         size: '14" / 13x34 cm',
-      })
+      }),
     );
     await GraboSku.create(
       graboSkuDoc({
         productId: "G18",
         size: '18"',
-      })
+      }),
     );
 
     const options = await getGraboSkuFilterOptions();

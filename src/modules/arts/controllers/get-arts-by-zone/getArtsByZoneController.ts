@@ -3,10 +3,7 @@ import { getArtsByZoneSchema } from "./schemas/getArtsByZoneSchema.js";
 import { getArtsByZoneUtil } from "./utils/getArtsByZoneUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getArtsByZoneController = async (
-  req: Request,
-  res: Response
-) => {
+export const getArtsByZoneController = async (req: Request, res: Response) => {
   try {
     const { zone } = req.params;
 
@@ -15,7 +12,7 @@ export const getArtsByZoneController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid zone parameter",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -36,4 +33,3 @@ export const getArtsByZoneController = async (
     }
   }
 };
-

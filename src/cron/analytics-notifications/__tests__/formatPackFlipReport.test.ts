@@ -3,7 +3,7 @@ import { formatPackFlipReport } from "../formatPackFlipReport.js";
 import type { PackFlipFinding } from "../../../modules/sku-slices/utils/reviewPackFlipsUtil.js";
 
 function finding(
-  overrides: Partial<PackFlipFinding> & Pick<PackFlipFinding, "productId" | "kind">
+  overrides: Partial<PackFlipFinding> & Pick<PackFlipFinding, "productId" | "kind">,
 ): PackFlipFinding {
   return {
     skuId: "",
@@ -29,9 +29,7 @@ describe("formatPackFlipReport", () => {
       ambiguous: [],
     });
     expect(msg).toContain("📊 Pack-flip perfect — applied");
-    expect(msg).toContain(
-      "perfect 2026-09-13…2026-09-15: patched 0, price-only 0, ambiguous 0"
-    );
+    expect(msg).toContain("perfect 2026-09-13…2026-09-15: patched 0, price-only 0, ambiguous 0");
     expect(msg).not.toContain("patched:");
   });
 
@@ -55,7 +53,7 @@ describe("formatPackFlipReport", () => {
         kind: "inverse",
         title: i === 0 ? "Balloon" : "",
         patched: { stock: 100, price: 100 },
-      })
+      }),
     );
     const msg = formatPackFlipReport({
       konkName: "perfect",

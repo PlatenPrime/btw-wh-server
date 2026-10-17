@@ -1,8 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import {
-  AIR_HTTP_PROXY_ENABLED,
-  getAirHttpProxyUrl,
-} from "../getAirHttpProxyUrl.js";
+import { AIR_HTTP_PROXY_ENABLED, getAirHttpProxyUrl } from "../getAirHttpProxyUrl.js";
 
 describe("getAirHttpProxyUrl", () => {
   const original = process.env.AIR_HTTP_PROXY_URL;
@@ -17,8 +14,7 @@ describe("getAirHttpProxyUrl", () => {
 
   it("AIR_HTTP_PROXY_ENABLED=false — всегда undefined, даже если env задан", () => {
     expect(AIR_HTTP_PROXY_ENABLED).toBe(false);
-    process.env.AIR_HTTP_PROXY_URL =
-      "  http://user:secret@77.47.252.164:50100  ";
+    process.env.AIR_HTTP_PROXY_URL = "  http://user:secret@77.47.252.164:50100  ";
     expect(getAirHttpProxyUrl()).toBeUndefined();
   });
 

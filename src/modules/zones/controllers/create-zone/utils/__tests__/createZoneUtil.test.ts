@@ -47,4 +47,3 @@ describe("createZoneUtil", () => {
     expect(result.sector).toBe(5);
   });
 });
-

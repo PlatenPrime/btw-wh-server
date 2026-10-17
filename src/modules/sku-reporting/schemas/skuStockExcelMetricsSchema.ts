@@ -7,9 +7,7 @@ const metricEnum = z.enum(SKU_STOCK_EXCEL_METRICS);
 
 const CANONICAL_ORDER: readonly SkuStockExcelMetric[] = SKU_STOCK_EXCEL_METRICS;
 
-function toCanonicalOrder(
-  metrics: readonly SkuStockExcelMetric[],
-): SkuStockExcelMetric[] {
+function toCanonicalOrder(metrics: readonly SkuStockExcelMetric[]): SkuStockExcelMetric[] {
   const selected = new Set(metrics);
   return CANONICAL_ORDER.filter((m) => selected.has(m));
 }
@@ -19,19 +17,23 @@ function toCanonicalOrder(
  * (`metrics[]=stock&metrics[]=price`). Пустой/отсутствующий → undefined (все метрики).
  * После парсинга — уникальные значения в каноническом порядке: stock → price.
  */
-export const skuStockExcelMetricsSchema = z.preprocess((raw) => {
-  if (raw === undefined || raw === null || raw === "") return undefined;
-  const parts: string[] = Array.isArray(raw)
-    ? raw.flatMap((v) => (typeof v === "string" ? v.split(",") : []))
-    : typeof raw === "string"
-      ? raw.split(",")
-      : [];
-  const trimmed = parts.map((s) => s.trim()).filter((s) => s.length > 0);
-  if (trimmed.length === 0) return undefined;
-  return trimmed;
-}, z.array(metricEnum).min(1).optional().transform((arr) => {
-  if (arr === undefined) return undefined;
-  return toCanonicalOrder(arr);
-}));
+export const skuStockExcelMetricsSchema = z.preprocess(
+  (raw) => {
+    if (raw === undefined || raw === null || raw === "") return undefined;
+    const parts: string[] = Array.isArray(raw)
+      ? raw.flatMap((v) => (typeof v === "string" ? v.split(",") : []))
+      : typeof raw === "string"
+        ? raw.split(",")
+        : [];
+    const trimmed = parts.map((s) => s.trim()).filter((s) => s.length > 0);
+    if (trimmed.length === 0) return undefined;
+    return trimmed;
+  },
+  z
+    .array(metricEnum)
+    .min(1)
+    .transform((arr) => toCanonicalOrder(arr))
+    .optional(),
+);
 
 export type SkuStockExcelMetricsInput = z.infer<typeof skuStockExcelMetricsSchema>;

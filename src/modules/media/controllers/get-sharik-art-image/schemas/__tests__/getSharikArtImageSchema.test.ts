@@ -25,27 +25,17 @@ describe("getSharikArtImageSchema", () => {
   });
 
   it("отклоняет пустой artikul", () => {
-    expect(getSharikArtImageSchema.safeParse({ artikul: "  " }).success).toBe(
-      false
-    );
+    expect(getSharikArtImageSchema.safeParse({ artikul: "  " }).success).toBe(false);
   });
 
   it("отклоняет artikul длиннее 64", () => {
-    expect(
-      getSharikArtImageSchema.safeParse({ artikul: "a".repeat(65) }).success
-    ).toBe(false);
+    expect(getSharikArtImageSchema.safeParse({ artikul: "a".repeat(65) }).success).toBe(false);
   });
 
   it("отклоняет / \\ и ..", () => {
-    expect(
-      getSharikArtImageSchema.safeParse({ artikul: "a/b" }).success
-    ).toBe(false);
-    expect(
-      getSharikArtImageSchema.safeParse({ artikul: "a\\b" }).success
-    ).toBe(false);
-    expect(
-      getSharikArtImageSchema.safeParse({ artikul: "a..b" }).success
-    ).toBe(false);
+    expect(getSharikArtImageSchema.safeParse({ artikul: "a/b" }).success).toBe(false);
+    expect(getSharikArtImageSchema.safeParse({ artikul: "a\\b" }).success).toBe(false);
+    expect(getSharikArtImageSchema.safeParse({ artikul: "a..b" }).success).toBe(false);
   });
 
   it("отклоняет невалидный size", () => {
@@ -53,7 +43,7 @@ describe("getSharikArtImageSchema", () => {
       getSharikArtImageSchema.safeParse({
         artikul: "1302-0065",
         size: "huge",
-      }).success
+      }).success,
     ).toBe(false);
   });
 });

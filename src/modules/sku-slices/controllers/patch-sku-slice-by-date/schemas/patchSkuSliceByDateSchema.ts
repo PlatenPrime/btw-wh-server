@@ -19,7 +19,7 @@ const stockPriceFields = {
 function refineDateRange(
   data: { dateFrom: Date; dateTo: Date },
   ctx: z.RefinementCtx,
-  pathPrefix: (string | number)[] = []
+  pathPrefix: (string | number)[] = [],
 ): void {
   if (data.dateFrom.getTime() > data.dateTo.getTime()) {
     ctx.addIssue({
@@ -96,10 +96,7 @@ export const patchSkuSliceByDateSchema = z.union([
 
 export type PatchSkuSliceInput = z.infer<typeof patchSkuSliceByDateSchema>;
 
-export type PatchSkuSliceByDateInput = Extract<
-  PatchSkuSliceInput,
-  { date: Date }
->;
+export type PatchSkuSliceByDateInput = Extract<PatchSkuSliceInput, { date: Date }>;
 
 export type PatchSkuSliceByDateRangeInput = Extract<
   PatchSkuSliceInput,
@@ -112,13 +109,13 @@ export type PatchSkuSliceByDatePeriodsInput = Extract<
 >;
 
 export function isPatchSkuSlicePeriodsInput(
-  input: PatchSkuSliceInput
+  input: PatchSkuSliceInput,
 ): input is PatchSkuSliceByDatePeriodsInput {
   return "periods" in input;
 }
 
 export function isPatchSkuSliceRangeInput(
-  input: PatchSkuSliceInput
+  input: PatchSkuSliceInput,
 ): input is PatchSkuSliceByDateRangeInput {
   return "dateFrom" in input && "dateTo" in input && !("periods" in input);
 }

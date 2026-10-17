@@ -24,7 +24,7 @@ describe("startSkuInvalidFlagCron", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     cronCallback = null;
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const cb = args[1];
       if (typeof cb === "function") {
         cronCallback = cb as () => Promise<void>;
@@ -54,9 +54,7 @@ describe("startSkuInvalidFlagCron", () => {
     expect(cronCallback).toBeDefined();
     if (cronCallback) await cronCallback();
     expect(runSkuInvalidFlagSync).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(runSkuInvalidFlagSync).mock.calls[0]![0]).toBeInstanceOf(
-      Date,
-    );
+    expect(vi.mocked(runSkuInvalidFlagSync).mock.calls[0]![0]).toBeInstanceOf(Date);
     expect(sendCronAnalyticsReport).toHaveBeenCalledWith("invalid report");
   });
 });

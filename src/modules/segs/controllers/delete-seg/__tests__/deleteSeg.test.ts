@@ -46,7 +46,7 @@ describe("deleteSeg Controller", () => {
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Segment deleted successfully");
     expect(String((responseJson.data as { _id: { toString(): string } })._id)).toBe(
-      seg._id.toString()
+      seg._id.toString(),
     );
     expect(await Seg.findById(seg._id).exec()).toBeNull();
   });

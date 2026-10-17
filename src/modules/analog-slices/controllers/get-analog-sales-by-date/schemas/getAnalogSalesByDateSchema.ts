@@ -9,6 +9,4 @@ export const getAnalogSalesByDateSchema = z.object({
   date: dateStringSchema,
 });
 
-export type GetAnalogSalesByDateInput = z.infer<
-  typeof getAnalogSalesByDateSchema
->;
+export type GetAnalogSalesByDateInput = z.infer<typeof getAnalogSalesByDateSchema>;

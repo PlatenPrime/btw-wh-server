@@ -12,12 +12,9 @@ vi.mock("../../modules/skugrs/cron/startFillSkugrSkusCron.js", () => ({
 vi.mock("../../modules/skus/cron/startSkuInvalidFlagCron.js", () => ({
   startSkuInvalidFlagCron: vi.fn(),
 }));
-vi.mock(
-  "../../modules/slice-compensation/cron/startCompensatingSlicesCron.js",
-  () => ({
-    startCompensatingSlicesCron: vi.fn(),
-  })
-);
+vi.mock("../../modules/slice-compensation/cron/startCompensatingSlicesCron.js", () => ({
+  startCompensatingSlicesCron: vi.fn(),
+}));
 vi.mock("../startFillPosNameukrFromArtsCron.js", () => ({
   startFillPosNameukrFromArtsCron: vi.fn(),
 }));

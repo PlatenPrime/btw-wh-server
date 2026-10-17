@@ -41,10 +41,7 @@ async function delayBetweenSkugrGroups(args: {
       runKind: "groupPagesFill",
     })
   ) {
-    const clusterMs = resolveInterUnitClusterPauseMs(
-      args.konkName,
-      "groupPagesFill"
-    );
+    const clusterMs = resolveInterUnitClusterPauseMs(args.konkName, "groupPagesFill");
     if (clusterMs != null && clusterMs > 0) {
       log.info(
         {
@@ -53,7 +50,7 @@ async function delayBetweenSkugrGroups(args: {
           pauseMs: clusterMs,
           pauseKind: "cluster",
         },
-        "skugr refill inter-group cluster pause"
+        "skugr refill inter-group cluster pause",
       );
       await delay(clusterMs);
     }
@@ -69,16 +66,13 @@ export function startFillSkugrSkusCron(): CronJob {
     "0 0 22 * * 0",
     async () => {
       try {
-        const skugrs = (await Skugr.find()
-          .select("_id konkName")
-          .lean()
-          .exec()) as SkugrCronRow[];
+        const skugrs = (await Skugr.find().select("_id konkName").lean().exec()) as SkugrCronRow[];
         log.info({ groupCount: skugrs.length }, "starting skugr refill");
 
         if (skugrs.length === 0) {
           log.info("no skugr groups found, skipping");
           await sendCronAnalyticsReport(
-            formatFillSkugrSkusReport({ successCount: 0, errorCount: 0, total: 0 })
+            formatFillSkugrSkusReport({ successCount: 0, errorCount: 0, total: 0 }),
           );
           return;
         }
@@ -96,7 +90,7 @@ export function startFillSkugrSkusCron(): CronJob {
           if (isServerSkugrFillDisabled(konkName)) {
             log.info(
               { skugrId, konkName, index: index + 1, total: skugrs.length },
-              "skugr refill skipped (server fill disabled)"
+              "skugr refill skipped (server fill disabled)",
             );
             continue;
           }
@@ -104,7 +98,7 @@ export function startFillSkugrSkusCron(): CronJob {
           if (airOriginBlocked && normalizedKonk === "air") {
             log.warn(
               { skugrId, index: index + 1, total: skugrs.length },
-              "skugr refill air group skipped after origin block"
+              "skugr refill air group skipped after origin block",
             );
             continue;
           }
@@ -114,7 +108,7 @@ export function startFillSkugrSkusCron(): CronJob {
             if (!result) {
               log.warn(
                 { skugrId, index: index + 1, total: skugrs.length },
-                "skugr group not found during refill"
+                "skugr group not found during refill",
               );
               continue;
             }
@@ -127,7 +121,7 @@ export function startFillSkugrSkusCron(): CronJob {
                 total: skugrs.length,
                 stats: result.stats,
               },
-              "skugr refill group completed"
+              "skugr refill group completed",
             );
           } catch (error) {
             errorCount += 1;
@@ -139,14 +133,14 @@ export function startFillSkugrSkusCron(): CronJob {
                 total: skugrs.length,
                 details: summarizeBrowserError(error),
               },
-              "skugr refill group failed"
+              "skugr refill group failed",
             );
 
             if (isOriginBlockedError(error) && normalizedKonk === "air") {
               airOriginBlocked = true;
               log.error(
                 { konkName, skugrId },
-                "skugr refill air groups aborted after origin block"
+                "skugr refill air groups aborted after origin block",
               );
             }
           }
@@ -165,33 +159,28 @@ export function startFillSkugrSkusCron(): CronJob {
 
         log.info(
           { successCount, errorCount, total: skugrs.length, airOriginBlocked },
-          "skugr refill finished"
+          "skugr refill finished",
         );
         await sendCronAnalyticsReport(
           formatFillSkugrSkusReport({
             successCount,
             errorCount,
             total: skugrs.length,
-          })
+          }),
         );
       } catch (error) {
         log.error(
           { err: error, details: summarizeBrowserError(error) },
-          "skugr refill fatal error"
+          "skugr refill fatal error",
         );
-        await sendCronAnalyticsReport(
-          formatCronErrorReport("Skugr refill", error)
-        );
+        await sendCronAnalyticsReport(formatCronErrorReport("Skugr refill", error));
       }
     },
     null,
     true,
-    "Europe/Kyiv"
+    "Europe/Kyiv",
   );
 
-  log.info(
-    { schedule: "0 0 22 * * 0", timezone: "Europe/Kyiv" },
-    "cron started"
-  );
+  log.info({ schedule: "0 0 22 * * 0", timezone: "Europe/Kyiv" }, "cron started");
   return job;
 }

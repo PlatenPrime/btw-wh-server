@@ -29,7 +29,7 @@ describe("isProductDueForSliceRotation", () => {
     const dayIndex = getSliceRotationDayIndex(sliceDate, 3);
 
     const dueIds = ["a", "b", "c", "air-1", "air-2", "air-999"].filter(
-      (id) => getProductRotationBucket(id, 3) === dayIndex
+      (id) => getProductRotationBucket(id, 3) === dayIndex,
     );
     for (const id of dueIds) {
       expect(isProductDueForSliceRotation(id, sliceDate, config)).toBe(true);
@@ -38,9 +38,7 @@ describe("isProductDueForSliceRotation", () => {
 
   it("returns false for blank productId", () => {
     const sliceDate = toSliceDate(new Date("2026-03-01T00:00:00.000Z"));
-    expect(
-      isProductDueForSliceRotation("  ", sliceDate, { cycleDays: 3 })
-    ).toBe(false);
+    expect(isProductDueForSliceRotation("  ", sliceDate, { cycleDays: 3 })).toBe(false);
   });
 });
 
@@ -48,11 +46,7 @@ describe("filterProductsForSliceRotation", () => {
   it("returns all items when konk has no rotation config", () => {
     const sliceDate = toSliceDate(new Date("2026-03-01T00:00:00.000Z"));
     const items = [{ productId: "balun-1" }, { productId: "balun-2" }];
-    const { filtered, rotation } = filterProductsForSliceRotation(
-      items,
-      sliceDate,
-      "balun"
-    );
+    const { filtered, rotation } = filterProductsForSliceRotation(items, sliceDate, "balun");
     expect(filtered).toEqual(items);
     expect(rotation).toBeNull();
   });
@@ -62,11 +56,7 @@ describe("filterProductsForSliceRotation", () => {
     const items = Array.from({ length: 300 }, (_, i) => ({
       productId: `air-${i}`,
     }));
-    const { filtered, rotation } = filterProductsForSliceRotation(
-      items,
-      sliceDate,
-      "air"
-    );
+    const { filtered, rotation } = filterProductsForSliceRotation(items, sliceDate, "air");
     expect(filtered).toEqual(items);
     expect(rotation).toBeNull();
   });
@@ -79,8 +69,6 @@ describe("resolveSliceRotationInfo", () => {
   });
 
   it("returns null for unknown konk", () => {
-    expect(
-      resolveSliceRotationInfo("balun", toSliceDate(new Date()))
-    ).toBeNull();
+    expect(resolveSliceRotationInfo("balun", toSliceDate(new Date()))).toBeNull();
   });
 });

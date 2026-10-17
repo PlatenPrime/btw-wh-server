@@ -3,9 +3,7 @@ import {
   computeRevenueForDay,
   computeSalesFromStockSequence,
 } from "../../slices/utils/salesComparisonUtils.js";
-import {
-  coalesceSkuSliceItemsAlongDates,
-} from "./coalesceSkuSliceItemsForReporting.js";
+import { coalesceSkuSliceItemsAlongDates } from "./coalesceSkuSliceItemsForReporting.js";
 import {
   loadSkuSliceSalesComputeContext,
   type SkuRowForSliceMetrics,
@@ -28,9 +26,7 @@ export async function aggregateDailySkuSliceMetricsForSkus(
   skus: SkuRowForSliceMetrics[],
   dateFrom: Date,
   dateTo: Date,
-): Promise<
-  { ok: true; data: DailySkuCompetitorMetricsItem[] } | { ok: false }
-> {
+): Promise<{ ok: true; data: DailySkuCompetitorMetricsItem[] } | { ok: false }> {
   const loaded = await loadSkuSliceSalesComputeContext(skus, dateFrom, dateTo);
   if (!loaded.ok) return { ok: false };
   const { maps, datesFull, indexStart, dates, recountDaysByKonk } = loaded.ctx;
@@ -56,11 +52,7 @@ export async function aggregateDailySkuSliceMetricsForSkus(
       const c = coalesced[i]!;
       const seq = salesSeq[i]!;
       const recountDays = recountDaysByKonk.get(sku.konkName) ?? new Set<string>();
-      const salesValue = applyRecountDayToSales(
-        seq.sales,
-        dates[i - indexStart]!,
-        recountDays,
-      );
+      const salesValue = applyRecountDayToSales(seq.sales, dates[i - indexStart]!, recountDays);
       stocks.push(c.stock);
       sales.push(salesValue);
       revenue.push(computeRevenueForDay(salesValue, c.price));

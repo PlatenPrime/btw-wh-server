@@ -5,10 +5,7 @@ import { isFullMinusOneStockPrice } from "./isInvalidSliceStockResult.js";
  * полный -1/-1 или цена не конечное неотрицательное число.
  * Держать в sync с invalidSliceEntryMongoCondition.
  */
-export function isInvalidSliceStockPriceItem(
-  stockOrQuantity: unknown,
-  price: unknown
-): boolean {
+export function isInvalidSliceStockPriceItem(stockOrQuantity: unknown, price: unknown): boolean {
   if (isFullMinusOneStockPrice(stockOrQuantity, price)) return true;
   if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
     return true;

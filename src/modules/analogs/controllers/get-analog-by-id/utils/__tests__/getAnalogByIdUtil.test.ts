@@ -12,9 +12,7 @@ describe("getAnalogByIdUtil", () => {
   });
 
   it("returns null for non-existent id", async () => {
-    const result = await getAnalogByIdUtil(
-      "000000000000000000000000"
-    );
+    const result = await getAnalogByIdUtil("000000000000000000000000");
     expect(result).toBeNull();
   });
 

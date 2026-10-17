@@ -4,9 +4,6 @@ import { fillSkugrSkusController } from "../fillSkugrSkusController.js";
 
 describe("fillSkugrSkusController", () => {
   it("returns 410 API_TASKS_MIGRATED", async () => {
-    await assertMigratedApiTaskController(
-      fillSkugrSkusController,
-      "skugrs.fill-skus",
-    );
+    await assertMigratedApiTaskController(fillSkugrSkusController, "skugrs.fill-skus");
   });
 });

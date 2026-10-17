@@ -27,7 +27,7 @@ export interface ISharikStocksResult {
  */
 export async function getSharikStocks(
   stocks: IMergedPosesResult,
-  limits: { [artikul: string]: number } = {}
+  limits: { [artikul: string]: number } = {},
 ): Promise<ISharikStocksResult> {
   const startTime = performance.now();
 

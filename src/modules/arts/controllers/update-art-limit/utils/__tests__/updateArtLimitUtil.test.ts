@@ -66,4 +66,3 @@ describe("updateArtLimitUtil", () => {
     expect(result?.updatedAt).toBeDefined();
   });
 });
-

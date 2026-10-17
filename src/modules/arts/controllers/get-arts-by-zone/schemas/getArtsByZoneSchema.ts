@@ -5,4 +5,3 @@ export const getArtsByZoneSchema = z.object({
 });
 
 export type GetArtsByZoneInput = z.infer<typeof getArtsByZoneSchema>;
-

@@ -66,15 +66,9 @@ describe("updateDelArtikulByDelIdController", () => {
     expect(responseStatus.code).toBe(200);
     const data = responseJson.data as {
       toObject?: () => {
-        artikuls?: Record<
-          string,
-          { quant: number; stock: number; nameukr?: string }
-        >;
+        artikuls?: Record<string, { quant: number; stock: number; nameukr?: string }>;
       };
-      artikuls?: Record<
-        string,
-        { quant: number; stock: number; nameukr?: string }
-      >;
+      artikuls?: Record<string, { quant: number; stock: number; nameukr?: string }>;
     };
     const artikuls = data?.toObject?.()?.artikuls ?? data?.artikuls ?? {};
     expect(artikuls["ART-1"]).toEqual({
@@ -106,8 +100,6 @@ describe("updateDelArtikulByDelIdController", () => {
     const events = await Event.find({ department: "dels" });
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(user._id));
-    expect(events[0].description).toBe(
-      `Оновлено артикул ART-1 у поставці "Del" (id: ${del._id})`
-    );
+    expect(events[0].description).toBe(`Оновлено артикул ART-1 у поставці "Del" (id: ${del._id})`);
   });
 });

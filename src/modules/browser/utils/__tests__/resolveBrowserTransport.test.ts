@@ -13,9 +13,7 @@ describe("parseBrowserTransportByKonk", () => {
   });
 
   it("парсит пары konk:transport", () => {
-    const map = parseBrowserTransportByKonk(
-      "air:impit, balun:http, YUMI:Playwright"
-    );
+    const map = parseBrowserTransportByKonk("air:impit, balun:http, YUMI:Playwright");
     expect(map.get("air")).toBe("impit");
     expect(map.get("balun")).toBe("http");
     expect(map.get("yumi")).toBe("playwright");
@@ -24,7 +22,7 @@ describe("parseBrowserTransportByKonk", () => {
 
   it("игнорирует невалидный transport и malformed entry", () => {
     const map = parseBrowserTransportByKonk(
-      "air:selenium, :playwright, noColon, foo:playwright, bar:impit"
+      "air:selenium, :playwright, noColon, foo:playwright, bar:impit",
     );
     expect(map.get("air")).toBeUndefined();
     expect(map.get("foo")).toBe("playwright");

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseAirGroupListingPage } from "../parseAirGroupListingPage.js";
 
-const PAGE_URL =
-  "https://air.example.test/ua/index.php?route=product/category&path=1";
+const PAGE_URL = "https://air.example.test/ua/index.php?route=product/category&path=1";
 const PAGE2_URL = `${PAGE_URL}&page=2`;
 
 function airProductCard(opts: {
@@ -23,14 +22,8 @@ function airProductCard(opts: {
   </div>`;
 }
 
-function airPageHtml(opts: {
-  cards: string[];
-  nextHref?: string;
-}): string {
-  const next =
-    opts.nextHref != null
-      ? `<link rel="next" href="${opts.nextHref}" />`
-      : "";
+function airPageHtml(opts: { cards: string[]; nextHref?: string }): string {
+  const next = opts.nextHref != null ? `<link rel="next" href="${opts.nextHref}" />` : "";
   const grid = opts.cards.join("");
   return `<!DOCTYPE html><html><head>${next}</head><body>
     <div class="row us-category-products">${grid}</div>
@@ -57,27 +50,23 @@ describe("parseAirGroupListingPage", () => {
     expect(result.nextPageUrl).toBe(PAGE2_URL);
     expect(result.products).toHaveLength(1);
     expect(result.products[0]?.productId).toBe("111");
-    expect(result.products[0]?.url).toBe(
-      "https://air.example.test/ua/product/p111"
-    );
+    expect(result.products[0]?.url).toBe("https://air.example.test/ua/product/p111");
     expect(result.products[0]?.title).not.toContain("&#");
     expect(result.products[0]?.title).toContain("10");
   });
 
   it("uses data-src when src is lazy placeholder", () => {
-    const real =
-      "https://air.example.test/image/cache/catalog/x-228x228.jpg";
+    const real = "https://air.example.test/image/cache/catalog/x-228x228.jpg";
     const html = airPageHtml({
       cards: [
         airProductCard({
           pid: "8",
           productPath: "/ua/product/y",
-          imageUrl:
-            "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
+          imageUrl: "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
           title: "Y",
         }).replace(
           `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg"`,
-          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-src="${real}"`
+          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-src="${real}"`,
         ),
       ],
     });
@@ -87,19 +76,17 @@ describe("parseAirGroupListingPage", () => {
   });
 
   it("uses data-srcset when src is lazy placeholder", () => {
-    const real =
-      "https://air.example.test/image/cache/catalog/x-228x228.jpg";
+    const real = "https://air.example.test/image/cache/catalog/x-228x228.jpg";
     const html = airPageHtml({
       cards: [
         airProductCard({
           pid: "9",
           productPath: "/ua/product/z",
-          imageUrl:
-            "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
+          imageUrl: "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
           title: "Z",
         }).replace(
           `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg"`,
-          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-srcset="${real} 100w"`
+          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-srcset="${real} 100w"`,
         ),
       ],
     });
@@ -134,8 +121,7 @@ describe("parseAirGroupListingPage", () => {
   });
 
   it("WAF / empty markup has no listing grid", () => {
-    const html =
-      "<!DOCTYPE html><html><body><h1>Захищена сторінка</h1></body></html>";
+    const html = "<!DOCTYPE html><html><body><h1>Захищена сторінка</h1></body></html>";
     const result = parseAirGroupListingPage(html, PAGE_URL);
     expect(result.hasListingMarkup).toBe(false);
     expect(result.products).toHaveLength(0);

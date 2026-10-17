@@ -5,6 +5,4 @@ export const deleteKonkInvalidSkusParamsSchema = z.object({
   konkName: z.union([z.literal("all"), z.string().min(1, "konkName is required")]),
 });
 
-export type DeleteKonkInvalidSkusParams = z.infer<
-  typeof deleteKonkInvalidSkusParamsSchema
->;
+export type DeleteKonkInvalidSkusParams = z.infer<typeof deleteKonkInvalidSkusParamsSchema>;

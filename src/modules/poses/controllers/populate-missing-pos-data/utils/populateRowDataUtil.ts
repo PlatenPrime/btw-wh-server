@@ -8,12 +8,12 @@ import { Row } from "../../../../rows/models/Row.js";
  * Если row отсутствует или невалиден, ищет Row по rowTitle
  */
 export const populateRowDataUtil = async (pos: IPos): Promise<IRow> => {
-  let rowId = pos.row;
-  let rowDoc: IRow | null = null;
+  const rowId = pos.row;
+  let rowDoc: IRow | null;
 
   // rowId может быть ObjectId, string или undefined/null
   const rowIdStr = rowId ? rowId.toString() : undefined;
-  
+
   if (!rowIdStr || !Types.ObjectId.isValid(rowIdStr)) {
     // row отсутствует или невалиден — ищем по rowTitle
     rowDoc = await Row.findOne({ title: pos.rowTitle });
@@ -35,4 +35,3 @@ export const populateRowDataUtil = async (pos: IPos): Promise<IRow> => {
 
   return rowDoc;
 };
-

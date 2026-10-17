@@ -26,27 +26,25 @@ describe("getSvbumStockData", () => {
 
   describe("Валидация входных данных", () => {
     it("должен выбрасывать ошибку при пустой ссылке", async () => {
-      await expect(getSvbumStockData("")).rejects.toThrow(
-        "Link is required and must be a string"
-      );
+      await expect(getSvbumStockData("")).rejects.toThrow("Link is required and must be a string");
     });
 
     it("должен выбрасывать ошибку при null", async () => {
-      await expect(
-        getSvbumStockData(null as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getSvbumStockData(null as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
 
     it("должен выбрасывать ошибку при undefined", async () => {
-      await expect(
-        getSvbumStockData(undefined as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getSvbumStockData(undefined as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
 
     it("должен выбрасывать ошибку при не-строковом link", async () => {
-      await expect(
-        getSvbumStockData(123 as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getSvbumStockData(123 as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
   });
 
@@ -58,13 +56,10 @@ describe("getSvbumStockData", () => {
 
   it("должен парсить ответ fetchPageHtml", async () => {
     vi.mocked(fetchPageHtml).mockResolvedValue(SIMPLE_HTML);
-    const result = await getSvbumStockData(
-      "https://sviatobum.ua/povitryani-kuli/item"
-    );
-    expect(fetchPageHtml).toHaveBeenCalledWith(
-      "https://sviatobum.ua/povitryani-kuli/item",
-      { konkName: "svbum" }
-    );
+    const result = await getSvbumStockData("https://sviatobum.ua/povitryani-kuli/item");
+    expect(fetchPageHtml).toHaveBeenCalledWith("https://sviatobum.ua/povitryani-kuli/item", {
+      konkName: "svbum",
+    });
     expect(result).toMatchObject({ stock: 43, price: 11.77 });
   });
 });

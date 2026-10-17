@@ -12,12 +12,9 @@ export const updateAnalogByIdSchema = z
     nameukr: z.string().optional(),
     url: z.string().min(1).optional(),
   })
-  .refine(
-    (data) => {
-      const keys = Object.keys(data).filter((k) => k !== "id");
-      return keys.some((k) => data[k as keyof typeof data] !== undefined);
-    },
-    "At least one field must be provided for update"
-  );
+  .refine((data) => {
+    const keys = Object.keys(data).filter((k) => k !== "id");
+    return keys.some((k) => data[k as keyof typeof data] !== undefined);
+  }, "At least one field must be provided for update");
 
 export type UpdateAnalogByIdInput = z.infer<typeof updateAnalogByIdSchema>;

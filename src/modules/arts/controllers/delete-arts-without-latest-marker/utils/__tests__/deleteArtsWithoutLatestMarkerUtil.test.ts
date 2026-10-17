@@ -318,4 +318,3 @@ describe("deleteArtsWithoutLatestMarkerUtil", () => {
     expect(remainingArts[0].artikul).toBe("ART-2025-11-23");
   });
 });
-

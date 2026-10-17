@@ -24,9 +24,8 @@ describe("updatePos Controller", () => {
         artikul: "UPDATED",
         quant: 99,
         boxes: 9,
-        sklad: "pogrebi" ,
-        comment: "new comment"
-
+        sklad: "pogrebi",
+        comment: "new comment",
       },
     });
     const res = createMockResponse();
@@ -78,7 +77,6 @@ describe("updatePos Controller", () => {
     const req = createMockRequest({
       params: { id: "invalid-id" },
       body: {
-
         artikul: "NOPE",
         quant: 1,
         boxes: 1,
@@ -94,7 +92,6 @@ describe("updatePos Controller", () => {
     const req = createMockRequest({
       params: { id: pos._id.toString() },
       body: {
-
         artikul: "ERR",
         quant: 1,
         boxes: 1,

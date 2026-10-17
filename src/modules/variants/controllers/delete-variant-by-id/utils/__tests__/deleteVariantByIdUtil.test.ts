@@ -8,9 +8,7 @@ describe("deleteVariantByIdUtil", () => {
   });
 
   it("returns null for non-existent id", async () => {
-    const result = await deleteVariantByIdUtil(
-      "000000000000000000000000"
-    );
+    const result = await deleteVariantByIdUtil("000000000000000000000000");
     expect(result).toBeNull();
   });
 
@@ -32,4 +30,3 @@ describe("deleteVariantByIdUtil", () => {
     expect(found).toBeNull();
   });
 });
-

@@ -46,7 +46,7 @@ const graboSkuSchema = new Schema<IGraboSku>(
     isOnSite: { type: Boolean, required: true, default: true },
     lastSeenAt: { type: Date, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 graboSkuSchema.index({ isOnSite: 1 });
@@ -56,5 +56,5 @@ graboSkuSchema.index({ tags: 1 });
 export const GraboSku: Model<IGraboSku> = getOrCreateModel<IGraboSku>(
   "GraboSku",
   graboSkuSchema,
-  "graboskus"
+  "graboskus",
 );

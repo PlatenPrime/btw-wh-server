@@ -18,12 +18,7 @@ import {
 
 const router = Router();
 
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSkuSliceController),
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getSkuSliceController));
 router.get(
   "/day-status",
   checkAuth,

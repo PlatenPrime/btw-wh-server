@@ -24,10 +24,7 @@ export type SkuReportingLean = {
 };
 
 /** Карта: konkName → (день UTC ms → data по productId). */
-export type SliceMapsByKonk = Map<
-  string,
-  Map<number, Record<string, ISkuSliceDataItem>>
->;
+export type SliceMapsByKonk = Map<string, Map<number, Record<string, ISkuSliceDataItem>>>;
 
 export function enumerateReportingDates(from: Date, to: Date): Date[] {
   const out: Date[] = [];
@@ -145,11 +142,7 @@ export async function loadSkugrsWithSkuRefsForKonkProd(
     return a._id.toString().localeCompare(b._id.toString());
   });
 
-  const allIds = [
-    ...new Set(
-      skugrs.flatMap((g) => (g.skus ?? []).map((id) => id.toString())),
-    ),
-  ];
+  const allIds = [...new Set(skugrs.flatMap((g) => (g.skus ?? []).map((id) => id.toString())))];
 
   const found =
     allIds.length === 0

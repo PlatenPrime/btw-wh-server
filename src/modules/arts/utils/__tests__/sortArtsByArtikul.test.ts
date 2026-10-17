@@ -4,19 +4,11 @@ import { sortArtsByArtikul } from "../sortArtsByArtikul.js";
 
 describe("sortArtsByArtikul", () => {
   it("сортирует артикулы по artikul в алфавитном порядке", () => {
-    const arts = [
-      { artikul: "ART-003" },
-      { artikul: "ART-001" },
-      { artikul: "ART-002" },
-    ] as IArt[];
+    const arts = [{ artikul: "ART-003" }, { artikul: "ART-001" }, { artikul: "ART-002" }] as IArt[];
 
     const sorted = sortArtsByArtikul(arts);
 
-    expect(sorted.map((art) => art.artikul)).toEqual([
-      "ART-001",
-      "ART-002",
-      "ART-003",
-    ]);
+    expect(sorted.map((art) => art.artikul)).toEqual(["ART-001", "ART-002", "ART-003"]);
   });
 
   it("возвращает пустой массив без изменений", () => {

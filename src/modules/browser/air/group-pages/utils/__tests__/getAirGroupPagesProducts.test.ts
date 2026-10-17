@@ -21,8 +21,7 @@ vi.mock("../../../../../../logging/createLogger.js", () => ({
 
 const GROUP_URL = "https://air.example.test/ua/index.php?route=product/category&path=1";
 const ORIGIN_URL = "https://air.example.test/";
-const PAGE2_URL =
-  "https://air.example.test/ua/index.php?route=product/category&path=1&page=2";
+const PAGE2_URL = "https://air.example.test/ua/index.php?route=product/category&path=1&page=2";
 
 function airProductCard(opts: {
   pid: string;
@@ -42,15 +41,8 @@ function airProductCard(opts: {
   </div>`;
 }
 
-function airPageHtml(opts: {
-  cards: string[];
-  nextHref?: string;
-  emptyMessage?: string;
-}): string {
-  const next =
-    opts.nextHref != null
-      ? `<link rel="next" href="${opts.nextHref}" />`
-      : "";
+function airPageHtml(opts: { cards: string[]; nextHref?: string; emptyMessage?: string }): string {
+  const next = opts.nextHref != null ? `<link rel="next" href="${opts.nextHref}" />` : "";
   const grid =
     opts.cards.length > 0
       ? opts.cards.join("")
@@ -202,8 +194,7 @@ describe("getAirGroupPagesProducts", () => {
   });
 
   it("uses data-srcset when src is lazy placeholder", async () => {
-    const real =
-      "https://air.example.test/image/cache/catalog/x-228x228.jpg";
+    const real = "https://air.example.test/image/cache/catalog/x-228x228.jpg";
     const html = airPageHtml({
       cards: [
         airProductCard({
@@ -213,7 +204,7 @@ describe("getAirGroupPagesProducts", () => {
           title: "Z",
         }).replace(
           `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg"`,
-          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-srcset="${real} 100w"`
+          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-srcset="${real} 100w"`,
         ),
       ],
     });
@@ -233,8 +224,7 @@ describe("getAirGroupPagesProducts", () => {
   });
 
   it("не передаёт proxyUrl пока AIR_HTTP_PROXY_ENABLED=false, даже если env задан", async () => {
-    process.env.AIR_HTTP_PROXY_URL =
-      "http://user:secret@77.47.252.164:50100";
+    process.env.AIR_HTTP_PROXY_URL = "http://user:secret@77.47.252.164:50100";
     const html = airPageHtml({
       cards: [
         airProductCard({
@@ -300,7 +290,7 @@ describe("getAirGroupPagesProducts", () => {
     vi.mocked(fetchPageHtml).mockRejectedValue(blocked);
 
     await expect(
-      getAirGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 1 })
+      getAirGroupPagesProducts({ groupUrl: GROUP_URL, maxPages: 1 }),
     ).rejects.toMatchObject({
       code: ORIGIN_BLOCKED_CODE,
       httpStatus: 520,

@@ -10,4 +10,3 @@ export const registrateUserSchema = z.object({
 });
 
 export type RegistrateUserInput = z.infer<typeof registrateUserSchema>;
-

@@ -6,10 +6,7 @@ import { deletePalletPosesSchema } from "./schemas/deletePalletPosesSchema.js";
 import { deletePalletPosesUtil } from "./utils/deletePalletPosesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const deletePalletPosesController = async (
-  req: Request,
-  res: Response
-) => {
+export const deletePalletPosesController = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
 
   try {
@@ -20,7 +17,7 @@ export const deletePalletPosesController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -68,11 +65,3 @@ export const deletePalletPosesController = async (
     await session.endSession();
   }
 };
-
-
-
-
-
-
-
-

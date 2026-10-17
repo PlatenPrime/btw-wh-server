@@ -7,17 +7,14 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить аналог по id с полями konk и prod
  * @route   GET /api/analogs/id/:id
  */
-export const getAnalogByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAnalogByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = getAnalogByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

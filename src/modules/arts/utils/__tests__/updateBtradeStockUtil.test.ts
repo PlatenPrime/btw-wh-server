@@ -47,8 +47,6 @@ describe("updateBtradeStockUtil", () => {
     await createTestArt({ artikul: "5555-3333", zone: "A1" });
     mockGetSharikStockData.mockRejectedValue(new Error("Network error"));
 
-    await expect(
-      updateBtradeStockUtil({ artikul: "5555-3333" })
-    ).rejects.toThrow("Network error");
+    await expect(updateBtradeStockUtil({ artikul: "5555-3333" })).rejects.toThrow("Network error");
   });
 });

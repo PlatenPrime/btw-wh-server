@@ -4,9 +4,6 @@ import { runCompensatingSliceController } from "../runCompensatingSliceControlle
 
 describe("runCompensatingSliceController", () => {
   it("returns 410 API_TASKS_MIGRATED", async () => {
-    await assertMigratedApiTaskController(
-      runCompensatingSliceController,
-      "slice-compensation.run",
-    );
+    await assertMigratedApiTaskController(runCompensatingSliceController, "slice-compensation.run");
   });
 });

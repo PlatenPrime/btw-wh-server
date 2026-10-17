@@ -68,9 +68,7 @@ describe("updateSkuByIdController", () => {
     } as unknown as Request;
     await updateSkuByIdController(req, res);
     expect(responseStatus.code).toBe(200);
-    expect(
-      (responseJson.data as { imageUrl: string }).imageUrl,
-    ).toBe("https://img.example/x.webp");
+    expect((responseJson.data as { imageUrl: string }).imageUrl).toBe("https://img.example/x.webp");
   });
 
   it("200 creates audit event when req.user is present", async () => {

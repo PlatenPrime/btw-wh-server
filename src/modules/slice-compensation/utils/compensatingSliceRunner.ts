@@ -17,7 +17,7 @@ export type CompensatingDataKeyWork = {
 export function buildCompensatingDataKeyQueue(
   docs: CompensatingSliceDoc[],
   excluded: Set<string>,
-  shouldInclude: (item: unknown) => boolean
+  shouldInclude: (item: unknown) => boolean,
 ): CompensatingDataKeyWork[] {
   const queue: CompensatingDataKeyWork[] = [];
   for (const doc of docs) {
@@ -64,19 +64,14 @@ function throwIfAborted(signal?: AbortSignal): void {
 
 export async function runCompensatingSliceRefetchLoop(
   queue: CompensatingDataKeyWork[],
-  processItem: (
-    work: CompensatingDataKeyWork
-  ) => Promise<CompensatingSliceRefetchStats>,
-  jitterOverrideOrOptions?:
-    | CompensatingSliceJitterOverride
-    | CompensatingSliceRefetchLoopOptions
+  processItem: (work: CompensatingDataKeyWork) => Promise<CompensatingSliceRefetchStats>,
+  jitterOverrideOrOptions?: CompensatingSliceJitterOverride | CompensatingSliceRefetchLoopOptions,
 ): Promise<CompensatingSliceRefetchStats> {
   const options: CompensatingSliceRefetchLoopOptions =
     jitterOverrideOrOptions &&
     ("minMs" in jitterOverrideOrOptions || "maxMs" in jitterOverrideOrOptions)
       ? { jitterOverride: jitterOverrideOrOptions as CompensatingSliceJitterOverride }
-      : ((jitterOverrideOrOptions as CompensatingSliceRefetchLoopOptions | undefined) ??
-        {});
+      : ((jitterOverrideOrOptions as CompensatingSliceRefetchLoopOptions | undefined) ?? {});
 
   let refetched = 0;
   let updated = 0;
@@ -102,16 +97,11 @@ export async function runCompensatingSliceRefetchLoop(
     });
     refetched += stats.refetched;
     updated += stats.updated;
-    options.onProgress?.(
-      i + 1,
-      progressTotal,
-      `Item ${i + 1}/${queue.length}`
-    );
+    options.onProgress?.(i + 1, progressTotal, `Item ${i + 1}/${queue.length}`);
     if (i < queue.length - 1) {
       throwIfAborted(options.signal);
       const next = queue[i + 1]!;
-      const range =
-        options.jitterOverride ?? resolveSkuSliceRequestJitterMs(next.konkName);
+      const range = options.jitterOverride ?? resolveSkuSliceRequestJitterMs(next.konkName);
       await delay(jitterMs(range.minMs, range.maxMs));
     }
   }

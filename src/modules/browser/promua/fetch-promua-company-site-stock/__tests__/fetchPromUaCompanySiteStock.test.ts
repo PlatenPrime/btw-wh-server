@@ -66,9 +66,7 @@ const CHANGE_RECALCULATED = {
 };
 
 function baseParams(
-  overrides: Partial<
-    Parameters<typeof fetchPromUaCompanySiteStock<Ctx, typeof NEGATIVE>>[0]
-  > = {}
+  overrides: Partial<Parameters<typeof fetchPromUaCompanySiteStock<Ctx, typeof NEGATIVE>>[0]> = {},
 ) {
   return {
     origin: ORIGIN,
@@ -84,10 +82,7 @@ function baseParams(
       quantity: number;
       unitPrice: number | undefined;
       ctx: Ctx;
-    }) =>
-      unitPrice === undefined
-        ? NEGATIVE
-        : { stock: quantity, price: unitPrice },
+    }) => (unitPrice === undefined ? NEGATIVE : { stock: quantity, price: unitPrice }),
     ...overrides,
   };
 }
@@ -108,7 +103,7 @@ describe("fetchPromUaCompanySiteStock", () => {
 
   it("returns negative when productId is missing", async () => {
     const result = await fetchPromUaCompanySiteStock(
-      baseParams({ productUrl: "https://example.com.ua/no-id" })
+      baseParams({ productUrl: "https://example.com.ua/no-id" }),
     );
     expect(result).toEqual(NEGATIVE);
     expect(mockGet).not.toHaveBeenCalled();
@@ -161,7 +156,7 @@ describe("fetchPromUaCompanySiteStock", () => {
       expect.objectContaining({
         operationName: "AddProductToCart",
         query: ADD_PRODUCT_TO_CART_QUERY,
-      })
+      }),
     );
     expect(mockPost.mock.calls[1][1]).toEqual(
       expect.objectContaining({
@@ -172,7 +167,7 @@ describe("fetchPromUaCompanySiteStock", () => {
             quantity: PROMUA_CART_PROBE_QUANTITY,
           }),
         }),
-      })
+      }),
     );
   });
 
@@ -193,7 +188,7 @@ describe("fetchPromUaCompanySiteStock", () => {
     const result = await fetchPromUaCompanySiteStock(
       baseParams({
         parseHtmlContext: () => ({ htmlPrice: undefined }),
-      })
+      }),
     );
     expect(result).toEqual({ stock: 42, price: 2 });
   });

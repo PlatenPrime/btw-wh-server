@@ -31,24 +31,14 @@ router.post(
   checkRoles([RoleType.ADMIN]),
   asyncHandler(postAirClientFillPageController),
 );
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllSkugrsController),
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllSkugrsController));
 router.get(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkugrByIdController),
 );
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createSkugrController),
-);
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createSkugrController));
 router.post(
   "/id/:id/fill-skus",
   checkAuth,

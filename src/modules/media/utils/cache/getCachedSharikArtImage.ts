@@ -1,9 +1,6 @@
 import type { SharikArtImageSize } from "../build-sharik-art-image-url/buildSharikArtImageUrl.js";
 import { fetchSharikArtImage } from "../fetch-sharik-art-image/fetchSharikArtImage.js";
-import {
-  SHARIK_ART_IMAGE_CACHE_MAX_ENTRIES,
-  SHARIK_ART_IMAGE_CACHE_TTL_MS,
-} from "./constants.js";
+import { SHARIK_ART_IMAGE_CACHE_MAX_ENTRIES, SHARIK_ART_IMAGE_CACHE_TTL_MS } from "./constants.js";
 
 export type SharikArtImageCacheEntry = {
   buffer: Buffer;
@@ -17,10 +14,7 @@ type CacheKey = string;
 const cache = new Map<CacheKey, SharikArtImageCacheEntry>();
 const inflight = new Map<CacheKey, Promise<SharikArtImageCacheEntry>>();
 
-export function buildSharikArtImageCacheKey(
-  size: SharikArtImageSize,
-  artikul: string
-): CacheKey {
+export function buildSharikArtImageCacheKey(size: SharikArtImageSize, artikul: string): CacheKey {
   return `${size}:${artikul}`;
 }
 
@@ -28,7 +22,7 @@ export function buildSharikArtImageEtag(
   size: SharikArtImageSize,
   artikul: string,
   buffer: Buffer,
-  fetchedAt: number
+  fetchedAt: number,
 ): string {
   return `"${size}-${artikul}-${buffer.length}-${fetchedAt}"`;
 }
@@ -57,7 +51,7 @@ function evictOldestIfNeeded(): void {
  */
 export async function getCachedSharikArtImage(
   artikul: string,
-  size: SharikArtImageSize
+  size: SharikArtImageSize,
 ): Promise<SharikArtImageCacheEntry> {
   const key = buildSharikArtImageCacheKey(size, artikul);
   const now = Date.now();
@@ -80,12 +74,7 @@ export async function getCachedSharikArtImage(
         buffer: fetched.buffer,
         contentType: fetched.contentType,
         fetchedAt,
-        etag: buildSharikArtImageEtag(
-          size,
-          artikul,
-          fetched.buffer,
-          fetchedAt
-        ),
+        etag: buildSharikArtImageEtag(size, artikul, fetched.buffer, fetchedAt),
       };
       if (cache.has(key)) {
         cache.delete(key);

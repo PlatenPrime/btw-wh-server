@@ -10,30 +10,22 @@ const MS_PER_DAY = 86_400_000;
  * Индекс дня в rotation-цикле по ключу среза (UTC midnight YMD).
  * Один sliceDate → один dayIndex при фиксированном cycleDays.
  */
-export function getSliceRotationDayIndex(
-  sliceDate: Date,
-  cycleDays: number
-): number {
+export function getSliceRotationDayIndex(sliceDate: Date, cycleDays: number): number {
   if (cycleDays < 2) {
-    throw new Error(
-      `getSliceRotationDayIndex: cycleDays must be >= 2, got ${cycleDays}`
-    );
+    throw new Error(`getSliceRotationDayIndex: cycleDays must be >= 2, got ${cycleDays}`);
   }
   const dayNumber = Math.floor(sliceDate.getTime() / MS_PER_DAY);
   return ((dayNumber % cycleDays) + cycleDays) % cycleDays;
 }
 
-export function getProductRotationBucket(
-  productId: string,
-  cycleDays: number
-): number {
+export function getProductRotationBucket(productId: string, cycleDays: number): number {
   return stableStringBucket(productId.trim(), cycleDays);
 }
 
 export function isProductDueForSliceRotation(
   productId: string,
   sliceDate: Date,
-  config: SliceRotationConfig
+  config: SliceRotationConfig,
 ): boolean {
   const key = productId.trim();
   if (!key) {
@@ -50,7 +42,7 @@ export type SliceRotationInfo = {
 
 export function resolveSliceRotationInfo(
   konkName: string,
-  sliceDate: Date
+  sliceDate: Date,
 ): SliceRotationInfo | null {
   const config = resolveSliceRotationConfig(konkName);
   if (!config) {
@@ -65,7 +57,7 @@ export function resolveSliceRotationInfo(
 export function filterProductsForSliceRotation<T extends { productId?: string }>(
   items: T[],
   sliceDate: Date,
-  konkName: string
+  konkName: string,
 ): { filtered: T[]; rotation: SliceRotationInfo | null } {
   const config = resolveSliceRotationConfig(konkName);
   if (!config) {
@@ -76,7 +68,7 @@ export function filterProductsForSliceRotation<T extends { productId?: string }>
     dayIndex: getSliceRotationDayIndex(sliceDate, config.cycleDays),
   };
   const filtered = items.filter((item) =>
-    isProductDueForSliceRotation(item.productId ?? "", sliceDate, config)
+    isProductDueForSliceRotation(item.productId ?? "", sliceDate, config),
   );
   return { filtered, rotation };
 }

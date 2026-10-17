@@ -20,4 +20,3 @@ describe("getMeResponseUtil", () => {
     expect(typeof response.token).toBe("string");
   });
 });
-

@@ -8,19 +8,16 @@ vi.mock("../utils/getKonkProdSkuStockChartDataUtil.js");
 describe("getKonkProdSkuStockChartDataController", () => {
   let res: Response;
   let responseStatus: { code?: number };
-  let responseJson: Record<string, unknown>;
 
   beforeEach(() => {
     vi.clearAllMocks();
     responseStatus = {};
-    responseJson = {};
     res = {
       status(code: number) {
         responseStatus.code = code;
         return this;
       },
-      json(data: unknown) {
-        responseJson = data as Record<string, unknown>;
+      json(_data: unknown) {
         return this;
       },
     } as unknown as Response;

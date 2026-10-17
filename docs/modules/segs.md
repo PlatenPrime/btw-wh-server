@@ -57,9 +57,11 @@
 Создание нового сегмента.
 
 **Запрос:**
+
 - Body: `{ blockData: { _id: string, title: string }, order: number, zones: Array<string> }`
 
 **Ответ:**
+
 - 201: `{ message: string, data: Seg }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации или зоны уже принадлежат другим сегментам
 - 404: `{ message: string }` - блок не найден
@@ -72,9 +74,11 @@
 Получение всех сегментов, отсортированных по порядку.
 
 **Запрос:**
+
 - Query параметры отсутствуют
 
 **Ответ:**
+
 - 200: `{ exists: boolean, message: string, data: Array<Seg> }`
 - 500: `{ message: string, error?: any }` - ошибка сервера
 
@@ -85,9 +89,11 @@
 Получение сегмента по идентификатору.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ exists: boolean, message: string, data: Seg | null }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -99,9 +105,11 @@
 Получение всех сегментов блока, отсортированных по порядку.
 
 **Запрос:**
+
 - Path параметры: `blockId` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ exists: boolean, message: string, data: Array<Seg> }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -113,9 +121,11 @@
 Получение всех зон сегмента.
 
 **Запрос:**
+
 - Path параметры: `segId` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ exists: boolean, message: string, data: Array<Zone> }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -127,10 +137,12 @@
 Обновление сегмента.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 - Body: `{ order?: number, zones?: Array<string> }` (все поля опциональны, но хотя бы одно должно быть указано)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Seg }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации или зоны уже принадлежат другим сегментам
 - 404: `{ message: string }` - сегмент не найден
@@ -145,9 +157,11 @@
 Удаление сегмента.
 
 **Запрос:**
+
 - Path параметры: `id` (MongoDB ObjectId)
 
 **Ответ:**
+
 - 200: `{ message: string, data: Seg }`
 - 400: `{ message: string, errors?: array }` - неверный формат ID
 - 404: `{ message: string }` - сегмент не найден
@@ -162,9 +176,11 @@
 Массовое создание или обновление сегментов.
 
 **Запрос:**
+
 - Body: `Array<{ _id?: string, blockId: string, order: number, zones: Array<string> }>`
 
 **Ответ:**
+
 - 200: `{ message: string, data: { processedSegs: Array<Seg> } }`
 - 400: `{ message: string, errors?: array }` - ошибка валидации
 - 500: `{ message: string, error?: any }` - ошибка сервера
@@ -179,20 +195,21 @@
 
 ```typescript
 {
-  _id: string;                    // MongoDB ObjectId
-  block: string;                   // ObjectId блока
-  blockData: {                     // Кэшированные данные блока
+  _id: string; // MongoDB ObjectId
+  block: string; // ObjectId блока
+  blockData: {
+    // Кэшированные данные блока
     _id: string;
     title: string;
-  };
-  sector: number;                  // Рассчитанный сектор (blockOrder * 1000 + segOrder)
-  order: number;                   // Порядок в блоке (начинается с 1)
-  zones: Array<{                   // Кэшированные данные зон
+  }
+  sector: number; // Рассчитанный сектор (blockOrder * 1000 + segOrder)
+  order: number; // Порядок в блоке (начинается с 1)
+  zones: Array<{
+    // Кэшированные данные зон
     _id: string;
     title: string;
   }>;
-  createdAt: Date;                 // Дата создания
-  updatedAt: Date;                 // Дата обновления
+  createdAt: Date; // Дата создания
+  updatedAt: Date; // Дата обновления
 }
 ```
-

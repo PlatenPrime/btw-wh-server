@@ -11,12 +11,7 @@ import { getDayPoint } from "../../utils/skuSliceMonthStore.js";
 
 describe("resolvePackFlipCliDates", () => {
   it("uses explicit from/to range", () => {
-    const parsed = resolvePackFlipCliDates([
-      "--from",
-      "2026-09-11",
-      "--to",
-      "2026-09-13",
-    ]);
+    const parsed = resolvePackFlipCliDates(["--from", "2026-09-11", "--to", "2026-09-13"]);
     expect(parsed.apply).toBe(false);
     expect(parsed.konkName).toBe("perfect");
     expect(parsed.dates.map((d) => d.toISOString().slice(0, 10))).toEqual([
@@ -89,16 +84,10 @@ describe("runPackFlipReviewConnected", () => {
   });
 
   it("connects and disconnects even when cli args are invalid", async () => {
-    const connect = vi
-      .spyOn(mongoose, "connect")
-      .mockResolvedValue(mongoose as never);
-    const disconnect = vi
-      .spyOn(mongoose, "disconnect")
-      .mockResolvedValue(undefined);
+    const connect = vi.spyOn(mongoose, "connect").mockResolvedValue(mongoose as never);
+    const disconnect = vi.spyOn(mongoose, "disconnect").mockResolvedValue(undefined);
 
-    await expect(runPackFlipReviewConnected(["--wat"])).rejects.toThrow(
-      /Unknown argument/
-    );
+    await expect(runPackFlipReviewConnected(["--wat"])).rejects.toThrow(/Unknown argument/);
     expect(connect).toHaveBeenCalledOnce();
     expect(disconnect).toHaveBeenCalledOnce();
   });

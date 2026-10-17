@@ -29,8 +29,6 @@ describe("BtradeSliceMonth Model", () => {
   it("enforces unique (artikul, month)", async () => {
     const month = new Date("2026-10-01T00:00:00.000Z");
     await BtradeSliceMonth.create({ artikul: "dup", month, days: {} });
-    await expect(
-      BtradeSliceMonth.create({ artikul: "dup", month, days: {} }),
-    ).rejects.toThrow();
+    await expect(BtradeSliceMonth.create({ artikul: "dup", month, days: {} })).rejects.toThrow();
   });
 });

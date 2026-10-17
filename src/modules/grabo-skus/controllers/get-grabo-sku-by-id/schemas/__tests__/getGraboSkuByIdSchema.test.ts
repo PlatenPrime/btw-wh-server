@@ -10,8 +10,6 @@ describe("getGraboSkuByIdSchema", () => {
   });
 
   it("rejects an invalid ObjectId", () => {
-    expect(
-      getGraboSkuByIdSchema.safeParse({ id: "bad-id" }).success
-    ).toBe(false);
+    expect(getGraboSkuByIdSchema.safeParse({ id: "bad-id" }).success).toBe(false);
   });
 });

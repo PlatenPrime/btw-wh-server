@@ -21,10 +21,7 @@ vi.mock("../../../../logging/createLogger.js", () => ({
 }));
 
 import { sendCronAnalyticsReport } from "../../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
-import {
-  clearGraboSkuSyncForTests,
-  tryAcquireGraboSkuSync,
-} from "../../utils/graboSkuSyncLock.js";
+import { clearGraboSkuSyncForTests, tryAcquireGraboSkuSync } from "../../utils/graboSkuSyncLock.js";
 import { runGraboSkuSyncUtil } from "../../utils/runGraboSkuSyncUtil.js";
 import {
   GRABO_SKU_SYNC_CRON_EXPR,
@@ -41,7 +38,7 @@ describe("startGraboSkuSyncCron", () => {
     vi.clearAllMocks();
     clearGraboSkuSyncForTests();
     cronCallback = null;
-    mockedCronJob.mockImplementation((...args: unknown[]) => {
+    mockedCronJob.mockImplementation(function (...args: unknown[]) {
       const cb = args[1];
       if (typeof cb === "function") {
         cronCallback = cb as () => Promise<void>;
@@ -69,7 +66,7 @@ describe("startGraboSkuSyncCron", () => {
       expect.any(Function),
       null,
       true,
-      GRABO_SKU_SYNC_CRON_TZ
+      GRABO_SKU_SYNC_CRON_TZ,
     );
     expect(GRABO_SKU_SYNC_CRON_EXPR).toBe("0 0 4 * * 6");
     expect(GRABO_SKU_SYNC_CRON_TZ).toBe("Europe/Kyiv");

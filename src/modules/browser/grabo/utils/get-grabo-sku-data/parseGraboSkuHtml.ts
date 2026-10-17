@@ -1,10 +1,7 @@
 import * as cheerio from "cheerio";
 import type { BrowserCheerioAPI } from "../../../utils/cheerioTypes.js";
 import { resolveHrefAgainstBase } from "../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
-import {
-  GRABO_BASE_URL,
-  type GraboSkuData,
-} from "../types/graboSkuData.js";
+import { GRABO_BASE_URL, type GraboSkuData } from "../types/graboSkuData.js";
 
 function normalizeWhitespace(value: string): string {
   return value.replace(/\s+/g, " ").trim();
@@ -13,10 +10,7 @@ function normalizeWhitespace(value: string): string {
 /**
  * Текст атрибута: предпочитает `.selected`, иначе первый `li span`.
  */
-function textFromAttribute(
-  $: BrowserCheerioAPI,
-  attributeSelector: string
-): string {
+function textFromAttribute($: BrowserCheerioAPI, attributeSelector: string): string {
   const root = $(attributeSelector).first();
   if (root.length === 0) {
     return "";

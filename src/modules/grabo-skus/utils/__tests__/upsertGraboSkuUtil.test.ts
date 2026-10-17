@@ -44,7 +44,7 @@ describe("upsertGraboSkuUtil", () => {
 
     const result = await upsertGraboSkuUtil(
       { ...fields, title: "Pink Ribbon Updated", isNew: false },
-      new Date("2026-08-15T12:00:00.000Z")
+      new Date("2026-08-15T12:00:00.000Z"),
     );
 
     expect(result).toBe("updated");

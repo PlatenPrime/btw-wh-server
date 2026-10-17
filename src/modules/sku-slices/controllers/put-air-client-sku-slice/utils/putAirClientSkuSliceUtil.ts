@@ -8,10 +8,7 @@ import { urlsMatchForClientIngest } from "../../../utils/urlsMatchForClientInges
 import type { PutAirClientSkuSliceInput } from "../schemas/putAirClientSkuSliceSchema.js";
 import { scheduleAfterSkuSliceStockMutation } from "../../../../sku-reporting/utils/scheduleAfterSkuSliceStockMutation.js";
 import { isSkuSliceDataKeyFilled } from "../../../utils/isSkuSliceDataKeyFilled.js";
-import {
-  getDayPoint,
-  upsertDayPoint,
-} from "../../../utils/skuSliceMonthStore.js";
+import { getDayPoint, upsertDayPoint } from "../../../utils/skuSliceMonthStore.js";
 import { ensureSkuSliceDayMeta } from "../../../utils/skuSliceDayMetaStore.js";
 
 export type PutAirClientSkuSliceStatus = "saved" | "skipped";
@@ -45,9 +42,7 @@ export async function putAirClientSkuSliceUtil(
   input: PutAirClientSkuSliceInput,
   now: Date = new Date(),
 ): Promise<PutAirClientSkuSliceResult> {
-  const sku = await Sku.findById(input.skuId)
-    .select("konkName productId url")
-    .lean();
+  const sku = await Sku.findById(input.skuId).select("konkName productId url").lean();
 
   if (!sku) {
     return {
@@ -110,11 +105,7 @@ export async function putAirClientSkuSliceUtil(
 
   await ensureSkuSliceDayMeta(AIR_CLIENT_SLICE_KONK, sliceDate);
 
-  const existing = await getDayPoint(
-    AIR_CLIENT_SLICE_KONK,
-    productId,
-    sliceDate,
-  );
+  const existing = await getDayPoint(AIR_CLIENT_SLICE_KONK, productId, sliceDate);
   if (isSkuSliceDataKeyFilled(existing)) {
     return {
       ok: true,

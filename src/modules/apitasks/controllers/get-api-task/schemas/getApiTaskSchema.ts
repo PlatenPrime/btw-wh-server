@@ -21,10 +21,9 @@ export const listApiTasksSchema = z.object({
         .map((part) => part.trim())
         .filter(Boolean);
     })
-    .refine(
-      (values) => values === undefined || values.every(isApiTaskStatus),
-      { message: "Invalid api task status filter" },
-    ),
+    .refine((values) => values === undefined || values.every(isApiTaskStatus), {
+      message: "Invalid api task status filter",
+    }),
 });
 
 export type ListApiTasksInput = z.infer<typeof listApiTasksSchema>;

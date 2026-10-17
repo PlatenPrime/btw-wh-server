@@ -5,10 +5,7 @@ import { describe, expect, it } from "vitest";
 import { parseSharikProductRestsHtml } from "../parseSharikProductRestsHtml.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const fixtureHtml = readFileSync(
-  join(__dirname, "fixtures", "product-rests-sample.html"),
-  "utf-8"
-);
+const fixtureHtml = readFileSync(join(__dirname, "fixtures", "product-rests-sample.html"), "utf-8");
 
 describe("parseSharikProductRestsHtml", () => {
   it("parses dual-qty pre lines; last duplicate wins", () => {
@@ -44,7 +41,7 @@ describe("parseSharikProductRestsHtml", () => {
 
   it("ignores old single-qty format and invalid lines", () => {
     const map = parseSharikProductRestsHtml(
-      "<pre>not a product line</pre><pre>1501-0001 = 1; 10.00</pre><pre>1501-0002 = 1; 2; 10.00</pre>"
+      "<pre>not a product line</pre><pre>1501-0001 = 1; 10.00</pre><pre>1501-0002 = 1; 2; 10.00</pre>",
     );
     expect(map.size).toBe(1);
     expect(map.get("1501-0002")).toEqual({

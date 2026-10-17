@@ -35,7 +35,7 @@ function pickProductCards($: cheerio.CheerioAPI): BrowserCheerio {
  */
 export function parseAirGroupListingProductsMap(
   $: cheerio.CheerioAPI,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, AirGroupPageProduct> {
   const result = new Map<string, AirGroupPageProduct>();
 
@@ -56,8 +56,7 @@ export function parseAirGroupListingProductsMap(
     const title = decodeHtmlEntities(rawTitle).replace(/\s+/g, " ").trim();
 
     const $imgLink = $card.find(".us-module-img a").first();
-    const href =
-      $imgLink.attr("href")?.trim() ?? $titleLink.attr("href")?.trim() ?? "";
+    const href = $imgLink.attr("href")?.trim() ?? $titleLink.attr("href")?.trim() ?? "";
     const url = resolveHrefAgainstBase(href, currentPageUrl);
 
     if (!title || !url || !imageUrl) {
@@ -84,17 +83,13 @@ export function hasAirGroupListingMarkup($: cheerio.CheerioAPI): boolean {
  */
 export function parseAirGroupListingPage(
   html: string,
-  pageUrl: string
+  pageUrl: string,
 ): ParseAirGroupListingPageResult {
   const $ = cheerio.load(html);
   const productsById = parseAirGroupListingProductsMap($, pageUrl);
   return {
     products: [...productsById.values()],
-    nextPageUrl: getNextPageUrlFromLinkRelNext(
-      $,
-      pageUrl,
-      resolveHrefAgainstBase
-    ),
+    nextPageUrl: getNextPageUrlFromLinkRelNext($, pageUrl, resolveHrefAgainstBase),
     hasListingMarkup: hasAirGroupListingMarkup($),
   };
 }

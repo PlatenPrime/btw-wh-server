@@ -7,7 +7,7 @@ export function toStockAndPrice(
   stockPacks: number,
   packPrice: number,
   title: string,
-  html?: string
+  html?: string,
 ): PerfectProductInfo {
   const packCount = resolvePackCount(title, html);
   if (!packCount) {

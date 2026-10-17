@@ -31,9 +31,7 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
 /**
  * Остаток и цена по SKU: по konkName выбирается геттер, вызов с sku.url.
  */
-export async function getSkuStockDataUtil(
-  skuId: string
-): Promise<SkuStockResult | null> {
+export async function getSkuStockDataUtil(skuId: string): Promise<SkuStockResult | null> {
   const sku = await Sku.findById(skuId).select("konkName url").lean();
 
   if (!sku) return null;
@@ -41,16 +39,15 @@ export async function getSkuStockDataUtil(
   const key = (sku.konkName ?? "").trim().toLowerCase();
   const getter = KONK_STOCK_GETTERS[key];
   if (!getter) {
-    const err = new Error(
-      `Unsupported competitor for stock: ${sku.konkName}`
-    ) as Error & { code?: string };
+    const err = new Error(`Unsupported competitor for stock: ${sku.konkName}`) as Error & {
+      code?: string;
+    };
     err.code = UNSUPPORTED_KONK_CODE;
     throw err;
   }
 
   const result = await getter(sku.url);
-  const price =
-    result.price !== undefined && result.price !== null ? result.price : -1;
+  const price = result.price !== undefined && result.price !== null ? result.price : -1;
 
   return {
     stock: result.stock,

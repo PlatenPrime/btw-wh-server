@@ -7,11 +7,8 @@ import { parseGraboSitemapCategoryUrls } from "../parseGraboSitemapCategoryUrls.
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const sitemapHtml = readFileSync(
-  join(
-    __dirname,
-    "../../get-grabo-sku-data/__tests__/fixtures/sitemap.txt"
-  ),
-  "utf-8"
+  join(__dirname, "../../get-grabo-sku-data/__tests__/fixtures/sitemap.txt"),
+  "utf-8",
 );
 
 describe("GRABO_SITEMAP_URL", () => {
@@ -63,8 +60,6 @@ describe("parseGraboSitemapCategoryUrls", () => {
   });
 
   it("returns empty array when sitemap tree is missing", () => {
-    expect(parseGraboSitemapCategoryUrls("<html><body></body></html>")).toEqual(
-      []
-    );
+    expect(parseGraboSitemapCategoryUrls("<html><body></body></html>")).toEqual([]);
   });
 });

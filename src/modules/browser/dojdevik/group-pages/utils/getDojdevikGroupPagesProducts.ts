@@ -21,13 +21,13 @@ export type DojdevikGroupPageProduct = {
 
 function parseProductsFromPage(
   $: CheerioAPI,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, DojdevikGroupPageProduct> {
   return parsePromUaGroupListingProducts($, currentPageUrl);
 }
 
 export async function getDojdevikGroupPagesProducts(
-  input: GetDojdevikGroupPagesProductsInput
+  input: GetDojdevikGroupPagesProductsInput,
 ): Promise<DojdevikGroupPageProduct[]> {
   const parseResult = getDojdevikGroupPagesProductsSchema.safeParse(input);
   if (!parseResult.success) {

@@ -69,7 +69,7 @@ describe("unlinkPalletController", () => {
       isDef: false,
       sector: 101,
     });
-    const group = await PalletGroup.create({
+    await PalletGroup.create({
       title: "Group Event",
       order: 1,
       pallets: [pallet._id],

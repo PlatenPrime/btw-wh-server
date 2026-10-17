@@ -96,17 +96,17 @@ describe("getKonkProdSkugrGroupsSalesUtil", () => {
     });
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-a`]: { stock: 10, price: 5 },
-          [`${konk}-b`]: { stock: 20, price: 2 },
-        });
+      [`${konk}-a`]: { stock: 10, price: 5 },
+      [`${konk}-b`]: { stock: 20, price: 2 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-a`]: { stock: 7, price: 5 },
-          [`${konk}-b`]: { stock: 18, price: 2 },
-        });
+      [`${konk}-a`]: { stock: 7, price: 5 },
+      [`${konk}-b`]: { stock: 18, price: 2 },
+    });
     await seedSkuSliceMonthDay(konk, d2, {
-          [`${konk}-a`]: { stock: 5, price: 5 },
-          [`${konk}-b`]: { stock: 15, price: 2 },
-        });
+      [`${konk}-a`]: { stock: 5, price: 5 },
+      [`${konk}-b`]: { stock: 15, price: 2 },
+    });
 
     const result = await getKonkProdSkugrGroupsSalesUtil({
       konk,

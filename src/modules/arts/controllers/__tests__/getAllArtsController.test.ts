@@ -58,4 +58,3 @@ describe("getAllArtsController", () => {
     expect(responseJson.message).toBe("Invalid query parameters");
   });
 });
-

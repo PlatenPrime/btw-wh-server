@@ -15,27 +15,18 @@ import { getSkugrSalesExcelSchema } from "../../../sku-excel-reports/controllers
 import { getSkugrSalesExcelUtil } from "../../../sku-excel-reports/controllers/get-skugr-sales-excel/utils/getSkugrSalesExcelUtil.js";
 import { getSkugrSliceExcelSchema } from "../../../sku-excel-reports/controllers/get-skugr-slice-excel/schemas/getSkugrSliceExcelSchema.js";
 import { getSkugrSliceExcelUtil } from "../../../sku-excel-reports/controllers/get-skugr-slice-excel/utils/getSkugrSliceExcelUtil.js";
-import {
-  failExcelJobRun,
-  okExcelJobRun,
-  type ExcelJobKindRunner,
-} from "../excelJobRunTypes.js";
+import { failExcelJobRun, okExcelJobRun, type ExcelJobKindRunner } from "../excelJobRunTypes.js";
 
 const SKU_NOT_FOUND = "No skus found for provided filters, or sku has no productId";
 
-function wrapOkFalse(
-  result: { ok: true; buffer: Buffer; fileName: string } | { ok: false },
-) {
+function wrapOkFalse(result: { ok: true; buffer: Buffer; fileName: string } | { ok: false }) {
   if (!result.ok) {
     return failExcelJobRun(SKU_NOT_FOUND);
   }
   return okExcelJobRun(result.buffer, result.fileName);
 }
 
-export const runSkuCatalogNewSince: ExcelJobKindRunner = async (
-  params,
-  options,
-) => {
+export const runSkuCatalogNewSince: ExcelJobKindRunner = async (params, options) => {
   const parsed = getCatalogNewSinceExcelQuerySchema.safeParse(params);
   if (!parsed.success) {
     return failExcelJobRun("Validation error");
@@ -48,10 +39,7 @@ export const runSkuCatalogNewSince: ExcelJobKindRunner = async (
   return okExcelJobRun(built.buffer, built.fileName);
 };
 
-export const runSkuCatalogInvalid: ExcelJobKindRunner = async (
-  params,
-  options,
-) => {
+export const runSkuCatalogInvalid: ExcelJobKindRunner = async (params, options) => {
   const parsed = getCatalogInvalidExcelQuerySchema.safeParse(params);
   if (!parsed.success) {
     return failExcelJobRun("Validation error");

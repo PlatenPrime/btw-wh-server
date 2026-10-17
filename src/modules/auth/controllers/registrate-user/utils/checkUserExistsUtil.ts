@@ -11,10 +11,7 @@ import User from "../../../models/User.js";
  * const exists = await checkUserExistsUtil("testuser");
  * ```
  */
-export const checkUserExistsUtil = async (
-  username: string
-): Promise<boolean> => {
+export const checkUserExistsUtil = async (username: string): Promise<boolean> => {
   const candidate = await User.findOne({ username });
   return !!candidate;
 };
-

@@ -136,11 +136,9 @@ describe("playwrightBrowser", () => {
     expect(mock.launch).toHaveBeenCalledWith(
       expect.objectContaining({
         headless: true,
-        args: expect.arrayContaining([
-          "--disable-blink-features=AutomationControlled",
-        ]),
+        args: expect.arrayContaining(["--disable-blink-features=AutomationControlled"]),
         ignoreDefaultArgs: ["--enable-automation"],
-      })
+      }),
     );
     expect(mock.newContext).toHaveBeenCalledTimes(1);
     expect(mock.newContext).toHaveBeenCalledWith(
@@ -148,10 +146,10 @@ describe("playwrightBrowser", () => {
         locale: "uk-UA",
         timezoneId: "Europe/Kyiv",
         viewport: { width: 1920, height: 1080 },
-      })
+      }),
     );
-    const firstCall = mock.newContext.mock.calls[0] as
-      unknown as [Record<string, unknown>] | undefined;
+    const firstCall = mock.newContext.mock.calls[0] as unknown as
+      [Record<string, unknown>] | undefined;
     expect(firstCall?.[0]).toBeDefined();
     expect(firstCall?.[0]).not.toHaveProperty("userAgent");
   });
@@ -174,7 +172,7 @@ describe("playwrightBrowser", () => {
           username: "user",
           password: "pass",
         },
-      })
+      }),
     );
   });
 
@@ -182,9 +180,9 @@ describe("playwrightBrowser", () => {
     const mock = createMockBrowser();
     setPlaywrightChromiumLoaderForTests(async () => ({ launch: mock.launch }));
 
-    await expect(
-      acquirePlaywrightContext({ proxyUrl: "not-a-url" })
-    ).rejects.toThrow(/Invalid browser HTTP proxy URL/);
+    await expect(acquirePlaywrightContext({ proxyUrl: "not-a-url" })).rejects.toThrow(
+      /Invalid browser HTTP proxy URL/,
+    );
     expect(mock.launch).not.toHaveBeenCalled();
   });
 

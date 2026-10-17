@@ -39,7 +39,7 @@ export function fitColumnWidths(
     minWidth = FIT_COLUMN_MIN_WIDTH,
     maxWidth = FIT_COLUMN_MAX_WIDTH,
     padding = FIT_COLUMN_PADDING,
-  }: FitColumnWidthsOptions
+  }: FitColumnWidthsOptions,
 ): void {
   for (let c = 1; c <= columnCount; c++) {
     const column = worksheet.getColumn(c);

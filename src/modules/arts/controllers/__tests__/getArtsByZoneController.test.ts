@@ -56,4 +56,3 @@ describe("getArtsByZoneController", () => {
     expect(responseJson.message).toBe("Invalid zone parameter");
   });
 });
-

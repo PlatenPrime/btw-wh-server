@@ -14,9 +14,7 @@ type RowWithPallets = {
   updatedAt?: Date;
 };
 
-export const getRowByTitleUtil = async (
-  title: string,
-): Promise<RowWithPallets | null> => {
+export const getRowByTitleUtil = async (title: string): Promise<RowWithPallets | null> => {
   const row: IRow | null = await Row.findOne({ title: title });
 
   if (!row) {

@@ -19,8 +19,6 @@ describe("normalizeDojdevikOutcome", () => {
   });
 
   it("returns negative outcome when package price is missing", () => {
-    expect(normalizeDojdevikOutcome(10, undefined, 5, "x")).toEqual(
-      DOJDEVIK_NEGATIVE_OUTCOME
-    );
+    expect(normalizeDojdevikOutcome(10, undefined, 5, "x")).toEqual(DOJDEVIK_NEGATIVE_OUTCOME);
   });
 });

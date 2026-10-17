@@ -10,13 +10,10 @@ import { seedBtradeSliceMonthDay } from "../../btrade-slices/utils/seedBtradeSli
 import { AnalogSlice } from "../models/AnalogSlice.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -101,9 +98,7 @@ describe("Analog-slices router integration", () => {
         .query({ date: "2026-03-01" })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Analog slice by date retrieved successfully",
-      );
+      expect(response.body.message).toBe("Analog slice by date retrieved successfully");
       expect(response.body.data).toEqual({ stock: 100, price: 10 });
     });
   });
@@ -118,9 +113,7 @@ describe("Analog-slices router integration", () => {
         .query({ dateFrom: "2026-03-01", dateTo: "2026-03-02" })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Analog slice range retrieved successfully",
-      );
+      expect(response.body.message).toBe("Analog slice range retrieved successfully");
       expect(response.body.data).toHaveLength(2);
     });
   });
@@ -135,9 +128,7 @@ describe("Analog-slices router integration", () => {
         .query({ dateFrom: "2026-03-01", dateTo: "2026-03-02" })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Analog sales range retrieved successfully",
-      );
+      expect(response.body.message).toBe("Analog sales range retrieved successfully");
       expect(response.body.data).toHaveLength(2);
     });
   });
@@ -152,9 +143,7 @@ describe("Analog-slices router integration", () => {
         .query({ date: "2026-03-02" })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Analog sales by date retrieved successfully",
-      );
+      expect(response.body.message).toBe("Analog sales by date retrieved successfully");
       expect(response.body.data.sales).toBe(10);
     });
   });
@@ -174,9 +163,7 @@ describe("Analog-slices router integration", () => {
         })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Sales comparison data retrieved successfully",
-      );
+      expect(response.body.message).toBe("Sales comparison data retrieved successfully");
       expect(response.body.data.days).toHaveLength(2);
     });
   });
@@ -196,9 +183,7 @@ describe("Analog-slices router integration", () => {
         })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Stock comparison data retrieved successfully",
-      );
+      expect(response.body.message).toBe("Stock comparison data retrieved successfully");
       expect(response.body.data.days).toHaveLength(2);
       expect(response.body.data.summary).toBeDefined();
     });
@@ -209,9 +194,7 @@ describe("Analog-slices router integration", () => {
       const analog = await seedBaseData();
 
       const response = await request(app)
-        .get(
-          `/api/analog-slices/analog/${analog._id.toString()}/comparison-excel`,
-        )
+        .get(`/api/analog-slices/analog/${analog._id.toString()}/comparison-excel`)
         .set(createAuthHeader(RoleType.ADMIN))
         .query({ dateFrom: "2026-03-01", dateTo: "2026-03-02" })
         .expect(410);
@@ -224,9 +207,7 @@ describe("Analog-slices router integration", () => {
       const analog = await seedBaseData();
 
       const response = await request(app)
-        .get(
-          `/api/analog-slices/analog/${analog._id.toString()}/sales-comparison-excel`,
-        )
+        .get(`/api/analog-slices/analog/${analog._id.toString()}/sales-comparison-excel`)
         .set(createAuthHeader(RoleType.ADMIN))
         .query({ dateFrom: "2026-03-01", dateTo: "2026-03-02" })
         .expect(410);

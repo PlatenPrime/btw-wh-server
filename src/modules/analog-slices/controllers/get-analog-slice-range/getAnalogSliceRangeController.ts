@@ -6,10 +6,7 @@ import { getAnalogSliceRangeUtil } from "./utils/getAnalogSliceRangeUtil.js";
  * @desc    Получить массив данных среза по аналогу за период дат (для графиков)
  * @route   GET /api/analog-slices/analog/:analogId/range?dateFrom=2026-03-01&dateTo=2026-03-31
  */
-export const getAnalogSliceRangeController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAnalogSliceRangeController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getAnalogSliceRangeSchema.safeParse({
     analogId: req.params.analogId,
     dateFrom: req.query.dateFrom,
@@ -18,7 +15,7 @@ export const getAnalogSliceRangeController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

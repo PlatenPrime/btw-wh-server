@@ -17,10 +17,7 @@ export const DEFAULT_MONGOD_VERSION = "7.0.14";
 type MongodBinaryDownloadOptions = Parameters<typeof MongoBinary.download>[0];
 
 /** MMS typings require all fields; runtime fills defaults in MongoBinaryDownload. */
-async function downloadMongodBinary(
-  downloadDir: string,
-  version: string,
-): Promise<string> {
+async function downloadMongodBinary(downloadDir: string, version: string): Promise<string> {
   return MongoBinary.download({ downloadDir, version } as MongodBinaryDownloadOptions);
 }
 
@@ -36,17 +33,11 @@ export function getMongodZipEntryPath(version = DEFAULT_MONGOD_VERSION): string 
   return `mongodb-win32-x86_64-windows-${version}/bin/mongod.exe`;
 }
 
-export function getMongodBinaryPath(
-  downloadDir: string,
-  version = DEFAULT_MONGOD_VERSION,
-): string {
+export function getMongodBinaryPath(downloadDir: string, version = DEFAULT_MONGOD_VERSION): string {
   return join(downloadDir, getMongodBinaryFileName(version));
 }
 
-export function getMongodZipPath(
-  downloadDir: string,
-  version = DEFAULT_MONGOD_VERSION,
-): string {
+export function getMongodZipPath(downloadDir: string, version = DEFAULT_MONGOD_VERSION): string {
   return join(downloadDir, getMongodZipFileName(version));
 }
 
@@ -73,11 +64,9 @@ export function extractMongodFromZip(
 
   try {
     const entryPath = getMongodZipEntryPath(version);
-    const extractResult = spawnSync(
-      "tar",
-      ["-xf", zipPath, "-C", tempDir, entryPath],
-      { windowsHide: true },
-    );
+    const extractResult = spawnSync("tar", ["-xf", zipPath, "-C", tempDir, entryPath], {
+      windowsHide: true,
+    });
 
     if (extractResult.status !== 0) {
       throw new Error(
@@ -87,9 +76,7 @@ export function extractMongodFromZip(
 
     const extractedBinaryPath = join(tempDir, entryPath);
     if (!existsSync(extractedBinaryPath)) {
-      throw new Error(
-        `Extracted mongod binary is missing at ${extractedBinaryPath}`,
-      );
+      throw new Error(`Extracted mongod binary is missing at ${extractedBinaryPath}`);
     }
 
     mkdirSync(join(binaryPath, ".."), { recursive: true });
@@ -159,8 +146,6 @@ export async function ensureMongodBinary(
   const repairedBinaryPath = await MongoBinary.getPath({ downloadDir, version });
 
   if (!isRunnableMongodBinary(repairedBinaryPath)) {
-    throw new Error(
-      `MongoDB test binary at ${repairedBinaryPath} is not runnable.`,
-    );
+    throw new Error(`MongoDB test binary at ${repairedBinaryPath} is not runnable.`);
   }
 }

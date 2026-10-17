@@ -50,60 +50,96 @@ export const exportCollectionsToJson = async (): Promise<string> => {
     // Используем lean() для получения простых JS объектов без методов Mongoose
     // Используем catch для обработки ошибок отдельных коллекций
     const exportPromises = [
-      Art.find().lean().exec().then(data => {
-        backupData.arts = data;
-      }).catch(err => {
-        log.error({ err, collection: "arts" }, "backup export collection failed");
-        backupData.arts = [];
-      }),
-      Row.find().lean().exec().then(data => {
-        backupData.rows = data;
-      }).catch(err => {
-        log.error({ err, collection: "rows" }, "backup export collection failed");
-        backupData.rows = [];
-      }),
-      Pallet.find().lean().exec().then(data => {
-        backupData.pallets = data;
-      }).catch(err => {
-        log.error({ err, collection: "pallets" }, "backup export collection failed");
-        backupData.pallets = [];
-      }),
-      Pos.find().lean().exec().then(data => {
-        backupData.poses = data;
-      }).catch(err => {
-        log.error({ err, collection: "poses" }, "backup export collection failed");
-        backupData.poses = [];
-      }),
-      Zone.find().lean().exec().then(data => {
-        backupData.zones = data;
-      }).catch(err => {
-        log.error({ err, collection: "zones" }, "backup export collection failed");
-        backupData.zones = [];
-      }),
-      Block.find().lean().exec().then(data => {
-        backupData.blocks = data;
-      }).catch(err => {
-        log.error({ err, collection: "blocks" }, "backup export collection failed");
-        backupData.blocks = [];
-      }),
-      Seg.find().lean().exec().then(data => {
-        backupData.segs = data;
-      }).catch(err => {
-        log.error({ err, collection: "segs" }, "backup export collection failed");
-        backupData.segs = [];
-      }),
-      User.find().lean().exec().then(data => {
-        backupData.users = data;
-      }).catch(err => {
-        log.error({ err, collection: "users" }, "backup export collection failed");
-        backupData.users = [];
-      }),
-      Role.find().lean().exec().then(data => {
-        backupData.roles = data;
-      }).catch(err => {
-        log.error({ err, collection: "roles" }, "backup export collection failed");
-        backupData.roles = [];
-      }),
+      Art.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.arts = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "arts" }, "backup export collection failed");
+          backupData.arts = [];
+        }),
+      Row.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.rows = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "rows" }, "backup export collection failed");
+          backupData.rows = [];
+        }),
+      Pallet.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.pallets = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "pallets" }, "backup export collection failed");
+          backupData.pallets = [];
+        }),
+      Pos.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.poses = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "poses" }, "backup export collection failed");
+          backupData.poses = [];
+        }),
+      Zone.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.zones = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "zones" }, "backup export collection failed");
+          backupData.zones = [];
+        }),
+      Block.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.blocks = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "blocks" }, "backup export collection failed");
+          backupData.blocks = [];
+        }),
+      Seg.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.segs = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "segs" }, "backup export collection failed");
+          backupData.segs = [];
+        }),
+      User.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.users = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "users" }, "backup export collection failed");
+          backupData.users = [];
+        }),
+      Role.find()
+        .lean()
+        .exec()
+        .then((data) => {
+          backupData.roles = data;
+        })
+        .catch((err) => {
+          log.error({ err, collection: "roles" }, "backup export collection failed");
+          backupData.roles = [];
+        }),
     ];
 
     // Ждем завершения всех экспортов
@@ -129,8 +165,7 @@ export const exportCollectionsToJson = async (): Promise<string> => {
     log.info({ filePath }, "collections exported");
     return filePath;
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     log.error({ err: error }, "backup export fatal error");
     throw new Error(`Failed to export collections: ${errorMessage}`);
   }

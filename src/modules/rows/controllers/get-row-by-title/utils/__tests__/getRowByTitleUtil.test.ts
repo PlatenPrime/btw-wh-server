@@ -26,15 +26,15 @@ describe("getRowByTitleUtil", () => {
 
   it("возвращает ряд с паллетами", async () => {
     const row = await Row.create({ title: "Row With Pallets Title" });
-    const pallet1 = await Pallet.create({
+    await Pallet.create({
       title: "1-1",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [],
     });
-    const pallet2 = await Pallet.create({
+    await Pallet.create({
       title: "2-1",
-      row: { _id: row._id, title: row.title },
+      row: row._id,
       rowData: { _id: row._id, title: row.title },
       poses: [],
     });
@@ -49,7 +49,7 @@ describe("getRowByTitleUtil", () => {
   });
 
   it("возвращает правильную структуру данных", async () => {
-    const row = await Row.create({ title: "Structure Row" });
+    await Row.create({ title: "Structure Row" });
 
     const result = await getRowByTitleUtil("Structure Row");
 
@@ -61,4 +61,3 @@ describe("getRowByTitleUtil", () => {
     expect(result?.updatedAt).toBeDefined();
   });
 });
-

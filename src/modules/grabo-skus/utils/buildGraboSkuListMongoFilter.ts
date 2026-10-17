@@ -17,7 +17,7 @@ function trimmedOrUndefined(value: string | undefined): string | undefined {
  * `size` — опция селекта (префикс до `/`), не сырая строка PDP.
  */
 export function buildGraboSkuListMongoFilter(
-  query: GraboSkuListFilterQuery
+  query: GraboSkuListFilterQuery,
 ): Record<string, unknown> {
   const filter: Record<string, unknown> = {};
   const search = trimmedOrUndefined(query.search);

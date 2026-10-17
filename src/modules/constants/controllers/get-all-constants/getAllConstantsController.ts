@@ -6,10 +6,7 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить все константы
  * @route   GET /api/constants
  */
-export const getAllConstantsController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAllConstantsController = async (req: Request, res: Response): Promise<void> => {
   try {
     const list = await getAllConstantsUtil();
     res.status(200).json({

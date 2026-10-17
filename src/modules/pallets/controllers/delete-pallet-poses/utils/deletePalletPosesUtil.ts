@@ -1,6 +1,6 @@
 import { ClientSession } from "mongoose";
 import { Pos } from "../../../../poses/models/Pos.js";
-import { IPallet, Pallet } from "../../../models/Pallet.js";
+import { Pallet } from "../../../models/Pallet.js";
 
 type DeletePalletPosesInput = {
   palletId: string;
@@ -23,11 +23,3 @@ export const deletePalletPosesUtil = async ({
 
   await pallet.save({ session });
 };
-
-
-
-
-
-
-
-

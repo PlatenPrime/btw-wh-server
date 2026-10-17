@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  API_TASK_KIND_IDS,
-  isApiTaskKind,
-  isApiTaskStatus,
-} from "../apiTaskConstants.js";
+import { API_TASK_KIND_IDS, isApiTaskKind, isApiTaskStatus } from "../apiTaskConstants.js";
 
 describe("apiTaskConstants", () => {
   it("recognizes kinds and statuses", () => {

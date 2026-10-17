@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  parseYuminProductsPage,
-  yuminProductsPageSchema,
-} from "../parseYuminProductsPage.js";
+import { parseYuminProductsPage, yuminProductsPageSchema } from "../parseYuminProductsPage.js";
 
 describe("parseYuminProductsPage", () => {
   it("parses JSON", () => {
@@ -13,7 +10,7 @@ describe("parseYuminProductsPage", () => {
 
   it("throws on invalid JSON", () => {
     expect(() => parseYuminProductsPage("not-json", "https://x/page")).toThrow(
-      "Invalid JSON in Yumin listing response: https://x/page"
+      "Invalid JSON in Yumin listing response: https://x/page",
     );
   });
 });
@@ -35,8 +32,6 @@ describe("yuminProductsPageSchema", () => {
   });
 
   it("rejects invalid payload", () => {
-    expect(yuminProductsPageSchema.safeParse({ data: "x" }).success).toBe(
-      false
-    );
+    expect(yuminProductsPageSchema.safeParse({ data: "x" }).success).toBe(false);
   });
 });

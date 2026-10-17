@@ -50,6 +50,7 @@ Content-Type: application/json
 ### Error Responses
 
 #### 400 Bad Request
+
 ```typescript
 {
   message: "Invalid block ID format" | "Validation error",
@@ -61,13 +62,15 @@ Content-Type: application/json
 ```
 
 #### 404 Not Found
+
 ```typescript
 {
-  message: "Block not found"
+  message: "Block not found";
 }
 ```
 
 #### 409 Conflict
+
 ```typescript
 {
   message: "Block with this title already exists",
@@ -76,6 +79,7 @@ Content-Type: application/json
 ```
 
 #### 500 Server Error
+
 ```typescript
 {
   message: "Server error",
@@ -173,7 +177,7 @@ const RenameBlockButton = ({ blockId }: { blockId: string }) => {
 ## Validation Rules
 
 - `id`: Должен быть валидным MongoDB ObjectId
-- `title`: 
+- `title`:
   - Обязательное поле
   - Минимум 1 символ
   - Должно быть уникальным (не должно совпадать с названием другого блока)
@@ -194,4 +198,3 @@ const RenameBlockButton = ({ blockId }: { blockId: string }) => {
 ## See Also
 
 Полная документация модуля Blocks: [BLOCKS_FRONTEND_DOCUMENTATION.md](../../BLOCKS_FRONTEND_DOCUMENTATION.md)
-

@@ -1,8 +1,5 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../lib/excel/worksheetStyles.js";
 import { fitColumnWidths } from "../../../lib/excel/fitColumnWidths.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import {
@@ -37,10 +34,7 @@ function toIso(value: Date | undefined | null): string {
   return value instanceof Date ? value.toISOString() : "";
 }
 
-function excelCellValue(
-  row: GraboSkuExcelRow,
-  key: GraboSkuExcelColumnKey
-): string | boolean {
+function excelCellValue(row: GraboSkuExcelRow, key: GraboSkuExcelColumnKey): string | boolean {
   if (key === "tags" || key === "images") {
     return joinList(row[key]);
   }
@@ -51,7 +45,7 @@ function excelCellValue(
 }
 
 export async function buildGraboSkuExcelBuffer(
-  rows: GraboSkuExcelRow[]
+  rows: GraboSkuExcelRow[],
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("GraboSku");

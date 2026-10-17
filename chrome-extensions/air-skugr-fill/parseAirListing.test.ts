@@ -3,8 +3,7 @@ import type { AnyNode } from "domhandler";
 import { describe, expect, it } from "vitest";
 import { parseAirListingFromDocument, isAirListingPayload } from "./parseAirListing.js";
 
-const PAGE_URL =
-  "https://air.example.test/ua/index.php?route=product/category&path=1";
+const PAGE_URL = "https://air.example.test/ua/index.php?route=product/category&path=1";
 const PAGE2_URL = `${PAGE_URL}&page=2`;
 
 function wrapNode($: cheerio.CheerioAPI, el: AnyNode) {
@@ -19,7 +18,10 @@ function wrapNode($: cheerio.CheerioAPI, el: AnyNode) {
       return found ? wrapNode($, found) : null;
     },
     querySelectorAll(sel: string) {
-      return $el.find(sel).toArray().map((node) => wrapNode($, node));
+      return $el
+        .find(sel)
+        .toArray()
+        .map((node) => wrapNode($, node));
     },
     get textContent() {
       return $el.text();
@@ -35,7 +37,9 @@ function cheerioDocument(html: string) {
       return el ? wrapNode($, el) : null;
     },
     querySelectorAll(sel: string) {
-      return $(sel).toArray().map((node) => wrapNode($, node));
+      return $(sel)
+        .toArray()
+        .map((node) => wrapNode($, node));
     },
   };
 }
@@ -59,10 +63,7 @@ function airProductCard(opts: {
 }
 
 function airPageHtml(opts: { cards: string[]; nextHref?: string }): string {
-  const next =
-    opts.nextHref != null
-      ? `<link rel="next" href="${opts.nextHref}" />`
-      : "";
+  const next = opts.nextHref != null ? `<link rel="next" href="${opts.nextHref}" />` : "";
   return `<!DOCTYPE html><html><head>${next}</head><body>
     <div class="row us-category-products">${opts.cards.join("")}</div>
   </body></html>`;
@@ -82,10 +83,7 @@ describe("parseAirListingFromDocument", () => {
       nextHref: PAGE2_URL,
     });
 
-    const result = parseAirListingFromDocument(
-      cheerioDocument(html),
-      PAGE_URL
-    );
+    const result = parseAirListingFromDocument(cheerioDocument(html), PAGE_URL);
 
     expect(result.hasListingMarkup).toBe(true);
     expect(result.nextPageUrl).toBe(PAGE2_URL);
@@ -105,20 +103,16 @@ describe("parseAirListingFromDocument", () => {
         airProductCard({
           pid: "9",
           productPath: "/ua/product/z",
-          imageUrl:
-            "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
+          imageUrl: "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
           title: "Z",
         }).replace(
           `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg"`,
-          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-src="${real}"`
+          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-src="${real}"`,
         ),
       ],
     });
 
-    const result = parseAirListingFromDocument(
-      cheerioDocument(html),
-      PAGE_URL
-    );
+    const result = parseAirListingFromDocument(cheerioDocument(html), PAGE_URL);
     expect(result.products[0]?.imageUrl).toBe(real);
   });
 
@@ -129,27 +123,23 @@ describe("parseAirListingFromDocument", () => {
         airProductCard({
           pid: "9",
           productPath: "/ua/product/z",
-          imageUrl:
-            "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
+          imageUrl: "https://air.example.test/image/catalog/1lazy/lazy-image.svg",
           title: "Z",
         }).replace(
           `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg"`,
-          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-srcset="${real} 100w"`
+          `src="https://air.example.test/image/catalog/1lazy/lazy-image.svg" data-srcset="${real} 100w"`,
         ),
       ],
     });
 
-    const result = parseAirListingFromDocument(
-      cheerioDocument(html),
-      PAGE_URL
-    );
+    const result = parseAirListingFromDocument(cheerioDocument(html), PAGE_URL);
     expect(result.products[0]?.imageUrl).toBe(real);
   });
 
   it("empty grid is listing markup with no products", () => {
     const result = parseAirListingFromDocument(
       cheerioDocument(airPageHtml({ cards: [] })),
-      PAGE_URL
+      PAGE_URL,
     );
     expect(result.hasListingMarkup).toBe(true);
     expect(result.products).toHaveLength(0);
@@ -167,10 +157,7 @@ describe("parseAirListingFromDocument", () => {
         })}
       </div>
     </body></html>`;
-    const result = parseAirListingFromDocument(
-      cheerioDocument(html),
-      PAGE_URL
-    );
+    const result = parseAirListingFromDocument(cheerioDocument(html), PAGE_URL);
     expect(result.hasListingMarkup).toBe(false);
     expect(result.products).toHaveLength(1);
     expect(result.products[0]?.productId).toBe("5");
@@ -184,20 +171,15 @@ describe("parseAirListingFromDocument", () => {
         </div>`,
       ],
     });
-    const result = parseAirListingFromDocument(
-      cheerioDocument(html),
-      PAGE_URL
-    );
+    const result = parseAirListingFromDocument(cheerioDocument(html), PAGE_URL);
     expect(result.hasListingMarkup).toBe(true);
     expect(result.products).toHaveLength(0);
   });
 
   it("WAF markup has no listing grid", () => {
     const result = parseAirListingFromDocument(
-      cheerioDocument(
-        "<!DOCTYPE html><html><body><h1>Захищена сторінка</h1></body></html>"
-      ),
-      PAGE_URL
+      cheerioDocument("<!DOCTYPE html><html><body><h1>Захищена сторінка</h1></body></html>"),
+      PAGE_URL,
     );
     expect(result.hasListingMarkup).toBe(false);
     expect(result.products).toHaveLength(0);
@@ -210,14 +192,14 @@ describe("parseAirListingFromDocument", () => {
         products: [],
         nextPageUrl: null,
         hasListingMarkup: true,
-      })
+      }),
     ).toBe(true);
     expect(
       isAirListingPayload({
         products: [],
         nextPageUrl: PAGE2_URL,
         hasListingMarkup: false,
-      })
+      }),
     ).toBe(true);
     expect(isAirListingPayload(null)).toBe(false);
     expect(isAirListingPayload({ products: [] })).toBe(false);
@@ -226,7 +208,7 @@ describe("parseAirListingFromDocument", () => {
         products: "nope",
         nextPageUrl: null,
         hasListingMarkup: true,
-      })
+      }),
     ).toBe(false);
   });
 });

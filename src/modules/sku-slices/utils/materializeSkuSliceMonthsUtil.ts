@@ -3,14 +3,8 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
 import { sliceDateMinusDays } from "../../sku-reporting/utils/coalesceSkuSliceItemsForReporting.js";
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
 import { SkuSlice } from "../models/SkuSlice.js";
-import {
-  SkuSliceMonth,
-  type ISkuSliceMonth,
-} from "../models/SkuSliceMonth.js";
-import {
-  toSliceMonthDate,
-  toSliceMonthDayKey,
-} from "./skuSliceMonthKeys.js";
+import { SkuSliceMonth, type ISkuSliceMonth } from "../models/SkuSliceMonth.js";
+import { toSliceMonthDate, toSliceMonthDayKey } from "./skuSliceMonthKeys.js";
 
 export type MaterializeSkuSliceMonthsProgress = {
   sliceIndex: number;
@@ -96,9 +90,7 @@ function dayWritesFromSliceData(slice: SliceLean): DayWrite[] {
   return out;
 }
 
-function buildUpsertOps(
-  writes: DayWrite[],
-): AnyBulkWriteOperation<ISkuSliceMonth>[] {
+function buildUpsertOps(writes: DayWrite[]): AnyBulkWriteOperation<ISkuSliceMonth>[] {
   return writes.map((w) => ({
     updateOne: {
       filter: {

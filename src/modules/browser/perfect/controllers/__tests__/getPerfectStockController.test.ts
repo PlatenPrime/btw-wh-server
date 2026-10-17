@@ -44,9 +44,7 @@ describe("getPerfectStockController", () => {
 
     expect(responseStatus.code).toBe(404);
     expect(responseJson.message).toBe("Товар не найден или данные недоступны");
-    expect(getPerfectStockData).toHaveBeenCalledWith(
-      "https://perfectparty.in.ua/product/16467"
-    );
+    expect(getPerfectStockData).toHaveBeenCalledWith("https://perfectparty.in.ua/product/16467");
   });
 
   it("200 returns stock data", async () => {

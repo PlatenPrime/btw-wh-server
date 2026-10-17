@@ -32,7 +32,7 @@ describe("calculatePalletsSectorsUtil", () => {
       sector: 0,
     } as Partial<IPallet>);
 
-    const group1 = await PalletGroup.create({
+    await PalletGroup.create({
       title: "Group 1",
       order: 1,
       pallets: [palletA._id, palletB._id],

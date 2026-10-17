@@ -3,10 +3,7 @@ import { Konk } from "../../konks/models/Konk.js";
 import { Sku } from "../../skus/models/Sku.js";
 import { loadDayMapForKonk } from "../../sku-slices/utils/skuSliceMonthStore.js";
 import { SkuManufacturerDaySales } from "../models/SkuManufacturerDaySales.js";
-import {
-  sliceDateMinusDays,
-  sliceDatePlusDays,
-} from "./coalesceSkuSliceItemsForReporting.js";
+import { sliceDateMinusDays, sliceDatePlusDays } from "./coalesceSkuSliceItemsForReporting.js";
 import { computePersistedDaySales } from "./persistedSliceSalesUtils.js";
 
 export { sliceDatePlusDays };
@@ -32,9 +29,7 @@ async function loadRecountDays(konkName: string): Promise<Set<string>> {
   return new Set((doc?.recountDays ?? []).map(String));
 }
 
-async function loadProdNameByProductId(
-  konkName: string,
-): Promise<Map<string, string>> {
+async function loadProdNameByProductId(konkName: string): Promise<Map<string, string>> {
   const docs = await Sku.find({ konkName })
     .select("productId prodName")
     .lean<{ productId: string; prodName: string }[]>();
@@ -94,15 +89,7 @@ async function replaceManufacturerDayRollup(params: {
   prodNameByProductId: Map<string, string>;
   apply: boolean;
 }): Promise<{ keysUpdated: number; rollupDocs: number }> {
-  const {
-    konkName,
-    day,
-    prevData,
-    currData,
-    recountDays,
-    prodNameByProductId,
-    apply,
-  } = params;
+  const { konkName, day, prevData, currData, recountDays, prodNameByProductId, apply } = params;
 
   const productSales = computeProductSalesForDay({
     day,
@@ -159,14 +146,13 @@ export async function materializeSkuSliceSalesForKonkDays(params: {
   const dayPrev = sliceDateMinusDays(dayD, 1);
   const apply = params.apply !== false;
 
-  const [recountDays, prodNameByProductId, prevData, dData, nextData] =
-    await Promise.all([
-      loadRecountDays(konkName),
-      loadProdNameByProductId(konkName),
-      loadDayMapForKonk(konkName, dayPrev),
-      loadDayMapForKonk(konkName, dayD),
-      loadDayMapForKonk(konkName, dayNext),
-    ]);
+  const [recountDays, prodNameByProductId, prevData, dData, nextData] = await Promise.all([
+    loadRecountDays(konkName),
+    loadProdNameByProductId(konkName),
+    loadDayMapForKonk(konkName, dayPrev),
+    loadDayMapForKonk(konkName, dayD),
+    loadDayMapForKonk(konkName, dayNext),
+  ]);
 
   let keysUpdated = 0;
   let rollupDocs = 0;
@@ -248,15 +234,10 @@ export async function materializeSkuSliceSalesDateRange(params: {
   let rollupDocs = 0;
   const daysTouched: string[] = [];
 
-  const dayTotal =
-    Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000)) + 1;
+  const dayTotal = Math.floor((to.getTime() - from.getTime()) / (24 * 60 * 60 * 1000)) + 1;
   let dayIndex = 0;
 
-  for (
-    let d = new Date(from);
-    d.getTime() <= to.getTime();
-    d = sliceDatePlusDays(d, 1)
-  ) {
+  for (let d = new Date(from); d.getTime() <= to.getTime(); d = sliceDatePlusDays(d, 1)) {
     dayIndex += 1;
     const dayPrev = sliceDateMinusDays(d, 1);
     const dayKey = d.toISOString().slice(0, 10);

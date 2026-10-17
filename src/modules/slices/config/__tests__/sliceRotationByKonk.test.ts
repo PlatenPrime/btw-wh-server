@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  resolveSliceRotationConfig,
-  SLICE_ROTATION_BY_KONK,
-} from "../sliceRotationByKonk.js";
+import { resolveSliceRotationConfig, SLICE_ROTATION_BY_KONK } from "../sliceRotationByKonk.js";
 
 describe("sliceRotationByKonk", () => {
   it("air has no rotation cycle", () => {

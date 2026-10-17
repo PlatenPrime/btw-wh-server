@@ -3,10 +3,7 @@ import { getBtwToken } from "../../constants/telegram.js";
 import { TelegramMessageResponse } from "./types.js";
 import { logModuleDebug, logModuleError } from "../../logging/logModuleError.js";
 
-export const sendMessageToTGUser = async (
-  message: string,
-  userId: string
-): Promise<void> => {
+export const sendMessageToTGUser = async (message: string, userId: string): Promise<void> => {
   if (!message?.trim()) {
     throw new Error("Message cannot be empty");
   }
@@ -21,7 +18,7 @@ export const sendMessageToTGUser = async (
         chat_id: userId,
         text: message,
         parse_mode: "HTML",
-      }
+      },
     );
 
     if (!response.data.ok) {
@@ -33,8 +30,7 @@ export const sendMessageToTGUser = async (
       messageId: response.data.result.message_id,
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     logModuleError("telegram", error, "Error sending message to user:");
     throw new Error(`Failed to send message to user: ${errorMessage}`);
   }

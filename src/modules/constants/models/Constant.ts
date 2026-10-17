@@ -30,7 +30,7 @@ const constantSchema = new Schema<IConstant>(
       },
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

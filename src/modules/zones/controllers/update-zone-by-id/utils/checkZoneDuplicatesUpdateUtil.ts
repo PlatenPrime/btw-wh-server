@@ -25,5 +25,3 @@ export const checkZoneDuplicatesUpdateUtil = async ({
 
   return duplicateZone as IZone | null;
 };
-
-

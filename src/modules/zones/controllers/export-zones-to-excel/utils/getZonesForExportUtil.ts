@@ -4,4 +4,3 @@ export const getZonesForExportUtil = async (): Promise<IZone[]> => {
   const zones: IZone[] = await Zone.find().sort({ sector: 1, title: 1 });
   return zones;
 };
-

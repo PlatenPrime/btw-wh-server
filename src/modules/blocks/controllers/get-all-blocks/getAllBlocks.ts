@@ -21,4 +21,3 @@ export const getAllBlocks = async (req: Request, res: Response) => {
     }
   }
 };
-

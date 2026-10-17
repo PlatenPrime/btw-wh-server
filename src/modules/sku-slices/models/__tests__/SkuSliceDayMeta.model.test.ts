@@ -41,8 +41,6 @@ describe("SkuSliceDayMeta Model", () => {
   it("enforces unique (konkName, date)", async () => {
     const date = new Date("2026-10-09T00:00:00.000Z");
     await SkuSliceDayMeta.create({ konkName: "dup", date });
-    await expect(
-      SkuSliceDayMeta.create({ konkName: "dup", date }),
-    ).rejects.toThrow();
+    await expect(SkuSliceDayMeta.create({ konkName: "dup", date })).rejects.toThrow();
   });
 });

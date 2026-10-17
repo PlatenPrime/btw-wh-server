@@ -126,7 +126,7 @@ describe("Variant Model", () => {
           title: "Variant B",
           url,
           imageUrl: "https://example.com/img-b.png",
-        })
+        }),
       ).rejects.toThrow();
 
       const count = await Variant.countDocuments();
@@ -134,4 +134,3 @@ describe("Variant Model", () => {
     });
   });
 });
-

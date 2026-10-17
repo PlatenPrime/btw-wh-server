@@ -16,7 +16,7 @@ export const GRABO_EXTRA_CATEGORY_URLS: readonly string[] = [
  */
 export function mergeGraboCategoryUrls(
   sitemapUrls: readonly string[],
-  extraUrls: readonly string[]
+  extraUrls: readonly string[],
 ): string[] {
   const urls: string[] = [];
   const seen = new Set<string>();

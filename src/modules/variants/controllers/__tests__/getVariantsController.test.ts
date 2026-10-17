@@ -56,4 +56,3 @@ describe("getVariantsController", () => {
     expect(responseStatus.code).toBe(400);
   });
 });
-

@@ -1,6 +1,6 @@
 import { ClientSession } from "mongoose";
 import { Pos } from "../../../../poses/models/Pos.js";
-import { IPallet, Pallet } from "../../../models/Pallet.js";
+import { Pallet } from "../../../models/Pallet.js";
 
 type DeletePalletEmptyPosesInput = {
   palletId: string;
@@ -49,8 +49,7 @@ export const deletePalletEmptyPosesUtil = async ({
 
   // Обновление паллеты - удаление ссылок на удалённые poses
   pallet.poses = pallet.poses.filter(
-    (poseId) =>
-      !emptyPoseIds.some((deletedId: any) => deletedId.equals(poseId))
+    (poseId) => !emptyPoseIds.some((deletedId: any) => deletedId.equals(poseId)),
   );
   await pallet.save({ session });
 
@@ -60,4 +59,3 @@ export const deletePalletEmptyPosesUtil = async ({
     palletTitle: pallet.title,
   };
 };
-

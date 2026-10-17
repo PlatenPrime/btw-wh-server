@@ -16,68 +16,32 @@ import {
 const router = Router();
 
 // Создать сегмент - доступно только для ADMIN
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createSeg)
-);
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createSeg));
 
 // Массовый upsert сегментов - доступно только для ADMIN
-router.post(
-  "/upsert",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(upsertSegsController)
-);
+router.post("/upsert", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(upsertSegsController));
 
 // Получить все сегменты - доступно только для ADMIN
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllSegs)
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllSegs));
 
 // Получить сегменты по ID блока - доступно только для ADMIN
 router.get(
   "/by-block/:blockId",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSegsByBlockId)
+  asyncHandler(getSegsByBlockId),
 );
 
 // Получить зоны по ID сегмента - доступно только для ADMIN
-router.get(
-  "/:segId/zones",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getZonesBySegId)
-);
+router.get("/:segId/zones", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getZonesBySegId));
 
 // Получить сегмент по ID - доступно только для ADMIN
-router.get(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getSegById)
-);
+router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getSegById));
 
 // Обновить сегмент - доступно только для ADMIN
-router.put(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateSeg)
-);
+router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateSeg));
 
 // Удалить сегмент - доступно только для ADMIN
-router.delete(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(deleteSeg)
-);
+router.delete("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(deleteSeg));
 
 export default router;
-

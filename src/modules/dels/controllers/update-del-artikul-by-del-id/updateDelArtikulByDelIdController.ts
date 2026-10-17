@@ -10,7 +10,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  */
 export const updateDelArtikulByDelIdController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     const { id, artikul } = req.params;
@@ -18,7 +18,7 @@ export const updateDelArtikulByDelIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -29,8 +29,7 @@ export const updateDelArtikulByDelIdController = async (
     });
     if (!del) {
       res.status(404).json({
-        message:
-          "Del not found or product not found on sharik.ua for this artikul",
+        message: "Del not found or product not found on sharik.ua for this artikul",
       });
       return;
     }

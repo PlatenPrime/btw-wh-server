@@ -28,7 +28,7 @@ describe("getAllRowsUtil", () => {
   });
 
   it("возвращает ряды с правильной структурой", async () => {
-    const createdRow = await Row.create({ title: "Structure Test" });
+    await Row.create({ title: "Structure Test" });
 
     const result = await getAllRowsUtil();
 
@@ -41,4 +41,3 @@ describe("getAllRowsUtil", () => {
     expect(result[0].updatedAt).toBeDefined();
   });
 });
-

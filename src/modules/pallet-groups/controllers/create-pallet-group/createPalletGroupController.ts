@@ -5,16 +5,13 @@ import type { PalletShortDto } from "../../../pallets/types/PalletShortDto.js";
 import { createPalletGroupSchema } from "./schemas/createPalletGroupSchema.js";
 import { createPalletGroupUtil } from "./utils/createPalletGroupUtil.js";
 
-export const createPalletGroupController = async (
-  req: Request,
-  res: Response,
-) => {
+export const createPalletGroupController = async (req: Request, res: Response) => {
   const parseResult = createPalletGroupSchema.safeParse(req.body);
 
   if (!parseResult.success) {
     return res.status(400).json({
       message: "Invalid data",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
   }
 
@@ -55,10 +52,7 @@ export const createPalletGroupController = async (
     await session.abortTransaction();
     session.endSession();
 
-    if (
-      error instanceof Error &&
-      error.message === "Pallet group with this title already exists"
-    ) {
+    if (error instanceof Error && error.message === "Pallet group with this title already exists") {
       return res.status(409).json({
         message: error.message,
       });

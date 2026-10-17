@@ -75,4 +75,3 @@ describe("getMeController", () => {
     expect(responseJson.message).toBe("Користувач не знайдений");
   });
 });
-

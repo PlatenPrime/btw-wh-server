@@ -26,11 +26,7 @@ function axCfg(url: string): InternalAxiosRequestConfig {
   return { url } as InternalAxiosRequestConfig;
 }
 
-function axiosHttpError(
-  url: string,
-  status: number,
-  statusText = "Error"
-): AxiosError {
+function axiosHttpError(url: string, status: number, statusText = "Error"): AxiosError {
   const response = {
     status,
     statusText,
@@ -43,7 +39,7 @@ function axiosHttpError(
     "ERR_BAD_RESPONSE",
     axCfg(url),
     undefined,
-    response
+    response,
   );
 }
 
@@ -56,9 +52,9 @@ describe("resolveBrowserProxyAgents", () => {
 
   it("бросает на SOCKS", async () => {
     const { resolveBrowserProxyAgents } = await import("../browserRequest.js");
-    expect(() =>
-      resolveBrowserProxyAgents("socks5://user:pass@10.0.0.1:50101")
-    ).toThrow(/Invalid browser HTTP proxy URL/);
+    expect(() => resolveBrowserProxyAgents("socks5://user:pass@10.0.0.1:50101")).toThrow(
+      /Invalid browser HTTP proxy URL/,
+    );
   });
 });
 
@@ -67,7 +63,7 @@ describe("browserGet proxy options", () => {
     await expect(
       browserGet("https://example.com/page", {
         proxyUrl: "socks5://user:pass@10.0.0.1:50101",
-      })
+      }),
     ).rejects.toThrow(/Invalid browser HTTP proxy URL/);
   });
 });
@@ -77,7 +73,7 @@ describe("browserGetBuffer", () => {
     await expect(
       browserGetBuffer("https://example.com/img.jpg", {
         proxyUrl: "socks5://user:pass@10.0.0.1:50101",
-      })
+      }),
     ).rejects.toThrow(/Invalid browser HTTP proxy URL/);
   });
 
@@ -102,7 +98,7 @@ describe("browserGetBuffer", () => {
           headers: expect.objectContaining({
             Accept: expect.stringContaining("image/"),
           }),
-        })
+        }),
       );
     } finally {
       getSpy.mockRestore();
@@ -137,10 +133,10 @@ describe("formatBrowserFetchError", () => {
       "ECONNABORTED",
       axCfg(url),
       undefined,
-      undefined
+      undefined,
     );
     expect(formatBrowserFetchError(url, err)).toBe(
-      "Browser GET timeout (30000ms): https://yumi.market/api/products?x=1"
+      "Browser GET timeout (30000ms): https://yumi.market/api/products?x=1",
     );
   });
 
@@ -151,10 +147,10 @@ describe("formatBrowserFetchError", () => {
       "ERR_FR_TOO_MANY_REDIRECTS",
       axCfg(url),
       undefined,
-      undefined
+      undefined,
     );
     expect(formatBrowserFetchError(url, err)).toBe(
-      "Browser GET redirect loop: https://airballoons.com.ua/"
+      "Browser GET redirect loop: https://airballoons.com.ua/",
     );
   });
 
@@ -162,14 +158,12 @@ describe("formatBrowserFetchError", () => {
     const url = "https://example.com/page";
     const err = axiosHttpError(url, 502, "Bad Gateway");
     expect(formatBrowserFetchError(url, err)).toBe(
-      "Browser GET HTTP 502 Bad Gateway: https://example.com/page"
+      "Browser GET HTTP 502 Bad Gateway: https://example.com/page",
     );
   });
 
   it("пробрасывает message обычного Error", () => {
-    expect(
-      formatBrowserFetchError("https://a", new Error("plain failure"))
-    ).toBe("plain failure");
+    expect(formatBrowserFetchError("https://a", new Error("plain failure"))).toBe("plain failure");
   });
 
   it("усекает слишком длинный message", () => {
@@ -194,16 +188,12 @@ describe("resolveAxiosError", () => {
 describe("getBrowserFetchLogLevel", () => {
   it("4xx → warn", () => {
     const url = "https://sharte.net/page";
-    expect(getBrowserFetchLogLevel(axiosHttpError(url, 404, "Not Found"))).toBe(
-      "warn"
-    );
+    expect(getBrowserFetchLogLevel(axiosHttpError(url, 404, "Not Found"))).toBe("warn");
   });
 
   it("5xx → error", () => {
     const url = "https://example.com/page";
-    expect(getBrowserFetchLogLevel(axiosHttpError(url, 502, "Bad Gateway"))).toBe(
-      "error"
-    );
+    expect(getBrowserFetchLogLevel(axiosHttpError(url, 502, "Bad Gateway"))).toBe("error");
   });
 
   it("timeout → error", () => {
@@ -213,7 +203,7 @@ describe("getBrowserFetchLogLevel", () => {
       "ECONNABORTED",
       axCfg(url),
       undefined,
-      undefined
+      undefined,
     );
     expect(getBrowserFetchLogLevel(err)).toBe("error");
   });
@@ -229,7 +219,7 @@ describe("logBrowserError", () => {
     logBrowserError("[ctx]", new Error("plain failure"));
     expect(mockError).toHaveBeenCalledWith(
       { context: "[ctx]", details: "plain failure" },
-      "browser fetch failed"
+      "browser fetch failed",
     );
     expect(mockWarn).not.toHaveBeenCalled();
   });
@@ -244,7 +234,7 @@ describe("logBrowserError", () => {
         details: "Browser GET HTTP 404 Not Found: https://sharte.net/page",
         httpStatus: 404,
       },
-      "browser fetch failed"
+      "browser fetch failed",
     );
     expect(mockError).not.toHaveBeenCalled();
   });
@@ -259,7 +249,7 @@ describe("logBrowserError", () => {
         details: "Browser GET HTTP 502 Bad Gateway: https://example.com/page",
         httpStatus: 502,
       },
-      "browser fetch failed"
+      "browser fetch failed",
     );
     expect(mockWarn).not.toHaveBeenCalled();
   });
@@ -277,7 +267,7 @@ describe("logBrowserError", () => {
         details: "Browser GET HTTP 404 Not Found: https://sharte.net/page",
         httpStatus: 404,
       },
-      "browser fetch failed"
+      "browser fetch failed",
     );
     expect(mockError).not.toHaveBeenCalled();
   });

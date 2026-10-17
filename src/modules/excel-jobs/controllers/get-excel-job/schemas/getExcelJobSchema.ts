@@ -21,10 +21,9 @@ export const listExcelJobsSchema = z.object({
         .map((part) => part.trim())
         .filter(Boolean);
     })
-    .refine(
-      (values) => values === undefined || values.every(isExcelJobStatus),
-      { message: "Invalid excel job status filter" },
-    ),
+    .refine((values) => values === undefined || values.every(isExcelJobStatus), {
+      message: "Invalid excel job status filter",
+    }),
 });
 
 export type ListExcelJobsInput = z.infer<typeof listExcelJobsSchema>;

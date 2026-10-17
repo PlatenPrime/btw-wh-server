@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
-import User from "../../models/User.js";
 import { getUserWithoutPasswordUtil } from "../getUserWithoutPasswordUtil.js";
 
 describe("getUserWithoutPasswordUtil", () => {
@@ -43,4 +41,3 @@ describe("getUserWithoutPasswordUtil", () => {
     expect(userWithoutPassword.photo).toBe("photo.jpg");
   });
 });
-

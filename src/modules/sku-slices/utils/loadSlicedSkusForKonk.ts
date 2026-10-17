@@ -17,17 +17,13 @@ type SkugrLean = {
  */
 export async function loadSlicedSkusForKonk(
   konkName: string,
-  select: string = "_id productId"
+  select: string = "_id productId",
 ): Promise<SlicedSkuLean[]> {
   const skugrs = (await Skugr.find({ konkName, isSliced: true })
     .select("skus")
     .lean()) as SkugrLean[];
   const slicedSkuIds = Array.from(
-    new Set(
-      skugrs.flatMap((group) =>
-        (group.skus ?? []).map((skuId) => skuId.toString())
-      )
-    )
+    new Set(skugrs.flatMap((group) => (group.skus ?? []).map((skuId) => skuId.toString()))),
   );
   if (slicedSkuIds.length === 0) return [];
 

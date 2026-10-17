@@ -20,7 +20,7 @@ describe("parseCorrectSvbumFakeStockCliArgs", () => {
         "--apply",
         "--lookback-days",
         "30",
-      ])
+      ]),
     ).toEqual({
       daysBack: 7,
       asOf: new Date("2026-10-07T00:00:00.000Z"),
@@ -30,9 +30,7 @@ describe("parseCorrectSvbumFakeStockCliArgs", () => {
   });
 
   it("allows lookback-days 0", () => {
-    expect(
-      parseCorrectSvbumFakeStockCliArgs(["--lookback-days", "0"])
-    ).toEqual({
+    expect(parseCorrectSvbumFakeStockCliArgs(["--lookback-days", "0"])).toEqual({
       daysBack: SVBUM_FAKE_STOCK_CRON_DAYS_BACK,
       apply: false,
       lookbackDays: 0,
@@ -40,23 +38,17 @@ describe("parseCorrectSvbumFakeStockCliArgs", () => {
   });
 
   it("rejects invalid ints, dates and unknown flags", () => {
-    expect(() => parseCorrectSvbumFakeStockCliArgs(["--wat"])).toThrow(
-      /Unknown/
+    expect(() => parseCorrectSvbumFakeStockCliArgs(["--wat"])).toThrow(/Unknown/);
+    expect(() => parseCorrectSvbumFakeStockCliArgs(["--days-back", "0"])).toThrow(/integer >= 1/);
+    expect(() => parseCorrectSvbumFakeStockCliArgs(["--days-back", "1.5"])).toThrow(/integer >= 1/);
+    expect(() => parseCorrectSvbumFakeStockCliArgs(["--lookback-days", "-1"])).toThrow(
+      /integer >= 0/,
     );
-    expect(() =>
-      parseCorrectSvbumFakeStockCliArgs(["--days-back", "0"])
-    ).toThrow(/integer >= 1/);
-    expect(() =>
-      parseCorrectSvbumFakeStockCliArgs(["--days-back", "1.5"])
-    ).toThrow(/integer >= 1/);
-    expect(() =>
-      parseCorrectSvbumFakeStockCliArgs(["--lookback-days", "-1"])
-    ).toThrow(/integer >= 0/);
-    expect(() =>
-      parseCorrectSvbumFakeStockCliArgs(["--as-of", "07.10.2026"])
-    ).toThrow(/YYYY-MM-DD/);
-    expect(() =>
-      parseCorrectSvbumFakeStockCliArgs(["--apply", "--as-of"])
-    ).toThrow(/--as-of requires a value/);
+    expect(() => parseCorrectSvbumFakeStockCliArgs(["--as-of", "07.10.2026"])).toThrow(
+      /YYYY-MM-DD/,
+    );
+    expect(() => parseCorrectSvbumFakeStockCliArgs(["--apply", "--as-of"])).toThrow(
+      /--as-of requires a value/,
+    );
   });
 });

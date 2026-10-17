@@ -30,9 +30,7 @@ export const getPalletsShortForGroup = async (
     byId.set(dto.id, dto);
   });
 
-  return palletIds
-    .map((id) => byId.get(id))
-    .filter((dto): dto is PalletShortDto => Boolean(dto));
+  return palletIds.map((id) => byId.get(id)).filter((dto): dto is PalletShortDto => Boolean(dto));
 };
 
 export const getPalletsShortForGroups = async (

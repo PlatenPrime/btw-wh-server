@@ -38,12 +38,7 @@ describe("extractToken", () => {
 
 describe("extractProductId", () => {
   it("prefers id from product URL", () => {
-    expect(
-      extractProductId(
-        "{}",
-        "https://perfectparty.in.ua/x/16467-product.html"
-      )
-    ).toBe("16467");
+    expect(extractProductId("{}", "https://perfectparty.in.ua/x/16467-product.html")).toBe("16467");
   });
 
   it("falls back to HTML patterns", () => {
@@ -68,22 +63,17 @@ describe("extractTitle", () => {
 describe("extractProductAttributeId", () => {
   it("reads combination id from product URL", () => {
     expect(
-      extractProductAttributeId(
-        "{}",
-        "https://perfectparty.in.ua/x/12115-3651-product.html"
-      )
+      extractProductAttributeId("{}", "https://perfectparty.in.ua/x/12115-3651-product.html"),
     ).toBe("3651");
   });
 
   it("falls back to HTML id_product_attribute", () => {
-    expect(
-      extractProductAttributeId('{"id_product_attribute":99}', "")
-    ).toBe("99");
+    expect(extractProductAttributeId('{"id_product_attribute":99}', "")).toBe("99");
   });
 
   it("returns null for simple product URL without combination", () => {
     expect(
-      extractProductAttributeId("{}", "https://perfectparty.in.ua/x/16467-product.html")
+      extractProductAttributeId("{}", "https://perfectparty.in.ua/x/16467-product.html"),
     ).toBeNull();
   });
 });
@@ -162,7 +152,7 @@ describe("buildPerfectDeleteFromCartBody", () => {
       buildPerfectDeleteFromCartBody({
         token: "aa",
         idProduct: "1",
-      })
+      }),
     );
     expect(params.get("id_customization")).toBe("0");
     expect(params.get("id_product_attribute")).toBeNull();

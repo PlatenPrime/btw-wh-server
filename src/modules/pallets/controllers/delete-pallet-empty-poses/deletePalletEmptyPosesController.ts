@@ -1,15 +1,11 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
-import { Pallet } from "../../models/Pallet.js";
 import { deletePalletEmptyPosesSchema } from "./schemas/deletePalletEmptyPosesSchema.js";
 import { deletePalletEmptyPosesUtil } from "./utils/deletePalletEmptyPosesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const deletePalletEmptyPosesController = async (
-  req: Request,
-  res: Response
-) => {
+export const deletePalletEmptyPosesController = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
 
   try {
@@ -20,7 +16,7 @@ export const deletePalletEmptyPosesController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -73,11 +69,3 @@ export const deletePalletEmptyPosesController = async (
     await session.endSession();
   }
 };
-
-
-
-
-
-
-
-

@@ -18,9 +18,7 @@ export type ArtSalesChartData = {
   };
 };
 
-export type GetArtSalesChartDataResult =
-  | { ok: true; data: ArtSalesChartData }
-  | { ok: false };
+export type GetArtSalesChartDataResult = { ok: true; data: ArtSalesChartData } | { ok: false };
 
 export async function getArtSalesChartDataUtil(
   input: GetArtStockChartDataInput,

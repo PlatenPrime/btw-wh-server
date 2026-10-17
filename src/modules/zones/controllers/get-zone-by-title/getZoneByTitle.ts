@@ -12,7 +12,7 @@ export const getZoneByTitle = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Title is required",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

@@ -24,29 +24,22 @@ import {
   type ImpitCookieJar,
   type ImpitFetchInit,
 } from "../impitGet.js";
-import {
-  ORIGIN_BLOCKED_CODE,
-} from "../browserOriginBlockedError.js";
+import { ORIGIN_BLOCKED_CODE } from "../browserOriginBlockedError.js";
 
-function makeClient(handlers: {
-  fetch: ImpitClientLike["fetch"];
-}): ImpitClientLike {
+function makeClient(handlers: { fetch: ImpitClientLike["fetch"] }): ImpitClientLike {
   return { fetch: handlers.fetch };
 }
 
 describe("formatImpitFetchError", () => {
   it("пробрасывает Impit GET HTTP message", () => {
-    expect(
-      formatImpitFetchError(
-        "https://x",
-        new Error("Impit GET HTTP 403: https://x")
-      )
-    ).toBe("Impit GET HTTP 403: https://x");
+    expect(formatImpitFetchError("https://x", new Error("Impit GET HTTP 403: https://x"))).toBe(
+      "Impit GET HTTP 403: https://x",
+    );
   });
 
   it("оборачивает прочие ошибки", () => {
     expect(formatImpitFetchError("https://x", new Error("boom"))).toBe(
-      "Impit GET https://x failed: boom"
+      "Impit GET https://x failed: boom",
     );
   });
 });
@@ -96,7 +89,7 @@ describe("impitGet", () => {
           status: 200,
           text: async () => "a",
         })),
-      })
+      }),
     );
     setImpitFactoryForTests(factory);
 
@@ -114,7 +107,7 @@ describe("impitGet", () => {
           status: 200,
           text: async () => "a",
         })),
-      })
+      }),
     );
     setImpitFactoryForTests(factory);
 
@@ -187,17 +180,16 @@ describe("impitGet", () => {
           status: 429,
           statusText: "Too Many Requests",
           headers: {
-            get: (name: string) =>
-              name.toLowerCase() === "retry-after" ? "5" : null,
+            get: (name: string) => (name.toLowerCase() === "retry-after" ? "5" : null),
           },
           text: async () =>
             "<html><head><title>Too Many Requests</title></head><body>rate limited by stormwall</body></html>",
         })),
-      })
+      }),
     );
 
     await expect(impitGet("https://example.com/blocked")).rejects.toThrow(
-      /Impit GET HTTP 429 Too Many Requests: https:\/\/example.com\/blocked.*title="Too Many Requests".*body=.*stormwall.*retryAfter="5"/
+      /Impit GET HTTP 429 Too Many Requests: https:\/\/example.com\/blocked.*title="Too Many Requests".*body=.*stormwall.*retryAfter="5"/,
     );
 
     expect(mockWarn).toHaveBeenCalledWith(
@@ -208,14 +200,14 @@ describe("impitGet", () => {
         retryAfter: "5",
         title: "Too Many Requests",
       }),
-      "impit http error body"
+      "impit http error body",
     );
   });
 
   it("кидает на невалидный proxy URL", async () => {
-    await expect(
-      impitGet("https://example.com", { proxyUrl: "not-a-url" })
-    ).rejects.toThrow(/Invalid browser HTTP proxy URL/);
+    await expect(impitGet("https://example.com", { proxyUrl: "not-a-url" })).rejects.toThrow(
+      /Invalid browser HTTP proxy URL/,
+    );
   });
 
   it("warm-up fail → warn и продолжает к target", async () => {
@@ -242,13 +234,12 @@ describe("impitGet", () => {
           status: 520,
           statusText: "unknown",
           headers: {
-            get: (name: string) =>
-              name.toLowerCase() === "retry-after" ? "60" : null,
+            get: (name: string) => (name.toLowerCase() === "retry-after" ? "60" : null),
           },
           text: async () =>
             "<html><head><title>airballoons.com.ua | 520: Web server is returning an unknown error</title></head></html>",
         })),
-      })
+      }),
     );
 
     await expect(impitGet("https://airballoons.com.ua/p")).rejects.toMatchObject({
@@ -265,8 +256,7 @@ describe("impitGet", () => {
         return {
           status: 520,
           headers: {
-            get: (name: string) =>
-              name.toLowerCase() === "retry-after" ? "60" : null,
+            get: (name: string) => (name.toLowerCase() === "retry-after" ? "60" : null),
           },
           text: async (): Promise<string> =>
             "<html><head><title>520</title></head><body>cf</body></html>",
@@ -279,7 +269,7 @@ describe("impitGet", () => {
     await expect(
       impitGet("https://example.com/product/1", {
         warmUpUrl: "https://example.com/",
-      })
+      }),
     ).rejects.toMatchObject({
       code: ORIGIN_BLOCKED_CODE,
       httpStatus: 520,
@@ -357,9 +347,7 @@ describe("impitGet", () => {
     const fetch = vi.fn(async (_url: string, init?: ImpitFetchInit) => {
       if (init?.method === "POST") {
         expect(init.body).toBe(JSON.stringify({ __ack: -142 }));
-        expect(init.headers?.["Content-Type"]).toBe(
-          "application/json; charset=UTF-8"
-        );
+        expect(init.headers?.["Content-Type"]).toBe("application/json; charset=UTF-8");
         return { status: 200, text: async (): Promise<string> => "acked" };
       }
       getCount += 1;
@@ -431,14 +419,14 @@ describe("impitGet", () => {
     });
     setImpitFactoryForTests(() => makeClient({ fetch }));
 
-    await expect(
-      impitGet("https://airballoons.com.ua/ua/product/x")
-    ).rejects.toThrow(/Impit GET HTTP 429/);
+    await expect(impitGet("https://airballoons.com.ua/ua/product/x")).rejects.toThrow(
+      /Impit GET HTTP 429/,
+    );
     expect(mockWarn).toHaveBeenCalledWith(
       expect.objectContaining({
         context: "adm.tools challenge solve failed",
       }),
-      "adm tools challenge failed"
+      "adm tools challenge failed",
     );
   });
 
@@ -453,7 +441,7 @@ describe("impitGet", () => {
           status: 200,
           text: async () => "ok",
         })),
-      })
+      }),
     );
 
     await expect(impitGet("https://example.com/p")).resolves.toBe("ok");
@@ -461,14 +449,14 @@ describe("impitGet", () => {
   });
 
   it("лениво создаёт Impit через module loader и кэширует клиент", async () => {
-    const Impit = vi.fn().mockImplementation(() =>
-      makeClient({
+    const Impit = vi.fn().mockImplementation(function () {
+      return makeClient({
         fetch: vi.fn(async () => ({
           status: 200,
           text: async () => "native-ok",
         })),
-      })
-    );
+      });
+    });
     const loader = vi.fn(async () => ({ Impit }));
     setImpitModuleLoaderForTests(loader);
 
@@ -488,33 +476,28 @@ describe("impitGet", () => {
   });
 
   it("параллельные GET делят один native client после загрузки модуля", async () => {
-    const Impit = vi.fn().mockImplementation(() =>
-      makeClient({
+    const Impit = vi.fn().mockImplementation(function () {
+      return makeClient({
         fetch: vi.fn(async () => ({
           status: 200,
           text: async () => "ok",
         })),
-      })
-    );
+      });
+    });
     const loader = vi.fn(async () => {
       await Promise.resolve();
       return { Impit };
     });
     setImpitModuleLoaderForTests(loader);
 
-    await Promise.all([
-      impitGet("https://example.com/a"),
-      impitGet("https://example.com/b"),
-    ]);
+    await Promise.all([impitGet("https://example.com/a"), impitGet("https://example.com/b")]);
 
     expect(loader).toHaveBeenCalledTimes(1);
     expect(Impit).toHaveBeenCalledTimes(1);
   });
 
   it("ошибка native bindings кидается на первом GET, не при импорте модуля", async () => {
-    const blocked = new Error(
-      "An Application Control policy has blocked this file"
-    );
+    const blocked = new Error("An Application Control policy has blocked this file");
     setImpitModuleLoaderForTests(async () => {
       throw blocked;
     });
@@ -526,23 +509,21 @@ describe("impitGet", () => {
   });
 
   it("после fail загрузки следующий GET повторяет loader", async () => {
-    const Impit = vi.fn().mockImplementation(() =>
-      makeClient({
+    const Impit = vi.fn().mockImplementation(function () {
+      return makeClient({
         fetch: vi.fn(async () => ({
           status: 200,
           text: async () => "ok",
         })),
-      })
-    );
+      });
+    });
     const loader = vi
       .fn()
       .mockRejectedValueOnce(new Error("blocked"))
       .mockResolvedValueOnce({ Impit });
     setImpitModuleLoaderForTests(loader);
 
-    await expect(impitGet("https://a")).rejects.toThrow(
-      IMPIT_NATIVE_LOAD_ERROR_PREFIX
-    );
+    await expect(impitGet("https://a")).rejects.toThrow(IMPIT_NATIVE_LOAD_ERROR_PREFIX);
     await expect(impitGet("https://a")).resolves.toBe("ok");
     expect(loader).toHaveBeenCalledTimes(2);
   });
@@ -553,7 +534,7 @@ describe("impitGet", () => {
     });
 
     await expect(impitGet("https://example.com")).rejects.toThrow(
-      `${IMPIT_NATIVE_LOAD_ERROR_PREFIX}: blocked`
+      `${IMPIT_NATIVE_LOAD_ERROR_PREFIX}: blocked`,
     );
   });
 });

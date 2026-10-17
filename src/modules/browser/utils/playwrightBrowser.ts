@@ -13,7 +13,7 @@ export type PlaywrightResponseLike = {
 export type PlaywrightPageLike = {
   goto: (
     url: string,
-    options?: { timeout?: number; waitUntil?: string }
+    options?: { timeout?: number; waitUntil?: string },
   ) => Promise<PlaywrightResponseLike | null>;
   content: () => Promise<string>;
   close: () => Promise<void>;
@@ -53,7 +53,7 @@ const slotWaiters: Array<() => void> = [];
  * Опции context: без подмены UA (совпадает с бинарём), uk locale/tz, desktop viewport.
  */
 export function buildPlaywrightContextOptions(
-  extra?: Record<string, unknown>
+  extra?: Record<string, unknown>,
 ): Record<string, unknown> {
   return {
     locale: "uk-UA",
@@ -69,9 +69,7 @@ export function buildPlaywrightContextOptions(
 /**
  * Патч navigator.webdriver (игнор, если mock context без addInitScript).
  */
-export async function applyPlaywrightStealth(
-  context: PlaywrightContextLike
-): Promise<void> {
+export async function applyPlaywrightStealth(context: PlaywrightContextLike): Promise<void> {
   if (typeof context.addInitScript !== "function") {
     return;
   }
@@ -105,9 +103,7 @@ async function loadChromium(): Promise<ChromiumLauncher> {
 /**
  * Подмена загрузчика Playwright в тестах (без реального Chromium).
  */
-export function setPlaywrightChromiumLoaderForTests(
-  loader: ChromiumLoader | null
-): void {
+export function setPlaywrightChromiumLoaderForTests(loader: ChromiumLoader | null): void {
   chromiumLoader = loader;
 }
 
@@ -133,9 +129,7 @@ function releaseSlot(): void {
   }
 }
 
-export async function withPlaywrightSlot<T>(
-  fn: () => Promise<T>
-): Promise<T> {
+export async function withPlaywrightSlot<T>(fn: () => Promise<T>): Promise<T> {
   await acquireSlot();
   try {
     return await fn();
@@ -149,7 +143,7 @@ export async function withPlaywrightSlot<T>(
  * `false`/`0` → окно Chromium; `shell` → old headless shell.
  */
 export function resolvePlaywrightHeadless(
-  raw: string | undefined = process.env.BROWSER_PLAYWRIGHT_HEADLESS
+  raw: string | undefined = process.env.BROWSER_PLAYWRIGHT_HEADLESS,
 ): boolean | "shell" {
   const v = raw?.trim().toLowerCase();
   if (!v || v === "true" || v === "1") {
@@ -178,10 +172,7 @@ async function getBrowser(): Promise<PlaywrightBrowserLike> {
     browserPromise = (async () => {
       const chromium = await loadChromium();
       const launchOpts = buildChromiumLaunchOptions();
-      browserLog.info(
-        { headless: launchOpts.headless },
-        "launching Playwright Chromium"
-      );
+      browserLog.info({ headless: launchOpts.headless }, "launching Playwright Chromium");
       return chromium.launch(launchOpts);
     })().catch((err) => {
       browserPromise = null;
@@ -193,11 +184,9 @@ async function getBrowser(): Promise<PlaywrightBrowserLike> {
 
 async function createStealthContext(
   browser: PlaywrightBrowserLike,
-  extra?: Record<string, unknown>
+  extra?: Record<string, unknown>,
 ): Promise<PlaywrightContextLike> {
-  const context = await browser.newContext(
-    buildPlaywrightContextOptions(extra)
-  );
+  const context = await browser.newContext(buildPlaywrightContextOptions(extra));
   await applyPlaywrightStealth(context);
   return context;
 }
@@ -224,7 +213,7 @@ export type PlaywrightProxyOptions = {
  * Caller обязан закрыть ephemeral context после использования.
  */
 export async function acquirePlaywrightContext(
-  options?: PlaywrightProxyOptions
+  options?: PlaywrightProxyOptions,
 ): Promise<{ context: PlaywrightContextLike; ephemeral: boolean }> {
   const proxyUrl = options?.proxyUrl?.trim();
   if (!proxyUrl) {
@@ -266,10 +255,7 @@ export async function closePlaywrightBrowser(): Promise<void> {
       const ctx = await contextP;
       await ctx.close();
     } catch (err) {
-      browserLog.warn(
-        { err },
-        "failed to close Playwright default context"
-      );
+      browserLog.warn({ err }, "failed to close Playwright default context");
     }
   }
 

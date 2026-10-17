@@ -14,9 +14,7 @@ export function extractDisplayPriceFromProductHtml(html: string): number | null 
   const fromItempropText = parseNumberLike(priceEl.text());
   if (fromItempropText !== null) return fromItempropText;
 
-  const currentPriceText = $(".current-price, .product-price .current-price")
-    .first()
-    .text();
+  const currentPriceText = $(".current-price, .product-price .current-price").first().text();
   const fromCurrent = parseNumberLike(currentPriceText);
   if (fromCurrent !== null) return fromCurrent;
 
@@ -29,8 +27,7 @@ export function extractDisplayPriceFromProductHtml(html: string): number | null 
   return null;
 }
 
-const RELATED_PRODUCT_SCOPE =
-  ".product-miniature, .product-accessories, .featured-products";
+const RELATED_PRODUCT_SCOPE = ".product-miniature, .product-accessories, .featured-products";
 
 export function isPerfectProductPageOutOfStock(html: string): boolean {
   const $ = cheerio.load(html);
@@ -55,8 +52,9 @@ export function isPerfectProductPageOutOfStock(html: string): boolean {
     const flagText = flagsBlock.text();
     if (/розпродано/i.test(flagText)) return true;
     if (
-      flagsBlock.find('[class*="out-of-stock"], [class*="out_of_stock"], .product-flag--out-of-stock')
-        .length
+      flagsBlock.find(
+        '[class*="out-of-stock"], [class*="out_of_stock"], .product-flag--out-of-stock',
+      ).length
     ) {
       return true;
     }

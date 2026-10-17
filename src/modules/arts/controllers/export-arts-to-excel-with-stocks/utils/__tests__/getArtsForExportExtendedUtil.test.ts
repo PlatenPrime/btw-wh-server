@@ -172,7 +172,7 @@ describe("getArtsForExportExtendedUtil", () => {
         createTestArt({
           artikul: `ART-${String(i).padStart(3, "0")}`,
           zone: `Z${i}`,
-        })
+        }),
       );
     }
     await Promise.all(arts);
@@ -186,4 +186,3 @@ describe("getArtsForExportExtendedUtil", () => {
     }
   });
 });
-

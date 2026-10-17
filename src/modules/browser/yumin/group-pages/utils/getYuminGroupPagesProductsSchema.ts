@@ -7,6 +7,4 @@ export const getYuminGroupPagesProductsSchema = z.object({
   maxPages: z.number().int().min(1).max(200).optional(),
 });
 
-export type GetYuminGroupPagesProductsInput = z.infer<
-  typeof getYuminGroupPagesProductsSchema
->;
+export type GetYuminGroupPagesProductsInput = z.infer<typeof getYuminGroupPagesProductsSchema>;

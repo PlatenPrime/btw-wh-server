@@ -7,7 +7,7 @@ describe("buildGraboSkuListMongoFilter", () => {
       buildGraboSkuListMongoFilter({
         isOnSite: false,
         isNewProduct: false,
-      })
+      }),
     ).toEqual({
       isOnSite: false,
       isNewProduct: false,
@@ -26,7 +26,7 @@ describe("buildGraboSkuListMongoFilter", () => {
         language: "",
         gasCapacity: "  ",
         tag: "  ",
-      })
+      }),
     ).toEqual({});
   });
 
@@ -52,7 +52,7 @@ describe("buildGraboSkuListMongoFilter", () => {
         language: "EN",
         gasCapacity: " air only ",
         tag: " birthday ",
-      })
+      }),
     ).toEqual({
       productId: "G1",
       isOnSite: true,

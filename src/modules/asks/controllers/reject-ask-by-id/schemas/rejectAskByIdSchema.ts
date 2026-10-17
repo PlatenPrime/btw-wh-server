@@ -11,4 +11,3 @@ export const rejectAskByIdSchema = z.object({
 });
 
 export type RejectAskByIdInput = z.infer<typeof rejectAskByIdSchema>;
-

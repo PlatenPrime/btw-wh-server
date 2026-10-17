@@ -1,9 +1,6 @@
 ﻿import { beforeEach, describe, expect, it } from "vitest";
 import { Prod } from "../../../prods/models/Prod.js";
-import {
-  isAllProd,
-  loadProdDisplayTitlesByName,
-} from "../prodDisplayTitles.js";
+import { isAllProd, loadProdDisplayTitlesByName } from "../prodDisplayTitles.js";
 
 describe("prodDisplayTitles", () => {
   beforeEach(async () => {

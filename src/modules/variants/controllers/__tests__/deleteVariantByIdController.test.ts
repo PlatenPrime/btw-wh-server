@@ -8,20 +8,17 @@ import { deleteVariantByIdController } from "../delete-variant-by-id/deleteVaria
 describe("deleteVariantByIdController", () => {
   let res: Response;
   let responseStatus: { code?: number };
-  let responseJson: Record<string, unknown>;
 
   beforeEach(async () => {
     await Variant.deleteMany({});
     await Event.deleteMany({});
     responseStatus = {};
-    responseJson = {};
     res = {
       status(code: number) {
         responseStatus.code = code;
         return this;
       },
-      json(data: unknown) {
-        responseJson = data as Record<string, unknown>;
+      json(_data: unknown) {
         return this;
       },
       headersSent: false,
@@ -82,4 +79,3 @@ describe("deleteVariantByIdController", () => {
     expect(events[0].userId.toString()).toBe(user._id.toString());
   });
 });
-

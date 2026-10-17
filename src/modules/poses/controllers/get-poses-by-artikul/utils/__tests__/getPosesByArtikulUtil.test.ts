@@ -39,4 +39,3 @@ describe("getPosesByArtikulUtil", () => {
     expect(poses).toEqual([]);
   });
 });
-

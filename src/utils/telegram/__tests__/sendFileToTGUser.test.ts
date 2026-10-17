@@ -72,14 +72,13 @@ describe("sendFileToTGUser", () => {
 
   const mockFormData = {
     append: vi.fn(),
-    getHeaders: vi
-      .fn()
-      .mockReturnValue({ "content-type": "multipart/form-data" }),
+    getHeaders: vi.fn().mockReturnValue({ "content-type": "multipart/form-data" }),
   };
 
   beforeEach(() => {
-    const MockFormData = vi.fn(() => mockFormData);
-    (FormData as any).mockImplementation(MockFormData);
+    (FormData as any).mockImplementation(function () {
+      return mockFormData;
+    });
     mockedFs.existsSync.mockReturnValue(true);
     mockedFs.createReadStream.mockReturnValue("mock-stream" as any);
   });
@@ -101,7 +100,7 @@ describe("sendFileToTGUser", () => {
         headers: {
           "content-type": "multipart/form-data",
         },
-      }
+      },
     );
     expect(logModuleDebug).toHaveBeenCalledWith("telegram", "file sent to user", {
       userId: "123456789",
@@ -111,29 +110,25 @@ describe("sendFileToTGUser", () => {
   });
 
   it("should throw error for empty filePath", async () => {
-    await expect(sendFileToTGUser("", "123456789")).rejects.toThrow(
-      "File path cannot be empty"
-    );
-    await expect(sendFileToTGUser("   ", "123456789")).rejects.toThrow(
-      "File path cannot be empty"
-    );
+    await expect(sendFileToTGUser("", "123456789")).rejects.toThrow("File path cannot be empty");
+    await expect(sendFileToTGUser("   ", "123456789")).rejects.toThrow("File path cannot be empty");
   });
 
   it("should throw error for empty userId", async () => {
     await expect(sendFileToTGUser("/path/to/file.txt", "")).rejects.toThrow(
-      "User ID cannot be empty"
+      "User ID cannot be empty",
     );
     await expect(sendFileToTGUser("/path/to/file.txt", "   ")).rejects.toThrow(
-      "User ID cannot be empty"
+      "User ID cannot be empty",
     );
   });
 
   it("should throw error when file does not exist", async () => {
     mockedFs.existsSync.mockReturnValue(false);
 
-    await expect(
-      sendFileToTGUser("/path/to/nonexistent.txt", "123456789")
-    ).rejects.toThrow("File does not exist: /path/to/nonexistent.txt");
+    await expect(sendFileToTGUser("/path/to/nonexistent.txt", "123456789")).rejects.toThrow(
+      "File does not exist: /path/to/nonexistent.txt",
+    );
   });
 
   it("should throw error when Telegram API returns error", async () => {
@@ -146,10 +141,8 @@ describe("sendFileToTGUser", () => {
       data: errorResponse,
     });
 
-    await expect(
-      sendFileToTGUser("/path/to/file.txt", "123456789")
-    ).rejects.toThrow(
-      "Не вдалося відправити файл користувачу: Telegram API error: [object Object]"
+    await expect(sendFileToTGUser("/path/to/file.txt", "123456789")).rejects.toThrow(
+      "Не вдалося відправити файл користувачу: Telegram API error: [object Object]",
     );
   });
 
@@ -157,8 +150,8 @@ describe("sendFileToTGUser", () => {
     const axiosError = new Error("Network error");
     mockedAxios.post.mockRejectedValueOnce(axiosError);
 
-    await expect(
-      sendFileToTGUser("/path/to/file.txt", "123456789")
-    ).rejects.toThrow("Не вдалося відправити файл користувачу: Network error");
+    await expect(sendFileToTGUser("/path/to/file.txt", "123456789")).rejects.toThrow(
+      "Не вдалося відправити файл користувачу: Network error",
+    );
   });
 });

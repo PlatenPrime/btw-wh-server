@@ -50,4 +50,3 @@ describe("getAllRolesController", () => {
     expect(responseJson.length).toBe(0);
   });
 });
-

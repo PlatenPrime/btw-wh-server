@@ -184,4 +184,3 @@ describe("updateUserInfoController", () => {
     expect(events).toHaveLength(0);
   });
 });
-

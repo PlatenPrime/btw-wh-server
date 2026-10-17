@@ -11,9 +11,7 @@ import {
 } from "../utils/migrateAllSkuSlicesToMonthsUtil.js";
 import { parseMigrateAllSkuSlicesToMonthsCliArgs } from "./parseMigrateAllSkuSlicesToMonthsCliArgs.js";
 
-export async function executeMigrateAllSkuSlicesToMonthsCli(
-  argv: string[],
-): Promise<{
+export async function executeMigrateAllSkuSlicesToMonthsCli(argv: string[]): Promise<{
   migrate: MigrateAllSkuSlicesToMonthsResult;
   verify?: Awaited<ReturnType<typeof verifyRandomSkuSlicesVsMonths>>;
 }> {
@@ -51,13 +49,8 @@ export async function executeMigrateAllSkuSlicesToMonthsCli(
         "[migrate-sku-slice-months] skip verify on dry-run (no writes); pass --apply for verify",
       );
     } else {
-      console.log(
-        `[migrate-sku-slice-months] verify sample=${args.verifySample}…`,
-      );
-      verify = await verifyRandomSkuSlicesVsMonths(
-        args.verifySample,
-        args.konkName,
-      );
+      console.log(`[migrate-sku-slice-months] verify sample=${args.verifySample}…`);
+      verify = await verifyRandomSkuSlicesVsMonths(args.verifySample, args.konkName);
       console.log(JSON.stringify(verify, null, 2));
       if (!verify.ok) {
         console.error(
@@ -65,9 +58,7 @@ export async function executeMigrateAllSkuSlicesToMonthsCli(
         );
         process.exitCode = 1;
       } else {
-        console.log(
-          `[migrate-sku-slice-months] verify OK compared=${verify.compared}`,
-        );
+        console.log(`[migrate-sku-slice-months] verify OK compared=${verify.compared}`);
       }
     }
   }
@@ -75,9 +66,7 @@ export async function executeMigrateAllSkuSlicesToMonthsCli(
   return { migrate, ...(verify ? { verify } : {}) };
 }
 
-export async function runMigrateAllSkuSlicesToMonthsConnected(
-  argv: string[],
-): Promise<void> {
+export async function runMigrateAllSkuSlicesToMonthsConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executeMigrateAllSkuSlicesToMonthsCli(argv);

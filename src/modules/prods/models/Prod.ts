@@ -19,15 +19,11 @@ const prodSchema = new Schema<IProd>(
     title: { type: String, required: true },
     imageUrl: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**
  * Prod Mongoose model
  * @see IProd
  */
-export const Prod: Model<IProd> = getOrCreateModel<IProd>(
-  "Prod",
-  prodSchema,
-  "prods",
-);
+export const Prod: Model<IProd> = getOrCreateModel<IProd>("Prod", prodSchema, "prods");

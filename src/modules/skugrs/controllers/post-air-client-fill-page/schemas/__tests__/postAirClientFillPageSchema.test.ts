@@ -12,13 +12,10 @@ describe("postAirClientFillPageSchema", () => {
 
   const valid = {
     id: "507f1f77bcf86cd799439011",
-    sourceUrl:
-      "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
-    pageUrl:
-      "https://airballoons.com.ua/ua/index.php?route=product/category&path=1&page=2",
+    sourceUrl: "https://airballoons.com.ua/ua/index.php?route=product/category&path=1",
+    pageUrl: "https://airballoons.com.ua/ua/index.php?route=product/category&path=1&page=2",
     products: [product],
-    nextPageUrl:
-      "https://airballoons.com.ua/ua/index.php?route=product/category&path=1&page=3",
+    nextPageUrl: "https://airballoons.com.ua/ua/index.php?route=product/category&path=1&page=3",
     hasListingMarkup: true,
   };
 
@@ -32,14 +29,12 @@ describe("postAirClientFillPageSchema", () => {
         ...valid,
         products: [],
         nextPageUrl: null,
-      }).success
+      }).success,
     ).toBe(true);
   });
 
   it("rejects invalid id", () => {
-    expect(
-      postAirClientFillPageSchema.safeParse({ ...valid, id: "bad" }).success
-    ).toBe(false);
+    expect(postAirClientFillPageSchema.safeParse({ ...valid, id: "bad" }).success).toBe(false);
   });
 
   it("rejects too many products", () => {
@@ -49,7 +44,7 @@ describe("postAirClientFillPageSchema", () => {
         products: Array.from({ length: AIR_CLIENT_SKUGR_PRODUCTS_MAX + 1 }, () => ({
           ...product,
         })),
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -58,7 +53,7 @@ describe("postAirClientFillPageSchema", () => {
       postAirClientFillPageSchema.safeParse({
         ...valid,
         products: [{ ...product, url: "not-url" }],
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -67,7 +62,7 @@ describe("postAirClientFillPageSchema", () => {
       postAirClientFillPageSchema.safeParse({
         ...valid,
         pageUrl: "not-url",
-      }).success
+      }).success,
     ).toBe(false);
   });
 
@@ -79,7 +74,7 @@ describe("postAirClientFillPageSchema", () => {
         pageUrl: valid.pageUrl,
         products: valid.products,
         nextPageUrl: valid.nextPageUrl,
-      }).success
+      }).success,
     ).toBe(false);
   });
 });

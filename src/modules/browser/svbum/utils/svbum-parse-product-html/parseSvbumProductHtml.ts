@@ -1,8 +1,5 @@
 import * as cheerio from "cheerio";
-import type {
-  BrowserCheerio,
-  BrowserCheerioAPI,
-} from "../../../utils/cheerioTypes.js";
+import type { BrowserCheerio, BrowserCheerioAPI } from "../../../utils/cheerioTypes.js";
 import { toMoney } from "../../../utils/to-money/toMoney.js";
 import { extractSvbumPackCount } from "../svbum-pack-count/extractSvbumPackCount.js";
 import type { SvbumProductInfo } from "../svbum-product-types/svbumProductInfo.js";
@@ -33,21 +30,13 @@ function parseUnitPrice($el: BrowserCheerio): number | null {
   return parseAttrNumber($el.attr("data-price"));
 }
 
-function withTitle(
-  result: { stock: number; price: number },
-  title: string
-): SvbumProductInfo {
+function withTitle(result: { stock: number; price: number }, title: string): SvbumProductInfo {
   return title.length > 0 ? { ...result, title } : result;
 }
 
-function parseOptionOffers(
-  $: BrowserCheerioAPI,
-  $product: BrowserCheerio
-): PackOffer[] {
+function parseOptionOffers($: BrowserCheerioAPI, $product: BrowserCheerio): PackOffer[] {
   const offers: PackOffer[] = [];
-  const inputs = $product.find(
-    ".product-options-list input[type='radio'][data-option-quantity]"
-  );
+  const inputs = $product.find(".product-options-list input[type='radio'][data-option-quantity]");
 
   inputs.each((_, el) => {
     const $input = $(el);
@@ -61,11 +50,7 @@ function parseOptionOffers(
       return;
     }
 
-    const name = $input
-      .closest("label")
-      .find(".product-option--name")
-      .first()
-      .text();
+    const name = $input.closest("label").find(".product-option--name").first().text();
     const packSize = extractSvbumPackCount(name) ?? 1;
     offers.push({
       packSize,
@@ -77,10 +62,7 @@ function parseOptionOffers(
   return offers;
 }
 
-function parseFromOptions(
-  offers: PackOffer[],
-  title: string
-): SvbumProductInfo {
+function parseFromOptions(offers: PackOffer[], title: string): SvbumProductInfo {
   if (offers.length === 0) {
     return SVBUM_NEGATIVE_OUTCOME;
   }
@@ -88,32 +70,22 @@ function parseFromOptions(
   const inStock = offers.filter((offer) => offer.qty > 0);
   const priced = inStock.length > 0 ? inStock : offers;
   const price = toMoney(Math.min(...priced.map((offer) => offer.perPiece)));
-  const stock = inStock.reduce(
-    (sum, offer) => sum + offer.qty * offer.packSize,
-    0
-  );
+  const stock = inStock.reduce((sum, offer) => sum + offer.qty * offer.packSize, 0);
 
   return withTitle({ stock, price }, title);
 }
 
-function parseSimpleProduct(
-  $product: BrowserCheerio,
-  title: string
-): SvbumProductInfo {
+function parseSimpleProduct($product: BrowserCheerio, title: string): SvbumProductInfo {
   const qty = parseAttrNumber(
-    $product.find("input[data-product-quantity]").first().attr("data-product-quantity")
+    $product.find("input[data-product-quantity]").first().attr("data-product-quantity"),
   );
   if (qty === null || qty < 0 || !Number.isInteger(qty)) {
     return SVBUM_NEGATIVE_OUTCOME;
   }
 
   const $priceNew = $product.find(".product-control-price .price-new").first();
-  const special = parseAttrNumber(
-    $priceNew.find("[data-special]").first().attr("data-special")
-  );
-  const regular = parseAttrNumber(
-    $priceNew.find("[data-price]").first().attr("data-price")
-  );
+  const special = parseAttrNumber($priceNew.find("[data-special]").first().attr("data-special"));
+  const regular = parseAttrNumber($priceNew.find("[data-price]").first().attr("data-price"));
   const unitPrice = special ?? regular;
   if (unitPrice === null) {
     return SVBUM_NEGATIVE_OUTCOME;
@@ -126,7 +98,7 @@ function parseSimpleProduct(
         stock: qty * packCount,
         price: toMoney(unitPrice / packCount),
       },
-      title
+      title,
     );
   }
 

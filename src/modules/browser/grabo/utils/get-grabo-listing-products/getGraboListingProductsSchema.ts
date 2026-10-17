@@ -7,6 +7,4 @@ export const getGraboListingProductsSchema = z.object({
   maxPages: z.number().int().min(1).max(200).optional(),
 });
 
-export type GetGraboListingProductsInput = z.infer<
-  typeof getGraboListingProductsSchema
->;
+export type GetGraboListingProductsInput = z.infer<typeof getGraboListingProductsSchema>;

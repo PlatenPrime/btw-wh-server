@@ -18,14 +18,12 @@ export function startSkuInvalidFlagCron(): CronJob {
         const r = await runSkuInvalidFlagSync(new Date());
         log.info(
           { updatedSku: r.updated, konkCount: r.konkCount },
-          "sku invalid flag sync completed"
+          "sku invalid flag sync completed",
         );
         await sendCronAnalyticsReport(formatSkuInvalidFlagReport(r));
       } catch (error) {
         log.error({ err: error }, "sku invalid flag cron failed");
-        await sendCronAnalyticsReport(
-          formatCronErrorReport("Sku invalid flag sync", error)
-        );
+        await sendCronAnalyticsReport(formatCronErrorReport("Sku invalid flag sync", error));
       }
     },
     null,
@@ -33,9 +31,6 @@ export function startSkuInvalidFlagCron(): CronJob {
     "Europe/Kyiv",
   );
 
-  log.info(
-    { schedule: "0 0 14 * * 0", timezone: "Europe/Kyiv" },
-    "cron started"
-  );
+  log.info({ schedule: "0 0 14 * * 0", timezone: "Europe/Kyiv" }, "cron started");
   return job;
 }

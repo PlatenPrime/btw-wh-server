@@ -236,7 +236,7 @@ describe("updateZoneById Controller", () => {
 
   it("should return 409 for duplicate title", async () => {
     // Arrange
-    const existingZone = await createTestZone({
+    await createTestZone({
       title: "42-5-2",
       bar: 420502,
       sector: 0,
@@ -266,7 +266,7 @@ describe("updateZoneById Controller", () => {
 
   it("should return 409 for duplicate bar", async () => {
     // Arrange
-    const existingZone = await createTestZone({
+    await createTestZone({
       title: "42-5-3",
       bar: 420503,
       sector: 0,
@@ -394,7 +394,7 @@ describe("updateZoneById Controller", () => {
     expect(responseJson.data.updatedAt).toBeDefined();
     expect(new Date(responseJson.data.updatedAt)).toBeInstanceOf(Date);
     expect(new Date(responseJson.data.updatedAt).getTime()).toBeGreaterThan(
-      originalUpdatedAt.getTime()
+      originalUpdatedAt.getTime(),
     );
   });
 });

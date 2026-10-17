@@ -63,9 +63,7 @@ describe("generateExcelExtendedUtil", () => {
 
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer.length).toBeGreaterThan(0);
-    expect(result.fileName).toMatch(
-      /^arts_export_with_stocks_\d{4}-\d{2}-\d{2}\.xlsx$/
-    );
+    expect(result.fileName).toMatch(/^arts_export_with_stocks_\d{4}-\d{2}-\d{2}\.xlsx$/);
   });
 
   it("генерирует корректное имя файла с текущей датой", async () => {
@@ -96,9 +94,7 @@ describe("generateExcelExtendedUtil", () => {
 
     expect(result.buffer).toBeInstanceOf(Buffer);
     expect(result.buffer.length).toBeGreaterThan(0);
-    expect(result.fileName).toMatch(
-      /^arts_export_with_stocks_\d{4}-\d{2}-\d{2}\.xlsx$/
-    );
+    expect(result.fileName).toMatch(/^arts_export_with_stocks_\d{4}-\d{2}-\d{2}\.xlsx$/);
   });
 
   it("проверяет структуру Excel файла - можно прочитать буфер", async () => {

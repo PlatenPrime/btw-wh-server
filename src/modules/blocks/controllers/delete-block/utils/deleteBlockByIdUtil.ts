@@ -7,11 +7,9 @@ type DeleteBlockByIdInput = {
   id: string;
 };
 
-export const deleteBlockByIdUtil = async ({
-  id,
-}: DeleteBlockByIdInput): Promise<IBlock | null> => {
+export const deleteBlockByIdUtil = async ({ id }: DeleteBlockByIdInput): Promise<IBlock | null> => {
   const objectId = new mongoose.Types.ObjectId(id);
-  
+
   // Удалить блок
   const deletedBlock = await Block.findByIdAndDelete(objectId).exec();
 
@@ -23,8 +21,8 @@ export const deleteBlockByIdUtil = async ({
   const segs = await Seg.find({ block: objectId }).exec();
 
   // Собрать все zoneId из всех сегментов
-  const zoneIds = segs.flatMap((seg) => seg.zones);
-  
+  const zoneIds = segs.flatMap((seg) => seg.zones.map((zone) => zone._id));
+
   // Удалить ссылки seg у всех зон, которые были в сегментах этого блока
   if (zoneIds.length > 0) {
     await Zone.updateMany(
@@ -38,7 +36,7 @@ export const deleteBlockByIdUtil = async ({
         $set: {
           sector: 0,
         },
-      }
+      },
     );
   }
 
@@ -47,4 +45,3 @@ export const deleteBlockByIdUtil = async ({
 
   return deletedBlock;
 };
-

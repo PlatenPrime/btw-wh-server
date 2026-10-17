@@ -37,7 +37,7 @@ describe("logBrowserStockResult", () => {
         stock: 3,
         price: 99.5,
       },
-      1_000
+      1_000,
     );
     expect(logged).toBe(true);
     expect(mockInfo).toHaveBeenCalledWith(
@@ -48,7 +48,7 @@ describe("logBrowserStockResult", () => {
         price: 99.5,
         ok: true,
       },
-      "browser stock result"
+      "browser stock result",
     );
   });
 
@@ -60,7 +60,7 @@ describe("logBrowserStockResult", () => {
         stock: -1,
         price: -1,
       },
-      1
+      1,
     );
     expect(mockInfo.mock.calls[0]?.[0]).toMatchObject({ ok: false });
   });
@@ -76,13 +76,11 @@ describe("logBrowserStockResult", () => {
             stock: i,
             price: 1,
           },
-          base + i
-        )
+          base + i,
+        ),
       ).toBe(true);
     }
-    expect(mockInfo).toHaveBeenCalledTimes(
-      BROWSER_STOCK_RESULT_LOGS_PER_MINUTE
-    );
+    expect(mockInfo).toHaveBeenCalledTimes(BROWSER_STOCK_RESULT_LOGS_PER_MINUTE);
 
     const dropped = logBrowserStockResult(
       {
@@ -91,32 +89,27 @@ describe("logBrowserStockResult", () => {
         stock: 0,
         price: 0,
       },
-      base + BROWSER_STOCK_RESULT_LOGS_PER_MINUTE
+      base + BROWSER_STOCK_RESULT_LOGS_PER_MINUTE,
     );
     expect(dropped).toBe(false);
-    expect(mockInfo).toHaveBeenCalledTimes(
-      BROWSER_STOCK_RESULT_LOGS_PER_MINUTE
-    );
+    expect(mockInfo).toHaveBeenCalledTimes(BROWSER_STOCK_RESULT_LOGS_PER_MINUTE);
   });
 
   it("после окна снова пишет; warn о dropped не чаще раза в минуту", () => {
     const base = 100_000;
     for (let i = 0; i < BROWSER_STOCK_RESULT_LOGS_PER_MINUTE; i++) {
-      logBrowserStockResult(
-        { konkName: "air", link: `https://a/${i}`, stock: 1, price: 1 },
-        base
-      );
+      logBrowserStockResult({ konkName: "air", link: `https://a/${i}`, stock: 1, price: 1 }, base);
     }
     logBrowserStockResult(
       { konkName: "air", link: "https://a/drop1", stock: 1, price: 1 },
-      base + 1
+      base + 1,
     );
     expect(mockWarn).toHaveBeenCalledTimes(1);
     expect(mockWarn.mock.calls[0]?.[0]).toMatchObject({ dropped: 1 });
 
     logBrowserStockResult(
       { konkName: "air", link: "https://a/drop2", stock: 1, price: 1 },
-      base + 2
+      base + 2,
     );
     expect(mockWarn).toHaveBeenCalledTimes(1);
 
@@ -124,20 +117,15 @@ describe("logBrowserStockResult", () => {
     expect(
       logBrowserStockResult(
         { konkName: "air", link: "https://a/next", stock: 2, price: 3 },
-        afterWindow
-      )
+        afterWindow,
+      ),
     ).toBe(true);
-    expect(mockInfo).toHaveBeenCalledTimes(
-      BROWSER_STOCK_RESULT_LOGS_PER_MINUTE + 1
-    );
+    expect(mockInfo).toHaveBeenCalledTimes(BROWSER_STOCK_RESULT_LOGS_PER_MINUTE + 1);
   });
 
   it("обрезает длинный link", () => {
     const long = `https://example.com/${"x".repeat(200)}`;
-    logBrowserStockResult(
-      { konkName: "air", link: long, stock: 1, price: 1 },
-      1
-    );
+    logBrowserStockResult({ konkName: "air", link: long, stock: 1, price: 1 }, 1);
     const payload = mockInfo.mock.calls[0]?.[0] as { link: string };
     expect(payload.link.length).toBeLessThanOrEqual(163);
     expect(payload.link.endsWith("...")).toBe(true);

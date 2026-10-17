@@ -1,6 +1,6 @@
 import { seedSkuSliceMonthDay } from "../../../sku-slices/utils/seedSkuSliceMonthDay.js";
 import { SkuSliceMonth } from "../../../sku-slices/models/SkuSliceMonth.js";
-﻿import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { Konk } from "../../../konks/models/Konk.js";
 import { aggregateDailySkuSliceMetricsForSkus } from "../aggregateDailySkuSliceMetricsForSkus.js";
 

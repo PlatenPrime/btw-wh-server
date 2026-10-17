@@ -38,9 +38,7 @@ describe("sliceDatePlusDays", () => {
 
   it("is inverse of sliceDateMinusDays", () => {
     const d = new Date("2025-04-03T00:00:00.000Z");
-    expect(sliceDatePlusDays(sliceDateMinusDays(d, 2), 2).toISOString()).toBe(
-      d.toISOString(),
-    );
+    expect(sliceDatePlusDays(sliceDateMinusDays(d, 2), 2).toISOString()).toBe(d.toISOString());
   });
 });
 
@@ -56,9 +54,7 @@ describe("coalesceSkuSliceItemsAlongDates", () => {
       [d1.getTime(), { stock: -1, price: -1 }],
       [d2.getTime(), { stock: -1, price: -1 }],
     ]);
-    const r = coalesceSkuSliceItemsAlongDates([d0, d1, d2], (d) =>
-      map.get(d.getTime())
-    );
+    const r = coalesceSkuSliceItemsAlongDates([d0, d1, d2], (d) => map.get(d.getTime()));
     expect(r[0]).toEqual({ stock: 100, price: 50 });
     expect(r[1]).toEqual({ stock: 100, price: 50 });
     expect(r[2]).toEqual({ stock: 100, price: 50 });
@@ -69,9 +65,7 @@ describe("coalesceSkuSliceItemsAlongDates", () => {
       [d0.getTime(), { stock: 10, price: 20 }],
       [d1.getTime(), { stock: 5, price: -1 }],
     ]);
-    const r = coalesceSkuSliceItemsAlongDates([d0, d1], (d) =>
-      map.get(d.getTime())
-    );
+    const r = coalesceSkuSliceItemsAlongDates([d0, d1], (d) => map.get(d.getTime()));
     expect(r[1]).toEqual({ stock: 5, price: 20 });
   });
 
@@ -79,11 +73,10 @@ describe("coalesceSkuSliceItemsAlongDates", () => {
     const map = new Map<number, { stock: number; price: number }>([
       [d1.getTime(), { stock: -1, price: -1 }],
     ]);
-    const r = coalesceSkuSliceItemsAlongDates(
-      [d0, d1],
-      (d) => map.get(d.getTime()),
-      { lastStock: 7, lastPrice: 8 },
-    );
+    const r = coalesceSkuSliceItemsAlongDates([d0, d1], (d) => map.get(d.getTime()), {
+      lastStock: 7,
+      lastPrice: 8,
+    });
     expect(r[0]).toEqual({ stock: 7, price: 8 });
     expect(r[1]).toEqual({ stock: 7, price: 8 });
   });
@@ -92,9 +85,7 @@ describe("coalesceSkuSliceItemsAlongDates", () => {
     const map = new Map<number, { stock: number; price: number }>([
       [d2.getTime(), { stock: 1, price: 2 }],
     ]);
-    const r = coalesceSkuSliceItemsAlongDates([d0, d1, d2, d3], (d) =>
-      map.get(d.getTime())
-    );
+    const r = coalesceSkuSliceItemsAlongDates([d0, d1, d2, d3], (d) => map.get(d.getTime()));
     expect(r[0]).toEqual({ stock: null, price: null });
     expect(r[1]).toEqual({ stock: null, price: null });
     expect(r[2]).toEqual({ stock: 1, price: 2 });

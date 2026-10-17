@@ -58,9 +58,7 @@ describe("purgePromotedFromNewskuController", () => {
     await purgePromotedFromNewskuController(req, res);
 
     expect(responseStatus.code).toBe(200);
-    expect(responseJson.message).toBe(
-      "Promoted skus purged from newsku groups successfully",
-    );
+    expect(responseJson.message).toBe("Promoted skus purged from newsku groups successfully");
     expect(responseJson.data).toEqual({
       groupsTotal: 1,
       groupsModified: 1,

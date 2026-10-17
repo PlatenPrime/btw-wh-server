@@ -35,8 +35,9 @@ describe("updateDelArtikulByDelIdUtil", () => {
     expect(result).toBeNull();
     expect(getSharikStockData).toHaveBeenCalledWith("ART-1");
     const found = await Del.findById(del._id);
-    expect((found?.artikuls as Record<string, { quant: number }>)["ART-1"])
-      .toMatchObject({ quant: 5 });
+    expect((found?.artikuls as Record<string, { quant: number }>)["ART-1"]).toMatchObject({
+      quant: 5,
+    });
   });
 
   it("updates stock from sharik and preserves quant", async () => {
@@ -56,10 +57,11 @@ describe("updateDelArtikulByDelIdUtil", () => {
       artikul: "ART-1",
     });
     expect(result).toBeTruthy();
-    const artikuls = (result?.toObject().artikuls as Record<
-      string,
-      { quant: number; stock: number; nameukr?: string }
-    >) ?? {};
+    const artikuls =
+      (result?.toObject().artikuls as Record<
+        string,
+        { quant: number; stock: number; nameukr?: string }
+      >) ?? {};
     expect(artikuls["ART-1"]).toEqual({
       quant: 5,
       stock: 42,
@@ -84,10 +86,11 @@ describe("updateDelArtikulByDelIdUtil", () => {
       artikul: "NEW-ART",
     });
     expect(result).toBeTruthy();
-    const artikuls = (result?.toObject().artikuls as Record<
-      string,
-      { quant: number; stock: number; nameukr?: string }
-    >) ?? {};
+    const artikuls =
+      (result?.toObject().artikuls as Record<
+        string,
+        { quant: number; stock: number; nameukr?: string }
+      >) ?? {};
     expect(artikuls["NEW-ART"]).toEqual({
       quant: 0,
       stock: 7,

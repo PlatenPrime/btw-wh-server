@@ -8,7 +8,7 @@ export const getKasksByDateSchema = z.object({
     },
     {
       message: "Invalid date format. Please provide a valid date string",
-    }
+    },
   ),
 });
 

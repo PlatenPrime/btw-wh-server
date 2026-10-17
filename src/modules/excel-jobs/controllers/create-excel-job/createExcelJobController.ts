@@ -4,10 +4,7 @@ import { isExcelJobKind } from "../../constants/excelJobConstants.js";
 import { createExcelJobSchema } from "./schemas/createExcelJobSchema.js";
 import { createExcelJobUtil } from "./utils/createExcelJobUtil.js";
 
-export const createExcelJobController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const createExcelJobController = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user?.id || !req.user.role) {
       res.status(401).json({
@@ -20,7 +17,7 @@ export const createExcelJobController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

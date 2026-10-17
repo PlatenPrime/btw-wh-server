@@ -8,7 +8,7 @@ import type { GetPackFlipReviewInput } from "../schemas/getPackFlipReviewSchema.
 export type PackFlipReviewApiData = Omit<PackFlipReviewResult, "apply">;
 
 export async function getPackFlipReviewUtil(
-  input: GetPackFlipReviewInput
+  input: GetPackFlipReviewInput,
 ): Promise<PackFlipReviewApiData> {
   const dates = enumerateSliceDates(input.dateFrom, input.dateTo);
   const result = await reviewPackFlipsUtil({

@@ -7,10 +7,7 @@ import { logBrowserError } from "../../utils/browserRequest.js";
  * @desc    Получить остатки и цену товара с сайта Yumin по ссылке на страницу товара
  * @route   GET /api/browser/yumin/stock?link=<url>
  */
-export const getYuminStockController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getYuminStockController = async (req: Request, res: Response): Promise<void> => {
   try {
     const link = req.query.link;
     const parseResult = getYuminStockSchema.safeParse({ link });
@@ -18,7 +15,7 @@ export const getYuminStockController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

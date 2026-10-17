@@ -1,22 +1,14 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../../../lib/excel/worksheetStyles.js";
 import type { ExcelPosRow } from "./formatPosesStocksForExcelUtil.js";
 
 const SHEET_NAME = "Остатки";
-const COLUMN_KEYS: (keyof ExcelPosRow)[] = [
-  "Артикул",
-  "Название (укр)",
-  "Склад",
-  "Количество",
-];
+const COLUMN_KEYS: (keyof ExcelPosRow)[] = ["Артикул", "Название (укр)", "Склад", "Количество"];
 const COLUMN_WIDTHS = [20, 40, 20, 15];
 
 export async function generateExcelUtil(
   excelData: ExcelPosRow[],
-  sklad?: string
+  sklad?: string,
 ): Promise<{ buffer: Buffer; fileName: string }> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet(SHEET_NAME);

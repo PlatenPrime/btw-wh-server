@@ -15,5 +15,3 @@ describe("getUpdateAskActionUtil (update-ask-actions-by-id)", () => {
     expect(s).toBe("2025-01-01 12:00 User: дія");
   });
 });
-
-

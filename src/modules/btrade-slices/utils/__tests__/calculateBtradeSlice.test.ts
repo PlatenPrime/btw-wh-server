@@ -10,12 +10,9 @@ vi.mock("../getUniqueArtikulsFromArtsUtil.js", () => ({
 vi.mock("../btradeSliceMonthStore.js", () => ({
   upsertDayPointsBulk: vi.fn(),
 }));
-vi.mock(
-  "../../../sku-reporting/utils/materializeBtradeManufacturerSalesUtil.js",
-  () => ({
-    afterBtradeSliceStockMutation: vi.fn(),
-  }),
-);
+vi.mock("../../../sku-reporting/utils/materializeBtradeManufacturerSalesUtil.js", () => ({
+  afterBtradeSliceStockMutation: vi.fn(),
+}));
 
 import { getCachedSharikProductRestsMap } from "../../../browser/sharik/utils/product-rests/index.js";
 import { afterBtradeSliceStockMutation } from "../../../sku-reporting/utils/materializeBtradeManufacturerSalesUtil.js";
@@ -28,10 +25,7 @@ describe("calculateBtradeSlice", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(mockSliceDate);
-    vi.mocked(getUniqueArtikulsFromArtsUtil).mockResolvedValue([
-      "ART-1",
-      "ART-2",
-    ]);
+    vi.mocked(getUniqueArtikulsFromArtsUtil).mockResolvedValue(["ART-1", "ART-2"]);
     vi.mocked(getCachedSharikProductRestsMap).mockResolvedValue(
       new Map([
         ["ART-1", { actualQuantity: 3, sliceQuantity: 5, price: 100 }],

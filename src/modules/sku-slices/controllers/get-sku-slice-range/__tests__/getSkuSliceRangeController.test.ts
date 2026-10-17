@@ -54,8 +54,12 @@ describe("getSkuSliceRangeController", () => {
       title: "T",
       url: "https://e.com/r",
     });
-    await seedSkuSliceMonthDay("air", new Date("2026-03-01T00:00:00.000Z"), { "air-range-1": { stock: 1, price: 2 } });
-    await seedSkuSliceMonthDay("air", new Date("2026-03-02T00:00:00.000Z"), { "air-range-1": { stock: 3, price: 2 } });
+    await seedSkuSliceMonthDay("air", new Date("2026-03-01T00:00:00.000Z"), {
+      "air-range-1": { stock: 1, price: 2 },
+    });
+    await seedSkuSliceMonthDay("air", new Date("2026-03-02T00:00:00.000Z"), {
+      "air-range-1": { stock: 3, price: 2 },
+    });
     const req = {
       params: { skuId: sku._id.toString() },
       query: { dateFrom: "2026-03-01", dateTo: "2026-03-02" },

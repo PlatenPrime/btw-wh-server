@@ -44,7 +44,7 @@ describe("resolvePackCount", () => {
           <p class="infoblock_p">Штук в упаковці: 50</p>
         </article>
       </section>`;
-    expect(resolvePackCount("Повітряна кулька Art Show 36\"", html)).toBeNull();
+    expect(resolvePackCount('Повітряна кулька Art Show 36"', html)).toBeNull();
   });
 
   it("returns null when neither source has pack", () => {
@@ -58,9 +58,7 @@ describe("resolvePackCount", () => {
         <div class="infoblock"><p class="infoblock_pp">Штук в упаковці: 1</p></div>
         <div class="product-description">100 мл концентрату додати 400 мл води. Незалишає плям на одязі.</div>
       </section>`;
-    expect(
-      resolvePackCount("Концентровні бульбашки, 100 мл. (1:4)", html)
-    ).toBe(1);
+    expect(resolvePackCount("Концентровні бульбашки, 100 мл. (1:4)", html)).toBe(1);
   });
 
   it("reads pack from characteristics dt/dd when infoblock absent", () => {
@@ -72,8 +70,6 @@ describe("resolvePackCount", () => {
           <dd class="value">1</dd>
         </dl>
       </section>`;
-    expect(
-      resolvePackCount("Концентровні бульбашки, 100 мл. (1:4)", html)
-    ).toBe(1);
+    expect(resolvePackCount("Концентровні бульбашки, 100 мл. (1:4)", html)).toBe(1);
   });
 });

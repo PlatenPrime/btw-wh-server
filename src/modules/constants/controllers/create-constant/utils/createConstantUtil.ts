@@ -6,9 +6,7 @@ type CreateConstantUtilInput = {
   data: Record<string, string>;
 };
 
-export const createConstantUtil = async (
-  input: CreateConstantUtilInput
-): Promise<IConstant> => {
+export const createConstantUtil = async (input: CreateConstantUtilInput): Promise<IConstant> => {
   const constant = await Constant.create({
     name: input.name,
     title: input.title,

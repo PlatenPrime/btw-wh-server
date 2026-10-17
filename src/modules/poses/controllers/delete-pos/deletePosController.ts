@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { Pallet } from "../../../pallets/models/Pallet.js";
-import { IPos, Pos } from "../../models/Pos.js";
+import { IPos } from "../../models/Pos.js";
 import { deletePosUtil } from "./utils/deletePosUtil.js";
 
 export const deletePosController = async (req: Request, res: Response) => {
@@ -22,13 +22,9 @@ export const deletePosController = async (req: Request, res: Response) => {
       deletedPos = await deletePosUtil({ posId: id, session });
 
       // Удаляем позицию из паллета
-      const pallet = await Pallet.findById(deletedPos.pallet._id).session(
-        session
-      );
+      const pallet = await Pallet.findById(deletedPos.pallet._id).session(session);
       if (pallet) {
-        pallet.poses = pallet.poses.filter(
-          (posId: any) => posId.toString() !== id
-        );
+        pallet.poses = pallet.poses.filter((posId: any) => posId.toString() !== id);
         await pallet.save({ session });
       }
     });
@@ -61,4 +57,3 @@ export const deletePosController = async (req: Request, res: Response) => {
     await session.endSession();
   }
 };
-

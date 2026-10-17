@@ -11,12 +11,8 @@ export type SlicedSkuWithProductId = {
 export function filterSlicedSkusForRotation<T extends SlicedSkuWithProductId>(
   skus: T[],
   sliceDate: Date,
-  konkName: string
+  konkName: string,
 ): { skus: T[]; rotation: SliceRotationInfo | null } {
-  const { filtered, rotation } = filterProductsForSliceRotation(
-    skus,
-    sliceDate,
-    konkName
-  );
+  const { filtered, rotation } = filterProductsForSliceRotation(skus, sliceDate, konkName);
   return { skus: filtered, rotation };
 }

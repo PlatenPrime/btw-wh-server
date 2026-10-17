@@ -46,8 +46,7 @@ describe("migrateAllBtradeSlicesToMonthsUtil", () => {
     const progress: string[] = [];
     const result = await migrateAllBtradeSlicesToMonthsUtil({
       apply: true,
-      onProgress: (p) =>
-        progress.push(`${p.sliceIndex}/${p.slicesTotal} ${p.date}`),
+      onProgress: (p) => progress.push(`${p.sliceIndex}/${p.slicesTotal} ${p.date}`),
     });
     expect(result.slicesRead).toBe(2);
     expect(result.dayWritesUpserted).toBe(3);

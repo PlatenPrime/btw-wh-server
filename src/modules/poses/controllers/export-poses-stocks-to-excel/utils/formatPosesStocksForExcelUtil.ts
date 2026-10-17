@@ -37,7 +37,7 @@ const normalizeSkladLabel = (value?: string | null): string => {
 const buildAggregationKey = (
   artikul: string,
   skladLabel: string,
-  selectedSklad?: "merezhi" | "pogrebi"
+  selectedSklad?: "merezhi" | "pogrebi",
 ) => {
   if (selectedSklad) {
     return artikul.toLowerCase();
@@ -54,7 +54,7 @@ const buildAggregationKey = (
  */
 export const formatPosesStocksForExcelUtil = (
   poses: RawPos[],
-  options: FormatPosesStocksOptions = {}
+  options: FormatPosesStocksOptions = {},
 ): ExcelPosRow[] => {
   const aggregated = poses.reduce<
     Map<
@@ -115,5 +115,3 @@ export const formatPosesStocksForExcelUtil = (
       Количество: item.quant,
     }));
 };
-
-

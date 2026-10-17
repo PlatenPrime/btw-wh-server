@@ -5,5 +5,4 @@ export type TestMongoGlobalState = {
   mongoConnectPromise?: Promise<void>;
 };
 
-export const testMongoGlobalState = globalThis as typeof globalThis &
-  TestMongoGlobalState;
+export const testMongoGlobalState = globalThis as typeof globalThis & TestMongoGlobalState;

@@ -8,9 +8,8 @@ export const getAsksByDateSchema = z.object({
     },
     {
       message: "Invalid date format. Please provide a valid date string",
-    }
+    },
   ),
 });
 
 export type GetAsksByDateInput = z.infer<typeof getAsksByDateSchema>;
-

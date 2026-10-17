@@ -14,47 +14,32 @@ import {
 
 const router = Router();
 
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getAllDelsController)
-);
-router.get(
-  "/id/:id",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getDelByIdController)
-);
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createDelController)
-);
+router.get("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAllDelsController));
+router.get("/id/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getDelByIdController));
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createDelController));
 router.delete(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteDelByIdController)
+  asyncHandler(deleteDelByIdController),
 );
 router.patch(
   "/:id/title",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateDelTitleByIdController)
+  asyncHandler(updateDelTitleByIdController),
 );
 router.patch(
   "/:id/artikuls/:artikul",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateDelArtikulByDelIdController)
+  asyncHandler(updateDelArtikulByDelIdController),
 );
 router.post(
   "/:id/artikuls/update-all",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateDelArtikulsByDelIdController)
+  asyncHandler(updateDelArtikulsByDelIdController),
 );
 
 export default router;

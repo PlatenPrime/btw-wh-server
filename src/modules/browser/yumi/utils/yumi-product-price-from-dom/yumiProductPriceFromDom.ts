@@ -23,8 +23,7 @@ export function parsePriceFromDom($: cheerio.CheerioAPI): number | null {
   }
 
   const priceAttr = priceElement.attr("data-qaprice");
-  const priceSource =
-    priceAttr && priceAttr.trim().length > 0 ? priceAttr : priceElement.text();
+  const priceSource = priceAttr && priceAttr.trim().length > 0 ? priceAttr : priceElement.text();
 
   return parseStrippedDecimal(priceSource);
 }

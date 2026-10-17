@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestPallet, createTestPos } from "../../../../../../test/utils/testHelpers.js";
-import { Pallet } from "../../../../models/Pallet.js";
 import { getPalletUtil } from "../getPalletUtil.js";
 
 describe("getPalletUtil", () => {
@@ -47,12 +46,8 @@ describe("getPalletUtil", () => {
   });
 
   it("возвращает null если паллета не найдена", async () => {
-    const result = await getPalletUtil(
-      new mongoose.Types.ObjectId().toString()
-    );
+    const result = await getPalletUtil(new mongoose.Types.ObjectId().toString());
 
     expect(result).toBeNull();
   });
 });
-
-

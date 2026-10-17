@@ -6,4 +6,3 @@ export const renameBlockSchema = z.object({
 });
 
 export type RenameBlockInput = z.infer<typeof renameBlockSchema>;
-

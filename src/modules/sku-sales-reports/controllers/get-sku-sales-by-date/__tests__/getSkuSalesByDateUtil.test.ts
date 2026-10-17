@@ -17,7 +17,7 @@ describe("getSkuSalesByDateUtil", () => {
       await getSkuSalesByDateUtil({
         skuId: "69a2de17f8a2a9cb9a8a75df",
         date: new Date("2026-03-01T00:00:00.000Z"),
-      })
+      }),
     ).toBeNull();
   });
 
@@ -33,7 +33,7 @@ describe("getSkuSalesByDateUtil", () => {
       await getSkuSalesByDateUtil({
         skuId: sku._id.toString(),
         date: new Date("2026-03-01T00:00:00.000Z"),
-      })
+      }),
     ).toBeNull();
   });
 

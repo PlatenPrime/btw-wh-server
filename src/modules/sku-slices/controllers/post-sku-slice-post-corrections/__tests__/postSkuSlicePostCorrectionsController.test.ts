@@ -2,12 +2,9 @@ import type { Request, Response } from "express";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RoleType } from "../../../../../constants/roles.js";
 
-vi.mock(
-  "../../../../apitasks/controllers/create-api-task/utils/createApiTaskUtil.js",
-  () => ({
-    createApiTaskUtil: vi.fn(),
-  })
-);
+vi.mock("../../../../apitasks/controllers/create-api-task/utils/createApiTaskUtil.js", () => ({
+  createApiTaskUtil: vi.fn(),
+}));
 
 import { createApiTaskUtil } from "../../../../apitasks/controllers/create-api-task/utils/createApiTaskUtil.js";
 import { postSkuSlicePostCorrectionsController } from "../postSkuSlicePostCorrectionsController.js";
@@ -59,9 +56,7 @@ describe("postSkuSlicePostCorrectionsController", () => {
       userRole: RoleType.ADMIN,
     });
     expect(status).toHaveBeenCalledWith(202);
-    expect(json).toHaveBeenCalledWith(
-      expect.objectContaining({ message: "Api task accepted" })
-    );
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ message: "Api task accepted" }));
   });
 
   it("returns 400 on validation error", async () => {

@@ -60,11 +60,3 @@ describe("getAllPalletsByRowIdController", () => {
     expect(Array.isArray(responseJson)).toBe(true);
   });
 });
-
-
-
-
-
-
-
-

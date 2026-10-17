@@ -13,41 +13,31 @@ import {
 
 const router = Router();
 
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllConstantsController)
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllConstantsController));
 router.get(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getConstantByIdController)
+  asyncHandler(getConstantByIdController),
 );
 router.get(
   "/name/:name",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(getConstantByNameController)
+  asyncHandler(getConstantByNameController),
 );
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createConstantController)
-);
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createConstantController));
 router.patch(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateConstantByIdController)
+  asyncHandler(updateConstantByIdController),
 );
 router.delete(
   "/id/:id",
   checkAuth,
   checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteConstantByIdController)
+  asyncHandler(deleteConstantByIdController),
 );
 
 export default router;

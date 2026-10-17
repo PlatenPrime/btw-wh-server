@@ -5,11 +5,7 @@ import { join } from "node:path";
 dotenv.config({ path: ".env.test" });
 
 // Keep mongod outside OneDrive-synced node_modules/.cache (Windows spawn EFTYPE).
-process.env.MONGOMS_DOWNLOAD_DIR ??= join(
-  homedir(),
-  ".cache",
-  "mongodb-binaries",
-);
+process.env.MONGOMS_DOWNLOAD_DIR ??= join(homedir(), ".cache", "mongodb-binaries");
 
 if (!process.env.JWT_SECRET) {
   process.env.JWT_SECRET = "test-jwt-secret-key-for-testing-only";

@@ -9,10 +9,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @route   PATCH /api/arts/:artikul/btrade-stock
  * @access  Private (ADMIN)
  */
-export const updateBtradeStockController = async (
-  req: Request,
-  res: Response
-) => {
+export const updateBtradeStockController = async (req: Request, res: Response) => {
   try {
     const { artikul } = req.params;
 
@@ -21,7 +18,7 @@ export const updateBtradeStockController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -61,4 +58,3 @@ export const updateBtradeStockController = async (
     }
   }
 };
-

@@ -22,14 +22,12 @@ export function startBtradeSlicesCron(): CronJob {
         await sendCronAnalyticsReport(formatBtradeSliceReport(result));
       } catch (error) {
         log.error({ err: error }, "btrade slice cron failed");
-        await sendCronAnalyticsReport(
-          formatCronErrorReport("Btrade slice", error)
-        );
+        await sendCronAnalyticsReport(formatCronErrorReport("Btrade slice", error));
       }
     },
     null,
     true,
-    "Europe/Kiev"
+    "Europe/Kiev",
   );
 
   log.info({ schedule: "0 0 0 * * *", timezone: "Europe/Kiev" }, "cron started");

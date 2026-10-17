@@ -8,10 +8,7 @@ import { updateConstantByIdUtil } from "./utils/updateConstantByIdUtil.js";
  * @desc    Обновить константу по id (указанные в body поля)
  * @route   PATCH /api/constants/id/:id
  */
-export const updateConstantByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateConstantByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { name, title, data } = req.body;
@@ -24,7 +21,7 @@ export const updateConstantByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

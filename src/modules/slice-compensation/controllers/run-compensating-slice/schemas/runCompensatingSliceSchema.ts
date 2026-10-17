@@ -11,6 +11,4 @@ export const runCompensatingSliceSchema = z.object({
     }),
 });
 
-export type RunCompensatingSliceInput = z.infer<
-  typeof runCompensatingSliceSchema
->;
+export type RunCompensatingSliceInput = z.infer<typeof runCompensatingSliceSchema>;

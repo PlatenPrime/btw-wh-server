@@ -10,7 +10,4 @@ export {
   getCachedSharikProductRestsMap,
 } from "./getCachedSharikProductRestsMap.js";
 export { parseSharikProductRestsHtml } from "./parseSharikProductRestsHtml.js";
-export type {
-  SharikProductRestsItem,
-  SharikProductRestsRow,
-} from "./types.js";
+export type { SharikProductRestsItem, SharikProductRestsRow } from "./types.js";

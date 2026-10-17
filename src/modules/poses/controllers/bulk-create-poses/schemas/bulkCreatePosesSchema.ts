@@ -6,4 +6,3 @@ export const bulkCreatePosesSchema = z.object({
 });
 
 export type BulkCreatePosesInput = z.infer<typeof bulkCreatePosesSchema>;
-

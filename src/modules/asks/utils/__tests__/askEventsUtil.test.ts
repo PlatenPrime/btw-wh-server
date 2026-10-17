@@ -65,7 +65,7 @@ describe("buildAskEvent", () => {
       buildAskEvent({
         eventName: "pull",
         user,
-      } as any)
+      } as any),
     ).toThrow("Pull events require pullDetails payload");
   });
 
@@ -83,8 +83,7 @@ describe("buildAskEvent", () => {
           quant: 1,
           boxes: 1,
         },
-      } as any)
+      } as any),
     ).toThrow("Only pull events may contain pullDetails payload");
   });
 });
-

@@ -24,9 +24,7 @@ import {
 describe("fetchSharikArtImage", () => {
   beforeEach(() => {
     vi.mocked(browserGetBuffer).mockReset();
-    vi.mocked(getSharikHttpProxyUrl).mockReturnValue(
-      "http://user:pass@proxy.example:50100"
-    );
+    vi.mocked(getSharikHttpProxyUrl).mockReturnValue("http://user:pass@proxy.example:50100");
   });
 
   it("возвращает buffer при 200 image/jpeg", async () => {
@@ -42,7 +40,7 @@ describe("fetchSharikArtImage", () => {
     expect(result).toEqual({ buffer, contentType: "image/jpeg" });
     expect(browserGetBuffer).toHaveBeenCalledWith(
       "https://sharik.ua/images/elements_big_prev/prev_1302-0065_m1.jpg",
-      { proxyUrl: "http://user:pass@proxy.example:50100" }
+      { proxyUrl: "http://user:pass@proxy.example:50100" },
     );
   });
 
@@ -54,7 +52,7 @@ describe("fetchSharikArtImage", () => {
     });
 
     await expect(fetchSharikArtImage("1302-0065", "big")).rejects.toBeInstanceOf(
-      SharikArtImageNotFoundError
+      SharikArtImageNotFoundError,
     );
   });
 
@@ -65,9 +63,9 @@ describe("fetchSharikArtImage", () => {
       buffer: Buffer.from("<html>block</html>"),
     });
 
-    await expect(
-      fetchSharikArtImage("1302-0065", "prev")
-    ).rejects.toBeInstanceOf(SharikArtImageNotFoundError);
+    await expect(fetchSharikArtImage("1302-0065", "prev")).rejects.toBeInstanceOf(
+      SharikArtImageNotFoundError,
+    );
   });
 
   it("NotFound при HTTP 404", async () => {
@@ -77,9 +75,9 @@ describe("fetchSharikArtImage", () => {
       buffer: Buffer.from("missing"),
     });
 
-    await expect(
-      fetchSharikArtImage("missing", "prev")
-    ).rejects.toBeInstanceOf(SharikArtImageNotFoundError);
+    await expect(fetchSharikArtImage("missing", "prev")).rejects.toBeInstanceOf(
+      SharikArtImageNotFoundError,
+    );
   });
 
   it("UpstreamError при HTTP 502", async () => {
@@ -89,18 +87,18 @@ describe("fetchSharikArtImage", () => {
       buffer: Buffer.from("bad gateway"),
     });
 
-    await expect(
-      fetchSharikArtImage("1302-0065", "prev")
-    ).rejects.toBeInstanceOf(SharikArtImageUpstreamError);
+    await expect(fetchSharikArtImage("1302-0065", "prev")).rejects.toBeInstanceOf(
+      SharikArtImageUpstreamError,
+    );
   });
 
   it("UpstreamError при сетевой ошибке browserGetBuffer", async () => {
     vi.mocked(browserGetBuffer).mockRejectedValue(
-      new Error("Browser GET timeout (30000ms): https://sharik.ua/x.jpg")
+      new Error("Browser GET timeout (30000ms): https://sharik.ua/x.jpg"),
     );
 
-    await expect(
-      fetchSharikArtImage("1302-0065", "prev")
-    ).rejects.toBeInstanceOf(SharikArtImageUpstreamError);
+    await expect(fetchSharikArtImage("1302-0065", "prev")).rejects.toBeInstanceOf(
+      SharikArtImageUpstreamError,
+    );
   });
 });

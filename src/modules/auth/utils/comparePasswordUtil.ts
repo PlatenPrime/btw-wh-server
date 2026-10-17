@@ -12,10 +12,6 @@ import bcrypt from "bcryptjs";
  * const isValid = comparePasswordUtil("myPassword123", user.password);
  * ```
  */
-export const comparePasswordUtil = (
-  password: string,
-  hash: string
-): boolean => {
+export const comparePasswordUtil = (password: string, hash: string): boolean => {
   return bcrypt.compareSync(password, hash);
 };
-

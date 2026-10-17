@@ -9,7 +9,7 @@ import { postSkuSlicePostCorrectionsSchema } from "./schemas/postSkuSlicePostCor
  */
 export const postSkuSlicePostCorrectionsController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   try {
     if (!req.user?.id || !req.user.role) {
@@ -23,7 +23,7 @@ export const postSkuSlicePostCorrectionsController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

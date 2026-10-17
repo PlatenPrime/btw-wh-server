@@ -4,7 +4,7 @@
  * @returns объект для Mongo `$or` по title или `null`, если поиск пустой
  */
 export function buildVariantSearchFilter(
-  search: string | undefined
+  search: string | undefined,
 ): { $or: Array<{ title?: { $regex: string; $options: string } }> } | null {
   const trimmed = search?.trim();
   if (!trimmed) return null;
@@ -17,4 +17,3 @@ export function buildVariantSearchFilter(
     $or: [{ title: re }],
   };
 }
-

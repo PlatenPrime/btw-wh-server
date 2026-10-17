@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createTestUser } from "../../../../test/setup.js";
 import { mapUserToEventUserData } from "../mapUserToEventUserData.js";
 

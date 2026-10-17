@@ -6,6 +6,4 @@ export const getCatalogNewSinceExcelQuerySchema = z.object({
   since: dateStringSchema,
 });
 
-export type GetCatalogNewSinceExcelQuery = z.infer<
-  typeof getCatalogNewSinceExcelQuerySchema
->;
+export type GetCatalogNewSinceExcelQuery = z.infer<typeof getCatalogNewSinceExcelQuerySchema>;

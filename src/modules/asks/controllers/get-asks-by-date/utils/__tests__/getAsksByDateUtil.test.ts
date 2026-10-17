@@ -23,5 +23,3 @@ describe("getAsksByDateUtil", () => {
     expect(list.map((a) => a.artikul).sort()).toEqual(["ART-A", "ART-B"].sort());
   });
 });
-
-

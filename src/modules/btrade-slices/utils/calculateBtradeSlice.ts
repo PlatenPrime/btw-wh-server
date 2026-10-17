@@ -41,8 +41,7 @@ export async function calculateBtradeSlice(): Promise<{
   }
 
   const fromProductRests = artikuls.filter(
-    (artikul) =>
-      !isInvalidSliceStockPriceItem(data[artikul]!.quantity, data[artikul]!.price),
+    (artikul) => !isInvalidSliceStockPriceItem(data[artikul]!.quantity, data[artikul]!.price),
   ).length;
 
   let count = 0;

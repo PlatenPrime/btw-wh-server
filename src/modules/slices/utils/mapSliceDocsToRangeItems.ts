@@ -10,9 +10,7 @@ export type SliceRangeMapOptions = {
 
 type SliceDocWithData = {
   date: Date;
-  data?:
-    | Record<string, { stock: number; price: number } | undefined>
-    | unknown;
+  data?: Record<string, { stock: number; price: number } | undefined> | unknown;
 };
 
 function sliceDateMinusDays(sliceDate: Date, days: number): Date {

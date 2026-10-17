@@ -11,10 +11,7 @@ function firstQuery(q: Request["query"], key: string): string | undefined {
  * @desc    Продажи и выручка по артикулу за период
  * @route   GET /api/art-sales-reports/artikul/:artikul/range?dateFrom=&dateTo=
  */
-export const getArtSalesRangeController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const getArtSalesRangeController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getArtSalesRangeSchema.safeParse({
     artikul: req.params.artikul,
     dateFrom: firstQuery(req.query, "dateFrom"),
@@ -24,7 +21,7 @@ export const getArtSalesRangeController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

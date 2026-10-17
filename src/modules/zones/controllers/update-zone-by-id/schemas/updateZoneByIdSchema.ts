@@ -11,7 +11,7 @@ export const updateZoneSchema = z
       .min(1, "Title is required")
       .regex(
         titlePattern,
-        'Title must be in format: 1-3 numeric segments (e.g., "42-1", "22-5-1", "42-13-2")'
+        'Title must be in format: 1-3 numeric segments (e.g., "42-1", "22-5-1", "42-13-2")',
       )
       .optional(),
     bar: z
@@ -25,11 +25,7 @@ export const updateZoneSchema = z
       .min(0, "Sector must be non-negative")
       .optional(),
   })
-  .refine(
-    (data) => Object.keys(data).length > 0,
-    "At least one field must be provided for update"
-  );
+  .refine((data) => Object.keys(data).length > 0, "At least one field must be provided for update");
 
 // Типы для экспорта
 export type UpdateZoneInput = z.infer<typeof updateZoneSchema>;
-

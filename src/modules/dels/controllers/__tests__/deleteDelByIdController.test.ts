@@ -7,21 +7,18 @@ import { deleteDelByIdController } from "../delete-del-by-id/deleteDelByIdContro
 
 describe("deleteDelByIdController", () => {
   let res: Response;
-  let responseJson: Record<string, unknown>;
   let responseStatus: { code?: number };
 
   beforeEach(async () => {
     await Del.deleteMany({});
     await Event.deleteMany({});
-    responseJson = {};
     responseStatus = {};
     res = {
       status(code: number) {
         responseStatus.code = code;
         return this;
       },
-      json(data: unknown) {
-        responseJson = data as Record<string, unknown>;
+      json(_data: unknown) {
         return this;
       },
       headersSent: false,
@@ -68,7 +65,7 @@ describe("deleteDelByIdController", () => {
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(user._id));
     expect(events[0].description).toBe(
-      `Видалено поставку "To delete with event" від виробника prod1 (id: ${del._id})`
+      `Видалено поставку "To delete with event" від виробника prod1 (id: ${del._id})`,
     );
   });
 });

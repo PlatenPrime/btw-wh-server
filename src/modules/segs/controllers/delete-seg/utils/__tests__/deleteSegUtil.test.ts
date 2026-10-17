@@ -17,7 +17,7 @@ describe("deleteSegUtil", () => {
   };
 
   const runWithSession = async <T>(
-    fn: (session: mongoose.ClientSession) => Promise<T>
+    fn: (session: mongoose.ClientSession) => Promise<T>,
   ): Promise<T> => {
     const session = await mongoose.startSession();
     try {
@@ -46,13 +46,10 @@ describe("deleteSegUtil", () => {
     block.segs.push(seg._id);
     await block.save();
 
-    await Zone.updateOne(
-      { _id: zone._id },
-      { $set: { "seg.id": seg._id, sector: seg.sector } }
-    );
+    await Zone.updateOne({ _id: zone._id }, { $set: { "seg.id": seg._id, sector: seg.sector } });
 
     const deleted = await runWithSession((session) =>
-      deleteSegUtil({ segId: seg._id.toString(), session })
+      deleteSegUtil({ segId: seg._id.toString(), session }),
     );
 
     expect(deleted).not.toBeNull();
@@ -72,9 +69,7 @@ describe("deleteSegUtil", () => {
   it("returns null when segment not found", async () => {
     const missingId = new mongoose.Types.ObjectId().toString();
 
-    const result = await runWithSession((session) =>
-      deleteSegUtil({ segId: missingId, session })
-    );
+    const result = await runWithSession((session) => deleteSegUtil({ segId: missingId, session }));
 
     expect(result).toBeNull();
   });
@@ -94,7 +89,7 @@ describe("deleteSegUtil", () => {
     await block.save();
 
     const deleted = await runWithSession((session) =>
-      deleteSegUtil({ segId: seg._id.toString(), session })
+      deleteSegUtil({ segId: seg._id.toString(), session }),
     );
 
     expect(deleted).not.toBeNull();

@@ -41,17 +41,10 @@ export function isAdequateBalunStock(stock: number): boolean {
   return !isBalunFakeStock(stock) && stock !== -1;
 }
 
-function findNextAdequateStock(
-  series: BalunStockDay[],
-  fromIndex: number
-): number | undefined {
+function findNextAdequateStock(series: BalunStockDay[], fromIndex: number): number | undefined {
   for (let i = fromIndex + 1; i < series.length; i++) {
     const stock = series[i]?.stock;
-    if (
-      typeof stock === "number" &&
-      Number.isFinite(stock) &&
-      isAdequateBalunStock(stock)
-    ) {
+    if (typeof stock === "number" && Number.isFinite(stock) && isAdequateBalunStock(stock)) {
       return stock;
     }
   }
@@ -68,7 +61,7 @@ export function computeBalunFakeStockPatchesForSeries(
   productId: string,
   series: BalunStockDay[],
   windowStartMs: number,
-  windowEndMs: number
+  windowEndMs: number,
 ): BalunFakeStockComputeResult {
   const patches: BalunFakeStockPatch[] = [];
   const skipped: BalunFakeStockSkip[] = [];
@@ -97,9 +90,7 @@ export function computeBalunFakeStockPatchesForSeries(
     }
 
     const replacement =
-      lastAdequate !== undefined
-        ? lastAdequate
-        : findNextAdequateStock(series, i);
+      lastAdequate !== undefined ? lastAdequate : findNextAdequateStock(series, i);
 
     if (replacement === undefined) {
       skipped.push({ productId, dateMs, reason: "no-adequate-neighbor" });
@@ -123,7 +114,7 @@ export function computeBalunFakeStockPatchesForSeries(
 export function computeBalunFakeStockPatches(
   seriesByProductId: Map<string, BalunStockDay[]>,
   windowStartMs: number,
-  windowEndMs: number
+  windowEndMs: number,
 ): BalunFakeStockComputeResult {
   const patches: BalunFakeStockPatch[] = [];
   const skipped: BalunFakeStockSkip[] = [];
@@ -133,7 +124,7 @@ export function computeBalunFakeStockPatches(
       productId,
       series,
       windowStartMs,
-      windowEndMs
+      windowEndMs,
     );
     patches.push(...result.patches);
     skipped.push(...result.skipped);

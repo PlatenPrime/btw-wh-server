@@ -8,11 +8,11 @@
 
 ## Сущности и связи
 
-| Сущность | Смысл |
-|----------|--------|
-| Artikul image request | Запрос картинки по артикулу и размеру (`prev` / `big`) |
-| Upstream URL | Канонический JPEG на sharik (`elements_big` / `elements_big_prev`) |
-| Cache entry | In-memory запись: байты, Content-Type, ETag, время выборки |
+| Сущность              | Смысл                                                              |
+| --------------------- | ------------------------------------------------------------------ |
+| Artikul image request | Запрос картинки по артикулу и размеру (`prev` / `big`)             |
+| Upstream URL          | Канонический JPEG на sharik (`elements_big` / `elements_big_prev`) |
+| Cache entry           | In-memory запись: байты, Content-Type, ETag, время выборки         |
 
 Связи:
 

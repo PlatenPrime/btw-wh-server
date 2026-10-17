@@ -8,7 +8,7 @@ export const updateArtByIdSchema = z
     }),
     limit: z
       .number({
-        invalid_type_error: "limit must be a number",
+        error: "limit must be a number",
       })
       .nonnegative("limit must be a non-negative number")
       .optional(),

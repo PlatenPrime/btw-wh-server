@@ -13,11 +13,7 @@ const createPosition = (artikul: string, sector?: number): IPos => {
 
 describe("sortPositionsByPalletSectorUtil", () => {
   it("sorts positions by pallet sector ascending", () => {
-    const positions = [
-      createPosition("C", 5),
-      createPosition("A", 1),
-      createPosition("B", 3),
-    ];
+    const positions = [createPosition("C", 5), createPosition("A", 1), createPosition("B", 3)];
 
     const sorted = sortPositionsByPalletSectorUtil(positions);
 

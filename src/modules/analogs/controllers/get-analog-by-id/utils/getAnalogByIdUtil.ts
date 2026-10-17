@@ -9,9 +9,7 @@ export type EnrichedAnalog = Record<string, unknown> & {
   prod: ProdRef;
 };
 
-export const getAnalogByIdUtil = async (
-  id: string
-): Promise<EnrichedAnalog | null> => {
+export const getAnalogByIdUtil = async (id: string): Promise<EnrichedAnalog | null> => {
   const analog = await Analog.findById(id).lean();
   if (!analog) return null;
 

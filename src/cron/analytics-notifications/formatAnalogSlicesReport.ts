@@ -6,12 +6,9 @@ import {
 
 export function formatAnalogSlicesReport(
   competitors: KonkSliceStats[],
-  excluded: string[] = []
+  excluded: string[] = [],
 ): string {
-  const lines = [
-    "📊 Analog slices — завершено",
-    ...formatKonkSliceReportLines(competitors),
-  ];
+  const lines = ["📊 Analog slices — завершено", ...formatKonkSliceReportLines(competitors)];
 
   if (excluded.length > 0) {
     lines.push(`Пропущено: ${excluded.join(", ")}`);

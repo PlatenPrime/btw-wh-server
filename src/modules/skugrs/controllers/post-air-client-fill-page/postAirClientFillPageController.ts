@@ -8,7 +8,7 @@ import { postAirClientFillPageUtil } from "./utils/postAirClientFillPageUtil.js"
  */
 export const postAirClientFillPageController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const parseResult = postAirClientFillPageSchema.safeParse({
     id: req.params.id,
@@ -21,7 +21,7 @@ export const postAirClientFillPageController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

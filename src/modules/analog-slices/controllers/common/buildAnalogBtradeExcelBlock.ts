@@ -1,8 +1,5 @@
 import type ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { AnalogBtradeCompareItem } from "../get-analog-btrade-comparison-excel/utils/getAnalogBtradeComparisonRangeUtil.js";
 
@@ -51,9 +48,7 @@ export function setupAnalogBtradeHeaderRow(
   headerRow.getCell(6).value = "";
 
   items.forEach((item, index) => {
-    headerRow.getCell(index + dataStartCol).value = formatExcelDateHeaderUk(
-      item.date,
-    );
+    headerRow.getCell(index + dataStartCol).value = formatExcelDateHeaderUk(item.date);
   });
 
   headerRow.getCell(diffCol).value = "Різниця";
@@ -173,10 +168,8 @@ export function buildAnalogBtradeExcelBlock(
   for (const { row, getVal } of metrics) {
     const firstRaw = items.length > 0 ? getVal(items[0]!) : null;
     const lastRaw = items.length > 0 ? getVal(items[items.length - 1]!) : null;
-    const firstVal =
-      typeof firstRaw === "number" ? firstRaw : Number(firstRaw ?? NaN);
-    const lastVal =
-      typeof lastRaw === "number" ? lastRaw : Number(lastRaw ?? NaN);
+    const firstVal = typeof firstRaw === "number" ? firstRaw : Number(firstRaw ?? NaN);
+    const lastVal = typeof lastRaw === "number" ? lastRaw : Number(lastRaw ?? NaN);
     if (!Number.isFinite(firstVal) || !Number.isFinite(lastVal)) continue;
 
     const diff = lastVal - firstVal;
@@ -230,23 +223,18 @@ export function buildAnalogBtradeExcelBlock(
       const deltaAnalog = analogBounds.last - analogBounds.first;
       const deltaBtrade = btradeBounds.last - btradeBounds.first;
 
-        if (Number.isFinite(deltaAnalog) && Number.isFinite(deltaBtrade)) {
+      if (Number.isFinite(deltaAnalog) && Number.isFinite(deltaBtrade)) {
         blockDeltas = { deltaAnalog, deltaBtrade };
         const diffPieces = deltaAnalog - deltaBtrade;
         const summaryDiffCell = analogStockRow.getCell(summaryDiffCol);
         summaryDiffCell.value = diffPieces;
 
         const diffPiecesNumeric =
-          typeof diffPieces === "number"
-            ? diffPieces
-            : Number(diffPieces ?? NaN);
+          typeof diffPieces === "number" ? diffPieces : Number(diffPieces ?? NaN);
         if (Number.isFinite(diffPiecesNumeric) && diffPiecesNumeric !== 0) {
           summaryDiffCell.font = {
             ...(summaryDiffCell.font ?? {}),
-            color:
-              diffPiecesNumeric > 0
-                ? { argb: "FF00AA00" }
-                : { argb: "FFFF0000" },
+            color: diffPiecesNumeric > 0 ? { argb: "FF00AA00" } : { argb: "FFFF0000" },
           };
         }
 
@@ -263,8 +251,7 @@ export function buildAnalogBtradeExcelBlock(
           };
         } else {
           const rawSummaryPct = (deltaBtrade / deltaAnalog - 1) * 100;
-          const roundedSummaryPct =
-            Math.round(rawSummaryPct * 100) / 100;
+          const roundedSummaryPct = Math.round(rawSummaryPct * 100) / 100;
 
           summaryPctCell.value = roundedSummaryPct / 100;
           summaryPctCell.numFmt = "0.00%";
@@ -276,21 +263,13 @@ export function buildAnalogBtradeExcelBlock(
           if (Number.isFinite(pctNumeric) && pctNumeric !== 0) {
             summaryPctCell.font = {
               ...(summaryPctCell.font ?? {}),
-              color:
-                pctNumeric > 0
-                  ? { argb: "FF00AA00" }
-                  : { argb: "FFFF0000" },
+              color: pctNumeric > 0 ? { argb: "FF00AA00" } : { argb: "FFFF0000" },
             };
           }
         }
 
         worksheet.mergeCells(startRow, summaryDiffCol, startRow + 3, summaryDiffCol);
-        worksheet.mergeCells(
-          startRow,
-          summaryDiffPctCol,
-          startRow + 3,
-          summaryDiffPctCol,
-        );
+        worksheet.mergeCells(startRow, summaryDiffPctCol, startRow + 3, summaryDiffPctCol);
       }
     }
   }
@@ -302,10 +281,8 @@ export function buildAnalogBtradeExcelBlock(
     const prevRaw = prevCell.value;
     const currRaw = currCell.value;
 
-    const prevVal =
-      typeof prevRaw === "number" ? prevRaw : Number(prevRaw ?? NaN);
-    const currVal =
-      typeof currRaw === "number" ? currRaw : Number(currRaw ?? NaN);
+    const prevVal = typeof prevRaw === "number" ? prevRaw : Number(prevRaw ?? NaN);
+    const currVal = typeof currRaw === "number" ? currRaw : Number(currRaw ?? NaN);
 
     if (!Number.isFinite(prevVal) || !Number.isFinite(currVal)) continue;
     if (currVal > prevVal) {
@@ -323,10 +300,8 @@ export function buildAnalogBtradeExcelBlock(
     const prevRaw = prevCell.value;
     const currRaw = currCell.value;
 
-    const prevVal =
-      typeof prevRaw === "number" ? prevRaw : Number(prevRaw ?? NaN);
-    const currVal =
-      typeof currRaw === "number" ? currRaw : Number(currRaw ?? NaN);
+    const prevVal = typeof prevRaw === "number" ? prevRaw : Number(prevRaw ?? NaN);
+    const currVal = typeof currRaw === "number" ? currRaw : Number(currRaw ?? NaN);
 
     if (!Number.isFinite(prevVal) || !Number.isFinite(currVal)) continue;
     if (currVal < prevVal) {
@@ -371,9 +346,7 @@ export interface BuildAnalogBtradeTotalBlockOptions {
   producerName?: string | null;
 }
 
-export function buildAnalogBtradeTotalBlock(
-  options: BuildAnalogBtradeTotalBlockOptions,
-): void {
+export function buildAnalogBtradeTotalBlock(options: BuildAnalogBtradeTotalBlockOptions): void {
   const {
     worksheet,
     totalStartRow,
@@ -440,10 +413,7 @@ export function buildAnalogBtradeTotalBlock(
     summaryDiffCell.font = {
       ...(summaryDiffCell.font ?? {}),
       bold: true,
-      color:
-        summaryDiffNumeric > 0
-          ? { argb: "FF00AA00" }
-          : { argb: "FFFF0000" },
+      color: summaryDiffNumeric > 0 ? { argb: "FF00AA00" } : { argb: "FFFF0000" },
     };
   }
 
@@ -463,15 +433,12 @@ export function buildAnalogBtradeTotalBlock(
     summaryPctCell.value = roundedSummaryPct / 100;
     summaryPctCell.numFmt = "0.00%";
     const pctNumeric =
-      typeof roundedSummaryPct === "number"
-        ? roundedSummaryPct
-        : Number(roundedSummaryPct ?? NaN);
+      typeof roundedSummaryPct === "number" ? roundedSummaryPct : Number(roundedSummaryPct ?? NaN);
     if (Number.isFinite(pctNumeric) && pctNumeric !== 0) {
       summaryPctCell.font = {
         ...(summaryPctCell.font ?? {}),
         bold: true,
-        color:
-          pctNumeric > 0 ? { argb: "FF00AA00" } : { argb: "FFFF0000" },
+        color: pctNumeric > 0 ? { argb: "FF00AA00" } : { argb: "FFFF0000" },
       };
     }
   }
@@ -484,4 +451,3 @@ export function buildAnalogBtradeTotalBlock(
     row2.getCell(c).font = { ...(row2.getCell(c).font ?? {}), bold: true };
   }
 }
-

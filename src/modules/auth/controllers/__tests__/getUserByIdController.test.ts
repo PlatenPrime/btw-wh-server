@@ -73,4 +73,3 @@ describe("getUserByIdController", () => {
     expect(responseJson.message).toBe("Користувач не знайдений");
   });
 });
-

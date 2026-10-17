@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  EXCEL_JOB_KIND_IDS,
-  isExcelJobKind,
-  isExcelJobStatus,
-} from "../excelJobConstants.js";
+import { EXCEL_JOB_KIND_IDS, isExcelJobKind, isExcelJobStatus } from "../excelJobConstants.js";
 
 describe("excelJobConstants", () => {
   it("accepts registered kinds", () => {

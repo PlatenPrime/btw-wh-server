@@ -7,10 +7,7 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить аналоги по prodName
  * @route   GET /api/analogs/prod/:prodName
  */
-export const getAnalogsByProdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAnalogsByProdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getAnalogsByProdSchema.safeParse({
       ...req.params,
@@ -19,7 +16,7 @@ export const getAnalogsByProdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

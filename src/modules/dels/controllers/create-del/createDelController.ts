@@ -8,16 +8,13 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Создать поставку
  * @route   POST /api/dels
  */
-export const createDelController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const createDelController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = createDelSchema.safeParse(req.body);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

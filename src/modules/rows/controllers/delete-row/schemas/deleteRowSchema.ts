@@ -8,4 +8,3 @@ export const deleteRowSchema = z.object({
 });
 
 export type DeleteRowInput = z.infer<typeof deleteRowSchema>;
-

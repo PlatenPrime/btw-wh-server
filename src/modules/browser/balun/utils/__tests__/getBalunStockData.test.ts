@@ -12,8 +12,7 @@ vi.mock("../../../utils/browserRequest.js", () => ({
   logBrowserError: vi.fn(),
 }));
 
-const PRODUCT_URL =
-  "https://balun.com.ua/ua/p1341824038-folgirovannaya-sharik-zvezda.html";
+const PRODUCT_URL = "https://balun.com.ua/ua/p1341824038-folgirovannaya-sharik-zvezda.html";
 const PRODUCT_ID = "1341824038";
 const CART_ID = "1094691970";
 const HTML_WITH_PRICE = `
@@ -81,32 +80,30 @@ describe("getBalunStockData", () => {
 
   describe("Валидация входных данных", () => {
     it("должен выбрасывать ошибку при пустой ссылке", async () => {
-      await expect(getBalunStockData("")).rejects.toThrow(
-        "Link is required and must be a string"
-      );
+      await expect(getBalunStockData("")).rejects.toThrow("Link is required and must be a string");
     });
 
     it("должен выбрасывать ошибку при пробельной ссылке", async () => {
       await expect(getBalunStockData("   ")).rejects.toThrow(
-        "Link is required and must be a string"
+        "Link is required and must be a string",
       );
     });
 
     it("должен выбрасывать ошибку при null", async () => {
-      await expect(
-        getBalunStockData(null as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getBalunStockData(null as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
 
     it("должен выбрасывать ошибку при undefined", async () => {
-      await expect(
-        getBalunStockData(undefined as unknown as string)
-      ).rejects.toThrow("Link is required and must be a string");
+      await expect(getBalunStockData(undefined as unknown as string)).rejects.toThrow(
+        "Link is required and must be a string",
+      );
     });
 
     it("должен выбрасывать ошибку при не-строковом link", async () => {
       await expect(getBalunStockData(123 as unknown as string)).rejects.toThrow(
-        "Link is required and must be a string"
+        "Link is required and must be a string",
       );
     });
   });
@@ -149,7 +146,7 @@ describe("getBalunStockData", () => {
           Cookie: expect.stringContaining("csrf_token_company_site=cookie-csrf"),
           "x-csrftoken": "cookie-csrf",
         }),
-      })
+      }),
     );
     expect(mockPost).toHaveBeenNthCalledWith(
       2,
@@ -167,7 +164,7 @@ describe("getBalunStockData", () => {
           source: "COMPANY_SITE",
         },
       }),
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -189,7 +186,7 @@ describe("getBalunStockData", () => {
     await getBalunStockData(PRODUCT_URL);
 
     expect(mockPost.mock.calls[0]?.[2]?.headers).toEqual(
-      expect.objectContaining({ "x-csrftoken": "html-csrf" })
+      expect.objectContaining({ "x-csrftoken": "html-csrf" }),
     );
   });
 
@@ -213,9 +210,10 @@ describe("getBalunStockData", () => {
   });
 
   it("returns -1 when productId is missing in URL", async () => {
-    await expect(
-      getBalunStockData("https://balun.com.ua/ua/catalog")
-    ).resolves.toEqual({ stock: -1, price: -1 });
+    await expect(getBalunStockData("https://balun.com.ua/ua/catalog")).resolves.toEqual({
+      stock: -1,
+      price: -1,
+    });
     expect(getBrowserAxios).not.toHaveBeenCalled();
   });
 

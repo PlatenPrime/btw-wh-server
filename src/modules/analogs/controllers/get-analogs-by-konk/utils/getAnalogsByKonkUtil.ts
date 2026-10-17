@@ -27,16 +27,13 @@ type GetAnalogsByKonkResult = {
 };
 
 export const getAnalogsByKonkUtil = async (
-  input: GetAnalogsByKonkInput
+  input: GetAnalogsByKonkInput,
 ): Promise<GetAnalogsByKonkResult> => {
   const { konkName, page, limit, search } = input;
 
   const baseFilter: Record<string, unknown> = { konkName };
   const searchCondition = buildAnalogSearchFilter(search);
-  const filter =
-    searchCondition === null
-      ? baseFilter
-      : { $and: [baseFilter, searchCondition] };
+  const filter = searchCondition === null ? baseFilter : { $and: [baseFilter, searchCondition] };
 
   const [analogs, total] = await Promise.all([
     Analog.find(filter)

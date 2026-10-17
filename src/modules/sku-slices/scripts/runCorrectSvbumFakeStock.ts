@@ -12,21 +12,19 @@ import {
 import { parseCorrectSvbumFakeStockCliArgs } from "./parseCorrectSvbumFakeStockCliArgs.js";
 
 export function resolveCorrectSvbumFakeStockCliInput(
-  argv: string[]
+  argv: string[],
 ): CorrectSvbumFakeStockSpikesInput {
   const args = parseCorrectSvbumFakeStockCliArgs(argv);
   return {
     daysBack: args.daysBack,
     apply: args.apply,
     ...(args.asOf ? { asOf: args.asOf } : {}),
-    ...(args.lookbackDays !== undefined
-      ? { lookbackDays: args.lookbackDays }
-      : {}),
+    ...(args.lookbackDays !== undefined ? { lookbackDays: args.lookbackDays } : {}),
   };
 }
 
 export async function executeCorrectSvbumFakeStockCli(
-  argv: string[]
+  argv: string[],
 ): Promise<CorrectSvbumFakeStockSpikesResult> {
   const input = resolveCorrectSvbumFakeStockCliInput(argv);
   const result = await correctSvbumFakeStockSpikesUtil(input);
@@ -34,9 +32,7 @@ export async function executeCorrectSvbumFakeStockCli(
   return result;
 }
 
-export async function runCorrectSvbumFakeStockConnected(
-  argv: string[]
-): Promise<void> {
+export async function runCorrectSvbumFakeStockConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executeCorrectSvbumFakeStockCli(argv);

@@ -1,21 +1,10 @@
-const TRANSIENT_CODES = new Set([
-  "ETIMEDOUT",
-  "ECONNRESET",
-  "ECONNREFUSED",
-  "EPIPE",
-  "EAI_AGAIN",
-]);
+const TRANSIENT_CODES = new Set(["ETIMEDOUT", "ECONNRESET", "ECONNREFUSED", "EPIPE", "EAI_AGAIN"]);
 
 const TRANSIENT_MESSAGE_RE =
   /etimedout|econnreset|econnrefused|epipe|eai_again|socket hang up|timeout/i;
 
 function readCode(value: unknown): string | undefined {
-  if (
-    value &&
-    typeof value === "object" &&
-    "code" in value &&
-    typeof value.code === "string"
-  ) {
+  if (value && typeof value === "object" && "code" in value && typeof value.code === "string") {
     return value.code;
   }
   return undefined;
@@ -32,8 +21,7 @@ export function isGraboTransientFetchError(error: unknown): boolean {
     if (code && TRANSIENT_CODES.has(code)) {
       return true;
     }
-    const message =
-      current instanceof Error ? current.message : String(current);
+    const message = current instanceof Error ? current.message : String(current);
     if (TRANSIENT_MESSAGE_RE.test(message)) {
       return true;
     }

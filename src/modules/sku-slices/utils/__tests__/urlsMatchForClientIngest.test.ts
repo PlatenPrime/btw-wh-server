@@ -1,16 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-  normalizeComparableUrl,
-  urlsMatchForClientIngest,
-} from "../urlsMatchForClientIngest.js";
+import { normalizeComparableUrl, urlsMatchForClientIngest } from "../urlsMatchForClientIngest.js";
 
 describe("normalizeComparableUrl", () => {
   it("strips hash and trailing slash", () => {
-    expect(
-      normalizeComparableUrl(
-        "https://airballoons.com.ua/ua/product/x/?q=1#frag"
-      )
-    ).toBe("https://airballoons.com.ua/ua/product/x?q=1");
+    expect(normalizeComparableUrl("https://airballoons.com.ua/ua/product/x/?q=1#frag")).toBe(
+      "https://airballoons.com.ua/ua/product/x?q=1",
+    );
   });
 });
 
@@ -19,8 +14,8 @@ describe("urlsMatchForClientIngest", () => {
     expect(
       urlsMatchForClientIngest(
         "https://airballoons.com.ua/ua/product/x/",
-        "https://airballoons.com.ua/ua/product/x"
-      )
+        "https://airballoons.com.ua/ua/product/x",
+      ),
     ).toBe(true);
   });
 
@@ -28,8 +23,8 @@ describe("urlsMatchForClientIngest", () => {
     expect(
       urlsMatchForClientIngest(
         "https://airballoons.com.ua/ua/product/a",
-        "https://airballoons.com.ua/ua/product/b"
-      )
+        "https://airballoons.com.ua/ua/product/b",
+      ),
     ).toBe(false);
   });
 

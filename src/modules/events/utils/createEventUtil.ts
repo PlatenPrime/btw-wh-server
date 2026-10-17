@@ -1,8 +1,5 @@
 import mongoose from "mongoose";
-import {
-  logModuleError,
-  logModuleWarn,
-} from "../../../logging/logModuleError.js";
+import { logModuleError, logModuleWarn } from "../../../logging/logModuleError.js";
 import User from "../../auth/models/User.js";
 import { Event, EventType, IEvent } from "../models/Event.js";
 import { mapUserToEventUserData } from "./mapUserToEventUserData.js";
@@ -18,9 +15,7 @@ export type CreateEventUtilInput = {
  * Создаёт audit-событие. Fail-soft: при любой ошибке логирует и возвращает null,
  * чтобы не ломать основную бизнес-операцию.
  */
-export const createEventUtil = async (
-  input: CreateEventUtilInput
-): Promise<IEvent | null> => {
+export const createEventUtil = async (input: CreateEventUtilInput): Promise<IEvent | null> => {
   try {
     if (!mongoose.Types.ObjectId.isValid(input.userId)) {
       logModuleWarn("events", "Skip event: invalid userId", {

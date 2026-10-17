@@ -4,17 +4,14 @@ import { deleteKaskUtil } from "./utils/deleteKaskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
-export const deleteKaskById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const deleteKaskById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = deleteKaskByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

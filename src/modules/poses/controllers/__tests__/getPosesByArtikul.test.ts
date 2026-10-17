@@ -78,7 +78,7 @@ describe("getPosesByArtikul", () => {
     });
   });
 
-  // Удалён тест "should return 404 if database returns null" 
+  // Удалён тест "should return 404 if database returns null"
   // exec() всегда возвращает массив (пустой или с данными), никогда null
   // Пустой массив уже покрыт тестом "should return 200 with empty data when no poses found"
 

@@ -35,7 +35,7 @@ describe("deletePerfectCartItem", () => {
         idCustomization: "0",
         cookieHeader: "",
         productUrl: "https://perfectparty.in.ua/x.html",
-      })
+      }),
     ).resolves.toBeUndefined();
     expect(logBrowserError).toHaveBeenCalled();
   });

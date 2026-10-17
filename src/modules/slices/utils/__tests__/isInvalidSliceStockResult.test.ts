@@ -17,9 +17,7 @@ describe("isFullMinusOneStockPrice", () => {
 describe("isFullMinusOneSliceStockResult", () => {
   it("returns true only for full -1/-1 object", () => {
     expect(isFullMinusOneSliceStockResult({ stock: -1, price: -1 })).toBe(true);
-    expect(isFullMinusOneSliceStockResult({ stock: -1, price: 10 })).toBe(
-      false,
-    );
+    expect(isFullMinusOneSliceStockResult({ stock: -1, price: 10 })).toBe(false);
     expect(isFullMinusOneSliceStockResult(null)).toBe(false);
   });
 });

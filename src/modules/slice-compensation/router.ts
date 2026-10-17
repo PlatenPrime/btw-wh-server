@@ -10,7 +10,7 @@ router.post(
   "/run",
   checkAuth,
   checkRoles([RoleType.ADMIN]),
-  asyncHandler(runCompensatingSliceController)
+  asyncHandler(runCompensatingSliceController),
 );
 
 export default router;

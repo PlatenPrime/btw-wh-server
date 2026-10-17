@@ -26,12 +26,3 @@ describe("deleteZoneByIdUtil", () => {
     expect(result).toBeNull();
   });
 });
-
-
-
-
-
-
-
-
-

@@ -68,9 +68,7 @@ describe("updateDelTitleByIdController", () => {
     } as unknown as Request;
     await updateDelTitleByIdController(req, res);
     expect(responseStatus.code).toBe(400);
-    expect(responseJson.message).toBe(
-      "Производитель с указанным name не найден",
-    );
+    expect(responseJson.message).toBe("Производитель с указанным name не найден");
   });
 
   it("200 updates del title", async () => {
@@ -107,7 +105,7 @@ describe("updateDelTitleByIdController", () => {
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(user._id));
     expect(events[0].description).toBe(
-      `Оновлено назву поставки на "Audited title" (виробник: acme, id: ${del._id})`
+      `Оновлено назву поставки на "Audited title" (виробник: acme, id: ${del._id})`,
     );
   });
 });

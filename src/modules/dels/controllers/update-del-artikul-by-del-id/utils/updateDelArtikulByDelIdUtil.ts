@@ -12,7 +12,7 @@ type UpdateDelArtikulByDelIdUtilInput = {
  * Если товар не найден на sharik — возвращает null.
  */
 export const updateDelArtikulByDelIdUtil = async (
-  input: UpdateDelArtikulByDelIdUtilInput
+  input: UpdateDelArtikulByDelIdUtilInput,
 ): Promise<IDel | null> => {
   const del = await Del.findById(input.delId);
   if (!del) return null;
@@ -20,9 +20,7 @@ export const updateDelArtikulByDelIdUtil = async (
   const sharikData = await getSharikStockData(input.artikul);
   if (!sharikData) return null;
 
-  const existing = (del.artikuls as Record<string, IDelArtikulValue>)[
-    input.artikul
-  ];
+  const existing = (del.artikuls as Record<string, IDelArtikulValue>)[input.artikul];
   const quant = existing?.quant ?? 0;
 
   del.set(`artikuls.${input.artikul}`, {

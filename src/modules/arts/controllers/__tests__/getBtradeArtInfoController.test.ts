@@ -80,4 +80,3 @@ describe("getBtradeArtInfoController", () => {
     expect(responseJson.message).toBe("Failed to fetch data from sharik.ua");
   });
 });
-

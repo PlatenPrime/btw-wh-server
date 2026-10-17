@@ -8,7 +8,7 @@ export const updateKaskUtil = async (
     quant: number;
     zone: string;
     com: string;
-  }>
+  }>,
 ): Promise<IKask | null> => {
   return Kask.findByIdAndUpdate(id, { $set: update }, { new: true });
 };

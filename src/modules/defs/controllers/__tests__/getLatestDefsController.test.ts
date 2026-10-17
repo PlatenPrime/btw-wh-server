@@ -75,9 +75,7 @@ describe("getLatestDefsController", () => {
   });
 
   it("500 при ошибке расчёта", async () => {
-    vi.mocked(calculateLivePogrebiDefsUtil).mockRejectedValue(
-      new Error("boom")
-    );
+    vi.mocked(calculateLivePogrebiDefsUtil).mockRejectedValue(new Error("boom"));
 
     await getLatestDefsController({} as Request, res);
 

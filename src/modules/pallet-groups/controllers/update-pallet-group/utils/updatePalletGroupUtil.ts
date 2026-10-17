@@ -25,18 +25,14 @@ export const updatePalletGroupUtil = async ({
   }
 
   if (order !== undefined && order !== group.order) {
-    const allGroups = await PalletGroup.find({})
-      .sort({ order: 1 })
-      .session(session);
+    const allGroups = await PalletGroup.find({}).sort({ order: 1 }).session(session);
 
     const targetIndex = order - 1;
     if (targetIndex < 0 || targetIndex >= allGroups.length) {
       throw new Error("Invalid order value");
     }
 
-    const currentIndex = allGroups.findIndex(
-      (g) => g._id.toString() === group._id.toString()
-    );
+    const currentIndex = allGroups.findIndex((g) => g._id.toString() === group._id.toString());
     if (currentIndex === -1) {
       throw new Error("Pallet group not found in ordering list");
     }
@@ -55,4 +51,3 @@ export const updatePalletGroupUtil = async ({
 
   return group;
 };
-

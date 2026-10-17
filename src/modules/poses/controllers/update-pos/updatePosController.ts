@@ -17,7 +17,7 @@ export const updatePosController = async (req: Request, res: Response) => {
   // 2. Валидация body
   const parseResult = updatePosSchema.safeParse(req.body);
   if (!parseResult.success) {
-    res.status(400).json({ error: parseResult.error.errors });
+    res.status(400).json({ error: parseResult.error.issues });
     return;
   }
 
@@ -67,4 +67,3 @@ export const updatePosController = async (req: Request, res: Response) => {
     await session.endSession();
   }
 };
-

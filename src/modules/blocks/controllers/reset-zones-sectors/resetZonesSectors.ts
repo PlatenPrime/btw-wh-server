@@ -34,4 +34,3 @@ export const resetZonesSectors = async (req: Request, res: Response) => {
     }
   }
 };
-

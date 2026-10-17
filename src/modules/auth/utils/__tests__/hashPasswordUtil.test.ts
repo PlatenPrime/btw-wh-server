@@ -27,4 +27,3 @@ describe("hashPasswordUtil", () => {
     expect(typeof hashed).toBe("string");
   });
 });
-

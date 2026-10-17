@@ -3,12 +3,9 @@ import { Row } from "../../../../models/Row.js";
 import { createRowUtil } from "../createRowUtil.js";
 import { logServerEgressGeo } from "../../../../../../utils/server-egress-geo/logServerEgressGeo.js";
 
-vi.mock(
-  "../../../../../../utils/server-egress-geo/logServerEgressGeo.js",
-  () => ({
-    logServerEgressGeo: vi.fn().mockResolvedValue(undefined),
-  })
-);
+vi.mock("../../../../../../utils/server-egress-geo/logServerEgressGeo.js", () => ({
+  logServerEgressGeo: vi.fn().mockResolvedValue(undefined),
+}));
 
 const mockedLogServerEgressGeo = vi.mocked(logServerEgressGeo);
 
@@ -41,9 +38,7 @@ describe("createRowUtil", () => {
     expect(result1.title).toBe("Unique Row");
 
     // Попытка создать дубликат должна выбрасывать ошибку
-    await expect(
-      createRowUtil({ title: "Unique Row" })
-    ).rejects.toThrow();
+    await expect(createRowUtil({ title: "Unique Row" })).rejects.toThrow();
 
     const found = await Row.find({ title: "Unique Row" });
     expect(found).toHaveLength(1);
@@ -58,4 +53,3 @@ describe("createRowUtil", () => {
     expect(result.updatedAt).toBeInstanceOf(Date);
   });
 });
-

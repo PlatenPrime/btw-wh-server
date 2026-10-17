@@ -12,8 +12,6 @@ describe("mapBtradeSliceDocsToRangeItems", () => {
       ],
       "ART-1",
     );
-    expect(items).toEqual([
-      { date: d1.toISOString(), quantity: 1, price: 2 },
-    ]);
+    expect(items).toEqual([{ date: d1.toISOString(), quantity: 1, price: 2 }]);
   });
 });

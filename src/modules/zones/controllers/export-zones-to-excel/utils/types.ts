@@ -1,5 +1,5 @@
 export type ExcelZoneRow = {
-  "Назва": string;
+  Назва: string;
   Штрихкод: number;
   Сектор: number;
 };

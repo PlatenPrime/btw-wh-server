@@ -11,9 +11,7 @@ describe("connectTestMongo", () => {
   });
 
   it("reuses in-flight connect promise for concurrent callers", async () => {
-    const connectSpy = vi.spyOn(mongoose, "connect").mockResolvedValue(
-      mongoose as never,
-    );
+    const connectSpy = vi.spyOn(mongoose, "connect").mockResolvedValue(mongoose as never);
     Object.defineProperty(mongoose.connection, "readyState", {
       configurable: true,
       get: () => 0,

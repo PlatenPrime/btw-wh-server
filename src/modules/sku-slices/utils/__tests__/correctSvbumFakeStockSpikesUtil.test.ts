@@ -12,7 +12,7 @@ async function seedSvbum(
   rows: Array<{
     date: Date;
     data: Record<string, { stock: number; price: number }>;
-  }>
+  }>,
 ): Promise<void> {
   for (const row of rows) {
     await seedSkuSliceMonthDay("svbum", row.date, row.data);
@@ -25,9 +25,7 @@ describe("correctSvbumFakeStockSpikesUtil", () => {
   });
 
   it("rejects daysBack < 1", async () => {
-    await expect(
-      correctSvbumFakeStockSpikesUtil({ daysBack: 0 })
-    ).rejects.toThrow(/daysBack/);
+    await expect(correctSvbumFakeStockSpikesUtil({ daysBack: 0 })).rejects.toThrow(/daysBack/);
   });
 
   it("dry-run finds sandwich patches and does not write", async () => {

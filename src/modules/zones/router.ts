@@ -17,20 +17,10 @@ import {
 const router = Router();
 
 // Создать зону - доступно только для ADMIN
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createZone),
-);
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createZone));
 
 // Получить все зоны с пагинацией и поиском - доступно только для ADMIN
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getAllZones),
-);
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getAllZones));
 
 // Экспорт зон в Excel - доступно только для ADMIN
 router.get(
@@ -41,12 +31,7 @@ router.get(
 );
 
 // Получить зону по title - доступно только для ADMIN
-router.get(
-  "/title/:title",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getZoneByTitle),
-);
+router.get("/title/:title", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getZoneByTitle));
 
 // Получить зоны по ID блока - доступно только для ADMIN
 router.get(
@@ -57,35 +42,15 @@ router.get(
 );
 
 // Получить зону по ID - доступно только для ADMIN
-router.get(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getZoneById),
-);
+router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getZoneById));
 
 // Обновить зону - доступно только для ADMIN
-router.put(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(updateZoneById),
-);
+router.put("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(updateZoneById));
 
 // Удалить зону - доступно только для PRIME
-router.delete(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.PRIME]),
-  asyncHandler(deleteZoneById),
-);
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deleteZoneById));
 
 // Массовое создание/обновление зон (upsert) - доступно только для PRIME
-router.post(
-  "/upsert",
-  checkAuth,
-  checkRoles([RoleType.PRIME]),
-  asyncHandler(upsertZones),
-);
+router.post("/upsert", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(upsertZones));
 
 export default router;

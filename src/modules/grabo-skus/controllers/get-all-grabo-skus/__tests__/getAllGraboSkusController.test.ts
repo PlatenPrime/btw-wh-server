@@ -77,7 +77,7 @@ describe("getAllGraboSkusController", () => {
     expect(responseJson.filterOptions).toEqual(
       expect.objectContaining({
         color: ["Pink"],
-      })
+      }),
     );
   });
 

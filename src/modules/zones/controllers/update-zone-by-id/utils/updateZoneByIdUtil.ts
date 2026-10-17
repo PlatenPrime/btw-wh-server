@@ -15,11 +15,10 @@ export const updateZoneByIdUtil = async ({
   const zoneObjectId = new mongoose.Types.ObjectId(id);
 
   // Сначала обновляем зону
-  const updatedZone: IZone | null = await Zone.findByIdAndUpdate(
-    id,
-    updateData,
-    { new: true, runValidators: true }
-  );
+  const updatedZone: IZone | null = await Zone.findByIdAndUpdate(id, updateData, {
+    new: true,
+    runValidators: true,
+  });
 
   if (!updatedZone) {
     return null;
@@ -34,9 +33,7 @@ export const updateZoneByIdUtil = async ({
 
     // Обновить title в каждом сегменте
     for (const seg of segsWithZone) {
-      const zoneIndex = seg.zones.findIndex((zone) =>
-        zone._id.equals(zoneObjectId)
-      );
+      const zoneIndex = seg.zones.findIndex((zone) => zone._id.equals(zoneObjectId));
       if (zoneIndex !== -1) {
         seg.zones[zoneIndex].title = updateData.title;
         await seg.save();

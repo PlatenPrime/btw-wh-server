@@ -18,4 +18,3 @@ export const createPosSchema = z.object({
 });
 
 export type CreatePosInput = z.infer<typeof createPosSchema>;
-

@@ -1,8 +1,5 @@
 import ExcelJS from "exceljs";
-import {
-  applyDataRowStyle,
-  applyHeaderStyle,
-} from "../../../lib/excel/worksheetStyles.js";
+import { applyDataRowStyle, applyHeaderStyle } from "../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
 import type { BtradeReportingCoalescedPoint } from "./coalesceBtradeSliceItemsForReporting.js";
 
@@ -24,10 +21,7 @@ export async function buildArtStockExcel(
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet("Залишки");
 
-  const headers = [
-    ...META_HEADERS,
-    ...input.datesReport.map((d) => formatExcelDateHeaderUk(d)),
-  ];
+  const headers = [...META_HEADERS, ...input.datesReport.map((d) => formatExcelDateHeaderUk(d))];
 
   worksheet.addRow(headers);
   applyHeaderStyle(worksheet, headers.length);

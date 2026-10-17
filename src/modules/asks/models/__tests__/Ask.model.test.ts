@@ -56,7 +56,7 @@ describe("Ask Model", () => {
     it("should accept valid status values", async () => {
       const user = await createTestUser({ username: `u4-${Date.now()}` });
 
-      for (const status of ["new", "processing", "completed", "rejected"]) {
+      for (const status of ["new", "processing", "completed", "rejected"] as const) {
         const saved = await Ask.create({
           artikul: `ART-${status}`,
           status,

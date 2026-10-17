@@ -3,10 +3,7 @@ import { checkAndCompleteAsksUtil } from "./utils/checkAndCompleteAsksUtil.js";
 import { getAsksPullsUtil } from "./utils/getAsksPullsUtil.js";
 import { logModuleError, logModuleInfo } from "../../../../logging/logModuleError.js";
 
-export const getAsksPullsController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAsksPullsController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { response, processingAsks } = await getAsksPullsUtil();
 

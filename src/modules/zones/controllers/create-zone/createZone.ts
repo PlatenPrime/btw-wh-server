@@ -12,7 +12,7 @@ export const createZone = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -24,8 +24,7 @@ export const createZone = async (req: Request, res: Response) => {
 
     if (duplicateZone) {
       const duplicateFields = [];
-      if (duplicateZone.title === zoneData.title)
-        duplicateFields.push("title");
+      if (duplicateZone.title === zoneData.title) duplicateFields.push("title");
       if (duplicateZone.bar === zoneData.bar) duplicateFields.push("bar");
 
       res.status(409).json({
@@ -74,4 +73,3 @@ export const createZone = async (req: Request, res: Response) => {
     }
   }
 };
-

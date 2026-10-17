@@ -7,10 +7,7 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить вариант по id
  * @route   GET /api/variants/id/:id
  */
-export const getVariantByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getVariantByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
 
@@ -18,7 +15,7 @@ export const getVariantByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -43,4 +40,3 @@ export const getVariantByIdController = async (
     }
   }
 };
-

@@ -58,4 +58,3 @@ describe("getVariantByIdController", () => {
     expect((responseJson.data as { title: string }).title).toBe("Variant X");
   });
 });
-

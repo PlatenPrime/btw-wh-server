@@ -35,16 +35,14 @@ describe("getZonesBySegIdUtil", () => {
 
     await Zone.updateMany(
       { _id: { $in: [zoneA._id, zoneB._id] } },
-      { $set: { "seg.id": seg._id, sector: seg.sector } }
+      { $set: { "seg.id": seg._id, sector: seg.sector } },
     );
 
     const result = await getZonesBySegIdUtil({ segId: seg._id.toString() });
 
     expect(result).toHaveLength(2);
     const resultIds = result.map((zone) => zone._id.toString()).sort();
-    expect(resultIds).toEqual(
-      [zoneA._id.toString(), zoneB._id.toString()].sort()
-    );
+    expect(resultIds).toEqual([zoneA._id.toString(), zoneB._id.toString()].sort());
     expect(resultIds).not.toContain(otherZone._id.toString());
   });
 

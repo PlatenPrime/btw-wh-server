@@ -27,9 +27,7 @@ type KonkLean = {
   title: string;
 };
 
-async function loadKonkTitles(
-  konkNames: string[],
-): Promise<Map<string, string>> {
+async function loadKonkTitles(konkNames: string[]): Promise<Map<string, string>> {
   if (konkNames.length === 0) return new Map();
   const konkDocs = await Konk.find({ name: { $in: konkNames } })
     .select("name title")

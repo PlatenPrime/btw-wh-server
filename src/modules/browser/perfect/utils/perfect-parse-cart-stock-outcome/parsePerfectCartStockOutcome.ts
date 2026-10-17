@@ -18,7 +18,7 @@ export function parsePerfectCartStockOutcome(
   fallbackIds: PerfectCartDeleteIds,
   htmlStatus: number,
   hasProductPageHtml: boolean,
-  productUrl: string
+  productUrl: string,
 ): { outcome: PerfectProductInfo; deleteIds: PerfectCartDeleteIds } {
   const cartData = parseCartResponse(cartRaw);
   const product = cartData?.cart?.products?.[0];
@@ -35,20 +35,11 @@ export function parsePerfectCartStockOutcome(
 
   const stockPacks = Math.floor(stockPacksRaw);
   if (!Number.isFinite(stockPacks) || stockPacks < 0) {
-    logPerfectUnavailableOutcome(
-      productUrl,
-      "invalid cart stock",
-      htmlStatus,
-      hasProductPageHtml
-    );
+    logPerfectUnavailableOutcome(productUrl, "invalid cart stock", htmlStatus, hasProductPageHtml);
     return { outcome: PERFECT_UNAVAILABLE_OUTCOME, deleteIds };
   }
 
-  const title = (
-    product.name ??
-    product.embedded_attributes?.name ??
-    pageTitle
-  ).trim();
+  const title = (product.name ?? product.embedded_attributes?.name ?? pageTitle).trim();
 
   return {
     outcome: {

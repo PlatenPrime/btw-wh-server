@@ -136,9 +136,7 @@ export async function fillSkugrSkusFromProductsUtil(
 
   const promotedFromNewsku = promoteFromNewskuIds.size;
   if (promoteFromNewskuIds.size > 0) {
-    const oidList = [...promoteFromNewskuIds].map(
-      (id) => new mongoose.Types.ObjectId(id),
-    );
+    const oidList = [...promoteFromNewskuIds].map((id) => new mongoose.Types.ObjectId(id));
     await Sku.updateMany(
       { _id: { $in: oidList }, prodName: NEWSKU_PROD_NAME },
       { $set: { prodName: skugr.prodName } },
@@ -188,10 +186,7 @@ export async function fillSkugrSkusFromProductsUtil(
 
   const combined = [...linkIds, ...insertedIds];
   if (combined.length > 0) {
-    await Skugr.updateOne(
-      { _id: skugr._id },
-      { $addToSet: { skus: { $each: combined } } },
-    ).exec();
+    await Skugr.updateOne({ _id: skugr._id }, { $addToSet: { skus: { $each: combined } } }).exec();
   }
 
   const updated = await Skugr.findById(skugrId).exec();

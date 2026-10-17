@@ -44,10 +44,7 @@ export const getAllPosesUtil = async ({
   const skip = (page - 1) * limit;
 
   // Получаем позиции
-  const poses = await Pos.find(mongoFilter)
-    .skip(skip)
-    .limit(limit)
-    .sort({ artikul: 1 });
+  const poses = await Pos.find(mongoFilter).skip(skip).limit(limit).sort({ artikul: 1 });
 
   const total = await Pos.countDocuments(mongoFilter);
 

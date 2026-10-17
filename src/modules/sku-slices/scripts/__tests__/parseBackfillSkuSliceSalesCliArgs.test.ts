@@ -22,12 +22,7 @@ describe("parseBackfillSkuSliceSalesCliArgs", () => {
   });
 
   it("defaults apply to false", () => {
-    const r = parseBackfillSkuSliceSalesCliArgs([
-      "--from",
-      "2026-01-01",
-      "--to",
-      "2026-01-02",
-    ]);
+    const r = parseBackfillSkuSliceSalesCliArgs(["--from", "2026-01-01", "--to", "2026-01-02"]);
     expect(r.apply).toBe(false);
   });
 

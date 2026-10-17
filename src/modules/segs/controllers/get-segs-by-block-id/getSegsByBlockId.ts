@@ -13,15 +13,13 @@ export const getSegsByBlockId = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
 
     const objectId = new mongoose.Types.ObjectId(parseResult.data.blockId);
-    const segs = await Seg.find({ block: objectId })
-      .sort({ order: 1 })
-      .exec();
+    const segs = await Seg.find({ block: objectId }).sort({ order: 1 }).exec();
 
     res.status(200).json({
       exists: segs.length > 0,
@@ -38,4 +36,3 @@ export const getSegsByBlockId = async (req: Request, res: Response) => {
     }
   }
 };
-

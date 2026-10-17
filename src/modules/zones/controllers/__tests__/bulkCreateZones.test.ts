@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestUser, createTestZone } from "../../../../test/setup.js";
 import { Event } from "../../../events/models/Event.js";
+import { Zone } from "../../models/Zone.js";
 import { upsertZones } from "../bulk-create-zones/bulkCreateZones.js";
 
 describe("upsertZones Controller", () => {
@@ -227,7 +228,6 @@ describe("upsertZones Controller", () => {
     expect(responseJson.result.upsertedCount).toBe(2);
 
     // Verify zones were created with sector = 0
-    const Zone = require("mongoose").model("Zone");
     const createdZones = await Zone.find({ title: { $in: ["42-1", "42-2"] } });
     expect(createdZones).toHaveLength(2);
     createdZones.forEach((zone: any) => {
@@ -315,12 +315,13 @@ describe("upsertZones Controller", () => {
     expect(responseJson.result.upsertedCount).toBe(2);
 
     // Verify zones were created with custom sectors
-    const Zone = require("mongoose").model("Zone");
     const createdZones = await Zone.find({ title: { $in: ["42-1", "42-2"] } });
     expect(createdZones).toHaveLength(2);
     const zone1 = createdZones.find((z: any) => z.title === "42-1");
     const zone2 = createdZones.find((z: any) => z.title === "42-2");
-    expect(zone1.sector).toBe(10);
-    expect(zone2.sector).toBe(20);
+    expect(zone1).toBeDefined();
+    expect(zone2).toBeDefined();
+    expect(zone1?.sector).toBe(10);
+    expect(zone2?.sector).toBe(20);
   });
 });

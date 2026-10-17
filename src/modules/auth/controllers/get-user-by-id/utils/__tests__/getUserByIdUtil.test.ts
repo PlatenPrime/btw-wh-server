@@ -29,4 +29,3 @@ describe("getUserByIdUtil", () => {
     expect(result).toBeNull();
   });
 });
-

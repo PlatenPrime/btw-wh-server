@@ -2,15 +2,9 @@ import type { AnyBulkWriteOperation } from "mongoose";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { isInvalidSliceStockPriceItem } from "../../slices/utils/isInvalidSliceStockPriceItem.js";
 import type { ISkuSliceDataItem } from "../models/skuSliceTypes.js";
-import {
-  SkuSliceMonth,
-  type ISkuSliceMonth,
-} from "../models/SkuSliceMonth.js";
+import { SkuSliceMonth, type ISkuSliceMonth } from "../models/SkuSliceMonth.js";
 import { isSkuSliceDataKeyFilled } from "./isSkuSliceDataKeyFilled.js";
-import {
-  toSliceMonthDate,
-  toSliceMonthDayKey,
-} from "./skuSliceMonthKeys.js";
+import { toSliceMonthDate, toSliceMonthDayKey } from "./skuSliceMonthKeys.js";
 
 export type SkuSliceDayPointWrite = {
   konkName: string;
@@ -40,9 +34,7 @@ function parseDayItem(raw: unknown): ISkuSliceDataItem | null {
   return { stock, price };
 }
 
-function buildUpsertOp(
-  w: SkuSliceDayPointWrite,
-): AnyBulkWriteOperation<ISkuSliceMonth> {
+function buildUpsertOp(w: SkuSliceDayPointWrite): AnyBulkWriteOperation<ISkuSliceMonth> {
   const sliceDate = toSliceDate(w.date);
   const month = toSliceMonthDate(sliceDate);
   const dayKey = toSliceMonthDayKey(sliceDate);
@@ -91,9 +83,7 @@ export async function upsertDayPoint(
 }
 
 /** Bulk upsert точек (scrape / patch range). */
-export async function upsertDayPointsBulk(
-  writes: SkuSliceDayPointWrite[],
-): Promise<number> {
+export async function upsertDayPointsBulk(writes: SkuSliceDayPointWrite[]): Promise<number> {
   if (writes.length === 0) return 0;
   await SkuSliceMonth.bulkWrite(writes.map(buildUpsertOp), { ordered: false });
   return writes.length;
@@ -205,14 +195,12 @@ export async function loadDayMapsForKonkDates(
   if (dates.length === 0) return out;
 
   const sliceDates = dates.map((d) => toSliceDate(d));
-  const uniqueTimes = [...new Set(sliceDates.map((d) => d.getTime()))].sort(
-    (a, b) => a - b,
-  );
+  const uniqueTimes = [...new Set(sliceDates.map((d) => d.getTime()))].sort((a, b) => a - b);
   const uniqueDates = uniqueTimes.map((t) => new Date(t));
 
-  const months = [
-    ...new Set(uniqueDates.map((d) => toSliceMonthDate(d).getTime())),
-  ].map((t) => new Date(t));
+  const months = [...new Set(uniqueDates.map((d) => toSliceMonthDate(d).getTime()))].map(
+    (t) => new Date(t),
+  );
 
   const dayKeysNeeded = new Set(uniqueDates.map((d) => toSliceMonthDayKey(d)));
 
@@ -286,10 +274,7 @@ export async function findDayPointsPage(
     if (!item) continue;
     const productId = (doc.productId ?? "").trim();
     if (!productId) continue;
-    if (
-      input.isInvalid === true &&
-      !isInvalidSliceStockPriceItem(item.stock, item.price)
-    ) {
+    if (input.isInvalid === true && !isInvalidSliceStockPriceItem(item.stock, item.price)) {
       continue;
     }
     rows.push({ productId, stock: item.stock, price: item.price });
@@ -326,9 +311,7 @@ export async function loadDayPointsForProductIds(
   productIds: string[],
   date: Date,
 ): Promise<Record<string, ISkuSliceDataItem>> {
-  const pids = [
-    ...new Set(productIds.map((p) => p.trim()).filter(Boolean)),
-  ];
+  const pids = [...new Set(productIds.map((p) => p.trim()).filter(Boolean))];
   if (pids.length === 0) return {};
 
   const sliceDate = toSliceDate(date);
@@ -364,12 +347,8 @@ export async function loadPointsForProductIdsRange(
   productIds: string[],
   dateFrom: Date,
   dateTo: Date,
-): Promise<
-  Array<{ productId: string; date: Date; item: ISkuSliceDataItem }>
-> {
-  const pids = [
-    ...new Set(productIds.map((p) => p.trim()).filter(Boolean)),
-  ];
+): Promise<Array<{ productId: string; date: Date; item: ISkuSliceDataItem }>> {
+  const pids = [...new Set(productIds.map((p) => p.trim()).filter(Boolean))];
   if (pids.length === 0) return [];
 
   const from = toSliceDate(dateFrom);
@@ -390,8 +369,7 @@ export async function loadPointsForProductIdsRange(
     .lean()
     .exec();
 
-  const out: Array<{ productId: string; date: Date; item: ISkuSliceDataItem }> =
-    [];
+  const out: Array<{ productId: string; date: Date; item: ISkuSliceDataItem }> = [];
 
   for (const doc of docs) {
     const productId = (doc.productId ?? "").trim();
@@ -450,12 +428,7 @@ export async function loadPointsForSkusRange(
   }> = [];
 
   for (const [konkName, pidSet] of byKonk) {
-    const rows = await loadPointsForProductIdsRange(
-      konkName,
-      [...pidSet],
-      from,
-      to,
-    );
+    const rows = await loadPointsForProductIdsRange(konkName, [...pidSet], from, to);
     for (const row of rows) {
       out.push({ konkName, ...row });
     }

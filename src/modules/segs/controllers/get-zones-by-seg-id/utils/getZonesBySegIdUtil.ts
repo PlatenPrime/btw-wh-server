@@ -5,13 +5,10 @@ type GetZonesBySegIdInput = {
   segId: string;
 };
 
-export const getZonesBySegIdUtil = async ({
-  segId,
-}: GetZonesBySegIdInput): Promise<IZone[]> => {
+export const getZonesBySegIdUtil = async ({ segId }: GetZonesBySegIdInput): Promise<IZone[]> => {
   const objectId = new mongoose.Types.ObjectId(segId);
-  
+
   const zones = await Zone.find({ "seg.id": objectId }).exec();
-  
+
   return zones;
 };
-

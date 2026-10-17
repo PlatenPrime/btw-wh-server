@@ -27,10 +27,8 @@ const airSkuProfile = resolveScrapeProfile("air", "skuSlice");
 
 /** Кластерная пауза только для основного Air SKU-среза (каждые 10 fetch). */
 export const AIR_SKU_SLICE_CLUSTER_SIZE = airSkuProfile.cluster!.every;
-export const AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS =
-  airSkuProfile.cluster!.pauseMinMs;
-export const AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS =
-  airSkuProfile.cluster!.pauseMaxMs;
+export const AIR_SKU_SLICE_CLUSTER_PAUSE_MIN_MS = airSkuProfile.cluster!.pauseMinMs;
+export const AIR_SKU_SLICE_CLUSTER_PAUSE_MAX_MS = airSkuProfile.cluster!.pauseMaxMs;
 
 /** Блочная пауза Air (каждые 100 fetch, не на границе чанка). */
 export const AIR_SKU_SLICE_BLOCK_SIZE = airSkuProfile.block!.every;
@@ -41,24 +39,18 @@ export const AIR_SKU_SLICE_BLOCK_PAUSE_MAX_MS = airSkuProfile.block!.pauseMaxMs;
 export const AIR_SKU_SLICE_CHUNK_MAX_FETCHES = airSkuProfile.chunk!.maxFetches;
 
 /** Пауза между чанками air (45–60 мин). */
-export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS =
-  airSkuProfile.chunk!.interChunkPauseMinMs;
-export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS =
-  airSkuProfile.chunk!.interChunkPauseMaxMs;
+export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MIN_MS = airSkuProfile.chunk!.interChunkPauseMinMs;
+export const AIR_SKU_SLICE_INTER_CHUNK_PAUSE_MAX_MS = airSkuProfile.chunk!.interChunkPauseMaxMs;
 
 /**
  * Сколько подряд soft-invalid (`-1` / null) до abort air-run
  * (тихий WAF/бан без CF 520).
  */
-export const AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT =
-  airSkuProfile.consecutiveInvalidAbort!;
+export const AIR_SKU_SLICE_CONSECUTIVE_INVALID_ABORT = airSkuProfile.consecutiveInvalidAbort!;
 
 export type AirSkuSlicePauseKind = "none" | "cluster" | "block";
 
-export type SkuSliceAbortReason =
-  | "origin_blocked"
-  | "unsupported"
-  | "consecutive_invalid";
+export type SkuSliceAbortReason = "origin_blocked" | "unsupported" | "consecutive_invalid";
 
 export function isAirSkuSliceChunkKonk(konkName: string): boolean {
   return normalizeCompetitorName(konkName) === "air";
@@ -66,7 +58,7 @@ export function isAirSkuSliceChunkKonk(konkName: string): boolean {
 
 export function shouldEndAirSkuSliceChunk(
   fetchesInChunk: number,
-  maxFetches: number = AIR_SKU_SLICE_CHUNK_MAX_FETCHES
+  maxFetches: number = AIR_SKU_SLICE_CHUNK_MAX_FETCHES,
 ): boolean {
   return fetchesInChunk >= maxFetches;
 }
@@ -76,10 +68,7 @@ export function shouldEndAirSkuSliceChunk(
  * @param completedCount сколько уже обработано (1-based)
  * @deprecated предпочитай resolveAirSkuSlicePauseKind — учитывает block/chunk
  */
-export function shouldPauseAirSkuSliceCluster(
-  completedCount: number,
-  total: number
-): boolean {
+export function shouldPauseAirSkuSliceCluster(completedCount: number, total: number): boolean {
   if (completedCount <= 0 || completedCount >= total) {
     return false;
   }
@@ -93,7 +82,7 @@ export function shouldPauseAirSkuSliceCluster(
  */
 export function resolveAirSkuSlicePauseKind(
   fetchesInChunk: number,
-  isLast: boolean
+  isLast: boolean,
 ): AirSkuSlicePauseKind {
   if (isLast || fetchesInChunk <= 0) {
     return "none";
@@ -113,9 +102,7 @@ export function resolveAirSkuSlicePauseKind(
 /**
  * Jitter-диапазон для konk: override из карты или дефолт 500–1500.
  */
-export function resolveSkuSliceRequestJitterMs(
-  konkName: string
-): SkuSliceRequestJitterRange {
+export function resolveSkuSliceRequestJitterMs(konkName: string): SkuSliceRequestJitterRange {
   const profile = resolveScrapeProfile(konkName, "skuSlice");
   return {
     minMs: profile.requestJitter.minMs,

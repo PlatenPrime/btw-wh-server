@@ -1,14 +1,9 @@
 import type { ApiTaskKind } from "../constants/apiTaskConstants.js";
 
-export type ApiTaskProgressHandler = (
-  done: number,
-  total: number,
-  message?: string,
-) => void;
+export type ApiTaskProgressHandler = (done: number, total: number, message?: string) => void;
 
 export type ApiTaskRunResult =
-  | { ok: true; result: Record<string, unknown> }
-  | { ok: false; error: string };
+  { ok: true; result: Record<string, unknown> } | { ok: false; error: string };
 
 export type ApiTaskRunOptions = {
   onProgress?: ApiTaskProgressHandler;
@@ -25,9 +20,7 @@ export function failApiTaskRun(error: string): ApiTaskRunResult {
   return { ok: false, error };
 }
 
-export function okApiTaskRun(
-  result: Record<string, unknown>,
-): ApiTaskRunResult {
+export function okApiTaskRun(result: Record<string, unknown>): ApiTaskRunResult {
   return { ok: true, result };
 }
 
@@ -50,7 +43,6 @@ export function throwIfAborted(signal?: AbortSignal): void {
 
 export function isApiTaskAbortedError(error: unknown): boolean {
   return (
-    error instanceof ApiTaskAbortedError ||
-    (error instanceof Error && error.name === "AbortError")
+    error instanceof ApiTaskAbortedError || (error instanceof Error && error.name === "AbortError")
   );
 }

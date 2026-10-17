@@ -9,13 +9,10 @@ import { Skugr } from "../models/Skugr.js";
 import { Sku } from "../../skus/models/Sku.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -174,8 +171,7 @@ describe("Skugrs router integration", () => {
   });
 
   describe("POST /api/skugrs/client/air/id/:id/fill-page", () => {
-    const groupUrl =
-      "https://airballoons.com.ua/ua/index.php?route=product/category&path=1";
+    const groupUrl = "https://airballoons.com.ua/ua/index.php?route=product/category&path=1";
 
     it("400 on validation error", async () => {
       await request(app)
@@ -193,9 +189,7 @@ describe("Skugrs router integration", () => {
 
     it("404 when skugr missing", async () => {
       await request(app)
-        .post(
-          "/api/skugrs/client/air/id/507f1f77bcf86cd799439011/fill-page"
-        )
+        .post("/api/skugrs/client/air/id/507f1f77bcf86cd799439011/fill-page")
         .set(createAuthHeader())
         .send({
           sourceUrl: groupUrl,

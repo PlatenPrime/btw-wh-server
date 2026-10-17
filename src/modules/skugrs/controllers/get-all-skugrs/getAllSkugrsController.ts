@@ -8,16 +8,13 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить группы товаров конкурента с фильтрами и пагинацией
  * @route   GET /api/skugrs
  */
-export const getAllSkugrsController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const getAllSkugrsController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getAllSkugrsQuerySchema.safeParse(req.query);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid query parameters",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

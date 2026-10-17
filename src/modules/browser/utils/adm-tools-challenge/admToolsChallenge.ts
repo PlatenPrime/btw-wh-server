@@ -29,8 +29,7 @@ export function isAdmToolsChallengeHtml(html: string): boolean {
     return false;
   }
   const hasAck = html.includes("__ack");
-  const hasVendor =
-    html.includes("adm.tools") || html.includes("Захищена сторінка");
+  const hasVendor = html.includes("adm.tools") || html.includes("Захищена сторінка");
   return hasAck && hasVendor;
 }
 
@@ -38,9 +37,7 @@ export function isAdmToolsChallengeHtml(html: string): boolean {
  * Какой POST-протокол использует страница challenge.
  * JSON-вариант приоритетнее, если оба паттерна вдруг встретятся.
  */
-export function detectAdmToolsAckProtocol(
-  html: string
-): AdmToolsAckProtocol | undefined {
+export function detectAdmToolsAckProtocol(html: string): AdmToolsAckProtocol | undefined {
   if (html.match(ACK_JSON_STRINGIFY_RE)) {
     return "json-__ack";
   }
@@ -53,9 +50,7 @@ export function detectAdmToolsAckProtocol(
 /**
  * Достаёт арифметическое выражение из eval(...) challenge.
  */
-export function extractAdmToolsAckExpression(
-  html: string
-): string | undefined {
+export function extractAdmToolsAckExpression(html: string): string | undefined {
   const jsonMatch = html.match(ACK_JSON_STRINGIFY_RE);
   const jsonExpr = jsonMatch?.[1]?.trim();
   if (jsonExpr) {
@@ -73,9 +68,7 @@ export function extractAdmToolsAckExpression(
 export function evalAdmToolsAckExpression(expression: string): number {
   const trimmed = expression.trim();
   if (!trimmed || !SAFE_ARITH_RE.test(trimmed)) {
-    throw new Error(
-      `Unsafe or empty adm.tools ack expression: ${JSON.stringify(expression)}`
-    );
+    throw new Error(`Unsafe or empty adm.tools ack expression: ${JSON.stringify(expression)}`);
   }
   let result: unknown;
   try {
@@ -85,9 +78,7 @@ export function evalAdmToolsAckExpression(expression: string): number {
     throw new Error(`Failed to eval adm.tools ack expression: ${msg}`);
   }
   if (typeof result !== "number" || !Number.isFinite(result)) {
-    throw new Error(
-      `adm.tools ack did not evaluate to a finite number: ${String(result)}`
-    );
+    throw new Error(`adm.tools ack did not evaluate to a finite number: ${String(result)}`);
   }
   return result;
 }

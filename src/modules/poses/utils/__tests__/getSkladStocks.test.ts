@@ -176,9 +176,7 @@ describe("getSkladStocks", () => {
       exec: vi.fn().mockRejectedValue(dbError),
     });
 
-    await expect(getSkladStocks()).rejects.toThrow(
-      "Database connection failed"
-    );
+    await expect(getSkladStocks()).rejects.toThrow("Database connection failed");
   });
 
   it("должна объединять позиции с одинаковыми артикулами", async () => {

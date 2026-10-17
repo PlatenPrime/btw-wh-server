@@ -18,13 +18,9 @@ describe("promUaCartGraphqlQueries", () => {
   });
 
   it("keeps CartChangeProductQuantity clamp fields", () => {
-    expect(CART_CHANGE_PRODUCT_QUANTITY_QUERY).toContain(
-      "mutation CartChangeProductQuantity"
-    );
+    expect(CART_CHANGE_PRODUCT_QUANTITY_QUERY).toContain("mutation CartChangeProductQuantity");
     expect(CART_CHANGE_PRODUCT_QUANTITY_QUERY).toContain("recalculatedQuantity");
-    expect(CART_CHANGE_PRODUCT_QUANTITY_QUERY).toContain(
-      "RequestedQuantityRecalculatedType"
-    );
+    expect(CART_CHANGE_PRODUCT_QUANTITY_QUERY).toContain("RequestedQuantityRecalculatedType");
     expect(CART_CHANGE_PRODUCT_QUANTITY_QUERY).toContain("RequestedQuantitySet");
   });
 });

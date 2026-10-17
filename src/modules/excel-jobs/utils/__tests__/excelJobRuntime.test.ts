@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import { afterEach, describe, expect, it } from "vitest";
+import type { ExcelJobKind } from "../../constants/excelJobConstants.js";
 import { ExcelJob } from "../../models/ExcelJob.js";
 import { executeExcelJobInProcess } from "../executeExcelJobInProcess.js";
 import { ensureExcelJobsDir, getExcelJobFilePath } from "../excelJobFilePaths.js";
@@ -39,7 +40,7 @@ describe("excel job runtime utils", () => {
   it("executeExcelJobInProcess marks failed for unknown kind stored on doc", async () => {
     const job = await ExcelJob.create({
       userId: "u1",
-      kind: "nope",
+      kind: "nope" as unknown as ExcelJobKind,
       params: {},
       status: "queued",
       phase: "queued",

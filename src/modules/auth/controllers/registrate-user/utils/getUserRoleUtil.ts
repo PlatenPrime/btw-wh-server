@@ -11,9 +11,7 @@ import Role from "../../../models/Role.js";
  * const role = await getUserRoleUtil("ADMIN");
  * ```
  */
-export const getUserRoleUtil = async (
-  roleValue?: string
-): Promise<string> => {
+export const getUserRoleUtil = async (roleValue?: string): Promise<string> => {
   if (!roleValue) {
     return "USER";
   }
@@ -21,4 +19,3 @@ export const getUserRoleUtil = async (
   const role = await Role.findOne({ value: roleValue });
   return role?.value || "USER";
 };
-

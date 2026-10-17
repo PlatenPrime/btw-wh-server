@@ -1,9 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { AxiosInstance } from "axios";
-import {
-  PERFECT_CART_SHOW_URL,
-  resolvePerfectToken,
-} from "../resolvePerfectToken.js";
+import { PERFECT_CART_SHOW_URL, resolvePerfectToken } from "../resolvePerfectToken.js";
 
 vi.mock("../../perfect-product-page-extract/perfectProductPageExtract.js", () => ({
   extractToken: vi.fn((html: string) => {
@@ -17,11 +14,7 @@ describe("resolvePerfectToken", () => {
   it("returns token from product HTML without cart GET", async () => {
     const get = vi.fn();
     const client = { get } as unknown as AxiosInstance;
-    const result = await resolvePerfectToken(
-      client,
-      "token-from-html",
-      "a=1"
-    );
+    const result = await resolvePerfectToken(client, "token-from-html", "a=1");
     expect(result).toEqual({ token: "html-token", cookieHeader: "a=1" });
     expect(get).not.toHaveBeenCalled();
   });
@@ -40,7 +33,7 @@ describe("resolvePerfectToken", () => {
       PERFECT_CART_SHOW_URL,
       expect.objectContaining({
         headers: { Cookie: "a=1" },
-      })
+      }),
     );
   });
 });

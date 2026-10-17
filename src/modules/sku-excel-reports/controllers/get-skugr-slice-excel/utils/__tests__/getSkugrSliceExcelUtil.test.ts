@@ -46,7 +46,9 @@ describe("getSkugrSliceExcelUtil", () => {
       isSliced: true,
       skus: [sku._id],
     });
-    await seedSkuSliceMonthDay("slice-gr", new Date("2026-06-01T00:00:00.000Z"), { "slice-gr-1": { stock: 3, price: 7 } });
+    await seedSkuSliceMonthDay("slice-gr", new Date("2026-06-01T00:00:00.000Z"), {
+      "slice-gr-1": { stock: 3, price: 7 },
+    });
 
     const result = await getSkugrSliceExcelUtil({
       skugrId: skugr._id.toString(),

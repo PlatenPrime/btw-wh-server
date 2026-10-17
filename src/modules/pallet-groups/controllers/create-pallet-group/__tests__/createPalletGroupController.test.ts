@@ -72,8 +72,6 @@ describe("createPalletGroupController", () => {
     await createPalletGroupController(req, res);
 
     expect(responseStatus.code).toBe(409);
-    expect(responseJson.message).toBe(
-      "Pallet group with this title already exists",
-    );
+    expect(responseJson.message).toBe("Pallet group with this title already exists");
   });
 });

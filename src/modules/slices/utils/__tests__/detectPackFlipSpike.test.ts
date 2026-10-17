@@ -134,18 +134,10 @@ describe("detectPriceOnlyPackFlip", () => {
 
 describe("rescaleToNeighborScale", () => {
   it("restores anomaly toward neighbor", () => {
-    expect(rescaleToNeighborScale(pt(100, 100), pt(10000, 1))).toEqual(
-      pt(100, 100)
-    );
-    expect(rescaleToNeighborScale(pt(10000, 1), pt(100, 100))).toEqual(
-      pt(10000, 1)
-    );
-    expect(rescaleToNeighborScale(pt(500, 200), pt(1000, 100))).toEqual(
-      pt(500, 200)
-    );
-    expect(rescaleToNeighborScale(pt(1, 48.5), pt(100, 0.48))).toEqual(
-      pt(1, 48)
-    );
+    expect(rescaleToNeighborScale(pt(100, 100), pt(10000, 1))).toEqual(pt(100, 100));
+    expect(rescaleToNeighborScale(pt(10000, 1), pt(100, 100))).toEqual(pt(10000, 1));
+    expect(rescaleToNeighborScale(pt(500, 200), pt(1000, 100))).toEqual(pt(500, 200));
+    expect(rescaleToNeighborScale(pt(1, 48.5), pt(100, 0.48))).toEqual(pt(1, 48));
   });
 });
 
@@ -159,7 +151,7 @@ describe("areSamePriceScale", () => {
 describe("decidePackFlipPatchesForSeries", () => {
   it("patches the middle day of a round-trip", () => {
     const decisions = decidePackFlipPatchesForSeries(
-      series([pt(100, 100), pt(10000, 1), pt(100, 100)])
+      series([pt(100, 100), pt(10000, 1), pt(100, 100)]),
     );
     expect(decisions).toHaveLength(1);
     expect(decisions[0]).toMatchObject({
@@ -174,7 +166,7 @@ describe("decidePackFlipPatchesForSeries", () => {
 
   it("patches the middle day when price rounding shifts the factor", () => {
     const decisions = decidePackFlipPatchesForSeries(
-      series([pt(1, 48.5), pt(100, 0.48), pt(1, 48.5)])
+      series([pt(1, 48.5), pt(100, 0.48), pt(1, 48.5)]),
     );
     expect(decisions).toHaveLength(1);
     expect(decisions[0]).toMatchObject({
@@ -190,7 +182,7 @@ describe("decidePackFlipPatchesForSeries", () => {
 
   it("patches today when yesterday is stable vs d-2", () => {
     const decisions = decidePackFlipPatchesForSeries(
-      series([pt(100, 100), pt(100, 100), pt(10000, 1)])
+      series([pt(100, 100), pt(100, 100), pt(10000, 1)]),
     );
     expect(decisions).toEqual([
       expect.objectContaining({
@@ -204,14 +196,14 @@ describe("decidePackFlipPatchesForSeries", () => {
 
   it("does not rescale today's return to normal", () => {
     const decisions = decidePackFlipPatchesForSeries(
-      series([pt(100, 100), pt(10000, 1), pt(100, 100)])
+      series([pt(100, 100), pt(10000, 1), pt(100, 100)]),
     );
     expect(decisions.every((d) => d.index !== 2)).toBe(true);
   });
 
   it("patches a leading spike when the rest of the window is stable", () => {
     const decisions = decidePackFlipPatchesForSeries(
-      series([pt(10000, 1), pt(100, 100), pt(100, 100)])
+      series([pt(10000, 1), pt(100, 100), pt(100, 100)]),
     );
     expect(decisions).toEqual([
       expect.objectContaining({
@@ -225,21 +217,15 @@ describe("decidePackFlipPatchesForSeries", () => {
 
   it("does not flag real sales or restock", () => {
     expect(
-      decidePackFlipPatchesForSeries(
-        series([pt(100, 100), pt(90, 100), pt(80, 100)])
-      )
+      decidePackFlipPatchesForSeries(series([pt(100, 100), pt(90, 100), pt(80, 100)])),
     ).toEqual([]);
     expect(
-      decidePackFlipPatchesForSeries(
-        series([pt(100, 100), pt(200, 100), pt(200, 100)])
-      )
+      decidePackFlipPatchesForSeries(series([pt(100, 100), pt(200, 100), pt(200, 100)])),
     ).toEqual([]);
   });
 
   it("reports price-only without a patch", () => {
-    const decisions = decidePackFlipPatchesForSeries(
-      series([pt(100, 100), pt(95, 1)])
-    );
+    const decisions = decidePackFlipPatchesForSeries(series([pt(100, 100), pt(95, 1)]));
     expect(decisions).toEqual([
       expect.objectContaining({
         kind: "price-only",
@@ -253,7 +239,7 @@ describe("decidePackFlipPatchesForSeries", () => {
 
   it("marks ambiguous when both jumps stay inverse to d-2", () => {
     const decisions = decidePackFlipPatchesForSeries(
-      series([pt(100, 100), pt(10000, 1), pt(1000000, 0.01)])
+      series([pt(100, 100), pt(10000, 1), pt(1000000, 0.01)]),
     );
     expect(decisions.some((d) => d.kind === "ambiguous")).toBe(true);
     expect(decisions.some((d) => d.kind === "inverse")).toBe(false);

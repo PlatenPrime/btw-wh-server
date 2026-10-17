@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import Role from "../../../../models/Role.js";
 import { getUserRoleUtil } from "../getUserRoleUtil.js";
@@ -21,7 +20,7 @@ describe("getUserRoleUtil", () => {
   });
 
   it("возвращает найденную роль если она существует", async () => {
-    const testRole = await Role.create({ value: "ADMIN", name: "Admin" });
+    await Role.create({ value: "ADMIN", name: "Admin" });
 
     const role = await getUserRoleUtil("ADMIN");
 
@@ -36,4 +35,3 @@ describe("getUserRoleUtil", () => {
     expect(role).toBe("EDITOR");
   });
 });
-

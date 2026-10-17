@@ -3,9 +3,7 @@ import { parseHttpProxyUrl } from "../parseHttpProxyUrl.js";
 
 describe("parseHttpProxyUrl", () => {
   it("парсит http proxy с auth и портом", () => {
-    expect(
-      parseHttpProxyUrl("http://user:secret@77.47.252.164:50100")
-    ).toEqual({
+    expect(parseHttpProxyUrl("http://user:secret@77.47.252.164:50100")).toEqual({
       protocol: "http",
       host: "77.47.252.164",
       port: 50100,

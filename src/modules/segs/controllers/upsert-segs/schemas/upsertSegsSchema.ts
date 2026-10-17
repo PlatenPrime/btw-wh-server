@@ -1,11 +1,9 @@
 import mongoose from "mongoose";
 import { z } from "zod";
 
-const objectIdString = z
-  .string()
-  .refine((value) => mongoose.Types.ObjectId.isValid(value), {
-    message: "Invalid ObjectId format",
-  });
+const objectIdString = z.string().refine((value) => mongoose.Types.ObjectId.isValid(value), {
+  message: "Invalid ObjectId format",
+});
 
 export const upsertSegsSchema = z
   .array(
@@ -17,10 +15,8 @@ export const upsertSegsSchema = z
         .array(objectIdString)
         .min(1, "At least one zone is required")
         .max(1000, "Zones array is too large"),
-    })
+    }),
   )
   .min(1, "At least one segment entry is required");
 
 export type UpsertSegsInput = z.infer<typeof upsertSegsSchema>;
-
-

@@ -77,9 +77,9 @@ describe("createPalletGroupUtil", () => {
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    await expect(
-      createPalletGroupUtil({ title: "Existing", session }),
-    ).rejects.toThrow("Pallet group with this title already exists");
+    await expect(createPalletGroupUtil({ title: "Existing", session })).rejects.toThrow(
+      "Pallet group with this title already exists",
+    );
 
     await session.abortTransaction();
     session.endSession();

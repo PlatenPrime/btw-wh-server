@@ -1,14 +1,26 @@
-import { homedir } from "node:os";
+import { readFileSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
-import { MongoMemoryReplSet } from "mongodb-memory-server";
 import mongoose from "mongoose";
-import { ensureMongodBinary } from "./ensureMongodBinary.js";
+import { DEFAULT_MONGOD_VERSION } from "./ensureMongodBinary.js";
 import { testMongoGlobalState } from "./testMongoState.js";
 
 const MONGO_STARTUP_TIMEOUT_MS = 120_000;
 const DEFAULT_MONGOD_DOWNLOAD_DIR = join(homedir(), ".cache", "mongodb-binaries");
 
-function getMongodDownloadDir(): string {
+export function createTestMongoReplSetOptions(downloadDir: string) {
+  return {
+    replSet: { count: 1 },
+    instanceOpts: [{ launchTimeout: MONGO_STARTUP_TIMEOUT_MS }],
+    binary: { downloadDir, version: DEFAULT_MONGOD_VERSION },
+  };
+}
+
+export function getTestMongoUriPath(): string {
+  return join(tmpdir(), "btw-wh-test-mongo.uri");
+}
+
+export function getMongodDownloadDir(): string {
   return process.env.MONGOMS_DOWNLOAD_DIR ?? DEFAULT_MONGOD_DOWNLOAD_DIR;
 }
 
@@ -18,24 +30,14 @@ export function connectTestMongo(): Promise<void> {
   }
 
   if (!testMongoGlobalState.mongoConnectPromise) {
-    testMongoGlobalState.mongoConnectPromise = (async () => {
-      if (!testMongoGlobalState.mongoMemoryReplSet) {
-        const downloadDir = getMongodDownloadDir();
-        await ensureMongodBinary(downloadDir);
-
-        testMongoGlobalState.mongoMemoryReplSet =
-          await MongoMemoryReplSet.create({
-            replSet: { count: 1 },
-            instanceOpts: [{ launchTimeout: MONGO_STARTUP_TIMEOUT_MS }],
-            binary: { downloadDir },
-          });
-      }
-
-      await mongoose.connect(testMongoGlobalState.mongoMemoryReplSet.getUri());
-    })().catch((error) => {
-      testMongoGlobalState.mongoConnectPromise = undefined;
-      throw error;
-    });
+    const uri = readFileSync(getTestMongoUriPath(), "utf8");
+    testMongoGlobalState.mongoConnectPromise = mongoose.connect(uri).then(
+      () => undefined,
+      (error: unknown) => {
+        testMongoGlobalState.mongoConnectPromise = undefined;
+        throw error;
+      },
+    );
   }
 
   return testMongoGlobalState.mongoConnectPromise;

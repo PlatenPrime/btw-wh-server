@@ -11,14 +11,9 @@ import {
 import { getSliceItem } from "../../../../sku-reporting/utils/skugrReporting.js";
 import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForSkus.js";
 import type { GetSkuSalesExcelInput } from "../schemas/getSkuSalesExcelSchema.js";
-import {
-  buildSkuSalesExcelForSkus,
-  type SkuSalesExcelSkuRow,
-} from "./buildSkuSalesExcel.js";
+import { buildSkuSalesExcelForSkus, type SkuSalesExcelSkuRow } from "./buildSkuSalesExcel.js";
 
-export type GetSkuSalesExcelResult =
-  | { ok: true; buffer: Buffer; fileName: string }
-  | { ok: false };
+export type GetSkuSalesExcelResult = { ok: true; buffer: Buffer; fileName: string } | { ok: false };
 
 export async function getSkuSalesExcelUtil(
   input: GetSkuSalesExcelInput,

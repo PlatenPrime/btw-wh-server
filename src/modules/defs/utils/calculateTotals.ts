@@ -16,9 +16,7 @@ export interface IDeficitTotals {
  * @param result - Результат расчета дефицитов
  * @returns Объект с итоговыми значениями
  */
-export function calculateDeficitTotals(
-  result: IDeficitCalculationResult
-): IDeficitTotals {
+export function calculateDeficitTotals(result: IDeficitCalculationResult): IDeficitTotals {
   let total = 0;
   let totalCriticalDefs = 0;
   let totalLimitDefs = 0;

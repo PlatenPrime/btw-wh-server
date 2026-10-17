@@ -20,4 +20,3 @@ describe("getUpdateUserResponseUtil", () => {
     expect(typeof response.token).toBe("string");
   });
 });
-

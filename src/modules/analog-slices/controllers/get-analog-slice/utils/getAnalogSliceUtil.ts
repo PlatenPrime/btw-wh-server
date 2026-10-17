@@ -6,7 +6,7 @@ import type { GetAnalogSliceQuery } from "../schemas/getAnalogSliceQuerySchema.j
  * Возвращает документ среза по konkName и дате (начало дня UTC).
  */
 export async function getAnalogSliceUtil(
-  input: GetAnalogSliceQuery
+  input: GetAnalogSliceQuery,
 ): Promise<{ konkName: string; date: Date; data: Record<string, IAnalogSliceDataItem> } | null> {
   const doc = await AnalogSlice.findOne({
     konkName: input.konkName,

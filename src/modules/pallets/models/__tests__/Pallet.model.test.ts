@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import "../../../../test/setup";
+import "../../../../test/setup.js";
 import { Pallet } from "../Pallet.js";
 
 const createTestRow = (overrides = {}) => ({
@@ -36,7 +36,7 @@ describe("Pallet Model - Schema Validation Only", () => {
       const row = createTestRow();
       const pallet = await Pallet.create({
         title: "Юникод-测试-!@#",
-        row,
+        row: row._id,
         rowData: { _id: row._id, title: row.title },
       });
       expect(pallet.title).toBe("Юникод-测试-!@#");
@@ -45,7 +45,7 @@ describe("Pallet Model - Schema Validation Only", () => {
       const row = createTestRow();
       const pallet = await Pallet.create({
         title: "EmptyPoses",
-        row,
+        row: row._id,
         rowData: { _id: row._id, title: row.title },
         poses: [],
       });
@@ -56,7 +56,7 @@ describe("Pallet Model - Schema Validation Only", () => {
       const row = createTestRow();
       const pallet = await Pallet.create({
         title: "NoSector",
-        row,
+        row: row._id,
         rowData: { _id: row._id, title: row.title },
       });
       expect(pallet.sector).toBe(0);
@@ -65,7 +65,7 @@ describe("Pallet Model - Schema Validation Only", () => {
       const row = createTestRow();
       const pallet = await Pallet.create({
         title: "DefaultIsDef",
-        row,
+        row: row._id,
         rowData: { _id: row._id, title: row.title },
       });
       expect(pallet.isDef).toBe(false);
@@ -74,7 +74,7 @@ describe("Pallet Model - Schema Validation Only", () => {
       const row = createTestRow();
       const pallet = await Pallet.create({
         title: "CustomIsDef",
-        row,
+        row: row._id,
         rowData: { _id: row._id, title: row.title },
         isDef: true,
       });

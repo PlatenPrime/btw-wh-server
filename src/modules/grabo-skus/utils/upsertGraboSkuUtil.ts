@@ -5,7 +5,7 @@ export type GraboSkuUpsertFields = GraboSkuData & { url: string };
 
 export async function upsertGraboSkuUtil(
   fields: GraboSkuUpsertFields,
-  now: Date = new Date()
+  now: Date = new Date(),
 ): Promise<"created" | "updated"> {
   const existing = await GraboSku.exists({ productId: fields.productId });
 
@@ -29,7 +29,7 @@ export async function upsertGraboSkuUtil(
         lastSeenAt: now,
       },
     },
-    { upsert: true }
+    { upsert: true },
   );
 
   return existing ? "updated" : "created";

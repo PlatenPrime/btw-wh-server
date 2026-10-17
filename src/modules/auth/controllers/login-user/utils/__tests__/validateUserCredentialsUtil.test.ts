@@ -1,7 +1,5 @@
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import { createTestUser } from "../../../../../../test/setup.js";
-import User from "../../../../models/User.js";
 import { hashPasswordUtil } from "../../../../utils/hashPasswordUtil.js";
 import { validateUserCredentialsUtil } from "../validateUserCredentialsUtil.js";
 
@@ -55,4 +53,3 @@ describe("validateUserCredentialsUtil", () => {
     expect(result.user).toBeNull();
   });
 });
-

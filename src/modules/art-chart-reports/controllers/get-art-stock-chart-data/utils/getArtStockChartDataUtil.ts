@@ -14,9 +14,7 @@ export type ArtStockChartData = {
   };
 };
 
-export type GetArtStockChartDataResult =
-  | { ok: true; data: ArtStockChartData }
-  | { ok: false };
+export type GetArtStockChartDataResult = { ok: true; data: ArtStockChartData } | { ok: false };
 
 export async function getArtStockChartDataUtil(
   input: GetArtStockChartDataInput,
@@ -40,9 +38,7 @@ export async function getArtStockChartDataUtil(
   const lastDayQuantity = days[dayCount - 1]!.quantity;
   const diffQuantity = lastDayQuantity - firstDayQuantity;
   const diffQuantityPct =
-    firstDayQuantity === 0
-      ? null
-      : Math.round((diffQuantity / firstDayQuantity) * 100 * 100) / 100;
+    firstDayQuantity === 0 ? null : Math.round((diffQuantity / firstDayQuantity) * 100 * 100) / 100;
 
   return {
     ok: true,

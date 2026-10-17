@@ -7,17 +7,14 @@ import { logBrowserError } from "../../utils/browserRequest.js";
  * @desc    Получить остатки товара с sharte.net по URL страницы товара
  * @route   GET /api/browser/sharte/stock?url=...
  */
-export const getSharteStockController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getSharteStockController = async (req: Request, res: Response): Promise<void> => {
   try {
     const url = typeof req.query?.url === "string" ? req.query.url : undefined;
     const parseResult = getSharteStockSchema.safeParse({ url });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
 import Role from "../../../../models/Role.js";
 import { getAllRolesUtil } from "../getAllRolesUtil.js";
@@ -25,4 +24,3 @@ describe("getAllRolesUtil", () => {
     expect(roles.some((r) => r.value === "ADMIN")).toBe(true);
   });
 });
-

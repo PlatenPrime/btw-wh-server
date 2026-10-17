@@ -42,9 +42,7 @@ describe("formatArtsForExcelExtendedUtil", () => {
       Ліміт: 100,
       Маркер: "MARK",
       ABC: "A",
-      "Дата зрізу": new Date(
-        "2024-01-15T10:00:00Z"
-      ).toLocaleDateString("uk-UA"),
+      "Дата зрізу": new Date("2024-01-15T10:00:00Z").toLocaleDateString("uk-UA"),
     });
   });
 
@@ -164,9 +162,7 @@ describe("formatArtsForExcelExtendedUtil", () => {
 
     const result = formatArtsForExcelExtendedUtil(arts, posesQuantMap);
 
-    expect(result[0]["Дата зрізу"]).toBe(
-      testDate.toLocaleDateString("uk-UA")
-    );
+    expect(result[0]["Дата зрізу"]).toBe(testDate.toLocaleDateString("uk-UA"));
   });
 
   it("возвращает пустой массив для пустого входного массива", () => {

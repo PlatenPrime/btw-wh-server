@@ -7,9 +7,7 @@ import {
 } from "../buildAnalogBtradeComparisonExcel.js";
 import type { AnalogBtradeCompareItem } from "../getAnalogBtradeComparisonRangeUtil.js";
 
-async function readSheetToMatrix(
-  buffer: Buffer
-): Promise<unknown[][]> {
+async function readSheetToMatrix(buffer: Buffer): Promise<unknown[][]> {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
   const worksheet = workbook.getWorksheet("Порівняння");
@@ -55,16 +53,11 @@ describe("buildAnalogBtradeComparisonExcel", () => {
       dateTo: new Date("2026-03-02T00:00:00.000Z"),
     };
 
-    const { buffer, fileName } = await buildAnalogBtradeComparisonExcel(
-      items,
-      options
-    );
+    const { buffer, fileName } = await buildAnalogBtradeComparisonExcel(items, options);
 
     expect(buffer).toBeInstanceOf(Buffer);
     expect(buffer.length).toBeGreaterThan(0);
-    expect(fileName).toContain(
-      "analog_btrade_comparison_1102-0259_2026-03-01_2026-03-02"
-    );
+    expect(fileName).toContain("analog_btrade_comparison_1102-0259_2026-03-01_2026-03-02");
 
     const rows = await readSheetToMatrix(buffer);
     expect(rows.length).toBeGreaterThanOrEqual(5);
@@ -76,12 +69,8 @@ describe("buildAnalogBtradeComparisonExcel", () => {
     expect(headerRow[3]).toBe("Виробник");
     expect(headerRow[4]).toBe("ABC");
     expect(headerRow[5]).toBe("");
-    expect(headerRow[6]).toBe(
-      formatExcelDateHeaderUk(new Date("2026-03-01T00:00:00.000Z"))
-    );
-    expect(headerRow[7]).toBe(
-      formatExcelDateHeaderUk(new Date("2026-03-02T00:00:00.000Z"))
-    );
+    expect(headerRow[6]).toBe(formatExcelDateHeaderUk(new Date("2026-03-01T00:00:00.000Z")));
+    expect(headerRow[7]).toBe(formatExcelDateHeaderUk(new Date("2026-03-02T00:00:00.000Z")));
     expect(headerRow[8]).toBe("Різниця");
     expect(headerRow[9]).toBe("Різниця, %");
 
@@ -281,10 +270,7 @@ describe("buildAnalogBtradeComparisonExcel", () => {
       dateTo: new Date("2026-03-02T00:00:00.000Z"),
     };
 
-    const { buffer } = await buildAnalogBtradeComparisonExcel(
-      items,
-      options
-    );
+    const { buffer } = await buildAnalogBtradeComparisonExcel(items, options);
 
     expect(buffer).toBeInstanceOf(Buffer);
     expect(buffer.length).toBeGreaterThan(0);
@@ -297,4 +283,3 @@ describe("buildAnalogBtradeComparisonExcel", () => {
     expect(headerRow[7]).toBe("Різниця, %");
   });
 });
-

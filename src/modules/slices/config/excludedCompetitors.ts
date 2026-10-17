@@ -16,9 +16,7 @@ export function normalizeCompetitorName(value: string): string {
 }
 
 export function getExcludedCompetitorSet(sliceType: SliceType): Set<string> {
-  return new Set(
-    excludedCompetitors[sliceType].map((name) => normalizeCompetitorName(name))
-  );
+  return new Set(excludedCompetitors[sliceType].map((name) => normalizeCompetitorName(name)));
 }
 
 /**
@@ -31,12 +29,7 @@ export const compensationExcludedCompetitors: ExcludedCompetitorsConfig = {
 };
 
 /** Union cron-исключений и compensation-only списка. */
-export function getCompensationExcludedCompetitorSet(
-  sliceType: SliceType
-): Set<string> {
-  const names = [
-    ...excludedCompetitors[sliceType],
-    ...compensationExcludedCompetitors[sliceType],
-  ];
+export function getCompensationExcludedCompetitorSet(sliceType: SliceType): Set<string> {
+  const names = [...excludedCompetitors[sliceType], ...compensationExcludedCompetitors[sliceType]];
   return new Set(names.map((name) => normalizeCompetitorName(name)));
 }

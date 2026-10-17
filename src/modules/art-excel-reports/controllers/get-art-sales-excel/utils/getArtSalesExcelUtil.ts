@@ -2,9 +2,7 @@ import { buildArtSalesExcel } from "../../../../art-reporting/utils/buildArtSale
 import { loadArtBtradeSliceSeries } from "../../../../art-reporting/utils/loadArtBtradeSliceSeries.js";
 import type { GetArtStockExcelInput } from "../../get-art-stock-excel/schemas/getArtStockExcelSchema.js";
 
-export type GetArtSalesExcelResult =
-  | { ok: true; buffer: Buffer; fileName: string }
-  | { ok: false };
+export type GetArtSalesExcelResult = { ok: true; buffer: Buffer; fileName: string } | { ok: false };
 
 export async function getArtSalesExcelUtil(
   input: GetArtStockExcelInput,

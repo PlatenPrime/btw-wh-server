@@ -12,25 +12,10 @@ import {
 
 const router = Router();
 
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(createExcelJobController),
-);
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(listExcelJobsController),
-);
+router.post("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(createExcelJobController));
+router.get("/", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(listExcelJobsController));
 router.get("/:id/file", asyncHandler(downloadExcelJobFileController));
-router.get(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.ADMIN]),
-  asyncHandler(getExcelJobController),
-);
+router.get("/:id", checkAuth, checkRoles([RoleType.ADMIN]), asyncHandler(getExcelJobController));
 router.delete(
   "/:id",
   checkAuth,

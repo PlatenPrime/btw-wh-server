@@ -21,7 +21,7 @@ describe("postSkuSlicePostCorrectionsSchema", () => {
       postSkuSlicePostCorrectionsSchema.safeParse({
         dateFrom: "2026-04-05",
         dateTo: "2026-04-01",
-      }).success
+      }).success,
     ).toBe(false);
 
     const from = "2026-04-01";
@@ -31,7 +31,7 @@ describe("postSkuSlicePostCorrectionsSchema", () => {
       postSkuSlicePostCorrectionsSchema.safeParse({
         dateFrom: from,
         dateTo: to,
-      }).success
+      }).success,
     ).toBe(false);
   });
 });

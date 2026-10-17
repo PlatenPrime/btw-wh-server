@@ -130,14 +130,9 @@ describe("getSkuSliceUtil", () => {
 
     expect(result).not.toBeNull();
     expect(result!.pagination.total).toBe(2);
-    expect(result!.items.map((i) => i.productId).sort()).toEqual([
-      "air-bad-full",
-      "air-bad-price",
-    ]);
+    expect(result!.items.map((i) => i.productId).sort()).toEqual(["air-bad-full", "air-bad-price"]);
     for (const row of result!.items) {
-      expect(
-        shouldRefetchSkuSliceItem({ stock: row.stock, price: row.price }),
-      ).toBe(true);
+      expect(shouldRefetchSkuSliceItem({ stock: row.stock, price: row.price })).toBe(true);
     }
     expect(shouldRefetchSkuSliceItem({ stock: 10, price: 100 })).toBe(false);
   });
@@ -177,10 +172,7 @@ describe("getSkuSliceUtil", () => {
       isInvalid: true,
     });
     expect(page1!.pagination.total).toBe(3);
-    expect(page1!.items.map((i) => i.productId)).toEqual([
-      "air-bad-a",
-      "air-bad-b",
-    ]);
+    expect(page1!.items.map((i) => i.productId)).toEqual(["air-bad-a", "air-bad-b"]);
 
     const page2 = await getSkuSliceUtil({
       konkName: "air",

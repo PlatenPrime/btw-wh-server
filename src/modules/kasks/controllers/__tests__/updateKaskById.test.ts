@@ -102,7 +102,7 @@ describe("updateKaskById", () => {
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(user._id));
     expect(events[0].description).toBe(
-      `Оновлено касовий запит на артикул 7777-7777 (id: ${kask._id})`
+      `Оновлено касовий запит на артикул 7777-7777 (id: ${kask._id})`,
     );
   });
 });

@@ -23,7 +23,7 @@ const varGroupSchema = new Schema<IVarGroup>(
     id: { type: String, required: true },
     title: { type: String, required: true },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const variantSchema = new Schema<IVariant>(
@@ -35,7 +35,7 @@ const variantSchema = new Schema<IVariant>(
     varGroup: { type: varGroupSchema, required: false },
     imageUrl: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 export const Variant: Model<IVariant> = getOrCreateModel<IVariant>(
@@ -43,4 +43,3 @@ export const Variant: Model<IVariant> = getOrCreateModel<IVariant>(
   variantSchema,
   "variants",
 );
-

@@ -210,4 +210,3 @@ describe("getPosesQuantByArtikulUtil", () => {
     expect(result.get("ART-002")).toBeUndefined();
   });
 });
-

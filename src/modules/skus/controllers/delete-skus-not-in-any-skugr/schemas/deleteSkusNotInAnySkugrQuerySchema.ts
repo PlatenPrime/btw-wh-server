@@ -2,9 +2,9 @@ import { z } from "zod";
 import { getAllSkusQuerySchema } from "../../get-all-skus/schemas/getAllSkusQuerySchema.js";
 
 /** Query для DELETE без пагинации; фильтр «сироты» задаётся в утилите принудительно. */
-export const deleteSkusNotInAnySkugrQuerySchema =
-  getAllSkusQuerySchema.omit({ page: true, limit: true });
+export const deleteSkusNotInAnySkugrQuerySchema = getAllSkusQuerySchema.omit({
+  page: true,
+  limit: true,
+});
 
-export type DeleteSkusNotInAnySkugrQuery = z.infer<
-  typeof deleteSkusNotInAnySkugrQuerySchema
->;
+export type DeleteSkusNotInAnySkugrQuery = z.infer<typeof deleteSkusNotInAnySkugrQuerySchema>;

@@ -117,4 +117,3 @@ describe("updateArtLimitController", () => {
     expect(events[0].description).toContain("ART-001");
   });
 });
-

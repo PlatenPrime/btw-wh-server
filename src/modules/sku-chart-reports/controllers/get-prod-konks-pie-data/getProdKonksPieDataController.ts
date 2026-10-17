@@ -11,10 +11,7 @@ function firstQuery(q: Request["query"], key: string): string | undefined {
  * @desc    Pie по производителю: продажи всех конкурентов + Btrade в шт/грн; итог в `all`
  * @route   GET /api/sku-chart-reports/prod/konks-pie?prod=&dateFrom=&dateTo=&excludeKonks=
  */
-export const getProdKonksPieDataController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const getProdKonksPieDataController = async (req: Request, res: Response): Promise<void> => {
   const q = req.query;
   const parseResult = getProdKonksPieDataSchema.safeParse({
     prod: firstQuery(q, "prod"),
@@ -26,7 +23,7 @@ export const getProdKonksPieDataController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

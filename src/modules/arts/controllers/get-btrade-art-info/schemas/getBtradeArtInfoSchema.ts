@@ -5,4 +5,3 @@ export const getBtradeArtInfoSchema = z.object({
 });
 
 export type GetBtradeArtInfoInput = z.infer<typeof getBtradeArtInfoSchema>;
-

@@ -25,10 +25,7 @@ describe("calculateWarehouseDataUtil", () => {
   });
 
   it("обрабатывает нулевые значения", () => {
-    const poses = [
-      { quant: 0, boxes: 0 } as any,
-      { quant: 10, boxes: 2 } as any,
-    ];
+    const poses = [{ quant: 0, boxes: 0 } as any, { quant: 10, boxes: 2 } as any];
 
     const result = calculateWarehouseDataUtil(poses);
 
@@ -36,4 +33,3 @@ describe("calculateWarehouseDataUtil", () => {
     expect(result.boxes).toBe(2);
   });
 });
-

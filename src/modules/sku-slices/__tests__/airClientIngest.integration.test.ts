@@ -13,13 +13,10 @@ import { SkuSliceMonth } from "../models/SkuSliceMonth.js";
 import { getDayPoint } from "../utils/skuSliceMonthStore.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -91,18 +88,16 @@ describe("Sku-slices air client ingestion integration", () => {
         skus: [unsliced._id],
       });
       await seedSkuSliceMonthDay("air", toSliceDate(new Date()), {
-          "air-valid": { stock: 5, price: 1.2 },
-          "air-pending": { stock: -1, price: -1 },
-        });
+        "air-valid": { stock: 5, price: 1.2 },
+        "air-pending": { stock: -1, price: -1 },
+      });
 
       const response = await request(app)
         .get("/api/sku-slices/client/air/pending")
         .set(createAuthHeader())
         .expect(200);
 
-      expect(response.body.data.date).toBe(
-        toSliceDate(new Date()).toISOString()
-      );
+      expect(response.body.data.date).toBe(toSliceDate(new Date()).toISOString());
       expect(response.body.data.rotation).toBeNull();
       expect(response.body.data.items).toEqual([
         {
@@ -239,9 +234,10 @@ describe("Sku-slices air client ingestion integration", () => {
         price: 2.1,
       });
 
-      expect(
-        await getDayPoint("air", "air-save", toSliceDate(new Date())),
-      ).toEqual({ stock: 10, price: 2.1 });
+      expect(await getDayPoint("air", "air-save", toSliceDate(new Date()))).toEqual({
+        stock: 10,
+        price: 2.1,
+      });
     });
   });
 });

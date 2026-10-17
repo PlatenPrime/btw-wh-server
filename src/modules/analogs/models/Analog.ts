@@ -23,15 +23,11 @@ const analogSchema = new Schema<IAnalog>(
     nameukr: { type: String },
     url: { type: String, required: true, unique: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**
  * Analog Mongoose model
  * @see IAnalog
  */
-export const Analog: Model<IAnalog> = getOrCreateModel<IAnalog>(
-  "Analog",
-  analogSchema,
-  "analogs",
-);
+export const Analog: Model<IAnalog> = getOrCreateModel<IAnalog>("Analog", analogSchema, "analogs");

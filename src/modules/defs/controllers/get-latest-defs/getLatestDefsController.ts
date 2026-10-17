@@ -9,16 +9,13 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @route   GET /api/defs/latest
  * @access  Private
  */
-export const getLatestDefsController = async (
-  req: Request,
-  res: Response
-) => {
+export const getLatestDefsController = async (req: Request, res: Response) => {
   try {
     const parseResult = getLatestDefsSchema.safeParse({});
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

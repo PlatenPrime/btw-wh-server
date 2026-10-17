@@ -41,8 +41,7 @@ export async function getYumiGroupPagesProducts(
     startUrl: groupUrl,
     maxPages,
     parseProductsFromPage,
-    getNextPageUrl: ($, url) =>
-      getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
+    getNextPageUrl: ($, url) => getNextPageUrlFromLinkRelNext($, url, resolveHrefAgainstBase),
     delayBeforeNextMs: getGroupPagesThrottleDelayMs,
   });
 }

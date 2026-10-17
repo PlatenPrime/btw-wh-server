@@ -12,9 +12,7 @@ interface AnalyticsData {
 export function parseBalunHtmlPrice(html: string): number | undefined {
   const $ = cheerio.load(html);
   const analyticsAttr = $("[data-analytics]").first().attr("data-analytics");
-  const analyticsData = parseJsonHtmlAttribute(analyticsAttr) as
-    | AnalyticsData
-    | undefined;
+  const analyticsData = parseJsonHtmlAttribute(analyticsAttr) as AnalyticsData | undefined;
   const priceOriginal = analyticsData?.clerk?.price_original;
   if (priceOriginal === undefined || priceOriginal === "") {
     return undefined;

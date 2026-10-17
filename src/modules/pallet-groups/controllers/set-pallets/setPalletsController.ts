@@ -10,9 +10,7 @@ export const setPalletsController = async (req: Request, res: Response) => {
   const parseResult = setPalletsSchema.safeParse(req.body);
 
   if (!parseResult.success) {
-    return res
-      .status(400)
-      .json({ message: "Invalid data", errors: parseResult.error.errors });
+    return res.status(400).json({ message: "Invalid data", errors: parseResult.error.issues });
   }
 
   const { groupId, palletIds } = parseResult.data;

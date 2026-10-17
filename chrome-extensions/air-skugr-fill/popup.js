@@ -1,11 +1,4 @@
-const FIELDS = [
-  "apiBase",
-  "jwt",
-  "pageMinMs",
-  "pageMaxMs",
-  "groupMinMs",
-  "groupMaxMs",
-];
+const FIELDS = ["apiBase", "jwt", "pageMinMs", "pageMaxMs", "groupMinMs", "groupMaxMs"];
 
 const DEFAULTS = {
   apiBase: "http://localhost:3232",

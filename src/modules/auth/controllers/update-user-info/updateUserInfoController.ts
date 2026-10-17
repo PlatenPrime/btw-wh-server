@@ -7,10 +7,7 @@ import { updateUserUtil } from "./utils/updateUserUtil.js";
 import { getUpdateUserResponseUtil } from "./utils/getUpdateUserResponseUtil.js";
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 
-export const updateUserInfoController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateUserInfoController = async (req: Request, res: Response): Promise<void> => {
   const session = await mongoose.startSession();
 
   try {
@@ -27,7 +24,7 @@ export const updateUserInfoController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -35,7 +32,7 @@ export const updateUserInfoController = async (
     if (parseResult.data.username !== undefined) {
       const available = await checkUsernameAvailableForUpdateUtil(
         parseResult.data.userId,
-        parseResult.data.username
+        parseResult.data.username,
       );
       if (!available) {
         res.status(409).json({
@@ -55,7 +52,7 @@ export const updateUserInfoController = async (
       photo: parseResult.data.photo,
     });
     const updateData = Object.fromEntries(
-      Object.entries(rawUpdateData).filter(([, v]) => v !== undefined)
+      Object.entries(rawUpdateData).filter(([, v]) => v !== undefined),
     ) as Parameters<typeof updateUserUtil>[0]["updateData"];
 
     let updatedUser: any = null;
@@ -97,4 +94,3 @@ export const updateUserInfoController = async (
     await session.endSession();
   }
 };
-

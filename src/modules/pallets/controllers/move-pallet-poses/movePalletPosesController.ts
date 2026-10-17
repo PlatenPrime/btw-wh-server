@@ -5,10 +5,7 @@ import { movePalletPosesSchema } from "./schemas/movePalletPosesSchema.js";
 import { movePalletPosesUtil } from "./utils/movePalletPosesUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const movePalletPosesController = async (
-  req: Request,
-  res: Response
-) => {
+export const movePalletPosesController = async (req: Request, res: Response) => {
   const session = await mongoose.startSession();
 
   try {
@@ -17,7 +14,7 @@ export const movePalletPosesController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -86,11 +83,3 @@ export const movePalletPosesController = async (
     await session.endSession();
   }
 };
-
-
-
-
-
-
-
-

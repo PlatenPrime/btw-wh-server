@@ -5,10 +5,7 @@ vi.mock("../../modules/browser/utils/playwrightBrowser.js", () => ({
 }));
 
 import { closePlaywrightBrowser } from "../../modules/browser/utils/playwrightBrowser.js";
-import {
-  registerProcessHandlers,
-  resetShutdownStateForTests,
-} from "../registerProcessHandlers.js";
+import { registerProcessHandlers, resetShutdownStateForTests } from "../registerProcessHandlers.js";
 
 describe("registerProcessHandlers shutdown", () => {
   afterEach(() => {
@@ -26,9 +23,7 @@ describe("registerProcessHandlers shutdown", () => {
       fatal: vi.fn(),
     } as unknown as Parameters<typeof registerProcessHandlers>[0];
 
-    const exitSpy = vi
-      .spyOn(process, "exit")
-      .mockImplementation((() => undefined) as never);
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => undefined) as never);
 
     registerProcessHandlers(log);
     process.emit("SIGINT");

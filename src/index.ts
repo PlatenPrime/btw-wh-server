@@ -9,4 +9,3 @@ const bootLog = createLogger({ module: "server" });
 registerProcessHandlers(bootLog);
 
 void startServer(createApp());
-

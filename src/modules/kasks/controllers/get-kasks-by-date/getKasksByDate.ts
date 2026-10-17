@@ -3,17 +3,14 @@ import { getKasksByDateSchema } from "./schemas/getKasksByDateSchema.js";
 import { getKasksByDateUtil } from "./utils/getKasksByDateUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getKasksByDate = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getKasksByDate = async (req: Request, res: Response): Promise<void> => {
   try {
     const { date } = req.query;
     const parseResult = getKasksByDateSchema.safeParse({ date });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

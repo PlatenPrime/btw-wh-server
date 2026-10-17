@@ -19,77 +19,42 @@ import {
 const router = Router();
 
 // GET роуты - доступно для всех авторизованных пользователей
-router.get(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getAllPallets)
-);
-router.get(
-  "/empty",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getEmptyPallets)
-);
+router.get("/", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getAllPallets));
+router.get("/empty", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getEmptyPallets));
 router.get(
   "/by-row/:rowId",
   checkAuth,
   checkRoles([RoleType.USER]),
-  asyncHandler(getAllPalletsByRowId)
+  asyncHandler(getAllPalletsByRowId),
 );
 router.get(
   "/by-title/:title",
   checkAuth,
   checkRoles([RoleType.USER]),
-  asyncHandler(getPalletByTitle)
+  asyncHandler(getPalletByTitle),
 );
-router.get(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.USER]),
-  asyncHandler(getPalletById)
-);
+router.get("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getPalletById));
 
 // POST роуты - доступно для ADMIN и PRIME
-router.post(
-  "/",
-  checkAuth,
-  checkRoles([RoleType.EDITOR]),
-  asyncHandler(createPallet)
-);
-router.post(
-  "/move-poses",
-  checkAuth,
-  checkRoles([RoleType.EDITOR]),
-  asyncHandler(movePalletPoses)
-);
+router.post("/", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(createPallet));
+router.post("/move-poses", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(movePalletPoses));
 
 // PUT роуты - доступно для EDITOR и PRIME
-router.put(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.EDITOR]),
-  asyncHandler(updatePallet)
-);
+router.put("/:id", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(updatePallet));
 
 // DELETE роуты - доступно для ADMIN и PRIME
-router.delete(
-  "/:id",
-  checkAuth,
-  checkRoles([RoleType.PRIME]),
-  asyncHandler(deletePallet)
-);
+router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deletePallet));
 router.delete(
   "/:id/poses",
   checkAuth,
   checkRoles([RoleType.EDITOR]),
-  asyncHandler(deletePalletPoses)
+  asyncHandler(deletePalletPoses),
 );
 router.delete(
   "/:id/empty-poses",
   checkAuth,
   checkRoles([RoleType.EDITOR]),
-  asyncHandler(deletePalletEmptyPoses)
+  asyncHandler(deletePalletEmptyPoses),
 );
 
 export default router;

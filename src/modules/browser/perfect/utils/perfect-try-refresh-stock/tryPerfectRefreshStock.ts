@@ -10,7 +10,7 @@ export async function tryPerfectRefreshStock(
   productUrl: string,
   pageTitle: string,
   formData: string,
-  cookieHeader: string
+  cookieHeader: string,
 ): Promise<{ info: PerfectProductInfo | null; cookieHeader: string }> {
   try {
     const refreshResp = await postPerfectAjax(
@@ -18,14 +18,12 @@ export async function tryPerfectRefreshStock(
       productUrl,
       formData,
       cookieHeader,
-      productUrl
+      productUrl,
     );
     if (refreshResp.status >= 400) {
       return { info: null, cookieHeader: refreshResp.cookieHeader };
     }
-    const detailsHtml = extractProductDetailsHtmlFromRefreshResponse(
-      refreshResp.data
-    );
+    const detailsHtml = extractProductDetailsHtmlFromRefreshResponse(refreshResp.data);
     if (!detailsHtml) {
       return { info: null, cookieHeader: refreshResp.cookieHeader };
     }

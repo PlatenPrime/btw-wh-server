@@ -7,4 +7,3 @@ export { getZonesBySegId } from "./get-zones-by-seg-id/getZonesBySegId.js";
 export { updateSeg } from "./update-seg/updateSeg.js";
 export { deleteSeg } from "./delete-seg/deleteSeg.js";
 export { upsertSegsController } from "./upsert-segs/upsertSegsController.js";
-

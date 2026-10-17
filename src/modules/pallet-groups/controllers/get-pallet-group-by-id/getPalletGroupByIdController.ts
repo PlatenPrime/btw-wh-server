@@ -3,10 +3,7 @@ import mongoose from "mongoose";
 import { PalletGroup } from "../../models/PalletGroup.js";
 import { getPalletsShortForGroup } from "../../utils/getGroupPalletsShortDtoUtil.js";
 
-export const getPalletGroupByIdController = async (
-  req: Request,
-  res: Response,
-) => {
+export const getPalletGroupByIdController = async (req: Request, res: Response) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {

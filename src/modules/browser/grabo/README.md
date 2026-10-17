@@ -13,19 +13,19 @@
 
 Контракт полей карточки. Имена **строго camelCase**. В Mongo/Excel тот же набор, кроме: парсер `isNew` → модель `isNewProduct`; парсер `tag` → модель `tags`.
 
-| Поле | Тип | Смысл | Источник на странице |
-|------|-----|--------|----------------------|
-| title | string | Название | `h1.title` |
-| productId | string | Артикул производителя (например G72274) | `.product-code` |
-| isNew | boolean | Новинка на сайте | наличие `.link-novita` / `.novita` |
-| color | string | Цвет | `.attribute-color` (`.selected` или первый `li span`) |
-| size | string | Размер | `.attribute-size` |
-| material | string | Материал | `.attribute-material` |
-| gas | string | Газ для наполнения | `.attribute-gas` |
-| language | string | Язык надписи | `.attribute-language` |
-| gasCapacity | string | Ёмкость / ограничения по газу | `.attribute-gascapacity` |
-| tag | string[] | Теги товара (набор вариативен) | `.attribute-tag1 .selected` |
-| images | string[] | Абсолютные URL больших изображений | `ul.product-gallery a[href]`, base `https://www.grabo-balloons.com` |
+| Поле        | Тип      | Смысл                                   | Источник на странице                                                |
+| ----------- | -------- | --------------------------------------- | ------------------------------------------------------------------- |
+| title       | string   | Название                                | `h1.title`                                                          |
+| productId   | string   | Артикул производителя (например G72274) | `.product-code`                                                     |
+| isNew       | boolean  | Новинка на сайте                        | наличие `.link-novita` / `.novita`                                  |
+| color       | string   | Цвет                                    | `.attribute-color` (`.selected` или первый `li span`)               |
+| size        | string   | Размер                                  | `.attribute-size`                                                   |
+| material    | string   | Материал                                | `.attribute-material`                                               |
+| gas         | string   | Газ для наполнения                      | `.attribute-gas`                                                    |
+| language    | string   | Язык надписи                            | `.attribute-language`                                               |
+| gasCapacity | string   | Ёмкость / ограничения по газу           | `.attribute-gascapacity`                                            |
+| tag         | string[] | Теги товара (набор вариативен)          | `.attribute-tag1 .selected`                                         |
+| images      | string[] | Абсолютные URL больших изображений      | `ul.product-gallery a[href]`, base `https://www.grabo-balloons.com` |
 
 Правила пустых значений: отсутствующая строка → `""`, отсутствующий список → `[]`.
 

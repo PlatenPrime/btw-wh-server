@@ -11,8 +11,7 @@ export type SkugrDailySummaryItem = {
 };
 
 export type GetSkugrDailySummaryResult =
-  | { ok: true; data: SkugrDailySummaryItem[] }
-  | { ok: false };
+  { ok: true; data: SkugrDailySummaryItem[] } | { ok: false };
 
 export async function getSkugrDailySummaryUtil(
   input: GetSkugrDailySummaryInput,

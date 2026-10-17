@@ -83,9 +83,7 @@ export async function getArtSalesByDateUtil(
   const coalescedPrice = coalesced[idxCurr]!.price;
   const revenue = computeRevenueForDay(dayResult.sales, coalescedPrice);
   const price =
-    typeof coalescedPrice === "number" && Number.isFinite(coalescedPrice)
-      ? coalescedPrice
-      : 0;
+    typeof coalescedPrice === "number" && Number.isFinite(coalescedPrice) ? coalescedPrice : 0;
 
   return {
     sales: dayResult.sales,

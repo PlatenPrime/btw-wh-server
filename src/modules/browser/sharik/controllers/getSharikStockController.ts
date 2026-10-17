@@ -7,17 +7,14 @@ import { logBrowserError } from "../../utils/browserRequest.js";
  * @desc    Получить остатки товара с sharik.ua по артикулу
  * @route   GET /api/browser/sharik/stock/:artikul
  */
-export const getSharikStockController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getSharikStockController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { artikul } = req.params;
     const parseResult = getSharikStockSchema.safeParse({ artikul });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

@@ -12,9 +12,7 @@ import { parseBackfillSkuSliceSalesCliArgs } from "./parseBackfillSkuSliceSalesC
 /** Логировать день каждые N шагов (+ всегда первый и последний). */
 const DAY_LOG_EVERY = 7;
 
-export async function executeBackfillSkuSliceSalesCli(
-  argv: string[],
-): Promise<{
+export async function executeBackfillSkuSliceSalesCli(argv: string[]): Promise<{
   apply: boolean;
   results: Array<{
     konkName: string;
@@ -51,9 +49,7 @@ export async function executeBackfillSkuSliceSalesCli(
 
   for (let i = 0; i < sorted.length; i++) {
     const konkName = sorted[i]!;
-    console.log(
-      `[backfill-sku-rollup] konk ${i + 1}/${sorted.length}: ${konkName} …`,
-    );
+    console.log(`[backfill-sku-rollup] konk ${i + 1}/${sorted.length}: ${konkName} …`);
     const started = Date.now();
     const r = await materializeSkuSliceSalesDateRange({
       konkName,
@@ -92,9 +88,7 @@ export async function executeBackfillSkuSliceSalesCli(
   return payload;
 }
 
-export async function runBackfillSkuSliceSalesConnected(
-  argv: string[],
-): Promise<void> {
+export async function runBackfillSkuSliceSalesConnected(argv: string[]): Promise<void> {
   await mongoose.connect(getMongoUri());
   try {
     await executeBackfillSkuSliceSalesCli(argv);

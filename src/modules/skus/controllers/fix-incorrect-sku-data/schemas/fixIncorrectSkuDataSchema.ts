@@ -18,25 +18,14 @@ const fixSkuFilterSchema = z
   })
   .strict()
   .superRefine((filter, ctx) => {
-    const hasKonk =
-      filter.konkName !== undefined && filter.konkName.trim() !== "";
-    const hasProd =
-      filter.prodName !== undefined && filter.prodName.trim() !== "";
-    const hasSearch =
-      filter.search !== undefined && filter.search.trim() !== "";
+    const hasKonk = filter.konkName !== undefined && filter.konkName.trim() !== "";
+    const hasProd = filter.prodName !== undefined && filter.prodName.trim() !== "";
+    const hasSearch = filter.search !== undefined && filter.search.trim() !== "";
     const hasProductId = filter.productId !== undefined;
-    const hasProductIds =
-      filter.productIds !== undefined && filter.productIds.length > 0;
+    const hasProductIds = filter.productIds !== undefined && filter.productIds.length > 0;
     const hasBtradeAnalog = filter.btradeAnalog !== undefined;
 
-    if (
-      !hasKonk &&
-      !hasProd &&
-      !hasSearch &&
-      !hasProductId &&
-      !hasProductIds &&
-      !hasBtradeAnalog
-    ) {
+    if (!hasKonk && !hasProd && !hasSearch && !hasProductId && !hasProductIds && !hasBtradeAnalog) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message:
@@ -57,10 +46,7 @@ const fixSkuUpdatesSchema = z
     imageUrl: z.string().optional(),
   })
   .strict()
-  .refine(
-    (updates) => Object.keys(updates).length > 0,
-    "At least one update field is required",
-  );
+  .refine((updates) => Object.keys(updates).length > 0, "At least one update field is required");
 
 export const fixIncorrectSkuDataSchema = z
   .object({

@@ -43,4 +43,3 @@ describe("hashPasswordIfProvidedUtil", () => {
     expect(result.password).not.toBe("newPassword123");
   });
 });
-

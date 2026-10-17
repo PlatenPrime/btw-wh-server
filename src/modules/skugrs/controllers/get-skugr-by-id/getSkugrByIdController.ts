@@ -7,16 +7,13 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить группу товаров конкурента по id (метаданные без поля skus)
  * @route   GET /api/skugrs/id/:id
  */
-export const getSkugrByIdController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const getSkugrByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getSkugrByIdSchema.safeParse({ id: req.params.id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

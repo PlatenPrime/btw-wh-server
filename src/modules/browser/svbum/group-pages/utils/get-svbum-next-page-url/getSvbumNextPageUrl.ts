@@ -1,7 +1,5 @@
 import type { CheerioAPI } from "cheerio";
-import {
-  getNextPageUrlFromLinkRelNext,
-} from "../../../../group-pages/utils/crawlHtmlGroupListingPages.js";
+import { getNextPageUrlFromLinkRelNext } from "../../../../group-pages/utils/crawlHtmlGroupListingPages.js";
 import { resolveHrefAgainstBase } from "../../../../utils/resolve-href-against-base/resolveHrefAgainstBase.js";
 
 const SVBUM_FORWARD_LABEL = "Вперед";
@@ -10,15 +8,8 @@ const SVBUM_FORWARD_LABEL = "Вперед";
  * Следующая страница: `link[rel=next]`, иначе `.pagination` «Вперед»
  * (класс `paination-text` — опечатка вёрстки сайта).
  */
-export function getSvbumNextPageUrl(
-  $: CheerioAPI,
-  currentPageUrl: string
-): string | null {
-  const fromRel = getNextPageUrlFromLinkRelNext(
-    $,
-    currentPageUrl,
-    resolveHrefAgainstBase
-  );
+export function getSvbumNextPageUrl($: CheerioAPI, currentPageUrl: string): string | null {
+  const fromRel = getNextPageUrlFromLinkRelNext($, currentPageUrl, resolveHrefAgainstBase);
   if (fromRel) {
     return fromRel;
   }

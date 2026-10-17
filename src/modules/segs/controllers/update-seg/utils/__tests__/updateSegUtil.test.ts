@@ -17,7 +17,7 @@ describe("updateSegUtil", () => {
   };
 
   const runWithSession = async <T>(
-    fn: (session: mongoose.ClientSession) => Promise<T>
+    fn: (session: mongoose.ClientSession) => Promise<T>,
   ): Promise<T> => {
     const session = await mongoose.startSession();
     try {
@@ -43,17 +43,14 @@ describe("updateSegUtil", () => {
       zones: [{ _id: zone._id, title: zone.title }],
     });
 
-    await Zone.updateOne(
-      { _id: zone._id },
-      { $set: { "seg.id": seg._id, sector: seg.sector } }
-    );
+    await Zone.updateOne({ _id: zone._id }, { $set: { "seg.id": seg._id, sector: seg.sector } });
 
     const updated = await runWithSession((session) =>
       updateSegUtil({
         segId: seg._id.toString(),
         updateData: { order: 5 },
         session,
-      })
+      }),
     );
 
     expect(updated).not.toBeNull();
@@ -77,17 +74,14 @@ describe("updateSegUtil", () => {
       zones: [{ _id: zoneOld._id, title: zoneOld.title }],
     });
 
-    await Zone.updateOne(
-      { _id: zoneOld._id },
-      { $set: { "seg.id": seg._id, sector: seg.sector } }
-    );
+    await Zone.updateOne({ _id: zoneOld._id }, { $set: { "seg.id": seg._id, sector: seg.sector } });
 
     const updated = await runWithSession((session) =>
       updateSegUtil({
         segId: seg._id.toString(),
         updateData: { zones: [zoneNew._id.toString()] },
         session,
-      })
+      }),
     );
 
     expect(updated?.zones).toHaveLength(1);
@@ -109,7 +103,7 @@ describe("updateSegUtil", () => {
         segId: missingId,
         updateData: { order: 2 },
         session,
-      })
+      }),
     );
 
     expect(result).toBeNull();
@@ -133,8 +127,8 @@ describe("updateSegUtil", () => {
           segId: seg._id.toString(),
           updateData: { zones: [missingZoneId] },
           session,
-        })
-      )
+        }),
+      ),
     ).rejects.toThrow(/one or more zones not found/i);
   });
 
@@ -151,10 +145,7 @@ describe("updateSegUtil", () => {
       zones: [],
     });
 
-    await Zone.updateOne(
-      { _id: zone._id },
-      { $set: { "seg.id": otherSegId, sector: 1001 } }
-    );
+    await Zone.updateOne({ _id: zone._id }, { $set: { "seg.id": otherSegId, sector: 1001 } });
 
     await expect(
       runWithSession((session) =>
@@ -162,8 +153,8 @@ describe("updateSegUtil", () => {
           segId: seg._id.toString(),
           updateData: { zones: [zone._id.toString()] },
           session,
-        })
-      )
+        }),
+      ),
     ).rejects.toThrow(/zones already belong to other segments/i);
   });
 });

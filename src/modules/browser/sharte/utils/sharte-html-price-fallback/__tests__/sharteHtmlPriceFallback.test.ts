@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  parsePriceFromElement,
-  stockInfoFromHtmlFallback,
-} from "../sharteHtmlPriceFallback.js";
+import { parsePriceFromElement, stockInfoFromHtmlFallback } from "../sharteHtmlPriceFallback.js";
 
 describe("parsePriceFromElement", () => {
   it("parses price with грн suffix", () => {

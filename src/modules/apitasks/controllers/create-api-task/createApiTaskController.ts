@@ -4,10 +4,7 @@ import { isApiTaskKind } from "../../constants/apiTaskConstants.js";
 import { createApiTaskSchema } from "./schemas/createApiTaskSchema.js";
 import { createApiTaskUtil } from "./utils/createApiTaskUtil.js";
 
-export const createApiTaskController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const createApiTaskController = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user?.id || !req.user.role) {
       res.status(401).json({
@@ -20,7 +17,7 @@ export const createApiTaskController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

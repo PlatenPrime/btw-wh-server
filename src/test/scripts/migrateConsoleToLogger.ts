@@ -58,9 +58,7 @@ function ensureImport(source: string, importPath: string): string {
   }
 
   const importLine = `import { logModuleError${needsWarn ? ", logModuleWarn" : ""} } from "${importPath}";`;
-  const existingImport = source.match(
-    /import\s+\{([^}]+)\}\s+from\s+"[^"]*logModuleError\.js";/
-  );
+  const existingImport = source.match(/import\s+\{([^}]+)\}\s+from\s+"[^"]*logModuleError\.js";/);
 
   if (existingImport) {
     const names = existingImport[1] ?? "";
@@ -88,37 +86,35 @@ function migrateContent(source: string, moduleName: string): string {
   next = next.replace(
     /console\.error\(\s*`([^`]+)`\s*,\s*(\w+)\s*\)/g,
     (_match, message: string, errVar: string) =>
-      `logModuleError("${moduleName}", ${errVar}, ${JSON.stringify(message)})`
+      `logModuleError("${moduleName}", ${errVar}, ${JSON.stringify(message)})`,
   );
 
   next = next.replace(
     /console\.error\(\s*(["'`])((?:\\.|(?!\1).)*)\1\s*,\s*(\w+)\s*\)/g,
     (_match, _q, message: string, errVar: string) =>
-      `logModuleError("${moduleName}", ${errVar}, ${JSON.stringify(message)})`
+      `logModuleError("${moduleName}", ${errVar}, ${JSON.stringify(message)})`,
   );
 
   next = next.replace(
     /console\.error\(\s*(\w+)\s*\)/g,
-    (_match, errVar: string) =>
-      `logModuleError("${moduleName}", ${errVar}, "operation failed")`
+    (_match, errVar: string) => `logModuleError("${moduleName}", ${errVar}, "operation failed")`,
   );
 
   next = next.replace(
     /console\.warn\(\s*(["'`])((?:\\.|(?!\1).)*)\1\s*,\s*(\{[\s\S]*?\})\s*\)/g,
     (_match, _q, message: string, extra: string) =>
-      `logModuleWarn("${moduleName}", ${JSON.stringify(message)}, ${extra})`
+      `logModuleWarn("${moduleName}", ${JSON.stringify(message)}, ${extra})`,
   );
 
   next = next.replace(
     /console\.warn\(\s*(["'`])((?:\\.|(?!\1).)*)\1\s*,\s*(\w+)\s*\)/g,
     (_match, _q, message: string, errVar: string) =>
-      `logModuleWarn("${moduleName}", ${JSON.stringify(message)}, { err: ${errVar} })`
+      `logModuleWarn("${moduleName}", ${JSON.stringify(message)}, { err: ${errVar} })`,
   );
 
   next = next.replace(
     /console\.warn\(\s*(["'`])((?:\\.|(?!\1).)*)\1\s*\)/g,
-    (_match, _q, message: string) =>
-      `logModuleWarn("${moduleName}", ${JSON.stringify(message)})`
+    (_match, _q, message: string) => `logModuleWarn("${moduleName}", ${JSON.stringify(message)})`,
   );
 
   return next;
@@ -127,8 +123,7 @@ function migrateContent(source: string, moduleName: string): string {
 function migrateFile(filePath: string): boolean {
   const original = fs.readFileSync(filePath, "utf8");
   const hasConsole = /console\.(error|warn)\(/.test(original);
-  const needsImport =
-    /logModuleError\(/.test(original) || /logModuleWarn\(/.test(original);
+  const needsImport = /logModuleError\(/.test(original) || /logModuleWarn\(/.test(original);
 
   if (!hasConsole && !needsImport) {
     return false;

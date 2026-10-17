@@ -13,6 +13,4 @@ export const putAirClientSkuSliceSchema = z.object({
     .max(AIR_CLIENT_HTML_MAX_CHARS, "html exceeds maximum length"),
 });
 
-export type PutAirClientSkuSliceInput = z.infer<
-  typeof putAirClientSkuSliceSchema
->;
+export type PutAirClientSkuSliceInput = z.infer<typeof putAirClientSkuSliceSchema>;

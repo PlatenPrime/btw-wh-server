@@ -11,7 +11,4 @@ export const getYumiGroupPagesProductsSchema = z.object({
   maxPages: z.number().int().min(1).max(200).optional(),
 });
 
-export type GetYumiGroupPagesProductsInput = z.infer<
-  typeof getYumiGroupPagesProductsSchema
->;
-
+export type GetYumiGroupPagesProductsInput = z.infer<typeof getYumiGroupPagesProductsSchema>;

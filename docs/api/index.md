@@ -90,9 +90,7 @@ Authorization: Bearer <token>
 ```json
 {
   "message": "Описание операции",
-  "data": {
-    /* данные */
-  }
+  "data": {/* данные */}
 }
 ```
 
@@ -102,9 +100,7 @@ Authorization: Bearer <token>
 {
   "exists": true,
   "message": "Описание операции",
-  "data": [
-    /* массив данных */
-  ]
+  "data": [/* массив данных */]
 }
 ```
 
@@ -115,9 +111,7 @@ Authorization: Bearer <token>
 ```json
 {
   "message": "Описание ошибки",
-  "errors": [
-    /* массив ошибок валидации (опционально) */
-  ]
+  "errors": [/* массив ошибок валидации (опционально) */]
 }
 ```
 
@@ -161,9 +155,7 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "data": [
-    /* данные */
-  ],
+  "data": [/* данные */],
   "pagination": {
     "page": 1,
     "limit": 10,

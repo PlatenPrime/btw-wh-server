@@ -10,9 +10,7 @@ const orderItemSchema = z.object({
 
 export const reorderPalletGroupsSchema = z
   .object({
-    orders: z
-      .array(orderItemSchema)
-      .min(1, "At least one order item must be provided"),
+    orders: z.array(orderItemSchema).min(1, "At least one order item must be provided"),
   })
   .refine(
     (data) => {
@@ -29,6 +27,4 @@ export const reorderPalletGroupsSchema = z
     { message: "Duplicate order values are not allowed", path: ["orders"] },
   );
 
-export type ReorderPalletGroupsInput = z.infer<
-  typeof reorderPalletGroupsSchema
->;
+export type ReorderPalletGroupsInput = z.infer<typeof reorderPalletGroupsSchema>;

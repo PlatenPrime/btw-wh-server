@@ -93,9 +93,7 @@ describe("createAskController", () => {
     const events = await Event.find({ department: "asks" });
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(user._id));
-    expect(events[0].description).toBe(
-      "Створено заявку на артикул ART-EVENT (3 шт.)"
-    );
+    expect(events[0].description).toBe("Створено заявку на артикул ART-EVENT (3 шт.)");
   });
 
   it("201: не создаёт audit-событие без req.user", async () => {

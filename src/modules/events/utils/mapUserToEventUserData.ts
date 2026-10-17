@@ -3,12 +3,9 @@ import { IUser } from "../../auth/models/User.js";
 import { EventUserData } from "../models/Event.js";
 
 type MapUserToEventUserDataInput =
-  | Pick<IUser, "_id" | "fullname" | "telegram" | "photo">
-  | EventUserData;
+  Pick<IUser, "_id" | "fullname" | "telegram" | "photo"> | EventUserData;
 
-export const mapUserToEventUserData = (
-  user: MapUserToEventUserDataInput
-): EventUserData => {
+export const mapUserToEventUserData = (user: MapUserToEventUserDataInput): EventUserData => {
   return {
     _id: normalizeObjectId(user._id),
     fullname: user.fullname,

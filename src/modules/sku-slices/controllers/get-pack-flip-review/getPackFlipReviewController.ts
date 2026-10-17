@@ -6,15 +6,12 @@ import { getPackFlipReviewUtil } from "./utils/getPackFlipReviewUtil.js";
  * @desc    Проверка pack-flip скачков stock/price по конкуренту и диапазону дат (без записи)
  * @route   GET /api/sku-slices/pack-flips?konkName=&dateFrom=&dateTo=
  */
-export const getPackFlipReviewController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getPackFlipReviewController = async (req: Request, res: Response): Promise<void> => {
   const parseResult = getPackFlipReviewSchema.safeParse(req.query);
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

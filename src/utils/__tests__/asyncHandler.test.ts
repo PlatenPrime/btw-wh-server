@@ -36,7 +36,7 @@ describe("asyncHandler", () => {
     const next = vi.fn();
 
     const wrapped = asyncHandler(asyncFn);
-    const result = await wrapped(req, res, next);
+    await wrapped(req, res, next);
 
     expect(asyncFn).toHaveBeenCalled();
     expect(next).not.toHaveBeenCalled();
@@ -59,7 +59,7 @@ describe("asyncHandler", () => {
     class TestClass {
       value = "test";
 
-      async method(req: any, res: any, next: any) {
+      async method(_req: any, _res: any, _next: any) {
         return this.value;
       }
     }
@@ -76,4 +76,3 @@ describe("asyncHandler", () => {
     expect(next).not.toHaveBeenCalled();
   });
 });
-

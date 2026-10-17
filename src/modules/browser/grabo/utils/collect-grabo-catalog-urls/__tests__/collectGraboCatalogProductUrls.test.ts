@@ -30,9 +30,7 @@ const PRODUCT_A = "https://www.grabo-balloons.com/en/g1-balloon-a";
 const PRODUCT_B = "https://www.grabo-balloons.com/en/g2-balloon-b";
 
 function sitemapWithCategories(urls: string[]): string {
-  const items = urls
-    .map((url) => `<li><a href="${url}">cat</a></li>`)
-    .join("");
+  const items = urls.map((url) => `<li><a href="${url}">cat</a></li>`).join("");
   return `<div class="site-map"><ul class="level-0"><li class="nav900"><a>Products</a><ul class="level-1">${items}</ul></li></ul></div>`;
 }
 
@@ -46,9 +44,7 @@ describe("collectGraboCatalogProductUrls", () => {
   });
 
   it("collects unique product urls across categories", async () => {
-    vi.mocked(fetchPageHtml).mockResolvedValue(
-      sitemapWithCategories([CAT_A, CAT_B])
-    );
+    vi.mocked(fetchPageHtml).mockResolvedValue(sitemapWithCategories([CAT_A, CAT_B]));
     vi.mocked(getGraboListingProducts)
       .mockResolvedValueOnce([PRODUCT_A, PRODUCT_B])
       .mockResolvedValueOnce([PRODUCT_B]);
@@ -66,7 +62,7 @@ describe("collectGraboCatalogProductUrls", () => {
     expect(getGraboListingProducts).toHaveBeenNthCalledWith(
       1,
       { groupUrl: CAT_A, maxPages: 4 },
-      expect.objectContaining({ delayBeforeNextMs: 3 })
+      expect.objectContaining({ delayBeforeNextMs: 3 }),
     );
     expect(result.productUrls).toEqual([PRODUCT_A, PRODUCT_B]);
     expect(result.failedCategoryUrls).toEqual([]);
@@ -77,7 +73,7 @@ describe("collectGraboCatalogProductUrls", () => {
         extraCategoryCount: 0,
         categoryCount: 2,
       },
-      "grabo catalog sitemap parsed"
+      "grabo catalog sitemap parsed",
     );
     expect(mockLogger.info).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -87,14 +83,12 @@ describe("collectGraboCatalogProductUrls", () => {
         listed: 2,
         uniqueTotal: 2,
       }),
-      "grabo catalog category done"
+      "grabo catalog category done",
     );
   });
 
   it("records failed categories and keeps urls from successful ones", async () => {
-    vi.mocked(fetchPageHtml).mockResolvedValue(
-      sitemapWithCategories([CAT_A, CAT_B])
-    );
+    vi.mocked(fetchPageHtml).mockResolvedValue(sitemapWithCategories([CAT_A, CAT_B]));
     vi.mocked(getGraboListingProducts)
       .mockRejectedValueOnce(new Error("boom"))
       .mockResolvedValueOnce([PRODUCT_A]);
@@ -110,16 +104,14 @@ describe("collectGraboCatalogProductUrls", () => {
         categoryUrl: CAT_A,
         details: "boom",
       }),
-      "grabo catalog category failed"
+      "grabo catalog category failed",
     );
   });
 
   it("rethrows sitemap fetch errors", async () => {
     vi.mocked(fetchPageHtml).mockRejectedValue(new Error("sitemap down"));
 
-    await expect(collectGraboCatalogProductUrls()).rejects.toThrow(
-      "sitemap down"
-    );
+    await expect(collectGraboCatalogProductUrls()).rejects.toThrow("sitemap down");
   });
 
   it("uses injected getHtml and function delays between categories", async () => {
@@ -158,7 +150,7 @@ describe("collectGraboCatalogProductUrls", () => {
     expect(getGraboListingProducts).toHaveBeenNthCalledWith(
       2,
       { groupUrl: extraA },
-      expect.anything()
+      expect.anything(),
     );
     expect(result.productUrls).toEqual([PRODUCT_A, extraProduct, PRODUCT_B]);
     expect(mockLogger.info).toHaveBeenCalledWith(
@@ -167,16 +159,14 @@ describe("collectGraboCatalogProductUrls", () => {
         extraCategoryCount: 2,
         categoryCount: 3,
       },
-      "grabo catalog sitemap parsed"
+      "grabo catalog sitemap parsed",
     );
   });
 
   it("does not recrawl extras already present in sitemap", async () => {
     const extraA = "https://www.grabo-balloons.com/en/plates";
 
-    vi.mocked(fetchPageHtml).mockResolvedValue(
-      sitemapWithCategories([CAT_A, extraA])
-    );
+    vi.mocked(fetchPageHtml).mockResolvedValue(sitemapWithCategories([CAT_A, extraA]));
     vi.mocked(getGraboListingProducts).mockResolvedValue([PRODUCT_A]);
 
     const result = await collectGraboCatalogProductUrls({
@@ -188,12 +178,12 @@ describe("collectGraboCatalogProductUrls", () => {
     expect(getGraboListingProducts).toHaveBeenNthCalledWith(
       1,
       { groupUrl: CAT_A },
-      expect.anything()
+      expect.anything(),
     );
     expect(getGraboListingProducts).toHaveBeenNthCalledWith(
       2,
       { groupUrl: extraA },
-      expect.anything()
+      expect.anything(),
     );
   });
 
@@ -204,8 +194,6 @@ describe("collectGraboCatalogProductUrls", () => {
     const result = await collectGraboCatalogProductUrls();
 
     expect(result.categoryUrls).toEqual([CAT_A, ...GRABO_EXTRA_CATEGORY_URLS]);
-    expect(getGraboListingProducts).toHaveBeenCalledTimes(
-      1 + GRABO_EXTRA_CATEGORY_URLS.length
-    );
+    expect(getGraboListingProducts).toHaveBeenCalledTimes(1 + GRABO_EXTRA_CATEGORY_URLS.length);
   });
 });

@@ -6,12 +6,8 @@ interface GetUpdateAskActionUtilInput {
   action: string;
 }
 
-export const getUpdateAskActionUtil = ({
-  user,
-  action,
-}: GetUpdateAskActionUtilInput): string => {
+export const getUpdateAskActionUtil = ({ user, action }: GetUpdateAskActionUtilInput): string => {
   const time = getCurrentFormattedDateTime();
   const userName = user.fullname;
   return `${time} ${userName}: ${action}` as string;
 };
-

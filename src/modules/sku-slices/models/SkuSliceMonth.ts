@@ -31,17 +31,13 @@ const skuSliceMonthSchema = new Schema<ISkuSliceMonth>(
   { timestamps: true },
 );
 
-skuSliceMonthSchema.index(
-  { konkName: 1, productId: 1, month: 1 },
-  { unique: true },
-);
+skuSliceMonthSchema.index({ konkName: 1, productId: 1, month: 1 }, { unique: true });
 
 /** Day-wide scan по konk+month без productId. */
 skuSliceMonthSchema.index({ konkName: 1, month: 1 });
 
-export const SkuSliceMonth: Model<ISkuSliceMonth> =
-  getOrCreateModel<ISkuSliceMonth>(
-    "SkuSliceMonth",
-    skuSliceMonthSchema,
-    "sku_slice_months",
-  );
+export const SkuSliceMonth: Model<ISkuSliceMonth> = getOrCreateModel<ISkuSliceMonth>(
+  "SkuSliceMonth",
+  skuSliceMonthSchema,
+  "sku_slice_months",
+);

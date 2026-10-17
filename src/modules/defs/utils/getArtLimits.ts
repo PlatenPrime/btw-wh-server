@@ -6,9 +6,7 @@ import { logModuleError } from "../../../logging/logModuleError.js";
  * @param artikuls - Массив артикулов
  * @returns Объект с лимитами по артикулам
  */
-export async function getArtLimits(
-  artikuls: string[]
-): Promise<{ [artikul: string]: number }> {
+export async function getArtLimits(artikuls: string[]): Promise<{ [artikul: string]: number }> {
   try {
     const arts = await Art.find({
       artikul: { $in: artikuls },

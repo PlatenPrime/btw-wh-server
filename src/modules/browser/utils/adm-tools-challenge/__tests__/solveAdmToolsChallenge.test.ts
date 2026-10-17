@@ -46,7 +46,7 @@ describe("solveAdmToolsChallenge", () => {
     const result = await solveAdmToolsChallenge(
       client,
       "https://airballoons.com.ua/ua/product/x",
-      SAMPLE_FORM_CHALLENGE_HTML
+      SAMPLE_FORM_CHALLENGE_HTML,
     );
 
     expect(result).toEqual({
@@ -63,9 +63,7 @@ describe("solveAdmToolsChallenge", () => {
       expect(init?.method).toBe("POST");
       expect(typeof init?.body).toBe("string");
       expect(init?.body).toBe(JSON.stringify({ __ack: -142 }));
-      expect(init?.headers?.["Content-Type"]).toBe(
-        "application/json; charset=UTF-8"
-      );
+      expect(init?.headers?.["Content-Type"]).toBe("application/json; charset=UTF-8");
       return { status: 200, text: async () => "ok" };
     });
     const client: ImpitClientLike = { fetch };
@@ -73,7 +71,7 @@ describe("solveAdmToolsChallenge", () => {
     const result = await solveAdmToolsChallenge(
       client,
       "https://airballoons.com.ua/ua/product/x",
-      SAMPLE_JSON_CHALLENGE_HTML
+      SAMPLE_JSON_CHALLENGE_HTML,
     );
 
     expect(result).toEqual({
@@ -86,9 +84,9 @@ describe("solveAdmToolsChallenge", () => {
 
   it("кидает если не challenge HTML", async () => {
     const client: ImpitClientLike = { fetch: vi.fn() };
-    await expect(
-      solveAdmToolsChallenge(client, "https://x", "<html>nope</html>")
-    ).rejects.toThrow(/Not an adm.tools challenge/);
+    await expect(solveAdmToolsChallenge(client, "https://x", "<html>nope</html>")).rejects.toThrow(
+      /Not an adm.tools challenge/,
+    );
   });
 
   it("кидает если POST не 200", async () => {
@@ -99,11 +97,7 @@ describe("solveAdmToolsChallenge", () => {
       })),
     };
     await expect(
-      solveAdmToolsChallenge(
-        client,
-        "https://example.com/p",
-        SAMPLE_FORM_CHALLENGE_HTML
-      )
+      solveAdmToolsChallenge(client, "https://example.com/p", SAMPLE_FORM_CHALLENGE_HTML),
     ).rejects.toThrow(/form-___ack POST HTTP 403/);
   });
 });

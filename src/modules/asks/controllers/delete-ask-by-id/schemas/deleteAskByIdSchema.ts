@@ -8,4 +8,3 @@ export const deleteAskByIdSchema = z.object({
 });
 
 export type DeleteAskByIdInput = z.infer<typeof deleteAskByIdSchema>;
-

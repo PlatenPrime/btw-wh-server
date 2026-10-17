@@ -58,9 +58,7 @@ describe("deleteSkugrWithSkusController", () => {
     await deleteSkugrWithSkusController(req, res);
 
     expect(responseStatus.code).toBe(200);
-    expect((responseJson.data as { deletedSkusCount: number }).deletedSkusCount).toBe(
-      1,
-    );
+    expect((responseJson.data as { deletedSkusCount: number }).deletedSkusCount).toBe(1);
     expect(await Skugr.findById(g._id)).toBeNull();
     expect(await Sku.findById(sku._id)).toBeNull();
   });

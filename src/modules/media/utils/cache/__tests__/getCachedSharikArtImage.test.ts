@@ -1,8 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import {
-  SHARIK_ART_IMAGE_CACHE_MAX_ENTRIES,
-  SHARIK_ART_IMAGE_CACHE_TTL_MS,
-} from "../constants.js";
+import { SHARIK_ART_IMAGE_CACHE_MAX_ENTRIES, SHARIK_ART_IMAGE_CACHE_TTL_MS } from "../constants.js";
 import {
   clearSharikArtImageCache,
   getCachedSharikArtImage,
@@ -56,15 +53,12 @@ describe("getCachedSharikArtImage", () => {
   });
 
   it("dedupes parallel miss into one fetch", async () => {
-    let resolveFetch!: (value: {
-      buffer: Buffer;
-      contentType: string;
-    }) => void;
+    let resolveFetch!: (value: { buffer: Buffer; contentType: string }) => void;
     vi.mocked(fetchSharikArtImage).mockImplementation(
       () =>
         new Promise((resolve) => {
           resolveFetch = resolve;
-        })
+        }),
     );
 
     const p1 = getCachedSharikArtImage("1302-0065", "big");
@@ -89,9 +83,7 @@ describe("getCachedSharikArtImage", () => {
       await getCachedSharikArtImage(`art-${i}`, "prev");
     }
 
-    expect(getSharikArtImageCacheSize()).toBe(
-      SHARIK_ART_IMAGE_CACHE_MAX_ENTRIES
-    );
+    expect(getSharikArtImageCacheSize()).toBe(SHARIK_ART_IMAGE_CACHE_MAX_ENTRIES);
 
     vi.mocked(fetchSharikArtImage).mockResolvedValueOnce({
       buffer: Buffer.from("new"),
@@ -99,9 +91,7 @@ describe("getCachedSharikArtImage", () => {
     });
     await getCachedSharikArtImage("art-new", "prev");
 
-    expect(getSharikArtImageCacheSize()).toBe(
-      SHARIK_ART_IMAGE_CACHE_MAX_ENTRIES
-    );
+    expect(getSharikArtImageCacheSize()).toBe(SHARIK_ART_IMAGE_CACHE_MAX_ENTRIES);
 
     vi.mocked(fetchSharikArtImage).mockClear();
     vi.mocked(fetchSharikArtImage).mockResolvedValue({

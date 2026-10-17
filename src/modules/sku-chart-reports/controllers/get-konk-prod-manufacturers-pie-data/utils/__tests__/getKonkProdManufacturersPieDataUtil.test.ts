@@ -9,11 +9,7 @@ import { getKonkProdManufacturersPieDataUtil } from "../getKonkProdManufacturers
 import { seedSkuSliceMonthDay } from "../../../../../sku-slices/utils/seedSkuSliceMonthDay.js";
 import { SkuSliceMonth } from "../../../../../sku-slices/models/SkuSliceMonth.js";
 
-async function seedRollup(
-  konk: string,
-  from: Date,
-  to: Date,
-): Promise<void> {
+async function seedRollup(konk: string, from: Date, to: Date): Promise<void> {
   await materializeSkuSliceSalesDateRange({
     konkName: konk,
     fromDate: from,
@@ -72,17 +68,17 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     });
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-a`]: { stock: 12, price: 10 },
-          [`${konk}-b`]: { stock: 8, price: 20 },
-        });
+      [`${konk}-a`]: { stock: 12, price: 10 },
+      [`${konk}-b`]: { stock: 8, price: 20 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-a`]: { stock: 10, price: 10 },
-          [`${konk}-b`]: { stock: 7, price: 20 },
-        });
+      [`${konk}-a`]: { stock: 10, price: 10 },
+      [`${konk}-b`]: { stock: 7, price: 20 },
+    });
     await seedSkuSliceMonthDay(konk, d2, {
-          [`${konk}-a`]: { stock: 9, price: 10 },
-          [`${konk}-b`]: { stock: 5, price: 20 },
-        });
+      [`${konk}-a`]: { stock: 9, price: 10 },
+      [`${konk}-b`]: { stock: 5, price: 20 },
+    });
     await seedRollup(konk, d1, d2);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -129,13 +125,13 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     ]);
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-a`]: { stock: 6, price: 5 },
-          [`${konk}-b`]: { stock: 9, price: 4 },
-        });
+      [`${konk}-a`]: { stock: 6, price: 5 },
+      [`${konk}-b`]: { stock: 9, price: 4 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-a`]: { stock: 4, price: 5 },
-          [`${konk}-b`]: { stock: 8, price: 4 },
-        });
+      [`${konk}-a`]: { stock: 4, price: 5 },
+      [`${konk}-b`]: { stock: 8, price: 4 },
+    });
     await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -173,14 +169,14 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     });
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-x`]: { stock: 10, price: 5 },
-        });
+      [`${konk}-x`]: { stock: 10, price: 5 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-x`]: { stock: -1, price: -1 },
-        });
+      [`${konk}-x`]: { stock: -1, price: -1 },
+    });
     await seedSkuSliceMonthDay(konk, d2, {
-          [`${konk}-x`]: { stock: 6, price: 4 },
-        });
+      [`${konk}-x`]: { stock: 6, price: 4 },
+    });
     await seedRollup(konk, d1, d2);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -214,11 +210,11 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     });
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-fallback`]: { stock: 5, price: 2 },
-        });
+      [`${konk}-fallback`]: { stock: 5, price: 2 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-fallback`]: { stock: 3, price: 2 },
-        });
+      [`${konk}-fallback`]: { stock: 3, price: 2 },
+    });
     await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({
@@ -318,13 +314,13 @@ describe("getKonkProdManufacturersPieDataUtil", () => {
     });
 
     await seedSkuSliceMonthDay(konk, d0, {
-          [`${konk}-in`]: { stock: 10, price: 5 },
-          [`${konk}-out`]: { stock: 50, price: 5 },
-        });
+      [`${konk}-in`]: { stock: 10, price: 5 },
+      [`${konk}-out`]: { stock: 50, price: 5 },
+    });
     await seedSkuSliceMonthDay(konk, d1, {
-          [`${konk}-in`]: { stock: 6, price: 5 },
-          [`${konk}-out`]: { stock: 30, price: 5 },
-        });
+      [`${konk}-in`]: { stock: 6, price: 5 },
+      [`${konk}-out`]: { stock: 30, price: 5 },
+    });
     await seedRollup(konk, d1, d1);
 
     const result = await getKonkProdManufacturersPieDataUtil({

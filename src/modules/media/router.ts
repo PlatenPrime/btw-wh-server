@@ -4,9 +4,6 @@ import { getSharikArtImageController } from "./controllers/get-sharik-art-image/
 
 const router = Router();
 
-router.get(
-  "/sharik/:artikul",
-  asyncHandler(getSharikArtImageController)
-);
+router.get("/sharik/:artikul", asyncHandler(getSharikArtImageController));
 
 export default router;

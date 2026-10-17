@@ -3,10 +3,7 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
 import { getExcelJobSchema } from "../get-excel-job/schemas/getExcelJobSchema.js";
 import { cancelExcelJobUtil } from "./utils/cancelExcelJobUtil.js";
 
-export const cancelExcelJobController = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+export const cancelExcelJobController = async (req: Request, res: Response): Promise<void> => {
   try {
     if (!req.user?.id) {
       res.status(401).json({
@@ -19,7 +16,7 @@ export const cancelExcelJobController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

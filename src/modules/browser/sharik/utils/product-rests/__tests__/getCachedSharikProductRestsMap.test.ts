@@ -22,9 +22,7 @@ describe("getCachedSharikProductRestsMap", () => {
     vi.useFakeTimers();
     clearSharikProductRestsCache();
     vi.mocked(browserGet).mockReset();
-    vi.mocked(browserGet).mockResolvedValue(
-      "<pre>1501-3445 = 7; 8; 509.60</pre>"
-    );
+    vi.mocked(browserGet).mockResolvedValue("<pre>1501-3445 = 7; 8; 509.60</pre>");
   });
 
   afterEach(() => {
@@ -44,9 +42,7 @@ describe("getCachedSharikProductRestsMap", () => {
   it("refetches after TTL expires", async () => {
     await getCachedSharikProductRestsMap("1302-0065");
     vi.advanceTimersByTime(SHARIK_PRODUCT_RESTS_CACHE_TTL_MS + 1);
-    vi.mocked(browserGet).mockResolvedValue(
-      "<pre>1501-3445 = 1; 2; 10.00</pre>"
-    );
+    vi.mocked(browserGet).mockResolvedValue("<pre>1501-3445 = 1; 2; 10.00</pre>");
 
     const refreshed = await getCachedSharikProductRestsMap("1302-0065");
 
@@ -64,7 +60,7 @@ describe("getCachedSharikProductRestsMap", () => {
       () =>
         new Promise((resolve) => {
           resolveHtml = resolve;
-        })
+        }),
     );
 
     const p1 = getCachedSharikProductRestsMap("1302-0065");

@@ -3,10 +3,7 @@ import type { ISkuSliceDataItem } from "../../../models/skuSliceTypes.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import type { PatchSkuSliceByDateInput } from "../schemas/patchSkuSliceByDateSchema.js";
 import { afterSkuSliceStockMutation } from "../../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
-import {
-  getDayPoint,
-  upsertDayPoint,
-} from "../../../utils/skuSliceMonthStore.js";
+import { getDayPoint, upsertDayPoint } from "../../../utils/skuSliceMonthStore.js";
 
 export type PatchSkuSliceByDateResult = {
   productId: string;
@@ -32,9 +29,7 @@ export function readPreviousPoint(item: unknown): ISkuSliceDataItem | null {
 export async function patchSkuSliceByDateUtil(
   input: PatchSkuSliceByDateInput,
 ): Promise<PatchSkuSliceByDateResult | null> {
-  const sku = await Sku.findById(input.skuId)
-    .select("konkName productId")
-    .lean();
+  const sku = await Sku.findById(input.skuId).select("konkName productId").lean();
   if (!sku) return null;
 
   const productId = sku.productId?.trim();

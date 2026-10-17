@@ -11,11 +11,7 @@ export const deleteSkuByIdUtil = async (id: string): Promise<ISku | null> => {
       if (!sku) {
         return;
       }
-      await Skugr.updateMany(
-        { skus: sku._id },
-        { $pull: { skus: sku._id } },
-        { session },
-      );
+      await Skugr.updateMany({ skus: sku._id }, { $pull: { skus: sku._id } }, { session });
       deleted = await Sku.findByIdAndDelete(id).session(session);
     });
     return deleted;

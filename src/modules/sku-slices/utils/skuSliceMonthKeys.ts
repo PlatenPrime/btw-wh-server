@@ -6,9 +6,7 @@ import { toSliceDate } from "../../../utils/sliceDate.js";
  */
 export function toSliceMonthDate(d: Date): Date {
   const day = toSliceDate(d);
-  return new Date(
-    Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), 1, 0, 0, 0, 0),
-  );
+  return new Date(Date.UTC(day.getUTCFullYear(), day.getUTCMonth(), 1, 0, 0, 0, 0));
 }
 
 /** YYYY-MM-DD ключ дня внутри `SkuSliceMonth.days`. */

@@ -1,8 +1,6 @@
 import { Konk } from "../../konks/models/Konk.js";
 
-export async function loadKonkTitleByKonkNames(
-  konkNames: string[],
-): Promise<Map<string, string>> {
+export async function loadKonkTitleByKonkNames(konkNames: string[]): Promise<Map<string, string>> {
   const unique = [...new Set(konkNames.filter((n) => n.length > 0))];
   if (unique.length === 0) return new Map();
 

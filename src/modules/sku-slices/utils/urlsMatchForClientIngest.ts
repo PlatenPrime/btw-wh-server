@@ -16,10 +16,7 @@ export function normalizeComparableUrl(raw: string): string {
 /**
  * true если оба URL указывают на один и тот же ресурс после нормализации.
  */
-export function urlsMatchForClientIngest(
-  left: string,
-  right: string
-): boolean {
+export function urlsMatchForClientIngest(left: string, right: string): boolean {
   try {
     return normalizeComparableUrl(left) === normalizeComparableUrl(right);
   } catch {

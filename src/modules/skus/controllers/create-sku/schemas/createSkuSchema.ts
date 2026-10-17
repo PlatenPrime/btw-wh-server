@@ -3,10 +3,7 @@ import { z } from "zod";
 const productIdSchema = z
   .string()
   .min(1, "ProductId is required")
-  .regex(
-    /^[a-z0-9_-]+-[A-Za-z0-9_-]+$/,
-    "ProductId must be like konkName-rawId (e.g. air-12345)",
-  );
+  .regex(/^[a-z0-9_-]+-[A-Za-z0-9_-]+$/, "ProductId must be like konkName-rawId (e.g. air-12345)");
 
 export const createSkuSchema = z.object({
   konkName: z.string().min(1, "KonkName is required"),

@@ -38,7 +38,7 @@ function isImageContentType(contentType: string): boolean {
  */
 export async function fetchSharikArtImage(
   artikul: string,
-  size: SharikArtImageSize
+  size: SharikArtImageSize,
 ): Promise<FetchedSharikArtImage> {
   const url = buildSharikArtImageUrl(artikul, size);
 
@@ -53,9 +53,7 @@ export async function fetchSharikArtImage(
   }
 
   if (result.status >= 500) {
-    throw new SharikArtImageUpstreamError(
-      `Upstream HTTP ${result.status} for sharik art image`
-    );
+    throw new SharikArtImageUpstreamError(`Upstream HTTP ${result.status} for sharik art image`);
   }
 
   if (

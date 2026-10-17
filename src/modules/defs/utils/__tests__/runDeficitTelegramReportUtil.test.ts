@@ -3,12 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("../../../browser/sharik/utils/product-rests/index.js", () => ({
   clearSharikProductRestsCache: vi.fn(),
 }));
-vi.mock(
-  "../../controllers/get-latest-defs/utils/calculateLivePogrebiDefsUtil.js",
-  () => ({
-    calculateLivePogrebiDefsUtil: vi.fn(),
-  })
-);
+vi.mock("../../controllers/get-latest-defs/utils/calculateLivePogrebiDefsUtil.js", () => ({
+  calculateLivePogrebiDefsUtil: vi.fn(),
+}));
 vi.mock("../sendDeficitTelegramReport.js", () => ({
   sendDeficitTelegramReport: vi.fn(),
 }));
@@ -20,9 +17,7 @@ import { formatDeficitTelegramErrorMessage } from "../formatDeficitTelegramMessa
 import { runDeficitTelegramReportUtil } from "../runDeficitTelegramReportUtil.js";
 import { sendDeficitTelegramReport } from "../sendDeficitTelegramReport.js";
 
-function liveDefs(
-  overrides: Partial<ILiveDefsCalculation> = {}
-): ILiveDefsCalculation {
+function liveDefs(overrides: Partial<ILiveDefsCalculation> = {}): ILiveDefsCalculation {
   return {
     result: {},
     total: 0,

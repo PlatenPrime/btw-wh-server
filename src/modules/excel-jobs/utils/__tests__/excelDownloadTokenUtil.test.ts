@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  createExcelDownloadToken,
-  verifyExcelDownloadToken,
-} from "../excelDownloadTokenUtil.js";
+import { createExcelDownloadToken, verifyExcelDownloadToken } from "../excelDownloadTokenUtil.js";
 
 describe("excelDownloadTokenUtil", () => {
   it("roundtrips jobId and userId", () => {

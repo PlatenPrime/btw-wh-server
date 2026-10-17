@@ -54,9 +54,7 @@ describe("materializeSkuSliceSalesUtil", () => {
     expect(result.daysTouched).toEqual(["2026-06-02", "2026-06-03"]);
     expect(result.rollupDocs).toBe(2);
 
-    const rollups = await SkuManufacturerDaySales.find({ konkName })
-      .sort({ date: 1 })
-      .lean();
+    const rollups = await SkuManufacturerDaySales.find({ konkName }).sort({ date: 1 }).lean();
     expect(rollups).toHaveLength(2);
     expect(rollups[0]).toMatchObject({
       prodName: "MakerX",
@@ -86,10 +84,7 @@ describe("materializeSkuSliceSalesUtil", () => {
   });
 
   it("applies recountDays", async () => {
-    await Konk.updateOne(
-      { name: konkName },
-      { $set: { recountDays: ["2026-06-02"] } },
-    );
+    await Konk.updateOne({ name: konkName }, { $set: { recountDays: ["2026-06-02"] } });
     await seedSkuSliceMonthDay(konkName, d0, { p1: { stock: 10, price: 5 } });
     await seedSkuSliceMonthDay(konkName, d1, { p1: { stock: 7, price: 5 } });
 
@@ -120,8 +115,7 @@ describe("materializeSkuSliceSalesUtil", () => {
     await seedSkuSliceMonthDay(konkName, d1, { p1: { stock: 7, price: 5 } });
     await seedSkuSliceMonthDay(konkName, d2, { p1: { stock: 4, price: 5 } });
 
-    const progress: Array<{ day: string; dayIndex: number; dayTotal: number }> =
-      [];
+    const progress: Array<{ day: string; dayIndex: number; dayTotal: number }> = [];
     await materializeSkuSliceSalesDateRange({
       konkName,
       fromDate: d1,

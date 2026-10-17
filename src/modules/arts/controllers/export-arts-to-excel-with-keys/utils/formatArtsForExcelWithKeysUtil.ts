@@ -16,4 +16,3 @@ export const formatArtsForExcelWithKeysUtil = (arts: IArt[]): ExcelArtKeyRow[] =
     abc: art.abc || "",
   }));
 };
-

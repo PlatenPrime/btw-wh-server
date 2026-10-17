@@ -10,4 +10,3 @@ export type ExcelArtRow = {
   "Залишки на сайті": number | string;
   "Дата оновлення залишків": string;
 };
-

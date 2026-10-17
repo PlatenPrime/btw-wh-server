@@ -24,9 +24,7 @@ describe("ensureMongodBinary helpers", () => {
   it("builds default mongod cache file names", () => {
     expect(getMongodBinaryFileName()).toBe("mongod-x64-win32-7.0.14.exe");
     expect(getMongodZipFileName()).toBe("mongodb-windows-x86_64-7.0.14.zip");
-    expect(getMongodZipEntryPath()).toBe(
-      "mongodb-win32-x86_64-windows-7.0.14/bin/mongod.exe",
-    );
+    expect(getMongodZipEntryPath()).toBe("mongodb-win32-x86_64-windows-7.0.14/bin/mongod.exe");
   });
 
   it("returns false for missing binary path", () => {
@@ -43,8 +41,6 @@ describe("ensureMongodBinary helpers", () => {
 
   it("builds zip path inside download dir", () => {
     tempDir = mkdtempSync(join(tmpdir(), "btw-mongod-test-"));
-    expect(getMongodZipPath(tempDir)).toBe(
-      join(tempDir, "mongodb-windows-x86_64-7.0.14.zip"),
-    );
+    expect(getMongodZipPath(tempDir)).toBe(join(tempDir, "mongodb-windows-x86_64-7.0.14.zip"));
   });
 });

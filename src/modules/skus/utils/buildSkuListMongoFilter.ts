@@ -16,8 +16,7 @@ export type SkuListFilterQuery = Omit<GetAllSkusQuery, "page" | "limit">;
 export async function buildSkuListMongoFilter(
   query: SkuListFilterQuery,
 ): Promise<Record<string, unknown>> {
-  const { konkName, prodName, search, isInvalid, createdFrom, notInAnySkugr } =
-    query;
+  const { konkName, prodName, search, isInvalid, createdFrom, notInAnySkugr } = query;
 
   const filter: Record<string, unknown> = {};
   if (konkName && konkName.trim() !== "") filter.konkName = konkName;

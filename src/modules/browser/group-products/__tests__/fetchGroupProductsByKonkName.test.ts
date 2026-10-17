@@ -108,13 +108,13 @@ describe("fetchGroupProductsByKonkName", () => {
     await expect(
       fetchGroupProductsByKonkName("unknown-shop", {
         groupUrl: "https://example.com/group",
-      })
+      }),
     ).rejects.toThrow(UnsupportedKonkForGroupProductsError);
 
     await expect(
       fetchGroupProductsByKonkName("unknown-shop", {
         groupUrl: "https://example.com/group",
-      })
+      }),
     ).rejects.toThrow(/not implemented for konkName: unknown-shop/);
   });
 });

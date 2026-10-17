@@ -5,10 +5,7 @@ import { IUser } from "../../auth/models/User.js";
 export const EVENT_TYPES = ["create", "edit", "delete", "other"] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 
-export type EventUserData = Pick<
-  IUser,
-  "_id" | "fullname" | "telegram" | "photo"
->;
+export type EventUserData = Pick<IUser, "_id" | "fullname" | "telegram" | "photo">;
 
 export interface IEvent extends Document {
   _id: Types.ObjectId;
@@ -28,7 +25,7 @@ const eventUserDataSchema = new Schema<EventUserData>(
     telegram: { type: String },
     photo: { type: String },
   },
-  { _id: false }
+  { _id: false },
 );
 
 const eventSchema = new Schema<IEvent>(
@@ -49,7 +46,7 @@ const eventSchema = new Schema<IEvent>(
     },
     description: { type: String, required: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 eventSchema.index({ createdAt: -1 });
@@ -60,8 +57,4 @@ eventSchema.index({ userId: 1, createdAt: -1 });
  * Event Mongoose model — append-only audit trail
  * @see IEvent
  */
-export const Event: Model<IEvent> = getOrCreateModel<IEvent>(
-  "Event",
-  eventSchema,
-  "events"
-);
+export const Event: Model<IEvent> = getOrCreateModel<IEvent>("Event", eventSchema, "events");

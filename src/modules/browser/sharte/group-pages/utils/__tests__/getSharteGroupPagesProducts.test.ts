@@ -5,8 +5,7 @@ import { browserGet } from "../../../../utils/browserRequest.js";
 vi.mock("../../../../utils/browserRequest.js");
 
 const GROUP_URL = "https://sharte.example.test/catalog/group/apply/";
-const PAGE2_URL =
-  "https://sharte.example.test/catalog/group/apply/?PAGEN_1=2";
+const PAGE2_URL = "https://sharte.example.test/catalog/group/apply/?PAGEN_1=2";
 
 function sharteProductCard(opts: {
   productId: string;
@@ -35,10 +34,7 @@ function shartePagination(opts: { nextHref?: string }): string {
   </ul></div></div>`;
 }
 
-function shartePageHtml(opts: {
-  cards: string[];
-  nextHref?: string;
-}): string {
+function shartePageHtml(opts: { cards: string[]; nextHref?: string }): string {
   const grid = opts.cards.join("");
   const pagination = shartePagination({
     ...(opts.nextHref !== undefined && { nextHref: opts.nextHref }),
@@ -162,7 +158,7 @@ describe("getSharteGroupPagesProducts", () => {
           title: "Z",
         }).replace(
           `src="/lazy/lazy-image.svg"`,
-          `src="/lazy/lazy-image.svg" data-srcset="${real} 100w"`
+          `src="/lazy/lazy-image.svg" data-srcset="${real} 100w"`,
         ),
       ],
     });

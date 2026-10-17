@@ -9,9 +9,7 @@ import type { GetAnalogSliceRangeInput } from "../schemas/getAnalogSliceRangeSch
 
 export type { SliceRangeItem };
 
-export type GetAnalogSliceRangeResult =
-  | { ok: true; data: SliceRangeItem[] }
-  | { ok: false };
+export type GetAnalogSliceRangeResult = { ok: true; data: SliceRangeItem[] } | { ok: false };
 
 function sliceDateMinusDays(sliceDate: Date, days: number): Date {
   const d = new Date(sliceDate);
@@ -25,11 +23,9 @@ function sliceDateMinusDays(sliceDate: Date, days: number): Date {
  * ok: false — аналог не найден или у аналога пустой artikul.
  */
 export async function getAnalogSliceRangeUtil(
-  input: GetAnalogSliceRangeInput
+  input: GetAnalogSliceRangeInput,
 ): Promise<GetAnalogSliceRangeResult> {
-  const analog = await Analog.findById(input.analogId)
-    .select("konkName artikul")
-    .lean();
+  const analog = await Analog.findById(input.analogId).select("konkName artikul").lean();
 
   if (!analog) return { ok: false };
 

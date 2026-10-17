@@ -5,8 +5,8 @@ export const getBtradeSliceQuerySchema = z.object({
   date: dateStringSchema,
   isInvalid: z
     .enum(["true", "false"])
-    .optional()
-    .transform((val) => (val === undefined ? undefined : val === "true")),
+    .transform((val) => val === "true")
+    .optional(),
   page: z
     .string()
     .optional()

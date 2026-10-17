@@ -23,7 +23,7 @@ export const updateZoneById = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -47,10 +47,7 @@ export const updateZoneById = async (req: Request, res: Response) => {
       if (updateData.title && duplicateZone.title === updateData.title) {
         duplicateFields.push("title");
       }
-      if (
-        updateData.bar !== undefined &&
-        duplicateZone.bar === updateData.bar
-      ) {
+      if (updateData.bar !== undefined && duplicateZone.bar === updateData.bar) {
         duplicateFields.push("bar");
       }
 
@@ -107,4 +104,3 @@ export const updateZoneById = async (req: Request, res: Response) => {
     }
   }
 };
-

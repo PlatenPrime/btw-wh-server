@@ -5,14 +5,8 @@ import {
 } from "../../skus/utils/getSkuStockDataUtil.js";
 import { SkuSliceDayMeta } from "../../sku-slices/models/SkuSliceDayMeta.js";
 import { SkuSliceMonth } from "../../sku-slices/models/SkuSliceMonth.js";
-import {
-  loadDayMapForKonk,
-  upsertDayPoint,
-} from "../../sku-slices/utils/skuSliceMonthStore.js";
-import {
-  toSliceMonthDate,
-  toSliceMonthDayKey,
-} from "../../sku-slices/utils/skuSliceMonthKeys.js";
+import { loadDayMapForKonk, upsertDayPoint } from "../../sku-slices/utils/skuSliceMonthStore.js";
+import { toSliceMonthDate, toSliceMonthDayKey } from "../../sku-slices/utils/skuSliceMonthKeys.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { getCompensationExcludedCompetitorSet } from "../../slices/config/excludedCompetitors.js";
 import {
@@ -21,11 +15,7 @@ import {
 } from "./compensatingSliceRunner.js";
 import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { shouldRefetchSkuSliceItem } from "./shouldRefetchSkuSliceItem.js";
-import {
-  logModuleError,
-  logModuleInfo,
-  logModuleWarn,
-} from "../../../logging/logModuleError.js";
+import { logModuleError, logModuleInfo, logModuleWarn } from "../../../logging/logModuleError.js";
 import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 type SkuIdLean = { _id: { toString(): string } };
@@ -37,15 +27,10 @@ export type RunCompensatingSkuSlicesOptions = {
   signal?: AbortSignal;
 };
 
-async function resolveKonkNamesForDay(
-  sliceDate: Date,
-  konkName?: string,
-): Promise<string[]> {
+async function resolveKonkNamesForDay(sliceDate: Date, konkName?: string): Promise<string[]> {
   if (konkName) return [konkName];
 
-  const metas = await SkuSliceDayMeta.find({ date: sliceDate })
-    .select("konkName")
-    .lean();
+  const metas = await SkuSliceDayMeta.find({ date: sliceDate }).select("konkName").lean();
   if (metas.length > 0) {
     return metas
       .map((m) => m.konkName)
@@ -79,11 +64,7 @@ export async function runCompensatingSkuSlices(
     docs.push({ konkName, data });
   }
 
-  const queue = buildCompensatingDataKeyQueue(
-    docs,
-    excluded,
-    shouldRefetchSkuSliceItem,
-  );
+  const queue = buildCompensatingDataKeyQueue(docs, excluded, shouldRefetchSkuSliceItem);
 
   const updatedByKonk = new Map<string, Set<string>>();
 
@@ -96,11 +77,10 @@ export async function runCompensatingSkuSlices(
           .select("_id")
           .lean()) as SkuIdLean | null;
         if (!sku) {
-          logModuleWarn(
-            "slice-compensation",
-            "compensating sku: entity not found, skip",
-            { konkName, productKey },
-          );
+          logModuleWarn("slice-compensation", "compensating sku: entity not found, skip", {
+            konkName,
+            productKey,
+          });
           return { refetched: 0, updated: 0 };
         }
         const result = await getSkuStockDataUtil(sku._id.toString());
@@ -133,27 +113,18 @@ export async function runCompensatingSkuSlices(
       } catch (err) {
         const e = err as Error & { code?: string };
         if (e.code === UNSUPPORTED_KONK_CODE) {
-          logModuleWarn(
-            "slice-compensation",
-            "unsupported konk, skipping refetch",
-            {
-              konkName,
-              productKey,
-            },
-          );
+          logModuleWarn("slice-compensation", "unsupported konk, skipping refetch", {
+            konkName,
+            productKey,
+          });
           return { refetched: 0, updated: 0 };
         }
         const msg = err instanceof Error ? err.message : String(err);
-        logModuleError(
-          "slice-compensation",
-          err,
-          "compensating sku slice refetch failed",
-          {
-            konkName,
-            productKey,
-            message: msg,
-          },
-        );
+        logModuleError("slice-compensation", err, "compensating sku slice refetch failed", {
+          konkName,
+          productKey,
+          message: msg,
+        });
         return { refetched: 0, updated: 0 };
       }
     },

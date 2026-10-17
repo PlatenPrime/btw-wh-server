@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import mongoose from "mongoose";
 import { formatZonesForExcelUtil } from "../formatZonesForExcelUtil.js";
 
@@ -27,12 +27,12 @@ describe("formatZonesForExcelUtil", () => {
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
-      "Назва": "1-1",
+      Назва: "1-1",
       Штрихкод: 10101,
       Сектор: 0,
     });
     expect(result[1]).toEqual({
-      "Назва": "2-1",
+      Назва: "2-1",
       Штрихкод: 20201,
       Сектор: 1,
     });
@@ -43,4 +43,3 @@ describe("formatZonesForExcelUtil", () => {
     expect(result).toHaveLength(0);
   });
 });
-

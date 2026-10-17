@@ -3,9 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ExcelPosRow } from "../formatPosesStocksForExcelUtil.js";
 import { generateExcelUtil } from "../generateExcelUtil.js";
 
-async function readSheetToJson(
-  buffer: Buffer
-): Promise<Record<string, unknown>[]> {
+async function readSheetToJson(buffer: Buffer): Promise<Record<string, unknown>[]> {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.load(buffer as unknown as ArrayBuffer);
   const worksheet = workbook.getWorksheet("Остатки");
@@ -14,8 +12,7 @@ async function readSheetToJson(
   const headers: string[] = [];
   worksheet.getRow(1).eachCell({ includeEmpty: true }, (cell, colNumber) => {
     const value = cell.value;
-    headers[colNumber - 1] =
-      typeof value === "string" ? value : String(value ?? "");
+    headers[colNumber - 1] = typeof value === "string" ? value : String(value ?? "");
   });
 
   const rows: Record<string, unknown>[] = [];

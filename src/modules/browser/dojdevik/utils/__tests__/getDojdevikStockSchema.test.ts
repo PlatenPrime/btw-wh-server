@@ -6,14 +6,12 @@ describe("getDojdevikStockSchema", () => {
     expect(
       getDojdevikStockSchema.safeParse({
         link: "https://dojdevik.com.ua/ua/p1.html",
-      }).success
+      }).success,
     ).toBe(true);
   });
 
   it("rejects empty or invalid link", () => {
     expect(getDojdevikStockSchema.safeParse({ link: "" }).success).toBe(false);
-    expect(getDojdevikStockSchema.safeParse({ link: "not-url" }).success).toBe(
-      false
-    );
+    expect(getDojdevikStockSchema.safeParse({ link: "not-url" }).success).toBe(false);
   });
 });

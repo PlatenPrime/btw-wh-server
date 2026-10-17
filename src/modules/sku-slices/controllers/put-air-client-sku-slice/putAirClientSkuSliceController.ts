@@ -8,7 +8,7 @@ import { putAirClientSkuSliceUtil } from "./utils/putAirClientSkuSliceUtil.js";
  */
 export const putAirClientSkuSliceController = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<void> => {
   const parseResult = putAirClientSkuSliceSchema.safeParse({
     skuId: req.params.skuId,
@@ -18,7 +18,7 @@ export const putAirClientSkuSliceController = async (
   if (!parseResult.success) {
     res.status(400).json({
       message: "Validation error",
-      errors: parseResult.error.errors,
+      errors: parseResult.error.issues,
     });
     return;
   }

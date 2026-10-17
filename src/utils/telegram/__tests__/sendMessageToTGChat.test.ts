@@ -68,7 +68,7 @@ describe("sendMessageToTGChat", () => {
       {
         chat_id: "-1002121224059",
         text: "Test message",
-      }
+      },
     );
     expect(logModuleDebug).toHaveBeenCalledWith("telegram", "message sent to chat", {
       chatId: "-1002121224059",
@@ -77,21 +77,21 @@ describe("sendMessageToTGChat", () => {
   });
 
   it("should throw error for empty message", async () => {
-    await expect(
-      sendMessageToTGChat({ message: "", chatId: "-1002121224059" })
-    ).rejects.toThrow("Message cannot be empty");
-    await expect(
-      sendMessageToTGChat({ message: "   ", chatId: "-1002121224059" })
-    ).rejects.toThrow("Message cannot be empty");
+    await expect(sendMessageToTGChat({ message: "", chatId: "-1002121224059" })).rejects.toThrow(
+      "Message cannot be empty",
+    );
+    await expect(sendMessageToTGChat({ message: "   ", chatId: "-1002121224059" })).rejects.toThrow(
+      "Message cannot be empty",
+    );
   });
 
   it("should throw error for empty chatId", async () => {
-    await expect(
-      sendMessageToTGChat({ message: "Test message", chatId: "" })
-    ).rejects.toThrow("Chat ID cannot be empty");
-    await expect(
-      sendMessageToTGChat({ message: "Test message", chatId: "   " })
-    ).rejects.toThrow("Chat ID cannot be empty");
+    await expect(sendMessageToTGChat({ message: "Test message", chatId: "" })).rejects.toThrow(
+      "Chat ID cannot be empty",
+    );
+    await expect(sendMessageToTGChat({ message: "Test message", chatId: "   " })).rejects.toThrow(
+      "Chat ID cannot be empty",
+    );
   });
 
   it("should throw error when Telegram API returns error", async () => {
@@ -105,10 +105,8 @@ describe("sendMessageToTGChat", () => {
     });
 
     await expect(
-      sendMessageToTGChat({ message: "Test message", chatId: "-1002121224059" })
-    ).rejects.toThrow(
-      "Failed to send message to chat: Telegram API error: [object Object]"
-    );
+      sendMessageToTGChat({ message: "Test message", chatId: "-1002121224059" }),
+    ).rejects.toThrow("Failed to send message to chat: Telegram API error: [object Object]");
   });
 
   it("should handle axios errors", async () => {
@@ -116,7 +114,7 @@ describe("sendMessageToTGChat", () => {
     mockedAxios.post.mockRejectedValueOnce(axiosError);
 
     await expect(
-      sendMessageToTGChat({ message: "Test message", chatId: "-1002121224059" })
+      sendMessageToTGChat({ message: "Test message", chatId: "-1002121224059" }),
     ).rejects.toThrow("Failed to send message to chat: Network error");
   });
 });

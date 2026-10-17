@@ -20,9 +20,7 @@ type UpdateData = {
  * const updateData = hashPasswordIfProvidedUtil({ password: "newPassword", fullname: "New Name" });
  * ```
  */
-export const hashPasswordIfProvidedUtil = (
-  updateData: UpdateData
-): UpdateData => {
+export const hashPasswordIfProvidedUtil = (updateData: UpdateData): UpdateData => {
   if (updateData.password) {
     return {
       ...updateData,
@@ -31,4 +29,3 @@ export const hashPasswordIfProvidedUtil = (
   }
   return updateData;
 };
-

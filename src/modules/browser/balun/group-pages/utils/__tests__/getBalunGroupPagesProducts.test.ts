@@ -14,10 +14,7 @@ function pageHtml(opts: {
   imageUrl: string;
   nextHref?: string;
 }): string {
-  const next =
-    opts.nextHref != null
-      ? `<link rel="next" href="${opts.nextHref}" />`
-      : "";
+  const next = opts.nextHref != null ? `<link rel="next" href="${opts.nextHref}" />` : "";
   return `<!DOCTYPE html><html><head>${next}</head><body>
 <button type="button" data-qaid="buy-button" data-product-id="${opts.productId}"
   data-product-name="${opts.titleAttr}"
@@ -34,7 +31,7 @@ describe("getBalunGroupPagesProducts", () => {
   it("parses products across two pages", async () => {
     const html1 = pageHtml({
       productId: "111",
-      titleAttr: 'Widget &#34;10&quot;',
+      titleAttr: "Widget &#34;10&quot;",
       productPath: "/ua/p111.html",
       imageUrl: "https://images.prom.ua/a.jpg",
       nextHref: PAGE2_URL,
@@ -94,8 +91,7 @@ describe("getBalunGroupPagesProducts", () => {
   it("preserves groupUrl query on paginated next URL (Prom.ua rel=next without query)", async () => {
     const groupWithQuery =
       "https://balun.example.test/ua/g123-pastel?product_items_per_page=48&csbss47=793893717&csbss49=835890110";
-    const page2NoQuery =
-      "https://balun.example.test/ua/g123-pastel/page_2";
+    const page2NoQuery = "https://balun.example.test/ua/g123-pastel/page_2";
     const page2WithQuery =
       "https://balun.example.test/ua/g123-pastel/page_2?product_items_per_page=48&csbss47=793893717&csbss49=835890110";
 
@@ -152,9 +148,7 @@ describe("getBalunGroupPagesProducts", () => {
 
     expect(result).toHaveLength(1);
     expect(result[0]?.productId).toBe("2688595028");
-    expect(result[0]?.url).toBe(
-      "https://balun.example.test/ua/p2688595028-z.html"
-    );
+    expect(result[0]?.url).toBe("https://balun.example.test/ua/p2688595028-z.html");
     expect(result[0]?.title).toBe("OOS product");
     expect(result[0]?.imageUrl).toBe("https://images.prom.ua/oos.jpg");
   });

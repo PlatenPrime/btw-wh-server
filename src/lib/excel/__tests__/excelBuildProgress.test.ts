@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  notifyExcelBuildProgress,
-} from "../excelBuildProgress.js";
+import { notifyExcelBuildProgress } from "../excelBuildProgress.js";
 
 describe("notifyExcelBuildProgress", () => {
   it("does nothing without handler", () => {

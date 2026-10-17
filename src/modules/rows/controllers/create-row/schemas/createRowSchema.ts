@@ -5,4 +5,3 @@ export const createRowSchema = z.object({
 });
 
 export type CreateRowInput = z.infer<typeof createRowSchema>;
-

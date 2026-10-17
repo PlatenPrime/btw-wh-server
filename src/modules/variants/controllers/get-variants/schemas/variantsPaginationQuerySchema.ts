@@ -14,7 +14,4 @@ export const variantsPaginationQuerySchema = z.object({
   search: z.string().optional(),
 });
 
-export type VariantsPaginationQuery = z.infer<
-  typeof variantsPaginationQuerySchema
->;
-
+export type VariantsPaginationQuery = z.infer<typeof variantsPaginationQuerySchema>;

@@ -21,7 +21,7 @@ export async function expireAndCleanupExcelJobs(
 
   let orphanFilesRemoved = 0;
   const dir = getExcelJobsDir();
-  let names: string[] = [];
+  let names: string[];
   try {
     names = await fs.readdir(dir);
   } catch {

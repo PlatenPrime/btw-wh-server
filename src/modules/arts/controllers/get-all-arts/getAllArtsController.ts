@@ -3,17 +3,14 @@ import { getAllArtsQuerySchema } from "./schemas/getAllArtsSchema.js";
 import { getAllArtsUtil } from "./utils/getAllArtsUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getAllArtsController = async (
-  req: Request<{}, {}, {}, any>,
-  res: Response
-) => {
+export const getAllArtsController = async (req: Request<{}, {}, {}, any>, res: Response) => {
   try {
     // Валидация параметров запроса
     const parseResult = getAllArtsQuerySchema.safeParse(req.query);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid query parameters",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -42,4 +39,3 @@ export const getAllArtsController = async (
     }
   }
 };
-

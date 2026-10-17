@@ -8,10 +8,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Обновить название поставки
  * @route   PATCH /api/dels/:id/title
  */
-export const updateDelTitleByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateDelTitleByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const { title, prodName } = req.body;
@@ -19,7 +16,7 @@ export const updateDelTitleByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

@@ -80,7 +80,7 @@ describe("deleteKaskById", () => {
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(user._id));
     expect(events[0].description).toBe(
-      "Видалено касовий запит на артикул 8888-8888 (id: " + kask._id + ")"
+      "Видалено касовий запит на артикул 8888-8888 (id: " + kask._id + ")",
     );
   });
 });

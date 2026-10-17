@@ -51,9 +51,7 @@ describe("deleteAskById", () => {
     const events = await Event.find({ department: "asks" });
     expect(events).toHaveLength(1);
     expect(events[0].userId.toString()).toBe(String(actor._id));
-    expect(events[0].description).toBe(
-      `Видалено заявку на артикул ART-DELETE (id: ${ask._id})`
-    );
+    expect(events[0].description).toBe(`Видалено заявку на артикул ART-DELETE (id: ${ask._id})`);
   });
 
   it("404: ask не найден", async () => {
@@ -70,5 +68,3 @@ describe("deleteAskById", () => {
     expect(responseJson.message).toBe("Validation error");
   });
 });
-
-

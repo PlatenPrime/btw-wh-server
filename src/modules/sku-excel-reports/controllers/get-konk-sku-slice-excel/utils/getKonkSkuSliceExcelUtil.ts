@@ -14,8 +14,7 @@ import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForS
 import type { GetKonkSkuSliceExcelInput } from "../schemas/getKonkSkuSliceExcelSchema.js";
 
 export type GetKonkSkuSliceExcelResult =
-  | { ok: true; buffer: Buffer; fileName: string }
-  | { ok: false };
+  { ok: true; buffer: Buffer; fileName: string } | { ok: false };
 
 export async function getKonkSkuSliceExcelUtil(
   input: GetKonkSkuSliceExcelInput,
@@ -28,9 +27,7 @@ export async function getKonkSkuSliceExcelUtil(
   });
   if (resolved.length === 0) return { ok: false };
 
-  const prodTitleByName = await loadProdDisplayTitlesByName(
-    resolved.map((r) => r.prodName),
-  );
+  const prodTitleByName = await loadProdDisplayTitlesByName(resolved.map((r) => r.prodName));
 
   const rows: SkuSliceExcelSkuRow[] = resolved.map((r) => ({
     title: r.title,

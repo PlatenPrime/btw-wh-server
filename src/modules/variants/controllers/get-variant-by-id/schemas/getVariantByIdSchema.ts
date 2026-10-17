@@ -8,4 +8,3 @@ export const getVariantByIdSchema = z.object({
 });
 
 export type GetVariantByIdInput = z.infer<typeof getVariantByIdSchema>;
-

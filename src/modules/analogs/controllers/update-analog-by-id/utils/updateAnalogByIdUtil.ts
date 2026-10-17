@@ -4,14 +4,11 @@ import { Analog, IAnalog } from "../../../models/Analog.js";
 import type { UpdateAnalogByIdInput } from "../schemas/updateAnalogByIdSchema.js";
 
 type AnalogUpdateFields = Partial<
-  Pick<
-    IAnalog,
-    "konkName" | "prodName" | "artikul" | "nameukr" | "url"
-  >
+  Pick<IAnalog, "konkName" | "prodName" | "artikul" | "nameukr" | "url">
 >;
 
 export const updateAnalogByIdUtil = async (
-  input: UpdateAnalogByIdInput
+  input: UpdateAnalogByIdInput,
 ): Promise<IAnalog | null> => {
   const update: AnalogUpdateFields = {};
   const updatable: (keyof UpdateAnalogByIdInput)[] = [
@@ -35,10 +32,9 @@ export const updateAnalogByIdUtil = async (
     return Analog.findById(input.id);
   }
 
-  const analog = await Analog.findByIdAndUpdate(
-    input.id,
-    update as UpdateQuery<IAnalog>,
-    { new: true, runValidators: true }
-  );
+  const analog = await Analog.findByIdAndUpdate(input.id, update as UpdateQuery<IAnalog>, {
+    new: true,
+    runValidators: true,
+  });
   return analog as IAnalog | null;
 };

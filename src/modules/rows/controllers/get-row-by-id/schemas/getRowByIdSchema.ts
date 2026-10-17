@@ -8,4 +8,3 @@ export const getRowByIdSchema = z.object({
 });
 
 export type GetRowByIdInput = z.infer<typeof getRowByIdSchema>;
-

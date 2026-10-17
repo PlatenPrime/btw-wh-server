@@ -12,11 +12,9 @@ export type SliceByDateResult = { stock: number; price: number };
  * Если аналог не найден, у аналога пустой artikul или среза/записи по артикулу нет — возвращает null.
  */
 export async function getAnalogSliceByDateUtil(
-  input: GetAnalogSliceByDateInput
+  input: GetAnalogSliceByDateInput,
 ): Promise<SliceByDateResult | null> {
-  const analog = await Analog.findById(input.analogId)
-    .select("konkName artikul")
-    .lean();
+  const analog = await Analog.findById(input.analogId).select("konkName artikul").lean();
 
   if (!analog) return null;
 

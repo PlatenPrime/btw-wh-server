@@ -6,10 +6,7 @@ import {
 } from "../../slices/config/balunFakeStockSentinel.js";
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
 import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
-import {
-  loadDayMapsForKonkDates,
-  upsertDayStockOnly,
-} from "./skuSliceMonthStore.js";
+import { loadDayMapsForKonkDates, upsertDayStockOnly } from "./skuSliceMonthStore.js";
 import {
   computeBalunFakeStockPatches,
   type BalunFakeStockPatch,
@@ -76,9 +73,7 @@ function readStock(raw: unknown): number | undefined {
   return typeof stock === "number" && Number.isFinite(stock) ? stock : undefined;
 }
 
-function collectProductIds(
-  dataByDate: Map<number, Record<string, unknown>>,
-): string[] {
+function collectProductIds(dataByDate: Map<number, Record<string, unknown>>): string[] {
   const ids = new Set<string>();
   for (const data of dataByDate.values()) {
     for (const key of Object.keys(data)) {
@@ -124,9 +119,7 @@ function toFindings(patches: BalunFakeStockPatch[]): BalunFakeStockFinding[] {
   }));
 }
 
-function toSkippedFindings(
-  skipped: BalunFakeStockSkip[],
-): BalunFakeStockSkippedFinding[] {
+function toSkippedFindings(skipped: BalunFakeStockSkip[]): BalunFakeStockSkippedFinding[] {
   return skipped.map((s) => ({
     productId: s.productId,
     date: toUtcYmd(new Date(s.dateMs)),
@@ -149,9 +142,7 @@ export async function correctBalunFakeStockSpikesUtil(
   const apply = input.apply !== false;
   const lookbackDays = input.lookbackDays ?? BALUN_FAKE_STOCK_LOOKBACK_DAYS;
   if (!Number.isFinite(lookbackDays) || lookbackDays < 0) {
-    throw new Error(
-      "correctBalunFakeStockSpikesUtil: lookbackDays must be >= 0",
-    );
+    throw new Error("correctBalunFakeStockSpikesUtil: lookbackDays must be >= 0");
   }
 
   const asOf = toSliceDate(input.asOf ?? new Date());
@@ -164,10 +155,7 @@ export async function correctBalunFakeStockSpikesUtil(
     return emptyResult(apply, daysBack, windowDates);
   }
 
-  const maps = await loadDayMapsForKonkDates(
-    BALUN_FAKE_STOCK_KONK_NAME,
-    loadDates,
-  );
+  const maps = await loadDayMapsForKonkDates(BALUN_FAKE_STOCK_KONK_NAME, loadDates);
   const dataByDate = new Map<number, Record<string, unknown>>();
   for (const date of loadDates) {
     dataByDate.set(date.getTime(), maps.get(date.getTime()) ?? {});

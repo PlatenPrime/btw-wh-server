@@ -3,7 +3,7 @@ import { ExcelZoneRow } from "./types.js";
 
 export const formatZonesForExcelUtil = (zones: IZone[]): ExcelZoneRow[] => {
   return zones.map((zone) => ({
-    "Назва": zone.title,
+    Назва: zone.title,
     Штрихкод: zone.bar,
     Сектор: zone.sector,
   }));

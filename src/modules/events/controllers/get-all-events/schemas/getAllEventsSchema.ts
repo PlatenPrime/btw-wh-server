@@ -17,10 +17,9 @@ export const getAllEventsQuerySchema = z.object({
   userId: z
     .string()
     .optional()
-    .refine(
-      (val) => val === undefined || mongoose.Types.ObjectId.isValid(val),
-      { message: "Invalid userId format" }
-    ),
+    .refine((val) => val === undefined || mongoose.Types.ObjectId.isValid(val), {
+      message: "Invalid userId format",
+    }),
   type: z.enum(EVENT_TYPES).optional(),
   from: z
     .string()

@@ -32,9 +32,7 @@ function parsePositiveInt(flag: string, raw: string, min: number): number {
   return n;
 }
 
-export function parseCorrectBalunFakeStockCliArgs(
-  argv: string[]
-): CorrectBalunFakeStockCliArgs {
+export function parseCorrectBalunFakeStockCliArgs(argv: string[]): CorrectBalunFakeStockCliArgs {
   let daysBack = BALUN_FAKE_STOCK_CRON_DAYS_BACK;
   let apply = false;
   let asOf: Date | undefined;
@@ -47,11 +45,7 @@ export function parseCorrectBalunFakeStockCliArgs(
       continue;
     }
     if (arg === "--days-back") {
-      daysBack = parsePositiveInt(
-        "--days-back",
-        readFlagValue(argv, i, "--days-back"),
-        1
-      );
+      daysBack = parsePositiveInt("--days-back", readFlagValue(argv, i, "--days-back"), 1);
       i += 1;
       continue;
     }
@@ -64,7 +58,7 @@ export function parseCorrectBalunFakeStockCliArgs(
       lookbackDays = parsePositiveInt(
         "--lookback-days",
         readFlagValue(argv, i, "--lookback-days"),
-        0
+        0,
       );
       i += 1;
       continue;

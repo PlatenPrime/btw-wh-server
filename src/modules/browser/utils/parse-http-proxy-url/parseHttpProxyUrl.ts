@@ -25,11 +25,7 @@ export function parseHttpProxyUrl(raw: string): AxiosProxyConfig | null {
     return null;
   }
 
-  const port = url.port
-    ? Number(url.port)
-    : url.protocol === "https:"
-      ? 443
-      : 80;
+  const port = url.port ? Number(url.port) : url.protocol === "https:" ? 443 : 80;
 
   if (!Number.isFinite(port) || port <= 0) {
     return null;

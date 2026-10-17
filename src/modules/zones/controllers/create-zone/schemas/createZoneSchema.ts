@@ -10,12 +10,9 @@ export const createZoneSchema = z.object({
     .min(1, "Title is required")
     .regex(
       titlePattern,
-      'Title must be in format: 1-3 numeric segments (e.g., "42-1", "22-5-1", "42-13-2")'
+      'Title must be in format: 1-3 numeric segments (e.g., "42-1", "22-5-1", "42-13-2")',
     ),
-  bar: z
-    .number()
-    .int("Bar must be an integer")
-    .positive("Bar must be a positive number"),
+  bar: z.number().int("Bar must be an integer").positive("Bar must be a positive number"),
   sector: z
     .number()
     .int("Sector must be an integer")
@@ -25,4 +22,3 @@ export const createZoneSchema = z.object({
 
 // Типы для экспорта
 export type CreateZoneInput = z.infer<typeof createZoneSchema>;
-

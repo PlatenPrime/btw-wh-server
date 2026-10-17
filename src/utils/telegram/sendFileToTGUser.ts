@@ -5,10 +5,7 @@ import { getBtwToken } from "../../constants/telegram.js";
 import { TelegramDocumentResponse } from "./types.js";
 import { logModuleDebug, logModuleError } from "../../logging/logModuleError.js";
 
-export const sendFileToTGUser = async (
-  filePath: string,
-  userId: string
-): Promise<void> => {
+export const sendFileToTGUser = async (filePath: string, userId: string): Promise<void> => {
   if (!filePath?.trim()) {
     throw new Error("File path cannot be empty");
   }
@@ -33,7 +30,7 @@ export const sendFileToTGUser = async (
         headers: {
           ...formData.getHeaders(),
         },
-      }
+      },
     );
 
     if (!response.data.ok) {
@@ -46,8 +43,7 @@ export const sendFileToTGUser = async (
       messageId: response.data.result.message_id,
     });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error occurred";
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     logModuleError("telegram", error, "Помилка відправки файла користувачу:");
     throw new Error(`Не вдалося відправити файл користувачу: ${errorMessage}`);
   }

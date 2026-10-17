@@ -10,9 +10,7 @@ type CreateSkuUtilInput = {
   imageUrl?: string;
 };
 
-export const createSkuUtil = async (
-  input: CreateSkuUtilInput
-): Promise<ISku> => {
+export const createSkuUtil = async (input: CreateSkuUtilInput): Promise<ISku> => {
   const sku = await Sku.create({
     konkName: input.konkName,
     prodName: input.prodName,

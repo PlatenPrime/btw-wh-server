@@ -19,12 +19,11 @@ import { getPosesStocksForExportUtil } from "../../../poses/controllers/export-p
 import { formatZonesForExcelUtil } from "../../../zones/controllers/export-zones-to-excel/utils/formatZonesForExcelUtil.js";
 import { generateExcelUtil as generateZonesExcelUtil } from "../../../zones/controllers/export-zones-to-excel/utils/generateExcelUtil.js";
 import { getZonesForExportUtil } from "../../../zones/controllers/export-zones-to-excel/utils/getZonesForExportUtil.js";
-import { emptyExcelJobParamsSchema, posesExportStocksParamsSchema } from "../excelJobKindDefinitions.js";
 import {
-  failExcelJobRun,
-  okExcelJobRun,
-  type ExcelJobKindRunner,
-} from "../excelJobRunTypes.js";
+  emptyExcelJobParamsSchema,
+  posesExportStocksParamsSchema,
+} from "../excelJobKindDefinitions.js";
+import { failExcelJobRun, okExcelJobRun, type ExcelJobKindRunner } from "../excelJobRunTypes.js";
 
 export const runArtStock: ExcelJobKindRunner = async (params, options) => {
   const parsed = getArtStockExcelSchema.safeParse(params);
@@ -69,10 +68,7 @@ export const runArtsExport: ExcelJobKindRunner = async (params, options) => {
   return okExcelJobRun(built.buffer, built.fileName);
 };
 
-export const runArtsExportWithStocks: ExcelJobKindRunner = async (
-  params,
-  options,
-) => {
+export const runArtsExportWithStocks: ExcelJobKindRunner = async (params, options) => {
   const parsed = emptyExcelJobParamsSchema.safeParse(params ?? {});
   if (!parsed.success) {
     return failExcelJobRun("Validation error");
@@ -100,9 +96,7 @@ export const runArtsExportKeys: ExcelJobKindRunner = async (params, options) => 
   if (!arts || arts.length === 0) {
     return failExcelJobRun("No arts found to export");
   }
-  const built = await generateExcelWithKeysUtil(
-    formatArtsForExcelWithKeysUtil(arts),
-  );
+  const built = await generateExcelWithKeysUtil(formatArtsForExcelWithKeysUtil(arts));
   notifyExcelBuildProgress(options?.onProgress, 1, 1);
   return okExcelJobRun(built.buffer, built.fileName);
 };

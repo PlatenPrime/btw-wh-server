@@ -8,13 +8,10 @@ import app from "../../../test/utils/testApp.js";
 import { Konk } from "../models/Konk.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -37,10 +34,7 @@ describe("Konks router integration", () => {
     });
 
     it("403 for USER role", async () => {
-      await request(app)
-        .get("/api/konks")
-        .set(createAuthHeader(RoleType.USER))
-        .expect(403);
+      await request(app).get("/api/konks").set(createAuthHeader(RoleType.USER)).expect(403);
     });
 
     it("200 returns all konks for ADMIN", async () => {

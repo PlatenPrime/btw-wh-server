@@ -25,9 +25,8 @@ export const updateArtByIdUtil = async ({
     {
       new: true,
       runValidators: true,
-      select:
-        "artikul prodName zone namerus nameukr limit marker btradeStock createdAt updatedAt",
-    }
+      select: "artikul prodName zone namerus nameukr limit marker btradeStock createdAt updatedAt",
+    },
   );
 
   return updatedArt;

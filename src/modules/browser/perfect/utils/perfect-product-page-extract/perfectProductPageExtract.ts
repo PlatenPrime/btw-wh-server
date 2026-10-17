@@ -2,9 +2,7 @@ import * as cheerio from "cheerio";
 
 /** CSRF для add-to-cart: static_token из формы, не session token из prestashop.token. */
 export function extractToken(html: string): string | null {
-  const formToken = html.match(
-    /name=["']token["'][^>]*value=["']([a-f0-9]{32})["']/i
-  );
+  const formToken = html.match(/name=["']token["'][^>]*value=["']([a-f0-9]{32})["']/i);
   if (formToken?.[1]) return formToken[1];
 
   const staticToken = html.match(/"static_token"\s*:\s*"([a-f0-9]{32})"/i);
@@ -42,17 +40,11 @@ export function extractTitle(html: string): string {
   return og ?? "";
 }
 
-export function extractProductAttributeId(
-  html: string,
-  productUrl: string
-): string | null {
+export function extractProductAttributeId(html: string, productUrl: string): string | null {
   const idFromUrlMatch = productUrl.match(/\/(\d+)-(\d+)-[^/]+\.html(?:\?.*)?$/i);
   if (idFromUrlMatch?.[2]) return idFromUrlMatch[2];
 
-  const attrPatterns = [
-    /"id_product_attribute"\s*:\s*(\d+)/,
-    /id_product_attribute=(\d+)/i,
-  ];
+  const attrPatterns = [/"id_product_attribute"\s*:\s*(\d+)/, /id_product_attribute=(\d+)/i];
   for (const pattern of attrPatterns) {
     const match = html.match(pattern);
     if (match?.[1]) return match[1];
@@ -94,10 +86,7 @@ export interface PerfectDeleteFromCartParams {
   idCustomization?: string | null;
 }
 
-function appendPerfectProductIdentity(
-  body: URLSearchParams,
-  params: PerfectAddToCartParams
-): void {
+function appendPerfectProductIdentity(body: URLSearchParams, params: PerfectAddToCartParams): void {
   body.set("token", params.token);
   body.set("id_product", params.idProduct);
   body.set("id_customization", "0");
@@ -130,9 +119,7 @@ export function buildPerfectRefreshBody(params: PerfectAddToCartParams): string 
   return body.toString();
 }
 
-export function buildPerfectDeleteFromCartBody(
-  params: PerfectDeleteFromCartParams
-): string {
+export function buildPerfectDeleteFromCartBody(params: PerfectDeleteFromCartParams): string {
   const customization = params.idCustomization?.trim() || "0";
   const body = new URLSearchParams({
     token: params.token,

@@ -144,7 +144,6 @@ describe("aggregateManufacturerDaySales", () => {
     expect(rows).toEqual([{ key: "k1", salesPcs: 2, salesUah: 20 }]);
   });
 
-
   it("dailyManufacturerSales fills missing days with zeros", async () => {
     await SkuManufacturerDaySales.insertMany([
       {
@@ -199,8 +198,6 @@ describe("aggregateManufacturerDaySales", () => {
       dateFrom: d1,
       dateTo: d1,
     });
-    expect(rows).toEqual([
-      { date: d1, salesPcs: 5, salesUah: 16 },
-    ]);
+    expect(rows).toEqual([{ date: d1, salesPcs: 5, salesUah: 16 }]);
   });
 });

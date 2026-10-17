@@ -15,7 +15,7 @@ export const createSeg = async (req: Request, res: Response) => {
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -70,4 +70,3 @@ export const createSeg = async (req: Request, res: Response) => {
     await session.endSession();
   }
 };
-

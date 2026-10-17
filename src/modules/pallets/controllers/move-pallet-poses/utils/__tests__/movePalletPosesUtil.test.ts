@@ -91,11 +91,9 @@ describe("movePalletPosesUtil", () => {
     expect(updatedTargetPallet?.poses.length).toBe(2);
 
     const updatedPos1 = await Pos.findById(pos1._id);
-    const updatedPos2 = await Pos.findById(pos2._id);
+    await Pos.findById(pos2._id);
 
-    expect(updatedPos1?.palletData._id.toString()).toBe(
-      String(targetPallet._id)
-    );
+    expect(updatedPos1?.palletData._id.toString()).toBe(String(targetPallet._id));
     expect(updatedPos1?.palletData.title).toBe("Target-Pallet");
     expect(updatedPos1?.rowData._id.toString()).toBe(String(row2._id));
     expect(updatedPos1?.rowData.title).toBe("Row 2");

@@ -3,8 +3,7 @@ import { loadKonkProdSkuChartSeries } from "../../../../sku-reporting/utils/konk
 import type { GetKonkProdSkuStockChartDataInput } from "../schemas/getKonkProdSkuStockChartDataSchema.js";
 
 export type GetKonkProdSkuStockChartDataResult =
-  | { ok: true; data: KonkBtradeStockComparisonData }
-  | { ok: false };
+  { ok: true; data: KonkBtradeStockComparisonData } | { ok: false };
 
 export async function getKonkProdSkuStockChartDataUtil(
   input: GetKonkProdSkuStockChartDataInput,
@@ -42,9 +41,7 @@ export async function getKonkProdSkuStockChartDataUtil(
       : Math.round((diffCompetitorStock / firstCompetitor) * 100 * 100) / 100;
 
   const diffBtradeStockPct =
-    firstBtrade === 0
-      ? null
-      : Math.round((diffBtradeStock / firstBtrade) * 100 * 100) / 100;
+    firstBtrade === 0 ? null : Math.round((diffBtradeStock / firstBtrade) * 100 * 100) / 100;
 
   return {
     ok: true,

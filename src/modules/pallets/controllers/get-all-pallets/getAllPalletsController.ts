@@ -2,10 +2,7 @@ import { Request, Response } from "express";
 import { Pallet } from "../../models/Pallet.js";
 import { sortPalletsByTitle } from "../../utils/sortPalletsByTitle.js";
 
-export const getAllPalletsController = async (
-  req: Request,
-  res: Response
-) => {
+export const getAllPalletsController = async (req: Request, res: Response) => {
   try {
     const pallets = await Pallet.find();
 
@@ -26,11 +23,3 @@ export const getAllPalletsController = async (
     }
   }
 };
-
-
-
-
-
-
-
-

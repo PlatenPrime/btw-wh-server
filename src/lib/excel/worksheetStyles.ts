@@ -16,10 +16,7 @@ const thinBorder = {
  * @param worksheet - ExcelJS worksheet
  * @param columnCount - number of columns to style (1-based)
  */
-export function applyHeaderStyle(
-  worksheet: Worksheet,
-  columnCount: number
-): void {
+export function applyHeaderStyle(worksheet: Worksheet, columnCount: number): void {
   const row = worksheet.getRow(1);
   for (let c = 1; c <= columnCount; c++) {
     const cell = row.getCell(c);
@@ -45,7 +42,7 @@ export function applyHeaderStyle(
 export function applyDataRowStyle(
   worksheet: Worksheet,
   rowNumber: number,
-  columnCount: number
+  columnCount: number,
 ): void {
   const row = worksheet.getRow(rowNumber);
   const isZebra = (rowNumber - 2) % 2 === 1; // row 2 = 0, row 3 = 1, ...

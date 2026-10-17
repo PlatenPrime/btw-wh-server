@@ -94,9 +94,10 @@ describe("runSkuSliceForSkugrTodayUtil", () => {
     });
     expect(getSkuStockDataUtil).toHaveBeenCalledWith(sku._id.toString());
 
-    expect(
-      await getDayPoint("perfect", "perfect-ow", result!.sliceDate),
-    ).toEqual({ stock: 10, price: 99 });
+    expect(await getDayPoint("perfect", "perfect-ow", result!.sliceDate)).toEqual({
+      stock: 10,
+      price: 99,
+    });
   });
 
   it("counts invalid when stock is -1", async () => {
@@ -131,9 +132,10 @@ describe("runSkuSliceForSkugrTodayUtil", () => {
       errors: 0,
     });
 
-    expect(
-      await getDayPoint("perfect", "perfect-inv", result!.sliceDate),
-    ).toEqual({ stock: -1, price: -1 });
+    expect(await getDayPoint("perfect", "perfect-inv", result!.sliceDate)).toEqual({
+      stock: -1,
+      price: -1,
+    });
   });
 
   it("counts sku without productId as invalid", async () => {

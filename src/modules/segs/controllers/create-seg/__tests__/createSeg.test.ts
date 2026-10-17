@@ -124,10 +124,7 @@ describe("createSeg Controller", () => {
     const zone = await createZone();
 
     const existingSegId = new mongoose.Types.ObjectId();
-    await Zone.updateOne(
-      { _id: zone._id },
-      { $set: { "seg.id": existingSegId, sector: 1001 } }
-    );
+    await Zone.updateOne({ _id: zone._id }, { $set: { "seg.id": existingSegId, sector: 1001 } });
 
     mockRequest = {
       body: {

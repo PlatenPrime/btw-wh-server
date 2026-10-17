@@ -6,9 +6,7 @@ import { Pos } from "../../../../poses/models/Pos.js";
  * Учитываются только позиции с sklad === "pogrebi"
  * @returns Promise с Map, где ключ - artikul, значение - сумма quant
  */
-export const getPosesQuantByArtikulUtil = async (): Promise<
-  Map<string, number>
-> => {
+export const getPosesQuantByArtikulUtil = async (): Promise<Map<string, number>> => {
   const aggregationResult = await Pos.aggregate([
     {
       $match: {

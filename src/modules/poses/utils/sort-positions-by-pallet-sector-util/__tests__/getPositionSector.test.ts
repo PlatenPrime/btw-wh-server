@@ -22,7 +22,7 @@ describe("getPositionSectorUtil", () => {
     expect(
       getPositionSectorUtil({
         palletData: { sector: "5" as unknown as number },
-      } as IPos)
+      } as IPos),
     ).toBe(0);
   });
 });

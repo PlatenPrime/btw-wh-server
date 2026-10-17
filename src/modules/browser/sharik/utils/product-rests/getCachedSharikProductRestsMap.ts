@@ -1,7 +1,4 @@
-import {
-  getProductRestsSeedArtikul,
-  SHARIK_PRODUCT_RESTS_CACHE_TTL_MS,
-} from "./constants.js";
+import { getProductRestsSeedArtikul, SHARIK_PRODUCT_RESTS_CACHE_TTL_MS } from "./constants.js";
 import { fetchSharikProductRestsMap } from "./fetchSharikProductRestsMap.js";
 import type { SharikProductRestsItem } from "./types.js";
 
@@ -16,8 +13,7 @@ let cache: CacheEntry | null = null;
 
 function isCacheFresh(entry: CacheEntry, seedArtikul: string, now: number): boolean {
   return (
-    entry.seedArtikul === seedArtikul &&
-    now - entry.fetchedAt < SHARIK_PRODUCT_RESTS_CACHE_TTL_MS
+    entry.seedArtikul === seedArtikul && now - entry.fetchedAt < SHARIK_PRODUCT_RESTS_CACHE_TTL_MS
   );
 }
 
@@ -26,7 +22,7 @@ function isCacheFresh(entry: CacheEntry, seedArtikul: string, now: number): bool
  * Параллельные miss'ы делят один inflight-fetch.
  */
 export async function getCachedSharikProductRestsMap(
-  seedArtikul: string = getProductRestsSeedArtikul()
+  seedArtikul: string = getProductRestsSeedArtikul(),
 ): Promise<Map<string, SharikProductRestsItem>> {
   const now = Date.now();
 

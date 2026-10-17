@@ -9,8 +9,6 @@ describe("skugrs router", () => {
 
     expect(paths).toContain("/client/air/pending");
     expect(paths).toContain("/client/air/id/:id/fill-page");
-    expect(paths.indexOf("/client/air/pending")).toBeLessThan(
-      paths.indexOf("/id/:id")
-    );
+    expect(paths.indexOf("/client/air/pending")).toBeLessThan(paths.indexOf("/id/:id"));
   });
 });

@@ -147,10 +147,7 @@ describe("Arts Router Integration", () => {
 ### Пример мок-объекта Express:
 
 ```ts
-import {
-  createMockRequest,
-  createMockResponse,
-} from "../../test/utils/testHelpers";
+import { createMockRequest, createMockResponse } from "../../test/utils/testHelpers";
 
 const req = createMockRequest({ body: { title: "Test" } });
 const res = createMockResponse();

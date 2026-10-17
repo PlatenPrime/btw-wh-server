@@ -7,16 +7,13 @@ import { logModuleError } from "../../../../logging/logModuleError.js";
  * @desc    Получить аналоги с пагинацией и фильтрами
  * @route   GET /api/analogs
  */
-export const getAnalogsController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getAnalogsController = async (req: Request, res: Response): Promise<void> => {
   try {
     const parseResult = getAnalogsQuerySchema.safeParse(req.query);
     if (!parseResult.success) {
       res.status(400).json({
         message: "Invalid query parameters",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

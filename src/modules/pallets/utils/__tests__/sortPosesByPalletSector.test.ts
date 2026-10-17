@@ -4,9 +4,7 @@ import { sortPosesByPalletSector } from "../sortPosesByPalletSector.js";
 
 function mapPosesToSector(poses: { palletData: { sector?: number } }[]) {
   return poses.map((p) =>
-    typeof p.palletData.sector === "number"
-      ? String(p.palletData.sector)
-      : "null",
+    typeof p.palletData.sector === "number" ? String(p.palletData.sector) : "null",
   );
 }
 

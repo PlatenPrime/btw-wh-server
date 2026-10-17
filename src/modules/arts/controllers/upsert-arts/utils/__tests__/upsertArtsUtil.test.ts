@@ -23,9 +23,7 @@ describe("upsertArtsUtil", () => {
     await Art.create({ artikul: "ART-001", zone: "A1" });
 
     const result = await upsertArtsUtil({
-      arts: [
-        { artikul: "ART-001", zone: "A2", nameukr: "Updated Art", abc: "C" },
-      ],
+      arts: [{ artikul: "ART-001", zone: "A2", nameukr: "Updated Art", abc: "C" }],
     });
 
     expect(result.upsertedCount).toBe(0);
@@ -36,9 +34,7 @@ describe("upsertArtsUtil", () => {
     const nonExistentId = "000000000000000000000000";
 
     const result = await upsertArtsUtil({
-      arts: [
-        { artikul: nonExistentId, zone: "A1" },
-      ],
+      arts: [{ artikul: nonExistentId, zone: "A1" }],
     });
 
     // bulkWrite не вернёт null, проверим результат
@@ -71,4 +67,3 @@ describe("upsertArtsUtil", () => {
     expect(saved?.prodName).toBe("gemar");
   });
 });
-

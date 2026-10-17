@@ -77,9 +77,7 @@ export async function loadKonkProdSkuChartSeries(
     }
   } else {
     const skuDocs = await Sku.find(
-      isAllProd
-        ? { konkName: input.konk }
-        : { konkName: input.konk, prodName: input.prod },
+      isAllProd ? { konkName: input.konk } : { konkName: input.konk, prodName: input.prod },
     )
       .sort({ productId: 1 })
       .select("konkName productId")
@@ -188,9 +186,7 @@ export async function loadKonkProdSkuChartSeries(
     const rollupDaily = await dailyBtradeManufacturerSales({
       dateFrom,
       dateTo,
-      ...(isAllProd
-        ? { prodName: "all" }
-        : { prodName: input.prod.trim().toLowerCase() }),
+      ...(isAllProd ? { prodName: "all" } : { prodName: input.prod.trim().toLowerCase() }),
     });
     for (let d = 0; d < dayCount; d++) {
       btradeSales[d] = rollupDaily[d]?.salesPcs ?? 0;
@@ -236,8 +232,7 @@ export async function loadKonkProdSkuChartSeries(
         if (hasSkugrFilter && salesSeq) {
           const sales = salesSeq[d]!.sales;
           const price = item?.price;
-          const p =
-            typeof price === "number" && Number.isFinite(price) ? price : null;
+          const p = typeof price === "number" && Number.isFinite(price) ? price : null;
           btradeSales[d] += sales;
           btradeRevenue[d] += computeRevenueForDay(sales, p);
         }

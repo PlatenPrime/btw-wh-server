@@ -6,9 +6,7 @@ type CreateProdUtilInput = {
   imageUrl: string;
 };
 
-export const createProdUtil = async (
-  input: CreateProdUtilInput
-): Promise<IProd> => {
+export const createProdUtil = async (input: CreateProdUtilInput): Promise<IProd> => {
   const prod = await Prod.create({
     name: input.name,
     title: input.title,

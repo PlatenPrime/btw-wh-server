@@ -29,18 +29,14 @@ describe("fetchSharikProductRestsMap", () => {
   });
 
   it("fetches product_rests URL with proxyUrl from env", async () => {
-    process.env.SHARIK_HTTP_PROXY_URL =
-      "http://user:secret@77.47.252.164:50100";
-    vi.mocked(browserGet).mockResolvedValue(
-      "<pre>1501-3445 = 7; 8; 509.60</pre>"
-    );
+    process.env.SHARIK_HTTP_PROXY_URL = "http://user:secret@77.47.252.164:50100";
+    vi.mocked(browserGet).mockResolvedValue("<pre>1501-3445 = 7; 8; 509.60</pre>");
 
     const map = await fetchSharikProductRestsMap("1302-0065");
 
-    expect(browserGet).toHaveBeenCalledWith(
-      "https://sharik.ua/product_rests/1302-0065/",
-      { proxyUrl: "http://user:secret@77.47.252.164:50100" }
-    );
+    expect(browserGet).toHaveBeenCalledWith("https://sharik.ua/product_rests/1302-0065/", {
+      proxyUrl: "http://user:secret@77.47.252.164:50100",
+    });
     expect(map.get("1501-3445")).toEqual({
       actualQuantity: 7,
       sliceQuantity: 8,
@@ -54,16 +50,13 @@ describe("fetchSharikProductRestsMap", () => {
 
     await fetchSharikProductRestsMap("1302-0065");
 
-    expect(browserGet).toHaveBeenCalledWith(
-      "https://sharik.ua/product_rests/1302-0065/",
-      { proxyUrl: undefined }
-    );
+    expect(browserGet).toHaveBeenCalledWith("https://sharik.ua/product_rests/1302-0065/", {
+      proxyUrl: undefined,
+    });
   });
 
   it("throws when seed artikul is empty", async () => {
-    await expect(fetchSharikProductRestsMap("")).rejects.toThrow(
-      "Seed artikul is required"
-    );
+    await expect(fetchSharikProductRestsMap("")).rejects.toThrow("Seed artikul is required");
   });
 
   it("wraps browser errors", async () => {
@@ -71,7 +64,7 @@ describe("fetchSharikProductRestsMap", () => {
     vi.mocked(browserGet).mockRejectedValue(new Error("Network error"));
 
     await expect(fetchSharikProductRestsMap("1302-0065")).rejects.toThrow(
-      "Failed to fetch Sharik product_rests: Network error"
+      "Failed to fetch Sharik product_rests: Network error",
     );
   });
 });

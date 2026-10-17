@@ -1,10 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { RoleType } from "../../../../constants/roles.js";
 import { ApiTask } from "../../models/ApiTask.js";
-import {
-  resetApiTaskQueueForTests,
-  setApiTaskExecutor,
-} from "../../utils/apiTaskQueue.js";
+import { resetApiTaskQueueForTests, setApiTaskExecutor } from "../../utils/apiTaskQueue.js";
 import { executeApiTaskInProcess } from "../../utils/executeApiTaskInProcess.js";
 import { createApiTaskUtil } from "../create-api-task/utils/createApiTaskUtil.js";
 

@@ -18,4 +18,3 @@ export const getAnalogBtradeComparisonExcelSchema = z
 export type GetAnalogBtradeComparisonExcelInput = z.infer<
   typeof getAnalogBtradeComparisonExcelSchema
 >;
-

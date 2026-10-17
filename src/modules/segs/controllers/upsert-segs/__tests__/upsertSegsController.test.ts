@@ -58,9 +58,7 @@ describe("upsertSegsController", () => {
 
     expect(responseStatus.code).toBe(200);
     expect(responseJson.message).toBe("Segments upsert completed");
-    expect(
-      (responseJson.data as { processedSegs: unknown[] }).processedSegs
-    ).toHaveLength(1);
+    expect((responseJson.data as { processedSegs: unknown[] }).processedSegs).toHaveLength(1);
 
     const createdSeg = await Seg.findOne({ block: block._id }).exec();
     expect(createdSeg).not.toBeNull();

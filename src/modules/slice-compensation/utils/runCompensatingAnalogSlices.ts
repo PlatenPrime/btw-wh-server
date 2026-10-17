@@ -8,11 +8,7 @@ import {
 } from "./compensatingSliceRunner.js";
 import { isFullMinusOneSliceStockResult } from "../../slices/utils/isInvalidSliceStockResult.js";
 import { isFullMinusOneSliceItem } from "./isFullMinusOneSliceItem.js";
-import {
-  logModuleError,
-  logModuleInfo,
-  logModuleWarn,
-} from "../../../logging/logModuleError.js";
+import { logModuleError, logModuleInfo, logModuleWarn } from "../../../logging/logModuleError.js";
 
 type AnalogSliceLean = {
   konkName: string;
@@ -34,83 +30,76 @@ export type RunCompensatingSlicesOptions = {
  */
 export async function runCompensatingAnalogSlices(
   sliceDate: Date,
-  options?: RunCompensatingSlicesOptions
+  options?: RunCompensatingSlicesOptions,
 ): Promise<{ refetched: number; updated: number }> {
   const excluded = getCompensationExcludedCompetitorSet("analogSlices");
   const filter: { date: Date; konkName?: string } = { date: sliceDate };
   if (options?.konkName) {
     filter.konkName = options.konkName;
   }
-  const docs = (await AnalogSlice.find(filter)
-    .select("konkName data")
-    .lean()) as AnalogSliceLean[];
+  const docs = (await AnalogSlice.find(filter).select("konkName data").lean()) as AnalogSliceLean[];
 
-  const queue = buildCompensatingDataKeyQueue(
-    docs,
-    excluded,
-    isFullMinusOneSliceItem
-  );
+  const queue = buildCompensatingDataKeyQueue(docs, excluded, isFullMinusOneSliceItem);
 
   return runCompensatingSliceRefetchLoop(
     queue,
     async ({ konkName, dataKey }) => {
-    const artikulKey = dataKey;
-    try {
-      const analog = (await Analog.findOne({ konkName, artikul: artikulKey })
-        .select("_id")
-        .lean()) as AnalogIdLean | null;
-      if (!analog) {
-        logModuleWarn(
-          "slice-compensation",
-          "compensating analog: entity not found, skip",
-          { konkName, artikulKey }
-        );
-        return { refetched: 0, updated: 0 };
-      }
-      const result = await getAnalogStockDataUtil(analog._id.toString());
-      if (!result) {
-        logModuleInfo("slice-compensation", "compensating analog refetch empty", {
+      const artikulKey = dataKey;
+      try {
+        const analog = (await Analog.findOne({ konkName, artikul: artikulKey })
+          .select("_id")
+          .lean()) as AnalogIdLean | null;
+        if (!analog) {
+          logModuleWarn("slice-compensation", "compensating analog: entity not found, skip", {
+            konkName,
+            artikulKey,
+          });
+          return { refetched: 0, updated: 0 };
+        }
+        const result = await getAnalogStockDataUtil(analog._id.toString());
+        if (!result) {
+          logModuleInfo("slice-compensation", "compensating analog refetch empty", {
+            konkName,
+            artikulKey,
+            kind: "analog",
+          });
+          return { refetched: 0, updated: 0 };
+        }
+        let updated = 0;
+        if (!isFullMinusOneSliceStockResult(result)) {
+          const dataItem: Record<string, unknown> = {
+            stock: result.stock,
+            price: result.price,
+            artikul: artikulKey,
+          };
+          await AnalogSlice.findOneAndUpdate(
+            { konkName, date: sliceDate },
+            { $set: { [`data.${artikulKey}`]: dataItem } },
+          );
+          updated = 1;
+        }
+        logModuleInfo("slice-compensation", "compensating analog refetch result", {
           konkName,
           artikulKey,
           kind: "analog",
+          stock: result.stock,
+          price: result.price,
+          updated: updated === 1,
+        });
+        return { refetched: 1, updated };
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        logModuleError("slice-compensation", err, "compensating analog slice refetch failed", {
+          konkName,
+          artikulKey,
+          message: msg,
         });
         return { refetched: 0, updated: 0 };
       }
-      let updated = 0;
-      if (!isFullMinusOneSliceStockResult(result)) {
-        const dataItem: Record<string, unknown> = {
-          stock: result.stock,
-          price: result.price,
-          artikul: artikulKey,
-        };
-        await AnalogSlice.findOneAndUpdate(
-          { konkName, date: sliceDate },
-          { $set: { [`data.${artikulKey}`]: dataItem } }
-        );
-        updated = 1;
-      }
-      logModuleInfo("slice-compensation", "compensating analog refetch result", {
-        konkName,
-        artikulKey,
-        kind: "analog",
-        stock: result.stock,
-        price: result.price,
-        updated: updated === 1,
-      });
-      return { refetched: 1, updated };
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      logModuleError("slice-compensation", err, "compensating analog slice refetch failed", {
-        konkName,
-        artikulKey,
-        message: msg,
-      });
-      return { refetched: 0, updated: 0 };
-    }
-  },
+    },
     {
       onProgress: options?.onProgress,
       signal: options?.signal,
-    }
+    },
   );
 }

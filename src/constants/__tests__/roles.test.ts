@@ -1,22 +1,11 @@
 import { describe, expect, it } from "vitest";
-import {
-  hasRoleAccess,
-  isValidRole,
-  RoleType,
-  ROLE_HIERARCHY,
-} from "../roles.js";
+import { hasRoleAccess, isValidRole, RoleType, ROLE_HIERARCHY } from "../roles.js";
 
 describe("ROLE_HIERARCHY", () => {
   it("содержит четыре уровня в порядке PRIME > ADMIN > EDITOR > USER", () => {
-    expect(ROLE_HIERARCHY[RoleType.PRIME]).toBeGreaterThan(
-      ROLE_HIERARCHY[RoleType.ADMIN]
-    );
-    expect(ROLE_HIERARCHY[RoleType.ADMIN]).toBeGreaterThan(
-      ROLE_HIERARCHY[RoleType.EDITOR]
-    );
-    expect(ROLE_HIERARCHY[RoleType.EDITOR]).toBeGreaterThan(
-      ROLE_HIERARCHY[RoleType.USER]
-    );
+    expect(ROLE_HIERARCHY[RoleType.PRIME]).toBeGreaterThan(ROLE_HIERARCHY[RoleType.ADMIN]);
+    expect(ROLE_HIERARCHY[RoleType.ADMIN]).toBeGreaterThan(ROLE_HIERARCHY[RoleType.EDITOR]);
+    expect(ROLE_HIERARCHY[RoleType.EDITOR]).toBeGreaterThan(ROLE_HIERARCHY[RoleType.USER]);
   });
 });
 

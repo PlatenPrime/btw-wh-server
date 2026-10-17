@@ -64,9 +64,7 @@ describe("runManualGraboSkuSync", () => {
     await runManualGraboSkuSync();
 
     expect(runGraboSkuSyncUtil).not.toHaveBeenCalled();
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      "grabo sku sync already running"
-    );
+    expect(mockLogger.warn).toHaveBeenCalledWith("grabo sku sync already running");
     expect(isGraboSkuSyncRunning()).toBe(true);
   });
 
@@ -79,10 +77,7 @@ describe("runManualGraboSkuSync", () => {
     expect(runGraboSkuSyncUtil).toHaveBeenCalledTimes(1);
     expect(sendCronAnalyticsReport).toHaveBeenCalledWith("grabo report");
     expect(mockLogger.info).toHaveBeenCalledWith("manual grabo sku sync started");
-    expect(mockLogger.info).toHaveBeenCalledWith(
-      stats,
-      "manual grabo sku sync done"
-    );
+    expect(mockLogger.info).toHaveBeenCalledWith(stats, "manual grabo sku sync done");
     expect(isGraboSkuSyncRunning()).toBe(false);
   });
 
@@ -93,10 +88,7 @@ describe("runManualGraboSkuSync", () => {
 
     await runManualGraboSkuSync();
 
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      { err },
-      "manual grabo sku sync failed"
-    );
+    expect(mockLogger.error).toHaveBeenCalledWith({ err }, "manual grabo sku sync failed");
     expect(sendCronAnalyticsReport).toHaveBeenCalledWith("grabo error");
     expect(isGraboSkuSyncRunning()).toBe(false);
   });

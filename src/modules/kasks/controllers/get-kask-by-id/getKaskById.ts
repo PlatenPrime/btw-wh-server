@@ -3,17 +3,14 @@ import { getKaskByIdSchema } from "./schemas/getKaskByIdSchema.js";
 import { getKaskUtil } from "./utils/getKaskUtil.js";
 import { logModuleError } from "../../../../logging/logModuleError.js";
 
-export const getKaskById = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getKaskById = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const parseResult = getKaskByIdSchema.safeParse({ id });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }

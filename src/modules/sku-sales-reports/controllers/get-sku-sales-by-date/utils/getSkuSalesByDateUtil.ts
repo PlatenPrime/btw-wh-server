@@ -87,27 +87,17 @@ export async function getSkuSalesByDateUtil(
 
   const productKey = sku.productId?.trim();
   if (!productKey) return null;
-  const konkDoc = await Konk.findOne({ name: sku.konkName })
-    .select("recountDays")
-    .lean();
+  const konkDoc = await Konk.findOne({ name: sku.konkName }).select("recountDays").lean();
   const recountDays = new Set((konkDoc?.recountDays ?? []).map(String));
 
   const sliceDate = toSliceDate(input.date);
   const prevDate = sliceDateMinusDays(sliceDate, 1);
 
-  const currData = await loadSliceDataForProduct(
-    sku.konkName,
-    productKey,
-    sliceDate,
-  );
+  const currData = await loadSliceDataForProduct(sku.konkName, productKey, sliceDate);
   const currItem = currData[productKey];
   if (!currItem) return null;
 
-  const prevData = await loadSliceDataForProduct(
-    sku.konkName,
-    productKey,
-    prevDate,
-  );
+  const prevData = await loadSliceDataForProduct(sku.konkName, productKey, prevDate);
   const prevItem = prevData[productKey];
 
   let warmStart = prevDate;
@@ -118,12 +108,7 @@ export async function getSkuSalesByDateUtil(
 
   if (needsHoleLookback(prevItem, currItem)) {
     warmStart = sliceDateMinusDays(sliceDate, LOOKBACK_DAYS_WHEN_HOLE);
-    byDate = await loadSliceDataRangeForProduct(
-      sku.konkName,
-      productKey,
-      warmStart,
-      sliceDate,
-    );
+    byDate = await loadSliceDataRangeForProduct(sku.konkName, productKey, warmStart, sliceDate);
   }
 
   const datesFull = enumerateReportingDates(warmStart, sliceDate);
@@ -147,9 +132,7 @@ export async function getSkuSalesByDateUtil(
   const coalescedPrice = coalesced[idxCurr]!.price;
   const revenue = computeRevenueForDay(sales, coalescedPrice);
   const price =
-    typeof coalescedPrice === "number" && Number.isFinite(coalescedPrice)
-      ? coalescedPrice
-      : 0;
+    typeof coalescedPrice === "number" && Number.isFinite(coalescedPrice) ? coalescedPrice : 0;
 
   return {
     sales,

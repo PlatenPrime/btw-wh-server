@@ -65,27 +65,14 @@ describe("getAllGraboSkusQuerySchema", () => {
   });
 
   it("rejects non-positive page and limit above 100", () => {
-    expect(
-      getAllGraboSkusQuerySchema.safeParse({ page: "0" }).success
-    ).toBe(false);
-    expect(
-      getAllGraboSkusQuerySchema.safeParse({ page: "-1" }).success
-    ).toBe(false);
-    expect(
-      getAllGraboSkusQuerySchema.safeParse({ limit: "101" }).success
-    ).toBe(false);
-    expect(
-      getAllGraboSkusQuerySchema.safeParse({ limit: "0" }).success
-    ).toBe(false);
+    expect(getAllGraboSkusQuerySchema.safeParse({ page: "0" }).success).toBe(false);
+    expect(getAllGraboSkusQuerySchema.safeParse({ page: "-1" }).success).toBe(false);
+    expect(getAllGraboSkusQuerySchema.safeParse({ limit: "101" }).success).toBe(false);
+    expect(getAllGraboSkusQuerySchema.safeParse({ limit: "0" }).success).toBe(false);
   });
 
   it("rejects invalid boolean literals", () => {
-    expect(
-      getAllGraboSkusQuerySchema.safeParse({ isOnSite: "yes" }).success
-    ).toBe(false);
-    expect(
-      getAllGraboSkusQuerySchema.safeParse({ includeFilterOptions: "1" })
-        .success
-    ).toBe(false);
+    expect(getAllGraboSkusQuerySchema.safeParse({ isOnSite: "yes" }).success).toBe(false);
+    expect(getAllGraboSkusQuerySchema.safeParse({ includeFilterOptions: "1" }).success).toBe(false);
   });
 });

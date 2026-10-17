@@ -35,11 +35,7 @@ describe("markGraboSkusOffSiteUtil", () => {
     const modified = await markGraboSkusOffSiteUtil([ON_SITE_URL]);
     expect(modified).toBe(1);
 
-    expect((await GraboSku.findOne({ productId: "G1" }).lean())?.isOnSite).toBe(
-      true
-    );
-    expect((await GraboSku.findOne({ productId: "G2" }).lean())?.isOnSite).toBe(
-      false
-    );
+    expect((await GraboSku.findOne({ productId: "G1" }).lean())?.isOnSite).toBe(true);
+    expect((await GraboSku.findOne({ productId: "G2" }).lean())?.isOnSite).toBe(false);
   });
 });

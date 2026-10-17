@@ -26,7 +26,7 @@ const blockSchema = new Schema<IBlock>(
     },
     segs: [{ type: Schema.Types.ObjectId, ref: "Seg" }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Индексы для оптимизации
@@ -37,4 +37,3 @@ blockSchema.index({ order: 1 }); // Для сортировки по order
  * @see IBlock
  */
 export const Block: Model<IBlock> = getOrCreateModel<IBlock>("Block", blockSchema);
-

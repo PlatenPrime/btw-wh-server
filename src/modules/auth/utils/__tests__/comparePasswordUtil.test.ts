@@ -29,4 +29,3 @@ describe("comparePasswordUtil", () => {
     expect(comparePasswordUtil(password, hash2)).toBe(true);
   });
 });
-

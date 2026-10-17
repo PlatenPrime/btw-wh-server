@@ -31,22 +31,14 @@ export function summarizePlaywrightErrorBody(html: string): {
   htmlLength: number;
 } {
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  const title = (titleMatch?.[1] ?? "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 120);
-  const snippet = html
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, PLAYWRIGHT_ERROR_BODY_SNIPPET_MAX);
+  const title = (titleMatch?.[1] ?? "").replace(/\s+/g, " ").trim().slice(0, 120);
+  const snippet = html.replace(/\s+/g, " ").trim().slice(0, PLAYWRIGHT_ERROR_BODY_SNIPPET_MAX);
   return { title, snippet, htmlLength: html.length };
 }
 
 function formatPlaywrightFetchError(url: string, err: unknown): string {
-  const msg =
-    err instanceof Error ? err.message.trim() : String(err).trim();
-  const short =
-    msg.length > 200 ? `${msg.slice(0, 200)}... [truncated]` : msg || "unknown";
+  const msg = err instanceof Error ? err.message.trim() : String(err).trim();
+  const short = msg.length > 200 ? `${msg.slice(0, 200)}... [truncated]` : msg || "unknown";
   return `Playwright GET ${url} failed: ${short}`;
 }
 
@@ -66,7 +58,7 @@ function readGotoStatus(response: unknown): number | undefined {
 async function throwIfHttpError(
   page: PlaywrightPageLike,
   url: string,
-  status: number | undefined
+  status: number | undefined,
 ): Promise<void> {
   if (status === undefined || status < 400) {
     return;
@@ -89,17 +81,11 @@ async function throwIfHttpError(
       httpStatus: status,
       ...bodySummary,
     },
-    "playwright http error body"
+    "playwright http error body",
   );
-  const titlePart = bodySummary.title
-    ? ` title=${JSON.stringify(bodySummary.title)}`
-    : "";
-  const snippetPart = bodySummary.snippet
-    ? ` body=${JSON.stringify(bodySummary.snippet)}`
-    : "";
-  throw new Error(
-    `Playwright GET HTTP ${status}: ${url}${titlePart}${snippetPart}`
-  );
+  const titlePart = bodySummary.title ? ` title=${JSON.stringify(bodySummary.title)}` : "";
+  const snippetPart = bodySummary.snippet ? ` body=${JSON.stringify(bodySummary.snippet)}` : "";
+  throw new Error(`Playwright GET HTTP ${status}: ${url}${titlePart}${snippetPart}`);
 }
 
 /**
@@ -107,10 +93,7 @@ async function throwIfHttpError(
  * Опционально warm-up URL в той же вкладке (session cookies).
  * HTTP status ≥ 400 на целевом URL → warn + throw.
  */
-export async function playwrightGet(
-  url: string,
-  options?: PlaywrightGetOptions
-): Promise<string> {
+export async function playwrightGet(url: string, options?: PlaywrightGetOptions): Promise<string> {
   return withPlaywrightSlot(async () => {
     const { context, ephemeral } = await acquirePlaywrightContext({
       proxyUrl: options?.proxyUrl,
@@ -134,7 +117,7 @@ export async function playwrightGet(
                 httpStatus: warmStatus,
                 targetUrl: url,
               },
-              "playwright warmup http error"
+              "playwright warmup http error",
             );
           }
         } catch (warmErr) {
@@ -143,12 +126,9 @@ export async function playwrightGet(
               context: "Playwright warm-up failed, continue to target",
               url: warmUpUrl,
               targetUrl: url,
-              details:
-                warmErr instanceof Error
-                  ? warmErr.message
-                  : String(warmErr),
+              details: warmErr instanceof Error ? warmErr.message : String(warmErr),
             },
-            "playwright warmup failed"
+            "playwright warmup failed",
           );
         }
       }
@@ -161,10 +141,7 @@ export async function playwrightGet(
       await throwIfHttpError(page, url, status);
       return await page.content();
     } catch (err) {
-      if (
-        err instanceof Error &&
-        err.message.startsWith("Playwright GET HTTP ")
-      ) {
+      if (err instanceof Error && err.message.startsWith("Playwright GET HTTP ")) {
         throw err;
       }
       throw new Error(formatPlaywrightFetchError(url, err), { cause: err });

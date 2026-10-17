@@ -5,10 +5,7 @@ interface GetRejectAskMesUtilInput {
   solverName: string;
 }
 
-export const getRejectAskMesUtil = ({
-  ask,
-  solverName,
-}: GetRejectAskMesUtilInput): string => {
+export const getRejectAskMesUtil = ({ ask, solverName }: GetRejectAskMesUtilInput): string => {
   const message = `❌ Ваш запит відхилено
 
 📦 ${ask.artikul}
@@ -17,4 +14,3 @@ export const getRejectAskMesUtil = ({
 👤 Відхилив: ${solverName}`;
   return message as string;
 };
-

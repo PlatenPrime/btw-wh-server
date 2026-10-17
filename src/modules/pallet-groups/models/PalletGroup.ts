@@ -48,7 +48,4 @@ const palletGroupSchema = new Schema<IPalletGroup>(
  * PalletGroup Mongoose model.
  * @see IPalletGroup
  */
-export const PalletGroup = getOrCreateModel<IPalletGroup>(
-  "PalletGroup",
-  palletGroupSchema,
-);
+export const PalletGroup = getOrCreateModel<IPalletGroup>("PalletGroup", palletGroupSchema);

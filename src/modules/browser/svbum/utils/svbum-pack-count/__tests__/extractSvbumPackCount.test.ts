@@ -14,9 +14,7 @@ describe("extractSvbumPackCount", () => {
   });
 
   it("ignores inches and grams without шт", () => {
-    expect(
-      extractSvbumPackCount('Фольгована кулька серце зелене 18" AS-10015 ArtShow')
-    ).toBeNull();
+    expect(extractSvbumPackCount('Фольгована кулька серце зелене 18" AS-10015 ArtShow')).toBeNull();
     expect(extractSvbumPackCount("Наповнювач паперова стружка білий 100г")).toBeNull();
   });
 

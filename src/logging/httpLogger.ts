@@ -27,20 +27,13 @@ export function createHttpLogger() {
 
   const middleware = pinoHttp.default({
     logger: rootLogger.child({ module: "http" }),
-    genReqId(
-      req: IncomingMessage,
-      res: ServerResponse<IncomingMessage>
-    ) {
+    genReqId(req: IncomingMessage, res: ServerResponse<IncomingMessage>) {
       const existing = readRequestId(req as Request);
       const requestId = existing ?? randomUUID();
       res.setHeader("x-request-id", requestId);
       return requestId;
     },
-    customLogLevel(
-      _req: IncomingMessage,
-      res: ServerResponse<IncomingMessage>,
-      err?: Error
-    ) {
+    customLogLevel(_req: IncomingMessage, res: ServerResponse<IncomingMessage>, err?: Error) {
       if (err || res.statusCode >= 500) {
         return "error";
       }
@@ -52,11 +45,7 @@ export function createHttpLogger() {
     customSuccessMessage(req: IncomingMessage, res: ServerResponse<IncomingMessage>) {
       return `${req.method} ${req.url} ${res.statusCode}`;
     },
-    customErrorMessage(
-      req: IncomingMessage,
-      res: ServerResponse<IncomingMessage>,
-      err: Error
-    ) {
+    customErrorMessage(req: IncomingMessage, res: ServerResponse<IncomingMessage>, err: Error) {
       return `${req.method} ${req.url} ${res.statusCode} — ${err.message}`;
     },
     customAttributeKeys: {
@@ -105,7 +94,7 @@ export function createSlowRequestLogger() {
           durationMs,
           userId: req.user?.id,
         },
-        "slow request"
+        "slow request",
       );
     });
 

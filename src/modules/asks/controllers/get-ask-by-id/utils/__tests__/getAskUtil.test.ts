@@ -18,5 +18,3 @@ describe("getAskUtil", () => {
     expect(found).toBeNull();
   });
 });
-
-

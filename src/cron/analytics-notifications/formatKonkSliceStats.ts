@@ -25,8 +25,6 @@ export function formatKonkSliceLine(stats: KonkSliceStats): string {
   return `${base} — abort ${ABORT_REASON_LABEL[stats.abortReason]} remaining ${stats.errors}`;
 }
 
-export function formatKonkSliceReportLines(
-  competitors: KonkSliceStats[]
-): string[] {
+export function formatKonkSliceReportLines(competitors: KonkSliceStats[]): string[] {
   return competitors.map(formatKonkSliceLine);
 }

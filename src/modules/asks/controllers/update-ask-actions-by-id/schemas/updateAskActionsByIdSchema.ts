@@ -11,7 +11,4 @@ export const updateAskActionsByIdSchema = z.object({
   }),
 });
 
-export type UpdateAskActionsByIdInput = z.infer<
-  typeof updateAskActionsByIdSchema
->;
-
+export type UpdateAskActionsByIdInput = z.infer<typeof updateAskActionsByIdSchema>;

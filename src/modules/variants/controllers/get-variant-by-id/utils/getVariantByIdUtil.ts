@@ -13,9 +13,6 @@ type VariantByIdLean = {
   updatedAt?: Date;
 };
 
-export const getVariantByIdUtil = async (
-  id: string
-): Promise<VariantByIdLean | null> => {
+export const getVariantByIdUtil = async (id: string): Promise<VariantByIdLean | null> => {
   return (await Variant.findById(id).lean()) as VariantByIdLean | null;
 };
-

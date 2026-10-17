@@ -14,9 +14,7 @@ type RowWithPallets = {
   updatedAt?: Date;
 };
 
-export const getRowByIdUtil = async (
-  id: string,
-): Promise<RowWithPallets | null> => {
+export const getRowByIdUtil = async (id: string): Promise<RowWithPallets | null> => {
   const row: IRow | null = await Row.findById(id);
 
   if (!row) {

@@ -10,7 +10,7 @@ import { ExcelArtRowExtended } from "./types.js";
  */
 export const formatArtsForExcelExtendedUtil = (
   arts: IArt[],
-  posesQuantMap: Map<string, number>
+  posesQuantMap: Map<string, number>,
 ): ExcelArtRowExtended[] => {
   return arts.map((art) => {
     // Получаем запасы из Map (0 если нет позиций)

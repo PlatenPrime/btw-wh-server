@@ -45,7 +45,7 @@ function packBodies(text: string, bodyLimit: number): string[] {
  */
 export function chunkTelegramMessage(
   text: string,
-  maxLen: number = TELEGRAM_MESSAGE_MAX_CHARS
+  maxLen: number = TELEGRAM_MESSAGE_MAX_CHARS,
 ): string[] {
   if (!Number.isFinite(maxLen) || maxLen < 1) {
     throw new Error("chunkTelegramMessage: maxLen must be a positive finite number");

@@ -7,7 +7,7 @@ type VariantUpdateFields = Partial<
 >;
 
 export const updateVariantByIdUtil = async (
-  input: UpdateVariantByIdInput
+  input: UpdateVariantByIdInput,
 ): Promise<IVariant | null> => {
   const update: VariantUpdateFields = {};
 
@@ -29,12 +29,10 @@ export const updateVariantByIdUtil = async (
     return Variant.findById(input.id);
   }
 
-  const variant = await Variant.findByIdAndUpdate(
-    input.id,
-    update as UpdateQuery<IVariant>,
-    { new: true, runValidators: true }
-  );
+  const variant = await Variant.findByIdAndUpdate(input.id, update as UpdateQuery<IVariant>, {
+    new: true,
+    runValidators: true,
+  });
 
   return variant as IVariant | null;
 };
-

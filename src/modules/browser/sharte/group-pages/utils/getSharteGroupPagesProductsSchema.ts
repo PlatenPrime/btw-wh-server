@@ -6,6 +6,4 @@ export const getSharteGroupPagesProductsSchema = z.object({
   maxPages: z.number().int().min(1).max(200).optional(),
 });
 
-export type GetSharteGroupPagesProductsInput = z.infer<
-  typeof getSharteGroupPagesProductsSchema
->;
+export type GetSharteGroupPagesProductsInput = z.infer<typeof getSharteGroupPagesProductsSchema>;

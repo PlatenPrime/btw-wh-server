@@ -116,14 +116,10 @@ describe("stripMixedSliceSalesUtil", () => {
       total: 2,
       scanned: 0,
     });
-    expect(events.some((e) => e.phase === "sku" && e.event === "doc")).toBe(
+    expect(events.some((e) => e.phase === "sku" && e.event === "doc")).toBe(true);
+    expect(events.some((e) => e.phase === "btrade" && e.event === "phase-start")).toBe(true);
+    expect(events.some((e) => e.phase === "btrade" && e.event === "doc" && e.touched === 1)).toBe(
       true,
     );
-    expect(
-      events.some((e) => e.phase === "btrade" && e.event === "phase-start"),
-    ).toBe(true);
-    expect(
-      events.some((e) => e.phase === "btrade" && e.event === "doc" && e.touched === 1),
-    ).toBe(true);
   });
 });

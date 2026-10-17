@@ -8,9 +8,7 @@ type CreateKonkUtilInput = {
   recountDays: string[];
 };
 
-export const createKonkUtil = async (
-  input: CreateKonkUtilInput
-): Promise<IKonk> => {
+export const createKonkUtil = async (input: CreateKonkUtilInput): Promise<IKonk> => {
   const konk = await Konk.create({
     name: input.name,
     title: input.title,

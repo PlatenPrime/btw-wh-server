@@ -81,8 +81,7 @@ describe("createApiTaskUtil", () => {
       expect(fourth.status).toBe(429);
     }
     expect(
-      getApiTaskQueueSnapshot().queuedIds.length +
-        (getApiTaskQueueSnapshot().runningId ? 1 : 0),
+      getApiTaskQueueSnapshot().queuedIds.length + (getApiTaskQueueSnapshot().runningId ? 1 : 0),
     ).toBeGreaterThanOrEqual(1);
     release();
     await ApiTask.deleteMany({ userId: "u-limit" });

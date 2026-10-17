@@ -106,10 +106,3 @@ describe("createPalletController", () => {
     expect(responseJson.message).toBe("Row not found");
   });
 });
-
-
-
-
-
-
-

@@ -21,13 +21,13 @@ export type BalunGroupPageProduct = {
 
 function parseProductsFromPage(
   $: cheerio.CheerioAPI,
-  currentPageUrl: string
+  currentPageUrl: string,
 ): Map<string, BalunGroupPageProduct> {
   return parsePromUaGroupListingProducts($, currentPageUrl);
 }
 
 export async function getBalunGroupPagesProducts(
-  input: GetBalunGroupPagesProductsInput
+  input: GetBalunGroupPagesProductsInput,
 ): Promise<BalunGroupPageProduct[]> {
   const parseResult = getBalunGroupPagesProductsSchema.safeParse(input);
   if (!parseResult.success) {

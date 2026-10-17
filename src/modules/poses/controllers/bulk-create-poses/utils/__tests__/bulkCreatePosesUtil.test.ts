@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 import { beforeEach, describe, expect, it } from "vitest";
-import {
-  createTestPallet,
-  createTestRow,
-} from "../../../../../../test/utils/testHelpers.js";
+import { createTestPallet, createTestRow } from "../../../../../../test/utils/testHelpers.js";
 import { Pos } from "../../../../models/Pos.js";
 import { bulkCreatePosesUtil } from "../bulkCreatePosesUtil.js";
 
@@ -70,7 +67,7 @@ describe("bulkCreatePosesUtil", () => {
             },
           ],
           session,
-        })
+        }),
       ).rejects.toThrow("Some pallets not found");
     });
     await session.endSession();
@@ -97,10 +94,9 @@ describe("bulkCreatePosesUtil", () => {
             },
           ],
           session,
-        })
+        }),
       ).rejects.toThrow("Some rows not found");
     });
     await session.endSession();
   });
 });
-

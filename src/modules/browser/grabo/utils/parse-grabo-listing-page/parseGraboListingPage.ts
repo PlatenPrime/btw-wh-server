@@ -29,14 +29,8 @@ export function isGraboProductPageUrl(url: string): boolean {
  * Следующая страница только по `nav.archive-links.pages a[rel="next"]`.
  * `rel="last"` на Grabo врёт (page-16 при реальной last page-17) — не используем.
  */
-export function getGraboListingNextPageUrl(
-  $: BrowserCheerioAPI,
-  pageUrl: string
-): string | null {
-  const href = $('nav.archive-links.pages a[rel="next"]')
-    .first()
-    .attr("href")
-    ?.trim();
+export function getGraboListingNextPageUrl($: BrowserCheerioAPI, pageUrl: string): string | null {
+  const href = $('nav.archive-links.pages a[rel="next"]').first().attr("href")?.trim();
   if (!href) {
     return null;
   }
@@ -45,7 +39,7 @@ export function getGraboListingNextPageUrl(
 
 export function parseGraboListingProducts(
   $: BrowserCheerioAPI,
-  pageUrl: string
+  pageUrl: string,
 ): Map<string, GraboListingProduct> {
   const result = new Map<string, GraboListingProduct>();
 
@@ -67,10 +61,7 @@ export function parseGraboListingProducts(
 /**
  * Чистый парсинг HTML листинга категории: URL товаров и next page.
  */
-export function parseGraboListingPage(
-  html: string,
-  pageUrl: string
-): GraboListingPageParse {
+export function parseGraboListingPage(html: string, pageUrl: string): GraboListingPageParse {
   const $ = cheerio.load(html);
   const products = parseGraboListingProducts($, pageUrl);
   return {

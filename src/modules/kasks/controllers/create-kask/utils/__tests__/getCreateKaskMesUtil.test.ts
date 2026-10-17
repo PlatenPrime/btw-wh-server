@@ -17,9 +17,7 @@ describe("getCreateKaskMessageUtil", () => {
     expect(message).toContain("10 шт");
     expect(message).toContain("42-5-1");
     expect(message).toContain("До каси 3");
-    expect(message).toContain(
-      "https://sharik.ua/images/elements_big/1234-5678_m1.jpg",
-    );
+    expect(message).toContain("https://sharik.ua/images/elements_big/1234-5678_m1.jpg");
   });
 
   it("подставляет прочерк для отсутствующего quant", () => {
@@ -50,8 +48,6 @@ describe("getCreateKaskMessageUtil", () => {
       zone: "A1",
     });
 
-    expect(message).toContain(
-      "https://sharik.ua/images/elements_big/art%2Fwith%20space_m1.jpg",
-    );
+    expect(message).toContain("https://sharik.ua/images/elements_big/art%2Fwith%20space_m1.jpg");
   });
 });

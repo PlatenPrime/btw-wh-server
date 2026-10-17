@@ -85,12 +85,7 @@ describe("tryPerfectDataProductFallback", () => {
         <div class="infoblock"><p class="infoblock_pp">Штук в упаковці: 1</p></div>
         <div class="product-description">100 мл концентрату додати 400 мл води. Незалишає плям на одязі.</div>
       </section>`;
-    expect(
-      tryPerfectDataProductFallback(
-        html,
-        "Концентровні бульбашки, 100 мл. (1:4)"
-      )
-    ).toEqual({
+    expect(tryPerfectDataProductFallback(html, "Концентровні бульбашки, 100 мл. (1:4)")).toEqual({
       stock: 489,
       price: 89,
       title: "Концентровні бульбашки, 100 мл. (1:4)",
@@ -110,10 +105,7 @@ describe("tryPerfectDataProductFallback", () => {
         </article>
       </section>`;
     expect(
-      tryPerfectDataProductFallback(
-        html,
-        "Кулька-гігант Небесний 36\" (90 см) Perfect Party"
-      )
+      tryPerfectDataProductFallback(html, 'Кулька-гігант Небесний 36" (90 см) Perfect Party'),
     ).toEqual({
       stock: 1,
       price: 68.5,

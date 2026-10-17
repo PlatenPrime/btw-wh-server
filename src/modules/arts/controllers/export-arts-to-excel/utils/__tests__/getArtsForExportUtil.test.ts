@@ -65,7 +65,7 @@ describe("getArtsForExportUtil", () => {
 
     expect(result).toHaveLength(1);
     const art = result[0];
-    
+
     // Проверяем что нужные поля присутствуют
     expect(art.artikul).toBe("ART-001");
     expect(art.nameukr).toBe("Тест");
@@ -77,7 +77,7 @@ describe("getArtsForExportUtil", () => {
     expect(art.btradeStock?.value).toBe(50);
     expect(art.createdAt).toBeDefined();
     expect(art.updatedAt).toBeDefined();
-    
+
     // Проверяем что это plain object (lean())
     expect(art.constructor.name).toBe("Object");
     expect((art as any).save).toBeUndefined();
@@ -101,7 +101,7 @@ describe("getArtsForExportUtil", () => {
 
     expect(result).toHaveLength(1);
     const art = result[0];
-    
+
     // Проверяем что это не Mongoose документ
     expect(art.constructor.name).toBe("Object");
     expect((art as any).save).toBeUndefined();
@@ -158,7 +158,7 @@ describe("getArtsForExportUtil", () => {
         createTestArt({
           artikul: `ART-${String(i).padStart(3, "0")}`,
           zone: `Z${i}`,
-        })
+        }),
       );
     }
     await Promise.all(arts);
@@ -172,4 +172,3 @@ describe("getArtsForExportUtil", () => {
     }
   });
 });
-

@@ -47,9 +47,7 @@ describe("materializeBtradeManufacturerSalesUtil", () => {
     });
     expect(r.daysTouched).toEqual(["2026-06-02", "2026-06-03"]);
 
-    const mid = await BtradeManufacturerDaySales.find({ date: d1 })
-      .sort({ prodName: 1 })
-      .lean();
+    const mid = await BtradeManufacturerDaySales.find({ date: d1 }).sort({ prodName: 1 }).lean();
     expect(mid).toHaveLength(2);
     expect(mid[0]).toMatchObject({
       prodName: "gemar",

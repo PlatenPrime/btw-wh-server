@@ -30,10 +30,8 @@ describe("getDelByIdUtil", () => {
       title: "Producer One",
       imageUrl: "https://example.com/prod1.png",
     });
-    const artikuls = (result?.artikuls as Record<
-      string,
-      { quant: number; nameukr?: string }
-    >) ?? {};
+    const artikuls =
+      (result?.artikuls as Record<string, { quant: number; nameukr?: string }>) ?? {};
     expect(artikuls["ART-1"]).toEqual({ quant: 5 });
     expect(artikuls["ART-2"]).toEqual({ quant: 10, nameukr: "Товар" });
   });

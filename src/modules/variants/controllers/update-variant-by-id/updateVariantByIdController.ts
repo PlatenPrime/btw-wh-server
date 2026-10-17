@@ -8,10 +8,7 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
  * @desc    Обновить вариант по id
  * @route   PATCH /api/variants/id/:id
  */
-export const updateVariantByIdController = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const updateVariantByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
     const body = req.body;
@@ -24,7 +21,7 @@ export const updateVariantByIdController = async (
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
-        errors: parseResult.error.errors,
+        errors: parseResult.error.issues,
       });
       return;
     }
@@ -58,4 +55,3 @@ export const updateVariantByIdController = async (
     }
   }
 };
-

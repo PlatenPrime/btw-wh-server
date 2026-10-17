@@ -19,8 +19,15 @@ describe("checkAndCompleteAsksUtil", () => {
   });
 
   it("автоматически завершает готовые заявки (pullQuant >= quant)", async () => {
-    const solver = await createTestUser({ username: `solver-${Date.now()}`, fullname: "Solver User" });
-    const asker = await createTestUser({ username: `asker-${Date.now()}`, fullname: "Asker User", telegram: "123456" });
+    const solver = await createTestUser({
+      username: `solver-${Date.now()}`,
+      fullname: "Solver User",
+    });
+    const asker = await createTestUser({
+      username: `asker-${Date.now()}`,
+      fullname: "Asker User",
+      telegram: "123456",
+    });
 
     const ask = await createTestAsk({
       artikul: "ART-READY",
@@ -39,7 +46,7 @@ describe("checkAndCompleteAsksUtil", () => {
     const result = await checkAndCompleteAsksUtil([ask]);
 
     expect(result).toContain(String(ask._id));
-    
+
     // Проверяем что заявка завершена
     const Ask = mongoose.model("Ask");
     const updatedAsk = await Ask.findById(ask._id);
@@ -194,12 +201,12 @@ describe("checkAndCompleteAsksUtil", () => {
 
     // Очищаем моки перед тестом
     mockSendCompleteAskMesUtil.mockClear();
-    
+
     const result = await checkAndCompleteAsksUtil([ask]);
 
     // Проверяем что заявка была завершена
     expect(result).toContain(String(ask._id));
-    
+
     // Проверяем что утилита отправки была вызвана
     // В тестовом окружении может быть ошибка отправки, но функция должна быть вызвана
     // Проверяем что заявка завершена, что означает что код дошел до отправки уведомления
@@ -250,10 +257,9 @@ describe("checkAndCompleteAsksUtil", () => {
     expect(updatedAsk?.status).toBe("completed");
     expect(updatedAsk?.events).toBeDefined();
     expect(updatedAsk?.events.length).toBeGreaterThan(0);
-    
+
     // Проверяем что последнее событие - complete
     const lastEvent = updatedAsk?.events[updatedAsk.events.length - 1];
     expect(lastEvent?.eventName).toBe("complete");
   });
 });
-

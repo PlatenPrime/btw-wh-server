@@ -58,14 +58,10 @@ export async function resolveKonkProdSkus(
   input: ResolveKonkProdSkusInput,
 ): Promise<ResolvedSkuRow[]> {
   const skugrIds = (input.skugrIds ?? []).filter((id) => id.length > 0);
-  return skugrIds.length > 0
-    ? resolveBySkugrIds(input, skugrIds)
-    : resolveByKonkProd(input);
+  return skugrIds.length > 0 ? resolveBySkugrIds(input, skugrIds) : resolveByKonkProd(input);
 }
 
-async function resolveByKonkProd(
-  input: ResolveKonkProdSkusInput,
-): Promise<ResolvedSkuRow[]> {
+async function resolveByKonkProd(input: ResolveKonkProdSkusInput): Promise<ResolvedSkuRow[]> {
   const skuFilter: Record<string, unknown> = { konkName: input.konk };
   if (input.prod !== undefined && !isAllProd(input.prod)) {
     skuFilter.prodName = input.prod;

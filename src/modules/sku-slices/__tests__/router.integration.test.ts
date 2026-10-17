@@ -11,13 +11,10 @@ import { seedSkuSliceMonthDay } from "../utils/seedSkuSliceMonthDay.js";
 import { SkuSliceMonth } from "../models/SkuSliceMonth.js";
 
 const createAuthHeader = (role: RoleType = RoleType.ADMIN) => {
-  const secret =
-    process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
-  const token = jwt.sign(
-    { id: new mongoose.Types.ObjectId().toString(), role },
-    secret,
-    { expiresIn: "1h" },
-  );
+  const secret = process.env.JWT_SECRET || "test-jwt-secret-key-for-testing-only";
+  const token = jwt.sign({ id: new mongoose.Types.ObjectId().toString(), role }, secret, {
+    expiresIn: "1h",
+  });
   return { Authorization: `Bearer ${token}` };
 };
 
@@ -114,9 +111,15 @@ describe("Sku-slices router integration", () => {
         title: "Balloon",
         url: "https://perfect.example/1",
       });
-      await seedSkuSliceMonthDay("perfect", new Date("2026-09-13T00:00:00.000Z"), { "perfect-1": { stock: 100, price: 100 } });
-      await seedSkuSliceMonthDay("perfect", new Date("2026-09-14T00:00:00.000Z"), { "perfect-1": { stock: 10000, price: 1 } });
-      await seedSkuSliceMonthDay("perfect", new Date("2026-09-15T00:00:00.000Z"), { "perfect-1": { stock: 100, price: 100 } });
+      await seedSkuSliceMonthDay("perfect", new Date("2026-09-13T00:00:00.000Z"), {
+        "perfect-1": { stock: 100, price: 100 },
+      });
+      await seedSkuSliceMonthDay("perfect", new Date("2026-09-14T00:00:00.000Z"), {
+        "perfect-1": { stock: 10000, price: 1 },
+      });
+      await seedSkuSliceMonthDay("perfect", new Date("2026-09-15T00:00:00.000Z"), {
+        "perfect-1": { stock: 100, price: 100 },
+      });
 
       const response = await request(app)
         .get("/api/sku-slices/pack-flips")
@@ -128,9 +131,7 @@ describe("Sku-slices router integration", () => {
         })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Pack-flip review retrieved successfully"
-      );
+      expect(response.body.message).toBe("Pack-flip review retrieved successfully");
       expect(response.body.data.apply).toBeUndefined();
       expect(response.body.data.patched).toHaveLength(1);
       expect(response.body.data.patched[0].productId).toBe("perfect-1");
@@ -154,7 +155,9 @@ describe("Sku-slices router integration", () => {
         title: "One",
         url: "https://e.com/1",
       });
-      await seedSkuSliceMonthDay("r-k", new Date("2026-06-02T00:00:00.000Z"), { "r-k-1": { stock: 4, price: 6 } });
+      await seedSkuSliceMonthDay("r-k", new Date("2026-06-02T00:00:00.000Z"), {
+        "r-k-1": { stock: 4, price: 6 },
+      });
 
       const response = await request(app)
         .get(`/api/sku-slices/sku/${sku._id.toString()}`)
@@ -211,7 +214,9 @@ describe("Sku-slices router integration", () => {
         title: "One",
         url: "https://e.com/1",
       });
-      await seedSkuSliceMonthDay("r-k", new Date("2026-09-20T00:00:00.000Z"), { "r-k-patch": { stock: 60, price: 5.5 } });
+      await seedSkuSliceMonthDay("r-k", new Date("2026-09-20T00:00:00.000Z"), {
+        "r-k-patch": { stock: 60, price: 5.5 },
+      });
 
       const response = await request(app)
         .patch(`/api/sku-slices/sku/${sku._id.toString()}`)
@@ -219,9 +224,7 @@ describe("Sku-slices router integration", () => {
         .send({ date: "2026-09-20", stock: 3, price: 110 })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Sku slice by date updated successfully"
-      );
+      expect(response.body.message).toBe("Sku slice by date updated successfully");
       expect(response.body.data).toMatchObject({
         productId: "r-k-patch",
         stock: 3,
@@ -251,9 +254,7 @@ describe("Sku-slices router integration", () => {
         })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Sku slice by date range updated successfully"
-      );
+      expect(response.body.message).toBe("Sku slice by date range updated successfully");
       expect(response.body.data.updatedCount).toBe(2);
       expect(response.body.data.days).toHaveLength(2);
     });
@@ -280,9 +281,7 @@ describe("Sku-slices router integration", () => {
         })
         .expect(200);
 
-      expect(response.body.message).toBe(
-        "Sku slice by date periods updated successfully"
-      );
+      expect(response.body.message).toBe("Sku slice by date periods updated successfully");
       expect(response.body.data.updatedCount).toBe(3);
       expect(response.body.data.days).toHaveLength(3);
       expect(response.body.data.periods).toHaveLength(2);

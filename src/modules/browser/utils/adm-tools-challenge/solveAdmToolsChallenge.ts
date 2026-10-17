@@ -21,7 +21,7 @@ function buildAckPostInit(
   ack: number,
   url: string,
   timeout: number,
-  extraHeaders?: Record<string, string>
+  extraHeaders?: Record<string, string>,
 ): ImpitFetchInit {
   if (protocol === "json-__ack") {
     return {
@@ -59,7 +59,7 @@ export async function solveAdmToolsChallenge(
   client: ImpitClientLike,
   url: string,
   challengeHtml: string,
-  options?: { timeoutMs?: number; headers?: Record<string, string> }
+  options?: { timeoutMs?: number; headers?: Record<string, string> },
 ): Promise<SolveAdmToolsChallengeResult> {
   if (!isAdmToolsChallengeHtml(challengeHtml)) {
     throw new Error("Not an adm.tools challenge HTML");
@@ -72,24 +72,16 @@ export async function solveAdmToolsChallenge(
 
   const ack = resolveAdmToolsAckFromHtml(challengeHtml);
   const timeout = options?.timeoutMs ?? BROWSER_REQUEST_TIMEOUT_MS;
-  const init = buildAckPostInit(
-    protocol,
-    ack,
-    url,
-    timeout,
-    options?.headers
-  );
+  const init = buildAckPostInit(protocol, ack, url, timeout, options?.headers);
 
   browserLog.info(
     { context: "adm.tools challenge solve", url, ack, protocol },
-    "adm tools challenge post"
+    "adm tools challenge post",
   );
 
   const postResponse = await client.fetch(url, init);
   if (postResponse.status !== 200) {
-    throw new Error(
-      `adm.tools ${protocol} POST HTTP ${postResponse.status}: ${url}`
-    );
+    throw new Error(`adm.tools ${protocol} POST HTTP ${postResponse.status}: ${url}`);
   }
 
   return { ack, postStatus: postResponse.status, protocol };

@@ -1,14 +1,8 @@
 import type { AnyBulkWriteOperation } from "mongoose";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import { BtradeSlice } from "../models/BtradeSlice.js";
-import {
-  BtradeSliceMonth,
-  type IBtradeSliceMonth,
-} from "../models/BtradeSliceMonth.js";
-import {
-  toSliceMonthDate,
-  toSliceMonthDayKey,
-} from "./btradeSliceMonthKeys.js";
+import { BtradeSliceMonth, type IBtradeSliceMonth } from "../models/BtradeSliceMonth.js";
+import { toSliceMonthDate, toSliceMonthDayKey } from "./btradeSliceMonthKeys.js";
 
 export type MigrateAllBtradeSlicesToMonthsProgress = {
   sliceIndex: number;
@@ -97,9 +91,7 @@ function dayWritesFromSliceData(slice: SliceLean): DayWrite[] {
   return out;
 }
 
-function buildUpsertOps(
-  writes: DayWrite[],
-): AnyBulkWriteOperation<IBtradeSliceMonth>[] {
+function buildUpsertOps(writes: DayWrite[]): AnyBulkWriteOperation<IBtradeSliceMonth>[] {
   return writes.map((w) => ({
     updateOne: {
       filter: { artikul: w.artikul, month: w.month },
@@ -127,10 +119,7 @@ export async function migrateAllBtradeSlicesToMonthsUtil(
   let dayWritesUpserted = 0;
   let sliceIndex = 0;
 
-  const cursor = BtradeSlice.find({})
-    .select("date data")
-    .lean()
-    .cursor();
+  const cursor = BtradeSlice.find({}).select("date data").lean().cursor();
 
   for await (const raw of cursor) {
     const slice = raw as SliceLean;
@@ -203,9 +192,7 @@ export async function verifyRandomBtradeSlicesVsMonths(
         .select({ [`days.${dayKey}`]: 1 })
         .lean();
 
-      const monthItem = doc?.days?.[dayKey] as
-        | { quantity?: number; price?: number }
-        | undefined;
+      const monthItem = doc?.days?.[dayKey] as { quantity?: number; price?: number } | undefined;
 
       if (!monthItem) {
         mismatches.push({

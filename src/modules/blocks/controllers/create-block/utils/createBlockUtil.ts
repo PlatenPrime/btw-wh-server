@@ -4,13 +4,9 @@ type CreateBlockInput = {
   title: string;
 };
 
-export const createBlockUtil = async ({
-  title,
-}: CreateBlockInput): Promise<IBlock> => {
+export const createBlockUtil = async ({ title }: CreateBlockInput): Promise<IBlock> => {
   // Автоматическое определение order: max order + 1 или 1 если первый
-  const maxOrderBlock = await Block.findOne({})
-    .sort({ order: -1 })
-    .exec();
+  const maxOrderBlock = await Block.findOne({}).sort({ order: -1 }).exec();
 
   const order = maxOrderBlock ? maxOrderBlock.order + 1 : 1;
 
@@ -18,4 +14,3 @@ export const createBlockUtil = async ({
   await block.save();
   return block as IBlock;
 };
-

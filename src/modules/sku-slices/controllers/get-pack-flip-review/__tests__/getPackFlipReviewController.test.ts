@@ -57,9 +57,15 @@ describe("getPackFlipReviewController", () => {
       url: "https://perfect.example/1",
       imageUrl: "https://cdn.example/balloon.webp",
     });
-    await seedSkuSliceMonthDay("perfect", new Date("2026-09-13T00:00:00.000Z"), { "perfect-1": { stock: 100, price: 100 } });
-    await seedSkuSliceMonthDay("perfect", new Date("2026-09-14T00:00:00.000Z"), { "perfect-1": { stock: 10000, price: 1 } });
-    await seedSkuSliceMonthDay("perfect", new Date("2026-09-15T00:00:00.000Z"), { "perfect-1": { stock: 100, price: 100 } });
+    await seedSkuSliceMonthDay("perfect", new Date("2026-09-13T00:00:00.000Z"), {
+      "perfect-1": { stock: 100, price: 100 },
+    });
+    await seedSkuSliceMonthDay("perfect", new Date("2026-09-14T00:00:00.000Z"), {
+      "perfect-1": { stock: 10000, price: 1 },
+    });
+    await seedSkuSliceMonthDay("perfect", new Date("2026-09-15T00:00:00.000Z"), {
+      "perfect-1": { stock: 100, price: 100 },
+    });
 
     const req = {
       query: {

@@ -1,6 +1,6 @@
 import { seedSkuSliceMonthDay } from "../../../sku-slices/utils/seedSkuSliceMonthDay.js";
 import { SkuSliceMonth } from "../../../sku-slices/models/SkuSliceMonth.js";
-﻿import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { Art } from "../../../arts/models/Art.js";
 import { BtradeSliceMonth } from "../../../btrade-slices/models/BtradeSliceMonth.js";
 import { seedBtradeSliceMonthDay } from "../../../btrade-slices/utils/seedBtradeSliceMonthDay.js";
@@ -121,9 +121,9 @@ describe("loadKonkProdSkuChartSeries", () => {
       },
     ]);
     await seedSkuSliceMonthDay(konk, d1, {
-        [`${konk}-a`]: { stock: 5, price: 1 },
-        [`${konk}-b`]: { stock: 8, price: 1 },
-      });
+      [`${konk}-a`]: { stock: 5, price: 1 },
+      [`${konk}-b`]: { stock: 8, price: 1 },
+    });
     await SkuManufacturerDaySales.insertMany([
       { konkName: konk, date: d1, prodName: "A", salesPcs: 2, salesUah: 2 },
       { konkName: konk, date: d1, prodName: "B", salesPcs: 4, salesUah: 4 },
