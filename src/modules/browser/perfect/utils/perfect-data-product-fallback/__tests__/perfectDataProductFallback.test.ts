@@ -78,6 +78,26 @@ describe("tryPerfectDataProductFallback", () => {
     expect(tryPerfectDataProductFallback("<html></html>", "x")).toBeNull();
   });
 
+  it("does not glue pack 1 with 100 мл description into stock×1100", () => {
+    const html = `
+      <section id="main">
+        <div id="product-details" data-product='{"quantity":489,"price_amount":89,"name":"Концентровні бульбашки, 100 мл. (1:4)"}'></div>
+        <div class="infoblock"><p class="infoblock_pp">Штук в упаковці: 1</p></div>
+        <div class="product-description">100 мл концентрату додати 400 мл води. Незалишає плям на одязі.</div>
+      </section>`;
+    expect(
+      tryPerfectDataProductFallback(
+        html,
+        "Концентровні бульбашки, 100 мл. (1:4)"
+      )
+    ).toEqual({
+      stock: 489,
+      price: 89,
+      title: "Концентровні бульбашки, 100 мл. (1:4)",
+      source: "data-product",
+    });
+  });
+
   it("does not apply related miniature pack to main product without фасовка", () => {
     const html = `
       <section id="main">

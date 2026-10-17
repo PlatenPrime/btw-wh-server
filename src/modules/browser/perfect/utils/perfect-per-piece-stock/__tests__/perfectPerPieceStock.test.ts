@@ -23,6 +23,26 @@ describe("toStockAndPrice", () => {
     });
   });
 
+  it("keeps pack=1 when description 100 мл follows infoblock (no 1100 glue)", () => {
+    const html = `
+      <section id="main">
+        <div class="infoblock"><p class="infoblock_pp">Штук в упаковці: 1</p></div>
+        <div class="product-description">100 мл концентрату додати 400 мл води.</div>
+      </section>`;
+    expect(
+      toStockAndPrice(
+        489,
+        89,
+        "Концентровні бульбашки, 100 мл. (1:4)",
+        html
+      )
+    ).toEqual({
+      stock: 489,
+      price: 89,
+      title: "Концентровні бульбашки, 100 мл. (1:4)",
+    });
+  });
+
   it("ignores related miniature pack when main has none", () => {
     const html = `
       <section id="main">

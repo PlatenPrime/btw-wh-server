@@ -51,4 +51,29 @@ describe("resolvePackCount", () => {
     expect(resolvePackCount("Без фасовки", "<div>no</div>")).toBeNull();
     expect(resolvePackCount("Без фасовки", undefined)).toBeNull();
   });
+
+  it("does not glue pack 1 with following 100 мл description into 1100", () => {
+    const html = `
+      <section id="main">
+        <div class="infoblock"><p class="infoblock_pp">Штук в упаковці: 1</p></div>
+        <div class="product-description">100 мл концентрату додати 400 мл води. Незалишає плям на одязі.</div>
+      </section>`;
+    expect(
+      resolvePackCount("Концентровні бульбашки, 100 мл. (1:4)", html)
+    ).toBe(1);
+  });
+
+  it("reads pack from characteristics dt/dd when infoblock absent", () => {
+    const html = `
+      <section id="main">
+        <div class="product-description">100 мл концентрату додати 400 мл води.</div>
+        <dl class="data-sheet">
+          <dt class="name">Штук в упаковці</dt>
+          <dd class="value">1</dd>
+        </dl>
+      </section>`;
+    expect(
+      resolvePackCount("Концентровні бульбашки, 100 мл. (1:4)", html)
+    ).toBe(1);
+  });
 });
