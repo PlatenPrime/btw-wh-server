@@ -21,6 +21,9 @@ export const updateKonkByIdUtil = async (input: UpdateKonkByIdUtilInput): Promis
     return Konk.findById(input.id);
   }
 
-  const konk = await Konk.findByIdAndUpdate(input.id, update, { new: true, runValidators: true });
+  const konk = await Konk.findByIdAndUpdate(input.id, update, {
+    returnDocument: "after",
+    runValidators: true,
+  });
   return konk;
 };

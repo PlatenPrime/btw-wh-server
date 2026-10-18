@@ -33,7 +33,7 @@ export const updateAnalogByIdUtil = async (
   }
 
   const analog = await Analog.findByIdAndUpdate(input.id, update as UpdateQuery<IAnalog>, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
   return analog as IAnalog | null;

@@ -6,7 +6,7 @@ import { Art, IArt } from "../../../models/Art.js";
 export const getArtsForExportWithKeysUtil = async (): Promise<IArt[]> => {
   const arts: IArt[] = await Art.find()
     .sort({ artikul: 1 })
-    .select("artikul prodName nameukr namerus zone limit marker abc")
+    .select("artikul bar boxbar prodName nameukr namerus zone limit marker abc")
     .lean();
 
   return arts;

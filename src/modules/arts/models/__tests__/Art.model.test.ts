@@ -68,6 +68,25 @@ describe("Art Model - Schema Validation Only", () => {
       const savedArt = await art.save();
       expect(savedArt.prodName).toBeUndefined();
     });
+    it("should save and retrieve optional bar and boxbar fields", async () => {
+      const artData = {
+        artikul: "BAR001",
+        zone: "A1",
+        bar: "4601234567890",
+        boxbar: "4601234567891",
+      };
+      const art = new Art(artData);
+      const savedArt = await art.save();
+      expect(savedArt.bar).toBe("4601234567890");
+      expect(savedArt.boxbar).toBe("4601234567891");
+    });
+    it("should allow saving without bar and boxbar fields", async () => {
+      const artData = { artikul: "NOBAR001", zone: "A1" };
+      const art = new Art(artData);
+      const savedArt = await art.save();
+      expect(savedArt.bar).toBeUndefined();
+      expect(savedArt.boxbar).toBeUndefined();
+    });
     it("should handle numeric, negative, and decimal limit", async () => {
       const art1 = await new Art({
         artikul: "LIMIT001",

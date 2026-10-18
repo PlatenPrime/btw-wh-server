@@ -25,7 +25,7 @@ export const updateSkugrByIdUtil = async (
   }
 
   const skugr = await Skugr.findByIdAndUpdate(input.id, update, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 

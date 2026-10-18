@@ -6,7 +6,11 @@ type UpdateRowInput = {
 };
 
 export const updateRowUtil = async ({ id, title }: UpdateRowInput): Promise<IRow | null> => {
-  const updatedRow = await Row.findByIdAndUpdate(id, { title }, { new: true, runValidators: true });
+  const updatedRow = await Row.findByIdAndUpdate(
+    id,
+    { title },
+    { returnDocument: "after", runValidators: true },
+  );
 
   return updatedRow as IRow | null;
 };

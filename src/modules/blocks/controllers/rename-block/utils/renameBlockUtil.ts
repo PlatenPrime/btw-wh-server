@@ -19,7 +19,11 @@ export const renameBlockUtil = async ({
   }
 
   // Обновить только поле title
-  const updatedBlock = await Block.findByIdAndUpdate(objectId, { title }, { new: true }).exec();
+  const updatedBlock = await Block.findByIdAndUpdate(
+    objectId,
+    { title },
+    { returnDocument: "after" },
+  ).exec();
 
   if (!updatedBlock) {
     return null;

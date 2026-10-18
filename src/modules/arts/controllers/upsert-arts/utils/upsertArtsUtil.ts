@@ -24,6 +24,8 @@ export const upsertArtsUtil = async ({ arts }: UpsertArtsUtilInput) => {
             namerus: art.namerus,
             nameukr: art.nameukr,
             abc: art.abc,
+            bar: art.bar,
+            boxbar: art.boxbar,
             ...(art.limit !== undefined && art.limit !== null && { limit: art.limit }),
             marker: marker,
           },

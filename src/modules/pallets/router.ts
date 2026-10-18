@@ -13,6 +13,7 @@ import {
   getPalletById,
   getPalletByTitle,
   movePalletPoses,
+  setPalletGroup,
   updatePallet,
 } from "./controllers/index.js";
 
@@ -39,8 +40,14 @@ router.get("/:id", checkAuth, checkRoles([RoleType.USER]), asyncHandler(getPalle
 router.post("/", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(createPallet));
 router.post("/move-poses", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(movePalletPoses));
 
-// PUT роуты - доступно для EDITOR и PRIME
+// PUT/PATCH роуты
 router.put("/:id", checkAuth, checkRoles([RoleType.EDITOR]), asyncHandler(updatePallet));
+router.patch(
+  "/:id/pallet-group",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(setPalletGroup),
+);
 
 // DELETE роуты - доступно для ADMIN и PRIME
 router.delete("/:id", checkAuth, checkRoles([RoleType.PRIME]), asyncHandler(deletePallet));

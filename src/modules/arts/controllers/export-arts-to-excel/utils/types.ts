@@ -1,5 +1,7 @@
 export type ExcelArtRow = {
   Артикул: string;
+  Штрихкод: string;
+  "Штрихкод коробки": string;
   Виробник?: string;
   "Назва (укр)": string;
   "Назва (рус)": string;

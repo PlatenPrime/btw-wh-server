@@ -32,7 +32,7 @@ export const updateSkuByIdUtil = async (input: UpdateSkuByIdUtilInput): Promise<
   }
 
   const sku = await Sku.findByIdAndUpdate(input.id, update, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 

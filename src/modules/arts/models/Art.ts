@@ -18,6 +18,10 @@ export interface IArt extends Document {
   limit?: number;
   marker?: string;
   abc?: string;
+  /** Штрихкод артикула */
+  bar?: string;
+  /** Штрихкод коробки артикула */
+  boxbar?: string;
   btradeStock?: IBtradeStock;
   createdAt?: Date;
   updatedAt?: Date;
@@ -50,6 +54,8 @@ const artSchema = new Schema<IArt>(
     limit: { type: Number },
     marker: { type: String },
     abc: { type: String },
+    bar: { type: String },
+    boxbar: { type: String },
     btradeStock: { type: btradeStockSchema },
   },
   { timestamps: true },

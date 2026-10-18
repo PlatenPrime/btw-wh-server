@@ -5,6 +5,8 @@ import { ExcelArtKeyRow } from "./types.js";
 const SHEET_NAME = "ArtsKeys";
 const COLUMN_KEYS: (keyof ExcelArtKeyRow)[] = [
   "artikul",
+  "bar",
+  "boxbar",
   "prodName",
   "nameukr",
   "namerus",
@@ -13,7 +15,7 @@ const COLUMN_KEYS: (keyof ExcelArtKeyRow)[] = [
   "marker",
   "abc",
 ];
-const COLUMN_WIDTHS = [18, 24, 30, 30, 12, 10, 14, 10];
+const COLUMN_WIDTHS = [18, 18, 18, 24, 30, 30, 12, 10, 14, 10];
 
 /**
  * Генерирует key-based Excel файл из данных артикулов.

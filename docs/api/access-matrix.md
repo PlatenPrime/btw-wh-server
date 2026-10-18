@@ -139,19 +139,20 @@
 
 ## `/api/pallets`
 
-| Метод  | Путь               | Аутентификация | Доступ   |
-| ------ | ------------------ | -------------- | -------- |
-| GET    | `/`                | JWT            | ≥ USER   |
-| GET    | `/empty`           | JWT            | ≥ USER   |
-| GET    | `/by-row/:rowId`   | JWT            | ≥ USER   |
-| GET    | `/by-title/:title` | JWT            | ≥ USER   |
-| GET    | `/:id`             | JWT            | ≥ USER   |
-| POST   | `/`                | JWT            | ≥ EDITOR |
-| POST   | `/move-poses`      | JWT            | ≥ EDITOR |
-| PUT    | `/:id`             | JWT            | ≥ EDITOR |
-| DELETE | `/:id`             | JWT            | ≥ PRIME  |
-| DELETE | `/:id/poses`       | JWT            | ≥ EDITOR |
-| DELETE | `/:id/empty-poses` | JWT            | ≥ EDITOR |
+| Метод  | Путь                | Аутентификация | Доступ   |
+| ------ | ------------------- | -------------- | -------- |
+| GET    | `/`                 | JWT            | ≥ USER   |
+| GET    | `/empty`            | JWT            | ≥ USER   |
+| GET    | `/by-row/:rowId`    | JWT            | ≥ USER   |
+| GET    | `/by-title/:title`  | JWT            | ≥ USER   |
+| GET    | `/:id`              | JWT            | ≥ USER   |
+| POST   | `/`                 | JWT            | ≥ EDITOR |
+| POST   | `/move-poses`       | JWT            | ≥ EDITOR |
+| PUT    | `/:id`              | JWT            | ≥ EDITOR |
+| PATCH  | `/:id/pallet-group` | JWT            | ≥ ADMIN  |
+| DELETE | `/:id`              | JWT            | ≥ PRIME  |
+| DELETE | `/:id/poses`        | JWT            | ≥ EDITOR |
+| DELETE | `/:id/empty-poses`  | JWT            | ≥ EDITOR |
 
 ---
 

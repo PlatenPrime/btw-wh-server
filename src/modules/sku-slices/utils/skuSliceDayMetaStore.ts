@@ -42,7 +42,7 @@ export async function upsertSkuSliceDayMeta(
 
   const doc = await SkuSliceDayMeta.findOneAndUpdate({ konkName: input.konkName, date }, update, {
     upsert: true,
-    new: true,
+    returnDocument: "after",
     setDefaultsOnInsert: true,
   }).exec();
 

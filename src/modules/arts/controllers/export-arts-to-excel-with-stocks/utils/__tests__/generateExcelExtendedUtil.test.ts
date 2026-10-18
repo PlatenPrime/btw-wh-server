@@ -33,6 +33,8 @@ describe("generateExcelExtendedUtil", () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
+        Штрихкод: "",
+        "Штрихкод коробки": "",
         Факт: "",
         Вітрина: 30,
         Сайт: 50,
@@ -46,6 +48,8 @@ describe("generateExcelExtendedUtil", () => {
       },
       {
         Артикул: "ART-002",
+        Штрихкод: "",
+        "Штрихкод коробки": "",
         Факт: "",
         Вітрина: 40,
         Сайт: 50,
@@ -70,6 +74,8 @@ describe("generateExcelExtendedUtil", () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
+        Штрихкод: "",
+        "Штрихкод коробки": "",
         Факт: "",
         Вітрина: 30,
         Сайт: 50,
@@ -101,6 +107,8 @@ describe("generateExcelExtendedUtil", () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
+        Штрихкод: "",
+        "Штрихкод коробки": "",
         Факт: "",
         Вітрина: 30,
         Сайт: 50,
@@ -132,6 +140,8 @@ describe("generateExcelExtendedUtil", () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
+        Штрихкод: "",
+        "Штрихкод коробки": "",
         Факт: "",
         Вітрина: 30,
         Сайт: 50,
@@ -161,6 +171,8 @@ describe("generateExcelExtendedUtil", () => {
     const excelData: ExcelArtRowExtended[] = [
       {
         Артикул: "ART-001",
+        Штрихкод: "",
+        "Штрихкод коробки": "",
         Факт: "",
         Вітрина: 0,
         Сайт: "",
@@ -174,6 +186,8 @@ describe("generateExcelExtendedUtil", () => {
       },
       {
         Артикул: "ART-002",
+        Штрихкод: "",
+        "Штрихкод коробки": "",
         Факт: "",
         Вітрина: -50,
         Сайт: 50,

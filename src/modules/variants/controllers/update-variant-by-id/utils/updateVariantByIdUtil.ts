@@ -30,7 +30,7 @@ export const updateVariantByIdUtil = async (
   }
 
   const variant = await Variant.findByIdAndUpdate(input.id, update as UpdateQuery<IVariant>, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 

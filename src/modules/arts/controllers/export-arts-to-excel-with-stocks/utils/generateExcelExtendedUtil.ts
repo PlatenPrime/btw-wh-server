@@ -5,6 +5,8 @@ import type { ExcelArtRowExtended } from "./types.js";
 const SHEET_NAME = "Артикулы";
 const COLUMN_KEYS: (keyof ExcelArtRowExtended)[] = [
   "Артикул",
+  "Штрихкод",
+  "Штрихкод коробки",
   "Факт",
   "Вітрина",
   "Склад",
@@ -15,7 +17,7 @@ const COLUMN_KEYS: (keyof ExcelArtRowExtended)[] = [
   "Маркер",
   "Дата зрізу",
 ];
-const COLUMN_WIDTHS = [12, 15, 15, 15, 15, 45, 10, 10, 15, 18];
+const COLUMN_WIDTHS = [12, 18, 18, 15, 15, 15, 15, 45, 10, 10, 15, 18];
 
 /**
  * Генерирует Excel файл из расширенных данных артикулов

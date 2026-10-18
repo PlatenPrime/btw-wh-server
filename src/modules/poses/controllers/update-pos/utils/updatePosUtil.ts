@@ -17,7 +17,7 @@ export const updatePosUtil = async ({
   session,
 }: UpdatePosUtilInput): Promise<IPos> => {
   const updatedPos = await Pos.findByIdAndUpdate(posId, updateData, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
     session,
   });

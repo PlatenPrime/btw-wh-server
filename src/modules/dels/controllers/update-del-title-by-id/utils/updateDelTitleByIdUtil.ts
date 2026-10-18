@@ -26,7 +26,7 @@ export const updateDelTitleByIdUtil = async (
       prodName: input.prodName,
       prod: { title: prod.title, imageUrl: prod.imageUrl },
     },
-    { new: true, runValidators: true },
+    { returnDocument: "after", runValidators: true },
   );
   return del;
 };

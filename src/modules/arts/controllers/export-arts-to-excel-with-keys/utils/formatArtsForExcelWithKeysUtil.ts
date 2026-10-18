@@ -7,6 +7,8 @@ import { ExcelArtKeyRow } from "./types.js";
 export const formatArtsForExcelWithKeysUtil = (arts: IArt[]): ExcelArtKeyRow[] => {
   return arts.map((art) => ({
     artikul: art.artikul,
+    bar: art.bar || "",
+    boxbar: art.boxbar || "",
     prodName: art.prodName || "",
     nameukr: art.nameukr || "",
     namerus: art.namerus || "",

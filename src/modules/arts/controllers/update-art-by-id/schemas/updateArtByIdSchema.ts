@@ -13,10 +13,19 @@ export const updateArtByIdSchema = z
       .nonnegative("limit must be a non-negative number")
       .optional(),
     prodName: z.string().optional(),
+    bar: z.string().optional(),
+    boxbar: z.string().optional(),
   })
-  .refine((data) => data.limit !== undefined || data.prodName !== undefined, {
-    message: "At least one of limit or prodName is required",
-    path: ["body"],
-  });
+  .refine(
+    (data) =>
+      data.limit !== undefined ||
+      data.prodName !== undefined ||
+      data.bar !== undefined ||
+      data.boxbar !== undefined,
+    {
+      message: "At least one of limit, prodName, bar or boxbar is required",
+      path: ["body"],
+    },
+  );
 
 export type UpdateArtByIdInput = z.infer<typeof updateArtByIdSchema>;

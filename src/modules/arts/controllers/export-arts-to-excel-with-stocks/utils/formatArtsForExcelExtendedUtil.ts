@@ -24,6 +24,8 @@ export const formatArtsForExcelExtendedUtil = (
 
     return {
       Артикул: art.artikul,
+      Штрихкод: art.bar || "",
+      "Штрихкод коробки": art.boxbar || "",
       Виробник: art.prodName || "",
       Факт: "",
       Вітрина: shelf,

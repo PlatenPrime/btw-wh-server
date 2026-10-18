@@ -15,6 +15,8 @@ describe("formatArtsForExcelWithKeysUtil", () => {
         limit: 100,
         marker: "MARK",
         abc: "A",
+        bar: "4601234567890",
+        boxbar: "4601234567891",
       } as IArt,
     ];
 
@@ -23,6 +25,8 @@ describe("formatArtsForExcelWithKeysUtil", () => {
     expect(result).toEqual([
       {
         artikul: "ART-001",
+        bar: "4601234567890",
+        boxbar: "4601234567891",
         prodName: "Gemar",
         nameukr: "Тестовий артикул",
         namerus: "Тестовый артикул",
@@ -53,6 +57,8 @@ describe("formatArtsForExcelWithKeysUtil", () => {
     expect(result).toEqual([
       {
         artikul: "ART-002",
+        bar: "",
+        boxbar: "",
         prodName: "",
         nameukr: "",
         namerus: "",

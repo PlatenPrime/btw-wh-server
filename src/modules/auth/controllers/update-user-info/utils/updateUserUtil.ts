@@ -35,7 +35,7 @@ export const updateUserUtil = async ({
   session,
 }: UpdateUserInput): Promise<IUser | null> => {
   const user = await User.findByIdAndUpdate(userId, updateData, {
-    new: true,
+    returnDocument: "after",
     session,
   });
 

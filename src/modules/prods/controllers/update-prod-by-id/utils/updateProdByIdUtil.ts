@@ -17,6 +17,9 @@ export const updateProdByIdUtil = async (input: UpdateProdByIdUtilInput): Promis
     return Prod.findById(input.id);
   }
 
-  const prod = await Prod.findByIdAndUpdate(input.id, update, { new: true, runValidators: true });
+  const prod = await Prod.findByIdAndUpdate(input.id, update, {
+    returnDocument: "after",
+    runValidators: true,
+  });
   return prod;
 };

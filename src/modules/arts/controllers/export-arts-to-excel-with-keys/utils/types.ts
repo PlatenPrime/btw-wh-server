@@ -1,5 +1,7 @@
 export type ExcelArtKeyRow = {
   artikul: string;
+  bar: string;
+  boxbar: string;
   prodName: string;
   nameukr: string;
   namerus: string;

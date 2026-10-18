@@ -64,7 +64,7 @@ describe("movePalletPosesController", () => {
     const updatedSource = await PalletModel.findByIdAndUpdate(
       sourcePallet._id,
       { $set: { poses: [pos._id] } },
-      { new: true },
+      { returnDocument: "after" },
     );
     expect(updatedSource?.poses.length).toBe(1);
 

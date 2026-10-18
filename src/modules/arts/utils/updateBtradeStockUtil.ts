@@ -33,9 +33,10 @@ export const updateBtradeStockUtil = async ({
         },
       },
       {
-        new: true,
+        returnDocument: "after",
         runValidators: true,
-        select: "artikul zone namerus nameukr limit marker btradeStock createdAt updatedAt",
+        select:
+          "artikul zone namerus nameukr limit marker bar boxbar btradeStock createdAt updatedAt",
       },
     );
 

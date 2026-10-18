@@ -10,5 +10,5 @@ export const updateKaskUtil = async (
     com: string;
   }>,
 ): Promise<IKask | null> => {
-  return Kask.findByIdAndUpdate(id, { $set: update }, { new: true });
+  return Kask.findByIdAndUpdate(id, { $set: update }, { returnDocument: "after" });
 };

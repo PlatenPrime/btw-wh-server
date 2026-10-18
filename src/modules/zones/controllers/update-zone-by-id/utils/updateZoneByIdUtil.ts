@@ -16,7 +16,7 @@ export const updateZoneByIdUtil = async ({
 
   // Сначала обновляем зону
   const updatedZone: IZone | null = await Zone.findByIdAndUpdate(id, updateData, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 

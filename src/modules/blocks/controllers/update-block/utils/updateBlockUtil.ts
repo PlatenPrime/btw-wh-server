@@ -50,7 +50,7 @@ export const updateBlockUtil = async ({
 
   // Обновить блок
   const updatedBlock = await Block.findByIdAndUpdate(objectId, blockUpdateData, {
-    new: true,
+    returnDocument: "after",
   }).exec();
 
   if (!updatedBlock) {

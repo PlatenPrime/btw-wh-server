@@ -20,7 +20,7 @@ export const updateConstantByIdUtil = async (
   }
 
   const constant = await Constant.findByIdAndUpdate(input.id, update, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
   return constant;

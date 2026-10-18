@@ -88,13 +88,27 @@
 
 ---
 
+### PATCH `/api/arts/:id`
+
+Частичное обновление артикула.
+
+**Доступ:** checkAuth + checkRoles(ADMIN).
+
+**Запрос:** path `id` — MongoDB ObjectId. Body: `{ limit?: number, prodName?: string, bar?: string, boxbar?: string }` — хотя бы одно поле.
+
+**Ответ 200:** обновлённый документ Art.
+
+**Ошибки:** 400 (валидация), 401, 403, 404, 500.
+
+---
+
 ### POST `/api/arts/upsert`
 
 Массовое создание/обновление артикулов.
 
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
-**Запрос body:** массив объектов: `artikul` (string), `zone` (string), опционально `prodName` (string), `nameukr`, `namerus`, `limit` (number), `marker` (string), `abc` (string). Минимум один элемент.
+**Запрос body:** массив объектов: `artikul` (string), `zone` (string), опционально `prodName` (string), `nameukr`, `namerus`, `limit` (number), `marker` (string), `abc` (string), `bar` (string), `boxbar` (string). Минимум один элемент.
 
 **Ответ 200:** `{ message: string, result: ... }`.
 
@@ -124,19 +138,19 @@
 
 ### GET `/api/arts/export`
 
-**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export`. Выгрузка: [excel-jobs](excel-jobs.md).
+**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export`. Выгрузка: [excel-jobs](excel-jobs.md). Колонки включают `Штрихкод` (`bar`) и `Штрихкод коробки` (`boxbar`).
 
 ---
 
 ### GET `/api/arts/export-with-stocks`
 
-**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-with-stocks`.
+**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-with-stocks`. Колонки включают `Штрихкод` и `Штрихкод коробки`.
 
 ---
 
 ### GET `/api/arts/export-keys`
 
-**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`.
+**410** `EXCEL_JOBS_MIGRATED`, kind `arts-export-keys`. Key-колонки включают `bar` и `boxbar`.
 
 ---
 

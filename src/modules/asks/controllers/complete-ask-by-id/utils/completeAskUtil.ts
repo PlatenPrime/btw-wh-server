@@ -33,7 +33,7 @@ export async function completeAskUtil({
   };
 
   const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
     session,
   });

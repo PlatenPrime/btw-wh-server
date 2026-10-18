@@ -94,4 +94,54 @@ describe("updateArtByIdUtil", () => {
     expect(result?.prodName).toBe("still-visible");
     expect(result?.artikul).toBe("ART-004");
   });
+
+  it("обновляет только bar", async () => {
+    const art = await Art.create({
+      artikul: "ART-BAR-001",
+      zone: "A1",
+      bar: "old-bar",
+      boxbar: "keep-boxbar",
+    });
+
+    const result = await updateArtByIdUtil({
+      id: art._id.toString(),
+      bar: "new-bar",
+    });
+
+    expect(result?.bar).toBe("new-bar");
+    expect(result?.boxbar).toBe("keep-boxbar");
+  });
+
+  it("обновляет только boxbar", async () => {
+    const art = await Art.create({
+      artikul: "ART-BOX-001",
+      zone: "A1",
+      bar: "keep-bar",
+      boxbar: "old-boxbar",
+    });
+
+    const result = await updateArtByIdUtil({
+      id: art._id.toString(),
+      boxbar: "new-boxbar",
+    });
+
+    expect(result?.bar).toBe("keep-bar");
+    expect(result?.boxbar).toBe("new-boxbar");
+  });
+
+  it("обновляет bar и boxbar одновременно", async () => {
+    const art = await Art.create({
+      artikul: "ART-BAR-002",
+      zone: "A1",
+    });
+
+    const result = await updateArtByIdUtil({
+      id: art._id.toString(),
+      bar: "b1",
+      boxbar: "bb1",
+    });
+
+    expect(result?.bar).toBe("b1");
+    expect(result?.boxbar).toBe("bb1");
+  });
 });

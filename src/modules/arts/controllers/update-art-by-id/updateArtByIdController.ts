@@ -7,9 +7,9 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const updateArtByIdController = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { limit, prodName } = req.body;
+    const { limit, prodName, bar, boxbar } = req.body;
 
-    const parseResult = updateArtByIdSchema.safeParse({ id, limit, prodName });
+    const parseResult = updateArtByIdSchema.safeParse({ id, limit, prodName, bar, boxbar });
     if (!parseResult.success) {
       res.status(400).json({
         message: "Validation error",
@@ -18,12 +18,20 @@ export const updateArtByIdController = async (req: Request, res: Response) => {
       return;
     }
 
-    const { id: artId, limit: nextLimit, prodName: nextProdName } = parseResult.data;
+    const {
+      id: artId,
+      limit: nextLimit,
+      prodName: nextProdName,
+      bar: nextBar,
+      boxbar: nextBoxbar,
+    } = parseResult.data;
 
     const updatedArt = await updateArtByIdUtil({
       id: artId,
       limit: nextLimit,
       prodName: nextProdName,
+      bar: nextBar,
+      boxbar: nextBoxbar,
     });
 
     if (!updatedArt) {

@@ -15,6 +15,8 @@ describe("formatArtsForExcelUtil", () => {
         limit: 100,
         marker: "MARK",
         abc: "A",
+        bar: "4601234567890",
+        boxbar: "4601234567891",
         btradeStock: {
           value: 50,
           date: new Date("2024-01-15T10:00:00Z"),
@@ -27,6 +29,8 @@ describe("formatArtsForExcelUtil", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       Артикул: "ART-001",
+      Штрихкод: "4601234567890",
+      "Штрихкод коробки": "4601234567891",
       Виробник: "Gemar",
       "Назва (укр)": "Тестовий артикул",
       "Назва (рус)": "Тестовый артикул",
@@ -56,6 +60,8 @@ describe("formatArtsForExcelUtil", () => {
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({
       Артикул: "ART-002",
+      Штрихкод: "",
+      "Штрихкод коробки": "",
       Виробник: "",
       "Назва (укр)": "",
       "Назва (рус)": "",

@@ -137,7 +137,7 @@ export const updateSegUtil = async ({
 
   // Обновить сегмент
   const updatedSeg = await Seg.findByIdAndUpdate(objectId, updateDataSeg, {
-    new: true,
+    returnDocument: "after",
     session,
   }).exec();
 

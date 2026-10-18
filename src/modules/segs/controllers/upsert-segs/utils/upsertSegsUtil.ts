@@ -197,7 +197,7 @@ export const upsertSegsUtil = async ({
 
     if (existingSeg) {
       segDoc = await Seg.findByIdAndUpdate(segInput.segId, payload, {
-        new: true,
+        returnDocument: "after",
         session,
       }).exec();
     } else {

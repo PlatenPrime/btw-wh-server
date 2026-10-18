@@ -1,5 +1,6 @@
 export { createPalletController as createPallet } from "./create-pallet/createPalletController.js";
 export { updatePalletController as updatePallet } from "./update-pallet/updatePalletController.js";
+export { setPalletGroupController as setPalletGroup } from "./set-pallet-group/setPalletGroupController.js";
 export { deletePalletController as deletePallet } from "./delete-pallet/deletePalletController.js";
 export { deletePalletPosesController as deletePalletPoses } from "./delete-pallet-poses/deletePalletPosesController.js";
 export { deletePalletEmptyPosesController as deletePalletEmptyPoses } from "./delete-pallet-empty-poses/deletePalletEmptyPosesController.js";

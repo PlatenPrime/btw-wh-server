@@ -73,7 +73,7 @@ export const pullAskUtil = async ({
   };
 
   const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
     session,
   });

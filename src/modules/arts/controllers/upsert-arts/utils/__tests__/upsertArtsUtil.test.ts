@@ -66,4 +66,21 @@ describe("upsertArtsUtil", () => {
     const saved = await Art.findOne({ artikul: "ART-PR-001" });
     expect(saved?.prodName).toBe("gemar");
   });
+
+  it("сохраняет bar и boxbar при upsert", async () => {
+    await upsertArtsUtil({
+      arts: [
+        {
+          artikul: "ART-BAR-001",
+          zone: "A1",
+          bar: "4601234567890",
+          boxbar: "4601234567891",
+        },
+      ],
+    });
+
+    const saved = await Art.findOne({ artikul: "ART-BAR-001" });
+    expect(saved?.bar).toBe("4601234567890");
+    expect(saved?.boxbar).toBe("4601234567891");
+  });
 });

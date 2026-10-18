@@ -25,7 +25,7 @@ export async function updateAskActionsUtil({
   };
 
   const updatedAsk = await Ask.findByIdAndUpdate(ask._id, updateFields, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
     session,
   });

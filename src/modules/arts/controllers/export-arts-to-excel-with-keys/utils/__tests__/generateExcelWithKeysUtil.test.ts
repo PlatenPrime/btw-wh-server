@@ -34,6 +34,8 @@ describe("generateExcelWithKeysUtil", () => {
     const excelData: ExcelArtKeyRow[] = [
       {
         artikul: "ART-001",
+        bar: "4601234567890",
+        boxbar: "4601234567891",
         prodName: "Gemar",
         nameukr: "Тест",
         namerus: "Тест",
@@ -53,6 +55,8 @@ describe("generateExcelWithKeysUtil", () => {
     const jsonData = await readSheetToJson(result.buffer);
     expect(jsonData).toHaveLength(1);
     expect(jsonData[0]?.artikul).toBe("ART-001");
+    expect(jsonData[0]?.bar).toBe("4601234567890");
+    expect(jsonData[0]?.boxbar).toBe("4601234567891");
     expect(jsonData[0]?.prodName).toBe("Gemar");
   });
 
