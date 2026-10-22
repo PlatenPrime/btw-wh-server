@@ -35,6 +35,7 @@ export const runSkuSlicesPostCorrectionsRun: ApiTaskKindRunner = async (params, 
       type: "other",
       description:
         "Post-corrections sku-slices " +
+        (result.konkName ? result.konkName + " " : "") +
         result.dateFrom +
         "…" +
         result.dateTo +

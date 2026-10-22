@@ -17,6 +17,7 @@ describe("sku-slices router", () => {
       "/skugr/:skugrId/run-today",
       "/post-corrections/run",
       "/sku/:skuId/range",
+      "/sku/:skuId/correct-balun-band-spike",
       "/sku/:skuId",
       "/sku/:skuId",
     ]);

@@ -4,7 +4,7 @@ import { createApiTaskUtil } from "../../../apitasks/controllers/create-api-task
 import { postSkuSlicePostCorrectionsSchema } from "./schemas/postSkuSlicePostCorrectionsSchema.js";
 
 /**
- * @desc    Постановка post-pass коррекций sku-slices за период (balun/svbum/pack-flip/rollup)
+ * @desc    Постановка post-pass коррекций sku-slices за период; optional konkName (RTL band при balun)
  * @route   POST /api/sku-slices/post-corrections/run
  */
 export const postSkuSlicePostCorrectionsController = async (

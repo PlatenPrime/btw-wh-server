@@ -272,6 +272,46 @@
 
 ---
 
+### POST `/api/sku-slices/sku/:skuId/correct-balun-band-spike`
+
+Клиентский RTL-corrector для sandwich-вспышки остатка balun: небольшое → `[9000, 10000]` → небольшое. Не входит в nightly post-pass. Сервер догружает соседей ±1 дня к окну; dump band→small в продажи не берёт; внутри полосы продажи сохраняются (ход справа налево). Гайд: [frontend: correct-balun-band-spike](../frontend/correct-balun-band-spike.md).
+
+**Path:** `skuId` — ObjectId SKU с `konkName === "balun"`.
+
+**Тело:**
+
+| Поле     | Тип     | Обязательно        | Описание                                                         |
+| -------- | ------- | ------------------ | ---------------------------------------------------------------- |
+| dateFrom | string  | да                 | YYYY-MM-DD, UTC, inclusive                                       |
+| dateTo   | string  | да                 | YYYY-MM-DD, inclusive, ≥ dateFrom; диапазон ≤ 366 дней           |
+| apply    | boolean | нет, default false | true — запись stock в SkuSliceMonth + materialize sales; preview |
+
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    productId: string,
+    window: { dateFrom: string, dateTo: string },
+    band: { min: 9000, max: 10000 },
+    patches: Array<{ date: string, from: number, to: number }>,
+    skipped: Array<{
+      dateFrom: string,
+      dateTo: string,
+      reason: "missing-left" | "missing-right" | "not-sandwich-left" | "not-sandwich-right"
+    }>,
+    applied: boolean
+  }
+}
+```
+
+`applied` — true только если `apply: true` и был хотя бы один патч. Пустые `patches` при непустом `skipped` — не ошибка.
+
+**Ошибки:** 400 валидация / не balun; 401; 403; 404 нет SKU / нет productId; 500.
+
+---
+
 ### GET `/api/sku-slices/pack-flips`
 
 Проверка кратных инверсий `stock`/`price` по конкуренту за период. Срезы не изменяются. Детектор общий для конкурентов; auto-apply после ночного cron — только konk из конфига `packFlipAutoApplyKonks`.
@@ -338,7 +378,11 @@
 
 ### POST `/api/sku-slices/post-corrections/run`
 
-Постановка фоновой задачи post-pass коррекций за календарный диапазон (balun/svbum fake stock, pack-flip auto-apply konks, manufacturer rollup). Синхронно не выполняет коррекцию — создаёт ApiTask `sku-slices.post-corrections.run`; статус и результат — через [apitasks](apitasks.md).
+Постановка фоновой задачи post-pass коррекций за календарный диапазон. Синхронно не выполняет коррекцию — создаёт ApiTask `sku-slices.post-corrections.run`; статус и результат — через [apitasks](apitasks.md).
+
+Без `konkName` (cron / полный прогон): balun LTR fake stock, svbum fake stock, pack-flip auto-apply konks, manufacturer rollup — **без** RTL band-spike.
+
+С `konkName`: шаги только для этого конкурента. При `konkName=balun` дополнительно один RTL sandwich-прогон `[9000,10000]` по всем balun productId за весь диапазон (`balunManualBand` в result). Гайд: [frontend: correct-balun-band-spike](../frontend/correct-balun-band-spike.md).
 
 **Тело:**
 
@@ -347,7 +391,8 @@
 | dateFrom | string  | да                 | YYYY-MM-DD, UTC-сутки, inclusive                              |
 | dateTo   | string  | да                 | YYYY-MM-DD, inclusive, не раньше dateFrom; диапазон ≤ 31 день |
 | apply    | boolean | нет, default false | true — запись в SkuSliceMonth и rollup; false — dry-run       |
+| konkName | string  | нет                | trim + lowercase; скоуп шагов; RTL band только при `balun`    |
 
 **Ответ 202:** как `POST /api/apitasks` (`message`, `data.taskId`, `data.kind`, `data.status`, `data.pollIntervalMs`, …).
 
-**Ошибки:** 400 валидация; 401; 403; 409 параллельная задача на тот же диапазон; 429 лимит активных задач пользователя; 500.
+**Ошибки:** 400 валидация; 401; 403; 409 параллельная задача на тот же resource key (`konk`+даты); 429 лимит активных задач пользователя; 500.

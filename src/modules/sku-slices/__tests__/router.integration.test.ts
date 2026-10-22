@@ -333,5 +333,24 @@ describe("Sku-slices router integration", () => {
         apply: false,
       });
     });
+
+    it("202 stores normalized konkName in task params", async () => {
+      const response = await request(app)
+        .post("/api/sku-slices/post-corrections/run")
+        .set(createAuthHeader())
+        .send({
+          dateFrom: "2026-04-01",
+          dateTo: "2026-04-03",
+          apply: true,
+          konkName: "Balun",
+        })
+        .expect(202);
+
+      const task = await ApiTask.findById(response.body.data.taskId).lean();
+      expect(task?.params).toMatchObject({
+        apply: true,
+        konkName: "balun",
+      });
+    });
   });
 });

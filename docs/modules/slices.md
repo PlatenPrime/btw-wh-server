@@ -8,21 +8,21 @@
 
 ## Содержимое
 
-| Файл                                                                                                | Назначение                                                                                                           |
-| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| [`config/excludedCompetitors.ts`](../../src/modules/slices/config/excludedCompetitors.ts)           | Списки конкурентов: primary cron + compensation-only (`compensationExcludedCompetitors`)                             |
-| [`config/sliceRotationByKonk.ts`](../../src/modules/slices/config/sliceRotationByKonk.ts)           | Per-konk цикл среза (rotation): сколько дней и какой bucket сегодня                                                  |
-| [`config/competitorScrapeProfiles.ts`](../../src/modules/slices/config/competitorScrapeProfiles.ts) | Throttle-профили скрапинга по konk и типу run                                                                        |
-| [`config/packFlipAutoApplyKonks.ts`](../../src/modules/slices/config/packFlipAutoApplyKonks.ts)     | Конкуренты, для которых sku-slices cron делает pack-flip review с записью                                            |
-| [`config/balunFakeStockSentinel.ts`](../../src/modules/slices/config/balunFakeStockSentinel.ts)     | Inclusive диапазоны фейкового остатка balun (`4990–5000`, `9950–10000`), lookback и имя konk для post-pass коррекции |
-| [`config/svbumFakeStockThreshold.ts`](../../src/modules/slices/config/svbumFakeStockThreshold.ts)   | Порог фейкового остатка svbum (`> 900000`), trailing grace, lookback и имя konk                                      |
-| [`utils/sliceRotation.ts`](../../src/modules/slices/utils/sliceRotation.ts)                         | Bucket по `productId`, dayIndex по дате среза                                                                        |
-| [`utils/competitorScrapeThrottle.ts`](../../src/modules/slices/utils/competitorScrapeThrottle.ts)   | Resolve профилей и задержки между unit/page/group                                                                    |
-| [`utils/enumerateSliceDates.ts`](../../src/modules/slices/utils/enumerateSliceDates.ts)             | Перечисление UTC-дней в диапазоне `from…to`                                                                          |
-| [`utils/isInvalidSliceStockResult.ts`](../../src/modules/slices/utils/isInvalidSliceStockResult.ts) | Правила сентинельных значений `-1`                                                                                   |
-| [`utils/mapSliceDocsToRangeItems.ts`](../../src/modules/slices/utils/mapSliceDocsToRangeItems.ts)   | Документы срезов → `{ date, stock, price }[]` (sparse или dense с forward-fill)                                      |
-| [`utils/salesComparisonUtils.ts`](../../src/modules/slices/utils/salesComparisonUtils.ts)           | Продажи/выручка из рядов остатков, дни поставки                                                                      |
-| [`utils/detectPackFlipSpike.ts`](../../src/modules/slices/utils/detectPackFlipSpike.ts)             | Детектор кратной инверсии `stock`/`price` (pack-flip) без привязки к конкуренту                                      |
+| Файл                                                                                                | Назначение                                                                                                                               |
+| --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| [`config/excludedCompetitors.ts`](../../src/modules/slices/config/excludedCompetitors.ts)           | Списки конкурентов: primary cron + compensation-only (`compensationExcludedCompetitors`)                                                 |
+| [`config/sliceRotationByKonk.ts`](../../src/modules/slices/config/sliceRotationByKonk.ts)           | Per-konk цикл среза (rotation): сколько дней и какой bucket сегодня                                                                      |
+| [`config/competitorScrapeProfiles.ts`](../../src/modules/slices/config/competitorScrapeProfiles.ts) | Throttle-профили скрапинга по konk и типу run                                                                                            |
+| [`config/packFlipAutoApplyKonks.ts`](../../src/modules/slices/config/packFlipAutoApplyKonks.ts)     | Конкуренты, для которых sku-slices cron делает pack-flip review с записью                                                                |
+| [`config/balunFakeStockSentinel.ts`](../../src/modules/slices/config/balunFakeStockSentinel.ts)     | Auto post-pass диапазоны balun (`4990–5000`, `9950–10000`) + ручной band `9000–10000` для клиентского RTL-corrector; lookback и имя konk |
+| [`config/svbumFakeStockThreshold.ts`](../../src/modules/slices/config/svbumFakeStockThreshold.ts)   | Порог фейкового остатка svbum (`> 900000`), trailing grace, lookback и имя konk                                                          |
+| [`utils/sliceRotation.ts`](../../src/modules/slices/utils/sliceRotation.ts)                         | Bucket по `productId`, dayIndex по дате среза                                                                                            |
+| [`utils/competitorScrapeThrottle.ts`](../../src/modules/slices/utils/competitorScrapeThrottle.ts)   | Resolve профилей и задержки между unit/page/group                                                                                        |
+| [`utils/enumerateSliceDates.ts`](../../src/modules/slices/utils/enumerateSliceDates.ts)             | Перечисление UTC-дней в диапазоне `from…to`                                                                                              |
+| [`utils/isInvalidSliceStockResult.ts`](../../src/modules/slices/utils/isInvalidSliceStockResult.ts) | Правила сентинельных значений `-1`                                                                                                       |
+| [`utils/mapSliceDocsToRangeItems.ts`](../../src/modules/slices/utils/mapSliceDocsToRangeItems.ts)   | Документы срезов → `{ date, stock, price }[]` (sparse или dense с forward-fill)                                                          |
+| [`utils/salesComparisonUtils.ts`](../../src/modules/slices/utils/salesComparisonUtils.ts)           | Продажи/выручка из рядов остатков, дни поставки                                                                                          |
+| [`utils/detectPackFlipSpike.ts`](../../src/modules/slices/utils/detectPackFlipSpike.ts)             | Детектор кратной инверсии `stock`/`price` (pack-flip) без привязки к конкуренту                                                          |
 
 ## Концепции и принятые решения
 
@@ -61,6 +61,10 @@ Per-konk цикл в `sliceRotationByKonk` (сейчас пусто: Air без 
 ### Throttle скрапинга конкурентов
 
 `competitorScrapeProfiles` + `competitorScrapeThrottle` — единый источник jitter/pause для SKU-срезов, weekly skugr fill и group-pages pagination. Per-konk override в config map; runner'ы вызывают resolver, не hardcode `if (air)`.
+
+### Balun fake stock
+
+Auto post-pass (`correctBalunFakeStockSpikes`) заменяет только inclusive диапазоны `4990–5000` ∪ `9950–10000` на соседний адекватный stock (LTR). Отдельно конфиг `BALUN_MANUAL_BAND_*` (`9000–10000`) обслуживает клиентский RTL-corrector в sku-slices: sandwich небольшое→band→небольшое, восстановление остатков справа налево с сохранением внутриполосных продаж. В cron не подключён.
 
 ### Pack-flip
 

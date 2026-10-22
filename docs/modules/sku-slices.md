@@ -38,7 +38,9 @@ Slim документ `(konkName, date)` без точек: `rotationMeta`, `sta
 
 Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/config/excludedCompetitors` (сейчас из sku-cron исключён `yumi`; Air в primary cron остаётся). Rotation в `sliceRotationByKonk` сейчас пустая: Air берёт полный sliced-каталог за день. Jitter из `resolveSkuSliceRequestJitterMs` / `competitorScrapeProfiles`. Для Air — ярусы пауз и **чанки по 1000 HTTP fetch** с паузой 45–60 мин и `resetImpitClientCache`. Следующий чанк только по pending (valid точка в months skip без fetch). Abort: Cloudflare `ORIGIN_BLOCKED`, unsupported konk, либо **15 подряд** soft-invalid. TG-итог по konk включает `abortReason`. Ключ даты — `toNextKyivSliceDate`.
 
-После срезов всех конкурентов — post-pass: balun fake stock, svbum fake stock, pack-flip auto-apply (`perfect`), manufacturer rollup. Ручные скрипты и ApiTask `sku-slices.post-corrections.run` без изменений по смыслу; запись точек — в months.
+После срезов всех конкурентов — post-pass: balun fake stock (только auto-диапазоны `4990–5000` ∪ `9950–10000`), svbum fake stock, pack-flip auto-apply (`perfect`), manufacturer rollup. ApiTask `sku-slices.post-corrections.run` без `konkName` повторяет этот полный набор **без** RTL.
+
+Клиентский post-corrections с `konkName` скоупит шаги на конкурента. При `konkName=balun` дополнительно RTL sandwich `small → [9000, 10000] → small` по всем balun productId за диапазон (сохраняет внутриполосные продажи). Точечно: `POST .../sku/:skuId/correct-balun-band-spike`.
 
 ### Client-ingestion для Air
 
@@ -55,8 +57,9 @@ Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/con
 - `GET /api/sku-slices/pack-flips` — проверка pack-flip за диапазон (без записи)
 - `GET /api/sku-slices/sku/:skuId` — точка на дату
 - `PATCH /api/sku-slices/sku/:skuId` — ручная запись stock/price (months upsert)
+- `POST /api/sku-slices/sku/:skuId/correct-balun-band-spike` — клиентский RTL-corrector band-spike balun (preview/apply)
 - `POST /api/sku-slices/skugr/:skugrId/run-today` — ручной scrape группы за сегодня
-- `POST /api/sku-slices/post-corrections/run` — post-pass за период (ApiTask, 202)
+- `POST /api/sku-slices/post-corrections/run` — post-pass за период (ApiTask, 202); optional `konkName`, RTL band при `balun`
 - `GET /api/sku-slices/sku/:skuId/range` — плотный ряд с forward-fill
 - `GET /api/sku-slices/client/air/pending` — очередь client-ingest
 - `PUT /api/sku-slices/client/air/sku/:skuId` — запись точки из HTML

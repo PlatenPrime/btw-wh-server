@@ -3,6 +3,7 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
+  correctBalunBandSpikeController,
   getAirClientPendingController,
   getPackFlipReviewController,
   getSkuSliceByDateController,
@@ -66,6 +67,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getSkuSliceRangeController),
+);
+router.post(
+  "/sku/:skuId/correct-balun-band-spike",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(correctBalunBandSpikeController),
 );
 router.get(
   "/sku/:skuId",

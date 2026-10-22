@@ -5,7 +5,7 @@ import {
 } from "../postSkuSlicePostCorrectionsSchema.js";
 
 describe("postSkuSlicePostCorrectionsSchema", () => {
-  it("defaults apply to false", () => {
+  it("defaults apply to false and leaves konkName undefined", () => {
     const parsed = postSkuSlicePostCorrectionsSchema.safeParse({
       dateFrom: "2026-04-01",
       dateTo: "2026-04-03",
@@ -13,7 +13,30 @@ describe("postSkuSlicePostCorrectionsSchema", () => {
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(parsed.data.apply).toBe(false);
+      expect(parsed.data.konkName).toBeUndefined();
     }
+  });
+
+  it("normalizes konkName to lowercase", () => {
+    const parsed = postSkuSlicePostCorrectionsSchema.safeParse({
+      dateFrom: "2026-04-01",
+      dateTo: "2026-04-03",
+      konkName: " Balun ",
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.konkName).toBe("balun");
+    }
+  });
+
+  it("rejects empty konkName", () => {
+    expect(
+      postSkuSlicePostCorrectionsSchema.safeParse({
+        dateFrom: "2026-04-01",
+        dateTo: "2026-04-03",
+        konkName: "   ",
+      }).success,
+    ).toBe(false);
   });
 
   it("rejects inverted range and ranges over max days", () => {

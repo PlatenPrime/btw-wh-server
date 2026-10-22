@@ -16,6 +16,13 @@ export const postSkuSlicePostCorrectionsSchema = z
     dateFrom: postCorrectionReportingDateSchema,
     dateTo: postCorrectionReportingDateSchema,
     apply: z.boolean().optional().default(false),
+    /** Если задан — скоуп шагов на этого конкурента; RTL band только при balun. */
+    konkName: z
+      .string()
+      .trim()
+      .min(1, "konkName is required")
+      .transform((value) => value.toLowerCase())
+      .optional(),
   })
   .strict()
   .superRefine((value, ctx) => {

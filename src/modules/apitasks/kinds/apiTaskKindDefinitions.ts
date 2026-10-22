@@ -52,7 +52,11 @@ export const API_TASK_KIND_DEFINITIONS: Record<ApiTaskKind, ApiTaskKindDefinitio
       const from = params.dateFrom;
       const to = params.dateTo;
       if (from instanceof Date && to instanceof Date) {
-        return `post-corrections:${from.toISOString().slice(0, 10)}:${to.toISOString().slice(0, 10)}`;
+        const konk =
+          typeof params.konkName === "string" && params.konkName.trim()
+            ? params.konkName.trim().toLowerCase()
+            : "all";
+        return `post-corrections:${konk}:${from.toISOString().slice(0, 10)}:${to.toISOString().slice(0, 10)}`;
       }
       return undefined;
     },
