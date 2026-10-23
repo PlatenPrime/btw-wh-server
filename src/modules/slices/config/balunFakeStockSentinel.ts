@@ -8,14 +8,14 @@ export const BALUN_FAKE_STOCK_SPIKE_MIN = 4990;
 export const BALUN_FAKE_STOCK_SPIKE_MAX = 5000;
 
 export const BALUN_FAKE_STOCK_MIN = 9950;
-export const BALUN_FAKE_STOCK_MAX = 10000;
+export const BALUN_FAKE_STOCK_MAX = 10050;
 
 /**
  * Ручной RTL band-spike (клиентский POST, не cron):
- * inclusive [9000, 10000] — шире auto-clamp, ловит near-miss вроде 9937.
+ * inclusive [9000, 11000] — шире auto-clamp, ловит near-miss вроде 9937.
  */
 export const BALUN_MANUAL_BAND_MIN = 9000;
-export const BALUN_MANUAL_BAND_MAX = 10000;
+export const BALUN_MANUAL_BAND_MAX = 11000;
 
 /** Сколько дней до окна коррекции грузить, чтобы найти адекватный stock слева. */
 export const BALUN_FAKE_STOCK_LOOKBACK_DAYS = 90;

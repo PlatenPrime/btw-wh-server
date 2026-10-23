@@ -128,7 +128,7 @@ function toSkippedFindings(skipped: BalunFakeStockSkip[]): BalunFakeStockSkipped
 }
 
 /**
- * Коррекция фейкового stock у balun (диапазоны 4990–5000 ∪ 9950–10000)
+ * Коррекция фейкового stock у balun (диапазоны 4990–5000 ∪ 9950–10050)
  * за окно [asOf-(daysBack-1) .. asOf]. Пишет в SkuSliceMonth.
  */
 export async function correctBalunFakeStockSpikesUtil(

@@ -42,7 +42,7 @@ const emptyManualBand = {
   konkName: "balun",
   apply: false,
   window: { dateFrom: "2026-04-02", dateTo: "2026-04-03" },
-  band: { min: 9000, max: 10000 },
+  band: { min: 9000, max: 11000 },
   patched: [],
   skipped: [],
 };

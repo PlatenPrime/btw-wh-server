@@ -18,13 +18,14 @@ function series(stocks: (number | undefined)[]): RtlBandStockDay[] {
 }
 
 describe("isBalunManualBandStock / isBalunManualSmallStock", () => {
-  it("treats 9000–10000 as band inclusive", () => {
+  it("treats 9000–11000 as band inclusive", () => {
     expect(isBalunManualBandStock(9000)).toBe(true);
     expect(isBalunManualBandStock(9937)).toBe(true);
     expect(isBalunManualBandStock(9950)).toBe(true);
     expect(isBalunManualBandStock(10000)).toBe(true);
+    expect(isBalunManualBandStock(11000)).toBe(true);
     expect(isBalunManualBandStock(8999)).toBe(false);
-    expect(isBalunManualBandStock(10001)).toBe(false);
+    expect(isBalunManualBandStock(11001)).toBe(false);
   });
 
   it("treats stock below band as small (not -1)", () => {

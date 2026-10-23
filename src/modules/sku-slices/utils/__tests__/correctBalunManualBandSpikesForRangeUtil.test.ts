@@ -48,6 +48,7 @@ describe("correctBalunManualBandSpikesForRangeUtil", () => {
       apply: true,
     });
 
+    expect(result.band).toEqual({ min: 9000, max: 11000 });
     expect(result.patched.filter((p) => p.productId === "balun-spike")).toEqual([
       { productId: "balun-spike", date: "2026-09-14", from: 9937, to: 59 },
       { productId: "balun-spike", date: "2026-09-15", from: 9937, to: 59 },
@@ -56,6 +57,32 @@ describe("correctBalunManualBandSpikesForRangeUtil", () => {
 
     expect(await getDayPoint("balun", "balun-spike", D1)).toEqual({ stock: 59, price: 10 });
     expect(await getDayPoint("balun", "balun-calm", D1)).toEqual({ stock: 12, price: 10 });
+  });
+
+  it("bulk-loads and dry-runs patches for stock in expanded band up to 11000", async () => {
+    await seedBalun([
+      { date: D0, data: { "balun-hi": { stock: 5, price: 10 } } },
+      { date: D1, data: { "balun-hi": { stock: 10500, price: 10 } } },
+      { date: D2, data: { "balun-hi": { stock: 8, price: 10 } } },
+    ]);
+    await seedBalun([
+      { date: D0, data: { "balun-other": { stock: 1, price: 10 } } },
+      { date: D1, data: { "balun-other": { stock: 2, price: 10 } } },
+      { date: D2, data: { "balun-other": { stock: 1, price: 10 } } },
+    ]);
+
+    const result = await correctBalunManualBandSpikesForRangeUtil({
+      dateFrom: D1,
+      dateTo: D1,
+      apply: false,
+    });
+
+    expect(result.apply).toBe(false);
+    expect(result.band).toEqual({ min: 9000, max: 11000 });
+    expect(result.patched).toEqual([
+      { productId: "balun-hi", date: "2026-09-14", from: 10500, to: 8 },
+    ]);
+    expect(await getDayPoint("balun", "balun-hi", D1)).toEqual({ stock: 10500, price: 10 });
   });
 
   it("preview does not write", async () => {

@@ -95,7 +95,7 @@ describe("correctBalunBandSpikeUtil", () => {
       konkName: "balun",
       apply: false,
       window: { dateFrom: "2026-09-14", dateTo: "2026-09-15" },
-      band: { min: 9000, max: 10000 },
+      band: { min: 9000, max: 11000 },
       patched: [
         { productId: "balun-1", date: "2026-09-14", from: 9937, to: 59 },
         { productId: "balun-1", date: "2026-09-15", from: 9937, to: 59 },
@@ -120,7 +120,7 @@ describe("correctBalunBandSpikeUtil", () => {
       ok: true,
       productId: "balun-1",
       window: { dateFrom: "2026-09-14", dateTo: "2026-09-15" },
-      band: { min: 9000, max: 10000 },
+      band: { min: 9000, max: 11000 },
       patches: [
         { date: "2026-09-14", from: 9937, to: 59 },
         { date: "2026-09-15", from: 9937, to: 59 },
@@ -140,7 +140,7 @@ describe("correctBalunBandSpikeUtil", () => {
       konkName: "balun",
       apply: true,
       window: { dateFrom: "2026-09-14", dateTo: "2026-09-15" },
-      band: { min: 9000, max: 10000 },
+      band: { min: 9000, max: 11000 },
       patched: [
         { productId: "balun-1", date: "2026-09-14", from: 9937, to: 70 },
         { productId: "balun-1", date: "2026-09-15", from: 9927, to: 60 },
@@ -171,7 +171,7 @@ describe("correctBalunBandSpikeUtil", () => {
       konkName: "balun",
       apply: false,
       window: { dateFrom: "2026-09-14", dateTo: "2026-09-15" },
-      band: { min: 9000, max: 10000 },
+      band: { min: 9000, max: 11000 },
       patched: [],
       skipped: [
         {

@@ -7,6 +7,8 @@ import {
   BALUN_FAKE_STOCK_MIN,
   BALUN_FAKE_STOCK_SPIKE_MAX,
   BALUN_FAKE_STOCK_SPIKE_MIN,
+  BALUN_MANUAL_BAND_MAX,
+  BALUN_MANUAL_BAND_MIN,
 } from "../balunFakeStockSentinel.js";
 
 describe("balunFakeStockSentinel", () => {
@@ -14,7 +16,9 @@ describe("balunFakeStockSentinel", () => {
     expect(BALUN_FAKE_STOCK_SPIKE_MIN).toBe(4990);
     expect(BALUN_FAKE_STOCK_SPIKE_MAX).toBe(5000);
     expect(BALUN_FAKE_STOCK_MIN).toBe(9950);
-    expect(BALUN_FAKE_STOCK_MAX).toBe(10000);
+    expect(BALUN_FAKE_STOCK_MAX).toBe(10050);
+    expect(BALUN_MANUAL_BAND_MIN).toBe(9000);
+    expect(BALUN_MANUAL_BAND_MAX).toBe(11000);
     expect(BALUN_FAKE_STOCK_LOOKBACK_DAYS).toBe(90);
     expect(BALUN_FAKE_STOCK_CRON_DAYS_BACK).toBe(7);
     expect(BALUN_FAKE_STOCK_KONK_NAME).toBe("balun");

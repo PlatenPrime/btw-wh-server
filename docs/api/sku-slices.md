@@ -274,7 +274,7 @@
 
 ### POST `/api/sku-slices/sku/:skuId/correct-balun-band-spike`
 
-Клиентский RTL-corrector для sandwich-вспышки остатка balun: небольшое → `[9000, 10000]` → небольшое. Не входит в nightly post-pass. Сервер догружает соседей ±1 дня к окну; dump band→small в продажи не берёт; внутри полосы продажи сохраняются (ход справа налево). Гайд: [frontend: correct-balun-band-spike](../frontend/correct-balun-band-spike.md).
+Клиентский RTL-corrector для sandwich-вспышки остатка balun: небольшое → `[9000, 11000]` → небольшое. Не входит в nightly post-pass. Сервер догружает соседей ±1 дня к окну; dump band→small в продажи не берёт; внутри полосы продажи сохраняются (ход справа налево). Гайд: [frontend: correct-balun-band-spike](../frontend/correct-balun-band-spike.md).
 
 **Path:** `skuId` — ObjectId SKU с `konkName === "balun"`.
 
@@ -294,7 +294,7 @@
   data: {
     productId: string,
     window: { dateFrom: string, dateTo: string },
-    band: { min: 9000, max: 10000 },
+    band: { min: 9000, max: 11000 },
     patches: Array<{ date: string, from: number, to: number }>,
     skipped: Array<{
       dateFrom: string,
@@ -382,7 +382,7 @@
 
 Без `konkName` (cron / полный прогон): balun LTR fake stock, svbum fake stock, pack-flip auto-apply konks, manufacturer rollup — **без** RTL band-spike.
 
-С `konkName`: шаги только для этого конкурента. При `konkName=balun` дополнительно один RTL sandwich-прогон `[9000,10000]` по всем balun productId за весь диапазон (`balunManualBand` в result). Гайд: [frontend: correct-balun-band-spike](../frontend/correct-balun-band-spike.md).
+С `konkName`: шаги только для этого конкурента. При `konkName=balun` дополнительно один RTL sandwich-прогон `[9000,11000]` по всем balun productId за весь диапазон (`balunManualBand` в result). Гайд: [frontend: correct-balun-band-spike](../frontend/correct-balun-band-spike.md).
 
 **Тело:**
 

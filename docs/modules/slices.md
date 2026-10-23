@@ -14,7 +14,7 @@
 | [`config/sliceRotationByKonk.ts`](../../src/modules/slices/config/sliceRotationByKonk.ts)           | Per-konk цикл среза (rotation): сколько дней и какой bucket сегодня                                                                      |
 | [`config/competitorScrapeProfiles.ts`](../../src/modules/slices/config/competitorScrapeProfiles.ts) | Throttle-профили скрапинга по konk и типу run                                                                                            |
 | [`config/packFlipAutoApplyKonks.ts`](../../src/modules/slices/config/packFlipAutoApplyKonks.ts)     | Конкуренты, для которых sku-slices cron делает pack-flip review с записью                                                                |
-| [`config/balunFakeStockSentinel.ts`](../../src/modules/slices/config/balunFakeStockSentinel.ts)     | Auto post-pass диапазоны balun (`4990–5000`, `9950–10000`) + ручной band `9000–10000` для клиентского RTL-corrector; lookback и имя konk |
+| [`config/balunFakeStockSentinel.ts`](../../src/modules/slices/config/balunFakeStockSentinel.ts)     | Auto post-pass диапазоны balun (`4990–5000`, `9950–10050`) + ручной band `9000–11000` для клиентского RTL-corrector; lookback и имя konk |
 | [`config/svbumFakeStockThreshold.ts`](../../src/modules/slices/config/svbumFakeStockThreshold.ts)   | Порог фейкового остатка svbum (`> 900000`), trailing grace, lookback и имя konk                                                          |
 | [`utils/sliceRotation.ts`](../../src/modules/slices/utils/sliceRotation.ts)                         | Bucket по `productId`, dayIndex по дате среза                                                                                            |
 | [`utils/competitorScrapeThrottle.ts`](../../src/modules/slices/utils/competitorScrapeThrottle.ts)   | Resolve профилей и задержки между unit/page/group                                                                                        |
@@ -64,7 +64,7 @@ Per-konk цикл в `sliceRotationByKonk` (сейчас пусто: Air без 
 
 ### Balun fake stock
 
-Auto post-pass (`correctBalunFakeStockSpikes`) заменяет только inclusive диапазоны `4990–5000` ∪ `9950–10000` на соседний адекватный stock (LTR). Отдельно конфиг `BALUN_MANUAL_BAND_*` (`9000–10000`) обслуживает клиентский RTL-corrector в sku-slices: sandwich небольшое→band→небольшое, восстановление остатков справа налево с сохранением внутриполосных продаж. В cron не подключён.
+Auto post-pass (`correctBalunFakeStockSpikes`) заменяет только inclusive диапазоны `4990–5000` ∪ `9950–10050` на соседний адекватный stock (LTR). Отдельно конфиг `BALUN_MANUAL_BAND_*` (`9000–11000`) обслуживает клиентский RTL-corrector в sku-slices: sandwich небольшое→band→небольшое, восстановление остатков справа налево с сохранением внутриполосных продаж. В cron не подключён.
 
 ### Pack-flip
 

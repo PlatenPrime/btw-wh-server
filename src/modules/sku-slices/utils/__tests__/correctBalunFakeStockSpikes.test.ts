@@ -17,18 +17,21 @@ function day(dateMs: number, stock: number | undefined): BalunStockDay {
 }
 
 describe("isAdequateBalunStock / isBalunFakeStock", () => {
-  it("treats inclusive 9950–10000 as fake and -1 as inadequate", () => {
+  it("treats inclusive 9950–10050 as fake and -1 as inadequate", () => {
     expect(isBalunFakeStock(9950)).toBe(true);
     expect(isBalunFakeStock(9975)).toBe(true);
     expect(isBalunFakeStock(9999)).toBe(true);
     expect(isBalunFakeStock(10000)).toBe(true);
+    expect(isBalunFakeStock(10050)).toBe(true);
     expect(isBalunFakeStock(9949)).toBe(false);
-    expect(isBalunFakeStock(10001)).toBe(false);
+    expect(isBalunFakeStock(10051)).toBe(false);
     expect(isAdequateBalunStock(10000)).toBe(false);
+    expect(isAdequateBalunStock(10050)).toBe(false);
     expect(isAdequateBalunStock(9950)).toBe(false);
     expect(isAdequateBalunStock(-1)).toBe(false);
     expect(isAdequateBalunStock(543)).toBe(true);
     expect(isAdequateBalunStock(9949)).toBe(true);
+    expect(isAdequateBalunStock(10051)).toBe(true);
     expect(isAdequateBalunStock(0)).toBe(true);
   });
 

@@ -51,7 +51,7 @@ function toSkipped(findings: BalunManualBandSkipFinding[]): CorrectBalunBandSpik
 }
 
 /**
- * Клиентский RTL-corrector sandwich small→[9000,10000]→small для одного balun SKU.
+ * Клиентский RTL-corrector sandwich small→[9000,11000]→small для одного balun SKU.
  * Не вызывается из nightly post-pass.
  */
 export async function correctBalunBandSpikeUtil(

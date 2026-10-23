@@ -16,9 +16,8 @@ import {
   type RtlBandStockDay,
 } from "./computeRtlBalunBandSpikePatches.js";
 import { addUtcDays, toUtcYmd } from "./reviewPackFlipsUtil.js";
-import { getPointsForSkuRange, upsertDayStockOnly } from "./skuSliceMonthStore.js";
-import { toSliceMonthDate, toSliceMonthDayKey } from "./skuSliceMonthKeys.js";
-import { SkuSliceMonth } from "../models/SkuSliceMonth.js";
+import { loadDayMapsForKonkDates, upsertDayStockOnly } from "./skuSliceMonthStore.js";
+import type { ISkuSliceDataItem } from "../models/skuSliceTypes.js";
 
 const log = createLogger({ module: "sku-slices", job: "balun-manual-band" });
 
@@ -26,7 +25,7 @@ export type CorrectBalunManualBandSpikesForRangeInput = {
   dateFrom: Date;
   dateTo: Date;
   apply?: boolean;
-  /** Если задан — только эти productId; иначе все из months за окно±1. */
+  /** Если задан — только эти productId; иначе все из day-maps за окно±1. */
   productIds?: string[];
 };
 
@@ -53,48 +52,39 @@ export type CorrectBalunManualBandSpikesForRangeResult = {
   skipped: BalunManualBandSkipFinding[];
 };
 
-async function listBalunProductIdsInMonthRange(loadFrom: Date, loadTo: Date): Promise<string[]> {
-  const docs = await SkuSliceMonth.find({
-    konkName: BALUN_FAKE_STOCK_KONK_NAME,
-    month: { $gte: toSliceMonthDate(loadFrom), $lte: toSliceMonthDate(loadTo) },
-  })
-    .select("productId")
-    .lean()
-    .exec();
-
-  return [
-    ...new Set(docs.map((doc) => (doc.productId ?? "").trim()).filter((id) => id.length > 0)),
-  ];
+function readStock(raw: unknown): number | undefined {
+  if (raw === null || raw === undefined || typeof raw !== "object") {
+    return undefined;
+  }
+  const stock = (raw as { stock?: unknown }).stock;
+  return typeof stock === "number" && Number.isFinite(stock) ? stock : undefined;
 }
 
-async function buildSeriesForProduct(
-  productId: string,
-  loadFrom: Date,
-  loadTo: Date,
-  loadDates: Date[],
-): Promise<RtlBandStockDay[]> {
-  const points = await getPointsForSkuRange(
-    BALUN_FAKE_STOCK_KONK_NAME,
-    productId,
-    loadFrom,
-    loadTo,
-  );
+function collectProductIds(dataByDate: Map<number, Record<string, ISkuSliceDataItem>>): string[] {
+  const ids = new Set<string>();
+  for (const data of dataByDate.values()) {
+    for (const key of Object.keys(data)) {
+      const pid = key.trim();
+      if (pid.length > 0) ids.add(pid);
+    }
+  }
+  return [...ids];
+}
 
-  return loadDates.map((date) => {
-    const item = points.get(toSliceMonthDayKey(date));
-    return {
-      dateMs: date.getTime(),
-      stock:
-        item && typeof item.stock === "number" && Number.isFinite(item.stock)
-          ? item.stock
-          : undefined,
-    };
-  });
+function buildSeriesForProduct(
+  productId: string,
+  loadDates: Date[],
+  dataByDate: Map<number, Record<string, ISkuSliceDataItem>>,
+): RtlBandStockDay[] {
+  return loadDates.map((date) => ({
+    dateMs: date.getTime(),
+    stock: readStock(dataByDate.get(date.getTime())?.[productId]),
+  }));
 }
 
 /**
- * RTL sandwich-corrector balun band [9000,10000] за [dateFrom, dateTo].
- * Грузит соседей ±1. Не для nightly cron без явного вызова.
+ * RTL sandwich-corrector balun band [BALUN_MANUAL_BAND_MIN, BALUN_MANUAL_BAND_MAX]
+ * за [dateFrom, dateTo]. Грузит соседей ±1 одним bulk-load. Не для nightly cron без явного вызова.
  */
 export async function correctBalunManualBandSpikesForRangeUtil(
   input: CorrectBalunManualBandSpikesForRangeInput,
@@ -107,18 +97,21 @@ export async function correctBalunManualBandSpikesForRangeUtil(
   const loadTo = addUtcDays(dateTo, 1);
   const loadDates = enumerateReportingDates(loadFrom, loadTo).map((d) => toSliceDate(d));
 
+  const maps = await loadDayMapsForKonkDates(BALUN_FAKE_STOCK_KONK_NAME, loadDates);
+  const dataByDate = new Map<number, Record<string, ISkuSliceDataItem>>();
+  for (const date of loadDates) {
+    dataByDate.set(date.getTime(), maps.get(date.getTime()) ?? {});
+  }
+
   const filterIds = input.productIds?.map((id) => id.trim()).filter(Boolean);
-  const productIds =
-    filterIds && filterIds.length > 0
-      ? filterIds
-      : await listBalunProductIdsInMonthRange(loadFrom, loadTo);
+  const productIds = filterIds && filterIds.length > 0 ? filterIds : collectProductIds(dataByDate);
 
   const patched: BalunManualBandPatchFinding[] = [];
   const skipped: BalunManualBandSkipFinding[] = [];
   const patchesToWrite: Array<{ productId: string; dateMs: number; to: number }> = [];
 
   for (const productId of productIds) {
-    const series = await buildSeriesForProduct(productId, loadFrom, loadTo, loadDates);
+    const series = buildSeriesForProduct(productId, loadDates, dataByDate);
     const { patches, skipped: productSkipped } = computeRtlBalunBandSpikePatches(
       series,
       dateFrom.getTime(),
