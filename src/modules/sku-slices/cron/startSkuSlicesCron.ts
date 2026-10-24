@@ -22,7 +22,7 @@ const log = createLogger({ module: "sku-slices", job: "cron" });
  * Ежедневно в 20:00 по Киеву: параллельно срез по каждому konkName, для которого есть SKU.
  * Ключ дня среза — следующий календарный день в Киеве (как при старом запуске в полночь).
  * TG: отдельное сообщение после каждого konk (+ excluded в начале, если есть).
- * После всех срезов — post-pass (balun/svbum fake stock, pack-flip, manufacturer rollup).
+ * После всех срезов — post-pass (pack-flip perfect, manufacturer rollup).
  */
 export function startSkuSlicesCron(): CronJob {
   const job = new CronJob(
@@ -77,18 +77,6 @@ export function startSkuSlicesCron(): CronJob {
           apply: true,
           rollupKonkNames: konkNames,
           hooks: {
-            onBalunError: async (error) => {
-              log.error({ err: error }, "balun fake stock correction failed");
-              await sendCronAnalyticsReport(
-                formatCronErrorReport("Balun fake stock correction", error),
-              );
-            },
-            onSvbumError: async (error) => {
-              log.error({ err: error }, "svbum fake stock correction failed");
-              await sendCronAnalyticsReport(
-                formatCronErrorReport("Svbum fake stock correction", error),
-              );
-            },
             onPackFlipSuccess: async (review) => {
               await sendCronAnalyticsReport(formatPackFlipReport(review));
             },

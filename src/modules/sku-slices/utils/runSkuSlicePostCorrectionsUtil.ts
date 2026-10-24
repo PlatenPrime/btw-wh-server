@@ -1,29 +1,9 @@
 import { throwIfAborted } from "../../apitasks/kinds/apiTaskRunTypes.js";
-import {
-  BALUN_FAKE_STOCK_CRON_DAYS_BACK,
-  BALUN_FAKE_STOCK_KONK_NAME,
-} from "../../slices/config/balunFakeStockSentinel.js";
 import { packFlipAutoApplyKonks } from "../../slices/config/packFlipAutoApplyKonks.js";
-import {
-  SVBUM_FAKE_STOCK_CRON_DAYS_BACK,
-  SVBUM_FAKE_STOCK_KONK_NAME,
-} from "../../slices/config/svbumFakeStockThreshold.js";
 import { afterSkuSliceStockMutation } from "../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 import { enumerateReportingDates } from "../../sku-reporting/utils/skugrReporting.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import type { PostSkuSlicePostCorrectionsInput } from "../controllers/post-sku-slice-post-corrections/schemas/postSkuSlicePostCorrectionsSchema.js";
-import {
-  correctBalunFakeStockSpikesUtil,
-  type CorrectBalunFakeStockSpikesResult,
-} from "./correctBalunFakeStockSpikesUtil.js";
-import {
-  correctBalunManualBandSpikesForRangeUtil,
-  type CorrectBalunManualBandSpikesForRangeResult,
-} from "./correctBalunManualBandSpikesForRangeUtil.js";
-import {
-  correctSvbumFakeStockSpikesUtil,
-  type CorrectSvbumFakeStockSpikesResult,
-} from "./correctSvbumFakeStockSpikesUtil.js";
 import { resolveSkuSliceRollupKonkNames } from "./resolveSkuSliceRollupKonkNames.js";
 import {
   packFlipReviewDatesForSliceDay,
@@ -33,9 +13,6 @@ import {
 } from "./reviewPackFlipsUtil.js";
 
 export type RunSkuSlicePostCorrectionsHooks = {
-  onBalunError?: (error: unknown) => Promise<void>;
-  onBalunManualBandError?: (error: unknown) => Promise<void>;
-  onSvbumError?: (error: unknown) => Promise<void>;
   onPackFlipSuccess?: (review: PackFlipReviewResult) => Promise<void>;
   onPackFlipError?: (konkName: string, error: unknown) => Promise<void>;
   onRollupError?: (konkName: string, error: unknown) => Promise<void>;
@@ -57,8 +34,6 @@ export type PostCorrectionStepError = {
 
 export type RunSkuSlicePostCorrectionsDayResult = {
   asOf: string;
-  balun?: CorrectBalunFakeStockSpikesResult | { error: string };
-  svbum?: CorrectSvbumFakeStockSpikesResult | { error: string };
   packFlips: Array<{
     konkName: string;
     review?: PackFlipReviewResult;
@@ -73,7 +48,6 @@ export type RunSkuSlicePostCorrectionsResult = {
   dateTo: string;
   konkName?: string;
   days: RunSkuSlicePostCorrectionsDayResult[];
-  balunManualBand?: CorrectBalunManualBandSpikesForRangeResult | { error: string };
   errors: PostCorrectionStepError[];
 };
 
@@ -82,9 +56,6 @@ function errorMessage(error: unknown): string {
 }
 
 type StepFlags = {
-  runBalunLtr: boolean;
-  runBalunManualBand: boolean;
-  runSvbum: boolean;
   packFlipKonks: readonly string[];
   rollupKonks: string[];
 };
@@ -92,75 +63,28 @@ type StepFlags = {
 function resolveStepFlags(konkName: string | undefined, allRollupKonks: string[]): StepFlags {
   if (!konkName) {
     return {
-      runBalunLtr: true,
-      runBalunManualBand: false,
-      runSvbum: true,
       packFlipKonks: packFlipAutoApplyKonks,
       rollupKonks: allRollupKonks,
     };
   }
 
-  if (konkName === BALUN_FAKE_STOCK_KONK_NAME) {
-    return {
-      runBalunLtr: true,
-      runBalunManualBand: true,
-      runSvbum: false,
-      packFlipKonks: [],
-      rollupKonks: [BALUN_FAKE_STOCK_KONK_NAME],
-    };
-  }
-
-  if (konkName === SVBUM_FAKE_STOCK_KONK_NAME) {
-    return {
-      runBalunLtr: false,
-      runBalunManualBand: false,
-      runSvbum: true,
-      packFlipKonks: [],
-      rollupKonks: [SVBUM_FAKE_STOCK_KONK_NAME],
-    };
-  }
-
   if (packFlipAutoApplyKonks.includes(konkName)) {
     return {
-      runBalunLtr: false,
-      runBalunManualBand: false,
-      runSvbum: false,
       packFlipKonks: [konkName],
       rollupKonks: [konkName],
     };
   }
 
   return {
-    runBalunLtr: false,
-    runBalunManualBand: false,
-    runSvbum: false,
     packFlipKonks: [],
     rollupKonks: [konkName],
   };
 }
 
-async function runBalunStep(
-  asOf: Date,
-  apply: boolean,
-): Promise<CorrectBalunFakeStockSpikesResult> {
-  return correctBalunFakeStockSpikesUtil({
-    daysBack: BALUN_FAKE_STOCK_CRON_DAYS_BACK,
-    asOf,
-    apply,
-  });
-}
-
-async function runSvbumStep(
-  asOf: Date,
-  apply: boolean,
-): Promise<CorrectSvbumFakeStockSpikesResult> {
-  return correctSvbumFakeStockSpikesUtil({
-    daysBack: SVBUM_FAKE_STOCK_CRON_DAYS_BACK,
-    asOf,
-    apply,
-  });
-}
-
+/**
+ * Post-pass после срезов: pack-flip auto-apply (perfect) + manufacturer rollup.
+ * Fake-stock / band-spike сюда не входят — только ручной клиентский flow.
+ */
 export async function runSkuSlicePostCorrectionsUtil(
   input: RunSkuSlicePostCorrectionsInput,
 ): Promise<RunSkuSlicePostCorrectionsResult> {
@@ -190,32 +114,6 @@ export async function runSkuSlicePostCorrectionsUtil(
       packFlips: [],
       rollupErrors: [],
     };
-
-    if (flags.runBalunLtr) {
-      try {
-        dayResult.balun = await runBalunStep(asOf, apply);
-      } catch (error) {
-        const message = errorMessage(error);
-        dayResult.balun = { error: message };
-        errors.push({ step: "balun", asOf: asOfYmd, message });
-        await input.hooks?.onBalunError?.(error);
-      }
-    }
-
-    throwIfAborted(input.signal);
-
-    if (flags.runSvbum) {
-      try {
-        dayResult.svbum = await runSvbumStep(asOf, apply);
-      } catch (error) {
-        const message = errorMessage(error);
-        dayResult.svbum = { error: message };
-        errors.push({ step: "svbum", asOf: asOfYmd, message });
-        await input.hooks?.onSvbumError?.(error);
-      }
-    }
-
-    throwIfAborted(input.signal);
 
     for (const packKonk of flags.packFlipKonks) {
       throwIfAborted(input.signal);
@@ -262,24 +160,6 @@ export async function runSkuSlicePostCorrectionsUtil(
     days.push(dayResult);
   }
 
-  let balunManualBand: RunSkuSlicePostCorrectionsResult["balunManualBand"];
-  if (flags.runBalunManualBand) {
-    throwIfAborted(input.signal);
-    input.onProgress?.(totalSteps, totalSteps, "Post-corrections balun manual band RTL");
-    try {
-      balunManualBand = await correctBalunManualBandSpikesForRangeUtil({
-        dateFrom,
-        dateTo,
-        apply,
-      });
-    } catch (error) {
-      const message = errorMessage(error);
-      balunManualBand = { error: message };
-      errors.push({ step: "balun-manual-band", message });
-      await input.hooks?.onBalunManualBandError?.(error);
-    }
-  }
-
   input.onProgress?.(totalSteps, totalSteps, "Post-corrections completed");
 
   return {
@@ -288,7 +168,6 @@ export async function runSkuSlicePostCorrectionsUtil(
     dateTo: toUtcYmd(dateTo),
     ...(konkName ? { konkName } : {}),
     days,
-    ...(balunManualBand ? { balunManualBand } : {}),
     errors,
   };
 }

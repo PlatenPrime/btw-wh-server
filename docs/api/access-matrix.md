@@ -407,18 +407,19 @@
 
 ## `/api/sku-slices`
 
-| Метод | Путь                                   | Аутентификация | Доступ  |
-| ----- | -------------------------------------- | -------------- | ------- |
-| GET   | `/`                                    | JWT            | ≥ ADMIN |
-| GET   | `/client/air/pending`                  | JWT            | ≥ ADMIN |
-| PUT   | `/client/air/sku/:skuId`               | JWT            | ≥ ADMIN |
-| GET   | `/pack-flips`                          | JWT            | ≥ ADMIN |
-| GET   | `/sku/:skuId/range`                    | JWT            | ≥ ADMIN |
-| POST  | `/sku/:skuId/correct-balun-band-spike` | JWT            | ≥ ADMIN |
-| GET   | `/sku/:skuId`                          | JWT            | ≥ ADMIN |
-| PATCH | `/sku/:skuId`                          | JWT            | ≥ ADMIN |
-| POST  | `/skugr/:skugrId/run-today`            | JWT            | ≥ ADMIN |
-| POST  | `/post-corrections/run`                | JWT            | ≥ ADMIN |
+| Метод | Путь                             | Аутентификация | Доступ  |
+| ----- | -------------------------------- | -------------- | ------- |
+| GET   | `/`                              | JWT            | ≥ ADMIN |
+| GET   | `/client/air/pending`            | JWT            | ≥ ADMIN |
+| PUT   | `/client/air/sku/:skuId`         | JWT            | ≥ ADMIN |
+| GET   | `/pack-flips`                    | JWT            | ≥ ADMIN |
+| POST  | `/band-spike/discover`           | JWT            | ≥ ADMIN |
+| GET   | `/sku/:skuId/range`              | JWT            | ≥ ADMIN |
+| POST  | `/sku/:skuId/correct-band-spike` | JWT            | ≥ ADMIN |
+| GET   | `/sku/:skuId`                    | JWT            | ≥ ADMIN |
+| PATCH | `/sku/:skuId`                    | JWT            | ≥ ADMIN |
+| POST  | `/skugr/:skugrId/run-today`      | JWT            | ≥ ADMIN |
+| POST  | `/post-corrections/run`          | JWT            | ≥ ADMIN |
 
 ---
 

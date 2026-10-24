@@ -114,12 +114,13 @@ describe("startSkuSlicesCron", () => {
         apply: true,
         rollupKonkNames: ["air", "balun"],
         hooks: expect.objectContaining({
-          onBalunError: expect.any(Function),
-          onSvbumError: expect.any(Function),
           onPackFlipSuccess: expect.any(Function),
           onPackFlipError: expect.any(Function),
         }),
       });
+      const hooks = vi.mocked(runSkuSlicePostCorrectionsUtil).mock.calls[0]![0].hooks!;
+      expect(hooks).not.toHaveProperty("onBalunError");
+      expect(hooks).not.toHaveProperty("onSvbumError");
 
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku-excluded:yumi");
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith("sku:air");
@@ -144,21 +145,19 @@ describe("startSkuSlicesCron", () => {
     }
   });
 
-  it("forwards balun errors to analytics via hooks", async () => {
+  it("forwards pack-flip errors to analytics via hooks", async () => {
     vi.useFakeTimers({ now: new Date("2026-04-02T17:00:00.000Z") });
     try {
       startSkuSlicesCron();
       await cronCallback?.();
 
       const hooks = vi.mocked(runSkuSlicePostCorrectionsUtil).mock.calls[0]![0].hooks!;
-      await hooks.onBalunError?.(new Error("balun fix down"));
+      await hooks.onPackFlipError?.("perfect", new Error("pack down"));
 
       expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
-        expect.stringContaining("Balun fake stock correction"),
+        expect.stringContaining("Pack-flip review (perfect)"),
       );
-      expect(sendCronAnalyticsReport).toHaveBeenCalledWith(
-        expect.stringContaining("balun fix down"),
-      );
+      expect(sendCronAnalyticsReport).toHaveBeenCalledWith(expect.stringContaining("pack down"));
     } finally {
       vi.useRealTimers();
     }

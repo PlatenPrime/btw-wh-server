@@ -272,11 +272,50 @@
 
 ---
 
-### POST `/api/sku-slices/sku/:skuId/correct-balun-band-spike`
+### POST `/api/sku-slices/band-spike/discover`
 
-Клиентский RTL-corrector для sandwich-вспышки остатка balun: небольшое → `[9000, 11000]` → небольшое. Не входит в nightly post-pass. Сервер догружает соседей ±1 дня к окну; dump band→small в продажи не берёт; внутри полосы продажи сохраняются (ход справа налево). Гайд: [frontend: correct-balun-band-spike](../frontend/correct-balun-band-spike.md).
+Список productId/SKU конкурента, у которых в окне дат остаток был в `[stockMin, stockMax]` и затем вышел из полосы (finite stock вне band). Trailing in-band без exit — не кандидат. Массовой записи нет. Гайд: [frontend: band-spike-correction](../frontend/band-spike-correction.md).
 
-**Path:** `skuId` — ObjectId SKU с `konkName === "balun"`.
+**Тело:**
+
+| Поле     | Тип    | Обязательно | Описание                                 |
+| -------- | ------ | ----------- | ---------------------------------------- |
+| konkName | string | да          | trim + lowercase                         |
+| stockMin | number | да          | ≥ 0, finite; ≤ stockMax                  |
+| stockMax | number | да          | ≥ 0, finite                              |
+| dateFrom | string | да          | YYYY-MM-DD, UTC, inclusive               |
+| dateTo   | string | да          | YYYY-MM-DD, inclusive; диапазон ≤ 93 дня |
+
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    konkName: string,
+    window: { dateFrom: string, dateTo: string },
+    band: { min: number, max: number },
+    items: Array<{
+      skuId: string | null,
+      productId: string,
+      title: string | null,
+      runs: Array<{ dateFrom: string, dateTo: string, peakStock: number }>
+    }>
+  }
+}
+```
+
+`skuId` / `title` — null, если документ Sku для productId не найден.
+
+**Ошибки:** 400; 401; 403; 500.
+
+---
+
+### POST `/api/sku-slices/sku/:skuId/correct-band-spike`
+
+Клиентский RTL-corrector sandwich-вспышки остатка для любого конкурента: небольшое (`< stockMin`) → `[stockMin, stockMax]` → небольшое. Не входит в nightly post-pass. Сервер догружает соседей ±1 дня к окну; dump band→small в продажи не берёт; внутри полосы продажи сохраняются (ход справа налево). Сначала preview (`apply: false`), затем confirm (`apply: true`). Гайд: [frontend: band-spike-correction](../frontend/band-spike-correction.md).
+
+**Path:** `skuId` — ObjectId любого SKU с непустым `konkName` и `productId`.
 
 **Тело:**
 
@@ -284,6 +323,8 @@
 | -------- | ------- | ------------------ | ---------------------------------------------------------------- |
 | dateFrom | string  | да                 | YYYY-MM-DD, UTC, inclusive                                       |
 | dateTo   | string  | да                 | YYYY-MM-DD, inclusive, ≥ dateFrom; диапазон ≤ 366 дней           |
+| stockMin | number  | да                 | ≥ 0, finite; ≤ stockMax                                          |
+| stockMax | number  | да                 | ≥ 0, finite                                                      |
 | apply    | boolean | нет, default false | true — запись stock в SkuSliceMonth + materialize sales; preview |
 
 **Ответ 200:**
@@ -292,9 +333,10 @@
 {
   message: string,
   data: {
+    konkName: string,
     productId: string,
     window: { dateFrom: string, dateTo: string },
-    band: { min: 9000, max: 11000 },
+    band: { min: number, max: number },
     patches: Array<{ date: string, from: number, to: number }>,
     skipped: Array<{
       dateFrom: string,
@@ -308,7 +350,7 @@
 
 `applied` — true только если `apply: true` и был хотя бы один патч. Пустые `patches` при непустом `skipped` — не ошибка.
 
-**Ошибки:** 400 валидация / не balun; 401; 403; 404 нет SKU / нет productId; 500.
+**Ошибки:** 400 валидация; 401; 403; 404 нет SKU / нет konkName / нет productId; 500.
 
 ---
 
@@ -380,9 +422,9 @@
 
 Постановка фоновой задачи post-pass коррекций за календарный диапазон. Синхронно не выполняет коррекцию — создаёт ApiTask `sku-slices.post-corrections.run`; статус и результат — через [apitasks](apitasks.md).
 
-Без `konkName` (cron / полный прогон): balun LTR fake stock, svbum fake stock, pack-flip auto-apply konks, manufacturer rollup — **без** RTL band-spike.
+Без `konkName` (cron / полный прогон): pack-flip auto-apply konks (`perfect`), manufacturer rollup по всем konk среза. Band-spike сюда не входит.
 
-С `konkName`: шаги только для этого конкурента. При `konkName=balun` дополнительно один RTL sandwich-прогон `[9000,11000]` по всем balun productId за весь диапазон (`balunManualBand` в result). Гайд: [frontend: correct-balun-band-spike](../frontend/correct-balun-band-spike.md).
+С `konkName`: pack-flip только если konk в `packFlipAutoApplyKonks`, иначе только rollup этого конкурента.
 
 **Тело:**
 
@@ -391,7 +433,7 @@
 | dateFrom | string  | да                 | YYYY-MM-DD, UTC-сутки, inclusive                              |
 | dateTo   | string  | да                 | YYYY-MM-DD, inclusive, не раньше dateFrom; диапазон ≤ 31 день |
 | apply    | boolean | нет, default false | true — запись в SkuSliceMonth и rollup; false — dry-run       |
-| konkName | string  | нет                | trim + lowercase; скоуп шагов; RTL band только при `balun`    |
+| konkName | string  | нет                | trim + lowercase; скоуп pack-flip/rollup                      |
 
 **Ответ 202:** как `POST /api/apitasks` (`message`, `data.taskId`, `data.kind`, `data.status`, `data.pollIntervalMs`, …).
 

@@ -9,4 +9,5 @@ export { getAirClientPendingController } from "./get-air-client-pending/getAirCl
 export { putAirClientSkuSliceController } from "./put-air-client-sku-slice/putAirClientSkuSliceController.js";
 export { runSkugrSlicesTodayController } from "./run-skugr-slices-today/runSkugrSlicesTodayController.js";
 export { postSkuSlicePostCorrectionsController } from "./post-sku-slice-post-corrections/postSkuSlicePostCorrectionsController.js";
-export { correctBalunBandSpikeController } from "./correct-balun-band-spike/correctBalunBandSpikeController.js";
+export { discoverBandSpikeController } from "./discover-band-spike/discoverBandSpikeController.js";
+export { correctBandSpikeController } from "./correct-band-spike/correctBandSpikeController.js";
