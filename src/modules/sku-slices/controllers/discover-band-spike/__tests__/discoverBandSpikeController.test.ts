@@ -41,6 +41,7 @@ describe("discoverBandSpikeController", () => {
           skuId: "abc",
           productId: "p1",
           title: "T",
+          imageUrl: "https://cdn.example/p1.webp",
           runs: [{ dateFrom: "2026-09-14", dateTo: "2026-09-15", peakStock: 9937 }],
         },
       ],

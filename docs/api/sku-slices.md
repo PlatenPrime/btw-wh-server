@@ -299,13 +299,14 @@
       skuId: string | null,
       productId: string,
       title: string | null,
+      imageUrl: string | null,
       runs: Array<{ dateFrom: string, dateTo: string, peakStock: number }>
     }>
   }
 }
 ```
 
-`skuId` / `title` — null, если документ Sku для productId не найден.
+`skuId` / `title` — null, если документ Sku для productId не найден. `imageUrl` — null, если Sku нет или `imageUrl` пустой.
 
 **Ошибки:** 400; 401; 403; 500.
 

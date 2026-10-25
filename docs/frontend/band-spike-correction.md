@@ -22,7 +22,7 @@ Auth везде: JWT, роль ≥ ADMIN.
 - Метод/путь: `POST /api/sku-slices/band-spike/discover`
 - Body: `{ konkName, stockMin, stockMax, dateFrom, dateTo }`
 - Лимит окна: **93** дня
-- Ответ: `data.items[]` — `skuId` (может быть `null`), `productId`, `title`, `runs[]` (`dateFrom`, `dateTo`, `peakStock`)
+- Ответ: `data.items[]` — `skuId` (может быть `null`), `productId`, `title`, `imageUrl` (может быть `null`), `runs[]` (`dateFrom`, `dateTo`, `peakStock`)
 
 Кандидат = в окне был contiguous run в `[stockMin, stockMax]`, и **после** него день с finite stock **вне** полосы. Trailing plateau без выхода из полосы в список не попадает. Entry слева не обязателен.
 

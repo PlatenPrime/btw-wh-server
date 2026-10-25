@@ -18,6 +18,7 @@ export type DiscoverBandSpikeItem = {
   skuId: string | null;
   productId: string;
   title: string | null;
+  imageUrl: string | null;
   runs: DiscoverBandSpikeRun[];
 };
 
@@ -31,6 +32,7 @@ export type DiscoverBandSpikeResult = {
 type SkuMeta = {
   skuId: string;
   title: string;
+  imageUrl: string;
 };
 
 function readStock(raw: unknown): number | undefined {
@@ -64,11 +66,12 @@ function buildSeriesForProduct(
 }
 
 async function loadSkuMetaByProductId(konkName: string): Promise<Map<string, SkuMeta>> {
-  const rows = await Sku.find({ konkName }).select("_id productId title").lean<
+  const rows = await Sku.find({ konkName }).select("_id productId title imageUrl").lean<
     {
       _id?: { toString(): string };
       productId?: string;
       title?: string;
+      imageUrl?: string;
     }[]
   >();
   const map = new Map<string, SkuMeta>();
@@ -77,6 +80,7 @@ async function loadSkuMetaByProductId(konkName: string): Promise<Map<string, Sku
     map.set(row.productId, {
       skuId: row._id ? row._id.toString() : "",
       title: typeof row.title === "string" ? row.title : "",
+      imageUrl: typeof row.imageUrl === "string" ? row.imageUrl : "",
     });
   }
   return map;
@@ -122,6 +126,7 @@ export async function discoverBandSpikeUtil(
       skuId: meta?.skuId ? meta.skuId : null,
       productId,
       title: meta ? meta.title || null : null,
+      imageUrl: meta?.imageUrl ? meta.imageUrl : null,
       runs: exits.map((run) => ({
         dateFrom: toUtcYmd(new Date(run.dateFromMs)),
         dateTo: toUtcYmd(new Date(run.dateToMs)),

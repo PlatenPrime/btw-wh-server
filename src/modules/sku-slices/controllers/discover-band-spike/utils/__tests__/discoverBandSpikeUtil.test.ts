@@ -22,6 +22,7 @@ describe("discoverBandSpikeUtil", () => {
       productId: "balun-spike",
       title: "Spike item",
       url: "https://example.com/balun-spike",
+      imageUrl: "https://cdn.example/balun-spike.webp",
     });
 
     await seedSkuSliceMonthDay("balun", D0, {
@@ -54,6 +55,7 @@ describe("discoverBandSpikeUtil", () => {
     expect(result.items[0]).toMatchObject({
       productId: "balun-spike",
       title: "Spike item",
+      imageUrl: "https://cdn.example/balun-spike.webp",
       runs: [{ dateFrom: "2026-09-14", dateTo: "2026-09-15", peakStock: 9937 }],
     });
     expect(result.items[0]!.skuId).toBeTruthy();
@@ -77,9 +79,46 @@ describe("discoverBandSpikeUtil", () => {
         skuId: null,
         productId: "orphan",
         title: null,
+        imageUrl: null,
         runs: [{ dateFrom: "2026-09-14", dateTo: "2026-09-14", peakStock: 1_200_000 }],
       },
     ]);
+  });
+
+  it("returns imageUrl null when Sku imageUrl is empty", async () => {
+    await Sku.create({
+      konkName: "balun",
+      prodName: "balun",
+      productId: "balun-blank",
+      title: "Blank image",
+      url: "https://example.com/balun-blank",
+      imageUrl: "",
+    });
+
+    await seedSkuSliceMonthDay("balun", D0, {
+      "balun-blank": { stock: 5, price: 10 },
+    });
+    await seedSkuSliceMonthDay("balun", D1, {
+      "balun-blank": { stock: 9500, price: 10 },
+    });
+    await seedSkuSliceMonthDay("balun", D2, {
+      "balun-blank": { stock: 20, price: 10 },
+    });
+
+    const result = await discoverBandSpikeUtil({
+      konkName: "balun",
+      stockMin: 9000,
+      stockMax: 11000,
+      dateFrom: D1,
+      dateTo: D1,
+    });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]).toMatchObject({
+      productId: "balun-blank",
+      title: "Blank image",
+      imageUrl: null,
+    });
   });
 
   it("excludes trailing band without exit", async () => {
