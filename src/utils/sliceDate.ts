@@ -1,11 +1,20 @@
 /** Календарный день срезов: Europe/Kiev (как кроны и бизнес-логика). */
 const SLICE_TIMEZONE = "Europe/Kiev";
 
+/** С этого часа по Киеву открыт срез следующего календарного дня (как cron `0 0 20`). */
+const SLICE_OPEN_HOUR = 20;
+
 const kyivCalendarPartsFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: SLICE_TIMEZONE,
   year: "numeric",
   month: "2-digit",
   day: "2-digit",
+});
+
+const kyivHourFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: SLICE_TIMEZONE,
+  hour: "numeric",
+  hourCycle: "h23",
 });
 
 function formatKyivYmd(d: Date): string {
@@ -47,4 +56,25 @@ export function toNextKyivSliceDate(d: Date): Date {
   const mm = String(next.getUTCMonth() + 1).padStart(2, "0");
   const dd = String(next.getUTCDate()).padStart(2, "0");
   return new Date(`${yy}-${mm}-${dd}T00:00:00.000Z`);
+}
+
+function kyivHour(d: Date): number {
+  const hourPart = kyivHourFormatter.formatToParts(d).find((p) => p.type === "hour");
+  const hour = Number(hourPart?.value);
+  if (!Number.isFinite(hour) || hour < 0 || hour > 23) {
+    throw new Error("toOpenKyivSliceDate: could not read hour in Europe/Kiev");
+  }
+  return hour;
+}
+
+/**
+ * Ключ среза, который можно проводить сейчас.
+ * С 20:00 Europe/Kiev — следующий календарный день, до 20:00 — сегодняшний.
+ * Утро дня среза и вечер предыдущего дня смотрят в одну дату.
+ */
+export function toOpenKyivSliceDate(d: Date): Date {
+  if (kyivHour(d) >= SLICE_OPEN_HOUR) {
+    return toNextKyivSliceDate(d);
+  }
+  return toSliceDate(d);
 }

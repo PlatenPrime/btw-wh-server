@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { toSliceDate } from "../../../../../../utils/sliceDate.js";
+import { toOpenKyivSliceDate, toSliceDate } from "../../../../../../utils/sliceDate.js";
 import { putAirClientSkuSliceUtil } from "../putAirClientSkuSliceUtil.js";
 
 vi.mock(
@@ -157,5 +157,20 @@ describe("putAirClientSkuSliceUtil", () => {
     });
     expect(upsertDayPoint).not.toHaveBeenCalled();
     expect(scheduleAfterSkuSliceStockMutation).not.toHaveBeenCalled();
+  });
+
+  it("from 20:00 Kyiv writes the next calendar day", async () => {
+    const evening = new Date("2026-07-26T17:00:00.000Z");
+    const nextDay = toOpenKyivSliceDate(evening);
+
+    const result = await putAirClientSkuSliceUtil(input, evening);
+
+    expect(nextDay.toISOString()).toBe("2026-07-27T00:00:00.000Z");
+    expect(result).toMatchObject({ ok: true, status: "saved", date: nextDay });
+    expect(upsertDayPoint).toHaveBeenCalledWith("air", "air-1", nextDay, {
+      stock: 12,
+      price: 2.1,
+    });
+    expect(ensureSkuSliceDayMeta).toHaveBeenCalledWith("air", nextDay);
   });
 });

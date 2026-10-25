@@ -1,6 +1,6 @@
 import { readAirProductFromHtml } from "../../../../browser/air/utils/air-product-page-from-html/readAirProductFromHtml.js";
 import { isInvalidSliceStockResult } from "../../../../slices/utils/isInvalidSliceStockResult.js";
-import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { toOpenKyivSliceDate } from "../../../../../utils/sliceDate.js";
 import { Sku } from "../../../../skus/models/Sku.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
 import { AIR_CLIENT_SLICE_KONK } from "../../../constants/airClientSlice.js";
@@ -35,8 +35,9 @@ export type PutAirClientSkuSliceResult =
     };
 
 /**
- * Парсит HTML Air-страницы и идемпотентно дозаполняет сегодняшний SkuSliceMonth
+ * Парсит HTML Air-страницы и идемпотентно дозаполняет открытый SkuSliceMonth
  * только если ключ отсутствует или содержит -1.
+ * Дата та же, что у pending: с 20:00 Киев — следующий календарный день.
  */
 export async function putAirClientSkuSliceUtil(
   input: PutAirClientSkuSliceInput,
@@ -100,7 +101,7 @@ export async function putAirClientSkuSliceUtil(
     };
   }
 
-  const sliceDate = toSliceDate(now);
+  const sliceDate = toOpenKyivSliceDate(now);
   const dataItem = { stock: parsed.stock, price: parsed.price };
 
   await ensureSkuSliceDayMeta(AIR_CLIENT_SLICE_KONK, sliceDate);

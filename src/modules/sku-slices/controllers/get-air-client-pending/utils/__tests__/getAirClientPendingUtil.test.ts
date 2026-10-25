@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { toSliceDate } from "../../../../../../utils/sliceDate.js";
+import { toOpenKyivSliceDate, toSliceDate } from "../../../../../../utils/sliceDate.js";
 import { getAirClientPendingUtil } from "../getAirClientPendingUtil.js";
 
 vi.mock("../../../../utils/loadSlicedSkusForKonk.js", () => ({
@@ -90,5 +90,28 @@ describe("getAirClientPendingUtil", () => {
 
     expect(result.rotation).toBeNull();
     expect(result.items.map((i) => i.productId)).toEqual(["air-minus", "air-missing"]);
+  });
+
+  it("from 20:00 Kyiv queues the next calendar day", async () => {
+    const evening = new Date("2026-07-26T17:00:00.000Z");
+    const nextDay = toOpenKyivSliceDate(evening);
+
+    vi.mocked(loadSlicedSkusForKonk).mockResolvedValue([
+      {
+        _id: { toString: () => "s1" },
+        productId: "air-a",
+        title: "One",
+        url: "https://airballoons.com.ua/ua/product/1",
+      },
+    ]);
+    vi.mocked(loadDayPointsForProductIds).mockResolvedValue({});
+
+    const result = await getAirClientPendingUtil(evening);
+
+    expect(nextDay.toISOString()).toBe("2026-07-27T00:00:00.000Z");
+    expect(toSliceDate(evening).toISOString()).toBe("2026-07-26T00:00:00.000Z");
+    expect(result.date).toEqual(nextDay);
+    expect(loadDayPointsForProductIds).toHaveBeenCalledWith("air", ["air-a"], nextDay);
+    expect(result.items.map((i) => i.productId)).toEqual(["air-a"]);
   });
 });

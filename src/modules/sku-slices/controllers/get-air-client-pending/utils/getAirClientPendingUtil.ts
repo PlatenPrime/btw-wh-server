@@ -1,7 +1,7 @@
 import type { ISkuSliceDataItem } from "../../../models/skuSliceTypes.js";
 import { isInvalidSliceStockResult } from "../../../../slices/utils/isInvalidSliceStockResult.js";
 import { resolveSliceRotationInfo } from "../../../../slices/utils/sliceRotation.js";
-import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { toOpenKyivSliceDate } from "../../../../../utils/sliceDate.js";
 import { AIR_CLIENT_SLICE_KONK } from "../../../constants/airClientSlice.js";
 import { loadSlicedSkusForKonk } from "../../../utils/loadSlicedSkusForKonk.js";
 import { filterSlicedSkusForRotation } from "../../../utils/filterSlicedSkusForRotation.js";
@@ -32,13 +32,14 @@ function isPendingSliceItem(item: ISkuSliceDataItem | undefined): boolean {
 }
 
 /**
- * Air SKU из sliced-групп, у которых в сегодняшнем SkuSliceMonth
- * нет записи или stock/price содержат sentinel -1.
+ * Air SKU из sliced-групп, у которых в открытом срезе нет записи
+ * или stock/price содержат sentinel -1.
+ * Ключ дня — `toOpenKyivSliceDate`: с 20:00 Киев это следующий календарный день.
  */
 export async function getAirClientPendingUtil(
   now: Date = new Date(),
 ): Promise<AirClientPendingResult> {
-  const sliceDate = toSliceDate(now);
+  const sliceDate = toOpenKyivSliceDate(now);
   const allSkus = await loadSlicedSkusForKonk(AIR_CLIENT_SLICE_KONK, "_id productId title url");
   const { skus, rotation } = filterSlicedSkusForRotation(allSkus, sliceDate, AIR_CLIENT_SLICE_KONK);
 
