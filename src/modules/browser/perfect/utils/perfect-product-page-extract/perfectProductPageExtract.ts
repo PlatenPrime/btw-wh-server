@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import type { PerfectProductInfo } from "../perfect-per-piece-stock/perfectProductInfo.js";
 
 /** CSRF для add-to-cart: static_token из формы, не session token из prestashop.token. */
 export function extractToken(html: string): string | null {
@@ -38,6 +39,23 @@ export function extractTitle(html: string): string {
   if (h1) return h1;
   const og = $('meta[property="og:title"]').attr("content")?.trim();
   return og ?? "";
+}
+
+/** Reference/артикул карточки (не PrestaShop id_product). */
+export function extractPerfectArtikul(html: string): string | undefined {
+  const $ = cheerio.load(html);
+  const fromReference = $(".product-reference span").first().text().trim();
+  if (fromReference) {
+    return fromReference;
+  }
+  return undefined;
+}
+
+export function withPerfectArtikul(
+  info: PerfectProductInfo,
+  artikul: string | undefined,
+): PerfectProductInfo {
+  return artikul ? { ...info, artikul } : info;
 }
 
 export function extractProductAttributeId(html: string, productUrl: string): string | null {

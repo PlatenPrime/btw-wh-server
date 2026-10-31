@@ -14,4 +14,12 @@ describe("normalizeBalunOutcome", () => {
   it("returns negative outcome when price is missing", () => {
     expect(normalizeBalunOutcome(10, undefined)).toEqual(BALUN_NEGATIVE_OUTCOME);
   });
+
+  it("attaches artikul when provided", () => {
+    expect(normalizeBalunOutcome(1, 2, "11033")).toEqual({
+      stock: 1,
+      price: 2,
+      artikul: "11033",
+    });
+  });
 });

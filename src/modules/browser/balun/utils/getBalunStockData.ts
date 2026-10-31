@@ -1,3 +1,4 @@
+import { extractPromUaProductArtikul } from "../../promua/extract-promua-product-artikul/extractPromUaProductArtikul.js";
 import { fetchPromUaCompanySiteStock } from "../../promua/fetch-promua-company-site-stock/fetchPromUaCompanySiteStock.js";
 import {
   BALUN_NEGATIVE_OUTCOME,
@@ -13,6 +14,7 @@ export { parseBalunHtmlPrice } from "./parse-balun-html-price/parseBalunHtmlPric
 
 type BalunHtmlContext = {
   htmlPrice: number | undefined;
+  artikul?: string;
 };
 
 /**
@@ -36,8 +38,12 @@ export async function getBalunStockData(link: string): Promise<BalunProductInfo>
     productUrl,
     negativeOutcome: BALUN_NEGATIVE_OUTCOME,
     logLabel: "balun",
-    parseHtmlContext: (html) => ({ htmlPrice: parseBalunHtmlPrice(html) }),
+    parseHtmlContext: (html) => ({
+      htmlPrice: parseBalunHtmlPrice(html),
+      artikul: extractPromUaProductArtikul(html),
+    }),
     resolveHtmlPrice: (ctx) => ctx.htmlPrice,
-    normalizeOutcome: ({ quantity, unitPrice }) => normalizeBalunOutcome(quantity, unitPrice),
+    normalizeOutcome: ({ quantity, unitPrice, ctx }) =>
+      normalizeBalunOutcome(quantity, unitPrice, ctx.artikul),
   });
 }

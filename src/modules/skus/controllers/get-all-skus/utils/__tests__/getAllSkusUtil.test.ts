@@ -116,6 +116,34 @@ describe("getAllSkusUtil", () => {
     expect(result.pagination.total).toBe(1);
   });
 
+  it("applies search by artikul substring (case-insensitive)", async () => {
+    await Sku.create({
+      konkName: "air",
+      prodName: "p1",
+      productId: "air-1",
+      artikul: "SDR-120",
+      title: "One",
+      url: "https://air.example/1",
+    });
+    await Sku.create({
+      konkName: "air",
+      prodName: "p1",
+      productId: "air-2",
+      artikul: "OTHER",
+      title: "Two",
+      url: "https://air.example/2",
+    });
+
+    const result = await getAllSkusUtil({
+      page: 1,
+      limit: 10,
+      search: "sdr-120",
+    });
+
+    expect(result.skus).toHaveLength(1);
+    expect(result.skus[0].artikul).toBe("SDR-120");
+  });
+
   it("combines search with konkName and prodName", async () => {
     await Sku.create({
       konkName: "k-x",

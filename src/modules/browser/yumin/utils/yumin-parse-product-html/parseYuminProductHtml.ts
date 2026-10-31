@@ -39,9 +39,29 @@ export function parseYuminProductHtml(html: string): YuminProductInfo {
     stock = options.flatQty * pieceCount;
   }
 
+  const artikul = extractYuminArtikul($, html);
+
   return {
     stock,
     price,
     ...(title.length > 0 && { title }),
+    ...(artikul && { artikul }),
   };
+}
+
+function extractYuminArtikul($: cheerio.CheerioAPI, html: string): string | undefined {
+  let found: string | undefined;
+  $("span").each((_, el) => {
+    if (found) return;
+    const $el = $(el);
+    const text = $el.clone().children().remove().end().text().replace(/\s+/g, " ").trim();
+    if (!/^Артикул:\s*$/i.test(text)) return;
+    const next = $el.nextAll("span").first().text().replace(/\s+/g, " ").trim();
+    if (next) found = next;
+  });
+  if (found) return found;
+
+  const match = html.match(/Артикул:\s*<\/span>\s*<span[^>]*>\s*([^<]+?)\s*<\/span>/i);
+  const fromHtml = match?.[1]?.replace(/\s+/g, " ").trim();
+  return fromHtml || undefined;
 }

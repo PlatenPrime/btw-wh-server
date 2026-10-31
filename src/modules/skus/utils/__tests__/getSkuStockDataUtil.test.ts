@@ -29,13 +29,18 @@ vi.mock("../../../browser/svbum/utils/getSvbumStockData.js", () => ({
 vi.mock("../../../browser/dojdevik/utils/getDojdevikStockData.js", () => ({
   getDojdevikStockData: vi.fn(),
 }));
+vi.mock("../maybeSetSkuArtikulIfEmpty.js", () => ({
+  maybeSetSkuArtikulIfEmpty: vi.fn(),
+}));
 
 import { getSkuStockDataUtil, UNSUPPORTED_KONK_CODE } from "../getSkuStockDataUtil.js";
+import { maybeSetSkuArtikulIfEmpty } from "../maybeSetSkuArtikulIfEmpty.js";
 
 const mockGetBalunStockData = vi.mocked(getBalunStockData);
 const mockGetAirStockData = vi.mocked(getAirStockData);
 const mockGetSvbumStockData = vi.mocked(getSvbumStockData);
 const mockGetDojdevikStockData = vi.mocked(getDojdevikStockData);
+const mockMaybeSetSkuArtikulIfEmpty = vi.mocked(maybeSetSkuArtikulIfEmpty);
 
 describe("getSkuStockDataUtil", () => {
   beforeEach(async () => {
@@ -44,6 +49,8 @@ describe("getSkuStockDataUtil", () => {
     mockGetAirStockData.mockReset();
     mockGetSvbumStockData.mockReset();
     mockGetDojdevikStockData.mockReset();
+    mockMaybeSetSkuArtikulIfEmpty.mockReset();
+    mockMaybeSetSkuArtikulIfEmpty.mockResolvedValue(undefined);
   });
 
   it("returns null when sku not found", async () => {
@@ -66,7 +73,7 @@ describe("getSkuStockDataUtil", () => {
   });
 
   it("calls getAirStockData for air", async () => {
-    mockGetAirStockData.mockResolvedValue({ stock: 4, price: 12.5 });
+    mockGetAirStockData.mockResolvedValue({ stock: 4, price: 12.5, artikul: "SDR-120" });
 
     const sku = await Sku.create({
       konkName: "air",
@@ -80,6 +87,7 @@ describe("getSkuStockDataUtil", () => {
 
     expect(mockGetAirStockData).toHaveBeenCalledWith("https://air.com/item");
     expect(result).toEqual({ stock: 4, price: 12.5 });
+    expect(mockMaybeSetSkuArtikulIfEmpty).toHaveBeenCalledWith(sku._id.toString(), "SDR-120");
   });
 
   it("calls konk-specific getter and maps stock and price", async () => {

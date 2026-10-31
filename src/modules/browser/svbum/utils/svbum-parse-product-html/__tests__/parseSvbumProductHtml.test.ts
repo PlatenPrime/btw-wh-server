@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { stripSkuProductCodeFixturePreamble } from "../../../../sku-product-codes/stripSkuProductCodeFixturePreamble.js";
 import { parseSvbumProductHtml } from "../parseSvbumProductHtml.js";
 import { SVBUM_NEGATIVE_OUTCOME } from "../../svbum-product-types/svbumProductInfo.js";
 
@@ -78,6 +79,18 @@ function optionsProductHtml(opts: {
 }
 
 describe("parseSvbumProductHtml", () => {
+  it("parses artikul from sku-product-codes fixture", () => {
+    const raw = readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        "../../../../sku-product-codes/svbum-product-code.txt",
+      ),
+      "utf8",
+    );
+    const result = parseSvbumProductHtml(stripSkuProductCodeFixturePreamble(raw));
+    expect(result.artikul).toBe("6002-0034");
+  });
+
   it('page-1: simple in-stock, 18" is not pack count, recommendations ignored', () => {
     const result = parseSvbumProductHtml(readFixture("product-page-1.txt"));
     expect(result).toMatchObject({ stock: 43, price: 11.77 });

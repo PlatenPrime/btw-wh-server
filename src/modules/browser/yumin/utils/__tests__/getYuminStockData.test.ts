@@ -1,4 +1,8 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { stripSkuProductCodeFixturePreamble } from "../../../sku-product-codes/stripSkuProductCodeFixturePreamble.js";
 import { getYuminStockData, parseYuminProductHtml } from "../getYuminStockData.js";
 import { browserGet } from "../../../utils/browserRequest.js";
 
@@ -11,6 +15,7 @@ function yuminProductPageHtml(opts: {
   h1Title: string;
   ldJsonProductName?: string;
   wholesaleBlocks?: string;
+  artikul?: string;
 }): string {
   const ld =
     opts.ldJsonProductName !== undefined
@@ -20,9 +25,14 @@ function yuminProductPageHtml(opts: {
         })}</script>`
       : "";
   const wholesale = opts.wholesaleBlocks ?? "";
+  const artikulBlock =
+    opts.artikul !== undefined
+      ? `<div><span class="text-base">Артикул: </span><span class="text-base">${opts.artikul}</span></div>`
+      : "";
   return `<!DOCTYPE html><html><body>
 ${ld}
 <h1 class="text-3xl">${opts.h1Title}</h1>
+${artikulBlock}
 <div v-product-customizable-options :initial-price="${opts.initialPrice}" :flat-qty="${opts.flatQty}"></div>
 ${wholesale}
 </body></html>`;
@@ -69,6 +79,33 @@ const YUMIN_HTML_ZERO_STOCK = yuminProductPageHtml({
 });
 
 describe("parseYuminProductHtml", () => {
+  it("parses artikul from adjacent span", () => {
+    const result = parseYuminProductHtml(
+      yuminProductPageHtml({
+        initialPrice: 5.92,
+        flatQty: 10,
+        h1Title: "Ball",
+        artikul: "91142",
+      }),
+    );
+    expect(result.artikul).toBe("91142");
+  });
+
+  it("parses artikul from sku-product-codes fixture markup", () => {
+    const raw = readFileSync(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        "../../../sku-product-codes/yumin-product-code.txt",
+      ),
+      "utf8",
+    );
+    const fixture = stripSkuProductCodeFixturePreamble(raw);
+    const withOptions = `${fixture}
+      <div v-product-customizable-options :initial-price="5.92" :flat-qty="10"></div>`;
+    const result = parseYuminProductHtml(withOptions);
+    expect(result.artikul).toBe("91142");
+  });
+
   it("clean_price: нормализация на штуки (10шт)", () => {
     const result = parseYuminProductHtml(YUMIN_HTML_CLEAN_PRICE);
     expect(result).toMatchObject({ stock: 150, price: 13.84 });

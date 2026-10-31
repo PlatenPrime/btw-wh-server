@@ -30,8 +30,37 @@ function parseUnitPrice($el: BrowserCheerio): number | null {
   return parseAttrNumber($el.attr("data-price"));
 }
 
-function withTitle(result: { stock: number; price: number }, title: string): SvbumProductInfo {
-  return title.length > 0 ? { ...result, title } : result;
+function withMeta(
+  result: { stock: number; price: number },
+  title: string,
+  artikul: string | undefined,
+): SvbumProductInfo {
+  let out: SvbumProductInfo = result;
+  if (title.length > 0) {
+    out = { ...out, title };
+  }
+  if (artikul) {
+    out = { ...out, artikul };
+  }
+  return out;
+}
+
+function extractSvbumArtikul($: BrowserCheerioAPI): string | undefined {
+  let found: string | undefined;
+  $("li").each((_, el) => {
+    if (found) return;
+    const $li = $(el);
+    const text = $li.text().replace(/\s+/g, " ").trim();
+    if (!/^Артикул:/i.test(text)) return;
+    const strong = $li.find("strong").first().text().trim();
+    if (strong) {
+      found = strong;
+      return;
+    }
+    const after = text.replace(/^Артикул:\s*/i, "").trim();
+    if (after) found = after;
+  });
+  return found;
 }
 
 function parseOptionOffers($: BrowserCheerioAPI, $product: BrowserCheerio): PackOffer[] {
@@ -62,7 +91,11 @@ function parseOptionOffers($: BrowserCheerioAPI, $product: BrowserCheerio): Pack
   return offers;
 }
 
-function parseFromOptions(offers: PackOffer[], title: string): SvbumProductInfo {
+function parseFromOptions(
+  offers: PackOffer[],
+  title: string,
+  artikul: string | undefined,
+): SvbumProductInfo {
   if (offers.length === 0) {
     return SVBUM_NEGATIVE_OUTCOME;
   }
@@ -72,10 +105,14 @@ function parseFromOptions(offers: PackOffer[], title: string): SvbumProductInfo 
   const price = toMoney(Math.min(...priced.map((offer) => offer.perPiece)));
   const stock = inStock.reduce((sum, offer) => sum + offer.qty * offer.packSize, 0);
 
-  return withTitle({ stock, price }, title);
+  return withMeta({ stock, price }, title, artikul);
 }
 
-function parseSimpleProduct($product: BrowserCheerio, title: string): SvbumProductInfo {
+function parseSimpleProduct(
+  $product: BrowserCheerio,
+  title: string,
+  artikul: string | undefined,
+): SvbumProductInfo {
   const qty = parseAttrNumber(
     $product.find("input[data-product-quantity]").first().attr("data-product-quantity"),
   );
@@ -93,16 +130,17 @@ function parseSimpleProduct($product: BrowserCheerio, title: string): SvbumProdu
 
   const packCount = extractSvbumPackCount(title);
   if (packCount !== null && packCount > 0) {
-    return withTitle(
+    return withMeta(
       {
         stock: qty * packCount,
         price: toMoney(unitPrice / packCount),
       },
       title,
+      artikul,
     );
   }
 
-  return withTitle({ stock: qty, price: toMoney(unitPrice) }, title);
+  return withMeta({ stock: qty, price: toMoney(unitPrice) }, title, artikul);
 }
 
 /**
@@ -121,10 +159,11 @@ export function parseSvbumProductHtml(html: string): SvbumProductInfo {
   }
 
   const title = $("h1.page-title").first().text().trim();
+  const artikul = extractSvbumArtikul($);
   const offers = parseOptionOffers($, $product);
   if (offers.length > 0) {
-    return parseFromOptions(offers, title);
+    return parseFromOptions(offers, title, artikul);
   }
 
-  return parseSimpleProduct($product, title);
+  return parseSimpleProduct($product, title, artikul);
 }

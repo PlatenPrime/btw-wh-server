@@ -114,4 +114,33 @@ describe("getAllSkusController", () => {
     expect(responseJson.data).toHaveLength(1);
     expect(responseJson.data[0].productId).toBe("perfect-14938");
   });
+
+  it("200 applies search query on artikul", async () => {
+    await Sku.create({
+      konkName: "air",
+      prodName: "p1",
+      productId: "air-a1",
+      artikul: "SDR-120",
+      title: "A",
+      url: "https://air.example/a1",
+    });
+    await Sku.create({
+      konkName: "air",
+      prodName: "p1",
+      productId: "air-a2",
+      artikul: "OTHER",
+      title: "B",
+      url: "https://air.example/a2",
+    });
+
+    const req = {
+      query: { page: "1", limit: "10", search: "SDR-120" },
+    } as unknown as Request;
+
+    await getAllSkusController(req, res);
+
+    expect(responseStatus.code).toBe(200);
+    expect(responseJson.data).toHaveLength(1);
+    expect(responseJson.data[0].artikul).toBe("SDR-120");
+  });
 });

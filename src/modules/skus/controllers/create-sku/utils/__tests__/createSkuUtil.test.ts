@@ -24,7 +24,20 @@ describe("createSkuUtil", () => {
     expect(result.title).toBe("Sku A");
     expect(result.url).toBe("https://konk-a.com/sku-a");
     expect(result.productId).toBe("konk-a-10");
+    expect(result.artikul).toBe("");
     expect(result.imageUrl).toBe("");
+  });
+
+  it("persists artikul when provided", async () => {
+    const result = await createSkuUtil({
+      konkName: "konk-a",
+      prodName: "prod-a",
+      productId: "konk-a-12",
+      title: "Sku C",
+      url: "https://konk-a.com/sku-c",
+      artikul: "SDR-120",
+    });
+    expect(result.artikul).toBe("SDR-120");
   });
 
   it("persists imageUrl when provided", async () => {

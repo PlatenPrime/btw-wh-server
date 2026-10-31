@@ -13,10 +13,12 @@ import { PERFECT_UNAVAILABLE_OUTCOME } from "./perfect-per-piece-stock/perfectPr
 import { isPerfectProductPageHtml } from "./perfect-product-page-detect/perfectProductPageDetect.js";
 import {
   buildPerfectRefreshBody,
+  extractPerfectArtikul,
   extractProductAttributeId,
   extractProductGroupSelections,
   extractProductId,
   extractTitle,
+  withPerfectArtikul,
 } from "./perfect-product-page-extract/perfectProductPageExtract.js";
 import { resolvePerfectToken } from "./perfect-resolve-token/resolvePerfectToken.js";
 import { tryPerfectRefreshStock } from "./perfect-try-refresh-stock/tryPerfectRefreshStock.js";
@@ -44,15 +46,16 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
     const html = String(htmlResponse.data ?? "");
     const htmlStatus = (htmlResponse as { status?: number }).status ?? 0;
     const hasProductPageHtml = isPerfectProductPageHtml(html);
+    const artikul = extractPerfectArtikul(html);
 
     if (!html.trim()) {
       logPerfectUnavailableOutcome(productUrl, "empty body", htmlStatus, false);
-      return PERFECT_UNAVAILABLE_OUTCOME;
+      return withPerfectArtikul(PERFECT_UNAVAILABLE_OUTCOME, artikul);
     }
 
     if (!hasProductPageHtml && htmlStatus >= 400) {
       logPerfectUnavailableOutcome(productUrl, "not a product page", htmlStatus, false);
-      return PERFECT_UNAVAILABLE_OUTCOME;
+      return withPerfectArtikul(PERFECT_UNAVAILABLE_OUTCOME, artikul);
     }
 
     const htmlRespHeaders = (htmlResponse as { headers?: Record<string, unknown> }).headers ?? {};
@@ -61,10 +64,10 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
     const pageTitle = extractTitle(html);
 
     const fromDataProduct = tryPerfectDataProductFallback(html, pageTitle);
-    if (fromDataProduct) return fromDataProduct;
+    if (fromDataProduct) return withPerfectArtikul(fromDataProduct, artikul);
 
     const fromOosHtml = tryPerfectHtmlFallback(html, pageTitle);
-    if (fromOosHtml) return fromOosHtml;
+    if (fromOosHtml) return withPerfectArtikul(fromOosHtml, artikul);
 
     const productId = extractProductId(html, productUrl);
     if (!productId) {
@@ -74,7 +77,7 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
         htmlStatus,
         hasProductPageHtml,
       );
-      return PERFECT_UNAVAILABLE_OUTCOME;
+      return withPerfectArtikul(PERFECT_UNAVAILABLE_OUTCOME, artikul);
     }
 
     const tokenResult = await resolvePerfectToken(client, html, cookieHeader);
@@ -82,7 +85,7 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
     const token = tokenResult.token;
     if (!token) {
       logPerfectUnavailableOutcome(productUrl, "token missing", htmlStatus, hasProductPageHtml);
-      return PERFECT_UNAVAILABLE_OUTCOME;
+      return withPerfectArtikul(PERFECT_UNAVAILABLE_OUTCOME, artikul);
     }
 
     const idProductAttribute = extractProductAttributeId(html, productUrl);
@@ -102,20 +105,23 @@ export async function getPerfectStockData(link: string): Promise<PerfectProductI
       cookieHeader,
     );
     cookieHeader = refreshResult.cookieHeader;
-    if (refreshResult.info) return refreshResult.info;
+    if (refreshResult.info) return withPerfectArtikul(refreshResult.info, artikul);
 
-    return await fetchPerfectCartStockAndRelease(client, {
-      productUrl,
-      html,
-      pageTitle,
-      token,
-      idProduct: productId,
-      idProductAttribute,
-      groupSelections,
-      cookieHeader,
-      htmlStatus,
-      hasProductPageHtml,
-    });
+    return withPerfectArtikul(
+      await fetchPerfectCartStockAndRelease(client, {
+        productUrl,
+        html,
+        pageTitle,
+        token,
+        idProduct: productId,
+        idProductAttribute,
+        groupSelections,
+        cookieHeader,
+        htmlStatus,
+        hasProductPageHtml,
+      }),
+      artikul,
+    );
   } catch (error) {
     logBrowserError("Error fetching data from perfectparty product page:", error);
     return PERFECT_UNAVAILABLE_OUTCOME;

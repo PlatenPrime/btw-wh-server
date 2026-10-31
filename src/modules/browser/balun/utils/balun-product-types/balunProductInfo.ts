@@ -1,6 +1,7 @@
 export interface BalunProductInfo {
   stock: number;
   price: number;
+  artikul?: string;
 }
 
 export const BALUN_ORIGIN = "https://balun.com.ua";

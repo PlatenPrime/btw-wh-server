@@ -16,7 +16,7 @@
 - `limit?: number` — размер страницы, по умолчанию `10`, максимум `100`
 - `konkName?: string` — фильтр по имени-ключу конкурента
 - `prodName?: string` — фильтр по имени-ключу производителя
-- `search?: string` — регистронезависимый поиск по подстроке в `title` **или** `productId` (спецсимволы regex экранируются)
+- `search?: string` — регистронезависимый поиск по подстроке в `title`, `productId` **или** `artikul` (спецсимволы regex экранируются)
 - `isInvalid?: string` — только `"true"` или `"false"`; фильтр по полю `Sku.isInvalid`
 - `notInAnySkugr?: string` — только `"true"` или `"false"`; при `"true"` в выборку попадают только SKU, чей `_id` не встречается ни в одном массиве `Skugr.skus` (пустое объединение всех групп не превращается в `$nin: []`)
 - `createdFrom?: string` — дата `YYYY-MM-DD`; в выборку попадают SKU с `createdAt` **не раньше** календарного ключа среза для этой даты (`toSliceDate`, часовой пояс как у срезов)
@@ -111,6 +111,7 @@ Excel по каталогу (новинки, invalid) перенесён в [API
 - `konkName`: string (обязательно)
 - `prodName`: string (обязательно)
 - `productId`: string (обязательно), канонический идентификатор вида `{konkLower}-{rawId}` (например `air-12345`), уникальный в коллекции
+- `artikul`: string (опционально, по умолчанию `""`) — артикул/код с карточки конкурента
 - `btradeAnalog`: string (опционально, по умолчанию `""`)
 - `title`: string (обязательно)
 - `url`: string (обязательно, валидный URL, уникальный)
@@ -129,7 +130,7 @@ Excel по каталогу (новинки, invalid) перенесён в [API
 **Доступ:** checkAuth + checkRoles(ADMIN).
 
 **Запрос:** path-параметр `id` — MongoDB ObjectId.  
-Body: `{ konkName?: string, prodName?: string, productId?: string, btradeAnalog?: string, title?: string, url?: string, imageUrl?: string }` (при передаче `productId` — тот же формат, что при создании).
+Body: `{ konkName?: string, prodName?: string, productId?: string, artikul?: string, btradeAnalog?: string, title?: string, url?: string, imageUrl?: string }` (при передаче `productId` — тот же формат, что при создании).
 
 **Ответ 200:** `{ message: string, data: Sku }`.
 
@@ -155,6 +156,7 @@ Body: `{ konkName?: string, prodName?: string, productId?: string, btradeAnalog?
 - `konkName`: string
 - `prodName`: string
 - `productId`: string
+- `artikul`: string — артикул/код с карточки конкурента; UX: [frontend: sku-artikul](../frontend/sku-artikul.md)
 - `btradeAnalog`: string
 - `title`: string
 - `url`: string

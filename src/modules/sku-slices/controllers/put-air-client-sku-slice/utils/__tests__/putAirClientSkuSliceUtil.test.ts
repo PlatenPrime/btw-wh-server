@@ -24,9 +24,13 @@ vi.mock("../../../../utils/skuSliceDayMetaStore.js", () => ({
 vi.mock("../../../../../sku-reporting/utils/scheduleAfterSkuSliceStockMutation.js", () => ({
   scheduleAfterSkuSliceStockMutation: vi.fn(),
 }));
+vi.mock("../../../../../skus/utils/maybeSetSkuArtikulIfEmpty.js", () => ({
+  maybeSetSkuArtikulIfEmpty: vi.fn(),
+}));
 
 import { readAirProductFromHtml } from "../../../../../browser/air/utils/air-product-page-from-html/readAirProductFromHtml.js";
 import { Sku } from "../../../../../skus/models/Sku.js";
+import { maybeSetSkuArtikulIfEmpty } from "../../../../../skus/utils/maybeSetSkuArtikulIfEmpty.js";
 import { Skugr } from "../../../../../skugrs/models/Skugr.js";
 import { getDayPoint, upsertDayPoint } from "../../../../utils/skuSliceMonthStore.js";
 import { ensureSkuSliceDayMeta } from "../../../../utils/skuSliceDayMetaStore.js";
@@ -58,7 +62,9 @@ describe("putAirClientSkuSliceUtil", () => {
     vi.mocked(readAirProductFromHtml).mockReturnValue({
       stock: 12,
       price: 2.1,
+      artikul: "SDR-120",
     });
+    vi.mocked(maybeSetSkuArtikulIfEmpty).mockResolvedValue(undefined);
     vi.mocked(ensureSkuSliceDayMeta).mockResolvedValue(undefined);
     vi.mocked(getDayPoint).mockResolvedValue(null);
     vi.mocked(upsertDayPoint).mockResolvedValue(undefined);
@@ -131,6 +137,7 @@ describe("putAirClientSkuSliceUtil", () => {
       stock: 12,
       price: 2.1,
     });
+    expect(maybeSetSkuArtikulIfEmpty).toHaveBeenCalledWith(skuId, "SDR-120");
     expect(ensureSkuSliceDayMeta).toHaveBeenCalledWith("air", sliceDate);
     expect(upsertDayPoint).toHaveBeenCalledWith("air", "air-1", sliceDate, {
       stock: 12,
@@ -140,6 +147,14 @@ describe("putAirClientSkuSliceUtil", () => {
       konkName: "air",
       dayD: sliceDate,
     });
+  });
+
+  it("sets artikul even when slice point already filled (skipped)", async () => {
+    vi.mocked(getDayPoint).mockResolvedValue({ stock: 9, price: 1.5 });
+
+    await putAirClientSkuSliceUtil(input, now);
+
+    expect(maybeSetSkuArtikulIfEmpty).toHaveBeenCalledWith(skuId, "SDR-120");
   });
 
   it("skips when valid value already exists", async () => {

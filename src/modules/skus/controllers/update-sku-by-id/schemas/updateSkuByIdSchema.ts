@@ -14,6 +14,7 @@ export const updateSkuByIdSchema = z.object({
   konkName: z.string().min(1).optional(),
   prodName: z.string().min(1).optional(),
   productId: optionalProductId,
+  artikul: z.string().optional(),
   btradeAnalog: z.string().optional(),
   title: z.string().min(1).optional(),
   url: z.string().url("Url must be a valid URL").optional(),

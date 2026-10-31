@@ -2,6 +2,7 @@ import { readAirProductFromHtml } from "../../../../browser/air/utils/air-produc
 import { isInvalidSliceStockResult } from "../../../../slices/utils/isInvalidSliceStockResult.js";
 import { toOpenKyivSliceDate } from "../../../../../utils/sliceDate.js";
 import { Sku } from "../../../../skus/models/Sku.js";
+import { maybeSetSkuArtikulIfEmpty } from "../../../../skus/utils/maybeSetSkuArtikulIfEmpty.js";
 import { Skugr } from "../../../../skugrs/models/Skugr.js";
 import { AIR_CLIENT_SLICE_KONK } from "../../../constants/airClientSlice.js";
 import { urlsMatchForClientIngest } from "../../../utils/urlsMatchForClientIngest.js";
@@ -100,6 +101,8 @@ export async function putAirClientSkuSliceUtil(
       message: "HTML did not contain valid stock/price",
     };
   }
+
+  await maybeSetSkuArtikulIfEmpty(input.skuId, parsed.artikul);
 
   const sliceDate = toOpenKyivSliceDate(now);
   const dataItem = { stock: parsed.stock, price: parsed.price };

@@ -10,12 +10,14 @@ export function normalizeDojdevikOutcome(
   packagePrice: number | undefined,
   packSize: number,
   title: string,
+  artikul?: string,
 ): DojdevikProductInfo {
   if (packagePrice === undefined) {
-    return DOJDEVIK_NEGATIVE_OUTCOME;
+    return artikul ? { ...DOJDEVIK_NEGATIVE_OUTCOME, artikul } : DOJDEVIK_NEGATIVE_OUTCOME;
   }
 
   const price = toMoney(packagePrice / packSize);
   const stock = packs * packSize;
-  return title.length > 0 ? { stock, price, title } : { stock, price };
+  const base: DojdevikProductInfo = title.length > 0 ? { stock, price, title } : { stock, price };
+  return artikul ? { ...base, artikul } : base;
 }

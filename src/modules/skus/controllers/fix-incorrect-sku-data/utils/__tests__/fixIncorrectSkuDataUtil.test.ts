@@ -65,4 +65,23 @@ describe("fixIncorrectSkuDataUtil", () => {
     expect(a?.btradeAnalog).toBe("BT-1");
     expect(b?.btradeAnalog).toBe("");
   });
+
+  it("updates artikul when provided in updates", async () => {
+    await Sku.create({
+      konkName: "k1",
+      prodName: "p1",
+      productId: "k1-art",
+      title: "A",
+      url: "https://k1.com/art",
+    });
+
+    const result = await fixIncorrectSkuDataUtil({
+      filter: { productId: "k1-art" },
+      updates: { artikul: "SDR-120" },
+    });
+
+    expect(result.modifiedCount).toBe(1);
+    const doc = await Sku.findOne({ productId: "k1-art" }).lean();
+    expect(doc?.artikul).toBe("SDR-120");
+  });
 });

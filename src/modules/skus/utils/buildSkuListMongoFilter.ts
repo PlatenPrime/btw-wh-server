@@ -10,7 +10,7 @@ export type SkuListFilterQuery = Omit<GetAllSkusQuery, "page" | "limit">;
 
 /**
  * Mongo-фильтр для списка SKU и для массового удаления «сирот».
- * `search` — регистронезависимый regex по `title` или `productId`.
+ * `search` — регистронезависимый regex по `title`, `productId` или `artikul`.
  * При `notInAnySkugr === true` не использует `$nin: []` (иначе попали бы все документы).
  */
 export async function buildSkuListMongoFilter(
@@ -26,7 +26,7 @@ export async function buildSkuListMongoFilter(
       $regex: escapeRegex(search.trim()),
       $options: "i",
     };
-    filter.$or = [{ title: regex }, { productId: regex }];
+    filter.$or = [{ title: regex }, { productId: regex }, { artikul: regex }];
   }
   if (typeof isInvalid === "boolean") filter.isInvalid = isInvalid;
   if (createdFrom != null) {

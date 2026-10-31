@@ -14,6 +14,8 @@ Sku — документ, описывающий единицу товара к�
 
 - `konkName`: string — имя-ключ конкурента
 - `prodName`: string — имя-ключ производителя
+- `productId`: string — канонический ключ `{konkLower}-{rawId}` с листинга, уникальный
+- `artikul`: string — артикул/код с карточки товара конкурента (не `productId` и не `btradeAnalog`), по умолчанию `""`
 - `btradeAnalog`: string — аналог артикула BTrade, по умолчанию `""`
 - `title`: string — название товара
 - `url`: string — ссылка на страницу товара у конкурента (уникальная)
@@ -39,12 +41,16 @@ Sku — документ, описывающий единицу товара к�
 
 Строка с URL картинки; при отсутствии в запросе или при создании через API без поля — `""`. При массовом заполнении из `fill-skus` значение приходит из парсера группы конкурента.
 
+### Поле `artikul`
+
+Код товара на сайте конкурента (лейблы вроде «Артикул» / «Код» / reference). Отличается от `productId` (внутренний id листинга в каноническом виде) и от `btradeAnalog` (связь с ассортиментом BTrade). Listing fill поле не заполняет. При live-stock scrape и при Air client slice ingest (HTML карточки) бэкенд пишет `artikul` **только если** в документе ещё пусто (`""` / отсутствует) — scrape не перезаписывает уже заполненное. У sharte поля на странице нет — значение остаётся пустым. Create/PATCH и fix-incorrect могут задать вручную. UX для клиента: [frontend: sku-artikul](../frontend/sku-artikul.md).
+
 ### Чтение с фильтрами и пагинацией
 
 Список SKU поддерживает:
 
 - фильтры по `konkName` и `prodName`;
-- опциональный `search` — регистронезависимый поиск по подстроке в `title` или `productId`;
+- опциональный `search` — регистронезависимый поиск по подстроке в `title`, `productId` или `artikul`;
 - опционально `isInvalid` (`true` / `false` в query) и `createdFrom` (`YYYY-MM-DD`) — «новинки» не раньше этой даты;
 - опционально признак «ни в одной товарной группе» — выборка SKU, чей `_id` не входит ни в один массив `skugr.skus` (для пустого объединения групп условие трактуется так, чтобы не выбирать по ошибке все документы коллекции);
 - пагинацию через `page` и `limit`;
@@ -64,11 +70,11 @@ Sku — документ, описывающий единицу товара к�
 
 Массовое создание SKU при привязке к группе конкурента выполняется через **POST `/api/skugrs/id/:id/fill-skus`**. Для Air при `AIR_IDLE_MODE` — **POST `/api/skugrs/client/air/id/:id/fill-page`** (см. [модуль Skugrs](./skugrs.md) и [API Skugrs](../api/skugrs.md)).
 
-Список SKU конкретной группы (по id из поля `skugr.skus`) — **GET `/api/skus/by-skugr/:skugrId`** с пагинацией и поиском по `title`, см. [API Skus](../api/skus.md).
+Список SKU конкретной группы (по id из поля `skugr.skus`) — **GET `/api/skus/by-skugr/:skugrId`** с пагинацией и тем же `search`, см. [API Skus](../api/skus.md).
 
 ### Live-остаток и цена
 
-Эндпоинт **GET `/api/skus/id/:id/stock`** по запросу опрашивает сайт конкурента: по `konkName` выбирается скрапер, по `url` карточки читаются актуальные `stock` и `price`. Это не данные из `SkuSliceMonth` и не Btrade — только live-снимок для карточки SKU на фронте. Поддерживаются air, balun, yumi, yumin, sharte, perfect, svbum, dojdevik. Для ручного дозаполнения срезов Air остаётся [frontend: air-client-sku-slices](../frontend/air-client-sku-slices.md). Подробности live UX — [frontend: sku-live-stock](../frontend/sku-live-stock.md).
+Эндпоинт **GET `/api/skus/id/:id/stock`** по запросу опрашивает сайт конкурента: по `konkName` выбирается скрапер, по `url` карточки читаются актуальные `stock` и `price`. Это не данные из `SkuSliceMonth` и не Btrade — только live-снимок для карточки SKU на фронте. Ответ по-прежнему `{ stock, price }`; побочно при пустом `Sku.artikul` скрапер может один раз заполнить артикул с HTML (кроме sharte). Поддерживаются air, balun, yumi, yumin, sharte, perfect, svbum, dojdevik. Для ручного дозаполнения срезов Air остаётся [frontend: air-client-sku-slices](../frontend/air-client-sku-slices.md). Подробности live UX — [frontend: sku-live-stock](../frontend/sku-live-stock.md); artikul — [frontend: sku-artikul](../frontend/sku-artikul.md).
 
 ## API эндпоинты
 
@@ -88,6 +94,8 @@ Sku — документ, описывающий единицу товара к�
 - `_id`: string (MongoDB ObjectId)
 - `konkName`: string
 - `prodName`: string
+- `productId`: string
+- `artikul`: string
 - `btradeAnalog`: string
 - `title`: string
 - `url`: string (unique)

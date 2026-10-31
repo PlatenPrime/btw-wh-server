@@ -7,6 +7,7 @@ import { getSharteStockData } from "../../browser/sharte/utils/getSharteStockDat
 import { getPerfectStockData } from "../../browser/perfect/utils/getPerfectStockData.js";
 import { getSvbumStockData } from "../../browser/svbum/utils/getSvbumStockData.js";
 import { getDojdevikStockData } from "../../browser/dojdevik/utils/getDojdevikStockData.js";
+import { maybeSetSkuArtikulIfEmpty } from "./maybeSetSkuArtikulIfEmpty.js";
 
 export const UNSUPPORTED_KONK_CODE = "UNSUPPORTED_KONK";
 
@@ -15,7 +16,11 @@ export interface SkuStockResult {
   price: number;
 }
 
-type StockDataFn = (url: string) => Promise<{ stock: number; price?: number }>;
+type StockDataFn = (url: string) => Promise<{
+  stock: number;
+  price?: number;
+  artikul?: string;
+}>;
 
 const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
   air: getAirStockData,
@@ -30,6 +35,7 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
 
 /**
  * Остаток и цена по SKU: по konkName выбирается геттер, вызов с sku.url.
+ * Побочно: write-once заполнение `Sku.artikul`, если геттер вернул артикул.
  */
 export async function getSkuStockDataUtil(skuId: string): Promise<SkuStockResult | null> {
   const sku = await Sku.findById(skuId).select("konkName url").lean();
@@ -48,6 +54,8 @@ export async function getSkuStockDataUtil(skuId: string): Promise<SkuStockResult
 
   const result = await getter(sku.url);
   const price = result.price !== undefined && result.price !== null ? result.price : -1;
+
+  await maybeSetSkuArtikulIfEmpty(skuId, result.artikul);
 
   return {
     stock: result.stock,

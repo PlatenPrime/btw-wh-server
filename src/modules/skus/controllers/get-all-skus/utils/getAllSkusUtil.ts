@@ -8,6 +8,7 @@ type SkuLean = {
   konkName: string;
   prodName: string;
   productId: string;
+  artikul: string;
   btradeAnalog: string;
   title: string;
   url: string;

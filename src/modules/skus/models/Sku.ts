@@ -10,6 +10,8 @@ export interface ISku extends Document {
   prodName: string;
   /** Канонический ключ: `{konkNameLower}-{rawProductId}` */
   productId: string;
+  /** Артикул/код с карточки конкурента (не productId и не btradeAnalog). */
+  artikul: string;
   btradeAnalog: string;
   title: string;
   url: string;
@@ -25,6 +27,7 @@ const skuSchema = new Schema<ISku>(
     konkName: { type: String, required: true },
     prodName: { type: String, required: true },
     productId: { type: String, required: true, unique: true },
+    artikul: { type: String, default: "" },
     btradeAnalog: { type: String, default: "" },
     title: { type: String, required: true },
     url: { type: String, required: true, unique: true },

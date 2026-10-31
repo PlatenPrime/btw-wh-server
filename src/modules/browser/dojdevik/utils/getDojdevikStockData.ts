@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { extractPromUaProductArtikul } from "../../promua/extract-promua-product-artikul/extractPromUaProductArtikul.js";
 import { fetchPromUaCompanySiteStock } from "../../promua/fetch-promua-company-site-stock/fetchPromUaCompanySiteStock.js";
 import {
   parseDojdevikPackagePriceFromDom,
@@ -17,6 +18,7 @@ type DojdevikHtmlContext = {
   title: string;
   packSize: number;
   htmlPackagePrice: number | null;
+  artikul?: string;
 };
 
 /**
@@ -46,10 +48,11 @@ export async function getDojdevikStockData(link: string): Promise<DojdevikProduc
         title: parseDojdevikTitleFromDom($),
         packSize: extractDojdevikPackCount(html),
         htmlPackagePrice: parseDojdevikPackagePriceFromDom($),
+        artikul: extractPromUaProductArtikul(html),
       };
     },
     resolveHtmlPrice: (ctx) => ctx.htmlPackagePrice,
     normalizeOutcome: ({ quantity, unitPrice, ctx }) =>
-      normalizeDojdevikOutcome(quantity, unitPrice, ctx.packSize, ctx.title),
+      normalizeDojdevikOutcome(quantity, unitPrice, ctx.packSize, ctx.title, ctx.artikul),
   });
 }

@@ -4,6 +4,7 @@ export interface PerfectProductInfo {
   stock: number;
   price: number;
   title?: string;
+  artikul?: string;
   source?: PerfectStockSource;
 }
 

@@ -21,4 +21,13 @@ describe("normalizeDojdevikOutcome", () => {
   it("returns negative outcome when package price is missing", () => {
     expect(normalizeDojdevikOutcome(10, undefined, 5, "x")).toEqual(DOJDEVIK_NEGATIVE_OUTCOME);
   });
+
+  it("attaches artikul when provided", () => {
+    expect(normalizeDojdevikOutcome(1, 10, 2, "Ball", "1101-0001")).toEqual({
+      stock: 2,
+      price: 5,
+      title: "Ball",
+      artikul: "1101-0001",
+    });
+  });
 });

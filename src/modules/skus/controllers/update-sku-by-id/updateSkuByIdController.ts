@@ -11,11 +11,13 @@ import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 export const updateSkuByIdController = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
-    const { konkName, prodName, btradeAnalog, title, url, imageUrl } = req.body;
+    const { konkName, prodName, productId, artikul, btradeAnalog, title, url, imageUrl } = req.body;
     const parseResult = updateSkuByIdSchema.safeParse({
       id,
       konkName,
       prodName,
+      productId,
+      artikul,
       btradeAnalog,
       title,
       url,

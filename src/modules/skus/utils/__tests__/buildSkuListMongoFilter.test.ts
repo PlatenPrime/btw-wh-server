@@ -29,6 +29,7 @@ describe("buildSkuListMongoFilter", () => {
     expect(filter.$or).toEqual([
       { title: { $regex: "widget", $options: "i" } },
       { productId: { $regex: "widget", $options: "i" } },
+      { artikul: { $regex: "widget", $options: "i" } },
     ]);
     expect(filter.isInvalid).toBe(true);
     expect(filter.createdAt).toEqual({
@@ -73,6 +74,7 @@ describe("buildSkuListMongoFilter", () => {
     expect(filter.$or).toEqual([
       { title: { $regex: "perfect\\.1", $options: "i" } },
       { productId: { $regex: "perfect\\.1", $options: "i" } },
+      { artikul: { $regex: "perfect\\.1", $options: "i" } },
     ]);
   });
 });

@@ -47,6 +47,7 @@ export const fixIncorrectSkuDataUtil = async (
   if (updates.konkName !== undefined) $set.konkName = updates.konkName;
   if (updates.prodName !== undefined) $set.prodName = updates.prodName;
   if (updates.productId !== undefined) $set.productId = updates.productId;
+  if (updates.artikul !== undefined) $set.artikul = updates.artikul;
   if (updates.btradeAnalog !== undefined) $set.btradeAnalog = updates.btradeAnalog;
   if (updates.title !== undefined) $set.title = updates.title;
   if (updates.url !== undefined) $set.url = updates.url;
