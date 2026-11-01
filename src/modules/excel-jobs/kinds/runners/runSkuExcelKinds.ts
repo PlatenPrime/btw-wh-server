@@ -7,6 +7,10 @@ import { getKonkSkuSalesExcelSchema } from "../../../sku-excel-reports/controlle
 import { getKonkSkuSalesExcelUtil } from "../../../sku-excel-reports/controllers/get-konk-sku-sales-excel/utils/getKonkSkuSalesExcelUtil.js";
 import { getKonkSkuSliceExcelSchema } from "../../../sku-excel-reports/controllers/get-konk-sku-slice-excel/schemas/getKonkSkuSliceExcelSchema.js";
 import { getKonkSkuSliceExcelUtil } from "../../../sku-excel-reports/controllers/get-konk-sku-slice-excel/utils/getKonkSkuSliceExcelUtil.js";
+import { getSelectionSkuSalesExcelSchema } from "../../../sku-excel-reports/controllers/get-selection-sku-sales-excel/schemas/getSelectionSkuSalesExcelSchema.js";
+import { getSelectionSkuSalesExcelUtil } from "../../../sku-excel-reports/controllers/get-selection-sku-sales-excel/utils/getSelectionSkuSalesExcelUtil.js";
+import { getSelectionSkuSliceExcelSchema } from "../../../sku-excel-reports/controllers/get-selection-sku-slice-excel/schemas/getSelectionSkuSliceExcelSchema.js";
+import { getSelectionSkuSliceExcelUtil } from "../../../sku-excel-reports/controllers/get-selection-sku-slice-excel/utils/getSelectionSkuSliceExcelUtil.js";
 import { getSkuSalesExcelSchema } from "../../../sku-excel-reports/controllers/get-sku-sales-excel/schemas/getSkuSalesExcelSchema.js";
 import { getSkuSalesExcelUtil } from "../../../sku-excel-reports/controllers/get-sku-sales-excel/utils/getSkuSalesExcelUtil.js";
 import { getSkuSliceExcelSchema } from "../../../sku-excel-reports/controllers/get-sku-slice-excel/schemas/getSkuSliceExcelSchema.js";
@@ -117,6 +121,30 @@ export const runSkuOneSales: ExcelJobKindRunner = async (params, options) => {
   }
   return wrapOkFalse(
     await getSkuSalesExcelUtil(parsed.data, {
+      onProgress: options?.onProgress,
+    }),
+  );
+};
+
+export const runSkuSelectionStock: ExcelJobKindRunner = async (params, options) => {
+  const parsed = getSelectionSkuSliceExcelSchema.safeParse(params);
+  if (!parsed.success) {
+    return failExcelJobRun("Validation error");
+  }
+  return wrapOkFalse(
+    await getSelectionSkuSliceExcelUtil(parsed.data, {
+      onProgress: options?.onProgress,
+    }),
+  );
+};
+
+export const runSkuSelectionSales: ExcelJobKindRunner = async (params, options) => {
+  const parsed = getSelectionSkuSalesExcelSchema.safeParse(params);
+  if (!parsed.success) {
+    return failExcelJobRun("Validation error");
+  }
+  return wrapOkFalse(
+    await getSelectionSkuSalesExcelUtil(parsed.data, {
       onProgress: options?.onProgress,
     }),
   );

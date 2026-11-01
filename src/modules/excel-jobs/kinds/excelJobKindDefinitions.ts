@@ -9,6 +9,8 @@ import { getCatalogInvalidExcelQuerySchema } from "../../sku-excel-reports/contr
 import { getCatalogNewSinceExcelQuerySchema } from "../../sku-excel-reports/controllers/get-catalog-new-since-excel/schemas/getCatalogNewSinceExcelSchema.js";
 import { getKonkSkuSalesExcelSchema } from "../../sku-excel-reports/controllers/get-konk-sku-sales-excel/schemas/getKonkSkuSalesExcelSchema.js";
 import { getKonkSkuSliceExcelSchema } from "../../sku-excel-reports/controllers/get-konk-sku-slice-excel/schemas/getKonkSkuSliceExcelSchema.js";
+import { getSelectionSkuSalesExcelSchema } from "../../sku-excel-reports/controllers/get-selection-sku-sales-excel/schemas/getSelectionSkuSalesExcelSchema.js";
+import { getSelectionSkuSliceExcelSchema } from "../../sku-excel-reports/controllers/get-selection-sku-slice-excel/schemas/getSelectionSkuSliceExcelSchema.js";
 import { getSkuSalesExcelSchema } from "../../sku-excel-reports/controllers/get-sku-sales-excel/schemas/getSkuSalesExcelSchema.js";
 import { getSkuSliceExcelSchema } from "../../sku-excel-reports/controllers/get-sku-slice-excel/schemas/getSkuSliceExcelSchema.js";
 import { getSkugrSalesExcelSchema } from "../../sku-excel-reports/controllers/get-skugr-sales-excel/schemas/getSkugrSalesExcelSchema.js";
@@ -78,6 +80,18 @@ export const EXCEL_JOB_KIND_DEFINITIONS: Record<ExcelJobKind, ExcelJobKindDefini
     minRole: RoleType.ADMIN,
     schema: getSkuSalesExcelSchema,
     oldPath: "GET /api/sku-excel-reports/sku/:skuId/sales",
+  },
+  "sku-selection-stock": {
+    kind: "sku-selection-stock",
+    minRole: RoleType.ADMIN,
+    schema: getSelectionSkuSliceExcelSchema,
+    oldPath: "n/a",
+  },
+  "sku-selection-sales": {
+    kind: "sku-selection-sales",
+    minRole: RoleType.ADMIN,
+    schema: getSelectionSkuSalesExcelSchema,
+    oldPath: "n/a",
   },
   "art-stock": {
     kind: "art-stock",

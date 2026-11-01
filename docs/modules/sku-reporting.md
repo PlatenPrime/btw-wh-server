@@ -14,6 +14,9 @@
 | `models/SkuManufacturerDaySales`               | Плоский дневной rollup продаж конкурента по `(konkName, date, prodName)`                                                |
 | `models/BtradeManufacturerDaySales`            | Плоский дневной rollup продаж Btrade по `(date, prodName)` (prodName lowercased)                                        |
 | `utils/resolveKonkProdSkus`                    | Выборка SKU для konk-prod отчётов с опциональным skugrIds                                                               |
+| `utils/resolveSkusByIds`                       | Произвольный мультивыбор SKU по `_id` (порядок, dedupe, skugrTitle; multi-konk)                                         |
+| `utils/konkDisplayTitles`                      | Заголовки конкурентов и recountDays из Konk                                                                             |
+| `utils/computeSharePercent`                    | Доля part/total в % (0..100, 2 знака) для pie/Excel часток                                                              |
 | `utils/skugrReporting`                         | Перечисление дат, карты срезов, загрузка Skugr со SKU                                                                   |
 | `utils/coalesceSkuSliceItemsForReporting`      | Forward-fill `-1` для stock/price в Excel/range; helpers дат                                                            |
 | `utils/persistedSliceSalesUtils`               | Формула sales на write-path rollup: `-1` → 0, delivery → 0, delta                                                       |

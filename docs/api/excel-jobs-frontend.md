@@ -32,6 +32,10 @@
 - Файл живёт 30 минут после ready, потом 410.
 - Не парсить xlsx на клиенте, пока идёт подготовка.
 
+## Selection SKU
+
+Мультивыбор SKU (разные конкуренты): kinds `sku-selection-stock` / `sku-selection-sales`, params `skuIds` + период. Pie — синхронный `POST /api/sku-chart-reports/selection/skus-pie`, не excel-job. UX: [sku-selection-reports](../frontend/sku-selection-reports.md).
+
 ## Не трогать
 
-JSON графиков и sales-reports (`/api/sku-chart-reports`, `/api/sku-sales-reports`, analog comparison без `-excel`) без изменений.
+JSON графиков и sales-reports (`/api/sku-chart-reports`, `/api/sku-sales-reports`, analog comparison без `-excel`) без изменений, кроме нового selection pie выше.

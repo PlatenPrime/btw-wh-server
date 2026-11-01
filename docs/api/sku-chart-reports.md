@@ -45,3 +45,37 @@ Pie-агрегация продаж по всем конкурентам и Btra
 **Ответ 200:** `{ message: string, data: Record<konkName | "btrade", { title, salesPcs, salesUah }>, all: { title, salesPcs, salesUah } }`.
 
 Ключ `btrade` присутствует, если есть артикулы Art с этим `prodName` и `btrade` не в `excludeKonks`; `all` — сумма оставшихся сегментов.
+
+---
+
+### POST `/api/sku-chart-reports/selection/skus-pie`
+
+Pie по произвольному списку SKU (в т.ч. разных конкурентов). Node compute из `SkuSliceMonth` (не manufacturer rollup).
+
+**Body:**
+
+| Поле       | Тип      | Обязательно | Описание                                   |
+| ---------- | -------- | ----------- | ------------------------------------------ |
+| `skuIds`   | string[] | да          | 1..100 Mongo ObjectId; порядок сохраняется |
+| `dateFrom` | string   | да          | `YYYY-MM-DD`                               |
+| `dateTo`   | string   | да          | `YYYY-MM-DD`, ≥ `dateFrom`                 |
+
+**Ответ 200:**
+
+```
+{
+  "message": string,
+  "data": Record<skuId, {
+    title: string,
+    konkName: string,
+    productId: string,
+    salesPcs: number,
+    salesUah: number,
+    sharePcs: number,
+    shareUah: number
+  }>,
+  "all": { title: "Всі обрані", salesPcs: number, salesUah: number }
+}
+```
+
+`sharePcs` / `shareUah` — проценты 0..100 с 2 знаками от суммы выбранных. Отсутствующие id пропускаются; если ни одного SKU не найдено — 404. 400 при валидации.

@@ -378,6 +378,33 @@ describe("buildSkuSliceExcelForSkus skugr column", () => {
     expect(ws!.getRow(3).getCell(7).value).not.toBe(SKU_SLICE_EXCEL_METRIC_LABELS[0]);
     expect(ws!.getRow(3).getCell(1).value).not.toBe("Підсумок");
   });
+
+  it("prefers per-sku competitorTitle over titles.competitorTitle", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-10T00:00:00.000Z");
+    const { buffer } = await buildSkuSliceExcelForSkus(
+      [
+        {
+          title: "N",
+          url: "https://x.com",
+          productId: "air-1",
+          konkName: "air",
+          prodName: "p",
+          competitorTitle: "Air Override",
+        },
+      ],
+      from,
+      to,
+      () => ({ stock: 1, price: 1 }),
+      TITLES,
+      { metrics: ["stock"] },
+    );
+
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(buffer as unknown as Parameters<typeof wb.xlsx.load>[0]);
+    const ws = wb.getWorksheet(SKU_SLICE_EXCEL_SHEET_NAME)!;
+    expect(ws.getRow(2).getCell(3).value).toBe("Air Override");
+  });
 });
 
 describe("buildSkuSliceExcel helpers", () => {

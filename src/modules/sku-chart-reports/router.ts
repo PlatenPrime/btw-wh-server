@@ -7,6 +7,7 @@ import {
   getKonkProdSkuSalesChartDataController,
   getKonkProdSkuStockChartDataController,
   getProdKonksPieDataController,
+  getSelectionSkusPieDataController,
 } from "./controllers/index.js";
 
 const router = Router();
@@ -34,6 +35,12 @@ router.get(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(getKonkProdSkuSalesChartDataController),
+);
+router.post(
+  "/selection/skus-pie",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(getSelectionSkusPieDataController),
 );
 
 export default router;

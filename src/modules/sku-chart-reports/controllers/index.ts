@@ -2,3 +2,4 @@ export { getKonkProdSkuStockChartDataController } from "./get-konk-prod-sku-stoc
 export { getKonkProdSkuSalesChartDataController } from "./get-konk-prod-sku-sales-chart-data/getKonkProdSkuSalesChartDataController.js";
 export { getKonkProdManufacturersPieDataController } from "./get-konk-prod-manufacturers-pie-data/getKonkProdManufacturersPieDataController.js";
 export { getProdKonksPieDataController } from "./get-prod-konks-pie-data/getProdKonksPieDataController.js";
+export { getSelectionSkusPieDataController } from "./get-selection-skus-pie-data/getSelectionSkusPieDataController.js";

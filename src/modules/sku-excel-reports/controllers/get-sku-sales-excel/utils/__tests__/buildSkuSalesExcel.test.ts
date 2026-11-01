@@ -135,4 +135,57 @@ describe("buildSkuSalesExcelForSkus", () => {
     expect(sheet!.getRow(3).getCell(7).value).toBe("Ціна");
     expect(sheet!.getRow(4).getCell(7).value).toBe("Виручка");
   });
+
+  it("uses recountDaysByKonk per sku konkName", async () => {
+    const from = new Date("2026-01-10T00:00:00.000Z");
+    const to = new Date("2026-01-10T00:00:00.000Z");
+    const other: SkuSalesExcelSkuRow = {
+      ...SKU,
+      productId: "balun-1",
+      konkName: "balun",
+      competitorTitle: "Balun",
+    };
+    const recountDaysByKonk = new Map<string, ReadonlySet<string>>([
+      ["air", new Set(["2026-01-10"])],
+      ["balun", new Set()],
+    ]);
+
+    const { buffer } = await buildSkuSalesExcelForSkus(
+      [SKU, other],
+      from,
+      to,
+      (_kn, pid, d) => {
+        const t = d.getTime();
+        if (t === new Date("2026-01-09T00:00:00.000Z").getTime()) return { stock: 5, price: 10 };
+        if (t === from.getTime()) return { stock: 3, price: 10 };
+        return undefined;
+      },
+      {
+        summaryMode: "bottomOnly",
+        includeShareBlock: true,
+        recountDaysByKonk,
+        metrics: ["sales"],
+      },
+    );
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.load(buffer as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
+    const sheet = workbook.getWorksheet("Продажі")!;
+    // air recount → sales 0; balun → sales 2; share block after summary
+    expect(sheet.getRow(2).getCell(9).value).toBe(0);
+    expect(sheet.getRow(3).getCell(9).value).toBe(2);
+
+    let shareTitleRow = 0;
+    for (let r = 1; r <= 20; r++) {
+      if (sheet.getRow(r).getCell(1).value === "Частки за період") {
+        shareTitleRow = r;
+        break;
+      }
+    }
+    expect(shareTitleRow).toBeGreaterThan(0);
+    expect(sheet.getRow(shareTitleRow + 2).getCell(4).value).toBe(0);
+    expect(sheet.getRow(shareTitleRow + 2).getCell(5).value).toBe(0);
+    expect(sheet.getRow(shareTitleRow + 3).getCell(4).value).toBe(2);
+    expect(sheet.getRow(shareTitleRow + 3).getCell(5).value).toBe(100);
+  });
 });

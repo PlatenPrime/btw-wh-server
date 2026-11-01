@@ -2,13 +2,15 @@
 
 ## Назначение
 
-JSON для графиков: сравнение агрегата SKU конкурента с Btrade (stock/sales), pie по производителям одного конкурента, pie по всем конкурентам и Btrade для одного производителя. Зависит от [sku-reporting](sku-reporting.md), [btrade-slices](btrade-slices.md), [arts](arts.md).
+JSON для графиков: сравнение агрегата SKU конкурента с Btrade (stock/sales), pie по производителям одного конкурента, pie по всем конкурентам и Btrade для одного производителя, pie по произвольному мультивыбору SKU. Зависит от [sku-reporting](sku-reporting.md), [btrade-slices](btrade-slices.md), [arts](arts.md).
 
 Потребители manufacturer rollup (нужен backfill/materialize за период):
 
 - **manufacturers-pie** — `SkuManufacturerDaySales`;
 - **prod-konks-pie** — competitor из Sku rollup (без `skugrIds`); Btrade из `BtradeManufacturerDaySales`; опционально `excludeKonks` вычитает konk/`btrade` из расчёта;
 - **konk-prod/sales** — competitor + btrade sales/revenue без `skugrIds` из соответствующих rollup; stock — из сырых срезов.
+
+**selection/skus-pie** — не rollup: `resolveSkusByIds` + period Node compute из `SkuSliceMonth`; в ответе явные `sharePcs`/`shareUah` относительно суммы выбранных.
 
 С `skugrIds` и stock-chart sales-rollup не используется (нужен productId/artikul subset / stock).
 

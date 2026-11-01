@@ -18,4 +18,25 @@ describe("runExcelJobKind", () => {
     });
     expect(result.ok).toBe(false);
   });
+
+  it("returns validation error for empty selection", async () => {
+    const result = await runExcelJobKind("sku-selection-stock", {
+      skuIds: [],
+      dateFrom: "2026-01-01",
+      dateTo: "2026-01-02",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toBe("Validation error");
+    }
+  });
+
+  it("returns not found for selection with missing skus", async () => {
+    const result = await runExcelJobKind("sku-selection-sales", {
+      skuIds: ["64b0c0c0c0c0c0c0c0c0c0c0"],
+      dateFrom: "2026-01-01",
+      dateTo: "2026-01-02",
+    });
+    expect(result.ok).toBe(false);
+  });
 });

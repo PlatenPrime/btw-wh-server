@@ -18,6 +18,8 @@ import {
   runSkuKonkStock,
   runSkuOneSales,
   runSkuOneStock,
+  runSkuSelectionSales,
+  runSkuSelectionStock,
   runSkuSkugrSales,
   runSkuSkugrStock,
 } from "./runners/runSkuExcelKinds.js";
@@ -41,6 +43,8 @@ const RUNNERS: Record<ExcelJobKind, ExcelJobKindRunner> = {
   "sku-skugr-sales": runSkuSkugrSales,
   "sku-one-stock": runSkuOneStock,
   "sku-one-sales": runSkuOneSales,
+  "sku-selection-stock": runSkuSelectionStock,
+  "sku-selection-sales": runSkuSelectionSales,
   "art-stock": runArtStock,
   "art-sales": runArtSales,
   "analog-comparison": runAnalogComparison,

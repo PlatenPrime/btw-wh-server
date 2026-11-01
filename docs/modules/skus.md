@@ -87,6 +87,7 @@ Sku — документ, описывающий единицу товара к�
 - `DELETE /api/skus/id/:id` — удаление SKU с удалением ссылки на этот id из всех `skugr.skus`
 - `DELETE /api/skus/not-in-any-skugr` — удаление всех SKU, не привязанных ни к одной группе (с опциональным сужением по полям списка)
 - Excel новинок и invalid — [sku-excel-reports](../api/sku-excel-reports.md) (`/api/sku-excel-reports/catalog/...`)
+- Excel/pie по произвольному мультивыбору SKU — [frontend: sku-selection-reports](../frontend/sku-selection-reports.md) (kinds `sku-selection-stock` / `sku-selection-sales`, `POST .../selection/skus-pie`)
 - `DELETE /api/skus/konk/:konkName/invalid` — удаление всех невалидных SKU конкурента; путь **`all`** — все невалидные по всем конкурентам (PRIME)
 
 ## Формат данных Sku

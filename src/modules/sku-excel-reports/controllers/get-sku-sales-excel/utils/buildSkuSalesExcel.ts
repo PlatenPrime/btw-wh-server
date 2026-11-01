@@ -21,6 +21,7 @@ import {
   SKU_SALES_EXCEL_METRICS,
   type SkuSalesExcelMetric,
 } from "../../../../sku-reporting/schemas/skuSalesExcelMetricsSchema.js";
+import { computeSharePercent } from "../../../../sku-reporting/utils/computeSharePercent.js";
 
 const HEADER_LABELS = [
   "Ідентифікатор товару",
@@ -57,6 +58,10 @@ export type SkuSalesExcelOptions = {
   summarySalesLabel?: string;
   summaryRevenueLabel?: string;
   recountDays?: string[];
+  /** Per-konk recount; если задано — перекрывает общий `recountDays` для строки SKU. */
+  recountDaysByKonk?: ReadonlyMap<string, ReadonlySet<string>>;
+  /** После bottom summary — блок часток продажів/виручки по SKU. */
+  includeShareBlock?: boolean;
   /** Подмножество строк метрик; без значения — все три. */
   metrics?: readonly SkuSalesExcelMetric[];
   onProgress?: ExcelBuildProgressHandler;
@@ -169,6 +174,68 @@ function applyRevenueRowBold(
   }
 }
 
+function resolveRecountDaysForSku(
+  konkName: string,
+  fallback: ReadonlySet<string>,
+  byKonk?: ReadonlyMap<string, ReadonlySet<string>>,
+): ReadonlySet<string> {
+  return byKonk?.get(konkName) ?? fallback;
+}
+
+function writeShareBlock(
+  sheet: ExcelJS.Worksheet,
+  startRow: number,
+  skus: SkuSalesExcelSkuRow[],
+  perSkuSales: number[],
+  perSkuRevenue: number[],
+  grandTotalSales: number,
+  grandTotalRevenue: number,
+): void {
+  let row = startRow + 1;
+  const titleRow = sheet.getRow(row);
+  titleRow.getCell(1).value = "Частки за період";
+  titleRow.getCell(1).font = { bold: true };
+  row += 1;
+
+  const header = sheet.getRow(row);
+  header.getCell(1).value = "Ідентифікатор товару";
+  header.getCell(2).value = "Назва";
+  header.getCell(3).value = "Конкурент";
+  header.getCell(4).value = "Продажі, шт";
+  header.getCell(5).value = "Частка продажів, %";
+  header.getCell(6).value = "Виручка, грн";
+  header.getCell(7).value = "Частка виручки, %";
+  for (let c = 1; c <= 7; c++) {
+    header.getCell(c).font = { bold: true };
+  }
+  row += 1;
+
+  for (let i = 0; i < skus.length; i++) {
+    const sku = skus[i]!;
+    const sales = perSkuSales[i] ?? 0;
+    const revenue = perSkuRevenue[i] ?? 0;
+    const dataRow = sheet.getRow(row);
+    dataRow.getCell(1).value = sku.productId;
+    dataRow.getCell(2).value = sku.title;
+    dataRow.getCell(3).value = sku.competitorTitle;
+    dataRow.getCell(4).value = sales;
+    dataRow.getCell(5).value = computeSharePercent(sales, grandTotalSales);
+    dataRow.getCell(6).value = revenue;
+    dataRow.getCell(7).value = computeSharePercent(revenue, grandTotalRevenue);
+    row += 1;
+  }
+
+  const totalRow = sheet.getRow(row);
+  totalRow.getCell(1).value = "Разом";
+  totalRow.getCell(4).value = grandTotalSales;
+  totalRow.getCell(5).value = grandTotalSales === 0 ? 0 : 100;
+  totalRow.getCell(6).value = grandTotalRevenue;
+  totalRow.getCell(7).value = grandTotalRevenue === 0 ? 0 : 100;
+  for (let c = 1; c <= 7; c++) {
+    totalRow.getCell(c).font = { bold: true };
+  }
+}
+
 export async function buildSkuSalesExcelForSkus(
   skus: SkuSalesExcelSkuRow[],
   dateFrom: Date,
@@ -204,7 +271,7 @@ export async function buildSkuSalesExcelForSkus(
   const summaryMode = options.summaryMode ?? "bottomOnly";
   const summarySalesLabel = options.summarySalesLabel ?? "Продажі конкурента (всього), шт";
   const summaryRevenueLabel = options.summaryRevenueLabel ?? "Виручка конкурента (всього), грн";
-  const recountDays = new Set((options.recountDays ?? []).map(String));
+  const recountDaysFallback = new Set((options.recountDays ?? []).map(String));
   const selectedMetrics =
     options.metrics && options.metrics.length > 0 ? options.metrics : DEFAULT_METRICS;
   const rowsPerSkuBlock = selectedMetrics.length;
@@ -213,15 +280,24 @@ export async function buildSkuSalesExcelForSkus(
 
   let grandTotalSales = 0;
   let grandTotalRevenue = 0;
+  const perSkuSales: number[] = [];
+  const perSkuRevenue: number[] = [];
   let startRow = 2;
   const skuTotal = skus.length;
 
   for (let skuIndex = 0; skuIndex < skuTotal; skuIndex++) {
     const sku = skus[skuIndex]!;
+    const recountDays = resolveRecountDaysForSku(
+      sku.konkName,
+      recountDaysFallback,
+      options.recountDaysByKonk,
+    );
     const { salesByDay, revenueByDay, prices, isRecountDayByDay, totalSales, totalRevenue } =
       computeSkuSalesPeriodMetrics(sku, dateFrom, dateTo, getItem, recountDays);
     grandTotalSales += totalSales;
     grandTotalRevenue += totalRevenue;
+    perSkuSales.push(totalSales);
+    perSkuRevenue.push(totalRevenue);
 
     const firstRow = sheet.getRow(startRow);
     firstRow.getCell(1).value = sku.productId;
@@ -304,7 +380,7 @@ export async function buildSkuSalesExcelForSkus(
   }
 
   if (summaryMode === "bottomOnly") {
-    writeSelectedSummaryRows(
+    const afterSummary = writeSelectedSummaryRows(
       sheet,
       startRow,
       includeSales,
@@ -314,6 +390,18 @@ export async function buildSkuSalesExcelForSkus(
       grandTotalSales,
       grandTotalRevenue,
     );
+    startRow = afterSummary;
+    if (options.includeShareBlock) {
+      writeShareBlock(
+        sheet,
+        startRow,
+        skus,
+        perSkuSales,
+        perSkuRevenue,
+        grandTotalSales,
+        grandTotalRevenue,
+      );
+    }
   }
   for (let c = 1; c <= columnCount; c++) {
     sheet.getColumn(c).width = c >= dataStartCol && c < totalCol ? 22 : 14;

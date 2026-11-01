@@ -48,4 +48,14 @@ describe("excelJobKindDefinitions", () => {
     const parsed = def!.schema.safeParse({ konk: "air" });
     expect(parsed.success).toBe(false);
   });
+
+  it("parses sku-selection-sales params", () => {
+    const def = getExcelJobKindDefinition("sku-selection-sales");
+    const parsed = def!.schema.safeParse({
+      skuIds: ["64b0c0c0c0c0c0c0c0c0c0c0"],
+      dateFrom: "2026-06-01",
+      dateTo: "2026-06-02",
+    });
+    expect(parsed.success).toBe(true);
+  });
 });

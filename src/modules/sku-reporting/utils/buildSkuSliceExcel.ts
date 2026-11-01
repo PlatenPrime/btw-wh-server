@@ -62,6 +62,8 @@ export type SkuSliceExcelSkuRow = {
   productId: string;
   konkName: string;
   prodName: string;
+  /** Заголовок конкурента; якщо задано — має пріоритет над titles.competitorTitle. */
+  competitorTitle?: string;
   /** Заголовок виробника для колонки «Виробник»; якщо задано — має пріоритет над titles.producerName. */
   producerName?: string;
   /** Заголовок Skugr для колонки «Товарна група»; пусто, если SKU не привязан. */
@@ -277,7 +279,7 @@ export async function buildSkuSliceExcelForSkus(
     const firstRow = sheet.getRow(startRow);
     firstRow.getCell(1).value = sku.productId;
     firstRow.getCell(2).value = sku.title;
-    firstRow.getCell(3).value = titles.competitorTitle;
+    firstRow.getCell(3).value = sku.competitorTitle ?? titles.competitorTitle;
     firstRow.getCell(4).value = sku.producerName ?? titles.producerName;
     firstRow.getCell(5).value = sku.skugrTitle ?? "";
     firstRow.getCell(6).value = sku.url;

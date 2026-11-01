@@ -4,8 +4,10 @@ import { EXCEL_JOB_KIND_IDS, isExcelJobKind, isExcelJobStatus } from "../excelJo
 describe("excelJobConstants", () => {
   it("accepts registered kinds", () => {
     expect(isExcelJobKind("sku-konk-sales")).toBe(true);
+    expect(isExcelJobKind("sku-selection-stock")).toBe(true);
+    expect(isExcelJobKind("sku-selection-sales")).toBe(true);
     expect(isExcelJobKind("grabo-skus")).toBe(true);
-    expect(EXCEL_JOB_KIND_IDS).toHaveLength(20);
+    expect(EXCEL_JOB_KIND_IDS).toHaveLength(22);
   });
 
   it("rejects unknown kind and status", () => {
