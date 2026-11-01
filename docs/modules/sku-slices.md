@@ -16,6 +16,8 @@
 
 Backfill rollup: `npx tsx src/modules/sku-slices/scripts/runBackfillSkuSliceSales.ts --from YYYY-MM-DD --to YYYY-MM-DD [--konk name] [--apply]`.
 
+One-shot rescale фасовки dojdevik: `runRescaleDojdevikPackSlices.ts` сравнивает legacy packSize (старый regex по любой «кількість») с актуальным `extractDojdevikPackCount` по live HTML карточки и переписывает историю `SkuSliceMonth` формулой `stock' = stock × new/old`, `price' = price × old/new` (sentinel `-1` не трогает). Это не pack-flip: детект кратной инверсии между днями здесь не используется и для кейса коробка/набір опасен. После apply нужен backfill продаж за затронутый диапазон; правильный парсер на прод имеет смысл деплоить уже после выравнивания истории.
+
 ### SkuSliceDayMeta
 
 Slim документ `(konkName, date)` без точек: `rotationMeta`, `stats` (`filled` / `invalid` / `errorCount` / опционально `dueTotal`, `abortReason`). Пишется при scrape. Нужен для мониторинга «как прошёл день» без разворота всех month-доков.

@@ -13,6 +13,13 @@ function attrRow(name: string, value: string): string {
   );
 }
 
+/** Сниппет attrs фонтана: набір 6 шт. + коробка 100 (regression). */
+const FOUNTAIN_ATTRS_SNIPPET =
+  attrRow("Вид свічки", "Свічка-феєрверк") +
+  attrRow("Кількість свічок в наборі", "6 шт.") +
+  attrRow("Висота свічки", "120 мм") +
+  attrRow("Кількість у коробці", "100");
+
 describe("extractDojdevikPackCount", () => {
   it("reads pack size from characteristics attribute_value", () => {
     expect(extractDojdevikPackCount(attrRow("Кількість в пачці.", "100"))).toBe(100);
@@ -24,6 +31,47 @@ describe("extractDojdevikPackCount", () => {
 
   it("reads pack size from lowercase attribute name with кількість", () => {
     expect(extractDojdevikPackCount(attrRow("кількість в пачці.", "50"))).toBe(50);
+  });
+
+  it("reads pack size from наборі with N шт. value", () => {
+    expect(extractDojdevikPackCount(attrRow("Кількість свічок в наборі", "6 шт."))).toBe(6);
+  });
+
+  it("prefers наборі over коробці when both present", () => {
+    expect(
+      extractDojdevikPackCount(
+        attrRow("Кількість свічок в наборі", "6 шт.") + attrRow("Кількість у коробці", "100"),
+      ),
+    ).toBe(6);
+  });
+
+  it("ignores коробці alone and falls back to 1", () => {
+    expect(extractDojdevikPackCount(attrRow("Кількість у коробці", "100"))).toBe(1);
+  });
+
+  it("reads pack size from title по N штук у пакованні", () => {
+    expect(
+      extractDojdevikPackCount(
+        '<span data-qaid="product_name">Фонтан, 12 см. по 6 штук у пакованні</span>',
+      ),
+    ).toBe(6);
+  });
+
+  it("reads pack size from title (N шт)", () => {
+    expect(extractDojdevikPackCount("<h1>Товар (10 шт)</h1>")).toBe(10);
+  });
+
+  it("prefers characteristics over title", () => {
+    expect(
+      extractDojdevikPackCount(
+        attrRow("Кількість в пачці.", "50") +
+          '<span data-qaid="product_name">Товар по 6 штук у пакованні</span>',
+      ),
+    ).toBe(50);
+  });
+
+  it("reads pack from fountain attrs snippet (набір 6, ignore коробка 100)", () => {
+    expect(extractDojdevikPackCount(FOUNTAIN_ATTRS_SNIPPET)).toBe(6);
   });
 
   it("reads pack size from description heading", () => {
