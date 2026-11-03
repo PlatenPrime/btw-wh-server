@@ -19,7 +19,13 @@ import { getSkugrSalesExcelSchema } from "../../../sku-excel-reports/controllers
 import { getSkugrSalesExcelUtil } from "../../../sku-excel-reports/controllers/get-skugr-sales-excel/utils/getSkugrSalesExcelUtil.js";
 import { getSkugrSliceExcelSchema } from "../../../sku-excel-reports/controllers/get-skugr-slice-excel/schemas/getSkugrSliceExcelSchema.js";
 import { getSkugrSliceExcelUtil } from "../../../sku-excel-reports/controllers/get-skugr-slice-excel/utils/getSkugrSliceExcelUtil.js";
+import { getSkugrSkusSalesSchema } from "../../../sku-sales-reports/controllers/get-skugr-skus-sales/schemas/getSkugrSkusSalesSchema.js";
+import { getSkugrSkusSalesUtil } from "../../../sku-sales-reports/controllers/get-skugr-skus-sales/utils/getSkugrSkusSalesUtil.js";
 import { failExcelJobRun, okExcelJobRun, type ExcelJobKindRunner } from "../excelJobRunTypes.js";
+import { buildSkuSkugrSkusShareExcel } from "../sku-skugr-skus-share/buildSkuSkugrSkusShareExcel.js";
+import { loadSkuPreviewJpegs } from "../sku-skugr-skus-share/loadSkuPreviewJpegs.js";
+import { skuSkugrSkusShareParamsSchema } from "../sku-skugr-skus-share/skuSkugrSkusShareParamsSchema.js";
+import { sortSkugrSkuSalesRows } from "../sku-skugr-skus-share/sortSkugrSkuSalesRows.js";
 
 const SKU_NOT_FOUND = "No skus found for provided filters, or sku has no productId";
 
@@ -100,6 +106,43 @@ export const runSkuSkugrSales: ExcelJobKindRunner = async (params, options) => {
       onProgress: options?.onProgress,
     }),
   );
+};
+
+export const runSkuSkugrSkusShare: ExcelJobKindRunner = async (params, options) => {
+  const parsed = skuSkugrSkusShareParamsSchema.safeParse(params);
+  if (!parsed.success) {
+    return failExcelJobRun("Validation error");
+  }
+
+  const salesParsed = getSkugrSkusSalesSchema.safeParse({
+    skugrId: parsed.data.skugrId,
+    dateFrom: parsed.data.dateFrom,
+    dateTo: parsed.data.dateTo,
+  });
+  if (!salesParsed.success) {
+    return failExcelJobRun("Validation error");
+  }
+
+  const loaded = await getSkugrSkusSalesUtil(salesParsed.data);
+  if (!loaded.ok) {
+    return failExcelJobRun("Skugr not found");
+  }
+
+  const rows = sortSkugrSkuSalesRows(loaded.data, parsed.data.sortBy);
+  const previews = await loadSkuPreviewJpegs(rows, {
+    onBatch: (done, total) => {
+      notifyExcelBuildProgress(options?.onProgress, done, total);
+    },
+  });
+  const built = await buildSkuSkugrSkusShareExcel({
+    skugrId: parsed.data.skugrId,
+    dateFrom: parsed.data.dateFrom,
+    dateTo: parsed.data.dateTo,
+    rows,
+    all: loaded.all,
+    previews,
+  });
+  return okExcelJobRun(built.buffer, built.fileName);
 };
 
 export const runSkuOneStock: ExcelJobKindRunner = async (params, options) => {

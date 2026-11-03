@@ -6,8 +6,9 @@ describe("excelJobConstants", () => {
     expect(isExcelJobKind("sku-konk-sales")).toBe(true);
     expect(isExcelJobKind("sku-selection-stock")).toBe(true);
     expect(isExcelJobKind("sku-selection-sales")).toBe(true);
+    expect(isExcelJobKind("sku-skugr-skus-share")).toBe(true);
     expect(isExcelJobKind("grabo-skus")).toBe(true);
-    expect(EXCEL_JOB_KIND_IDS).toHaveLength(22);
+    expect(EXCEL_JOB_KIND_IDS).toHaveLength(23);
   });
 
   it("rejects unknown kind and status", () => {

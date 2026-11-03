@@ -16,6 +16,7 @@ import { getSkuSliceExcelSchema } from "../../sku-excel-reports/controllers/get-
 import { getSkugrSalesExcelSchema } from "../../sku-excel-reports/controllers/get-skugr-sales-excel/schemas/getSkugrSalesExcelSchema.js";
 import { getSkugrSliceExcelSchema } from "../../sku-excel-reports/controllers/get-skugr-slice-excel/schemas/getSkugrSliceExcelSchema.js";
 import { isExcelJobKind, type ExcelJobKind } from "../constants/excelJobConstants.js";
+import { skuSkugrSkusShareParamsSchema } from "./sku-skugr-skus-share/skuSkugrSkusShareParamsSchema.js";
 
 export const emptyExcelJobParamsSchema = z.object({});
 
@@ -68,6 +69,12 @@ export const EXCEL_JOB_KIND_DEFINITIONS: Record<ExcelJobKind, ExcelJobKindDefini
     minRole: RoleType.ADMIN,
     schema: getSkugrSalesExcelSchema,
     oldPath: "GET /api/sku-excel-reports/skugr/:skugrId/sales",
+  },
+  "sku-skugr-skus-share": {
+    kind: "sku-skugr-skus-share",
+    minRole: RoleType.ADMIN,
+    schema: skuSkugrSkusShareParamsSchema,
+    oldPath: "n/a",
   },
   "sku-one-stock": {
     kind: "sku-one-stock",

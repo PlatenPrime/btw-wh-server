@@ -49,6 +49,19 @@ describe("excelJobKindDefinitions", () => {
     expect(parsed.success).toBe(false);
   });
 
+  it("parses sku-skugr-skus-share params", () => {
+    const def = getExcelJobKindDefinition("sku-skugr-skus-share");
+    const parsed = def!.schema.safeParse({
+      skugrId: "64b0c0c0c0c0c0c0c0c0c0c0",
+      dateFrom: "2026-10-26",
+      dateTo: "2026-11-03",
+      sortBy: "revenue",
+    });
+    expect(parsed.success).toBe(true);
+    if (!parsed.success) return;
+    expect(parsed.data).toMatchObject({ sortBy: "revenue" });
+  });
+
   it("parses sku-selection-sales params", () => {
     const def = getExcelJobKindDefinition("sku-selection-sales");
     const parsed = def!.schema.safeParse({
