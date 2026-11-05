@@ -2,12 +2,17 @@ import ExcelJS from "exceljs";
 import { applyHeaderStyle } from "../../../../lib/excel/worksheetStyles.js";
 import { computeSharePercent } from "../../../sku-reporting/utils/computeSharePercent.js";
 import type { SkugrSkuSalesRow } from "../../../sku-sales-reports/controllers/get-skugr-skus-sales/utils/getSkugrSkusSalesUtil.js";
-import type { SkuPreviewJpeg } from "./loadSkuPreviewJpegs.js";
+import {
+  SKU_EXCEL_PHOTO_COLUMN_WIDTH,
+  SKU_EXCEL_PHOTO_HEADER,
+  embedSkuPreviewInCell,
+  previewRowHeightPt,
+  type SkuPreviewJpeg,
+} from "../../../../lib/excel/skuExcelPhoto.js";
 
 export const SKU_SKUGR_SKUS_SHARE_SHEET_NAME = "Дані";
 
-export const SKU_SKUGR_SKUS_SHARE_HEADERS = [
-  "Фото",
+export const SKU_SKUGR_SKUS_SHARE_DATA_HEADERS = [
   "Товар",
   "Продажі, шт",
   "Виручка, грн",
@@ -15,16 +20,15 @@ export const SKU_SKUGR_SKUS_SHARE_HEADERS = [
   "Частка за виручкою, %",
 ] as const;
 
-const PHOTO_MAX_PX = 200;
-const DEFAULT_ROW_HEIGHT_PT = 15;
+/** @deprecated use SKU_SKUGR_SKUS_SHARE_DATA_HEADERS + optional photo */
+export const SKU_SKUGR_SKUS_SHARE_HEADERS = [
+  SKU_EXCEL_PHOTO_HEADER,
+  ...SKU_SKUGR_SKUS_SHARE_DATA_HEADERS,
+] as const;
+
+export { previewRowHeightPt, SKU_EXCEL_PHOTO_COLUMN_WIDTH as SKU_SHARE_PHOTO_COLUMN_WIDTH };
+
 const SHARE_NUM_FMT = "0.00";
-
-/** Excel column width (character units) for ~200 CSS px. */
-export const SKU_SHARE_PHOTO_COLUMN_WIDTH = (PHOTO_MAX_PX - 5) / 7;
-
-export function previewRowHeightPt(heightPx: number): number {
-  return Math.max(DEFAULT_ROW_HEIGHT_PT, (heightPx * 72) / 96);
-}
 
 /** 100 при ненулевом итоге метрики, иначе 0. */
 export function totalSharePercent(total: number): number {
@@ -47,14 +51,15 @@ export type SkugrSkusShareTotal = {
 
 function writeShareCells(
   row: ExcelJS.Row,
+  titleCol: number,
   salesPcs: number,
   salesUah: number,
   all: SkugrSkusShareTotal,
 ): void {
-  row.getCell(5).value = computeSharePercent(salesPcs, all.salesPcs);
-  row.getCell(6).value = computeSharePercent(salesUah, all.salesUah);
-  row.getCell(5).numFmt = SHARE_NUM_FMT;
-  row.getCell(6).numFmt = SHARE_NUM_FMT;
+  row.getCell(titleCol + 3).value = computeSharePercent(salesPcs, all.salesPcs);
+  row.getCell(titleCol + 4).value = computeSharePercent(salesUah, all.salesUah);
+  row.getCell(titleCol + 3).numFmt = SHARE_NUM_FMT;
+  row.getCell(titleCol + 4).numFmt = SHARE_NUM_FMT;
 }
 
 export async function buildSkuSkugrSkusShareExcel(input: {
@@ -64,52 +69,60 @@ export async function buildSkuSkugrSkusShareExcel(input: {
   rows: readonly SkugrSkuSalesRow[];
   all: SkugrSkusShareTotal;
   previews: ReadonlyMap<string, SkuPreviewJpeg>;
+  includeImages?: boolean;
 }): Promise<{ buffer: Buffer; fileName: string }> {
+  const includeImages = input.includeImages === true;
+  const photoOffset = includeImages ? 1 : 0;
+  const titleCol = 1 + photoOffset;
+  const headers = includeImages
+    ? ([SKU_EXCEL_PHOTO_HEADER, ...SKU_SKUGR_SKUS_SHARE_DATA_HEADERS] as const)
+    : SKU_SKUGR_SKUS_SHARE_DATA_HEADERS;
+
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet(SKU_SKUGR_SKUS_SHARE_SHEET_NAME);
 
   const header = sheet.getRow(1);
-  SKU_SKUGR_SKUS_SHARE_HEADERS.forEach((title, index) => {
+  headers.forEach((title, index) => {
     header.getCell(index + 1).value = title;
   });
-  applyHeaderStyle(sheet, SKU_SKUGR_SKUS_SHARE_HEADERS.length);
+  applyHeaderStyle(sheet, headers.length);
 
-  sheet.getColumn(1).width = SKU_SHARE_PHOTO_COLUMN_WIDTH;
-  sheet.getColumn(2).width = 40;
-  sheet.getColumn(3).width = 16;
-  sheet.getColumn(4).width = 16;
-  sheet.getColumn(5).width = 26;
-  sheet.getColumn(6).width = 26;
+  if (includeImages) {
+    sheet.getColumn(1).width = SKU_EXCEL_PHOTO_COLUMN_WIDTH;
+  }
+  sheet.getColumn(titleCol).width = 40;
+  sheet.getColumn(titleCol + 1).width = 16;
+  sheet.getColumn(titleCol + 2).width = 16;
+  sheet.getColumn(titleCol + 3).width = 26;
+  sheet.getColumn(titleCol + 4).width = 26;
 
   const totalRow = sheet.getRow(2);
-  totalRow.getCell(2).value = input.all.title;
-  totalRow.getCell(3).value = input.all.salesPcs;
-  totalRow.getCell(4).value = input.all.salesUah;
-  totalRow.getCell(5).value = totalSharePercent(input.all.salesPcs);
-  totalRow.getCell(6).value = totalSharePercent(input.all.salesUah);
-  totalRow.getCell(5).numFmt = SHARE_NUM_FMT;
-  totalRow.getCell(6).numFmt = SHARE_NUM_FMT;
+  totalRow.getCell(titleCol).value = input.all.title;
+  totalRow.getCell(titleCol + 1).value = input.all.salesPcs;
+  totalRow.getCell(titleCol + 2).value = input.all.salesUah;
+  totalRow.getCell(titleCol + 3).value = totalSharePercent(input.all.salesPcs);
+  totalRow.getCell(titleCol + 4).value = totalSharePercent(input.all.salesUah);
+  totalRow.getCell(titleCol + 3).numFmt = SHARE_NUM_FMT;
+  totalRow.getCell(titleCol + 4).numFmt = SHARE_NUM_FMT;
   totalRow.font = { bold: true };
 
   input.rows.forEach((sku, index) => {
     const rowNumber = 3 + index;
     const excelRow = sheet.getRow(rowNumber);
-    excelRow.getCell(2).value = sku.title;
-    excelRow.getCell(3).value = sku.salesPcs;
-    excelRow.getCell(4).value = sku.salesUah;
-    writeShareCells(excelRow, sku.salesPcs, sku.salesUah, input.all);
+    excelRow.getCell(titleCol).value = sku.title;
+    excelRow.getCell(titleCol + 1).value = sku.salesPcs;
+    excelRow.getCell(titleCol + 2).value = sku.salesUah;
+    writeShareCells(excelRow, titleCol, sku.salesPcs, sku.salesUah, input.all);
 
+    if (!includeImages) return;
     const preview = input.previews.get(sku.skuId);
     if (!preview) return;
-    excelRow.height = previewRowHeightPt(preview.height);
-    const imageId = workbook.addImage({
-      base64: preview.buffer.toString("base64"),
-      extension: "jpeg",
-    });
-    sheet.addImage(imageId, {
-      tl: { col: 0, row: rowNumber - 1 },
-      ext: { width: preview.width, height: preview.height },
-      editAs: "oneCell",
+    embedSkuPreviewInCell({
+      workbook,
+      sheet,
+      rowNumber,
+      colIndex: 0,
+      preview,
     });
   });
 

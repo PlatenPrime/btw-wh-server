@@ -1,6 +1,7 @@
 import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import { Konk } from "../../../../konks/models/Konk.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { loadSkuPreviewsIfRequested } from "../../../../../lib/excel/loadSkuPreviewsIfRequested.js";
 import {
   buildSkuSliceExcelForSkus,
   formatDateHeader,
@@ -27,11 +28,14 @@ export async function getKonkSkuSliceExcelUtil(
   });
   if (resolved.length === 0) return { ok: false };
 
+  const includeImages = input.includeImages === true;
   const prodTitleByName = await loadProdDisplayTitlesByName(resolved.map((r) => r.prodName));
 
   const rows: SkuSliceExcelSkuRow[] = resolved.map((r) => ({
+    skuId: r._id.toString(),
     title: r.title,
     url: r.url,
+    imageUrl: r.imageUrl,
     productId: r.productId,
     konkName: r.konkName,
     prodName: r.prodName,
@@ -47,6 +51,12 @@ export async function getKonkSkuSliceExcelUtil(
     resolved.map((r) => ({ konkName: r.konkName, productId: r.productId })),
     dateFrom,
     dateTo,
+  );
+
+  const previews = await loadSkuPreviewsIfRequested(
+    includeImages,
+    rows.map((r) => ({ skuId: r.skuId!, imageUrl: r.imageUrl ?? "" })),
+    progress.onProgress,
   );
 
   const konkDoc = await Konk.findOne({ name: input.konk }).select("title").lean();
@@ -65,6 +75,8 @@ export async function getKonkSkuSliceExcelUtil(
       includeTotalsRow: true,
       totalsRowLabel: "Підсумок",
       metrics: input.metrics,
+      includeImages,
+      previews,
       onProgress: progress.onProgress,
     },
   );

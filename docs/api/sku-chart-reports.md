@@ -52,13 +52,17 @@ Pie-агрегация продаж по всем конкурентам и Btra
 
 Pie по произвольному списку SKU (в т.ч. разных конкурентов). Node compute из `SkuSliceMonth` (не manufacturer rollup).
 
-**Body:**
+**Body (XOR):** режим A — `skuIds` (≥1 ObjectId, без upper bound) без `selectAll`; режим B — `selectAll: true` без `skuIds`, опционально `search` / `konkName` / `prodName` (как `GET /skus`). Иначе 400.
 
-| Поле       | Тип      | Обязательно | Описание                                   |
-| ---------- | -------- | ----------- | ------------------------------------------ |
-| `skuIds`   | string[] | да          | 1..100 Mongo ObjectId; порядок сохраняется |
-| `dateFrom` | string   | да          | `YYYY-MM-DD`                               |
-| `dateTo`   | string   | да          | `YYYY-MM-DD`, ≥ `dateFrom`                 |
+| Поле        | Тип      | Обязательно | Описание                               |
+| ----------- | -------- | ----------- | -------------------------------------- |
+| `skuIds`    | string[] | режим A     | ≥1 Mongo ObjectId; порядок сохраняется |
+| `selectAll` | boolean  | режим B     | строго `true`                          |
+| `search`    | string   | нет         | trim; с `selectAll`                    |
+| `konkName`  | string   | нет         | точная назва конкурента; с `selectAll` |
+| `prodName`  | string   | нет         | точна назва виробника; с `selectAll`   |
+| `dateFrom`  | string   | да          | `YYYY-MM-DD`                           |
+| `dateTo`    | string   | да          | `YYYY-MM-DD`, ≥ `dateFrom`             |
 
 **Ответ 200:**
 

@@ -22,8 +22,8 @@ import { getSkugrSliceExcelUtil } from "../../../sku-excel-reports/controllers/g
 import { getSkugrSkusSalesSchema } from "../../../sku-sales-reports/controllers/get-skugr-skus-sales/schemas/getSkugrSkusSalesSchema.js";
 import { getSkugrSkusSalesUtil } from "../../../sku-sales-reports/controllers/get-skugr-skus-sales/utils/getSkugrSkusSalesUtil.js";
 import { failExcelJobRun, okExcelJobRun, type ExcelJobKindRunner } from "../excelJobRunTypes.js";
+import { loadSkuPreviewsIfRequested } from "../../../../lib/excel/loadSkuPreviewsIfRequested.js";
 import { buildSkuSkugrSkusShareExcel } from "../sku-skugr-skus-share/buildSkuSkugrSkusShareExcel.js";
-import { loadSkuPreviewJpegs } from "../sku-skugr-skus-share/loadSkuPreviewJpegs.js";
 import { skuSkugrSkusShareParamsSchema } from "../sku-skugr-skus-share/skuSkugrSkusShareParamsSchema.js";
 import { sortSkugrSkuSalesRows } from "../sku-skugr-skus-share/sortSkugrSkuSalesRows.js";
 
@@ -129,11 +129,16 @@ export const runSkuSkugrSkusShare: ExcelJobKindRunner = async (params, options) 
   }
 
   const rows = sortSkugrSkuSalesRows(loaded.data, parsed.data.sortBy);
-  const previews = await loadSkuPreviewJpegs(rows, {
-    onBatch: (done, total) => {
+  const includeImages = parsed.data.includeImages === true;
+  let previews = new Map();
+  if (includeImages) {
+    previews = await loadSkuPreviewsIfRequested(true, rows, (done, total) => {
       notifyExcelBuildProgress(options?.onProgress, done, total);
-    },
-  });
+    });
+  } else {
+    // как empty loadSkuPreviewJpegs: один тик 0/1 без fetch
+    notifyExcelBuildProgress(options?.onProgress, 0, 1);
+  }
   const built = await buildSkuSkugrSkusShareExcel({
     skugrId: parsed.data.skugrId,
     dateFrom: parsed.data.dateFrom,
@@ -141,6 +146,7 @@ export const runSkuSkugrSkusShare: ExcelJobKindRunner = async (params, options) 
     rows,
     all: loaded.all,
     previews,
+    includeImages,
   });
   return okExcelJobRun(built.buffer, built.fileName);
 };

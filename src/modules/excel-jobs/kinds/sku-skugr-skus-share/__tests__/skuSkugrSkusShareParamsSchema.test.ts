@@ -4,7 +4,7 @@ import { skuSkugrSkusShareParamsSchema } from "../skuSkugrSkusShareParamsSchema.
 const SKUGR_ID = "507f1f77bcf86cd799439011";
 
 describe("skuSkugrSkusShareParamsSchema", () => {
-  it("parses a range without sortBy", () => {
+  it("parses a range without sortBy and defaults includeImages to false", () => {
     const parsed = skuSkugrSkusShareParamsSchema.safeParse({
       skugrId: SKUGR_ID,
       dateFrom: "2026-10-26",
@@ -14,6 +14,18 @@ describe("skuSkugrSkusShareParamsSchema", () => {
     if (!parsed.success) return;
     expect(parsed.data.sortBy).toBeUndefined();
     expect(parsed.data.dateFrom).toBe("2026-10-26");
+    expect(parsed.data.includeImages).toBeUndefined();
+  });
+
+  it("accepts includeImages true", () => {
+    const parsed = skuSkugrSkusShareParamsSchema.safeParse({
+      skugrId: SKUGR_ID,
+      dateFrom: "2026-10-26",
+      dateTo: "2026-11-03",
+      includeImages: true,
+    });
+    expect(parsed.success).toBe(true);
+    if (parsed.success) expect(parsed.data.includeImages).toBe(true);
   });
 
   it("parses sortBy sales and revenue", () => {

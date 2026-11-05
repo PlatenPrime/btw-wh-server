@@ -2,6 +2,7 @@ import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBui
 import { Konk } from "../../../../konks/models/Konk.js";
 import { Prod } from "../../../../prods/models/Prod.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { loadSkuPreviewsIfRequested } from "../../../../../lib/excel/loadSkuPreviewsIfRequested.js";
 import {
   buildSkuSliceExcelForSkus,
   formatDateHeader,
@@ -27,9 +28,12 @@ export async function getSkugrSliceExcelUtil(
   const { skugr, skus } = loaded;
   if (skus.length === 0) return { ok: false };
 
+  const includeImages = input.includeImages === true;
   const rows: SkuSliceExcelSkuRow[] = skus.map((s) => ({
+    skuId: s._id.toString(),
     title: s.title,
     url: s.url,
+    imageUrl: s.imageUrl,
     productId: s.productId,
     konkName: s.konkName,
     prodName: s.prodName,
@@ -44,6 +48,12 @@ export async function getSkugrSliceExcelUtil(
     skus.map((s) => ({ konkName: s.konkName, productId: s.productId })),
     dateFrom,
     dateTo,
+  );
+
+  const previews = await loadSkuPreviewsIfRequested(
+    includeImages,
+    rows.map((r) => ({ skuId: r.skuId!, imageUrl: r.imageUrl ?? "" })),
+    progress.onProgress,
   );
 
   const [konkDoc, prodDoc] = await Promise.all([
@@ -65,6 +75,8 @@ export async function getSkugrSliceExcelUtil(
       includeTotalsRow: true,
       totalsRowLabel: "Підсумок",
       metrics: input.metrics,
+      includeImages,
+      previews,
       onProgress: progress.onProgress,
     },
   );

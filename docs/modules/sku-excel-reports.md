@@ -8,6 +8,8 @@ Sales Excel (one / skugr / konk / selection) собирает блок стро�
 
 Stock Excel (one / skugr / konk / selection) — блок Залишок / Ціна; param `metrics` (`stock` / `price`), без param — обе строки. Підсумок по остаткам пишется только если выбран `stock`.
 
-**Selection** (`sku-selection-stock` / `sku-selection-sales`): произвольный список `skuIds` (1..100), в том числе с разных конкурентов. Resolve через `resolveSkusByIds` в sku-reporting. Sales selection дополнительно пишет блок «Частки за період» (шт / % / виручка / %) и применяет `recountDays` per `konkName`. Старых GET-stub’ов для selection нет — только excel-jobs kinds.
+**Selection** (`sku-selection-stock` / `sku-selection-sales`): либо явный список `skuIds` (≥1, без upper bound), либо `selectAll: true` с теми же фильтрами, что `GET /skus` (`search`, `konkName`, `prodName`); режимы XOR. Resolve через `resolveSelectionSkus` в sku-reporting. Sales selection дополнительно пишет блок «Частки за період» (шт / % / виручка / %) и применяет `recountDays` per `konkName`. Старых GET-stub’ов для selection нет — только excel-jobs kinds.
+
+**Фото:** у konk / skugr / selection Excel и у `sku-skugr-skus-share` params могут включать `includeImages` (default `false`). При `true` builders добавляют колонку «Фото» и встраивают JPEG-превью (max edge 150px).
 
 Роли: ADMIN.

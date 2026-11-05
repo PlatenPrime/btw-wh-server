@@ -1,5 +1,6 @@
 import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
+import { loadSkuPreviewsIfRequested } from "../../../../../lib/excel/loadSkuPreviewsIfRequested.js";
 import {
   buildSkuSliceExcelForSkus,
   formatDateHeader,
@@ -7,7 +8,7 @@ import {
 } from "../../../../sku-reporting/utils/buildSkuSliceExcel.js";
 import { loadKonkDisplayMetaByName } from "../../../../sku-reporting/utils/konkDisplayTitles.js";
 import { loadProdDisplayTitlesByName } from "../../../../sku-reporting/utils/prodDisplayTitles.js";
-import { resolveSkusByIds } from "../../../../sku-reporting/utils/resolveSkusByIds.js";
+import { resolveSelectionSkus } from "../../../../sku-reporting/utils/resolveSelectionSkus.js";
 import { getSliceItem } from "../../../../sku-reporting/utils/skugrReporting.js";
 import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForSkus.js";
 import type { GetSelectionSkuSliceExcelInput } from "../schemas/getSelectionSkuSliceExcelSchema.js";
@@ -19,17 +20,29 @@ export async function getSelectionSkuSliceExcelUtil(
   input: GetSelectionSkuSliceExcelInput,
   progress: ExcelUtilProgressOptions = {},
 ): Promise<GetSelectionSkuSliceExcelResult> {
-  const resolved = await resolveSkusByIds(input.skuIds);
+  const resolved = await resolveSelectionSkus(
+    input.selectAll === true
+      ? {
+          selectAll: true,
+          search: input.search,
+          konkName: input.konkName,
+          prodName: input.prodName,
+        }
+      : { skuIds: input.skuIds! },
+  );
   if (resolved.length === 0) return { ok: false };
 
+  const includeImages = input.includeImages === true;
   const [konkMetaByName, prodTitleByName] = await Promise.all([
     loadKonkDisplayMetaByName(resolved.map((r) => r.konkName)),
     loadProdDisplayTitlesByName(resolved.map((r) => r.prodName)),
   ]);
 
   const rows: SkuSliceExcelSkuRow[] = resolved.map((r) => ({
+    skuId: r._id.toString(),
     title: r.title,
     url: r.url,
+    imageUrl: r.imageUrl,
     productId: r.productId,
     konkName: r.konkName,
     prodName: r.prodName,
@@ -48,6 +61,12 @@ export async function getSelectionSkuSliceExcelUtil(
     dateTo,
   );
 
+  const previews = await loadSkuPreviewsIfRequested(
+    includeImages,
+    rows.map((r) => ({ skuId: r.skuId!, imageUrl: r.imageUrl ?? "" })),
+    progress.onProgress,
+  );
+
   const { buffer } = await buildSkuSliceExcelForSkus(
     rows,
     dateFrom,
@@ -58,6 +77,8 @@ export async function getSelectionSkuSliceExcelUtil(
       includeTotalsRow: true,
       totalsRowLabel: "Підсумок",
       metrics: input.metrics,
+      includeImages,
+      previews,
       onProgress: progress.onProgress,
     },
   );

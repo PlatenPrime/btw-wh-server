@@ -36,7 +36,7 @@ async function loadSheet(buffer: Buffer): Promise<ExcelJS.Worksheet> {
 
 describe("share excel helpers", () => {
   it("sizes a photo row in points without shrinking below the default", () => {
-    expect(previewRowHeightPt(200)).toBe(150);
+    expect(previewRowHeightPt(150)).toBe(112.5);
     expect(previewRowHeightPt(10)).toBe(15);
   });
 
@@ -53,11 +53,12 @@ describe("share excel helpers", () => {
 });
 
 describe("buildSkuSkugrSkusShareExcel", () => {
-  it("writes header, total, shares and a preview only on the sku row", async () => {
+  it("writes header, total, shares and a preview only on the sku row when includeImages", async () => {
     const built = await buildSkuSkugrSkusShareExcel({
       skugrId: "507f1f77bcf86cd799439011",
       dateFrom: "2026-10-26",
       dateTo: "2026-11-03",
+      includeImages: true,
       all: { title: "Усього", salesPcs: 4, salesUah: 40 },
       rows: [
         sku({ skuId: "a", title: "A", salesPcs: 1, salesUah: 10 }),
@@ -69,7 +70,7 @@ describe("buildSkuSkugrSkusShareExcel", () => {
           imageUrl: "https://cdn.example/b.jpg",
         }),
       ],
-      previews: new Map([["b", { buffer: JPEG, width: 200, height: 100 }]]),
+      previews: new Map([["b", { buffer: JPEG, width: 150, height: 100 }]]),
     });
 
     expect(built.fileName).toBe(
@@ -113,8 +114,25 @@ describe("buildSkuSkugrSkusShareExcel", () => {
       ext?: { width?: number; height?: number };
     };
     expect(range.tl.nativeRow).toBe(3);
-    expect(range.ext?.width).toBeCloseTo(200);
+    expect(range.ext?.width).toBeCloseTo(150);
     expect(range.ext?.height).toBeCloseTo(100);
+  });
+
+  it("omits photo column when includeImages is false", async () => {
+    const built = await buildSkuSkugrSkusShareExcel({
+      skugrId: "507f1f77bcf86cd799439011",
+      dateFrom: "2026-10-26",
+      dateTo: "2026-10-26",
+      includeImages: false,
+      all: { title: "Усього", salesPcs: 1, salesUah: 10 },
+      rows: [sku({ skuId: "a", title: "A", salesPcs: 1, salesUah: 10 })],
+      previews: new Map([["a", { buffer: JPEG, width: 150, height: 100 }]]),
+    });
+    const sheet = await loadSheet(built.buffer);
+    expect(sheet.getRow(1).getCell(1).value).toBe("Товар");
+    expect(sheet.getRow(2).getCell(1).value).toBe("Усього");
+    expect(sheet.getRow(3).getCell(1).value).toBe("A");
+    expect(sheet.getImages()).toHaveLength(0);
   });
 
   it("writes zero shares when the period total is zero", async () => {
@@ -127,10 +145,10 @@ describe("buildSkuSkugrSkusShareExcel", () => {
       previews: new Map(),
     });
     const sheet = await loadSheet(built.buffer);
+    expect(sheet.getRow(2).getCell(4).value).toBe(0);
     expect(sheet.getRow(2).getCell(5).value).toBe(0);
-    expect(sheet.getRow(2).getCell(6).value).toBe(0);
+    expect(sheet.getRow(3).getCell(4).value).toBe(0);
     expect(sheet.getRow(3).getCell(5).value).toBe(0);
-    expect(sheet.getRow(3).getCell(6).value).toBe(0);
     expect(sheet.getImages()).toHaveLength(0);
   });
 
@@ -144,8 +162,8 @@ describe("buildSkuSkugrSkusShareExcel", () => {
       previews: new Map(),
     });
     const sheet = await loadSheet(built.buffer);
-    expect(sheet.getRow(2).getCell(5).value).toBe(0);
-    expect(sheet.getRow(2).getCell(6).value).toBe(100);
-    expect(sheet.getRow(3).getCell(2).value ?? null).toBeNull();
+    expect(sheet.getRow(2).getCell(4).value).toBe(0);
+    expect(sheet.getRow(2).getCell(5).value).toBe(100);
+    expect(sheet.getRow(3).getCell(1).value ?? null).toBeNull();
   });
 });

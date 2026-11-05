@@ -5,6 +5,12 @@ import {
 } from "../../../lib/excel/excelBuildProgress.js";
 import { applyDataRowStyle, applyHeaderStyle } from "../../../lib/excel/worksheetStyles.js";
 import { formatExcelDateHeaderUk } from "../../../lib/excel/formatExcelDateHeaderUk.js";
+import {
+  SKU_EXCEL_PHOTO_COLUMN_WIDTH,
+  SKU_EXCEL_PHOTO_HEADER,
+  embedSkuPreviewInCell,
+  type SkuPreviewJpeg,
+} from "../../../lib/excel/skuExcelPhoto.js";
 import { enumerateSliceDates } from "../../slices/utils/enumerateSliceDates.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
 import type { ISkuSliceDataItem } from "../../sku-slices/models/skuSliceTypes.js";
@@ -43,7 +49,6 @@ const METRIC_LABEL_BY_KEY: Record<SkuStockExcelMetric, string> = {
 const DEFAULT_METRICS: readonly SkuStockExcelMetric[] = SKU_STOCK_EXCEL_METRICS;
 
 const META_COL_COUNT = HEADER_LABELS.length;
-const METRIC_LABEL_COL = META_COL_COUNT + 1;
 
 export function formatDateHeader(d: Date): string {
   const y = d.getUTCFullYear();
@@ -62,6 +67,9 @@ export type SkuSliceExcelSkuRow = {
   productId: string;
   konkName: string;
   prodName: string;
+  /** Для ключа previews map при includeImages. */
+  skuId?: string;
+  imageUrl?: string;
   /** Заголовок конкурента; якщо задано — має пріоритет над titles.competitorTitle. */
   competitorTitle?: string;
   /** Заголовок виробника для колонки «Виробник»; якщо задано — має пріоритет над titles.producerName. */
@@ -82,6 +90,9 @@ export type SkuSliceExcelOptions = {
   totalsRowLabel?: string;
   /** Подмножество строк метрик; без значения — stock + price. */
   metrics?: readonly SkuStockExcelMetric[];
+  /** Колонка «Фото» зліва; потрібні skuId + previews. */
+  includeImages?: boolean;
+  previews?: ReadonlyMap<string, SkuPreviewJpeg>;
   onProgress?: ExcelBuildProgressHandler;
 };
 
@@ -229,6 +240,10 @@ export async function buildSkuSliceExcelForSkus(
   titles: SkuSliceExcelTitles,
   options: SkuSliceExcelOptions = {},
 ): Promise<{ buffer: Buffer; fileName: string }> {
+  const includeImages = options.includeImages === true;
+  const photoOffset = includeImages ? 1 : 0;
+  const firstMetaCol = 1 + photoOffset;
+  const metricLabelCol = firstMetaCol + META_COL_COUNT;
   const datesReport = enumerateSliceDates(dateFrom, dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
   const datesFull =
@@ -236,7 +251,7 @@ export async function buildSkuSliceExcelForSkus(
   const reportOffset = datesFull.length - datesReport.length;
   const dates = datesReport;
   const dateCount = dates.length;
-  const dataStartCol = METRIC_LABEL_COL + 1;
+  const dataStartCol = metricLabelCol + 1;
   const diffCol = dataStartCol + dateCount;
   const diffPctCol = diffCol + 1;
   const columnCount = diffPctCol;
@@ -245,10 +260,13 @@ export async function buildSkuSliceExcelForSkus(
   const sheet = workbook.addWorksheet(SKU_SLICE_EXCEL_SHEET_NAME);
 
   const headerRow = sheet.getRow(1);
-  for (let i = 0; i < HEADER_LABELS.length; i++) {
-    headerRow.getCell(i + 1).value = HEADER_LABELS[i];
+  if (includeImages) {
+    headerRow.getCell(1).value = SKU_EXCEL_PHOTO_HEADER;
   }
-  headerRow.getCell(METRIC_LABEL_COL).value = "";
+  for (let i = 0; i < HEADER_LABELS.length; i++) {
+    headerRow.getCell(firstMetaCol + i).value = HEADER_LABELS[i];
+  }
+  headerRow.getCell(metricLabelCol).value = "";
 
   dates.forEach((d, index) => {
     headerRow.getCell(dataStartCol + index).value = formatExcelDateHeaderUk(d);
@@ -257,11 +275,15 @@ export async function buildSkuSliceExcelForSkus(
   headerRow.getCell(diffPctCol).value = "Різниця, %";
 
   applyHeaderStyle(sheet, columnCount);
+  if (includeImages) {
+    sheet.getColumn(1).width = SKU_EXCEL_PHOTO_COLUMN_WIDTH;
+  }
 
   const selectedMetrics =
     options.metrics && options.metrics.length > 0 ? options.metrics : DEFAULT_METRICS;
   const rowsPerSkuBlock = selectedMetrics.length;
   const includeStock = selectedMetrics.includes("stock");
+  const mergeEndCol = firstMetaCol + META_COL_COUNT - 1;
 
   let totalDiff = 0;
   let totalFirstStock = 0;
@@ -277,17 +299,17 @@ export async function buildSkuSliceExcelForSkus(
     const prices = forReport.map((c) => c.price);
 
     const firstRow = sheet.getRow(startRow);
-    firstRow.getCell(1).value = sku.productId;
-    firstRow.getCell(2).value = sku.title;
-    firstRow.getCell(3).value = sku.competitorTitle ?? titles.competitorTitle;
-    firstRow.getCell(4).value = sku.producerName ?? titles.producerName;
-    firstRow.getCell(5).value = sku.skugrTitle ?? "";
-    firstRow.getCell(6).value = sku.url;
+    firstRow.getCell(firstMetaCol).value = sku.productId;
+    firstRow.getCell(firstMetaCol + 1).value = sku.title;
+    firstRow.getCell(firstMetaCol + 2).value = sku.competitorTitle ?? titles.competitorTitle;
+    firstRow.getCell(firstMetaCol + 3).value = sku.producerName ?? titles.producerName;
+    firstRow.getCell(firstMetaCol + 4).value = sku.skugrTitle ?? "";
+    firstRow.getCell(firstMetaCol + 5).value = sku.url;
 
     for (let m = 0; m < selectedMetrics.length; m++) {
       const metric = selectedMetrics[m]!;
       const row = sheet.getRow(startRow + m);
-      row.getCell(METRIC_LABEL_COL).value = METRIC_LABEL_BY_KEY[metric];
+      row.getCell(metricLabelCol).value = METRIC_LABEL_BY_KEY[metric];
       const values = metric === "stock" ? stocks : prices;
 
       for (let i = 0; i < dateCount; i++) {
@@ -304,14 +326,28 @@ export async function buildSkuSliceExcelForSkus(
     }
 
     const endRow = startRow + rowsPerSkuBlock - 1;
+    const mergeFromCol = includeImages ? 1 : firstMetaCol;
     if (rowsPerSkuBlock > 1) {
-      for (let c = 1; c <= META_COL_COUNT; c++) {
+      for (let c = mergeFromCol; c <= mergeEndCol; c++) {
         sheet.mergeCells(startRow, c, endRow, c);
         setMergedMetaAlignment(firstRow.getCell(c));
       }
     } else {
-      for (let c = 1; c <= META_COL_COUNT; c++) {
+      for (let c = mergeFromCol; c <= mergeEndCol; c++) {
         setMergedMetaAlignment(firstRow.getCell(c));
+      }
+    }
+
+    if (includeImages && sku.skuId) {
+      const preview = options.previews?.get(sku.skuId);
+      if (preview) {
+        embedSkuPreviewInCell({
+          workbook,
+          sheet,
+          rowNumber: startRow,
+          colIndex: 0,
+          preview,
+        });
       }
     }
 
@@ -333,7 +369,7 @@ export async function buildSkuSliceExcelForSkus(
 
   if (options.includeTotalsRow && includeStock) {
     const totalsRow = sheet.getRow(startRow);
-    totalsRow.getCell(1).value = options.totalsRowLabel ?? "Підсумок";
+    totalsRow.getCell(firstMetaCol).value = options.totalsRowLabel ?? "Підсумок";
     totalsRow.getCell(diffCol).value = totalDiff;
 
     const totalDiffPctCell = totalsRow.getCell(diffPctCol);
@@ -354,6 +390,7 @@ export async function buildSkuSliceExcelForSkus(
   }
 
   for (let c = 1; c <= columnCount; c++) {
+    if (includeImages && c === 1) continue;
     sheet.getColumn(c).width = c >= dataStartCol && c < diffCol ? 22 : 14;
   }
 

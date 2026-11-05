@@ -10,7 +10,7 @@ JSON для графиков: сравнение агрегата SKU конку
 - **prod-konks-pie** — competitor из Sku rollup (без `skugrIds`); Btrade из `BtradeManufacturerDaySales`; опционально `excludeKonks` вычитает konk/`btrade` из расчёта;
 - **konk-prod/sales** — competitor + btrade sales/revenue без `skugrIds` из соответствующих rollup; stock — из сырых срезов.
 
-**selection/skus-pie** — не rollup: `resolveSkusByIds` + period Node compute из `SkuSliceMonth`; в ответе явные `sharePcs`/`shareUah` относительно суммы выбранных.
+**selection/skus-pie** — не rollup: `resolveSelectionSkus` (явные `skuIds` или `selectAll` + фильтры каталога) + period Node compute из `SkuSliceMonth`; в ответе явные `sharePcs`/`shareUah` относительно суммы выбранных.
 
 С `skugrIds` и stock-chart sales-rollup не используется (нужен productId/artikul subset / stock).
 

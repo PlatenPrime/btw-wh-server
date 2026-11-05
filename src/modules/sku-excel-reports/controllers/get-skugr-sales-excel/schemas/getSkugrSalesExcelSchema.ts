@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { z } from "zod";
 import { dateStringSchema } from "../../../../sku-reporting/schemas/dateSchema.js";
+import { includeImagesSchema } from "../../../../sku-reporting/schemas/includeImagesSchema.js";
 import { skuSalesExcelMetricsSchema } from "../../../../sku-reporting/schemas/skuSalesExcelMetricsSchema.js";
 
 export const getSkugrSalesExcelSchema = z
@@ -11,6 +12,7 @@ export const getSkugrSalesExcelSchema = z
     dateFrom: dateStringSchema,
     dateTo: dateStringSchema,
     metrics: skuSalesExcelMetricsSchema,
+    includeImages: includeImagesSchema,
   })
   .refine((data) => data.dateFrom.getTime() <= data.dateTo.getTime(), {
     message: "dateFrom must be before or equal to dateTo",

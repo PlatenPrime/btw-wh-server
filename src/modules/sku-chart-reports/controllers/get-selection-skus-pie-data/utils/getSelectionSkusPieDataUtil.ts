@@ -1,7 +1,7 @@
 import { toSliceDate } from "../../../../../utils/sliceDate.js";
 import { aggregatePeriodSkuSliceMetricsForSkus } from "../../../../sku-reporting/utils/aggregatePeriodSkuSliceMetricsForSkus.js";
 import { computeSharePercent } from "../../../../sku-reporting/utils/computeSharePercent.js";
-import { resolveSkusByIds } from "../../../../sku-reporting/utils/resolveSkusByIds.js";
+import { resolveSelectionSkus } from "../../../../sku-reporting/utils/resolveSelectionSkus.js";
 import type { GetSelectionSkusPieDataInput } from "../schemas/getSelectionSkusPieDataSchema.js";
 
 const ALL_SELECTED_TITLE = "Всі обрані";
@@ -33,7 +33,16 @@ export type GetSelectionSkusPieDataResult =
 export async function getSelectionSkusPieDataUtil(
   input: GetSelectionSkusPieDataInput,
 ): Promise<GetSelectionSkusPieDataResult> {
-  const resolved = await resolveSkusByIds(input.skuIds);
+  const resolved = await resolveSelectionSkus(
+    input.selectAll === true
+      ? {
+          selectAll: true,
+          search: input.search,
+          konkName: input.konkName,
+          prodName: input.prodName,
+        }
+      : { skuIds: input.skuIds! },
+  );
   if (resolved.length === 0) return { ok: false };
 
   const dateFrom = toSliceDate(input.dateFrom);

@@ -7,6 +7,12 @@ import {
   type ExcelBuildProgressHandler,
 } from "../../../../../lib/excel/excelBuildProgress.js";
 import {
+  SKU_EXCEL_PHOTO_COLUMN_WIDTH,
+  SKU_EXCEL_PHOTO_HEADER,
+  embedSkuPreviewInCell,
+  type SkuPreviewJpeg,
+} from "../../../../../lib/excel/skuExcelPhoto.js";
+import {
   applyRecountDayToSales,
   computeRevenueForDay,
   computeSalesFromStockSequence,
@@ -38,7 +44,6 @@ const METRIC_LABEL_BY_KEY: Record<SkuSalesExcelMetric, string> = {
   revenue: "Виручка",
 };
 const META_COL_COUNT = HEADER_LABELS.length;
-const METRIC_LABEL_COL = META_COL_COUNT + 1;
 const RECOUNT_DAY_PURPLE_FILL_ARGB = "FF800080";
 const DEFAULT_METRICS: readonly SkuSalesExcelMetric[] = SKU_SALES_EXCEL_METRICS;
 
@@ -49,6 +54,9 @@ export type SkuSalesExcelSkuRow = {
   konkName: string;
   competitorTitle: string;
   producerName: string;
+  /** Для ключа previews map при includeImages. */
+  skuId?: string;
+  imageUrl?: string;
   /** Заголовок Skugr для колонки «Товарна група»; пусто, если SKU не привязан. */
   skugrTitle?: string;
 };
@@ -64,6 +72,8 @@ export type SkuSalesExcelOptions = {
   includeShareBlock?: boolean;
   /** Подмножество строк метрик; без значения — все три. */
   metrics?: readonly SkuSalesExcelMetric[];
+  includeImages?: boolean;
+  previews?: ReadonlyMap<string, SkuPreviewJpeg>;
   onProgress?: ExcelBuildProgressHandler;
 };
 export type SkuSalesPeriodMetrics = {
@@ -247,26 +257,37 @@ export async function buildSkuSalesExcelForSkus(
   ) => ISkuSliceDataItem | null | undefined,
   options: SkuSalesExcelOptions = {},
 ): Promise<{ buffer: Buffer }> {
+  const includeImages = options.includeImages === true;
+  const photoOffset = includeImages ? 1 : 0;
+  const firstMetaCol = 1 + photoOffset;
+  const metricLabelCol = firstMetaCol + META_COL_COUNT;
   const datesReport = enumerateSliceDates(dateFrom, dateTo);
   const dates = datesReport;
   const dateCount = dates.length;
-  const dataStartCol = METRIC_LABEL_COL + 1;
+  const dataStartCol = metricLabelCol + 1;
   const totalCol = dataStartCol + dateCount;
   const columnCount = totalCol;
+  const mergeEndCol = firstMetaCol + META_COL_COUNT - 1;
 
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet("Продажі");
 
   const headerRow = sheet.getRow(1);
-  for (let i = 0; i < HEADER_LABELS.length; i++) {
-    headerRow.getCell(i + 1).value = HEADER_LABELS[i];
+  if (includeImages) {
+    headerRow.getCell(1).value = SKU_EXCEL_PHOTO_HEADER;
   }
-  headerRow.getCell(METRIC_LABEL_COL).value = "";
+  for (let i = 0; i < HEADER_LABELS.length; i++) {
+    headerRow.getCell(firstMetaCol + i).value = HEADER_LABELS[i];
+  }
+  headerRow.getCell(metricLabelCol).value = "";
   dates.forEach((d, index) => {
     headerRow.getCell(dataStartCol + index).value = formatExcelDateHeaderUk(d);
   });
   headerRow.getCell(totalCol).value = "Всього";
   applyHeaderStyle(sheet, columnCount);
+  if (includeImages) {
+    sheet.getColumn(1).width = SKU_EXCEL_PHOTO_COLUMN_WIDTH;
+  }
 
   const summaryMode = options.summaryMode ?? "bottomOnly";
   const summarySalesLabel = options.summarySalesLabel ?? "Продажі конкурента (всього), шт";
@@ -300,17 +321,17 @@ export async function buildSkuSalesExcelForSkus(
     perSkuRevenue.push(totalRevenue);
 
     const firstRow = sheet.getRow(startRow);
-    firstRow.getCell(1).value = sku.productId;
-    firstRow.getCell(2).value = sku.title;
-    firstRow.getCell(3).value = sku.competitorTitle;
-    firstRow.getCell(4).value = sku.producerName;
-    firstRow.getCell(5).value = sku.skugrTitle ?? "";
-    firstRow.getCell(6).value = sku.url;
+    firstRow.getCell(firstMetaCol).value = sku.productId;
+    firstRow.getCell(firstMetaCol + 1).value = sku.title;
+    firstRow.getCell(firstMetaCol + 2).value = sku.competitorTitle;
+    firstRow.getCell(firstMetaCol + 3).value = sku.producerName;
+    firstRow.getCell(firstMetaCol + 4).value = sku.skugrTitle ?? "";
+    firstRow.getCell(firstMetaCol + 5).value = sku.url;
 
     for (let m = 0; m < selectedMetrics.length; m++) {
       const metric = selectedMetrics[m]!;
       const row = sheet.getRow(startRow + m);
-      row.getCell(METRIC_LABEL_COL).value = METRIC_LABEL_BY_KEY[metric];
+      row.getCell(metricLabelCol).value = METRIC_LABEL_BY_KEY[metric];
 
       for (let i = 0; i < dateCount; i++) {
         const col = dataStartCol + i;
@@ -341,14 +362,28 @@ export async function buildSkuSalesExcelForSkus(
     }
 
     const endRow = startRow + rowsPerSkuBlock - 1;
+    const mergeFromCol = includeImages ? 1 : firstMetaCol;
     if (rowsPerSkuBlock > 1) {
-      for (let c = 1; c <= META_COL_COUNT; c++) {
+      for (let c = mergeFromCol; c <= mergeEndCol; c++) {
         sheet.mergeCells(startRow, c, endRow, c);
         setMergedMetaAlignment(firstRow.getCell(c));
       }
     } else {
-      for (let c = 1; c <= META_COL_COUNT; c++) {
+      for (let c = mergeFromCol; c <= mergeEndCol; c++) {
         setMergedMetaAlignment(firstRow.getCell(c));
+      }
+    }
+
+    if (includeImages && sku.skuId) {
+      const preview = options.previews?.get(sku.skuId);
+      if (preview) {
+        embedSkuPreviewInCell({
+          workbook,
+          sheet,
+          rowNumber: startRow,
+          colIndex: 0,
+          preview,
+        });
       }
     }
 
@@ -357,7 +392,7 @@ export async function buildSkuSalesExcelForSkus(
     }
     const revenueOffset = selectedMetrics.indexOf("revenue");
     if (revenueOffset >= 0) {
-      applyRevenueRowBold(sheet, startRow + revenueOffset, METRIC_LABEL_COL, totalCol);
+      applyRevenueRowBold(sheet, startRow + revenueOffset, metricLabelCol, totalCol);
     }
 
     startRow += rowsPerSkuBlock;
@@ -404,6 +439,7 @@ export async function buildSkuSalesExcelForSkus(
     }
   }
   for (let c = 1; c <= columnCount; c++) {
+    if (includeImages && c === 1) continue;
     sheet.getColumn(c).width = c >= dataStartCol && c < totalCol ? 22 : 14;
   }
 

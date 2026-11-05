@@ -3,22 +3,37 @@ import { describe, expect, it } from "vitest";
 import { getSelectionSkuSalesExcelSchema } from "../getSelectionSkuSalesExcelSchema.js";
 
 describe("getSelectionSkuSalesExcelSchema", () => {
-  it("accepts valid selection sales params", () => {
+  it("accepts skuIds mode and defaults includeImages to false", () => {
     const parsed = getSelectionSkuSalesExcelSchema.safeParse({
       skuIds: [new Types.ObjectId().toString()],
       dateFrom: "2026-01-01",
-      dateTo: "2026-01-10",
-      metrics: ["sales", "revenue"],
+      dateTo: "2026-01-05",
     });
     expect(parsed.success).toBe(true);
+    if (parsed.success) {
+      expect(parsed.data.includeImages).toBeUndefined();
+    }
   });
 
-  it("rejects invalid object id", () => {
+  it("accepts selectAll mode", () => {
     expect(
       getSelectionSkuSalesExcelSchema.safeParse({
-        skuIds: ["not-an-id"],
+        selectAll: true,
+        konkName: "air",
         dateFrom: "2026-01-01",
-        dateTo: "2026-01-10",
+        dateTo: "2026-01-05",
+        metrics: ["sales"],
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects selectAll together with skuIds", () => {
+    expect(
+      getSelectionSkuSalesExcelSchema.safeParse({
+        selectAll: true,
+        skuIds: [new Types.ObjectId().toString()],
+        dateFrom: "2026-01-01",
+        dateTo: "2026-01-05",
       }).success,
     ).toBe(false);
   });

@@ -10,6 +10,7 @@ type SkuLean = {
   productId: string;
   title: string;
   url: string;
+  imageUrl?: string;
   createdAt?: Date;
 };
 
@@ -42,7 +43,7 @@ export async function resolveSkusByIds(skuIds: string[]): Promise<ResolvedSkuRow
   if (orderedIds.length === 0) return [];
 
   const skuDocs = await Sku.find({ _id: { $in: orderedIds } })
-    .select("konkName prodName productId title url createdAt")
+    .select("konkName prodName productId title url imageUrl createdAt")
     .lean<SkuLean[]>();
 
   if (skuDocs.length === 0) return [];
@@ -79,6 +80,7 @@ export async function resolveSkusByIds(skuIds: string[]): Promise<ResolvedSkuRow
       productId,
       title: sku.title,
       url: sku.url,
+      imageUrl: (sku.imageUrl ?? "").trim(),
       createdAt: sku.createdAt,
       skugrId: skugr ? skugr._id.toString() : null,
       skugrTitle: skugr?.title ?? "",

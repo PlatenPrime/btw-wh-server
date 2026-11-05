@@ -34,8 +34,22 @@
 
 ## Selection SKU
 
-Мультивыбор SKU (разные конкуренты): kinds `sku-selection-stock` / `sku-selection-sales`, params `skuIds` + период. Pie — синхронный `POST /api/sku-chart-reports/selection/skus-pie`, не excel-job. UX: [sku-selection-reports](../frontend/sku-selection-reports.md).
+Мультивыбор SKU (разные конкуренты): kinds `sku-selection-stock` / `sku-selection-sales`.
+
+- Режим A: `skuIds` (≥1 ObjectId, без upper bound) + период.
+- Режим B: `selectAll: true` + опциональные `search` / `konkName` / `prodName` (как `GET /skus`) + период; `skuIds` не слать.
+- XOR: оба или ни одного → 400.
+
+Pie — синхронный `POST /api/sku-chart-reports/selection/skus-pie` с теми же режимами A/B, не excel-job. UX: [sku-selection-reports](../frontend/sku-selection-reports.md). Полный контракт: [frontend prompt](../prompts/frontend-sku-selection-select-all-and-images.md).
+
+## Колонка «Фото» (`includeImages`)
+
+Для kinds с набором SKU: `sku-konk-stock` / `sku-konk-sales`, `sku-skugr-stock` / `sku-skugr-sales`, `sku-skugr-skus-share`, `sku-selection-stock` / `sku-selection-sales`.
+
+- В `params` слать `includeImages: true`, если нужна колонка с картинками.
+- Без поля или `false` — колонки «Фото» нет (default). Для `sku-skugr-skus-share` это breaking: раньше превью были всегда.
+- Размер превью на бекенде (150×150) фронту не конфигурируется.
 
 ## Не трогать
 
-JSON графиков и sales-reports (`/api/sku-chart-reports`, `/api/sku-sales-reports`, analog comparison без `-excel`) без изменений, кроме нового selection pie выше.
+JSON графиков и sales-reports (`/api/sku-chart-reports`, `/api/sku-sales-reports`, analog comparison без `-excel`) без изменений контракта ответа; body selection pie расширен режимом `selectAll`.

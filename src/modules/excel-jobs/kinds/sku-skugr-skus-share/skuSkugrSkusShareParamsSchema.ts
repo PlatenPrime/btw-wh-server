@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { z } from "zod";
+import { includeImagesSchema } from "../../../sku-reporting/schemas/includeImagesSchema.js";
 
 function isUtcCalendarDate(value: string): boolean {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -26,6 +27,7 @@ export const skuSkugrSkusShareParamsSchema = z
     dateFrom: ymdSchema,
     dateTo: ymdSchema,
     sortBy: z.enum(["sales", "revenue"]).optional(),
+    includeImages: includeImagesSchema,
   })
   .strict()
   .refine((data) => data.dateFrom <= data.dateTo, {

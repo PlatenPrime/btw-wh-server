@@ -11,6 +11,7 @@ import { getSliceItem } from "../../../../sku-reporting/utils/skugrReporting.js"
 import { loadExcelSliceMapsForSkus } from "../../../utils/loadExcelSliceMapsForSkus.js";
 import type { GetKonkSkuSalesExcelInput } from "../schemas/getKonkSkuSalesExcelSchema.js";
 import type { ExcelUtilProgressOptions } from "../../../../../lib/excel/excelBuildProgress.js";
+import { loadSkuPreviewsIfRequested } from "../../../../../lib/excel/loadSkuPreviewsIfRequested.js";
 import {
   buildSkuSalesExcelForSkus,
   computeSkuSalesPeriodMetrics,
@@ -32,6 +33,7 @@ export async function getKonkSkuSalesExcelUtil(
   });
   if (resolved.length === 0) return { ok: false };
 
+  const includeImages = input.includeImages === true;
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
   const warmStart = sliceDateMinusDays(dateFrom, 1);
@@ -51,8 +53,10 @@ export async function getKonkSkuSalesExcelUtil(
 
   const competitorTitle = (konkDoc?.title ?? "").trim();
   const rows: SkuSalesExcelSkuRow[] = resolved.map((r) => ({
+    skuId: r._id.toString(),
     title: r.title,
     url: r.url,
+    imageUrl: r.imageUrl,
     productId: r.productId,
     konkName: r.konkName,
     competitorTitle,
@@ -79,12 +83,20 @@ export async function getKonkSkuSalesExcelUtil(
     );
   }
 
+  const previews = await loadSkuPreviewsIfRequested(
+    includeImages,
+    rowsOrdered.map((r) => ({ skuId: r.skuId!, imageUrl: r.imageUrl ?? "" })),
+    progress.onProgress,
+  );
+
   const { buffer } = await buildSkuSalesExcelForSkus(rowsOrdered, dateFrom, dateTo, lookup, {
     summaryMode: "bottomOnly",
     summarySalesLabel: "Загальні продажі, шт",
     summaryRevenueLabel: "Загальна виручка, грн",
     recountDays,
     metrics: input.metrics,
+    includeImages,
+    previews,
     onProgress: progress.onProgress,
   });
 

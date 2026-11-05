@@ -34,8 +34,9 @@ Excel-job — это отложенная выгрузка одного файл
 - Charts и JSON sales-reports не входят в модуль и не меняют контракт.
 - У SKU sales kinds (`sku-one-sales`, `sku-skugr-sales`, `sku-konk-sales`, `sku-selection-sales`) params могут включать `metrics` — выбор строк метрик в XLSX; схема та же, что у старых sales Excel-роутов (selection — без oldPath, сразу excel-jobs).
 - У SKU stock kinds (`sku-one-stock`, `sku-skugr-stock`, `sku-konk-stock`, `sku-selection-stock`) — тот же param `metrics` со значениями `stock` / `price`.
-- Selection kinds принимают `skuIds` (1..100); sales selection добавляет блок часток в XLSX.
-- `sku-skugr-skus-share` не имеет старого URL. Данные — агрегат JSON `skus-sales` за период: строка «Усього», доли штук и выручки, JPEG-превью в worker. Сбой или таймаут картинки оставляет ячейку пустой и не переводит job в failed. `sortBy` меняет только порядок SKU-строк.
+- Selection kinds: либо `skuIds` (≥1, без upper bound), либо `selectAll: true` с фильтрами каталога `search`/`konkName`/`prodName` (XOR). Sales selection добавляет блок часток в XLSX.
+- Multi-SKU kinds (`sku-konk-*`, `sku-skugr-*`, `sku-selection-*`, `sku-skugr-skus-share`) принимают опциональный `includeImages` (default `false`): при `true` слева колонка «Фото» с JPEG-превью до 150×150. Сбой/таймаут картинки — пустая ячейка, job не failed.
+- `sku-skugr-skus-share` не имеет старого URL. Данные — агрегат JSON `skus-sales` за период: строка «Усього», доли штук и выручки; превью только при `includeImages: true`. `sortBy` меняет только порядок SKU-строк.
 
 ## Ограничения
 

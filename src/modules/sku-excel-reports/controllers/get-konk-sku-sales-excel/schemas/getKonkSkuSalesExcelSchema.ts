@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { includeImagesSchema } from "../../../../sku-reporting/schemas/includeImagesSchema.js";
 import { konkProdRangeSchema } from "../../../../sku-reporting/schemas/konkProdRangeSchema.js";
 import { skuSalesExcelMetricsSchema } from "../../../../sku-reporting/schemas/skuSalesExcelMetricsSchema.js";
 
@@ -14,6 +15,7 @@ export const getKonkSkuSalesExcelSchema = konkProdRangeSchema.and(
   z.object({
     sortBy: sortBySchema,
     metrics: skuSalesExcelMetricsSchema,
+    includeImages: includeImagesSchema,
   }),
 );
 
