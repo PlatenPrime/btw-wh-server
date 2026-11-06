@@ -28,14 +28,20 @@ export async function expireAndCleanupExcelJobs(
     return { expired, orphanFilesRemoved };
   }
 
-  const readyJobs = await ExcelJob.find({ status: "ready" }).select("_id").lean();
-  const readyIds = new Set(readyJobs.map((job) => String(job._id)));
+  // Protect ready + running: writeFile happens before status flips to ready
+  // (finalizing window). Orphan sweep must not delete that in-flight file.
+  const protectedJobs = await ExcelJob.find({
+    status: { $in: ["ready", "running"] },
+  })
+    .select("_id")
+    .lean();
+  const protectedIds = new Set(protectedJobs.map((job) => String(job._id)));
   for (const name of names) {
     if (!name.endsWith(".xlsx")) {
       continue;
     }
     const jobId = name.slice(0, -".xlsx".length);
-    if (readyIds.has(jobId)) {
+    if (protectedIds.has(jobId)) {
       continue;
     }
     await fs.unlink(path.join(dir, name)).catch(() => undefined);

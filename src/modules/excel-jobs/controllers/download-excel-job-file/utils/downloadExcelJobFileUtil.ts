@@ -48,6 +48,10 @@ export async function downloadExcelJobFileUtil(input: {
       sizeBytes: stat.size,
     };
   } catch {
+    await ExcelJob.updateOne(
+      { _id: job._id, status: "ready" },
+      { $set: { status: "expired" }, $unset: { filePath: 1 } },
+    );
     return { ok: false, status: 410, message: "Excel job file is missing" };
   }
 }
