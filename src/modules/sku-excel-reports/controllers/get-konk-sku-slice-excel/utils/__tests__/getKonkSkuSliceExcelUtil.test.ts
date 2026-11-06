@@ -61,7 +61,7 @@ describe("getKonkSkuSliceExcelUtil", () => {
     }
   });
 
-  it("filters skus by skugrIds and writes Skugr title into column 5", async () => {
+  it("filters skus by skugrIds and writes Skugr title into column 6", async () => {
     const sA = await Sku.create({
       konkName: "air",
       prodName: "gemar",
@@ -106,7 +106,7 @@ describe("getKonkSkuSliceExcelUtil", () => {
     await wb.xlsx.load(r.buffer as unknown as ArrayBuffer);
     const ws = wb.getWorksheet("Срез");
     expect(ws?.getRow(2).getCell(1).value).toBe("air-slice-skugr-a");
-    expect(ws?.getRow(2).getCell(5).value).toBe("Filtered Group");
+    expect(ws?.getRow(2).getCell(6).value).toBe("Filtered Group");
     let foundB = false;
     ws?.eachRow((row) => {
       if (row.getCell(1).value === "air-slice-skugr-b") foundB = true;
@@ -180,8 +180,8 @@ describe("getKonkSkuSliceExcelUtil", () => {
     await wb.xlsx.load(r.buffer as unknown as ArrayBuffer);
     const ws = wb.getWorksheet("Срез");
     expect(ws?.getRow(2).getCell(1).value).toBe("air-slice-all-p1");
-    expect(ws?.getRow(2).getCell(4).value).toBe("Producer One");
+    expect(ws?.getRow(2).getCell(5).value).toBe("Producer One");
     expect(ws?.getRow(4).getCell(1).value).toBe("air-slice-all-p2");
-    expect(ws?.getRow(4).getCell(4).value).toBe("Producer Two");
+    expect(ws?.getRow(4).getCell(5).value).toBe("Producer Two");
   });
 });

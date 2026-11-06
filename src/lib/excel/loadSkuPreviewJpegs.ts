@@ -1,7 +1,7 @@
 import sharp from "sharp";
 
 /** Keep in sync with SKU_EXCEL_PHOTO_MAX_PX in skuExcelPhoto.ts */
-export const SKU_PREVIEW_MAX_EDGE_PX = 150;
+export const SKU_PREVIEW_MAX_EDGE_PX = 100;
 export const SKU_PREVIEW_JPEG_QUALITY = 75;
 export const SKU_PREVIEW_CONCURRENCY = 8;
 export const SKU_PREVIEW_FETCH_TIMEOUT_MS = 10_000;

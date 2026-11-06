@@ -73,6 +73,7 @@ Pie по произвольному списку SKU (в т.ч. разных к�
     title: string,
     konkName: string,
     productId: string,
+    imageUrl: string,
     salesPcs: number,
     salesUah: number,
     sharePcs: number,

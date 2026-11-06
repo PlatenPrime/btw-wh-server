@@ -36,6 +36,7 @@ export async function getSkuSliceExcelUtil(
     title: sku.title,
     url: sku.url,
     productId: productKey,
+    artikul: (sku.artikul ?? "").trim(),
     konkName: sku.konkName,
     prodName: sku.prodName,
     createdAt: sku.createdAt,

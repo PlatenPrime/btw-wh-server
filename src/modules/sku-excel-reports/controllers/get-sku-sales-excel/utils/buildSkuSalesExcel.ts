@@ -31,6 +31,7 @@ import { computeSharePercent } from "../../../../sku-reporting/utils/computeShar
 
 const HEADER_LABELS = [
   "Ідентифікатор товару",
+  "Артикул",
   "Назва",
   "Конкурент",
   "Виробник",
@@ -51,6 +52,7 @@ export type SkuSalesExcelSkuRow = {
   title: string;
   url: string;
   productId: string;
+  artikul?: string;
   konkName: string;
   competitorTitle: string;
   producerName: string;
@@ -322,11 +324,12 @@ export async function buildSkuSalesExcelForSkus(
 
     const firstRow = sheet.getRow(startRow);
     firstRow.getCell(firstMetaCol).value = sku.productId;
-    firstRow.getCell(firstMetaCol + 1).value = sku.title;
-    firstRow.getCell(firstMetaCol + 2).value = sku.competitorTitle;
-    firstRow.getCell(firstMetaCol + 3).value = sku.producerName;
-    firstRow.getCell(firstMetaCol + 4).value = sku.skugrTitle ?? "";
-    firstRow.getCell(firstMetaCol + 5).value = sku.url;
+    firstRow.getCell(firstMetaCol + 1).value = sku.artikul ?? "";
+    firstRow.getCell(firstMetaCol + 2).value = sku.title;
+    firstRow.getCell(firstMetaCol + 3).value = sku.competitorTitle;
+    firstRow.getCell(firstMetaCol + 4).value = sku.producerName;
+    firstRow.getCell(firstMetaCol + 5).value = sku.skugrTitle ?? "";
+    firstRow.getCell(firstMetaCol + 6).value = sku.url;
 
     for (let m = 0; m < selectedMetrics.length; m++) {
       const metric = selectedMetrics[m]!;

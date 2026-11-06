@@ -60,6 +60,7 @@ export async function getSelectionSkuSalesExcelUtil(
     url: r.url,
     imageUrl: r.imageUrl,
     productId: r.productId,
+    artikul: r.artikul,
     konkName: r.konkName,
     competitorTitle: konkMetaByName.get(r.konkName)?.title ?? r.konkName,
     producerName: prodTitleByName.get(r.prodName) ?? r.prodName,

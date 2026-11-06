@@ -59,6 +59,7 @@ describe("getSelectionSkusPieDataController", () => {
           title: "Item",
           konkName: "air",
           productId: "air-1",
+          imageUrl: "https://cdn.example/item.png",
           salesPcs: 2,
           salesUah: 20,
           sharePcs: 100,

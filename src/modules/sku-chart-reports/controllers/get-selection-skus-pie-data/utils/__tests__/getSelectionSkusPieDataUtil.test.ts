@@ -32,6 +32,7 @@ describe("getSelectionSkusPieDataUtil", () => {
       productId: "air-p",
       title: "Air item",
       url: "https://e.com/air-p",
+      imageUrl: "https://cdn.example/air.png",
     });
     const balun = await Sku.create({
       konkName: "balun",
@@ -39,6 +40,7 @@ describe("getSelectionSkusPieDataUtil", () => {
       productId: "balun-p",
       title: "Balun item",
       url: "https://e.com/balun-p",
+      imageUrl: "",
     });
 
     await seedSkuSliceMonthDay("air", d0, { "air-p": { stock: 10, price: 5 } });
@@ -67,12 +69,14 @@ describe("getSelectionSkusPieDataUtil", () => {
       title: "Air item",
       konkName: "air",
       productId: "air-p",
+      imageUrl: "https://cdn.example/air.png",
       salesPcs: 5,
       salesUah: 25,
       sharePcs: 50,
       shareUah: 33.33,
     });
     expect(result.data[balun._id.toString()]).toMatchObject({
+      imageUrl: "",
       salesPcs: 5,
       salesUah: 50,
       sharePcs: 50,

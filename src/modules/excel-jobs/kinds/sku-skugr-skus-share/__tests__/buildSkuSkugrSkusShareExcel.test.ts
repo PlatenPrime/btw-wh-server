@@ -19,6 +19,7 @@ function sku(
   return {
     title: partial.title ?? partial.skuId,
     productId: partial.productId ?? partial.skuId,
+    artikul: partial.artikul ?? "",
     imageUrl: partial.imageUrl ?? "",
     salesPcs: partial.salesPcs ?? 0,
     salesUah: partial.salesUah ?? 0,
@@ -36,7 +37,7 @@ async function loadSheet(buffer: Buffer): Promise<ExcelJS.Worksheet> {
 
 describe("share excel helpers", () => {
   it("sizes a photo row in points without shrinking below the default", () => {
-    expect(previewRowHeightPt(150)).toBe(112.5);
+    expect(previewRowHeightPt(100)).toBe(75);
     expect(previewRowHeightPt(10)).toBe(15);
   });
 
@@ -61,16 +62,17 @@ describe("buildSkuSkugrSkusShareExcel", () => {
       includeImages: true,
       all: { title: "Усього", salesPcs: 4, salesUah: 40 },
       rows: [
-        sku({ skuId: "a", title: "A", salesPcs: 1, salesUah: 10 }),
+        sku({ skuId: "a", title: "A", artikul: "A-1", salesPcs: 1, salesUah: 10 }),
         sku({
           skuId: "b",
           title: "B",
+          artikul: "B-2",
           salesPcs: 3,
           salesUah: 30,
           imageUrl: "https://cdn.example/b.jpg",
         }),
       ],
-      previews: new Map([["b", { buffer: JPEG, width: 150, height: 100 }]]),
+      previews: new Map([["b", { buffer: JPEG, width: 100, height: 100 }]]),
     });
 
     expect(built.fileName).toBe(
@@ -85,26 +87,29 @@ describe("buildSkuSkugrSkusShareExcel", () => {
     const total = sheet.getRow(2);
     expect(total.getCell(1).value).toBeNull();
     expect(total.getCell(2).value).toBe("Усього");
-    expect(total.getCell(3).value).toBe(4);
-    expect(total.getCell(4).value).toBe(40);
-    expect(total.getCell(5).value).toBe(100);
+    expect(total.getCell(3).value).toBe("");
+    expect(total.getCell(4).value).toBe(4);
+    expect(total.getCell(5).value).toBe(40);
     expect(total.getCell(6).value).toBe(100);
-    expect(total.getCell(5).numFmt).toBe("0.00");
+    expect(total.getCell(7).value).toBe(100);
     expect(total.getCell(6).numFmt).toBe("0.00");
+    expect(total.getCell(7).numFmt).toBe("0.00");
     expect(total.getCell(2).font?.bold).toBe(true);
 
     const first = sheet.getRow(3);
     expect(first.getCell(2).value).toBe("A");
-    expect(first.getCell(5).value).toBe(25);
+    expect(first.getCell(3).value).toBe("A-1");
     expect(first.getCell(6).value).toBe(25);
-    expect(first.getCell(5).numFmt).toBe("0.00");
+    expect(first.getCell(7).value).toBe(25);
+    expect(first.getCell(6).numFmt).toBe("0.00");
     expect(first.height == null || first.height === 15).toBe(true);
 
     const second = sheet.getRow(4);
     expect(second.getCell(2).value).toBe("B");
-    expect(second.getCell(3).value).toBe(3);
-    expect(second.getCell(5).value).toBe(75);
+    expect(second.getCell(3).value).toBe("B-2");
+    expect(second.getCell(4).value).toBe(3);
     expect(second.getCell(6).value).toBe(75);
+    expect(second.getCell(7).value).toBe(75);
     expect(second.height).toBe(previewRowHeightPt(100));
 
     const images = sheet.getImages();
@@ -114,7 +119,7 @@ describe("buildSkuSkugrSkusShareExcel", () => {
       ext?: { width?: number; height?: number };
     };
     expect(range.tl.nativeRow).toBe(3);
-    expect(range.ext?.width).toBeCloseTo(150);
+    expect(range.ext?.width).toBeCloseTo(100);
     expect(range.ext?.height).toBeCloseTo(100);
   });
 
@@ -125,13 +130,15 @@ describe("buildSkuSkugrSkusShareExcel", () => {
       dateTo: "2026-10-26",
       includeImages: false,
       all: { title: "Усього", salesPcs: 1, salesUah: 10 },
-      rows: [sku({ skuId: "a", title: "A", salesPcs: 1, salesUah: 10 })],
-      previews: new Map([["a", { buffer: JPEG, width: 150, height: 100 }]]),
+      rows: [sku({ skuId: "a", title: "A", artikul: "X", salesPcs: 1, salesUah: 10 })],
+      previews: new Map([["a", { buffer: JPEG, width: 100, height: 100 }]]),
     });
     const sheet = await loadSheet(built.buffer);
     expect(sheet.getRow(1).getCell(1).value).toBe("Товар");
+    expect(sheet.getRow(1).getCell(2).value).toBe("Артикул");
     expect(sheet.getRow(2).getCell(1).value).toBe("Усього");
     expect(sheet.getRow(3).getCell(1).value).toBe("A");
+    expect(sheet.getRow(3).getCell(2).value).toBe("X");
     expect(sheet.getImages()).toHaveLength(0);
   });
 
@@ -145,10 +152,10 @@ describe("buildSkuSkugrSkusShareExcel", () => {
       previews: new Map(),
     });
     const sheet = await loadSheet(built.buffer);
-    expect(sheet.getRow(2).getCell(4).value).toBe(0);
     expect(sheet.getRow(2).getCell(5).value).toBe(0);
-    expect(sheet.getRow(3).getCell(4).value).toBe(0);
+    expect(sheet.getRow(2).getCell(6).value).toBe(0);
     expect(sheet.getRow(3).getCell(5).value).toBe(0);
+    expect(sheet.getRow(3).getCell(6).value).toBe(0);
     expect(sheet.getImages()).toHaveLength(0);
   });
 
@@ -162,8 +169,8 @@ describe("buildSkuSkugrSkusShareExcel", () => {
       previews: new Map(),
     });
     const sheet = await loadSheet(built.buffer);
-    expect(sheet.getRow(2).getCell(4).value).toBe(0);
-    expect(sheet.getRow(2).getCell(5).value).toBe(100);
+    expect(sheet.getRow(2).getCell(5).value).toBe(0);
+    expect(sheet.getRow(2).getCell(6).value).toBe(100);
     expect(sheet.getRow(3).getCell(1).value ?? null).toBeNull();
   });
 });

@@ -44,6 +44,7 @@ export async function getSkuSalesExcelUtil(
     title: sku.title,
     url: sku.url,
     productId: productKey,
+    artikul: (sku.artikul ?? "").trim(),
     konkName: sku.konkName,
     competitorTitle: (konkDoc?.title ?? "").trim(),
     producerName: (prodDoc?.title ?? "").trim(),

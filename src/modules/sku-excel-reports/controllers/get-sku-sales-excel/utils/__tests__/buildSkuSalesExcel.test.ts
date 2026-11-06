@@ -10,6 +10,7 @@ const SKU: SkuSalesExcelSkuRow = {
   title: "Item",
   url: "https://e.com/i",
   productId: "air-1",
+  artikul: "ART-1",
   konkName: "air",
   competitorTitle: "Air UA",
   producerName: "Maker",
@@ -57,6 +58,8 @@ describe("buildSkuSalesExcelForSkus", () => {
     const sheet = workbook.getWorksheet("Продажі");
     expect(sheet).toBeDefined();
     expect(sheet!.getRow(1).getCell(1).value).toBe("Ідентифікатор товару");
+    expect(sheet!.getRow(1).getCell(2).value).toBe("Артикул");
+    expect(sheet!.getRow(2).getCell(2).value).toBe("ART-1");
   });
 
   it("reports onProgress once per sku", async () => {
@@ -91,9 +94,9 @@ describe("buildSkuSalesExcelForSkus", () => {
     await workbook.xlsx.load(buffer as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
     const sheet = workbook.getWorksheet("Продажі");
     expect(sheet).toBeDefined();
-    expect(sheet!.getRow(2).getCell(7).value).toBe("Виручка");
-    expect(sheet!.getRow(3).getCell(7).value).not.toBe("Продажі");
-    expect(sheet!.getRow(3).getCell(7).value).not.toBe("Ціна");
+    expect(sheet!.getRow(2).getCell(8).value).toBe("Виручка");
+    expect(sheet!.getRow(3).getCell(8).value).not.toBe("Продажі");
+    expect(sheet!.getRow(3).getCell(8).value).not.toBe("Ціна");
     expect(sheet!.getRow(3).getCell(1).value).toBe("Виручка конкурента (всього), грн");
   });
 
@@ -112,9 +115,9 @@ describe("buildSkuSalesExcelForSkus", () => {
     await workbook.xlsx.load(buffer as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
     const sheet = workbook.getWorksheet("Продажі");
     expect(sheet).toBeDefined();
-    expect(sheet!.getRow(2).getCell(7).value).toBe("Продажі");
-    expect(sheet!.getRow(3).getCell(7).value).toBe("Ціна");
-    expect(sheet!.getRow(4).getCell(7).value).not.toBe("Виручка");
+    expect(sheet!.getRow(2).getCell(8).value).toBe("Продажі");
+    expect(sheet!.getRow(3).getCell(8).value).toBe("Ціна");
+    expect(sheet!.getRow(4).getCell(8).value).not.toBe("Виручка");
     expect(sheet!.getRow(4).getCell(1).value).toBe("Продажі конкурента (всього), шт");
     expect(sheet!.getRow(5).getCell(1).value).not.toBe("Виручка конкурента (всього), грн");
   });
@@ -131,9 +134,9 @@ describe("buildSkuSalesExcelForSkus", () => {
     await workbook.xlsx.load(buffer as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
     const sheet = workbook.getWorksheet("Продажі");
     expect(sheet).toBeDefined();
-    expect(sheet!.getRow(2).getCell(7).value).toBe("Продажі");
-    expect(sheet!.getRow(3).getCell(7).value).toBe("Ціна");
-    expect(sheet!.getRow(4).getCell(7).value).toBe("Виручка");
+    expect(sheet!.getRow(2).getCell(8).value).toBe("Продажі");
+    expect(sheet!.getRow(3).getCell(8).value).toBe("Ціна");
+    expect(sheet!.getRow(4).getCell(8).value).toBe("Виручка");
   });
 
   it("uses recountDaysByKonk per sku konkName", async () => {
@@ -172,8 +175,8 @@ describe("buildSkuSalesExcelForSkus", () => {
     await workbook.xlsx.load(buffer as unknown as Parameters<ExcelJS.Workbook["xlsx"]["load"]>[0]);
     const sheet = workbook.getWorksheet("Продажі")!;
     // air recount → sales 0; balun → sales 2; share block after summary
-    expect(sheet.getRow(2).getCell(9).value).toBe(0);
-    expect(sheet.getRow(3).getCell(9).value).toBe(2);
+    expect(sheet.getRow(2).getCell(10).value).toBe(0);
+    expect(sheet.getRow(3).getCell(10).value).toBe(2);
 
     let shareTitleRow = 0;
     for (let r = 1; r <= 20; r++) {

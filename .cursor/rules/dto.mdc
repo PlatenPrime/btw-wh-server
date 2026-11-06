@@ -1,0 +1,10 @@
+---
+description: DTO mapping — imageUrl and response shapes
+alwaysApply: true
+---
+
+Если у сущности в модели есть ссылка на изображение (`imageUrl`, `images` и аналогичные поля), в API DTO и в `{ message, data }` payload этой сущности поле обязательно включать. Пустая строка или `null` — по принятому в конкретном эндпоинте контракту.
+
+Short/урезанные DTO — исключение только если omission полей задокументирован явно (тип ShortDto, комментарий/док).
+
+При изменении формы ответа актуализируй `docs/api/*.md` (см. docs.mdc).

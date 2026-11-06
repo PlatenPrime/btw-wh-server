@@ -9,6 +9,7 @@ async function createSku(opts: {
   productId: string;
   title: string;
   imageUrl?: string;
+  artikul?: string;
 }): Promise<Types.ObjectId> {
   const doc = await Sku.create({
     konkName: opts.konkName,
@@ -17,6 +18,7 @@ async function createSku(opts: {
     title: opts.title,
     url: `https://e.com/${opts.productId}`,
     imageUrl: opts.imageUrl ?? "",
+    artikul: opts.artikul ?? "",
   });
   return doc._id;
 }
@@ -58,6 +60,7 @@ describe("resolveSelectionSkus", () => {
       productId: "1",
       title: "Apple",
       imageUrl: "https://cdn.example/a.jpg",
+      artikul: "APL-1",
     });
     await createSku({
       konkName: "other",
@@ -73,6 +76,7 @@ describe("resolveSelectionSkus", () => {
     });
     expect(rows.map((r) => r.title)).toEqual(["Apple", "Zebra"]);
     expect(rows[0]!.imageUrl).toBe("https://cdn.example/a.jpg");
+    expect(rows[0]!.artikul).toBe("APL-1");
   });
 
   it("selectAll with search returns matches only", async () => {

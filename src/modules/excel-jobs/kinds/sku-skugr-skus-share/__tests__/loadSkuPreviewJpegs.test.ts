@@ -152,7 +152,7 @@ describe("fetchSkuImageBytes", () => {
 });
 
 describe("resizeImageToPreviewJpeg", () => {
-  it("fits inside 150 and does not upscale", async () => {
+  it("fits inside 100 and does not upscale", async () => {
     const wide = await sharp({
       create: { width: 300, height: 100, channels: 3, background: { r: 10, g: 20, b: 30 } },
     })
@@ -173,8 +173,8 @@ describe("resizeImageToPreviewJpeg", () => {
     const tallPreview = await resizeImageToPreviewJpeg(tall);
     const smallPreview = await resizeImageToPreviewJpeg(small);
 
-    expect(widePreview).toMatchObject({ width: 150, height: 50 });
-    expect(tallPreview).toMatchObject({ width: 50, height: 150 });
+    expect(widePreview).toMatchObject({ width: 100, height: 33 });
+    expect(tallPreview).toMatchObject({ width: 33, height: 100 });
     expect(smallPreview).toMatchObject({ width: 50, height: 40 });
     expect(widePreview?.buffer.subarray(0, 2).toString("hex")).toBe("ffd8");
     expect(widePreview?.buffer.equals(wide)).toBe(false);
@@ -225,7 +225,7 @@ describe("loadSkuPreviewJpegs", () => {
       },
     );
     expect(previews.has("bad")).toBe(false);
-    expect(previews.get("ok")).toMatchObject({ width: 150, height: 38 });
+    expect(previews.get("ok")).toMatchObject({ width: 100, height: 25 });
     expect(previews.get("ok")?.buffer.equals(png)).toBe(false);
   });
 

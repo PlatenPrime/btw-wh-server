@@ -58,6 +58,7 @@ export async function getKonkSkuSalesExcelUtil(
     url: r.url,
     imageUrl: r.imageUrl,
     productId: r.productId,
+    artikul: r.artikul,
     konkName: r.konkName,
     competitorTitle,
     producerName: prodTitleByName.get(r.prodName) ?? r.prodName,

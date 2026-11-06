@@ -22,6 +22,7 @@ export type ResolvedSkuRow = {
   konkName: string;
   prodName: string;
   productId: string;
+  artikul: string;
   title: string;
   url: string;
   imageUrl: string;
@@ -42,6 +43,7 @@ type SkuLean = {
   konkName: string;
   prodName: string;
   productId: string;
+  artikul?: string;
   title: string;
   url: string;
   imageUrl?: string;
@@ -71,7 +73,7 @@ async function resolveByKonkProd(input: ResolveKonkProdSkusInput): Promise<Resol
 
   const skus = await Sku.find(skuFilter)
     .sort({ productId: 1 })
-    .select("konkName prodName productId title url imageUrl createdAt")
+    .select("konkName prodName productId artikul title url imageUrl createdAt")
     .lean<SkuLean[]>();
 
   if (skus.length === 0) return [];
@@ -108,6 +110,7 @@ async function resolveByKonkProd(input: ResolveKonkProdSkusInput): Promise<Resol
       konkName: sku.konkName,
       prodName: sku.prodName,
       productId,
+      artikul: (sku.artikul ?? "").trim(),
       title: sku.title,
       url: sku.url,
       imageUrl: (sku.imageUrl ?? "").trim(),
@@ -169,7 +172,7 @@ async function resolveBySkugrIds(
   }
 
   const skuDocs = await Sku.find(skuFilter)
-    .select("konkName prodName productId title url imageUrl createdAt")
+    .select("konkName prodName productId artikul title url imageUrl createdAt")
     .lean<SkuLean[]>();
 
   const skuById = new Map(skuDocs.map((s) => [s._id.toString(), s] as const));
@@ -189,6 +192,7 @@ async function resolveBySkugrIds(
       konkName: sku.konkName,
       prodName: sku.prodName,
       productId,
+      artikul: (sku.artikul ?? "").trim(),
       title: sku.title,
       url: sku.url,
       imageUrl: (sku.imageUrl ?? "").trim(),

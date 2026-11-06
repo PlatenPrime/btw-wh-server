@@ -1,7 +1,7 @@
 import type ExcelJS from "exceljs";
 
 /** Keep in sync with SKU_PREVIEW_MAX_EDGE_PX in loadSkuPreviewJpegs.ts */
-export const SKU_EXCEL_PHOTO_MAX_PX = 150;
+export const SKU_EXCEL_PHOTO_MAX_PX = 100;
 export const SKU_EXCEL_PHOTO_HEADER = "Фото";
 
 const DEFAULT_ROW_HEIGHT_PT = 15;

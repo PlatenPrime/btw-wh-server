@@ -37,6 +37,7 @@ export async function getKonkSkuSliceExcelUtil(
     url: r.url,
     imageUrl: r.imageUrl,
     productId: r.productId,
+    artikul: r.artikul,
     konkName: r.konkName,
     prodName: r.prodName,
     producerName: prodTitleByName.get(r.prodName) ?? r.prodName,

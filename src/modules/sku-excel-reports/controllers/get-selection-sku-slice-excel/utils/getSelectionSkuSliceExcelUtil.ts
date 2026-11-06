@@ -44,6 +44,7 @@ export async function getSelectionSkuSliceExcelUtil(
     url: r.url,
     imageUrl: r.imageUrl,
     productId: r.productId,
+    artikul: r.artikul,
     konkName: r.konkName,
     prodName: r.prodName,
     competitorTitle: konkMetaByName.get(r.konkName)?.title ?? r.konkName,

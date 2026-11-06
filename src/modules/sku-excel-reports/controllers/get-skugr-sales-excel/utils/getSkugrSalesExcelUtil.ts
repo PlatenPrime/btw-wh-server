@@ -55,6 +55,7 @@ export async function getSkugrSalesExcelUtil(
     url: sku.url,
     imageUrl: sku.imageUrl,
     productId: sku.productId,
+    artikul: sku.artikul,
     konkName: sku.konkName,
     competitorTitle,
     producerName,

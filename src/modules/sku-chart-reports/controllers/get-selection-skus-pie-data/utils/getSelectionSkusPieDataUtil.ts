@@ -10,6 +10,7 @@ export type SelectionSkuPieItem = {
   title: string;
   konkName: string;
   productId: string;
+  imageUrl: string;
   salesPcs: number;
   salesUah: number;
   sharePcs: number;
@@ -72,6 +73,7 @@ export async function getSelectionSkusPieDataUtil(
       title: sku.title,
       konkName: sku.konkName,
       productId: sku.productId,
+      imageUrl: sku.imageUrl,
       salesPcs: m.salesPcs,
       salesUah: m.salesUah,
       sharePcs: computeSharePercent(m.salesPcs, totalPcs),

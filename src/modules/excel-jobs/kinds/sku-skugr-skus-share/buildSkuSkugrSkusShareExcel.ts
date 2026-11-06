@@ -14,6 +14,7 @@ export const SKU_SKUGR_SKUS_SHARE_SHEET_NAME = "Дані";
 
 export const SKU_SKUGR_SKUS_SHARE_DATA_HEADERS = [
   "Товар",
+  "Артикул",
   "Продажі, шт",
   "Виручка, грн",
   "Частка за продажами, %",
@@ -56,10 +57,10 @@ function writeShareCells(
   salesUah: number,
   all: SkugrSkusShareTotal,
 ): void {
-  row.getCell(titleCol + 3).value = computeSharePercent(salesPcs, all.salesPcs);
-  row.getCell(titleCol + 4).value = computeSharePercent(salesUah, all.salesUah);
-  row.getCell(titleCol + 3).numFmt = SHARE_NUM_FMT;
+  row.getCell(titleCol + 4).value = computeSharePercent(salesPcs, all.salesPcs);
+  row.getCell(titleCol + 5).value = computeSharePercent(salesUah, all.salesUah);
   row.getCell(titleCol + 4).numFmt = SHARE_NUM_FMT;
+  row.getCell(titleCol + 5).numFmt = SHARE_NUM_FMT;
 }
 
 export async function buildSkuSkugrSkusShareExcel(input: {
@@ -93,25 +94,28 @@ export async function buildSkuSkugrSkusShareExcel(input: {
   sheet.getColumn(titleCol).width = 40;
   sheet.getColumn(titleCol + 1).width = 16;
   sheet.getColumn(titleCol + 2).width = 16;
-  sheet.getColumn(titleCol + 3).width = 26;
+  sheet.getColumn(titleCol + 3).width = 16;
   sheet.getColumn(titleCol + 4).width = 26;
+  sheet.getColumn(titleCol + 5).width = 26;
 
   const totalRow = sheet.getRow(2);
   totalRow.getCell(titleCol).value = input.all.title;
-  totalRow.getCell(titleCol + 1).value = input.all.salesPcs;
-  totalRow.getCell(titleCol + 2).value = input.all.salesUah;
-  totalRow.getCell(titleCol + 3).value = totalSharePercent(input.all.salesPcs);
-  totalRow.getCell(titleCol + 4).value = totalSharePercent(input.all.salesUah);
-  totalRow.getCell(titleCol + 3).numFmt = SHARE_NUM_FMT;
+  totalRow.getCell(titleCol + 1).value = "";
+  totalRow.getCell(titleCol + 2).value = input.all.salesPcs;
+  totalRow.getCell(titleCol + 3).value = input.all.salesUah;
+  totalRow.getCell(titleCol + 4).value = totalSharePercent(input.all.salesPcs);
+  totalRow.getCell(titleCol + 5).value = totalSharePercent(input.all.salesUah);
   totalRow.getCell(titleCol + 4).numFmt = SHARE_NUM_FMT;
+  totalRow.getCell(titleCol + 5).numFmt = SHARE_NUM_FMT;
   totalRow.font = { bold: true };
 
   input.rows.forEach((sku, index) => {
     const rowNumber = 3 + index;
     const excelRow = sheet.getRow(rowNumber);
     excelRow.getCell(titleCol).value = sku.title;
-    excelRow.getCell(titleCol + 1).value = sku.salesPcs;
-    excelRow.getCell(titleCol + 2).value = sku.salesUah;
+    excelRow.getCell(titleCol + 1).value = sku.artikul ?? "";
+    excelRow.getCell(titleCol + 2).value = sku.salesPcs;
+    excelRow.getCell(titleCol + 3).value = sku.salesUah;
     writeShareCells(excelRow, titleCol, sku.salesPcs, sku.salesUah, input.all);
 
     if (!includeImages) return;

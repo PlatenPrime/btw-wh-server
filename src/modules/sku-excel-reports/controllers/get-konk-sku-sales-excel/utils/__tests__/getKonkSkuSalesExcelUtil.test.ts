@@ -132,7 +132,7 @@ describe("getKonkSkuSalesExcelUtil", () => {
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(result.buffer as unknown as ArrayBuffer);
     const ws = wb.getWorksheet("Продажі");
-    expect(ws?.getRow(1).getCell(8).value).toBe(formatExcelDateHeaderUk(d1));
+    expect(ws?.getRow(1).getCell(9).value).toBe(formatExcelDateHeaderUk(d1));
     expect(ws?.getRow(2).getCell(1).value).toBe("zzz-high-revenue");
     expect(ws?.getRow(5).getCell(1).value).toBe("aaa-many-sales");
   });
@@ -184,7 +184,7 @@ describe("getKonkSkuSalesExcelUtil", () => {
     expect(ws?.getRow(5).getCell(1).value).toBe("zzz-high-sales");
   });
 
-  it("filters skus by skugrIds and writes Skugr title into column 5", async () => {
+  it("filters skus by skugrIds and writes Skugr title into column 6", async () => {
     const sA = await Sku.create({
       konkName: "air",
       prodName: "gemar",
@@ -243,7 +243,7 @@ describe("getKonkSkuSalesExcelUtil", () => {
     const ws = wb.getWorksheet("Продажі");
     expect(ws?.getRow(2).getCell(1).value).toBe("air-skugr-a");
     expect(ws?.getRow(5).getCell(1).value).toBe("air-skugr-b");
-    expect(ws?.getRow(2).getCell(5).value).toBe("Selected Group");
+    expect(ws?.getRow(2).getCell(6).value).toBe("Selected Group");
     let found = false;
     ws?.eachRow((row) => {
       if (row.getCell(1).value === "air-skugr-c") found = true;
@@ -278,7 +278,7 @@ describe("getKonkSkuSalesExcelUtil", () => {
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(result.buffer as unknown as ArrayBuffer);
     const ws = wb.getWorksheet("Продажі");
-    const dataCol = 8;
+    const dataCol = 9;
 
     expect(ws?.getRow(2).getCell(dataCol).value).toBe(3);
     expect(ws?.getRow(4).getCell(dataCol).value).toBe(15);
@@ -357,8 +357,8 @@ describe("getKonkSkuSalesExcelUtil", () => {
     await wb.xlsx.load(result.buffer as unknown as ArrayBuffer);
     const ws = wb.getWorksheet("Продажі");
     expect(ws?.getRow(2).getCell(1).value).toBe("air-all-p1");
-    expect(ws?.getRow(2).getCell(4).value).toBe("Producer One");
+    expect(ws?.getRow(2).getCell(5).value).toBe("Producer One");
     expect(ws?.getRow(5).getCell(1).value).toBe("air-all-p2");
-    expect(ws?.getRow(5).getCell(4).value).toBe("Producer Two");
+    expect(ws?.getRow(5).getCell(5).value).toBe("Producer Two");
   });
 });
