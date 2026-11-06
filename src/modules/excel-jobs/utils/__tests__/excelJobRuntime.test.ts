@@ -76,6 +76,46 @@ describe("excel job runtime utils", () => {
     expect(result.orphanFilesRemoved).toBeGreaterThanOrEqual(1);
   });
 
+  it("expireAndCleanupExcelJobs keeps file for running job during finalizing", async () => {
+    await ensureExcelJobsDir();
+    const running = await ExcelJob.create({
+      userId: "u1",
+      kind: "grabo-skus",
+      params: {},
+      status: "running",
+      phase: "finalizing",
+      progress: 95,
+      expiresAt: new Date(Date.now() + 60_000),
+    });
+    const runningPath = getExcelJobFilePath(String(running._id));
+    await fs.writeFile(runningPath, Buffer.from("in-flight"));
+
+    await expireAndCleanupExcelJobs(new Date());
+    await expect(fs.stat(runningPath)).resolves.toBeDefined();
+
+    await fs.unlink(runningPath).catch(() => undefined);
+  });
+
+  it("expireAndCleanupExcelJobs removes leftover file for failed job", async () => {
+    await ensureExcelJobsDir();
+    const failed = await ExcelJob.create({
+      userId: "u1",
+      kind: "grabo-skus",
+      params: {},
+      status: "failed",
+      phase: "finalizing",
+      progress: 100,
+      error: "boom",
+      expiresAt: new Date(Date.now() + 60_000),
+    });
+    const failedPath = getExcelJobFilePath(String(failed._id));
+    await fs.writeFile(failedPath, Buffer.from("leftover"));
+
+    const result = await expireAndCleanupExcelJobs(new Date());
+    expect(result.orphanFilesRemoved).toBeGreaterThanOrEqual(1);
+    await expect(fs.stat(failedPath)).rejects.toMatchObject({ code: "ENOENT" });
+  });
+
   it("queue position is 0 for running and 1+ for queued", async () => {
     let release!: () => void;
     const gate = new Promise<void>((resolve) => {

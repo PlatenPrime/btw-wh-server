@@ -71,7 +71,7 @@ describe("downloadExcelJobFileUtil", () => {
     await fs.unlink(filePath).catch(() => undefined);
   });
 
-  it("410 when ready file is missing on disk", async () => {
+  it("410 when ready file is missing on disk and marks job expired", async () => {
     const job = await ExcelJob.create({
       userId: "u1",
       kind: "grabo-skus",
@@ -87,6 +87,12 @@ describe("downloadExcelJobFileUtil", () => {
       token,
     });
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.status).toBe(410);
+    if (!result.ok) {
+      expect(result.status).toBe(410);
+      expect(result.message).toBe("Excel job file is missing");
+    }
+    const reloaded = await ExcelJob.findById(job._id);
+    expect(reloaded?.status).toBe("expired");
+    expect(reloaded?.filePath).toBeUndefined();
   });
 });
