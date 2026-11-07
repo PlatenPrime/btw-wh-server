@@ -1,5 +1,5 @@
 https://partymall.ua/vozdushnyje-shary-pastjel-bjelyj-10-25-sm-gemar
-stock: 23
+stock: 23 * 100 = 2300
 price: 170.04 / 100 = 1.70 грн
 artikul: G90 01
 

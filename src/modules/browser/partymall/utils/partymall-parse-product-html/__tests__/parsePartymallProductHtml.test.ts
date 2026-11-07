@@ -13,15 +13,15 @@ function readFixture(name: string): string {
 }
 
 describe("parsePartymallProductHtml", () => {
-  it("sku-page: in-stock with pack divides price, stock as-is", () => {
+  it("sku-page: in-stock with pack divides price and multiplies stock", () => {
     const result = parsePartymallProductHtml(readFixture("sku-page.txt"));
-    expect(result).toMatchObject({ stock: 23, price: 1.7, artikul: "G90 01" });
+    expect(result).toMatchObject({ stock: 2300, price: 1.7, artikul: "G90 01" });
     expect(result.title).toContain("Gemar");
   });
 
-  it("sku-page-sale: uses sale price / pack", () => {
+  it("sku-page-sale: uses sale price / pack and stock × pack", () => {
     const result = parsePartymallProductHtml(readFixture("sku-page-sale.txt"));
-    expect(result).toMatchObject({ stock: 2, price: 5.29, artikul: "3256-0003" });
+    expect(result).toMatchObject({ stock: 20, price: 5.29, artikul: "3256-0003" });
   });
 
   it("sku-page-soldout: stock 0 with per-piece price", () => {
@@ -80,7 +80,7 @@ describe("parsePartymallProductHtml", () => {
       </div>
     </body></html>`;
     expect(parsePartymallProductHtml(html)).toMatchObject({
-      stock: 5,
+      stock: 50,
       price: 1,
       artikul: "ART-1",
     });

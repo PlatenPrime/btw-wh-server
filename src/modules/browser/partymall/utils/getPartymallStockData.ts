@@ -8,7 +8,7 @@ export { extractPartymallPackCount } from "./partymall-pack-count/extractPartyma
 export { parsePartymallProductHtml } from "./partymall-parse-product-html/parsePartymallProductHtml.js";
 
 /**
- * Остаток с витрины и цена за штуку со страницы товара partymall.ua.
+ * Остаток в штуках и цена за штуку со страницы товара partymall.ua.
  * @param link — URL страницы товара
  * @throws Error при пустом/не-строковом link
  */

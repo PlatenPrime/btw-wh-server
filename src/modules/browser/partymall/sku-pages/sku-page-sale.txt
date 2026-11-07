@@ -1,5 +1,5 @@
 https://partymall.ua/m-n-upakovka-sharov-likee-bjelyj-12-10-shtuk
-stock: 2
+stock: 2 * 10 = 20
 price: 52.88 / 10 = 5.29 грн
 artikul: 3256-0003
 

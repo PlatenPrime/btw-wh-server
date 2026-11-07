@@ -91,8 +91,8 @@ function parseStock($product: BrowserCheerio): number | null {
 }
 
 /**
- * Парсит HTML карточки partymall.ua: цена за штуку и остаток с витрины.
- * Pack attr делит цену; stock не умножается. Wholesale tiers игнорируются.
+ * Парсит HTML карточки partymall.ua: цена за штуку и остаток в штуках.
+ * Pack attr делит цену и умножает stock. Wholesale tiers игнорируются.
  */
 export function parsePartymallProductHtml(html: string): PartymallProductInfo {
   if (!html || typeof html !== "string") {
@@ -123,8 +123,9 @@ export function parsePartymallProductHtml(html: string): PartymallProductInfo {
   }
 
   const packCount = extractPartymallPackCount($);
-  const divisor = packCount !== null && packCount > 0 ? packCount : 1;
-  const price = toMoney(packagePrice / divisor);
+  const factor = packCount !== null && packCount > 0 ? packCount : 1;
+  const price = toMoney(packagePrice / factor);
+  const pieceStock = stock * factor;
 
-  return withMeta({ stock, price }, title, artikul);
+  return withMeta({ stock: pieceStock, price }, title, artikul);
 }

@@ -87,7 +87,7 @@ CSRF для add: токен из HTML, иначе cookie `csrf_token_company_sit
 
 ### Partymall: OpenCart / oct_deals (partymall.ua)
 
-Источник стока — HTML главной карточки (`#product`). Цена витрины — `.ds-product-main-price .ds-price-new` (базовая/акционная; оптовые ступени `.product-discount-line` игнорируются). Остаток — число из `.ds-product-main-stock` as-is (включая `0` при OOS). Фасовка только из характеристики «Кількість в упаковці»: делит цену на pack, **не** умножает stock; без атрибута pack не угадывается из title. Artikul — `#product-model-*` (не SEO `код:` из `<title>`).
+Источник стока — HTML главной карточки (`#product`). Цена витрины — `.ds-product-main-price .ds-price-new` (базовая/акционная; оптовые ступени `.product-discount-line` игнорируются). Остаток на витрине — число упаковок из `.ds-product-main-stock` (включая `0` при OOS). Фасовка только из характеристики «Кількість в упаковці»: делит цену на pack и умножает stock (`packs × pack` → штуки, `packagePrice / pack` → цена за штуку); без атрибута pack не угадывается из title. Artikul — `#product-model-*` (не SEO `код:` из `<title>`).
 
 `getPartymallStockData` и обход групп — `fetchPageHtml` с `konkName: "partymall"`. Листинг: `.ds-category-products .ds-module-item[data-pid]` (кроме `0000`), пагинация `rel=next`, `ocf` мержится с первой страницы; страница с `.error-404-wrapper` — пустой набор / stop.
 
