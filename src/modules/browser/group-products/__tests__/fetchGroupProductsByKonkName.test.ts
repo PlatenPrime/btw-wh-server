@@ -28,11 +28,15 @@ vi.mock("../../svbum/group-pages/utils/getSvbumGroupPagesProducts.js", () => ({
 vi.mock("../../dojdevik/group-pages/utils/getDojdevikGroupPagesProducts.js", () => ({
   getDojdevikGroupPagesProducts: vi.fn(),
 }));
+vi.mock("../../partymall/skugr-pages/utils/getPartymallGroupPagesProducts.js", () => ({
+  getPartymallGroupPagesProducts: vi.fn(),
+}));
 
 import { getYumiGroupPagesProducts } from "../../yumi/group-pages/utils/getYumiGroupPagesProducts.js";
 import { getAirGroupPagesProducts } from "../../air/group-pages/utils/getAirGroupPagesProducts.js";
 import { getSvbumGroupPagesProducts } from "../../svbum/group-pages/utils/getSvbumGroupPagesProducts.js";
 import { getDojdevikGroupPagesProducts } from "../../dojdevik/group-pages/utils/getDojdevikGroupPagesProducts.js";
+import { getPartymallGroupPagesProducts } from "../../partymall/skugr-pages/utils/getPartymallGroupPagesProducts.js";
 
 const sampleRow = {
   title: "Product A",
@@ -99,6 +103,23 @@ describe("fetchGroupProductsByKonkName", () => {
 
     expect(getDojdevikGroupPagesProducts).toHaveBeenCalledWith({
       groupUrl: "https://dojdevik.com.ua/ua/g4092193",
+      maxPages: 2,
+    });
+    expect(result).toEqual([sampleRow]);
+  });
+
+  it("dispatches to partymall fetcher", async () => {
+    vi.mocked(getPartymallGroupPagesProducts).mockResolvedValue([sampleRow]);
+
+    const result = await fetchGroupProductsByKonkName("PartyMall", {
+      groupUrl:
+        "https://partymall.ua/vozdushnyje-shary/lateksnye-shary-145712766/kruglye-bez-risunka-145712629/belbal-1?ocf=abc",
+      maxPages: 2,
+    });
+
+    expect(getPartymallGroupPagesProducts).toHaveBeenCalledWith({
+      groupUrl:
+        "https://partymall.ua/vozdushnyje-shary/lateksnye-shary-145712766/kruglye-bez-risunka-145712629/belbal-1?ocf=abc",
       maxPages: 2,
     });
     expect(result).toEqual([sampleRow]);

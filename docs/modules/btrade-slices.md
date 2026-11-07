@@ -14,7 +14,7 @@
 
 Индексы: unique `(artikul, month)`; day-scan по `month`.
 
-**Важно:** в срезах Btrade поле остатка называется `quantity`, тогда как в `analog-slices` и `sku-slices` используется `stock`.
+**Важно:** в срезах Btrade поле остатка называется `quantity`, тогда как в `sku-slices` используется `stock`.
 
 ### BtradeSlice (legacy)
 
@@ -32,8 +32,7 @@ Legacy Mixed salesPcs/salesUah снять: `npx tsx src/modules/sku-slices/scrip
 
 - **Art:** список артикулов для среза формируется из distinct `artikul` коллекции `Art` (`getUniqueArtikulsFromArtsUtil`).
 - **browser/sharik:** источник — bulk-страница `product_rests`; в срез пишется **sliceQuantity** (второй остаток в строке `artikul = actual; slice; price`).
-- **sku-reporting / charts:** чтение Btrade через `btradeSliceMonthStore` / shim `aggregateBtradeSlices`.
-- **analog-slices:** сравнение остатков и продаж аналога конкурента с Btrade в отчётах comparison.
+- **sku-reporting / charts:** чтение Btrade через `btradeSliceMonthStore` / shim `aggregateBtradeSlices`; сравнение конкурент↔Btrade в sku-chart/sku-sales reports.
 
 ## Концепции и принятые решения
 

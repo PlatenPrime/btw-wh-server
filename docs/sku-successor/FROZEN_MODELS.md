@@ -252,7 +252,7 @@ Source: [src/modules/excel-jobs/models/ExcelJob.ts](../../src/modules/excel-jobs
 
 Индексы: `{ userId: 1, status: 1 }`, TTL на `expiresAt`.
 
-SKU-релевантные kind ids в legacy (референс поведения, не контракт БД): `sku-catalog-new-since`, `sku-catalog-invalid`, `sku-konk-stock`, `sku-konk-sales`, `sku-skugr-stock`, `sku-skugr-sales`, `sku-skugr-skus-share`, `sku-one-stock`, `sku-one-sales`, `sku-selection-stock`, `sku-selection-sales`, `grabo-skus`, сравнения с btrade (`konk-btrade-comparison`, `konk-btrade-sales-comparison`).
+SKU-релевантные kind ids в legacy (референс поведения, не контракт БД): `sku-catalog-new-since`, `sku-catalog-invalid`, `sku-konk-stock`, `sku-konk-sales`, `sku-skugr-stock`, `sku-skugr-sales`, `sku-skugr-skus-share`, `sku-one-stock`, `sku-one-sales`, `sku-selection-stock`, `sku-selection-sales`, `grabo-skus`. Analog/konk-btrade excel kinds на базе Analog удалены (2026-11-07).
 
 ---
 

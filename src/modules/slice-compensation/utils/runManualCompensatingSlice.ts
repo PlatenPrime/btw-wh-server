@@ -5,7 +5,7 @@ import { runCompensatingSlicesForKonk } from "./runCompensatingSlicesForKonk.js"
 const log = createLogger({ module: "slice-compensation", job: "manual" });
 
 /**
- * Локальный/отладочный прогон compensating slice (lock + analog/sku refetch за сегодня).
+ * Локальный/отладочный прогон compensating slice (lock + sku refetch за сегодня).
  * Для разового вызова после mongoose.connect без HTTP/JWT.
  */
 export async function runManualCompensatingSlice(konkName: string): Promise<void> {
@@ -19,7 +19,6 @@ export async function runManualCompensatingSlice(konkName: string): Promise<void
       {
         konkName: result.konkName,
         sliceDate: result.sliceDate.toISOString().slice(0, 10),
-        analog: result.analog,
         sku: result.sku,
       },
       "manual compensating slice done",

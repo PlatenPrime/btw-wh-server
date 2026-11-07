@@ -36,7 +36,7 @@ modules/<name>/
     └── __tests__/
 ```
 
-#### 2. Reporting-модуль (`sku-slices`, `analog-slices`)
+#### 2. Reporting-модуль (`sku-slices`)
 
 Дополнительно: `controllers/common/`, `utils/`, `constants/`.
 

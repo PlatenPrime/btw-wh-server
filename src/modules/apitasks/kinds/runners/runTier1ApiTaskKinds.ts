@@ -105,7 +105,6 @@ export const runSliceCompensationRun: ApiTaskKindRunner = async (params, options
   return okApiTaskRun({
     konkName: result.konkName,
     sliceDate: result.sliceDate.toISOString().slice(0, 10),
-    analog: result.analog,
     sku: result.sku,
   });
 };

@@ -22,17 +22,11 @@ describe("getExcludedCompetitorSet", () => {
     expect(set.has("air")).toBe(false);
   });
 
-  it("returns empty set for analogSlices (air enabled)", () => {
-    expect(getExcludedCompetitorSet("analogSlices")).toEqual(new Set());
-  });
-
   it("reflects excludedCompetitors config", () => {
-    for (const sliceType of ["analogSlices", "skuSlices"] as const) {
-      const expected = new Set(
-        excludedCompetitors[sliceType].map((name) => normalizeCompetitorName(name)),
-      );
-      expect(getExcludedCompetitorSet(sliceType)).toEqual(expected);
-    }
+    const expected = new Set(
+      excludedCompetitors.skuSlices.map((name) => normalizeCompetitorName(name)),
+    );
+    expect(getExcludedCompetitorSet("skuSlices")).toEqual(expected);
   });
 });
 
@@ -42,19 +36,12 @@ describe("getCompensationExcludedCompetitorSet", () => {
     expect(getExcludedCompetitorSet("skuSlices").has("air")).toBe(false);
   });
 
-  it("analogSlices excludes air only from compensation", () => {
-    expect(getCompensationExcludedCompetitorSet("analogSlices")).toEqual(new Set(["air"]));
-    expect(getExcludedCompetitorSet("analogSlices")).toEqual(new Set());
-  });
-
   it("reflects union of both configs", () => {
-    for (const sliceType of ["analogSlices", "skuSlices"] as const) {
-      const expected = new Set(
-        [...excludedCompetitors[sliceType], ...compensationExcludedCompetitors[sliceType]].map(
-          (name) => normalizeCompetitorName(name),
-        ),
-      );
-      expect(getCompensationExcludedCompetitorSet(sliceType)).toEqual(expected);
-    }
+    const expected = new Set(
+      [...excludedCompetitors.skuSlices, ...compensationExcludedCompetitors.skuSlices].map((name) =>
+        normalizeCompetitorName(name),
+      ),
+    );
+    expect(getCompensationExcludedCompetitorSet("skuSlices")).toEqual(expected);
   });
 });

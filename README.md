@@ -59,13 +59,11 @@ flowchart TB
   subgraph competitors [Конкуренты]
     konks --> skus
     konks --> skugrs
-    konks --> analogs
     browser
   end
 
   subgraph analytics [Срезы]
     skuSlices[sku-slices]
-    analogSlices[analog-slices]
     btradeSlices[btrade-slices]
     sharedSlices[slices shared]
     sliceComp[slice-compensation]
@@ -80,10 +78,8 @@ flowchart TB
 
   arts --> poses
   skus --> skuSlices
-  analogs --> analogSlices
   arts --> btradeSlices
   sharedSlices --> skuSlices
-  sharedSlices --> analogSlices
 ```
 
 ### Склад и размещение
@@ -124,7 +120,6 @@ flowchart TB
 | prods   | [`src/modules/prods/`](src/modules/prods/)     | `/api/prods`   | [API](docs/api/prods.md) · [концепция](docs/modules/prods.md)     |
 | skus    | [`src/modules/skus/`](src/modules/skus/)       | `/api/skus`    | [API](docs/api/skus.md) · [концепция](docs/modules/skus.md)       |
 | skugrs  | [`src/modules/skugrs/`](src/modules/skugrs/)   | `/api/skugrs`  | [API](docs/api/skugrs.md) · [концепция](docs/modules/skugrs.md)   |
-| analogs | [`src/modules/analogs/`](src/modules/analogs/) | `/api/analogs` | [API](docs/api/analogs.md) · [концепция](docs/modules/analogs.md) |
 | browser | [`src/modules/browser/`](src/modules/browser/) | `/api/browser` | [API](docs/api/browser.md) · [концепция](docs/modules/browser.md) |
 
 **Browser** — live-парсинг остатков и цен по URL страницы товара. Организация по конкурентам:
@@ -139,6 +134,8 @@ flowchart TB
 | yumi           | [`src/modules/browser/yumi/`](src/modules/browser/yumi/)                     |
 | yumin          | [`src/modules/browser/yumin/`](src/modules/browser/yumin/)                   |
 | svbum          | [`src/modules/browser/svbum/`](src/modules/browser/svbum/)                   |
+| dojdevik       | [`src/modules/browser/dojdevik/`](src/modules/browser/dojdevik/)             |
+| partymall      | [`src/modules/browser/partymall/`](src/modules/browser/partymall/)           |
 | общие утилиты  | [`src/modules/browser/utils/`](src/modules/browser/utils/)                   |
 | group-pages    | [`src/modules/browser/group-pages/`](src/modules/browser/group-pages/)       |
 | group-products | [`src/modules/browser/group-products/`](src/modules/browser/group-products/) |
@@ -148,7 +145,6 @@ flowchart TB
 | Модуль             | Код                                                                  | API                       | Документация                                                                                                                                  |
 | ------------------ | -------------------------------------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | sku-slices         | [`src/modules/sku-slices/`](src/modules/sku-slices/)                 | `/api/sku-slices`         | [API](docs/api/sku-slices.md) · [концепция](docs/modules/sku-slices.md)                                                                       |
-| analog-slices      | [`src/modules/analog-slices/`](src/modules/analog-slices/)           | `/api/analog-slices`      | [API](docs/api/analog-slices.md) · [концепция](docs/modules/analog-slices.md)                                                                 |
 | btrade-slices      | [`src/modules/btrade-slices/`](src/modules/btrade-slices/)           | `/api/btrade-slices`      | [API](docs/api/btrade-slices.md) · [концепция](docs/modules/btrade-slices.md)                                                                 |
 | slices             | [`src/modules/slices/`](src/modules/slices/)                         | —                         | [концепция](docs/modules/slices.md) — shared-утилиты (без HTTP)                                                                               |
 | slice-compensation | [`src/modules/slice-compensation/`](src/modules/slice-compensation/) | `/api/slice-compensation` | [API](docs/api/slice-compensation.md) · [концепция](docs/modules/slice-compensation.md) · [фронт](docs/frontend/manual-compensating-slice.md) |
@@ -173,8 +169,8 @@ flowchart TB
 [`src/cron/startCronOperations.ts`](src/cron/startCronOperations.ts) запускает фоновые задачи из модулей:
 
 - `defs` — расчёт дефицитов
-- `analog-slices`, `btrade-slices`, `sku-slices` — ежедневные срезы
-- `slice-compensation` — компенсирующие срезы
+- `btrade-slices`, `sku-slices` — ежедневные срезы
+- `slice-compensation` — компенсирующие SKU-срезы
 - `skugrs`, `skus` — заполнение групп и флаги invalid
 - `src/cron/startFillPosNameukrFromArtsCron.ts` — синхронизация названий позиций
 
@@ -188,13 +184,13 @@ Telegram-отчёты: [`src/cron/analytics-notifications/`](src/cron/analytics-
 
 Краткая выжимка из [`.cursor/rules/project.mdc`](.cursor/rules/project.mdc):
 
-| Тип              | Пример                        | Структура                                |
-| ---------------- | ----------------------------- | ---------------------------------------- |
-| Стандартный HTTP | `constants`                   | `router.ts` → `controllers/` → `models/` |
-| Reporting        | `sku-slices`, `analog-slices` | + `controllers/common/`, Excel-утилиты   |
-| Cron + thin HTTP | `slice-compensation`          | `cron/` + `utils/` + один POST           |
-| Shared domain    | `slices`                      | только `config/` + `utils/`              |
-| Browser/scraper  | `browser`                     | по конкуренту + общие `utils/`           |
+| Тип              | Пример               | Структура                                |
+| ---------------- | -------------------- | ---------------------------------------- |
+| Стандартный HTTP | `constants`          | `router.ts` → `controllers/` → `models/` |
+| Reporting        | `sku-slices`         | + `controllers/common/`, Excel-утилиты   |
+| Cron + thin HTTP | `slice-compensation` | `cron/` + `utils/` + один POST           |
+| Shared domain    | `slices`             | только `config/` + `utils/`              |
+| Browser/scraper  | `browser`            | по конкуренту + общие `utils/`           |
 
 Слои внутри endpoint: `router → controller → util → model`.
 

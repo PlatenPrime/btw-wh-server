@@ -9,6 +9,7 @@ import { getYumiStockController } from "./yumi/controllers/index.js";
 import { getYuminStockController } from "./yumin/controllers/index.js";
 import { getSvbumStockController } from "./svbum/controllers/index.js";
 import { getDojdevikStockController } from "./dojdevik/controllers/index.js";
+import { getPartymallStockController } from "./partymall/controllers/index.js";
 
 const router = Router();
 
@@ -20,6 +21,7 @@ router.get("/yumin/stock", asyncHandler(getYuminStockController));
 router.get("/sharte/stock", asyncHandler(getSharteStockController));
 router.get("/svbum/stock", asyncHandler(getSvbumStockController));
 router.get("/dojdevik/stock", asyncHandler(getDojdevikStockController));
+router.get("/partymall/stock", asyncHandler(getPartymallStockController));
 router.get("/sharik/stock/:artikul", asyncHandler(getSharikStockController));
 
 export default router;

@@ -2,7 +2,7 @@
 
 ## Описание модуля
 
-Модуль `slices` — **shared domain-модуль без HTTP и cron**. Он содержит общие конфигурации и утилиты, которые переиспользуют `analog-slices`, `sku-slices` и `slice-compensation`.
+Модуль `slices` — **shared domain-модуль без HTTP и cron**. Он содержит общие конфигурации и утилиты, которые переиспользуют `sku-slices` и `slice-compensation`.
 
 Тип модуля в архитектуре проекта: только `config/` + `utils/` + `__tests__/`.
 
@@ -26,12 +26,11 @@
 
 ### Исключения конкурентов
 
-Конфиг `excludedCompetitors` задаёт per-type списки для **primary cron** срезов:
+Конфиг `excludedCompetitors` задаёт списки для **primary cron** срезов:
 
-- `analogSlices` — пусто; **primary cron analog-slices отключён** (сбор только через API/ручной триггер);
 - `skuSlices` — `yumi`.
 
-Отдельно `compensationExcludedCompetitors` + `getCompensationExcludedCompetitorSet` — union с cron-списком **только для компенсации**. Сейчас туда добавлен `air` (analog + sku): после Cloudflare 520 повторный серверный опрос бессмысленен; хвост дозаполняется через client-ingestion.
+Отдельно `compensationExcludedCompetitors` + `getCompensationExcludedCompetitorSet` — union с cron-списком **только для компенсации**. Сейчас туда добавлен `air`: после Cloudflare 520 повторный серверный опрос бессмысленен; хвост дозаполняется через client-ingestion.
 
 Имена нормализуются через `normalizeCompetitorName` (trim + lowercase). Primary cron смотрит только `excludedCompetitors`; compensation — union.
 
@@ -41,7 +40,7 @@
 
 ### Продажи из остатков
 
-`salesComparisonUtils` реализует расчёт продаж как разницу остатков между днями, учёт дней поставки (`isDeliveryDay`) и выручку — общая логика для Excel и JSON-отчётов в `analog-slices` и `sku-slices`.
+`salesComparisonUtils` реализует расчёт продаж как разницу остатков между днями, учёт дней поставки (`isDeliveryDay`) и выручку — общая логика для Excel и JSON-отчётов в `sku-slices` / reporting.
 
 ### Диапазоны дат
 
@@ -70,7 +69,6 @@ Per-konk цикл в `sliceRotationByKonk` (сейчас пусто: Air без 
 
 **Потребители:**
 
-- `analog-slices` — range-маппинг, sales comparison, exclusions;
 - `sku-slices` — cron, сырые read API, pack-flip review, `sliceDataAggregationStages`;
 - `sku-reporting` — shared utils/schemas для reporting-модулей;
 - `sku-excel-reports`, `sku-sales-reports`, `sku-chart-reports` — HTTP-отчёты;
@@ -79,6 +77,4 @@ Per-konk цикл в `sliceRotationByKonk` (сейчас пусто: Air без 
 
 **Запрещено** импортировать `controllers/common/` другого slice-модуля — общий код выносится сюда (см. [project.mdc](../../.cursor/rules/project.mdc)).
 
-## HTTP и cron
-
-Отсутствуют. Модуль не регистрирует роуты и не запускает фоновые задачи.
+Домен **analogs / analog-slices** удалён (2026-11-07) и больше не является потребителем.

@@ -8,8 +8,6 @@ API системы управления складом предоставляе�
 
 Все API эндпоинты имеют базовый путь `/api`, за которым следует название модуля. **Кто каким методом может пользоваться** — в едином реестре: [Матрица доступа](access-matrix.md).
 
-- [API Analog Slices](analog-slices.md) — `/api/analog-slices` — срезы остатков и цен аналогов по датам
-- [API Analogs](analogs.md) — `/api/analogs` — аналоги артикулов у конкурентов
 - [API Variants](variants.md) — `/api/variants` — варианты товаров у конкурентов
 - [API Browser](browser.md) — `/api/browser` — остаток и цена по URL страницы товара
 - [API Media](media.md) — `/api/media` — публичный proxy JPEG артикулов sharik
@@ -190,8 +188,6 @@ Authorization: Bearer <token>
 
 Детальная документация по эндпоинтам и форматам данных каждого модуля (по базовым путям). Доступ по ролям — [Матрица доступа](access-matrix.md).
 
-- [API Analog Slices](analog-slices.md)
-- [API Analogs](analogs.md)
 - [API Variants](variants.md)
 - [API Browser](browser.md)
 - [API Btrade Slices](btrade-slices.md)
@@ -217,4 +213,4 @@ Authorization: Bearer <token>
 - [API Grabo Skus](grabo-skus.md)
 - [API Slice Compensation](slice-compensation.md)
 
-Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — analog-slices, analogs, auth, arts, asks, kasks, blocks, segs, zones, rows, pallets, [pallet-groups](../modules/pallet-groups.md), poses, defs, dels, konks, prods, skus, skugrs, sku-slices, [grabo-skus](../modules/grabo-skus.md), [browser](../modules/browser.md), [media](../modules/media.md), [btrade-slices](../modules/btrade-slices.md), [slices](../modules/slices.md), [slice-compensation](../modules/slice-compensation.md), variants, constants.
+Концептуальная документация модулей (сущности, связи, решения): [../modules/](../modules/) — auth, arts, asks, kasks, blocks, segs, zones, rows, pallets, [pallet-groups](../modules/pallet-groups.md), poses, defs, dels, konks, prods, skus, skugrs, sku-slices, [grabo-skus](../modules/grabo-skus.md), [browser](../modules/browser.md), [media](../modules/media.md), [btrade-slices](../modules/btrade-slices.md), [slices](../modules/slices.md), [slice-compensation](../modules/slice-compensation.md), variants, constants. Analogs удалены — см. [frontend: analogs-removed](../frontend/analogs-removed.md).

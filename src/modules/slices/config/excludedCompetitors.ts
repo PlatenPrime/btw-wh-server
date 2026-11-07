@@ -1,4 +1,4 @@
-type SliceType = "analogSlices" | "skuSlices";
+type SliceType = "skuSlices";
 
 type ExcludedCompetitorsConfig = Record<SliceType, readonly string[]>;
 
@@ -7,7 +7,6 @@ type ExcludedCompetitorsConfig = Record<SliceType, readonly string[]>;
  * Для исключения конкурента достаточно добавить его имя в нужный список.
  */
 export const excludedCompetitors: ExcludedCompetitorsConfig = {
-  analogSlices: [],
   skuSlices: ["yumi"],
 };
 
@@ -24,7 +23,6 @@ export function getExcludedCompetitorSet(sliceType: SliceType): Set<string> {
  * Air: Cloudflare 520 — повторный серверный опрос бессмысленен; хвост через client-ingest.
  */
 export const compensationExcludedCompetitors: ExcludedCompetitorsConfig = {
-  analogSlices: ["air"],
   skuSlices: ["air"],
 };
 

@@ -2,8 +2,6 @@
  * Registers Mongoose models for integration tests.
  * Import lazily from setup after connect so vi.mock in test files can bind first.
  */
-import "../modules/analog-slices/models/AnalogSlice.js";
-import "../modules/analogs/models/Analog.js";
 import "../modules/variants/models/Variant.js";
 import "../modules/arts/models/Art.js";
 import "../modules/btrade-slices/models/BtradeSlice.js";

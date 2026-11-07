@@ -6,12 +6,6 @@ import {
   type ExcelJobRunResult,
 } from "./excelJobRunTypes.js";
 import {
-  runAnalogComparison,
-  runAnalogSalesComparison,
-  runKonkBtradeComparison,
-  runKonkBtradeSalesComparison,
-} from "./runners/runAnalogExcelKinds.js";
-import {
   runSkuCatalogInvalid,
   runSkuCatalogNewSince,
   runSkuKonkSales,
@@ -49,10 +43,6 @@ const RUNNERS: Record<ExcelJobKind, ExcelJobKindRunner> = {
   "sku-selection-sales": runSkuSelectionSales,
   "art-stock": runArtStock,
   "art-sales": runArtSales,
-  "analog-comparison": runAnalogComparison,
-  "analog-sales-comparison": runAnalogSalesComparison,
-  "konk-btrade-comparison": runKonkBtradeComparison,
-  "konk-btrade-sales-comparison": runKonkBtradeSalesComparison,
   "arts-export": runArtsExport,
   "arts-export-with-stocks": runArtsExportWithStocks,
   "arts-export-keys": runArtsExportKeys,

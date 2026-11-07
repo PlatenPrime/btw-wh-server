@@ -52,4 +52,4 @@ Pie — синхронный `POST /api/sku-chart-reports/selection/skus-pie` с
 
 ## Не трогать
 
-JSON графиков и sales-reports (`/api/sku-chart-reports`, `/api/sku-sales-reports`, analog comparison без `-excel`) без изменений контракта ответа; body selection pie расширен режимом `selectAll`.
+JSON графиков и sales-reports (`/api/sku-chart-reports`, `/api/sku-sales-reports`) без изменений контракта ответа; body selection pie расширен режимом `selectAll`. Analog comparison API удалён (2026-11-07).

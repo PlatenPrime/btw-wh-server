@@ -1,7 +1,5 @@
 import type { Express, RequestHandler } from "express";
 
-import analogSlicesRoute from "./modules/analog-slices/router.js";
-import analogsRoute from "./modules/analogs/router.js";
 import artChartReportsRoute from "./modules/art-chart-reports/router.js";
 import artExcelReportsRoute from "./modules/art-excel-reports/router.js";
 import artSalesReportsRoute from "./modules/art-sales-reports/router.js";
@@ -38,8 +36,6 @@ import variantsRoute from "./modules/variants/router.js";
 import zonesRoute from "./modules/zones/router.js";
 
 export const API_ROUTES: ReadonlyArray<readonly [string, RequestHandler]> = [
-  ["/api/analog-slices", analogSlicesRoute],
-  ["/api/analogs", analogsRoute],
   ["/api/variants", variantsRoute],
   ["/api/auth", authRoute],
   ["/api/arts", artsRoute],

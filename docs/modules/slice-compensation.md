@@ -1,72 +1,44 @@
-# Модуль Slice Compensation (Компенсирующие срезы)
+# Модуль Slice Compensation
 
 ## Описание модуля
 
-Модуль `slice-compensation` выполняет **повторный опрос** позиций в сегодняшних `AnalogSlice` и точках `SkuSliceMonth`, где первичный скрапинг вернул недостоверные данные. Новые day-meta/month документы при необходимости upsert'ятся точечно — обновляется день `YYYY-MM-DD` у productId (SKU) или ключ в `AnalogSlice.data`.
+Модуль `slice-compensation` выполняет **повторный опрос** позиций в сегодняшних точках `SkuSliceMonth`, где первичный скрапинг вернул недостоверные данные. Новые day-meta/month документы при необходимости upsert'ятся точечно — обновляется день `YYYY-MM-DD` у productId.
 
-Тип модуля: **cron + thin HTTP** — ежедневный cron и один ADMIN POST для внеочередного запуска по одному конкуренту.
+Домен Analog compensation удалён (2026-11-07).
 
-## Что компенсируется
+## Когда позиция считается недостоверной
 
-| Целевая коллекция | Условие попадания в очередь            | Источник refetch                          | Обновление                   |
-| ----------------- | -------------------------------------- | ----------------------------------------- | ---------------------------- |
-| **AnalogSlice**   | `stock === -1 && price === -1`         | `getAnalogStockDataUtil` по `_id` аналога | если ответ не полный `-1/-1` |
-| **SkuSliceMonth** | полный `-1/-1` **или** невалидная цена | `getSkuStockDataUtil` по `_id` SKU        | если ответ не полный `-1/-1` |
+| Источник          | Критерий                            | Stock getter                   | Обновление                   |
+| ----------------- | ----------------------------------- | ------------------------------ | ---------------------------- |
+| **SkuSliceMonth** | invalid stock/price по правилам SKU | `getSkuStockDataUtil` по `_id` | если ответ не полный `-1/-1` |
 
-Пропускаются: конкуренты из `getCompensationExcludedCompetitorSet` (union [`excludedCompetitors`](slices.md) и `compensationExcludedCompetitors`), отсутствующие Analog/Sku, неподдерживаемый konk. **Air исключён из server compensation** (и cron 10:30, и ручной POST по `konkName=air` дают пустую очередь). Дозаполнение Air SKU — только client-ingestion в [sku-slices](sku-slices.md).
+Пропускаются: конкуренты из `getCompensationExcludedCompetitorSet` (union [`excludedCompetitors`](slices.md) и `compensationExcludedCompetitors`), отсутствующие Sku, неподдерживаемый konk. **Air исключён из server compensation** (и cron 10:30, и ручной POST по `konkName=air` дают пустую очередь). Дозаполнение Air SKU — только client-ingestion в [sku-slices](sku-slices.md).
 
-## Связи между модулями
+## Связи
 
-- **analog-slices / sku-slices** — `AnalogSlice` и `SkuSliceMonth` на `sliceDate = toSliceDate(new Date())`.
-- **analogs / skus** — lookup сущностей и stock-утилиты (которые вызывают **browser**).
-- **slices** — конфиг исключений (cron + compensation-only) и семантика `-1`.
-- **sku-reporting** — jitter между запросами (`resolveSkuSliceRequestJitterMs`: дефолт 500–1500 мс, для `air` — 2000–5000 мс; на compensation air не попадает).
-- **analog-slices** — пауза первичного сбора analog (`resolveAnalogSliceRequestDelayMs`: дефолт 1000 мс, для `air` — 2000 мс); compensating analog/sku используют sku jitter-резолвер по `konkName` следующего item.
+- **sku-slices** — `SkuSliceMonth` на `sliceDate = toSliceDate(new Date())`.
+- **skus** — lookup сущностей и stock-утилиты (которые вызывают **browser**).
+- **slices** — exclusions / `-1` семантика / throttle.
 
-## Концепции и принятые решения
+## Запись
 
-### Частичное обновление MongoDB
+SKU: upsert дня в `SkuSliceMonth.days.YYYY-MM-DD` — без перезаписи всего month-документа.
 
-Analog: `$set` ключа в `data`. SKU: upsert дня в `SkuSliceMonth.days.YYYY-MM-DD` — без перезаписи всего month-документа.
+## Параллелизм
 
-### Параллельность и последовательность
+В cron-tick и ручном запуске обрабатывается только SKU-ветка. Внутри run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов; диапазон зависит от `konkName` следующего item). По каждой позиции в лог пишется start/done цикла и результат refetch (`stock`, `price`, `updated`).
 
-В одном cron-tick (и в ручном запуске) analog и sku runs выполняются через `Promise.all`. Внутри каждого run позиции обрабатываются **последовательно** с jitter (как при первичном сборе SKU-срезов; диапазон зависит от `konkName` следующего item). По каждой позиции в лог пишется start/done цикла и результат refetch (`stock`, `price`, `updated`) — одинаково для cron и ручного запуска.
+## Ключевые файлы
 
-### Фильтр по конкуренту
-
-Утилиты принимают опциональный `konkName`: cron вызывает без фильтра (все документы дня), HTTP — только выбранный конкурент. Исключения из `getCompensationExcludedCompetitorSet` дают пустую очередь (в т.ч. `air`).
-
-### Ручной запуск и lock
-
-Внеочередной POST держит in-memory lock на нормализованный `konkName`: повторный запуск того же конкурента, пока первый не завершился, получает отказ. Разные конкуренты могут идти параллельно. Полный пересбор среза (`run*SliceForKonkUtil`) этим эндпоинтом не выполняется.
-
-Для локального/отладочного прогона без HTTP/JWT есть `runManualCompensatingSlice`: тот же lock и оркестратор, результат пишется в лог модуля. Обычно вызывается разово после `mongoose.connect` в bootstrap.
-
-### Ключевые файлы
-
-- [`cron/startCompensatingSlicesCron.ts`](../../src/modules/slice-compensation/cron/startCompensatingSlicesCron.ts) — планировщик;
-- [`utils/compensatingSliceRunner.ts`](../../src/modules/slice-compensation/utils/compensatingSliceRunner.ts) — построение очереди и цикл refetch;
-- [`utils/runCompensatingAnalogSlices.ts`](../../src/modules/slice-compensation/utils/runCompensatingAnalogSlices.ts);
+- [`cron/startCompensatingSlicesCron.ts`](../../src/modules/slice-compensation/cron/startCompensatingSlicesCron.ts);
 - [`utils/runCompensatingSkuSlices.ts`](../../src/modules/slice-compensation/utils/runCompensatingSkuSlices.ts);
-- [`utils/runCompensatingSlicesForKonk.ts`](../../src/modules/slice-compensation/utils/runCompensatingSlicesForKonk.ts) — оркестратор ручного запуска;
-- [`utils/runManualCompensatingSlice.ts`](../../src/modules/slice-compensation/utils/runManualCompensatingSlice.ts) — локальный boot-прогон с lock и логом;
-- [`controllers/run-compensating-slice/`](../../src/modules/slice-compensation/controllers/run-compensating-slice/) — HTTP.
+- [`utils/runCompensatingSlicesForKonk.ts`](../../src/modules/slice-compensation/utils/runCompensatingSlicesForKonk.ts).
 
 ## Cron
 
-- **Расписание:** ежедневно в **10:30 Europe/Kiev** (`0 30 10 * * *`).
-- **Задача:** refetch для `sliceDate` текущего дня; parallel analog + sku; Telegram-отчёт через `cron/analytics-notifications`.
-
-### Контекст пайплайна срезов
-
-```
-00:00  btrade-slices     → BtradeSliceMonth
-~20:00 sku-slices cron   → SkuSliceMonth + DayMeta (следующий киевский день)
-         analog-slices   → AnalogSlice
-10:30  slice-compensation → повторный опрос -1/-1 в сегодняшних срезах
-```
+- **Задача:** refetch для `sliceDate` текущего дня; Telegram-отчёт через `cron/analytics-notifications`.
+- Schedule: `0 30 10 * * *` Europe/Kiev.
 
 ## HTTP
 
-`POST /api/slice-compensation/run` — внеочередная компенсация по `konkName` за сегодняшний `sliceDate` (analog + sku). Контракт: [`docs/api/slice-compensation.md`](../api/slice-compensation.md). Гайд для UI: [`docs/frontend/manual-compensating-slice.md`](../frontend/manual-compensating-slice.md).
+`POST /api/slice-compensation/run` — внеочередная компенсация по `konkName` за сегодняшний `sliceDate` (только SKU). Контракт: [`docs/api/slice-compensation.md`](../api/slice-compensation.md).

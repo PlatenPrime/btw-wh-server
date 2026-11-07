@@ -47,6 +47,6 @@ alwaysApply: false
 3. Если менялись cron schedule / writers — `docs/sku-successor/CRONS_AND_CUTOVER.md`.
 4. Добавить файл `docs/sku-successor/sync/YYYY-MM-DD-<slug>.md` по шаблону `docs/sku-successor/sync/_TEMPLATE.md`.
 
-Не трогать runtime ради миграции на successor. Аналоги (`analogs`, `analog-slices`) вне периметра successor — дельта не нужна, если правка только про них.
+Не трогать runtime ради миграции на successor. Домен Analogs удалён из продукта (2026-11-07) — не переносить в successor.
 
 Процесс: `docs/sku-successor/sync/README.md`.

@@ -1,6 +1,5 @@
 import { normalizeCompetitorName } from "../../slices/config/excludedCompetitors.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-import { runCompensatingAnalogSlices } from "./runCompensatingAnalogSlices.js";
 import { runCompensatingSkuSlices } from "./runCompensatingSkuSlices.js";
 
 export type CompensatingSliceStats = {
@@ -11,7 +10,6 @@ export type CompensatingSliceStats = {
 export type CompensatingSlicesForKonkResult = {
   konkName: string;
   sliceDate: Date;
-  analog: CompensatingSliceStats;
   sku: CompensatingSliceStats;
 };
 
@@ -21,7 +19,7 @@ export type RunCompensatingSlicesForKonkOptions = {
 };
 
 /**
- * Внеочередная компенсация сегодняшних AnalogSlice + SkuSlice для одного конкурента.
+ * Внеочередная компенсация сегодняшних SkuSlice для одного конкурента.
  */
 export async function runCompensatingSlicesForKonk(
   konkName: string,
@@ -30,40 +28,19 @@ export async function runCompensatingSlicesForKonk(
   const normalized = normalizeCompetitorName(konkName);
   const sliceDate = toSliceDate(new Date());
 
-  const remapProgress =
-    (offset: number, weight: number, label: string) =>
-    (done: number, total: number, message?: string) => {
-      const mappedDone = offset + Math.round((weight * done) / Math.max(total, 1));
-      options?.onProgress?.(mappedDone, 100, message ? `${label}: ${message}` : label);
-    };
+  const sku = await runCompensatingSkuSlices(sliceDate, {
+    konkName: normalized,
+    signal: options?.signal,
+    onProgress: options?.onProgress
+      ? (done, total, message) => {
+          options.onProgress?.(done, total, message ? `SKU: ${message}` : "SKU");
+        }
+      : undefined,
+  });
 
-  if (options?.onProgress || options?.signal) {
-    const analog = await runCompensatingAnalogSlices(sliceDate, {
-      konkName: normalized,
-      signal: options.signal,
-      onProgress: remapProgress(0, 50, "Analog"),
-    });
-    const sku = await runCompensatingSkuSlices(sliceDate, {
-      konkName: normalized,
-      signal: options.signal,
-      onProgress: remapProgress(50, 50, "SKU"),
-    });
-    return {
-      konkName: normalized,
-      sliceDate,
-      analog,
-      sku,
-    };
-  }
-
-  const [analog, sku] = await Promise.all([
-    runCompensatingAnalogSlices(sliceDate, { konkName: normalized }),
-    runCompensatingSkuSlices(sliceDate, { konkName: normalized }),
-  ]);
   return {
     konkName: normalized,
     sliceDate,
-    analog,
     sku,
   };
 }
