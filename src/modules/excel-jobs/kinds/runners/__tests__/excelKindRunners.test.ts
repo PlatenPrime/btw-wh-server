@@ -1,13 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { runAnalogComparison } from "../runAnalogExcelKinds.js";
 import { runArtsExport, runGraboSkus } from "../runWarehouseExcelKinds.js";
 
 describe("excel kind runners", () => {
-  it("analog comparison fails validation", async () => {
-    const result = await runAnalogComparison({});
-    expect(result.ok).toBe(false);
-  });
-
   it("grabo builds a buffer", async () => {
     const result = await runGraboSkus({});
     expect(result.ok).toBe(true);

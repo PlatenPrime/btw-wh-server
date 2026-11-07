@@ -43,7 +43,7 @@
 
 Переключение в **неактивном окне между ночными срезами** (после завершения sku-slice прогона, до следующего 20:00 Kyiv). См. [CRONS_AND_CUTOVER.md](./CRONS_AND_CUTOVER.md).
 
-Порядок: stop SKU-периметровых cron в старом → enable cron в successor → переключение фронта → выпил SKU-модулей из `btw-wh-server` и старого React (отдельный этап). Analog compensation остаётся в складском процессе.
+Порядок: stop SKU-периметровых cron в старом → enable cron в successor → переключение фронта → выпил SKU-модулей из `btw-wh-server` и старого React (отдельный этап). Домен Analogs удалён из legacy и **не** остаётся в складском процессе.
 
 ## Развитие до дня Д
 

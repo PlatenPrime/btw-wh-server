@@ -1,9 +1,32 @@
-import type { KonkBtradeSalesComparisonData } from "../../../../analog-slices/controllers/get-konk-btrade-sales-comparison/utils/getKonkBtradeSalesComparisonUtil.js";
 import { loadKonkProdSkuChartSeries } from "../../../../sku-reporting/utils/konkProdSkuChartCore.js";
 import type { GetKonkProdSkuSalesChartDataInput } from "../schemas/getKonkProdSkuSalesChartDataSchema.js";
 
+export interface DaySalesComparison {
+  date: string;
+  competitorSales: number;
+  competitorRevenue: number;
+  btradeSales: number;
+  btradeRevenue: number;
+}
+
+export interface SalesComparisonSummary {
+  totalCompetitorSales: number;
+  totalBtradeSales: number;
+  totalCompetitorRevenue: number;
+  totalBtradeRevenue: number;
+  diffSalesPcs: number;
+  diffRevenueUah: number;
+  diffSalesPct: number | null;
+  diffRevenuePct: number | null;
+}
+
+export interface KonkProdSkuSalesChartData {
+  days: DaySalesComparison[];
+  summary: SalesComparisonSummary;
+}
+
 export type GetKonkProdSkuSalesChartDataResult =
-  { ok: true; data: KonkBtradeSalesComparisonData } | { ok: false };
+  { ok: true; data: KonkProdSkuSalesChartData } | { ok: false };
 
 export async function getKonkProdSkuSalesChartDataUtil(
   input: GetKonkProdSkuSalesChartDataInput,

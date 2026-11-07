@@ -4,14 +4,13 @@ import { formatCronErrorReport } from "../../../cron/analytics-notifications/for
 import { sendCronAnalyticsReport } from "../../../cron/analytics-notifications/sendCronAnalyticsReport.js";
 import { createLogger } from "../../../logging/createLogger.js";
 import { toSliceDate } from "../../../utils/sliceDate.js";
-import { runCompensatingAnalogSlices } from "../utils/runCompensatingAnalogSlices.js";
 import { runCompensatingSkuSlices } from "../utils/runCompensatingSkuSlices.js";
 
 const log = createLogger({ module: "slice-compensation", job: "cron" });
 
 /**
  * Компенсирующие срезы: ежедневно в 10:30 Europe/Kiev — повторный опрос позиций
- * с недостоверными данными в сегодняшних AnalogSlice и SkuSliceMonth.
+ * с недостоверными данными в сегодняшних SkuSliceMonth.
  */
 export function startCompensatingSlicesCron(): CronJob {
   const job = new CronJob(
@@ -21,15 +20,11 @@ export function startCompensatingSlicesCron(): CronJob {
         const sliceDate = toSliceDate(new Date());
         const sliceDateLabel = sliceDate.toISOString().slice(0, 10);
         log.info({ sliceDateLabel }, "starting compensating slices");
-        const [analog, sku] = await Promise.all([
-          runCompensatingAnalogSlices(sliceDate),
-          runCompensatingSkuSlices(sliceDate),
-        ]);
-        log.info({ analog, sku }, "compensating slices completed");
+        const sku = await runCompensatingSkuSlices(sliceDate);
+        log.info({ sku }, "compensating slices completed");
         await sendCronAnalyticsReport(
           formatCompensatingSlicesReport({
             sliceDateLabel,
-            analog,
             sku,
           }),
         );

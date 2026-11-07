@@ -7,6 +7,7 @@ import { getSharteStockData } from "../../browser/sharte/utils/getSharteStockDat
 import { getPerfectStockData } from "../../browser/perfect/utils/getPerfectStockData.js";
 import { getSvbumStockData } from "../../browser/svbum/utils/getSvbumStockData.js";
 import { getDojdevikStockData } from "../../browser/dojdevik/utils/getDojdevikStockData.js";
+import { getPartymallStockData } from "../../browser/partymall/utils/getPartymallStockData.js";
 import { maybeSetSkuArtikulIfEmpty } from "./maybeSetSkuArtikulIfEmpty.js";
 
 export const UNSUPPORTED_KONK_CODE = "UNSUPPORTED_KONK";
@@ -31,6 +32,7 @@ const KONK_STOCK_GETTERS: Record<string, StockDataFn> = {
   perfect: getPerfectStockData,
   svbum: getSvbumStockData,
   dojdevik: getDojdevikStockData,
+  partymall: getPartymallStockData,
 };
 
 /**

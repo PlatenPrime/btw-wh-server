@@ -1,10 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  formatAnalogKonkSliceReport,
-  formatAnalogSlicesExcludedReport,
-  formatAnalogSlicesReport,
-} from "../formatAnalogSlicesReport.js";
-import {
   formatCronErrorReport,
   formatFillPosNameukrErrorReport,
   formatFillPosNameukrReport,
@@ -70,42 +65,6 @@ describe("formatKonkSliceStats", () => {
   });
 });
 
-describe("formatAnalogSlicesReport", () => {
-  it("includes header and competitor lines", () => {
-    const msg = formatAnalogSlicesReport([
-      { konkName: "air", count: 5, errors: 0, invalid: 1, total: 6 },
-    ]);
-
-    expect(msg).toContain("Analog slices");
-    expect(msg).toContain("air: ✅5 / ❌0 / ⚠️1");
-  });
-
-  it("includes excluded list when provided", () => {
-    const msg = formatAnalogSlicesReport([], ["yumi"]);
-    expect(msg).toContain("Пропущено: yumi");
-  });
-});
-
-describe("formatAnalogKonkSliceReport", () => {
-  it("formats single konk message", () => {
-    expect(
-      formatAnalogKonkSliceReport({
-        konkName: "balun",
-        count: 5,
-        errors: 0,
-        invalid: 1,
-        total: 6,
-      }),
-    ).toBe("📊 Analog slices — balun\nbalun: ✅5 / ❌0 / ⚠️1");
-  });
-});
-
-describe("formatAnalogSlicesExcludedReport", () => {
-  it("lists excluded", () => {
-    expect(formatAnalogSlicesExcludedReport(["balun"])).toBe("📊 Analog slices — пропущено: balun");
-  });
-});
-
 describe("formatSkuSlicesReport", () => {
   it("includes header and competitor lines", () => {
     const msg = formatSkuSlicesReport([
@@ -156,16 +115,15 @@ describe("formatBtradeSliceReport", () => {
 });
 
 describe("formatCompensatingSlicesReport", () => {
-  it("includes analog and sku stats", () => {
+  it("includes sku stats", () => {
     const msg = formatCompensatingSlicesReport({
       sliceDateLabel: "2025-06-06",
-      analog: { refetched: 5, updated: 3 },
       sku: { refetched: 8, updated: 4 },
     });
 
     expect(msg).toContain("Compensating slices");
-    expect(msg).toContain("Analog: refetched=5, updated=3");
     expect(msg).toContain("SKU: refetched=8, updated=4");
+    expect(msg).not.toContain("Analog:");
   });
 });
 

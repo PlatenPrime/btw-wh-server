@@ -28,7 +28,6 @@ describe("slice-compensation router integration", () => {
     vi.mocked(runCompensatingSlicesForKonk).mockResolvedValue({
       konkName: "air",
       sliceDate: new Date("2026-07-14T00:00:00.000Z"),
-      analog: { refetched: 1, updated: 1 },
       sku: { refetched: 0, updated: 0 },
     });
   });

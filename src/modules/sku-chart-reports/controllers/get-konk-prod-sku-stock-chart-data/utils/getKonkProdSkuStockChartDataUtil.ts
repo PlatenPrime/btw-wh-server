@@ -1,9 +1,30 @@
-import type { KonkBtradeStockComparisonData } from "../../../../analog-slices/controllers/get-konk-btrade-stock-comparison/utils/getKonkBtradeStockComparisonUtil.js";
 import { loadKonkProdSkuChartSeries } from "../../../../sku-reporting/utils/konkProdSkuChartCore.js";
 import type { GetKonkProdSkuStockChartDataInput } from "../schemas/getKonkProdSkuStockChartDataSchema.js";
 
+export interface DayStockComparison {
+  date: string;
+  competitorStock: number;
+  btradeStock: number;
+}
+
+export interface StockComparisonSummary {
+  firstDayCompetitorStock: number;
+  lastDayCompetitorStock: number;
+  firstDayBtradeStock: number;
+  lastDayBtradeStock: number;
+  diffCompetitorStock: number;
+  diffBtradeStock: number;
+  diffCompetitorStockPct: number | null;
+  diffBtradeStockPct: number | null;
+}
+
+export interface KonkProdSkuStockChartData {
+  days: DayStockComparison[];
+  summary: StockComparisonSummary;
+}
+
 export type GetKonkProdSkuStockChartDataResult =
-  { ok: true; data: KonkBtradeStockComparisonData } | { ok: false };
+  { ok: true; data: KonkProdSkuStockChartData } | { ok: false };
 
 export async function getKonkProdSkuStockChartDataUtil(
   input: GetKonkProdSkuStockChartDataInput,

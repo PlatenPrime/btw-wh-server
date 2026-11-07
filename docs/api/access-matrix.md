@@ -39,6 +39,7 @@
 | GET   | `/sharte/stock`          | Нет            | Публично |
 | GET   | `/svbum/stock`           | Нет            | Публично |
 | GET   | `/dojdevik/stock`        | Нет            | Публично |
+| GET   | `/partymall/stock`       | Нет            | Публично |
 | GET   | `/sharik/stock/:artikul` | Нет            | Публично |
 
 ---
@@ -296,40 +297,6 @@
 | ----- | --------- | -------------- | ------- |
 | GET   | `/`       | JWT            | ≥ ADMIN |
 | GET   | `/id/:id` | JWT            | ≥ ADMIN |
-
----
-
-## `/api/analogs`
-
-| Метод  | Путь                | Аутентификация | Доступ  |
-| ------ | ------------------- | -------------- | ------- |
-| GET    | `/id/:id/stock`     | JWT            | ≥ ADMIN |
-| GET    | `/id/:id`           | JWT            | ≥ ADMIN |
-| GET    | `/prod/:prodName`   | JWT            | ≥ ADMIN |
-| GET    | `/konk/:konkName`   | JWT            | ≥ ADMIN |
-| GET    | `/artikul/:artikul` | JWT            | ≥ ADMIN |
-| GET    | `/`                 | JWT            | ≥ ADMIN |
-| POST   | `/`                 | JWT            | ≥ ADMIN |
-| PATCH  | `/id/:id`           | JWT            | ≥ ADMIN |
-| DELETE | `/id/:id`           | JWT            | ≥ PRIME |
-
----
-
-## `/api/analog-slices`
-
-| Метод | Путь                                       | Аутентификация | Доступ                                 |
-| ----- | ------------------------------------------ | -------------- | -------------------------------------- |
-| GET   | `/`                                        | JWT            | ≥ ADMIN                                |
-| GET   | `/analog/:analogId/range`                  | JWT            | ≥ ADMIN                                |
-| GET   | `/analog/:analogId/sales-range`            | JWT            | ≥ ADMIN                                |
-| GET   | `/analog/:analogId/sales-by-date`          | JWT            | ≥ ADMIN                                |
-| GET   | `/analog/:analogId/comparison-excel`       | JWT            | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
-| GET   | `/konk-btrade/sales-comparison`            | JWT            | ≥ ADMIN                                |
-| GET   | `/konk-btrade/stock-comparison`            | JWT            | ≥ ADMIN                                |
-| GET   | `/konk-btrade/comparison-excel`            | JWT            | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
-| GET   | `/konk-btrade/sales-comparison-excel`      | JWT            | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
-| GET   | `/analog/:analogId/sales-comparison-excel` | JWT            | ≥ ADMIN, ответ 410 EXCEL_JOBS_MIGRATED |
-| GET   | `/analog/:analogId`                        | JWT            | ≥ ADMIN                                |
 
 ---
 

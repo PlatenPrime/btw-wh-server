@@ -12,7 +12,7 @@
 
 **Query:** `konk`, `prod`, `dateFrom`, `dateTo`; опционально `skugrIds`. Режим `prod=all` поддерживается.
 
-**Ответ 200:** `{ message: string, data: { days, summary } }` — форма как у analog konk-btrade stock-comparison.
+**Ответ 200:** `{ message: string, data: { days, summary } }` — ряды stock competitor vs btrade + summary.
 
 ---
 
@@ -22,7 +22,7 @@
 
 **Query:** как у `konk-prod/stock`.
 
-**Ответ 200:** `{ message: string, data: { days, summary } }` — форма как у analog sales-comparison.
+**Ответ 200:** `{ message: string, data: { days, summary } }` — ряды sales/revenue competitor vs btrade + summary.
 
 ---
 

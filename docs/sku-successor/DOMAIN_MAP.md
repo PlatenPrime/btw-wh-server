@@ -57,9 +57,12 @@ Auth: **User**, **Role** — как в старом проекте.
 
 ### Вне периметра
 
-- **analogs / analog-slices** и analog-часть compensating cron — складской мир.
 - Склад: arts, poses, pallets, asks, zones, rows, defs, …
 - Публичные browser demo-роуты текущего Express.
+
+### Удалено (не проектировать)
+
+- **analogs / analog-slices** — сняты из legacy (2026-11-07); successor не наследует.
 
 ## Зарезервированные доменные ключи
 

@@ -4,6 +4,7 @@ import { getAirStockData } from "../../../browser/air/utils/getAirStockData.js";
 import { getBalunStockData } from "../../../browser/balun/utils/getBalunStockData.js";
 import { getSvbumStockData } from "../../../browser/svbum/utils/getSvbumStockData.js";
 import { getDojdevikStockData } from "../../../browser/dojdevik/utils/getDojdevikStockData.js";
+import { getPartymallStockData } from "../../../browser/partymall/utils/getPartymallStockData.js";
 
 vi.mock("../../../browser/air/utils/getAirStockData.js", () => ({
   getAirStockData: vi.fn(),
@@ -29,6 +30,9 @@ vi.mock("../../../browser/svbum/utils/getSvbumStockData.js", () => ({
 vi.mock("../../../browser/dojdevik/utils/getDojdevikStockData.js", () => ({
   getDojdevikStockData: vi.fn(),
 }));
+vi.mock("../../../browser/partymall/utils/getPartymallStockData.js", () => ({
+  getPartymallStockData: vi.fn(),
+}));
 vi.mock("../maybeSetSkuArtikulIfEmpty.js", () => ({
   maybeSetSkuArtikulIfEmpty: vi.fn(),
 }));
@@ -40,6 +44,7 @@ const mockGetBalunStockData = vi.mocked(getBalunStockData);
 const mockGetAirStockData = vi.mocked(getAirStockData);
 const mockGetSvbumStockData = vi.mocked(getSvbumStockData);
 const mockGetDojdevikStockData = vi.mocked(getDojdevikStockData);
+const mockGetPartymallStockData = vi.mocked(getPartymallStockData);
 const mockMaybeSetSkuArtikulIfEmpty = vi.mocked(maybeSetSkuArtikulIfEmpty);
 
 describe("getSkuStockDataUtil", () => {
@@ -49,6 +54,7 @@ describe("getSkuStockDataUtil", () => {
     mockGetAirStockData.mockReset();
     mockGetSvbumStockData.mockReset();
     mockGetDojdevikStockData.mockReset();
+    mockGetPartymallStockData.mockReset();
     mockMaybeSetSkuArtikulIfEmpty.mockReset();
     mockMaybeSetSkuArtikulIfEmpty.mockResolvedValue(undefined);
   });
@@ -156,5 +162,24 @@ describe("getSkuStockDataUtil", () => {
       "https://dojdevik.com.ua/ua/p17755382.html",
     );
     expect(result).toEqual({ stock: 3500, price: 1.7 });
+  });
+
+  it("calls getPartymallStockData for partymall", async () => {
+    mockGetPartymallStockData.mockResolvedValue({ stock: 23, price: 1.7 });
+
+    const sku = await Sku.create({
+      konkName: "partymall",
+      prodName: "p",
+      productId: "partymall-stock-1",
+      title: "Item",
+      url: "https://partymall.ua/vozdushnyje-shary-pastjel-bjelyj-10-25-sm-gemar",
+    });
+
+    const result = await getSkuStockDataUtil(sku._id.toString());
+
+    expect(mockGetPartymallStockData).toHaveBeenCalledWith(
+      "https://partymall.ua/vozdushnyje-shary-pastjel-bjelyj-10-25-sm-gemar",
+    );
+    expect(result).toEqual({ stock: 23, price: 1.7 });
   });
 });

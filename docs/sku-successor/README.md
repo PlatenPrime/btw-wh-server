@@ -28,7 +28,7 @@
 
 **Внутри:** skus, skugrs, konks, shared prods, sku-slices / reporting / sales / chart, btrade как конкурент, grabo как отдельный не-конкурент, scrapers по конкурентам, auth как в старом проекте.
 
-**Снаружи:** analogs / analog-slices (остаются складскому миру).
+**Снаружи:** складской домен. **Analogs / analog-slices удалены** из продукта (2026-11-07) — successor их не реализует.
 
 Excel в successor — **с нуля**; текущие excel-jobs kinds — референс поведения, не обязательная архитектура.
 

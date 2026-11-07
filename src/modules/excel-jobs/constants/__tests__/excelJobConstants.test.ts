@@ -8,7 +8,8 @@ describe("excelJobConstants", () => {
     expect(isExcelJobKind("sku-selection-sales")).toBe(true);
     expect(isExcelJobKind("sku-skugr-skus-share")).toBe(true);
     expect(isExcelJobKind("grabo-skus")).toBe(true);
-    expect(EXCEL_JOB_KIND_IDS).toHaveLength(23);
+    expect(EXCEL_JOB_KIND_IDS).toHaveLength(19);
+    expect(isExcelJobKind("analog-comparison")).toBe(false);
   });
 
   it("rejects unknown kind and status", () => {

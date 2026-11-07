@@ -95,6 +95,11 @@ Legacy: [excel-jobs](../modules/excel-jobs.md), kinds sku-* / grabo-skus / konk-
 
 ## Вне периметра (не переносить)
 
-- Analogs / analog-slices / analog excel comparison как продукт.
 - Складской домен (arts, poses, pallets, asks, …).
 - Warehouse-only excel kinds (arts-export, zones-export, …) — остаются старому, кроме grabo/sku/btrade-сравнений в SKU-продукте.
+
+## Удалено из продукта (не реализовывать в successor)
+
+- **Analogs / analog-slices** — домен снят из `btw-wh-server` (2026-11-07): нет CRUD, live stock API, primary/compensating analog slices, analog excel kinds (`analog-comparison`, `analog-sales-comparison`, `konk-btrade-comparison`, `konk-btrade-sales-comparison` на базе Analog).
+- Поле `Sku.btradeAnalog` остаётся (связь карточки SKU с артикулом BTrade) — это не модуль Analog.
+- Сравнения конкурент↔Btrade в successor — только через SKU / sku-slices / btrade-slices.

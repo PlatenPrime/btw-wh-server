@@ -6,6 +6,7 @@ import { getSvbumGroupPagesProducts } from "../svbum/group-pages/utils/getSvbumG
 import { getYumiGroupPagesProducts } from "../yumi/group-pages/utils/getYumiGroupPagesProducts.js";
 import { getYuminGroupPagesProducts } from "../yumin/group-pages/utils/getYuminGroupPagesProducts.js";
 import { getDojdevikGroupPagesProducts } from "../dojdevik/group-pages/utils/getDojdevikGroupPagesProducts.js";
+import { getPartymallGroupPagesProducts } from "../partymall/skugr-pages/utils/getPartymallGroupPagesProducts.js";
 import type { FetchGroupProductsInput, GroupBrowserProduct } from "./types.js";
 
 type GroupPageProductRow = Pick<GroupBrowserProduct, keyof GroupBrowserProduct>;
@@ -63,6 +64,8 @@ export async function fetchGroupProductsByKonkName(
       return fetchGroupPagesProductsVia(input, getSvbumGroupPagesProducts);
     case "dojdevik":
       return fetchGroupPagesProductsVia(input, getDojdevikGroupPagesProducts);
+    case "partymall":
+      return fetchGroupPagesProductsVia(input, getPartymallGroupPagesProducts);
     default:
       throw new UnsupportedKonkForGroupProductsError(konkName);
   }

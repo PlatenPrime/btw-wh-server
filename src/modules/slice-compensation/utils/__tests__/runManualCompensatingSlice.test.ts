@@ -51,7 +51,6 @@ describe("runManualCompensatingSlice", () => {
     vi.mocked(runCompensatingSlicesForKonk).mockResolvedValue({
       konkName: "air",
       sliceDate: new Date("2026-07-14T00:00:00.000Z"),
-      analog: { refetched: 3, updated: 2 },
       sku: { refetched: 1, updated: 1 },
     });
 
@@ -62,7 +61,6 @@ describe("runManualCompensatingSlice", () => {
       {
         konkName: "air",
         sliceDate: "2026-07-14",
-        analog: { refetched: 3, updated: 2 },
         sku: { refetched: 1, updated: 1 },
       },
       "manual compensating slice done",

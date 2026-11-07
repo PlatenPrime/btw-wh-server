@@ -1,8 +1,4 @@
 import { z } from "zod";
-import { getAnalogBtradeComparisonExcelSchema } from "../../analog-slices/controllers/get-analog-btrade-comparison-excel/schemas/getAnalogBtradeComparisonExcelSchema.js";
-import { getAnalogSalesComparisonExcelSchema } from "../../analog-slices/controllers/get-analog-sales-comparison-excel/schemas/getAnalogSalesComparisonExcelSchema.js";
-import { getKonkBtradeComparisonExcelSchema } from "../../analog-slices/controllers/get-konk-btrade-comparison-excel/schemas/getKonkBtradeComparisonExcelSchema.js";
-import { getKonkBtradeSalesComparisonExcelSchema } from "../../analog-slices/controllers/get-konk-btrade-sales-comparison-excel/schemas/getKonkBtradeSalesComparisonExcelSchema.js";
 import { getArtStockExcelSchema } from "../../art-excel-reports/controllers/get-art-stock-excel/schemas/getArtStockExcelSchema.js";
 import { RoleType } from "../../../constants/roles.js";
 import { getCatalogInvalidExcelQuerySchema } from "../../sku-excel-reports/controllers/get-catalog-invalid-excel/schemas/getCatalogInvalidExcelSchema.js";
@@ -111,30 +107,6 @@ export const EXCEL_JOB_KIND_DEFINITIONS: Record<ExcelJobKind, ExcelJobKindDefini
     minRole: RoleType.ADMIN,
     schema: getArtStockExcelSchema,
     oldPath: "GET /api/art-excel-reports/artikul/:artikul/sales",
-  },
-  "analog-comparison": {
-    kind: "analog-comparison",
-    minRole: RoleType.ADMIN,
-    schema: getAnalogBtradeComparisonExcelSchema,
-    oldPath: "GET /api/analog-slices/analog/:analogId/comparison-excel",
-  },
-  "analog-sales-comparison": {
-    kind: "analog-sales-comparison",
-    minRole: RoleType.ADMIN,
-    schema: getAnalogSalesComparisonExcelSchema,
-    oldPath: "GET /api/analog-slices/analog/:analogId/sales-comparison-excel",
-  },
-  "konk-btrade-comparison": {
-    kind: "konk-btrade-comparison",
-    minRole: RoleType.ADMIN,
-    schema: getKonkBtradeComparisonExcelSchema,
-    oldPath: "GET /api/analog-slices/konk-btrade/comparison-excel",
-  },
-  "konk-btrade-sales-comparison": {
-    kind: "konk-btrade-sales-comparison",
-    minRole: RoleType.ADMIN,
-    schema: getKonkBtradeSalesComparisonExcelSchema,
-    oldPath: "GET /api/analog-slices/konk-btrade/sales-comparison-excel",
   },
   "arts-export": {
     kind: "arts-export",
