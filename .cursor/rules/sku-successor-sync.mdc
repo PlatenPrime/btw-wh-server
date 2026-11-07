@@ -1,0 +1,52 @@
+---
+description: После изменений SKU-периметра обновлять docs/sku-successor и писать sync-дельту
+globs:
+  - src/modules/skus/**
+  - src/modules/skugrs/**
+  - src/modules/konks/**
+  - src/modules/prods/**
+  - src/modules/sku-slices/**
+  - src/modules/sku-reporting/**
+  - src/modules/sku-sales-reports/**
+  - src/modules/sku-chart-reports/**
+  - src/modules/sku-excel-reports/**
+  - src/modules/btrade-slices/**
+  - src/modules/grabo-skus/**
+  - src/modules/browser/**
+  - src/modules/slices/**
+  - src/modules/slice-compensation/**
+  - src/modules/excel-jobs/**
+  - docs/modules/skus.md
+  - docs/modules/skugrs.md
+  - docs/modules/konks.md
+  - docs/modules/prods.md
+  - docs/modules/sku-*.md
+  - docs/modules/btrade-slices.md
+  - docs/modules/grabo-skus.md
+  - docs/modules/browser.md
+  - docs/modules/slices.md
+  - docs/modules/slice-compensation.md
+  - docs/modules/excel-jobs.md
+  - docs/api/skus.md
+  - docs/api/skugrs.md
+  - docs/api/sku-*.md
+  - docs/api/btrade-slices.md
+  - docs/api/grabo-skus.md
+  - docs/api/browser.md
+  - docs/api/excel-jobs*.md
+  - docs/sku-successor/**
+alwaysApply: false
+---
+
+# SKU-successor sync
+
+При изменениях в SKU-периметре (см. globs) **в том же изменении**:
+
+1. Если менялась Mongo-схема / индексы моделей из периметра — обновить `docs/sku-successor/FROZEN_MODELS.md` (для `Prod` — shared со складом).
+2. Если менялось продуктовое поведение — `docs/sku-successor/CAPABILITIES.md`.
+3. Если менялись cron schedule / writers — `docs/sku-successor/CRONS_AND_CUTOVER.md`.
+4. Добавить файл `docs/sku-successor/sync/YYYY-MM-DD-<slug>.md` по шаблону `docs/sku-successor/sync/_TEMPLATE.md`.
+
+Не трогать runtime ради миграции на successor. Аналоги (`analogs`, `analog-slices`) вне периметра successor — дельта не нужна, если правка только про них.
+
+Процесс: `docs/sku-successor/sync/README.md`.
