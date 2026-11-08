@@ -1,6 +1,8 @@
 import { createEventUtil } from "../../../events/utils/createEventUtil.js";
 import { runSkuSliceForSkugrTodayUtil } from "../../../sku-slices/controllers/run-skugr-slices-today/utils/runSkuSliceForSkugrTodayUtil.js";
 import { runSkuSlicePostCorrectionsUtil } from "../../../sku-slices/utils/runSkuSlicePostCorrectionsUtil.js";
+import { batchCorrectStockBandSchema } from "../../../sku-slices/controllers/batch-correct-stock-band/schemas/batchCorrectStockBandSchema.js";
+import { batchCorrectStockBandUtil } from "../../../sku-slices/controllers/batch-correct-stock-band/utils/batchCorrectStockBandUtil.js";
 import { postSkuSlicePostCorrectionsSchema } from "../../../sku-slices/controllers/post-sku-slice-post-corrections/schemas/postSkuSlicePostCorrectionsSchema.js";
 import { runCompensatingSlicesForKonk } from "../../../slice-compensation/utils/runCompensatingSlicesForKonk.js";
 import { fillSkugrSkusFromBrowserUtil } from "../../../skugrs/utils/fillSkugrSkusFromBrowserUtil.js";
@@ -43,6 +45,43 @@ export const runSkuSlicesPostCorrectionsRun: ApiTaskKindRunner = async (params, 
     });
   }
   return okApiTaskRun({ ...result });
+};
+
+export const runSkuSlicesStockBandBatchCorrect: ApiTaskKindRunner = async (params, options) => {
+  const parsed = batchCorrectStockBandSchema.safeParse(params);
+  if (!parsed.success) {
+    return failApiTaskRun("Invalid params for sku-slices.stock-band.batch-correct");
+  }
+  throwIfAborted(options?.signal);
+  const outcome = await batchCorrectStockBandUtil(parsed.data, {
+    onProgress: options?.onProgress,
+    signal: options?.signal,
+  });
+  if (!outcome.ok) {
+    return failApiTaskRun(outcome.message);
+  }
+  if (options?.userId) {
+    await createEventUtil({
+      userId: options.userId,
+      department: "sku-slices",
+      type: "other",
+      description:
+        "Stock-band batch-correct " +
+        outcome.bandId +
+        " " +
+        outcome.result.konkName +
+        " " +
+        outcome.result.window.dateFrom +
+        "…" +
+        outcome.result.window.dateTo +
+        " patched=" +
+        String(outcome.result.patched.length),
+    });
+  }
+  return okApiTaskRun({
+    bandId: outcome.bandId,
+    ...outcome.result,
+  });
 };
 
 export const runSkuSlicesSkugrRunToday: ApiTaskKindRunner = async (params, options) => {

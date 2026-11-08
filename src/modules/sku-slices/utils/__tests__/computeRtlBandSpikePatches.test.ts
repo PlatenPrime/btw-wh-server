@@ -3,6 +3,7 @@ import {
   computeRtlBandSpikePatches,
   isManualBandStock,
   isManualSmallStock,
+  isNormalStock,
   type RtlBandStockDay,
 } from "../computeRtlBandSpikePatches.js";
 
@@ -33,6 +34,13 @@ describe("isManualBandStock / isManualSmallStock", () => {
     expect(isManualSmallStock(8999, 9000)).toBe(true);
     expect(isManualSmallStock(9000, 9000)).toBe(false);
     expect(isManualSmallStock(-1, 9000)).toBe(false);
+  });
+
+  it("treats stock <= normalMax as normal (not -1)", () => {
+    expect(isNormalStock(0, 500)).toBe(true);
+    expect(isNormalStock(500, 500)).toBe(true);
+    expect(isNormalStock(501, 500)).toBe(false);
+    expect(isNormalStock(-1, 500)).toBe(false);
   });
 });
 
@@ -137,6 +145,33 @@ describe("computeRtlBandSpikePatches", () => {
     expect(patches).toEqual([
       { dateMs: s[1]!.dateMs, from: 9937, to: 1 },
       { dateMs: s[4]!.dateMs, from: 9940, to: 2 },
+    ]);
+  });
+
+  it("with normalMax skips elevated right edge that legacy would accept", () => {
+    const s = series([200, 10000, 10000, 8000]);
+    const legacy = computeRtlBandSpikePatches(s, s[1]!.dateMs, s[2]!.dateMs, BAND);
+    expect(legacy.skipped).toEqual([]);
+    expect(legacy.patches.length).toBeGreaterThan(0);
+
+    const withNorm = computeRtlBandSpikePatches(s, s[1]!.dateMs, s[2]!.dateMs, {
+      ...BAND,
+      normalMax: 500,
+    });
+    expect(withNorm.patches).toEqual([]);
+    expect(withNorm.skipped[0]?.reason).toBe("not-sandwich-right");
+  });
+
+  it("with normalMax applies when right returns to norm", () => {
+    const s = series([200, 10000, 10000, 150]);
+    const { patches, skipped } = computeRtlBandSpikePatches(s, s[1]!.dateMs, s[2]!.dateMs, {
+      ...BAND,
+      normalMax: 500,
+    });
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([
+      { dateMs: s[1]!.dateMs, from: 10000, to: 150 },
+      { dateMs: s[2]!.dateMs, from: 10000, to: 150 },
     ]);
   });
 });

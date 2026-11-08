@@ -26,6 +26,11 @@ export type RtlBandSpikeComputeResult = {
 export type RtlBandSpikeBand = {
   bandMin: number;
   bandMax: number;
+  /**
+   * Верх «нормы» для sandwich-якоря.
+   * Если задан — small = stock <= normalMax; иначе legacy: stock < bandMin.
+   */
+  normalMax?: number;
 };
 
 export function isManualBandStock(stock: number, bandMin: number, bandMax: number): boolean {
@@ -35,6 +40,18 @@ export function isManualBandStock(stock: number, bandMin: number, bandMax: numbe
 /** «Небольшое»: ниже bandMin, finite, не сентинел -1. */
 export function isManualSmallStock(stock: number, bandMin: number): boolean {
   return Number.isFinite(stock) && stock !== -1 && stock < bandMin;
+}
+
+/** Нормальный остаток по потолку normalMax (inclusive), finite, не -1. */
+export function isNormalStock(stock: number, normalMax: number): boolean {
+  return Number.isFinite(stock) && stock !== -1 && stock <= normalMax;
+}
+
+function isSandwichAnchor(stock: number, band: RtlBandSpikeBand): boolean {
+  if (band.normalMax !== undefined) {
+    return isNormalStock(stock, band.normalMax);
+  }
+  return isManualSmallStock(stock, band.bandMin);
 }
 
 type BandRun = { startIndex: number; endIndex: number };
@@ -118,11 +135,11 @@ export function computeRtlBandSpikePatches(
       skipped.push({ dateFromMs: runFromMs, dateToMs: runToMs, reason: "missing-right" });
       continue;
     }
-    if (!isManualSmallStock(leftStock, bandMin)) {
+    if (!isSandwichAnchor(leftStock, band)) {
       skipped.push({ dateFromMs: runFromMs, dateToMs: runToMs, reason: "not-sandwich-left" });
       continue;
     }
-    if (!isManualSmallStock(rightStock, bandMin)) {
+    if (!isSandwichAnchor(rightStock, band)) {
       skipped.push({ dateFromMs: runFromMs, dateToMs: runToMs, reason: "not-sandwich-right" });
       continue;
     }

@@ -37,6 +37,7 @@
 - Ночной сбор срезов по конкурентам + post-corrections.
 - Compensation недостоверных точек.
 - Band-spike discover + RTL correct (preview/apply).
+- Сохранённые stock bands (CRUD) + discover/batch-correct через ApiTask с `normalMax`.
 - Air client slice ingest при необходимости.
 
 Модуль: [docs/modules/sku-slices.md](../modules/sku-slices.md).

@@ -3,8 +3,10 @@ import { RoleType } from "../../constants/roles.js";
 import { checkAuth, checkRoles } from "../../middleware/index.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import {
+  batchCorrectStockBandController,
   correctBandSpikeController,
   discoverBandSpikeController,
+  discoverStockBandController,
   getAirClientPendingController,
   getPackFlipReviewController,
   getSkuSliceByDateController,
@@ -68,6 +70,18 @@ router.post(
   checkAuth,
   checkRoles([RoleType.ADMIN]),
   asyncHandler(discoverBandSpikeController),
+);
+router.post(
+  "/stock-bands/:bandId/discover",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(discoverStockBandController),
+);
+router.post(
+  "/stock-bands/:bandId/batch-correct",
+  checkAuth,
+  checkRoles([RoleType.ADMIN]),
+  asyncHandler(batchCorrectStockBandController),
 );
 router.get(
   "/sku/:skuId/range",

@@ -11,3 +11,5 @@ export { runSkugrSlicesTodayController } from "./run-skugr-slices-today/runSkugr
 export { postSkuSlicePostCorrectionsController } from "./post-sku-slice-post-corrections/postSkuSlicePostCorrectionsController.js";
 export { discoverBandSpikeController } from "./discover-band-spike/discoverBandSpikeController.js";
 export { correctBandSpikeController } from "./correct-band-spike/correctBandSpikeController.js";
+export { discoverStockBandController } from "./discover-stock-band/discoverStockBandController.js";
+export { batchCorrectStockBandController } from "./batch-correct-stock-band/batchCorrectStockBandController.js";

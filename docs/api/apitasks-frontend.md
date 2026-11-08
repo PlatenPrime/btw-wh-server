@@ -13,9 +13,13 @@
 
 Любой клик по старому action-URL (run-today, compensating run, fill-skus, grabo sync, update-all, recalc, populate, batch delete) получает 410 с `kind`. Фронт подставляет этот `kind` в `POST /api/apitasks` и переносит path/body в `params` по таблице в [apitasks.md](apitasks.md).
 
+## Stock-band batch-correct
+
+После чекбоксов на карточке диапазона: `POST /api/sku-slices/stock-bands/:bandId/batch-correct` (или `POST /api/apitasks` с kind `sku-slices.stock-band.batch-correct`). Поллинг как обычно. На `completed` разобрать `result.patched` / `result.skipped`. Гайд: [sku-stock-bands](../frontend/sku-stock-bands.md).
+
 ## Что не переводить на ApiTasks
 
-Live GET stock, browser stock, charts/sales JSON, обычный CRUD, set-pallets/unlink, быстрые reset/updateMany one-shot.
+Live GET stock, browser stock, charts/sales JSON, обычный CRUD диапазонов (`/api/sku-stock-bands`), set-pallets/unlink, быстрые reset/updateMany one-shot.
 
 ## Excel отдельно
 

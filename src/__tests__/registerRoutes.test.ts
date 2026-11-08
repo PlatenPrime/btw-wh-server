@@ -15,6 +15,10 @@ describe("registerRoutes", () => {
     expect(getApiRoutePrefixes()).toContain("/api/events");
   });
 
+  it("включает /api/sku-stock-bands среди зарегистрированных prefix'ов", () => {
+    expect(getApiRoutePrefixes()).toContain("/api/sku-stock-bands");
+  });
+
   it("монтирует каждый prefix через app.use", () => {
     const app = express();
     const useSpy = vi.spyOn(app, "use");

@@ -20,11 +20,15 @@ export type CorrectManualBandSpikesForRangeInput = {
   konkName: string;
   stockMin: number;
   stockMax: number;
+  /** Если задан — sandwich через stock <= normalMax; иначе legacy stock < stockMin. */
+  normalMax?: number;
   dateFrom: Date;
   dateTo: Date;
   apply?: boolean;
   /** Если задан — только эти productId; иначе все из day-maps за окно±1. */
   productIds?: string[];
+  signal?: AbortSignal;
+  onProgress?: (done: number, total: number, message?: string) => void;
 };
 
 export type ManualBandPatchFinding = {
@@ -45,7 +49,7 @@ export type CorrectManualBandSpikesForRangeResult = {
   konkName: string;
   apply: boolean;
   window: { dateFrom: string; dateTo: string };
-  band: { min: number; max: number };
+  band: { min: number; max: number; normalMax?: number };
   patched: ManualBandPatchFinding[];
   skipped: ManualBandSkipFinding[];
 };
@@ -90,6 +94,7 @@ export async function correctManualBandSpikesForRangeUtil(
   const konkName = input.konkName.trim().toLowerCase();
   const stockMin = input.stockMin;
   const stockMax = input.stockMax;
+  const normalMax = input.normalMax;
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
   const apply = input.apply === true;
@@ -111,13 +116,24 @@ export async function correctManualBandSpikesForRangeUtil(
   const skipped: ManualBandSkipFinding[] = [];
   const patchesToWrite: Array<{ productId: string; dateMs: number; to: number }> = [];
 
-  for (const productId of productIds) {
+  const band =
+    normalMax !== undefined
+      ? { bandMin: stockMin, bandMax: stockMax, normalMax }
+      : { bandMin: stockMin, bandMax: stockMax };
+
+  for (let i = 0; i < productIds.length; i++) {
+    if (input.signal?.aborted) {
+      const aborted = new Error("Aborted");
+      aborted.name = "AbortError";
+      throw aborted;
+    }
+    const productId = productIds[i]!;
     const series = buildSeriesForProduct(productId, loadDates, dataByDate);
     const { patches, skipped: productSkipped } = computeRtlBandSpikePatches(
       series,
       dateFrom.getTime(),
       dateTo.getTime(),
-      { bandMin: stockMin, bandMax: stockMax },
+      band,
     );
 
     for (const p of patches) {
@@ -137,6 +153,7 @@ export async function correctManualBandSpikesForRangeUtil(
         reason: s.reason,
       });
     }
+    input.onProgress?.(i + 1, productIds.length, productId);
   }
 
   if (apply && patchesToWrite.length > 0) {
@@ -168,7 +185,11 @@ export async function correctManualBandSpikesForRangeUtil(
     konkName,
     apply,
     window: { dateFrom: toUtcYmd(dateFrom), dateTo: toUtcYmd(dateTo) },
-    band: { min: stockMin, max: stockMax },
+    band: {
+      min: stockMin,
+      max: stockMax,
+      ...(normalMax !== undefined ? { normalMax } : {}),
+    },
     patched,
     skipped,
   };
@@ -184,6 +205,7 @@ export async function correctManualBandSpikesForRangeUtil(
         dateTo: result.window.dateTo,
         stockMin,
         stockMax,
+        normalMax,
       },
       "manual band spike correction",
     );

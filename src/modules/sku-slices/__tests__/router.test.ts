@@ -17,6 +17,8 @@ describe("sku-slices router", () => {
       "/skugr/:skugrId/run-today",
       "/post-corrections/run",
       "/band-spike/discover",
+      "/stock-bands/:bandId/discover",
+      "/stock-bands/:bandId/batch-correct",
       "/sku/:skuId/range",
       "/sku/:skuId/correct-band-spike",
       "/sku/:skuId",

@@ -355,6 +355,64 @@
 
 ---
 
+### POST `/api/sku-slices/stock-bands/:bandId/discover`
+
+Discover кандидатов по сохранённому диапазону ([sku-stock-bands](sku-stock-bands.md)). Старый `POST .../band-spike/discover` не меняется. Гайд: [frontend: sku-stock-bands](../frontend/sku-stock-bands.md).
+
+**Path:** `bandId` — ObjectId `SkuStockBand`.
+
+**Тело:**
+
+| Поле     | Тип    | Обязательно | Описание                   |
+| -------- | ------ | ----------- | -------------------------- |
+| dateFrom | string | да          | YYYY-MM-DD, UTC, inclusive |
+| dateTo   | string | да          | YYYY-MM-DD; диапазон ≤ 93  |
+
+**Ответ 200:**
+
+```text
+{
+  message: string,
+  data: {
+    bandId: string,
+    konkName: string,
+    window: { dateFrom: string, dateTo: string },
+    band: { min: number, max: number, normalMax: number },
+    items: Array<{
+      skuId: string | null,
+      productId: string,
+      title: string | null,
+      imageUrl: string | null,
+      runs: Array<{ dateFrom: string, dateTo: string, peakStock: number }>
+    }>
+  }
+}
+```
+
+**Ошибки:** 400; 401; 403; 404 нет band; 500.
+
+---
+
+### POST `/api/sku-slices/stock-bands/:bandId/batch-correct`
+
+Постановка ApiTask `sku-slices.stock-band.batch-correct`: RTL-apply для выбранных `productIds` с `normalMax` из band. Ответ **202**. Один активный batch на `bandId` (resourceKey).
+
+**Path:** `bandId` — ObjectId.
+
+**Тело:**
+
+| Поле       | Тип      | Обязательно | Описание      |
+| ---------- | -------- | ----------- | ------------- |
+| dateFrom   | string   | да          | YYYY-MM-DD    |
+| dateTo     | string   | да          | ≤ 366 дней    |
+| productIds | string[] | да          | unique, 1…500 |
+
+**Ответ 202:** как `POST /api/apitasks` (`taskId`, `pollIntervalMs`, …).
+
+**Ошибки:** 400; 401; 403; 409 дубль resourceKey; 429 лимит активных задач; 500.
+
+---
+
 ### GET `/api/sku-slices/pack-flips`
 
 Проверка кратных инверсий `stock`/`price` по конкуренту за период. Срезы не изменяются. Детектор общий для конкурентов; auto-apply после ночного cron — только konk из конфига `packFlipAutoApplyKonks`.

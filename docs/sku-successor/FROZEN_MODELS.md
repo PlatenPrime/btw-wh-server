@@ -107,6 +107,21 @@ Observability дневного прогона (без точек stock/price).
 
 ---
 
+## SkuStockBand → коллекция `sku_stock_bands`
+
+Source: [src/modules/sku-stock-bands/models/SkuStockBand.ts](../../src/modules/sku-stock-bands/models/SkuStockBand.ts)
+
+| Поле      | Тип                      | Ограничения                 |
+| --------- | ------------------------ | --------------------------- |
+| konk      | `{ name, title }` subdoc | required; name lowercase    |
+| stockMin  | number                   | required, ≥ 0; ≤ stockMax   |
+| stockMax  | number                   | required, ≥ 0               |
+| normalMax | number                   | required, ≥ 0; `< stockMin` |
+
+Индексы: `{ "konk.name": 1 }`. Несколько документов на один konk допустимы.
+
+---
+
 ## SkuSlice → коллекция `sku_slices` (legacy)
 
 Source: [src/modules/sku-slices/models/SkuSlice.ts](../../src/modules/sku-slices/models/SkuSlice.ts)

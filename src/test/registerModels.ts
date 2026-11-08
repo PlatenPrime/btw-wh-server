@@ -24,6 +24,7 @@ import "../modules/skus/models/Sku.js";
 import "../modules/sku-slices/models/SkuSlice.js";
 import "../modules/sku-slices/models/SkuSliceMonth.js";
 import "../modules/sku-slices/models/SkuSliceDayMeta.js";
+import "../modules/sku-stock-bands/models/SkuStockBand.js";
 import "../modules/zones/models/Zone.js";
 import "../modules/excel-jobs/models/ExcelJob.js";
 import "../modules/apitasks/models/ApiTask.js";

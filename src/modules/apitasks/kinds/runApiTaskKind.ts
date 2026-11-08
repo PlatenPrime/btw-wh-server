@@ -9,6 +9,7 @@ import {
   runSkugrsFillSkus,
   runSkuSlicesPostCorrectionsRun,
   runSkuSlicesSkugrRunToday,
+  runSkuSlicesStockBandBatchCorrect,
   runSliceCompensationRun,
 } from "./runners/runTier1ApiTaskKinds.js";
 import {
@@ -29,6 +30,7 @@ import {
 const RUNNERS: Record<ApiTaskKind, ApiTaskKindRunner> = {
   "sku-slices.skugr-run-today": runSkuSlicesSkugrRunToday,
   "sku-slices.post-corrections.run": runSkuSlicesPostCorrectionsRun,
+  "sku-slices.stock-band.batch-correct": runSkuSlicesStockBandBatchCorrect,
   "slice-compensation.run": runSliceCompensationRun,
   "skugrs.fill-skus": runSkugrsFillSkus,
   "grabo-skus.sync": runGraboSkusSync,

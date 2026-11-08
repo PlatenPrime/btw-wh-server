@@ -42,7 +42,9 @@ Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/con
 
 После срезов всех конкурентов — post-pass: pack-flip auto-apply (`perfect`), manufacturer rollup. Авто-коррекций всплесков остатка нет. ApiTask `sku-slices.post-corrections.run` повторяет тот же набор (со скоупом по `konkName`, если задан).
 
-Всплески остатка правятся вручную с клиента: discovery кандидатов (`POST .../band-spike/discover`) по `konkName` + `[stockMin, stockMax]` + даты, затем точечный RTL sandwich `small → band → small` на одном SKU (`POST .../sku/:skuId/correct-band-spike`, preview → apply). Массовой записи нет. Гайд: [frontend: band-spike-correction](../frontend/band-spike-correction.md).
+Всплески остатка правятся вручную с клиента: discovery кандидатов (`POST .../band-spike/discover`) по `konkName` + `[stockMin, stockMax]` + даты, затем точечный RTL sandwich `small → band → small` на одном SKU (`POST .../sku/:skuId/correct-band-spike`, preview → apply). Этот контур без изменений.
+
+Параллельно — сохранённые диапазоны ([sku-stock-bands](sku-stock-bands.md)): `POST .../stock-bands/:bandId/discover` и batch ApiTask `sku-slices.stock-band.batch-correct` с sandwich через `normalMax`. Гайд: [frontend: sku-stock-bands](../frontend/sku-stock-bands.md).
 
 ### Client-ingestion для Air
 
@@ -61,6 +63,8 @@ Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/con
 - `PATCH /api/sku-slices/sku/:skuId` — ручная запись stock/price (months upsert)
 - `POST /api/sku-slices/band-spike/discover` — список SKU с выходом из полосы остатка
 - `POST /api/sku-slices/sku/:skuId/correct-band-spike` — клиентский RTL-corrector band-spike любого konk (preview/apply)
+- `POST /api/sku-slices/stock-bands/:bandId/discover` — discover по сохранённому диапазону
+- `POST /api/sku-slices/stock-bands/:bandId/batch-correct` — batch RTL-apply (ApiTask, 202)
 - `POST /api/sku-slices/skugr/:skugrId/run-today` — ручной scrape группы за сегодня
 - `POST /api/sku-slices/post-corrections/run` — post-pass за период (ApiTask, 202): pack-flip + rollup; optional `konkName`
 - `GET /api/sku-slices/sku/:skuId/range` — плотный ряд с forward-fill

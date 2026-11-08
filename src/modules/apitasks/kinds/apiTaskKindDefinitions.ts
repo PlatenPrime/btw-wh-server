@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { z } from "zod";
 import { RoleType } from "../../../constants/roles.js";
 import { runCompensatingSliceSchema } from "../../slice-compensation/controllers/run-compensating-slice/schemas/runCompensatingSliceSchema.js";
+import { batchCorrectStockBandSchema } from "../../sku-slices/controllers/batch-correct-stock-band/schemas/batchCorrectStockBandSchema.js";
 import { postSkuSlicePostCorrectionsSchema } from "../../sku-slices/controllers/post-sku-slice-post-corrections/schemas/postSkuSlicePostCorrectionsSchema.js";
 import { runSkugrSlicesTodaySchema } from "../../sku-slices/controllers/run-skugr-slices-today/schemas/runSkugrSlicesTodaySchema.js";
 import { fixIncorrectSkuDataSchema } from "../../skus/controllers/fix-incorrect-sku-data/schemas/fixIncorrectSkuDataSchema.js";
@@ -60,6 +61,14 @@ export const API_TASK_KIND_DEFINITIONS: Record<ApiTaskKind, ApiTaskKindDefinitio
       }
       return undefined;
     },
+  },
+  "sku-slices.stock-band.batch-correct": {
+    kind: "sku-slices.stock-band.batch-correct",
+    minRole: RoleType.ADMIN,
+    schema: batchCorrectStockBandSchema,
+    oldPath: "POST /api/sku-slices/stock-bands/:bandId/batch-correct",
+    getResourceKey: (params) =>
+      typeof params.bandId === "string" ? `stock-band:${params.bandId}` : undefined,
   },
   "slice-compensation.run": {
     kind: "slice-compensation.run",

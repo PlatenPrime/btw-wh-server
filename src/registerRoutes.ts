@@ -29,6 +29,7 @@ import skuChartReportsRoute from "./modules/sku-chart-reports/router.js";
 import skuExcelReportsRoute from "./modules/sku-excel-reports/router.js";
 import skuSalesReportsRoute from "./modules/sku-sales-reports/router.js";
 import skuSlicesRoute from "./modules/sku-slices/router.js";
+import skuStockBandsRoute from "./modules/sku-stock-bands/router.js";
 import skugrsRoute from "./modules/skugrs/router.js";
 import skusRoute from "./modules/skus/router.js";
 import sliceCompensationRoute from "./modules/slice-compensation/router.js";
@@ -56,6 +57,7 @@ export const API_ROUTES: ReadonlyArray<readonly [string, RequestHandler]> = [
   ["/api/prods", prodsRoute],
   ["/api/skus", skusRoute],
   ["/api/sku-slices", skuSlicesRoute],
+  ["/api/sku-stock-bands", skuStockBandsRoute],
   ["/api/sku-excel-reports", skuExcelReportsRoute],
   ["/api/sku-sales-reports", skuSalesReportsRoute],
   ["/api/sku-chart-reports", skuChartReportsRoute],
