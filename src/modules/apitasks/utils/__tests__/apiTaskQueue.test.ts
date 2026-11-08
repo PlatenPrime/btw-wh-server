@@ -1,11 +1,18 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { ApiTask } from "../../models/ApiTask.js";
 import {
-  recoverApiTasksOnStartup,
-  resetApiTaskQueueForTests,
+  enqueueApiTask,
   getApiTaskQueuePosition,
+  getApiTaskQueueSnapshot,
+  recoverApiTasksOnStartup,
+  requestApiTaskCancel,
+  resetApiTaskQueueForTests,
   setApiTaskExecutor,
 } from "../apiTaskQueue.js";
+
+function tick(ms = 0): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 describe("apiTaskQueue", () => {
   afterEach(() => {
@@ -44,6 +51,51 @@ describe("apiTaskQueue", () => {
     expect(getApiTaskQueuePosition(String(queued._id))).toBe(0);
 
     release();
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await tick(20);
+  });
+
+  it("cancel running frees slot and starts next queued task", async () => {
+    let releaseA!: () => void;
+    let releaseB!: () => void;
+    const gateA = new Promise<void>((resolve) => {
+      releaseA = resolve;
+    });
+    const gateB = new Promise<void>((resolve) => {
+      releaseB = resolve;
+    });
+    const started: string[] = [];
+
+    setApiTaskExecutor(async (taskId) => {
+      started.push(taskId);
+      if (taskId === "task-a") {
+        await gateA;
+        return;
+      }
+      await gateB;
+    });
+
+    enqueueApiTask("task-a");
+    await tick(5);
+    expect(getApiTaskQueueSnapshot().runningId).toBe("task-a");
+
+    enqueueApiTask("task-b");
+    expect(getApiTaskQueuePosition("task-b")).toBe(1);
+
+    const cancelResult = await requestApiTaskCancel("task-a");
+    expect(cancelResult).toBe("running");
+    await tick(5);
+
+    expect(getApiTaskQueueSnapshot().runningId).toBe("task-b");
+    expect(getApiTaskQueuePosition("task-b")).toBe(0);
+    expect(started).toEqual(["task-a", "task-b"]);
+
+    // Orphaned A finally must not clear B's slot.
+    releaseA();
+    await tick(20);
+    expect(getApiTaskQueueSnapshot().runningId).toBe("task-b");
+
+    releaseB();
+    await tick(20);
+    expect(getApiTaskQueueSnapshot().runningId).toBeNull();
   });
 });

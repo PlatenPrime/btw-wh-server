@@ -1,8 +1,21 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SkuSliceMonth } from "../../models/SkuSliceMonth.js";
 import { getDayPoint } from "../skuSliceMonthStore.js";
 import { seedSkuSliceMonthDay } from "../seedSkuSliceMonthDay.js";
 import { correctManualBandSpikesForRangeUtil } from "../correctManualBandSpikesForRangeUtil.js";
+
+vi.mock("../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js", async (importOriginal) => {
+  const actual =
+    await importOriginal<
+      typeof import("../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js")
+    >();
+  return {
+    ...actual,
+    materializeSkuSliceSalesDateRange: vi.fn(async () => undefined),
+  };
+});
+
+import { materializeSkuSliceSalesDateRange } from "../../../sku-reporting/utils/materializeSkuSliceSalesUtil.js";
 
 const D0 = new Date("2026-09-13T00:00:00.000Z");
 const D1 = new Date("2026-09-14T00:00:00.000Z");
@@ -24,6 +37,7 @@ async function seedKonk(
 describe("correctManualBandSpikesForRangeUtil", () => {
   beforeEach(async () => {
     await SkuSliceMonth.deleteMany({});
+    vi.mocked(materializeSkuSliceSalesDateRange).mockClear();
   });
 
   it("patches only sandwich product among two for balun band", async () => {
@@ -104,5 +118,76 @@ describe("correctManualBandSpikesForRangeUtil", () => {
     ]);
     expect(result.apply).toBe(false);
     expect(await getDayPoint("balun", "balun-1", D1)).toEqual({ stock: 9937, price: 10 });
+    expect(materializeSkuSliceSalesDateRange).not.toHaveBeenCalled();
+  });
+
+  it("applies with one rematerialize for multiple patched products and reports progress", async () => {
+    await seedKonk("balun", [
+      { date: D0, data: { a: { stock: 5, price: 10 }, b: { stock: 5, price: 10 } } },
+      { date: D1, data: { a: { stock: 9937, price: 10 }, b: { stock: 9940, price: 10 } } },
+      { date: D2, data: { a: { stock: 59, price: 10 }, b: { stock: 40, price: 10 } } },
+    ]);
+
+    const progress: Array<[number, number, string | undefined]> = [];
+    const result = await correctManualBandSpikesForRangeUtil({
+      konkName: "balun",
+      stockMin: 9000,
+      stockMax: 11000,
+      dateFrom: D1,
+      dateTo: D1,
+      apply: true,
+      productIds: ["a", "b"],
+      onProgress: (done, total, message) => {
+        progress.push([done, total, message]);
+      },
+    });
+
+    expect(result.patched).toHaveLength(2);
+    expect(await getDayPoint("balun", "a", D1)).toEqual({ stock: 59, price: 10 });
+    expect(await getDayPoint("balun", "b", D1)).toEqual({ stock: 40, price: 10 });
+
+    expect(materializeSkuSliceSalesDateRange).toHaveBeenCalledTimes(1);
+    expect(materializeSkuSliceSalesDateRange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        konkName: "balun",
+        fromDate: D1,
+        toDate: D2,
+        apply: true,
+      }),
+    );
+
+    expect(progress).toEqual([
+      [1, 2, "a"],
+      [2, 2, "b"],
+      [2, 2, "Rematerializing sales"],
+    ]);
+  });
+
+  it("throws AbortError when signal aborted mid-apply before rematerialize", async () => {
+    await seedKonk("balun", [
+      { date: D0, data: { a: { stock: 5, price: 10 }, b: { stock: 5, price: 10 } } },
+      { date: D1, data: { a: { stock: 9937, price: 10 }, b: { stock: 9940, price: 10 } } },
+      { date: D2, data: { a: { stock: 8, price: 10 }, b: { stock: 40, price: 10 } } },
+    ]);
+
+    const controller = new AbortController();
+
+    await expect(
+      correctManualBandSpikesForRangeUtil({
+        konkName: "balun",
+        stockMin: 9000,
+        stockMax: 11000,
+        dateFrom: D1,
+        dateTo: D1,
+        apply: true,
+        productIds: ["a", "b"],
+        signal: controller.signal,
+        onProgress: (done) => {
+          if (done === 1) controller.abort();
+        },
+      }),
+    ).rejects.toMatchObject({ name: "AbortError" });
+
+    expect(materializeSkuSliceSalesDateRange).not.toHaveBeenCalled();
   });
 });

@@ -37,7 +37,7 @@
 - Ночной сбор срезов по конкурентам + post-corrections.
 - Compensation недостоверных точек.
 - Band-spike discover + RTL correct (preview/apply); left neighbor optional when absent.
-- Сохранённые stock bands (CRUD) + discover/batch-correct через ApiTask: sandwich по `normalMax`, left optional when absent.
+- Сохранённые stock bands (CRUD) + discover/batch-correct через ApiTask: sandwich по `normalMax`, left optional when absent; batch progress по productIds + один rematerialize; cancel running frees ApiTask queue slot.
 - Air client slice ingest при необходимости.
 
 Модуль: [docs/modules/sku-slices.md](../modules/sku-slices.md).

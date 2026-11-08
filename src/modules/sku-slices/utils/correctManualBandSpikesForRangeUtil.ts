@@ -84,9 +84,18 @@ function buildSeriesForProduct(
   }));
 }
 
+function throwIfSignalAborted(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    const aborted = new Error("Aborted");
+    aborted.name = "AbortError";
+    throw aborted;
+  }
+}
+
 /**
  * RTL sandwich-corrector [stockMin, stockMax] за [dateFrom, dateTo] для любого konk.
  * Грузит соседей ±1 одним bulk-load. Не для nightly cron.
+ * Apply: upsert per product в цикле (прогресс), затем один rematerialize на union дат.
  */
 export async function correctManualBandSpikesForRangeUtil(
   input: CorrectManualBandSpikesForRangeInput,
@@ -122,11 +131,7 @@ export async function correctManualBandSpikesForRangeUtil(
       : { bandMin: stockMin, bandMax: stockMax };
 
   for (let i = 0; i < productIds.length; i++) {
-    if (input.signal?.aborted) {
-      const aborted = new Error("Aborted");
-      aborted.name = "AbortError";
-      throw aborted;
-    }
+    throwIfSignalAborted(input.signal);
     const productId = productIds[i]!;
     const series = buildSeriesForProduct(productId, loadDates, dataByDate);
     const { patches, skipped: productSkipped } = computeRtlBandSpikePatches(
@@ -136,6 +141,7 @@ export async function correctManualBandSpikesForRangeUtil(
       band,
     );
 
+    const productPatches: Array<{ dateMs: number; to: number }> = [];
     for (const p of patches) {
       patched.push({
         productId,
@@ -144,6 +150,7 @@ export async function correctManualBandSpikesForRangeUtil(
         to: p.to,
       });
       patchesToWrite.push({ productId, dateMs: p.dateMs, to: p.to });
+      productPatches.push({ dateMs: p.dateMs, to: p.to });
     }
     for (const s of productSkipped) {
       skipped.push({
@@ -153,32 +160,28 @@ export async function correctManualBandSpikesForRangeUtil(
         reason: s.reason,
       });
     }
+
+    if (apply && productPatches.length > 0) {
+      for (const patch of productPatches) {
+        throwIfSignalAborted(input.signal);
+        await upsertDayStockOnly(konkName, productId, new Date(patch.dateMs), patch.to);
+      }
+    }
+
     input.onProgress?.(i + 1, productIds.length, productId);
   }
 
   if (apply && patchesToWrite.length > 0) {
-    for (const patch of patchesToWrite) {
-      await upsertDayStockOnly(konkName, patch.productId, new Date(patch.dateMs), patch.to);
-    }
-
-    const byProduct = new Map<string, number[]>();
-    for (const patch of patchesToWrite) {
-      const list = byProduct.get(patch.productId) ?? [];
-      list.push(patch.dateMs);
-      byProduct.set(patch.productId, list);
-    }
-
-    for (const [productId, dateMsList] of byProduct) {
-      const minMs = Math.min(...dateMsList);
-      const maxMs = Math.max(...dateMsList);
-      await materializeSkuSliceSalesDateRange({
-        konkName,
-        fromDate: new Date(minMs),
-        toDate: sliceDatePlusDays(new Date(maxMs), 1),
-        productIds: [productId],
-        apply: true,
-      });
-    }
+    throwIfSignalAborted(input.signal);
+    input.onProgress?.(productIds.length, productIds.length, "Rematerializing sales");
+    const minMs = Math.min(...patchesToWrite.map((p) => p.dateMs));
+    const maxMs = Math.max(...patchesToWrite.map((p) => p.dateMs));
+    await materializeSkuSliceSalesDateRange({
+      konkName,
+      fromDate: new Date(minMs),
+      toDate: sliceDatePlusDays(new Date(maxMs), 1),
+      apply: true,
+    });
   }
 
   const result: CorrectManualBandSpikesForRangeResult = {

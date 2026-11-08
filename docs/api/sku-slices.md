@@ -395,7 +395,7 @@ Discover кандидатов по сохранённому диапазону (
 
 ### POST `/api/sku-slices/stock-bands/:bandId/batch-correct`
 
-Постановка ApiTask `sku-slices.stock-band.batch-correct`: RTL-apply для выбранных `productIds` с `normalMax` из band. Ответ **202**. Один активный batch на `bandId` (resourceKey).
+Постановка ApiTask `sku-slices.stock-band.batch-correct`: RTL-apply для выбранных `productIds` с `normalMax` из band; прогресс по товарам, один rematerialize на union дат в конце. Ответ **202**. Один активный batch на `bandId` (resourceKey).
 
 **Path:** `bandId` — ObjectId.
 

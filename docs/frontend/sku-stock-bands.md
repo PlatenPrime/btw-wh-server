@@ -17,7 +17,7 @@
 3. `POST /api/sku-slices/stock-bands/:bandId/discover` с `{ dateFrom, dateTo }`.
 4. Таблица как у старого discover: товар (`title`, `imageUrl`), runs, чекбоксы по `productId`.
 5. Подтверждение: `POST /api/sku-slices/stock-bands/:bandId/batch-correct` с `{ dateFrom, dateTo, productIds }` → **202** ApiTask.
-6. Поллинг задачи: [apitasks-frontend](../api/apitasks-frontend.md). Kind: `sku-slices.stock-band.batch-correct`.
+6. Поллинг задачи: [apitasks-frontend](../api/apitasks-frontend.md). Kind: `sku-slices.stock-band.batch-correct`. Прогресс растёт по обработанным `productIds` (message = productId), в конце шаг rematerialize sales; cancel running сразу отпускает очередь.
 7. В `result` смотреть `patched` / `skipped` / `band.normalMax`.
 
 Discover и batch используют один sandwich: right `stock ≤ normalMax`; left — если день с данными есть, тоже `≤ normalMax`; если left нет (товар только появился в полосе) — кандидат/патч допустимы. Выход «высокий, но ниже band» (`> normalMax`) в discover не попадает; в batch — `not-sandwich-right`.

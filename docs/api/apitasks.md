@@ -76,7 +76,7 @@ TTL результата: 24 часа после `completed`.
 
 ## DELETE `/api/apitasks/:id`
 
-Отмена `queued` или `running`. Иначе 409.
+Отмена `queued` или `running`. Иначе 409. Cancel `running` освобождает слот очереди и сразу запускает следующую queued (если есть).
 
 **Ответ 200:** `{ "message": "Api task cancelled", "data": { ...task } }`
 

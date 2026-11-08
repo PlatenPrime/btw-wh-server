@@ -25,7 +25,7 @@ Excel-выгрузки остаются в модуле excel-jobs (файл + w
 ## Решения
 
 - Без Redis/Bull: один процесс сервера, очередь в памяти, состояние в Mongo.
-- Cancel: сначала статус `cancelled` в Mongo, затем abort текущего AbortController / снятие из очереди. Runner уважает `signal`.
+- Cancel: сначала статус `cancelled` в Mongo, затем abort текущего AbortController / снятие из очереди. Cancel **running** сразу освобождает in-process слот (`runningId`) и будит pump — следующая queued стартует, не дожидаясь выхода старого executor. `finally` runner’а чистит слот только если всё ещё владеет своей задачей (иначе не затрёт уже стартовавшую следующую). Runner уважает `signal`.
 - Дедуп по `resourceKey` (например одна skugr-run-today на группу) → 409 при активном дубле.
 - Лимит активных задач на пользователя (`queued`+`running`).
 - Старые доменные action-URL отвечают 410 с `kind`, чтобы фронт мигрировал по месту клика.

@@ -47,12 +47,19 @@ export function removeApiTaskFromQueue(taskId: string): boolean {
   return true;
 }
 
+/**
+ * Cancel queued (remove) or running (abort + free slot so next can start).
+ * Ownership: pump `finally` only clears if still owning `nextId`.
+ */
 export async function requestApiTaskCancel(taskId: string): Promise<"queued" | "running" | "none"> {
   if (removeApiTaskFromQueue(taskId)) {
     return "queued";
   }
   if (runningId === taskId) {
     runningAbort?.abort();
+    runningId = null;
+    runningAbort = null;
+    void pumpApiTaskQueue();
     return "running";
   }
   return "none";
@@ -92,9 +99,12 @@ async function pumpApiTaskQueue(): Promise<void> {
       },
     );
   } finally {
-    runningId = null;
-    runningAbort = null;
-    void pumpApiTaskQueue();
+    // Do not clobber a newer runner started after cancel freed this slot.
+    if (runningId === nextId) {
+      runningId = null;
+      runningAbort = null;
+      void pumpApiTaskQueue();
+    }
   }
 }
 
