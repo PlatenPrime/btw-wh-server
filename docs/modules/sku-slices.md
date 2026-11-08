@@ -42,9 +42,9 @@ Cron ежедневно 20:00 Europe/Kiev; конкуренты из `slices/con
 
 После срезов всех конкурентов — post-pass: pack-flip auto-apply (`perfect`), manufacturer rollup. Авто-коррекций всплесков остатка нет. ApiTask `sku-slices.post-corrections.run` повторяет тот же набор (со скоупом по `konkName`, если задан).
 
-Всплески остатка правятся вручную с клиента: discovery кандидатов (`POST .../band-spike/discover`) по `konkName` + `[stockMin, stockMax]` + даты, затем точечный RTL sandwich `small → band → small` на одном SKU (`POST .../sku/:skuId/correct-band-spike`, preview → apply). Этот контур без изменений.
+Всплески остатка правятся вручную с клиента: discovery кандидатов (`POST .../band-spike/discover`) по `konkName` + `[stockMin, stockMax]` + даты (exit вне band, без `normalMax`), затем точечный RTL sandwich `small → band → small` на одном SKU (`POST .../sku/:skuId/correct-band-spike`, preview → apply). Правый якорь обязателен; отсутствующий left при валидном right не блокирует патч.
 
-Параллельно — сохранённые диапазоны ([sku-stock-bands](sku-stock-bands.md)): `POST .../stock-bands/:bandId/discover` и batch ApiTask `sku-slices.stock-band.batch-correct` с sandwich через `normalMax`. Гайд: [frontend: sku-stock-bands](../frontend/sku-stock-bands.md).
+Параллельно — сохранённые диапазоны ([sku-stock-bands](sku-stock-bands.md)): `POST .../stock-bands/:bandId/discover` фильтрует sandwich через `normalMax` (left optional), batch ApiTask `sku-slices.stock-band.batch-correct` — тот же RTL. Гайд: [frontend: sku-stock-bands](../frontend/sku-stock-bands.md).
 
 ### Client-ingestion для Air
 

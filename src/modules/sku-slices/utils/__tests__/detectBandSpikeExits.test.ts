@@ -78,4 +78,39 @@ describe("detectBandSpikeExits", () => {
       },
     ]);
   });
+
+  describe("with normalMax sandwich", () => {
+    it("rejects exit above normalMax that legacy would accept", () => {
+      const s = series([100, 10000, 5000]);
+      expect(detectBandSpikeExits(s, s[0]!.dateMs, s[2]!.dateMs, 9000, 11000)).toHaveLength(1);
+      expect(detectBandSpikeExits(s, s[0]!.dateMs, s[2]!.dateMs, 9000, 11000, 2000)).toEqual([]);
+    });
+
+    it("accepts missing left when right is within normalMax", () => {
+      const s = series([undefined, 10000, 150]);
+      expect(detectBandSpikeExits(s, s[1]!.dateMs, s[1]!.dateMs, 9000, 11000, 2000)).toEqual([
+        {
+          dateFromMs: s[1]!.dateMs,
+          dateToMs: s[1]!.dateMs,
+          peakStock: 10000,
+        },
+      ]);
+    });
+
+    it("rejects elevated left even when right is normal", () => {
+      const s = series([8000, 10000, 150]);
+      expect(detectBandSpikeExits(s, s[1]!.dateMs, s[1]!.dateMs, 9000, 11000, 2000)).toEqual([]);
+    });
+
+    it("accepts when both sides are within normalMax", () => {
+      const s = series([100, 10000, 150]);
+      expect(detectBandSpikeExits(s, s[1]!.dateMs, s[1]!.dateMs, 9000, 11000, 2000)).toEqual([
+        {
+          dateFromMs: s[1]!.dateMs,
+          dateToMs: s[1]!.dateMs,
+          peakStock: 10000,
+        },
+      ]);
+    });
+  });
 });

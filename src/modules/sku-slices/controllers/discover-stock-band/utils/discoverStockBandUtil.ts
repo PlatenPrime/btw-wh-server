@@ -34,6 +34,7 @@ export async function discoverStockBandUtil(
     konkName: stockBand.konk.name,
     stockMin: stockBand.stockMin,
     stockMax: stockBand.stockMax,
+    normalMax: stockBand.normalMax,
     dateFrom: input.dateFrom,
     dateTo: input.dateTo,
   });

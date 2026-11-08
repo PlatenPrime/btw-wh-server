@@ -86,17 +86,23 @@ async function loadSkuMetaByProductId(konkName: string): Promise<Map<string, Sku
   return map;
 }
 
+export type DiscoverBandSpikeUtilInput = DiscoverBandSpikeInput & {
+  /** Stock-band sandwich ceiling; omit for legacy exit-outside-band discover. */
+  normalMax?: number;
+};
+
 export async function discoverBandSpikeUtil(
-  input: DiscoverBandSpikeInput,
+  input: DiscoverBandSpikeUtilInput,
 ): Promise<DiscoverBandSpikeResult> {
   const konkName = input.konkName;
   const stockMin = input.stockMin;
   const stockMax = input.stockMax;
+  const normalMax = input.normalMax;
   const dateFrom = toSliceDate(input.dateFrom);
   const dateTo = toSliceDate(input.dateTo);
 
-  // +1 day after window so exit on dateTo+1 is visible for trailing band runs ending on dateTo
-  const loadFrom = dateFrom;
+  // +1 after window for exit day; −1 before when sandwich needs left-neighbor check
+  const loadFrom = normalMax !== undefined ? addUtcDays(dateFrom, -1) : dateFrom;
   const loadTo = addUtcDays(dateTo, 1);
   const loadDates = enumerateReportingDates(loadFrom, loadTo).map((d) => toSliceDate(d));
 
@@ -118,6 +124,7 @@ export async function discoverBandSpikeUtil(
       dateTo.getTime(),
       stockMin,
       stockMax,
+      normalMax,
     );
     if (exits.length === 0) continue;
 

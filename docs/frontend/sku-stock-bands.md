@@ -20,7 +20,7 @@
 6. Поллинг задачи: [apitasks-frontend](../api/apitasks-frontend.md). Kind: `sku-slices.stock-band.batch-correct`.
 7. В `result` смотреть `patched` / `skipped` / `band.normalMax`.
 
-Коррекция использует RTL от правого нормального края (`stock ≤ normalMax`). Если после полосы остаток «высокий, но ниже band» — кандидат в discover может быть, а в batch попадёт в `skipped` (`not-sandwich-right`) — это ожидаемо.
+Discover и batch используют один sandwich: right `stock ≤ normalMax`; left — если день с данными есть, тоже `≤ normalMax`; если left нет (товар только появился в полосе) — кандидат/патч допустимы. Выход «высокий, но ниже band» (`> normalMax`) в discover не попадает; в batch — `not-sandwich-right`.
 
 ## Роли
 

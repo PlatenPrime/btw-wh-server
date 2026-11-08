@@ -314,7 +314,7 @@
 
 ### POST `/api/sku-slices/sku/:skuId/correct-band-spike`
 
-Клиентский RTL-corrector sandwich-вспышки остатка для любого конкурента: небольшое (`< stockMin`) → `[stockMin, stockMax]` → небольшое. Не входит в nightly post-pass. Сервер догружает соседей ±1 дня к окну; dump band→small в продажи не берёт; внутри полосы продажи сохраняются (ход справа налево). Сначала preview (`apply: false`), затем confirm (`apply: true`). Гайд: [frontend: band-spike-correction](../frontend/band-spike-correction.md).
+Клиентский RTL-corrector sandwich-вспышки остатка для любого конкурента: небольшое (`< stockMin`) → `[stockMin, stockMax]` → небольшое. Правый якорь обязателен; левый — только если день с finite stock есть (товар, появившийся сразу в полосе: нет left + валидный right → патч RTL до первого дня run). Не входит в nightly post-pass. Сервер догружает соседей ±1 дня к окну; dump band→small в продажи не берёт; внутри полосы продажи сохраняются (ход справа налево). Сначала preview (`apply: false`), затем confirm (`apply: true`). Гайд: [frontend: band-spike-correction](../frontend/band-spike-correction.md).
 
 **Path:** `skuId` — ObjectId любого SKU с непустым `konkName` и `productId`.
 
@@ -357,7 +357,7 @@
 
 ### POST `/api/sku-slices/stock-bands/:bandId/discover`
 
-Discover кандидатов по сохранённому диапазону ([sku-stock-bands](sku-stock-bands.md)). Старый `POST .../band-spike/discover` не меняется. Гайд: [frontend: sku-stock-bands](../frontend/sku-stock-bands.md).
+Discover кандидатов по сохранённому диапазону ([sku-stock-bands](sku-stock-bands.md)): in-band run + sandwich по `normalMax` (right `≤ normalMax`; left отсутствует или тоже `≤ normalMax`). Старый `POST .../band-spike/discover` без `normalMax` не меняется (exit = stock вне band). Гайд: [frontend: sku-stock-bands](../frontend/sku-stock-bands.md).
 
 **Path:** `bandId` — ObjectId `SkuStockBand`.
 

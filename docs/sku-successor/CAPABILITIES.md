@@ -36,8 +36,8 @@
 - Чтение точек / range по sku; day meta observability.
 - Ночной сбор срезов по конкурентам + post-corrections.
 - Compensation недостоверных точек.
-- Band-spike discover + RTL correct (preview/apply).
-- Сохранённые stock bands (CRUD) + discover/batch-correct через ApiTask с `normalMax`.
+- Band-spike discover + RTL correct (preview/apply); left neighbor optional when absent.
+- Сохранённые stock bands (CRUD) + discover/batch-correct через ApiTask: sandwich по `normalMax`, left optional when absent.
 - Air client slice ingest при необходимости.
 
 Модуль: [docs/modules/sku-slices.md](../modules/sku-slices.md).

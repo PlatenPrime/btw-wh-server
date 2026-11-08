@@ -52,6 +52,7 @@ describe("discoverStockBandUtil", () => {
       konkName: "balun",
       stockMin: 9500,
       stockMax: 10500,
+      normalMax: 500,
       dateFrom,
       dateTo,
     });

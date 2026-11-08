@@ -101,12 +101,43 @@ describe("computeRtlBandSpikePatches", () => {
     expect(skipped[0]?.reason).toBe("not-sandwich-right");
   });
 
-  it("skips when left neighbor is missing", () => {
+  it("patches when left neighbor is missing but right is sandwich", () => {
     const s = series([undefined, 9937, 50]);
     const { patches, skipped } = computeRtlBandSpikePatches(s, s[1]!.dateMs, s[1]!.dateMs, BAND);
 
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([{ dateMs: s[1]!.dateMs, from: 9937, to: 50 }]);
+  });
+
+  it("preserves intra-band sales RTL when left neighbor is missing", () => {
+    const s = series([undefined, 9937, 9927, 59]);
+    const { patches, skipped } = computeRtlBandSpikePatches(s, s[1]!.dateMs, s[2]!.dateMs, BAND);
+
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([
+      { dateMs: s[1]!.dateMs, from: 9937, to: 69 },
+      { dateMs: s[2]!.dateMs, from: 9927, to: 59 },
+    ]);
+  });
+
+  it("with normalMax patches missing-left when right returns to norm", () => {
+    const s = series([undefined, 10000, 150]);
+    const { patches, skipped } = computeRtlBandSpikePatches(s, s[1]!.dateMs, s[1]!.dateMs, {
+      ...BAND,
+      normalMax: 500,
+    });
+    expect(skipped).toEqual([]);
+    expect(patches).toEqual([{ dateMs: s[1]!.dateMs, from: 10000, to: 150 }]);
+  });
+
+  it("with normalMax skips elevated right even when left is missing", () => {
+    const s = series([undefined, 10000, 8000]);
+    const { patches, skipped } = computeRtlBandSpikePatches(s, s[1]!.dateMs, s[1]!.dateMs, {
+      ...BAND,
+      normalMax: 500,
+    });
     expect(patches).toEqual([]);
-    expect(skipped[0]?.reason).toBe("missing-left");
+    expect(skipped[0]?.reason).toBe("not-sandwich-right");
   });
 
   it("returns empty when window has no band days", () => {

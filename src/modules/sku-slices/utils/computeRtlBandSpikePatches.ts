@@ -47,7 +47,7 @@ export function isNormalStock(stock: number, normalMax: number): boolean {
   return Number.isFinite(stock) && stock !== -1 && stock <= normalMax;
 }
 
-function isSandwichAnchor(stock: number, band: RtlBandSpikeBand): boolean {
+export function isSandwichAnchor(stock: number, band: RtlBandSpikeBand): boolean {
   if (band.normalMax !== undefined) {
     return isNormalStock(stock, band.normalMax);
   }
@@ -100,7 +100,9 @@ function readFiniteStock(day: RtlBandStockDay | undefined): number | undefined {
 }
 
 /**
- * RTL-коррекция sandwich small → [bandMin, bandMax] → small.
+ * RTL-коррекция sandwich → [bandMin, bandMax] → sandwich.
+ * Правый якорь обязателен; левый — только если день с finite stock есть
+ * (товар, появившийся сразу в полосе: missing left + valid right → патч).
  * Последний день run = rightAnchor; левее: corrected[i] = corrected[i+1] + max(0, orig[i]-orig[i+1]).
  * Dump band→small в продажи не входит.
  *
@@ -127,20 +129,17 @@ export function computeRtlBandSpikePatches(
     const runFromMs = series[run.startIndex]!.dateMs;
     const runToMs = series[run.endIndex]!.dateMs;
 
-    if (leftStock === undefined) {
-      skipped.push({ dateFromMs: runFromMs, dateToMs: runToMs, reason: "missing-left" });
-      continue;
-    }
     if (rightStock === undefined) {
       skipped.push({ dateFromMs: runFromMs, dateToMs: runToMs, reason: "missing-right" });
       continue;
     }
-    if (!isSandwichAnchor(leftStock, band)) {
-      skipped.push({ dateFromMs: runFromMs, dateToMs: runToMs, reason: "not-sandwich-left" });
-      continue;
-    }
     if (!isSandwichAnchor(rightStock, band)) {
       skipped.push({ dateFromMs: runFromMs, dateToMs: runToMs, reason: "not-sandwich-right" });
+      continue;
+    }
+    // Left optional when absent; elevated/"bad" left still blocks.
+    if (leftStock !== undefined && !isSandwichAnchor(leftStock, band)) {
+      skipped.push({ dateFromMs: runFromMs, dateToMs: runToMs, reason: "not-sandwich-left" });
       continue;
     }
 

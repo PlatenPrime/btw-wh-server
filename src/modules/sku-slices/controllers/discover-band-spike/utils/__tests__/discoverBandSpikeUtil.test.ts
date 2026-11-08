@@ -135,4 +135,59 @@ describe("discoverBandSpikeUtil", () => {
 
     expect(result.items).toEqual([]);
   });
+
+  it("with normalMax excludes exit above norma and keeps sandwich", async () => {
+    await seedSkuSliceMonthDay("balun", D0, {
+      "balun-ok": { stock: 100, price: 10 },
+      "balun-elevated-exit": { stock: 100, price: 10 },
+    });
+    await seedSkuSliceMonthDay("balun", D1, {
+      "balun-ok": { stock: 10000, price: 10 },
+      "balun-elevated-exit": { stock: 10000, price: 10 },
+    });
+    await seedSkuSliceMonthDay("balun", D2, {
+      "balun-ok": { stock: 150, price: 10 },
+      "balun-elevated-exit": { stock: 5000, price: 10 },
+    });
+
+    const result = await discoverBandSpikeUtil({
+      konkName: "balun",
+      stockMin: 9000,
+      stockMax: 11000,
+      normalMax: 2000,
+      dateFrom: D1,
+      dateTo: D1,
+    });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.productId).toBe("balun-ok");
+  });
+
+  it("with normalMax includes product that appears already in band then drops to norma", async () => {
+    await seedSkuSliceMonthDay("balun", D1, {
+      "balun-new": { stock: 10000, price: 10 },
+    });
+    await seedSkuSliceMonthDay("balun", D2, {
+      "balun-new": { stock: 200, price: 10 },
+    });
+
+    const result = await discoverBandSpikeUtil({
+      konkName: "balun",
+      stockMin: 9000,
+      stockMax: 11000,
+      normalMax: 2000,
+      dateFrom: D1,
+      dateTo: D1,
+    });
+
+    expect(result.items).toEqual([
+      {
+        skuId: null,
+        productId: "balun-new",
+        title: null,
+        imageUrl: null,
+        runs: [{ dateFrom: "2026-09-14", dateTo: "2026-09-14", peakStock: 10000 }],
+      },
+    ]);
+  });
 });
